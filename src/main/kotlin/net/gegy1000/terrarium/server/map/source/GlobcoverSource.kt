@@ -5,13 +5,7 @@ import com.google.common.cache.CacheLoader
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.launch
 import net.gegy1000.terrarium.Terrarium
-import net.gegy1000.terrarium.server.map.source.GlobcoverSource.IMAGE_SIZE
-import net.gegy1000.terrarium.server.map.source.GlobcoverSource.MAX_X
-import net.gegy1000.terrarium.server.map.source.GlobcoverSource.MAX_Z
-import net.gegy1000.terrarium.server.map.source.GlobcoverSource.MIN_X
-import net.gegy1000.terrarium.server.map.source.GlobcoverSource.MIN_Z
-import net.gegy1000.terrarium.server.map.source.GlobcoverSource.REGION_TILE
-import net.gegy1000.terrarium.server.map.source.GlobcoverSource.getTile
+import net.gegy1000.terrarium.server.map.source.GlobcoverSource.TILE_SIZE
 import net.minecraft.init.Biomes
 import net.minecraft.util.math.MathHelper
 import net.minecraft.world.biome.Biome
@@ -25,39 +19,8 @@ import java.net.URL
 import java.util.concurrent.TimeUnit
 import javax.imageio.ImageIO
 
-fun main(args: Array<String>) {
-    var minX = Int.MAX_VALUE
-    var minZ = Int.MAX_VALUE
-    var maxX = Int.MIN_VALUE
-    var maxZ = Int.MIN_VALUE
-
-    for (x in MIN_X..MAX_X) {
-        for (z in MIN_Z..MAX_Z) {
-            val pos = GlobTilePos(x, z)
-            val tile = getTile(pos)
-
-            val tileMinX = pos.minX / 10
-            val tileMinZ = pos.minZ / 10
-            val tileMaxX = tileMinX + tile.width
-            val tileMaxZ = tileMinZ + tile.height
-
-            if (tileMinX < minX) minX = tileMinX
-            if (tileMinZ < minZ) minZ = tileMinZ
-            if (tileMaxX > maxX) maxX = tileMaxX
-            if (tileMaxZ > maxZ) maxZ = tileMaxZ
-        }
-    }
-
-    println("$minX $minZ $maxX $maxZ - ${maxX - minX} ${maxZ - minZ}")
-}
-
 object GlobcoverSource : ChunkMapperSource() {
-    const val MIN_X = -26 // 51 x 22
-    const val MIN_Z = -13
-    const val MAX_X = 25
-    const val MAX_Z = 9
-    const val IMAGE_SIZE = 2560
-    const val REGION_TILE = 25600
+    const val TILE_SIZE = 2560
 
     val GLOBCOVER_CACHE = File(CACHE_DIRECTORY, "globcover")
 
@@ -71,10 +34,10 @@ object GlobcoverSource : ChunkMapperSource() {
             })
 
     operator fun get(x: Int, z: Int): Glob {
-        val pos = GlobTilePos(MathHelper.intFloorDiv(x, REGION_TILE), MathHelper.intFloorDiv(z, REGION_TILE))
+        val pos = GlobTilePos(MathHelper.intFloorDiv(x, TILE_SIZE), MathHelper.intFloorDiv(z, TILE_SIZE))
         val tile = this.getTile(pos)
-        val localX = (x - pos.minX) / 10
-        val localZ = (z - pos.minZ) / 10
+        val localX = x - pos.minX
+        val localZ = z - pos.minZ
         return tile[localX, localZ]
     }
 
@@ -103,8 +66,8 @@ object GlobcoverSource : ChunkMapperSource() {
             launch(CommonPool) { saveTile(pos, image) }
         }
 
-        val offsetX = if (pos.tileX < 0) IMAGE_SIZE - image.width else 0
-        val offsetZ = if (pos.tileZ < 0) IMAGE_SIZE - image.height else 0
+        val offsetX = if (pos.tileX < 0) TILE_SIZE - image.width else 0
+        val offsetZ = if (pos.tileZ < 0) TILE_SIZE - image.height else 0
 
         return GlobTile(buffer, offsetX, offsetZ, image.width, image.height)
     }
@@ -126,13 +89,13 @@ data class GlobTilePos(val tileX: Int, val tileZ: Int) {
         get() = "f_${tileX}_${tileZ}_.txt"
 
     val minX: Int
-        get() = this.tileX * REGION_TILE
+        get() = this.tileX * TILE_SIZE
     val minZ: Int
-        get() = this.tileZ * REGION_TILE
+        get() = this.tileZ * TILE_SIZE
 }
 
-data class GlobTile(val data: ByteArray = ByteArray(IMAGE_SIZE * IMAGE_SIZE), val offsetX: Int = 0, val offsetZ: Int = 0, val width: Int = 0, val height: Int = 0) {
-    operator fun get(x: Int, z: Int) = Glob[this.data[(x - this.offsetX) + (z - this.offsetZ) * IMAGE_SIZE].toInt() and 0xFF]
+data class GlobTile(val data: ByteArray = ByteArray(TILE_SIZE * TILE_SIZE), val offsetX: Int = 0, val offsetZ: Int = 0, val width: Int = 0, val height: Int = 0) {
+    operator fun get(x: Int, z: Int) = Glob[this.data[(x - this.offsetX) + (z - this.offsetZ) * TILE_SIZE].toInt() and 0xFF]
 }
 
 enum class Glob(val biome: Biome) {

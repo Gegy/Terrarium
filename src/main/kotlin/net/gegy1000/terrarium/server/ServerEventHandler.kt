@@ -12,10 +12,7 @@ object ServerEventHandler {
         val world = event.world
         if (world.worldType is EarthWorldType) {
             val settings = EarthGenerationSettings.deserialize(world.worldInfo.generatorOptions)
-            val latitude = 46.555076
-            val longitude = 9.390182
-
-            world.spawnPoint = Coordinates.toBlockPos(latitude, longitude, settings)
+            world.spawnPoint = Coordinates.toBlockPos(27.988350, 86.923641, settings)
         }
     }
 }
