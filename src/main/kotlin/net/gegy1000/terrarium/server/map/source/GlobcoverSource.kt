@@ -5,8 +5,13 @@ import com.google.common.cache.CacheLoader
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.launch
 import net.gegy1000.terrarium.Terrarium
+import net.gegy1000.terrarium.server.map.source.GlobcoverSource.IMAGE_SIZE
+import net.gegy1000.terrarium.server.map.source.GlobcoverSource.MAX_X
+import net.gegy1000.terrarium.server.map.source.GlobcoverSource.MAX_Z
+import net.gegy1000.terrarium.server.map.source.GlobcoverSource.MIN_X
+import net.gegy1000.terrarium.server.map.source.GlobcoverSource.MIN_Z
 import net.gegy1000.terrarium.server.map.source.GlobcoverSource.REGION_TILE
-import net.gegy1000.terrarium.server.map.source.GlobcoverSource.TILE_SIZE
+import net.gegy1000.terrarium.server.map.source.GlobcoverSource.getTile
 import net.minecraft.init.Biomes
 import net.minecraft.util.math.MathHelper
 import net.minecraft.world.biome.Biome
@@ -20,12 +25,38 @@ import java.net.URL
 import java.util.concurrent.TimeUnit
 import javax.imageio.ImageIO
 
+fun main(args: Array<String>) {
+    var minX = Int.MAX_VALUE
+    var minZ = Int.MAX_VALUE
+    var maxX = Int.MIN_VALUE
+    var maxZ = Int.MIN_VALUE
+
+    for (x in MIN_X..MAX_X) {
+        for (z in MIN_Z..MAX_Z) {
+            val pos = GlobTilePos(x, z)
+            val tile = getTile(pos)
+
+            val tileMinX = pos.minX / 10
+            val tileMinZ = pos.minZ / 10
+            val tileMaxX = tileMinX + tile.width
+            val tileMaxZ = tileMinZ + tile.height
+
+            if (tileMinX < minX) minX = tileMinX
+            if (tileMinZ < minZ) minZ = tileMinZ
+            if (tileMaxX > maxX) maxX = tileMaxX
+            if (tileMaxZ > maxZ) maxZ = tileMaxZ
+        }
+    }
+
+    println("$minX $minZ $maxX $maxZ - ${maxX - minX} ${maxZ - minZ}")
+}
+
 object GlobcoverSource : ChunkMapperSource() {
     const val MIN_X = -26 // 51 x 22
     const val MIN_Z = -13
     const val MAX_X = 25
     const val MAX_Z = 9
-    const val TILE_SIZE = 2560
+    const val IMAGE_SIZE = 2560
     const val REGION_TILE = 25600
 
     val GLOBCOVER_CACHE = File(CACHE_DIRECTORY, "globcover")
@@ -40,11 +71,11 @@ object GlobcoverSource : ChunkMapperSource() {
             })
 
     operator fun get(x: Int, z: Int): Glob {
-        val pos = GlobTilePos(MathHelper.floor(x / REGION_TILE.toDouble()), MathHelper.floor(z / REGION_TILE.toDouble()))
+        val pos = GlobTilePos(MathHelper.intFloorDiv(x, REGION_TILE), MathHelper.intFloorDiv(z, REGION_TILE))
         val tile = this.getTile(pos)
-        val tileX = (x - pos.minX) / 10
-        val tileZ = (z - pos.minZ) / 10
-        return tile[tileX, tileZ]
+        val localX = (x - pos.minX) / 10
+        val localZ = (z - pos.minZ) / 10
+        return tile[localX, localZ]
     }
 
     fun getTile(pos: GlobTilePos) = this.cache[pos]!!
@@ -53,18 +84,18 @@ object GlobcoverSource : ChunkMapperSource() {
         try {
             val cache = File(GLOBCOVER_CACHE, pos.name)
             if (cache.exists()) {
-                return GlobTile(this.loadTile(pos, FileInputStream(cache), false))
+                return this.loadTile(pos, FileInputStream(cache), false)
             } else {
                 val url = URL("$MAT/${pos.name}")
-                return GlobTile(this.loadTile(pos, url.openStream(), true))
+                return this.loadTile(pos, url.openStream(), true)
             }
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             Terrarium.LOGGER.warn("Failed to load Globcover tile: ${pos.name}", e)
         }
         return null
     }
 
-    private fun loadTile(pos: GlobTilePos, input: InputStream, save: Boolean): ByteArray {
+    private fun loadTile(pos: GlobTilePos, input: InputStream, save: Boolean): GlobTile {
         val image = ImageIO.read(input)
         val buffer = (image.raster.dataBuffer as DataBufferByte).data
 
@@ -72,7 +103,10 @@ object GlobcoverSource : ChunkMapperSource() {
             launch(CommonPool) { saveTile(pos, image) }
         }
 
-        return buffer
+        val offsetX = if (pos.tileX < 0) IMAGE_SIZE - image.width else 0
+        val offsetZ = if (pos.tileZ < 0) IMAGE_SIZE - image.height else 0
+
+        return GlobTile(buffer, offsetX, offsetZ, image.width, image.height)
     }
 
     private suspend fun saveTile(pos: GlobTilePos, image: BufferedImage) {
@@ -97,8 +131,8 @@ data class GlobTilePos(val tileX: Int, val tileZ: Int) {
         get() = this.tileZ * REGION_TILE
 }
 
-data class GlobTile(val data: ByteArray = ByteArray(TILE_SIZE * TILE_SIZE)) {
-    operator fun get(x: Int, z: Int) = Glob[this.data[x + z * TILE_SIZE].toInt() and 0xFF]
+data class GlobTile(val data: ByteArray = ByteArray(IMAGE_SIZE * IMAGE_SIZE), val offsetX: Int = 0, val offsetZ: Int = 0, val width: Int = 0, val height: Int = 0) {
+    operator fun get(x: Int, z: Int) = Glob[this.data[(x - this.offsetX) + (z - this.offsetZ) * IMAGE_SIZE].toInt() and 0xFF]
 }
 
 enum class Glob(val biome: Biome) {

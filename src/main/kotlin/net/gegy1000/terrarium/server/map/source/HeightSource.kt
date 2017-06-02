@@ -1,11 +1,11 @@
 package net.gegy1000.terrarium.server.map.source
 
+import com.chunkmapper.protoc.ChunkMapperHeightsContainer
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.launch
 import net.gegy1000.terrarium.Terrarium
-import com.chunkmapper.protoc.ChunkMapperHeightsContainer
 import net.minecraft.util.math.MathHelper
 import java.io.*
 import java.net.URL
@@ -47,7 +47,7 @@ object HeightSource : ChunkMapperSource() {
     }
 
     operator fun get(x: Int, z: Int): Short {
-        val pos = HeightTilePos(-MathHelper.floor(z / 1200.0), MathHelper.floor(x / 1200.0))
+        val pos = HeightTilePos(MathHelper.floor(-z / 1200.0), MathHelper.floor(x / 1200.0))
         val tile = this.getTile(pos)
         val tileX = x - pos.minX
         val tileZ = z - pos.minZ
@@ -79,7 +79,12 @@ object HeightSource : ChunkMapperSource() {
         val data = DataInputStream(input)
         data.use {
             for (index in 0..heightmap.size - 1) {
-                heightmap[index] = data.readShort()
+                val height = data.readShort()
+                if (height >= 0) {
+                    heightmap[index] = height
+                } else {
+                    heightmap[index] = 0
+                }
             }
         }
 
@@ -129,7 +134,7 @@ data class HeightTilePos(val latitude: Int, val longitude: Int) {
     val minX: Int
         get() = this.longitude * 1200
     val minZ: Int
-        get() = -this.latitude * 1200
+        get() = -(this.latitude + 1) * 1200
 }
 
 data class HeightTile(val heights: ShortArray = ShortArray(HeightSource.TILE_SIZE * HeightSource.TILE_SIZE)) {

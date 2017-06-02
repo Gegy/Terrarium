@@ -12,10 +12,10 @@ class EarthGenerationHandler(val settings: EarthGenerationSettings) : HeightProv
     companion object {
         const val WIDTH = 432000
         const val HEIGHT = 216000
-        const val GLOB_WIDTH = 64000
-        const val GLOB_HEIGHT = 23040
-        const val GLOB_X = 6.75
-        const val GLOB_Y = 9.375
+        const val GLOB_WIDTH = 1313600
+        const val GLOB_HEIGHT = 566800
+        const val GLOB_SCALE_X = GLOB_WIDTH.toDouble() / WIDTH
+        const val GLOB_SCALE_Y = GLOB_HEIGHT.toDouble() / HEIGHT
         const val REAL_SCALE = 92.766203
     }
 
@@ -55,13 +55,22 @@ class EarthGenerationHandler(val settings: EarthGenerationSettings) : HeightProv
     }
 
     fun provideBiome(x: Int, z: Int): Biome {
-        val scaledX = (x/* / GLOB_X*/).toInt()
-        val scaledZ = (z/* / GLOB_Y*/).toInt()
+        val globScaledX = x * GLOB_SCALE_X
+        val globScaledZ = z * GLOB_SCALE_Y
 
         val scaledWidth = (WIDTH * this.scale).toInt()
         val scaledHeight = (HEIGHT * this.scale).toInt()
 
-        return GlobcoverSource[(scaledX.toDouble() / (scaledWidth - 1) * (WIDTH - 1)).toInt(), (scaledZ.toDouble() / (scaledHeight - 1) * (HEIGHT - 1)).toInt()].biome
+        val scaledX = globScaledX / (scaledWidth - 1) * (WIDTH - 1)
+        val scaledZ = globScaledZ / (scaledHeight - 1) * (HEIGHT - 1)
+
+        val roundX = this.probRound(scaledX)
+        val roundZ = this.probRound(scaledZ)
+//
+//        val roundX = scaledX.toInt()
+//        val roundZ = scaledZ.toInt()
+
+        return GlobcoverSource[roundX, roundZ].biome
         /*val scaledWidth = (WIDTH * this.scale).toInt()
         val scaledHeight = (HEIGHT * this.scale).toInt()
 
@@ -138,5 +147,14 @@ class EarthGenerationHandler(val settings: EarthGenerationSettings) : HeightProv
         } else {
             return prevBiome
         }*/
+    }
+
+    private fun probRound(value: Double): Int {
+        val floor = value.toInt()
+        if (Math.random() > value - floor) {
+            return floor
+        } else {
+            return floor + 1
+        }
     }
 }

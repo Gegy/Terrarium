@@ -1,7 +1,7 @@
 package net.gegy1000.terrarium.server.util
 
 object Interpolation {
-    val buffer = ThreadLocal.withInitial({ DoubleArray(4) })
+    val buffer: ThreadLocal<DoubleArray> = ThreadLocal.withInitial({ DoubleArray(4) })
 
     fun bicubic(buffer: Array<DoubleArray>, scaleX: Double, scaleY: Double): Double {
         val cubic = this.buffer.get()
