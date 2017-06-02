@@ -5,7 +5,7 @@ import com.google.common.cache.CacheLoader
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.launch
 import net.gegy1000.terrarium.Terrarium
-import net.gegy1000.terrarium.server.protoc.ChunkMapperHeightsContainer
+import com.chunkmapper.protoc.ChunkMapperHeightsContainer
 import net.minecraft.util.math.MathHelper
 import java.io.*
 import java.net.URL
