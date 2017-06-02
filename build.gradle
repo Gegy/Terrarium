@@ -1,0 +1,89 @@
+buildscript {
+    repositories {
+        jcenter()
+        maven {
+            name = "forge"
+            url = "http://files.minecraftforge.net/maven"
+        }
+    }
+    dependencies {
+        classpath "net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.1.2"
+    }
+}
+
+apply plugin: "kotlin"
+apply plugin: "net.minecraftforge.gradle.forge"
+
+def mod_file = getModFile()
+version = getModField("VERSION", mod_file)
+group = "net.gegy1000"
+archivesBaseName = "terrarium"
+sourceCompatibility = targetCompatibility = "1.8"
+
+minecraft {
+    version = "1.11.2-13.20.0.2228"
+    runDir = "minecraft"
+    mappings = "snapshot_20170415"
+}
+
+repositories {
+	mavenCentral()
+    maven {
+	    url "http://mvn.rx14.co.uk/shadowfacts/"
+    }
+}
+
+dependencies {
+    compile "net.shadowfacts:Forgelin:1.4.2"
+    compile "org.jetbrains.kotlin:kotlin-stdlib"
+    compile "com.google.protobuf:protobuf-java:2.5.0"
+}
+
+processResources {
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
+
+    from (sourceSets.main.resources.srcDirs) {
+        include "mcmod.info"
+        expand "version": project.version, "mcversion": project.minecraft.version
+    }
+        
+    from (sourceSets.main.resources.srcDirs) {
+        exclude "mcmod.info"
+    }
+}
+
+String getModFile() {
+    String path = ""
+    FileTree tree = fileTree(dir: 'src/main/kotlin')
+    tree.include '**/*.kotlin'
+    tree.visit {element ->
+        if (element.file.isFile()) {
+            element.file.eachLine { String s ->
+                s = s.trim()
+                if (s.startsWith("@Mod")) {
+                    path = "src/main/kotlin/$element.relativePath"
+                }
+            }
+        }
+    }
+    return path
+}
+
+String getModField(String type, String mod_file) {
+    if (mod_file.length() == 0) {
+        return ""
+    }
+    String field = ""
+    String prefix = "const val $type = \""
+    File file = file(mod_file)
+    file.eachLine { String s ->
+        s = s.trim()
+        if (s.startsWith(prefix)) {
+            s = s.substring(prefix.length(), s.length() - 2)
+            field = s
+        }
+    }
+    return field
+}

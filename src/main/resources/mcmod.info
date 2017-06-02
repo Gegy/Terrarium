@@ -1,0 +1,16 @@
+[
+  {
+    "modid": "terrarium",
+    "name": "Terrarium",
+    "description": "Generation of the Earth in a new customizable world type\n\nMap data: OpenStreetMap Contributors (C)\nHeight & Globcover data: NASA, hosted by ChunkMapper",
+    "version": "${version}",
+    "url": "https://github.com/gegy1000/Terrarium/",
+    "authorList": [
+      "gegy1000"
+    ],
+    "dependencies": [
+      "forgelin@[1.4.2,)"
+    ],
+    "credits": "ChunkMapper (whamtet) & NASA: Height & Globcover data, OpenStreetMap Contributors (C): Map data"
+  }
+]
