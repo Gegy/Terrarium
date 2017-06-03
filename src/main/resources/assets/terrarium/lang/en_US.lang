@@ -11,10 +11,8 @@ button.terrarium:setting_decorate.name=Decorate: %s
 slider.terrarium:setting_horizontal_scale.name=Horizontal Scale: %s
 slider.terrarium:setting_vertical_scale.name=Vertical Scale: %s
 
-# Items
+# Commands
 
-item.terrarium:tracker.name=Tracker
-
-# Tooltips
-
-tooltip.terrarium:tracker_no_signal.name=No Signal Detected
+commands.terrarium:geotp.usage=geotp <latitude> <longitude>
+commands.terrarium:geotp.wrong_world=Cannot use command in this world
+commands.terrarium:geotp.success=Successfully teleported to %s, %s

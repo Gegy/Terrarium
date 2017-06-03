@@ -1,12 +1,14 @@
 package net.gegy1000.terrarium
 
 import net.gegy1000.terrarium.server.ServerProxy
+import net.gegy1000.terrarium.server.command.GeoTeleportCommand
 import net.gegy1000.terrarium.server.world.EarthWorldType
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.SidedProxy
 import net.minecraftforge.fml.common.event.FMLInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent
 import org.apache.logging.log4j.LogManager
 
 @Mod(
@@ -44,5 +46,10 @@ object Terrarium {
     @Mod.EventHandler
     fun onPostInit(event: FMLPostInitializationEvent) {
         PROXY.onPostInit()
+    }
+
+    @Mod.EventHandler
+    fun onServerStarting(event: FMLServerStartingEvent) {
+        event.registerServerCommand(GeoTeleportCommand())
     }
 }
