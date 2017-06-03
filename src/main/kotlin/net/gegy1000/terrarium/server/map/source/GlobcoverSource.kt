@@ -6,9 +6,8 @@ import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.launch
 import net.gegy1000.terrarium.Terrarium
 import net.gegy1000.terrarium.server.map.source.GlobcoverSource.TILE_SIZE
-import net.minecraft.init.Biomes
+import net.gegy1000.terrarium.server.world.Glob
 import net.minecraft.util.math.MathHelper
-import net.minecraft.world.biome.Biome
 import java.awt.image.BufferedImage
 import java.awt.image.DataBufferByte
 import java.io.File
@@ -96,60 +95,4 @@ data class GlobTilePos(val tileX: Int, val tileZ: Int) {
 
 data class GlobTile(val data: ByteArray = ByteArray(TILE_SIZE * TILE_SIZE), val offsetX: Int = 0, val offsetZ: Int = 0, val width: Int = 0, val height: Int = 0) {
     operator fun get(x: Int, z: Int) = Glob[this.data[(x - this.offsetX) + (z - this.offsetZ) * TILE_SIZE].toInt() and 0xFF]
-}
-
-enum class Glob(val biome: Biome) {
-    IRRIGATED_CROPS(Biomes.PLAINS),
-    RAINFED_CROPS(Biomes.PLAINS),
-    CROPLAND_WITH_VEGETATION(Biomes.PLAINS),
-    VEGETATION_WITH_CROPLAND(Biomes.PLAINS),
-    BROADLEAF_EVERGREEN(Biomes.FOREST),
-    CLOSED_BROADLEAF_DECIDUOUS(Biomes.FOREST),
-    OPEN_BROADLEAF_DECIDUOUS(Biomes.FOREST),
-    CLOSED_NEEDLELEAF_EVERGREEN(Biomes.FOREST),
-    OPEN_NEEDLELEAF(Biomes.FOREST),
-    MIXED_BROAD_NEEDLELEAF(Biomes.FOREST),
-    FOREST_SHRUBLAND_WITH_GRASS(Biomes.FOREST),
-    GRASS_WITH_FOREST_SHRUBLAND(Biomes.PLAINS),
-    SHRUBLAND(Biomes.DESERT),
-    GRASSLAND(Biomes.PLAINS),
-    SPARSE_VEGETATION(Biomes.DESERT),
-    FRESH_FLOODED_FOREST(Biomes.SWAMPLAND),
-    SALINE_FLOODED_FOREST(Biomes.SWAMPLAND),
-    FLOODED_GRASSLAND(Biomes.SWAMPLAND),
-    URBAN(Biomes.PLAINS),
-    BARE(Biomes.DESERT),
-    WATER(Biomes.RIVER),
-    SNOW(Biomes.ICE_PLAINS),
-    NO_DATA(Biomes.PLAINS);
-
-    companion object {
-        operator fun get(i: Int): Glob {
-            return when (i) {
-                11 -> IRRIGATED_CROPS
-                14 -> RAINFED_CROPS
-                20 -> CROPLAND_WITH_VEGETATION
-                30 -> VEGETATION_WITH_CROPLAND
-                40 -> BROADLEAF_EVERGREEN
-                50 -> CLOSED_BROADLEAF_DECIDUOUS
-                60 -> OPEN_BROADLEAF_DECIDUOUS
-                70 -> CLOSED_NEEDLELEAF_EVERGREEN
-                90 -> OPEN_NEEDLELEAF
-                100 -> MIXED_BROAD_NEEDLELEAF
-                110 -> FOREST_SHRUBLAND_WITH_GRASS
-                120 -> GRASS_WITH_FOREST_SHRUBLAND
-                130 -> SHRUBLAND
-                140 -> GRASSLAND
-                150 -> SPARSE_VEGETATION
-                160 -> FRESH_FLOODED_FOREST
-                170 -> SALINE_FLOODED_FOREST
-                180 -> FLOODED_GRASSLAND
-                190 -> URBAN
-                200 -> BARE
-                210 -> WATER
-                220 -> SNOW
-                else -> NO_DATA
-            }
-        }
-    }
 }

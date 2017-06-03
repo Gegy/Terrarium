@@ -7,8 +7,10 @@ data class EarthGenerationSettings(
         var buildings: Boolean = true,
         var streets: Boolean = true,
         var decorate: Boolean = true,
-        var terrainHeightScale: Double = 1.0,
-        var scale: Double = 0.01
+        var terrainHeightScale: Double = 2.0,
+        var scale: Double = 0.01,
+        val heightOffset: Int = 20,
+        val scatterRange: Int = 200
 ) {
     companion object {
         private val GSON = Gson()

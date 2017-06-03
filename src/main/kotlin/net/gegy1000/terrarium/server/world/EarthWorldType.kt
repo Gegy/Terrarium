@@ -18,7 +18,7 @@ class EarthWorldType : WorldType("${Terrarium.MODID}:earth") {
 
     override fun getChunkGenerator(world: World, settings: String) = EarthChunkGenerator(world, world.seed, settings)
 
-    override fun getBiomeProvider(world: World) = EarthBiomeProvider(EarthGenerationSettings.deserialize(world.worldInfo.generatorOptions))
+    override fun getBiomeProvider(world: World) = EarthBiomeProvider(world, EarthGenerationSettings.deserialize(world.worldInfo.generatorOptions))
 
     @SideOnly(Side.CLIENT)
     override fun onCustomizeButton(mc: Minecraft, parent: GuiCreateWorld) {
