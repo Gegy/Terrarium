@@ -5,8 +5,8 @@ import com.google.common.cache.CacheLoader
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.launch
 import net.gegy1000.terrarium.Terrarium
+import net.gegy1000.terrarium.server.map.glob.GlobType
 import net.gegy1000.terrarium.server.map.source.GlobcoverSource.TILE_SIZE
-import net.gegy1000.terrarium.server.world.Glob
 import net.minecraft.util.math.MathHelper
 import java.awt.image.BufferedImage
 import java.awt.image.DataBufferByte
@@ -32,7 +32,7 @@ object GlobcoverSource : ChunkMapperSource() {
                 }
             })
 
-    operator fun get(x: Int, z: Int): Glob {
+    operator fun get(x: Int, z: Int): GlobType {
         val pos = GlobTilePos(MathHelper.intFloorDiv(x, TILE_SIZE), MathHelper.intFloorDiv(z, TILE_SIZE))
         val tile = this.getTile(pos)
         val localX = x - pos.minX
@@ -94,5 +94,5 @@ data class GlobTilePos(val tileX: Int, val tileZ: Int) {
 }
 
 data class GlobTile(val data: ByteArray = ByteArray(TILE_SIZE * TILE_SIZE), val offsetX: Int = 0, val offsetZ: Int = 0, val width: Int = 0, val height: Int = 0) {
-    operator fun get(x: Int, z: Int) = Glob[this.data[(x - this.offsetX) + (z - this.offsetZ) * TILE_SIZE].toInt() and 0xFF]
+    operator fun get(x: Int, z: Int) = GlobType[this.data[(x - this.offsetX) + (z - this.offsetZ) * TILE_SIZE].toInt() and 0xFF]
 }

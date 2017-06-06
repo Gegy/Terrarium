@@ -1,7 +1,8 @@
 package net.gegy1000.terrarium.server.world.generator
 
+import net.gegy1000.terrarium.server.map.glob.GlobGenerator
+import net.gegy1000.terrarium.server.map.glob.GlobType
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings
-import net.gegy1000.terrarium.server.world.Glob
 import net.minecraft.block.BlockFalling
 import net.minecraft.block.material.Material
 import net.minecraft.entity.EnumCreatureType
@@ -14,10 +15,13 @@ import net.minecraft.world.chunk.Chunk
 import net.minecraft.world.chunk.ChunkPrimer
 import net.minecraft.world.chunk.IChunkGenerator
 import net.minecraft.world.gen.NoiseGeneratorPerlin
+import net.minecraft.world.gen.layer.IntCache
 import net.minecraftforge.event.ForgeEventFactory
 import net.minecraftforge.event.terraingen.PopulateChunkEvent
 import net.minecraftforge.event.terraingen.TerrainGen
-import java.util.*
+import java.util.EnumMap
+import java.util.Random
+import kotlin.reflect.full.createInstance
 
 class EarthChunkGenerator(val world: World, seed: Long, settingsString: String) : IChunkGenerator {
     companion object {
@@ -37,11 +41,21 @@ class EarthChunkGenerator(val world: World, seed: Long, settingsString: String) 
     val coverNoise = NoiseGeneratorPerlin(this.random, 4)
     val pos = BlockPos.MutableBlockPos()
 
+    val globGenerators = EnumMap<GlobType, GlobGenerator>(GlobType::class.java)
+
     var depthBuffer = DoubleArray(256)
     var heightBuffer = IntArray(256)
-    var globBuffer = Array(256, { Glob.NO_DATA })
+    var globBuffer = Array(256, { GlobType.NO_DATA })
 
     var biomeBuffer: Array<Biome>? = null
+
+    init {
+        GlobType.values().forEach {
+            val generator = it.generator.createInstance()
+            generator.initialize(this.world)
+            this.globGenerators.put(it, generator)
+        }
+    }
 
     override fun provideChunk(chunkX: Int, chunkZ: Int): Chunk {
         this.random.setSeed(chunkX.toLong() * 341873128712L + chunkZ.toLong() * 132897987541L)
@@ -103,9 +117,11 @@ class EarthChunkGenerator(val world: World, seed: Long, settingsString: String) 
         }
     }
 
-    private fun generateBiomeTerrain(glob: Glob, rand: Random, primer: ChunkPrimer, x: Int, z: Int, noise: Double) {
-        val topBlock = glob.getTopBlock(noise, rand)
-        val fillerBlock = glob.getFillerBlock(noise, rand)
+    private fun generateBiomeTerrain(glob: GlobType, rand: Random, primer: ChunkPrimer, x: Int, z: Int, noise: Double) {
+        val generator = this.globGenerators[glob]
+
+        val topBlock = generator?.getCover(x, z, rand) ?: STONE
+        val fillerBlock = generator?.getFiller(x, z, rand) ?: STONE
 
         val oceanHeight = this.handler.oceanHeight
 
@@ -135,11 +151,7 @@ class EarthChunkGenerator(val world: World, seed: Long, settingsString: String) 
                             }
                         }
                         if (localY < oceanHeight && (currentTop == null || currentTop.material === Material.AIR)) {
-                            if (glob.biome.temperature < 0.15F) {
-                                currentTop = ICE
-                            } else {
-                                currentTop = WATER
-                            }
+                            currentTop = WATER
                         }
                         depth = soilDepth
                         if (localY >= oceanHeight - 1) {
@@ -163,6 +175,8 @@ class EarthChunkGenerator(val world: World, seed: Long, settingsString: String) 
     override fun populate(chunkX: Int, chunkZ: Int) {
         BlockFalling.fallInstantly = true
 
+        this.handler.getGlobRegion(this.globBuffer, chunkX, chunkZ)
+
         val x = chunkX shl 4
         val z = chunkZ shl 4
 
@@ -171,39 +185,19 @@ class EarthChunkGenerator(val world: World, seed: Long, settingsString: String) 
         val l = this.random.nextLong() / 2L * 2L + 1L
         this.random.setSeed(chunkX.toLong() * k + chunkZ.toLong() * l xor this.world.seed)
 
-        this.handler.getGlobRegion(this.globBuffer, chunkX, chunkZ)
-
-        val glob = this.globBuffer[255]
-        val biome = glob.biome
-
-        this.pos.setPos(x, 0, z)
+        val biome = this.globBuffer[255].biome
 
         if (this.settings.decorate) {
             ForgeEventFactory.onChunkPopulate(true, this, this.world, this.random, chunkX, chunkZ, false)
 
-            glob.decorate(this.world, this.random, this.pos)
+            IntCache.resetIntCache()
+
+            this.globBuffer.toHashSet().forEach {
+                this.globGenerators[it]?.coverDecorate(this.globBuffer, this.world, this.random, x, z)
+            }
 
             if (TerrainGen.populate(this, this.world, this.random, chunkX, chunkZ, false, PopulateChunkEvent.Populate.EventType.ANIMALS)) {
                 WorldEntitySpawner.performWorldGenSpawning(this.world, biome, x + 8, z + 8, 16, 16, this.random)
-            }
-
-            this.pos.setPos(x + 8, 0, z + 8)
-
-            if (TerrainGen.populate(this, this.world, this.random, chunkX, chunkZ, false, PopulateChunkEvent.Populate.EventType.ICE)) {
-                for (offsetX in 0..15) {
-                    for (offsetZ in 0..15) {
-                        val snowPos = this.world.getPrecipitationHeight(this.pos.add(offsetX, 0, offsetZ))
-                        val groundPos = snowPos.down()
-
-                        if (this.world.canBlockFreezeWater(groundPos)) {
-                            this.world.setBlockState(groundPos, Blocks.ICE.defaultState, 2)
-                        }
-
-                        if (this.world.canSnowAt(snowPos, true)) {
-                            this.world.setBlockState(snowPos, Blocks.SNOW_LAYER.defaultState, 2)
-                        }
-                    }
-                }
             }
 
             ForgeEventFactory.onChunkPopulate(false, this, this.world, this.random, chunkX, chunkZ, false)

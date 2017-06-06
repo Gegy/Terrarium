@@ -1,13 +1,13 @@
 package net.gegy1000.terrarium.server.world.generator
 
+import net.gegy1000.terrarium.server.map.glob.GlobType
 import net.gegy1000.terrarium.server.map.source.GlobcoverSource
 import net.gegy1000.terrarium.server.map.source.HeightSource
 import net.gegy1000.terrarium.server.util.Interpolation
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings
-import net.gegy1000.terrarium.server.world.Glob
 import net.minecraft.util.math.MathHelper
 import net.minecraft.world.World
-import java.util.*
+import java.util.Random
 
 class EarthGenerationHandler(val world: World, val settings: EarthGenerationSettings) {
     companion object {
@@ -64,7 +64,7 @@ class EarthGenerationHandler(val world: World, val settings: EarthGenerationSett
         return MathHelper.clamp(scaled + this.settings.heightOffset, 0, 255)
     }
 
-    fun getGlobRegion(buffer: Array<Glob>, chunkX: Int, chunkZ: Int) {
+    fun getGlobRegion(buffer: Array<GlobType>, chunkX: Int, chunkZ: Int) {
         this.random.setSeed(chunkX.toLong() * 341873128712L + chunkZ.toLong() * 132897987541L)
         val x = chunkX shl 4
         val z = chunkZ shl 4
@@ -75,7 +75,7 @@ class EarthGenerationHandler(val world: World, val settings: EarthGenerationSett
         }
     }
 
-    private fun getGlob(x: Int, z: Int): Glob {
+    private fun getGlob(x: Int, z: Int): GlobType {
         val scatterX = x + this.random.nextInt(this.scatterRange) - this.random.nextInt(this.scatterRange)
         val scatterZ = z + this.random.nextInt(this.scatterRange) - this.random.nextInt(this.scatterRange)
 
