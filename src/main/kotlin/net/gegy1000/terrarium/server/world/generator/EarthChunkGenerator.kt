@@ -5,6 +5,7 @@ import net.gegy1000.terrarium.server.map.glob.GlobType
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings
 import net.minecraft.block.BlockFalling
 import net.minecraft.block.material.Material
+import net.minecraft.block.state.IBlockState
 import net.minecraft.entity.EnumCreatureType
 import net.minecraft.init.Blocks
 import net.minecraft.util.math.BlockPos
@@ -44,8 +45,9 @@ class EarthChunkGenerator(val world: World, seed: Long, settingsString: String) 
     val globGenerators = EnumMap<GlobType, GlobGenerator>(GlobType::class.java)
 
     var depthBuffer = DoubleArray(256)
-    var heightBuffer = IntArray(256)
-    var globBuffer = Array(256, { GlobType.NO_DATA })
+    val heightBuffer = IntArray(256)
+    val globBuffer = Array(256, { GlobType.NO_DATA })
+    val coverBuffer = Array(256, { STONE })
 
     var biomeBuffer: Array<Biome>? = null
 
@@ -109,26 +111,33 @@ class EarthChunkGenerator(val world: World, seed: Long, settingsString: String) 
         this.depthBuffer = this.coverNoise.getRegion(this.depthBuffer, globalX.toDouble(), globalZ.toDouble(), 16, 16, scale * 2.0, scale * 2.0, 1.0)
         this.handler.getGlobRegion(this.globBuffer, chunkX, chunkZ)
 
-        for (x in 0..15) {
-            for (z in 0..15) {
+        val generators = this.globBuffer.toHashSet()
+        generators.forEach {
+            this.globGenerators[it]?.getCover(this.globBuffer, this.coverBuffer, globalX, globalZ, this.random)
+        }
+
+        for (z in 0..15) {
+            for (x in 0..15) {
                 val index = x + z * 16
-                this.generateBiomeTerrain(this.globBuffer[index], this.random, primer, globalX + x, globalZ + z, this.depthBuffer[index])
+                val cover = this.coverBuffer[index]
+                val glob = this.globBuffer[index]
+                val noise = this.depthBuffer[index]
+                this.generateBiomeTerrain(cover, glob, this.random, primer, globalX + x, globalZ + z, noise)
             }
         }
 
         if (this.settings.decorate) {
             IntCache.resetIntCache()
 
-            this.globBuffer.toHashSet().forEach {
+            generators.forEach {
                 this.globGenerators[it]?.coverDecorate(this.globBuffer, this.heightBuffer, primer, this.random, globalX, globalZ)
             }
         }
     }
 
-    private fun generateBiomeTerrain(glob: GlobType, rand: Random, primer: ChunkPrimer, x: Int, z: Int, noise: Double) {
+    private fun generateBiomeTerrain(topBlock: IBlockState, glob: GlobType, rand: Random, primer: ChunkPrimer, x: Int, z: Int, noise: Double) {
         val generator = this.globGenerators[glob]
 
-        val topBlock = generator?.getCover(x, z, rand) ?: STONE
         val fillerBlock = generator?.getFiller(x, z, rand) ?: STONE
 
         val oceanHeight = this.handler.oceanHeight

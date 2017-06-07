@@ -26,7 +26,13 @@ abstract class GlobGenerator(val type: GlobType) {
     open fun coverDecorate(globBuffer: Array<GlobType>, heightBuffer: IntArray, primer: ChunkPrimer, random: Random, x: Int, z: Int) {
     }
 
-    open fun getCover(x: Int, z: Int, random: Random): IBlockState = this.topBlock
+    open fun getCover(glob: Array<GlobType>, cover: Array<IBlockState>, x: Int, z: Int, random: Random) {
+        this.foreach(glob) { localX: Int, localZ: Int ->
+            cover[localX + localZ * 16] = this.getCover(x + localX, z + localZ, random)
+        }
+    }
+
+    protected open fun getCover(x: Int, z: Int, random: Random): IBlockState = this.topBlock
 
     open fun getFiller(x: Int, z: Int, random: Random): IBlockState = this.fillerBlock
 

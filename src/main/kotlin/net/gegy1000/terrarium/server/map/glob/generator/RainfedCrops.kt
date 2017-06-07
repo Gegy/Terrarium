@@ -1,88 +1,61 @@
 package net.gegy1000.terrarium.server.map.glob.generator
 
-import net.gegy1000.terrarium.server.map.glob.GlobGenerator
 import net.gegy1000.terrarium.server.map.glob.GlobType
-import net.minecraft.block.BlockCrops
-import net.minecraft.block.BlockDirt
-import net.minecraft.block.BlockFarmland
 import net.minecraft.block.state.IBlockState
-import net.minecraft.init.Blocks
 import net.minecraft.world.World
-import net.minecraft.world.chunk.ChunkPrimer
 import net.minecraft.world.gen.layer.GenLayer
 import net.minecraft.world.gen.layer.GenLayerFuzzyZoom
-import net.minecraft.world.gen.layer.GenLayerVoronoiZoom
 import net.minecraft.world.gen.layer.IntCache
 import java.util.Random
 
-class RainfedCrops : GlobGenerator(GlobType.RAINFED_CROPS) {
-    companion object {
-        const val LAYER_WHEAT = 0
-        const val LAYER_CARROTS = 1
-        const val LAYER_POTATOES = 2
-        const val CROP_COUNT = 3
-
-        val WATER = Blocks.WATER.defaultState
-        val FARMLAND = Blocks.FARMLAND.defaultState.withProperty(BlockFarmland.MOISTURE, 7)
-        val COARSE_DIRT = Blocks.DIRT.defaultState.withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT)
-
-        val WHEAT = Blocks.WHEAT.defaultState
-        val CARROTS = Blocks.CARROTS.defaultState
-        val POTATOES = Blocks.POTATOES.defaultState
-    }
-
-    lateinit var cropSelector: GenLayer
+class RainfedCrops : Cropland(GlobType.RAINFED_CROPS) {
+    lateinit var coverSelector: GenLayer
 
     override fun createLayers(world: World) {
-        var layer: GenLayer = SelectCropLayer(1)
-        layer = GenLayerVoronoiZoom(1000, layer)
-        layer = GenLayerFuzzyZoom(2000, layer)
-        layer = GenLayerVoronoiZoom(5000, layer)
+        super.createLayers(world)
 
-        this.cropSelector = layer
-        this.cropSelector.initWorldGenSeed(world.seed)
+        var layer: GenLayer = RainfedCoverLayer(50)
+        layer = GenLayerFuzzyZoom(5, layer)
+        layer = GenLayerFuzzyZoom(2000, layer)
+
+        this.coverSelector = layer
+        this.coverSelector.initWorldGenSeed(world.seed)
     }
 
-    override fun coverDecorate(globBuffer: Array<GlobType>, heightBuffer: IntArray, primer: ChunkPrimer, random: Random, x: Int, z: Int) {
-        val cropLayer = this.sampleChunk(this.cropSelector, x, z)
+    override fun getCover(glob: Array<GlobType>, cover: Array<IBlockState>, x: Int, z: Int, random: Random) {
+        val coverLayer = this.sampleChunk(this.coverSelector, x, z)
 
-        this.foreach(globBuffer) { localX: Int, localZ: Int ->
-            if (random.nextInt(20) != 0) {
-                val bufferIndex = localX + localZ * 16
-                val y = heightBuffer[bufferIndex]
-
-                if (primer.getBlockState(localX, y, localZ).block is BlockFarmland) {
-                    val state = when (cropLayer[bufferIndex]) {
-                        LAYER_WHEAT -> WHEAT
-                        LAYER_CARROTS -> CARROTS
-                        LAYER_POTATOES -> POTATOES
-                        else -> WHEAT
-                    }
-
-                    primer.setBlockState(localX, y + 1, localZ, state.withProperty(BlockCrops.AGE, random.nextInt(8)))
+        this.foreach(glob) { localX: Int, localZ: Int ->
+            val index = localX + localZ * 16
+            if (random.nextInt(40) == 0) {
+                cover[index] = WATER
+            } else {
+                cover[index] = when (coverLayer[index]) {
+                    0 -> FARMLAND
+                    1 -> WATER
+                    else -> COARSE_DIRT
                 }
             }
         }
     }
-
-    override fun getCover(x: Int, z: Int, random: Random): IBlockState {
-        if (x % 8 == 0 && z % 8 == 0) {
-            return WATER
-        }
-        if (random.nextInt(20) == 0) {
-            return COARSE_DIRT
-        }
-        return FARMLAND
-    }
 }
 
-class SelectCropLayer(seed: Long) : GenLayer(seed) {
+class RainfedCoverLayer(seed: Long) : GenLayer(seed) {
     override fun getInts(areaX: Int, areaY: Int, areaWidth: Int, areaHeight: Int): IntArray {
         val result = IntCache.getIntCache(areaWidth * areaHeight)
         for (z in 0..areaHeight - 1) {
             for (x in 0..areaWidth - 1) {
                 this.initChunkSeed((areaX + x).toLong(), (areaY + z).toLong())
-                result[x + z * areaWidth] = this.nextInt(RainfedCrops.CROP_COUNT)
+                val index = x + z * areaWidth
+                if (this.nextInt(10) == 0) {
+                    if (this.nextInt(5) == 0) {
+                        result[index] = 1
+                    } else {
+                        result[index] = 2
+                    }
+                } else {
+                    result[index] = 0
+                }
             }
         }
         return result
