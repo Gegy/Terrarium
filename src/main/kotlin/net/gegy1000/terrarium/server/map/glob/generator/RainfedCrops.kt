@@ -7,8 +7,8 @@ import net.minecraft.block.BlockDirt
 import net.minecraft.block.BlockFarmland
 import net.minecraft.block.state.IBlockState
 import net.minecraft.init.Blocks
-import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
+import net.minecraft.world.chunk.ChunkPrimer
 import net.minecraft.world.gen.layer.GenLayer
 import net.minecraft.world.gen.layer.GenLayerFuzzyZoom
 import net.minecraft.world.gen.layer.GenLayerVoronoiZoom
@@ -33,8 +33,6 @@ class RainfedCrops : GlobGenerator(GlobType.RAINFED_CROPS) {
 
     lateinit var cropSelector: GenLayer
 
-    val pos = BlockPos.MutableBlockPos()
-
     override fun createLayers(world: World) {
         var layer: GenLayer = SelectCropLayer(1)
         layer = GenLayerVoronoiZoom(1000, layer)
@@ -45,23 +43,23 @@ class RainfedCrops : GlobGenerator(GlobType.RAINFED_CROPS) {
         this.cropSelector.initWorldGenSeed(world.seed)
     }
 
-    override fun coverDecorate(buffer: Array<GlobType>, world: World, random: Random, x: Int, z: Int) {
+    override fun coverDecorate(globBuffer: Array<GlobType>, heightBuffer: IntArray, primer: ChunkPrimer, random: Random, x: Int, z: Int) {
         val cropLayer = this.sampleChunk(this.cropSelector, x, z)
 
-        this.foreach(buffer) { localX: Int, localZ: Int ->
+        this.foreach(globBuffer) { localX: Int, localZ: Int ->
             if (random.nextInt(20) != 0) {
-                this.pos.setPos(x + localX, 0, z + localZ)
-                val ground = world.getTopSolidOrLiquidBlock(this.pos)
+                val bufferIndex = localX + localZ * 16
+                val y = heightBuffer[bufferIndex]
 
-                if (WHEAT.block.canPlaceBlockAt(world, ground)) {
-                    val state = when (cropLayer[localX + localZ * 16]) {
+                if (primer.getBlockState(localX, y, localZ).block is BlockFarmland) {
+                    val state = when (cropLayer[bufferIndex]) {
                         LAYER_WHEAT -> WHEAT
                         LAYER_CARROTS -> CARROTS
                         LAYER_POTATOES -> POTATOES
                         else -> WHEAT
                     }
 
-                    world.setBlockState(ground, state.withProperty(BlockCrops.AGE, random.nextInt(8)))
+                    primer.setBlockState(localX, y + 1, localZ, state.withProperty(BlockCrops.AGE, random.nextInt(8)))
                 }
             }
         }

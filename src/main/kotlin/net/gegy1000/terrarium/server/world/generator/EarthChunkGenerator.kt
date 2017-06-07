@@ -115,6 +115,14 @@ class EarthChunkGenerator(val world: World, seed: Long, settingsString: String) 
                 this.generateBiomeTerrain(this.globBuffer[index], this.random, primer, globalX + x, globalZ + z, this.depthBuffer[index])
             }
         }
+
+        if (this.settings.decorate) {
+            IntCache.resetIntCache()
+
+            this.globBuffer.toHashSet().forEach {
+                this.globGenerators[it]?.coverDecorate(this.globBuffer, this.heightBuffer, primer, this.random, globalX, globalZ)
+            }
+        }
     }
 
     private fun generateBiomeTerrain(glob: GlobType, rand: Random, primer: ChunkPrimer, x: Int, z: Int, noise: Double) {
@@ -189,12 +197,6 @@ class EarthChunkGenerator(val world: World, seed: Long, settingsString: String) 
 
         if (this.settings.decorate) {
             ForgeEventFactory.onChunkPopulate(true, this, this.world, this.random, chunkX, chunkZ, false)
-
-            IntCache.resetIntCache()
-
-            this.globBuffer.toHashSet().forEach {
-                this.globGenerators[it]?.coverDecorate(this.globBuffer, this.world, this.random, x, z)
-            }
 
             if (TerrainGen.populate(this, this.world, this.random, chunkX, chunkZ, false, PopulateChunkEvent.Populate.EventType.ANIMALS)) {
                 WorldEntitySpawner.performWorldGenSpawning(this.world, biome, x + 8, z + 8, 16, 16, this.random)

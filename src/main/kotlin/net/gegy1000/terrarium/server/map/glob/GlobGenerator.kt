@@ -3,6 +3,7 @@ package net.gegy1000.terrarium.server.map.glob
 import net.minecraft.block.state.IBlockState
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
+import net.minecraft.world.chunk.ChunkPrimer
 import net.minecraft.world.gen.layer.GenLayer
 import java.util.Random
 
@@ -22,7 +23,7 @@ abstract class GlobGenerator(val type: GlobType) {
     protected open fun createLayers(world: World) {
     }
 
-    open fun coverDecorate(buffer: Array<GlobType>, world: World, random: Random, x: Int, z: Int) {
+    open fun coverDecorate(globBuffer: Array<GlobType>, heightBuffer: IntArray, primer: ChunkPrimer, random: Random, x: Int, z: Int) {
     }
 
     open fun getCover(x: Int, z: Int, random: Random): IBlockState = this.topBlock
