@@ -43,8 +43,8 @@ class EarthGenerationHandler(val world: World, val settings: EarthGenerationSett
     private fun getHeight(x: Int, z: Int): Int {
         val scaledX = x.toDouble() / (this.scaledWidth - 1) * (WIDTH - 1)
         val scaledZ = z.toDouble() / (this.scaledHeight - 1) * (HEIGHT - 1)
-        val originX = scaledX.toInt()
-        val originZ = scaledZ.toInt()
+        val originX = MathHelper.floor(scaledX)
+        val originZ = MathHelper.floor(scaledZ)
         val intermediateX = scaledX - originX
         val intermediateZ = scaledZ - originZ
 
@@ -82,8 +82,8 @@ class EarthGenerationHandler(val world: World, val settings: EarthGenerationSett
         val scaledX = scatterX.toDouble() / (this.scaledWidth - 1) * (WIDTH - 1)
         val scaledZ = scatterZ.toDouble() / (this.scaledHeight - 1) * (HEIGHT - 1)
 
-        val roundX = (scaledX * 3.0 / 10.0).toInt()
-        val roundZ = (scaledZ * 3.0 / 10.0).toInt()
+        val roundX = MathHelper.floor(scaledX * 3.0 / 10.0)
+        val roundZ = MathHelper.floor(scaledZ * 3.0 / 10.0)
 
         return GlobcoverSource[roundX, roundZ]
     }

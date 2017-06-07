@@ -48,6 +48,7 @@ class EarthChunkGenerator(val world: World, seed: Long, settingsString: String) 
     val heightBuffer = IntArray(256)
     val globBuffer = Array(256, { GlobType.NO_DATA })
     val coverBuffer = Array(256, { STONE })
+    val fillerBuffer = Array(256, { STONE })
 
     var biomeBuffer: Array<Biome>? = null
 
@@ -113,16 +114,18 @@ class EarthChunkGenerator(val world: World, seed: Long, settingsString: String) 
 
         val generators = this.globBuffer.toHashSet()
         generators.forEach {
-            this.globGenerators[it]?.getCover(this.globBuffer, this.coverBuffer, globalX, globalZ, this.random)
+            val generator = this.globGenerators[it]
+            generator?.getCover(this.globBuffer, this.coverBuffer, globalX, globalZ, this.random)
+            generator?.getFiller(this.globBuffer, this.fillerBuffer, globalX, globalZ, this.random)
         }
 
         for (z in 0..15) {
             for (x in 0..15) {
                 val index = x + z * 16
                 val cover = this.coverBuffer[index]
-                val glob = this.globBuffer[index]
+                val filler = this.fillerBuffer[index]
                 val noise = this.depthBuffer[index]
-                this.generateBiomeTerrain(cover, glob, this.random, primer, globalX + x, globalZ + z, noise)
+                this.generateBiomeTerrain(cover, filler, this.random, primer, globalX + x, globalZ + z, noise)
             }
         }
 
@@ -135,11 +138,7 @@ class EarthChunkGenerator(val world: World, seed: Long, settingsString: String) 
         }
     }
 
-    private fun generateBiomeTerrain(topBlock: IBlockState, glob: GlobType, rand: Random, primer: ChunkPrimer, x: Int, z: Int, noise: Double) {
-        val generator = this.globGenerators[glob]
-
-        val fillerBlock = generator?.getFiller(x, z, rand) ?: STONE
-
+    private fun generateBiomeTerrain(topBlock: IBlockState, fillerBlock: IBlockState, rand: Random, primer: ChunkPrimer, x: Int, z: Int, noise: Double) {
         val oceanHeight = this.handler.oceanHeight
 
         var currentTop = topBlock

@@ -34,7 +34,13 @@ abstract class GlobGenerator(val type: GlobType) {
 
     protected open fun getCover(x: Int, z: Int, random: Random): IBlockState = this.topBlock
 
-    open fun getFiller(x: Int, z: Int, random: Random): IBlockState = this.fillerBlock
+    open fun getFiller(glob: Array<GlobType>, filler: Array<IBlockState>, x: Int, z: Int, random: Random) {
+        this.foreach(glob) { localX: Int, localZ: Int ->
+            filler[localX + localZ * 16] = this.getFiller(x + localX, z + localZ, random)
+        }
+    }
+
+    protected open fun getFiller(x: Int, z: Int, random: Random): IBlockState = this.fillerBlock
 
     protected fun scatter(pos: BlockPos, random: Random, range: Int): BlockPos {
         val offsetX = random.nextInt(range) - random.nextInt(range)

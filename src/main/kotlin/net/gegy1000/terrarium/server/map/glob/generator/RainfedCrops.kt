@@ -14,7 +14,7 @@ class RainfedCrops : Cropland(GlobType.RAINFED_CROPS) {
     override fun createLayers(world: World) {
         super.createLayers(world)
 
-        var layer: GenLayer = RainfedCoverLayer(50)
+        var layer: GenLayer = CoverLayer(50)
         layer = GenLayerFuzzyZoom(5, layer)
         layer = GenLayerFuzzyZoom(2000, layer)
 
@@ -38,26 +38,26 @@ class RainfedCrops : Cropland(GlobType.RAINFED_CROPS) {
             }
         }
     }
-}
 
-class RainfedCoverLayer(seed: Long) : GenLayer(seed) {
-    override fun getInts(areaX: Int, areaY: Int, areaWidth: Int, areaHeight: Int): IntArray {
-        val result = IntCache.getIntCache(areaWidth * areaHeight)
-        for (z in 0..areaHeight - 1) {
-            for (x in 0..areaWidth - 1) {
-                this.initChunkSeed((areaX + x).toLong(), (areaY + z).toLong())
-                val index = x + z * areaWidth
-                if (this.nextInt(10) == 0) {
-                    if (this.nextInt(5) == 0) {
-                        result[index] = 1
+    private class CoverLayer(seed: Long) : GenLayer(seed) {
+        override fun getInts(areaX: Int, areaY: Int, areaWidth: Int, areaHeight: Int): IntArray {
+            val result = IntCache.getIntCache(areaWidth * areaHeight)
+            for (z in 0..areaHeight - 1) {
+                for (x in 0..areaWidth - 1) {
+                    this.initChunkSeed((areaX + x).toLong(), (areaY + z).toLong())
+                    val index = x + z * areaWidth
+                    if (this.nextInt(10) == 0) {
+                        if (this.nextInt(5) == 0) {
+                            result[index] = 1
+                        } else {
+                            result[index] = 2
+                        }
                     } else {
-                        result[index] = 2
+                        result[index] = 0
                     }
-                } else {
-                    result[index] = 0
                 }
             }
+            return result
         }
-        return result
     }
 }
