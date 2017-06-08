@@ -24,8 +24,8 @@ object GlobcoverSource : ChunkMapperSource() {
     val GLOBCOVER_CACHE = File(CACHE_DIRECTORY, "globcover")
 
     private val cache = CacheBuilder.newBuilder()
-            .expireAfterAccess(10, TimeUnit.SECONDS)
-            .maximumSize(16)
+            .expireAfterAccess(4, TimeUnit.SECONDS)
+            .maximumSize(3)
             .build(object : CacheLoader<GlobTilePos, GlobTile>() {
                 override fun load(pos: GlobTilePos): GlobTile {
                     return loadTile(pos) ?: GlobTile()

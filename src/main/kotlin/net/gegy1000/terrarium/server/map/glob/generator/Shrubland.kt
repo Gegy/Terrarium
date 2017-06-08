@@ -16,16 +16,16 @@ import java.util.Random
 
 class Shrubland : GlobGenerator(GlobType.SHRUBLAND) {
     companion object {
-        const val LAYER_DIRT = 0
-        const val LAYER_SAND = 1
+        private const val LAYER_DIRT = 0
+        private const val LAYER_SAND = 1
 
-        val SAND = Blocks.SAND.defaultState
-        val DIRT = Blocks.DIRT.defaultState.withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT)
+        private val SAND = Blocks.SAND.defaultState
+        private val DIRT = Blocks.DIRT.defaultState.withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT)
 
-        val TALL_GRASS = Blocks.TALLGRASS.defaultState.withProperty(BlockTallGrass.TYPE, BlockTallGrass.EnumType.GRASS)
-        val DEAD_BUSH = Blocks.TALLGRASS.defaultState.withProperty(BlockTallGrass.TYPE, BlockTallGrass.EnumType.DEAD_BUSH)
+        private val TALL_GRASS = Blocks.TALLGRASS.defaultState.withProperty(BlockTallGrass.TYPE, BlockTallGrass.EnumType.GRASS)
+        private val DEAD_BUSH = Blocks.TALLGRASS.defaultState.withProperty(BlockTallGrass.TYPE, BlockTallGrass.EnumType.DEAD_BUSH)
 
-        val BUSH = Blocks.LEAVES.defaultState
+        private val BUSH = Blocks.LEAVES.defaultState
     }
 
     lateinit var coverSelector: GenLayer

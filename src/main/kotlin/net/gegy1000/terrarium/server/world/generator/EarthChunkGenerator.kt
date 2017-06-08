@@ -201,10 +201,13 @@ class EarthChunkGenerator(val world: World, seed: Long, settingsString: String) 
         val l = this.random.nextLong() / 2L * 2L + 1L
         this.random.setSeed(chunkX.toLong() * k + chunkZ.toLong() * l xor this.world.seed)
 
-        val biome = this.globBuffer[255].biome
+        val glob = this.globBuffer[255]
+        val biome = glob.biome
 
         if (this.settings.decorate) {
             ForgeEventFactory.onChunkPopulate(true, this, this.world, this.random, chunkX, chunkZ, false)
+
+            this.globGenerators[glob]?.decorate(this.world, this.random, x + 8, z + 8)
 
             if (TerrainGen.populate(this, this.world, this.random, chunkX, chunkZ, false, PopulateChunkEvent.Populate.EventType.ANIMALS)) {
                 WorldEntitySpawner.performWorldGenSpawning(this.world, biome, x + 8, z + 8, 16, 16, this.random)

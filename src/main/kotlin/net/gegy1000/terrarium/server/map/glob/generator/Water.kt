@@ -15,11 +15,11 @@ import java.util.Random
 
 class Water : GlobGenerator(GlobType.WATER) {
     companion object {
-        val WATER: IBlockState = Blocks.WATER.defaultState
-        val SAND: IBlockState = Blocks.SAND.defaultState
-        val DIRT: IBlockState = Blocks.DIRT.defaultState.withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT)
-        val CLAY: IBlockState = Blocks.CLAY.defaultState
-        val GRAVEL: IBlockState = Blocks.GRAVEL.defaultState
+        private val WATER: IBlockState = Blocks.WATER.defaultState
+        private val SAND: IBlockState = Blocks.SAND.defaultState
+        private val DIRT: IBlockState = Blocks.DIRT.defaultState.withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT)
+        private val CLAY: IBlockState = Blocks.CLAY.defaultState
+        private val GRAVEL: IBlockState = Blocks.GRAVEL.defaultState
     }
 
     lateinit var coverSelector: GenLayer

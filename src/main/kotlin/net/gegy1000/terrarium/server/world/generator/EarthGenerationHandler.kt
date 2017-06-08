@@ -57,7 +57,7 @@ class EarthGenerationHandler(val world: World, val settings: EarthGenerationSett
         val bicubic = Interpolation.bicubic(this.buffer, intermediateX, intermediateZ)
         val scaled = (bicubic * this.heightScale).toInt()
 
-        if (bicubic >= 1.0 && scaled < 1) {
+        if (bicubic >= 0.0 && scaled < 1) {
             return this.settings.heightOffset + 1
         }
 

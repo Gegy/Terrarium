@@ -15,12 +15,17 @@ abstract class GlobGenerator(val type: GlobType) {
     val topBlock = this.type.biome.topBlock
     val fillerBlock = this.type.biome.fillerBlock
 
+    val pos = BlockPos.MutableBlockPos()
+
     fun initialize(world: World) {
         this.seed = world.seed
         this.createLayers(world)
     }
 
     protected open fun createLayers(world: World) {
+    }
+
+    open fun decorate(world: World, random: Random, x: Int, z: Int) {
     }
 
     open fun coverDecorate(globBuffer: Array<GlobType>, heightBuffer: IntArray, primer: ChunkPrimer, random: Random, x: Int, z: Int) {
@@ -42,23 +47,18 @@ abstract class GlobGenerator(val type: GlobType) {
 
     protected open fun getFiller(x: Int, z: Int, random: Random): IBlockState = this.fillerBlock
 
-    protected fun scatter(pos: BlockPos, random: Random, range: Int): BlockPos {
-        val offsetX = random.nextInt(range) - random.nextInt(range)
-        val offsetZ = random.nextInt(range) - random.nextInt(range)
-        return pos.add(offsetX, 0, offsetZ)
-    }
-
-    protected fun scatter(x: Int, z: Int, random: Random, range: Int): BlockPos {
-        val offsetX = random.nextInt(range) - random.nextInt(range)
-        val offsetZ = random.nextInt(range) - random.nextInt(range)
-        return BlockPos(offsetX + x, 0, offsetZ + z)
-    }
-
     protected fun <T> select(random: Random, vararg items: T) = items[random.nextInt(items.size)]
 
     protected fun range(random: Random, minimum: Int, maximum: Int) = random.nextInt(maximum - minimum) + minimum
 
     protected fun sampleChunk(layer: GenLayer, x: Int, z: Int) = layer.getInts(x, z, 16, 16)
+
+    protected fun scatter(coordinate: Int, range: Int, random: Random) = coordinate + random.nextInt(range) - random.nextInt(range)
+
+    protected fun scatterDecorate(x: Int, z: Int, random: Random): BlockPos {
+        this.pos.setPos(x + random.nextInt(16), 0, z + random.nextInt(16))
+        return this.pos
+    }
 
     protected inline fun foreach(buffer: Array<GlobType>, lambda: (localX: Int, localZ: Int) -> Unit) {
         for (localZ in 0..15) {
@@ -67,6 +67,12 @@ abstract class GlobGenerator(val type: GlobType) {
                     lambda(localX, localZ)
                 }
             }
+        }
+    }
+
+    protected inline fun decorateScatter(x: Int, z: Int, count: Int, world: World, random: Random, lambda: (pos: BlockPos) -> Unit) {
+        for (i in 0..count) {
+            lambda(world.getTopSolidOrLiquidBlock(this.scatterDecorate(x, z, random)))
         }
     }
 }

@@ -26,8 +26,8 @@ object HeightSource : ChunkMapperSource() {
     val HEIGHT_CACHE = File(CACHE_DIRECTORY, "heights")
 
     private val cache = CacheBuilder.newBuilder()
-            .expireAfterAccess(10, TimeUnit.SECONDS)
-            .maximumSize(16)
+            .expireAfterAccess(4, TimeUnit.SECONDS)
+            .maximumSize(4)
             .build(object : CacheLoader<HeightTilePos, HeightTile>() {
                 override fun load(pos: HeightTilePos): HeightTile {
                     return loadTile(pos) ?: HeightTile()

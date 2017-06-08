@@ -26,58 +26,45 @@ import net.minecraft.init.Biomes
 import net.minecraft.world.biome.Biome
 import kotlin.reflect.KClass
 
-enum class GlobType(val biome: Biome, val generator: KClass<out GlobGenerator>) {
-    IRRIGATED_CROPS(Biomes.FOREST, IrrigatedCrops::class),
-    RAINFED_CROPS(Biomes.PLAINS, RainfedCrops::class),
-    CROPLAND_WITH_VEGETATION(Biomes.PLAINS, CroplandWithVegetation::class),
-    VEGETATION_WITH_CROPLAND(Biomes.PLAINS, VegetationWithCropland::class),
-    BROADLEAF_EVERGREEN(Biomes.FOREST, BroadleafEvergreen::class),
-    CLOSED_BROADLEAF_DECIDUOUS(Biomes.FOREST, ClosedBroadleafDeciduous::class),
-    OPEN_BROADLEAF_DECIDUOUS(Biomes.FOREST, OpenBroadleafDeciduous::class),
-    CLOSED_NEEDLELEAF_EVERGREEN(Biomes.FOREST, ClosedNeedleleafEvergreen::class),
-    OPEN_NEEDLELEAF(Biomes.FOREST, OpenNeedleleaf::class),
-    MIXED_BROAD_NEEDLELEAF(Biomes.FOREST, MixedBroadNeedleleaf::class),
-    FOREST_SHRUBLAND_WITH_GRASS(Biomes.PLAINS, ForestShrublandWithGrass::class),
-    GRASS_WITH_FOREST_SHRUBLAND(Biomes.PLAINS, GrassWithForestShrubland::class),
-    SHRUBLAND(Biomes.DESERT, Shrubland::class),
-    GRASSLAND(Biomes.SAVANNA, Grassland::class),
-    SPARSE_VEGETATION(Biomes.DESERT, SparseVegetation::class),
-    FRESH_FLOODED_FOREST(Biomes.SWAMPLAND, FreshFloodedForest::class),
-    SALINE_FLOODED_FOREST(Biomes.SWAMPLAND, SalineFloodedForest::class),
-    FLOODED_GRASSLAND(Biomes.SWAMPLAND, FloodedGrassland::class),
-    URBAN(Biomes.PLAINS, Urban::class),
-    BARE(Biomes.DESERT, Bare::class),
-    WATER(Biomes.OCEAN, Water::class),
-    SNOW(Biomes.ICE_PLAINS, Snow::class),
-    NO_DATA(Biomes.PLAINS, Bare::class);
+enum class GlobType(val id: Int, val biome: Biome, val generator: KClass<out GlobGenerator>) {
+    IRRIGATED_CROPS(11, Biomes.FOREST, IrrigatedCrops::class),
+    RAINFED_CROPS(14, Biomes.PLAINS, RainfedCrops::class),
+    CROPLAND_WITH_VEGETATION(20, Biomes.PLAINS, CroplandWithVegetation::class),
+    VEGETATION_WITH_CROPLAND(30, Biomes.PLAINS, VegetationWithCropland::class),
+    BROADLEAF_EVERGREEN(40, Biomes.FOREST, BroadleafEvergreen::class),
+    CLOSED_BROADLEAF_DECIDUOUS(50, Biomes.FOREST, ClosedBroadleafDeciduous::class),
+    OPEN_BROADLEAF_DECIDUOUS(60, Biomes.FOREST, OpenBroadleafDeciduous::class),
+    CLOSED_NEEDLELEAF_EVERGREEN(70, Biomes.FOREST, ClosedNeedleleafEvergreen::class),
+    OPEN_NEEDLELEAF(90, Biomes.FOREST, OpenNeedleleaf::class),
+    MIXED_BROAD_NEEDLELEAF(100, Biomes.FOREST, MixedBroadNeedleleaf::class),
+    FOREST_SHRUBLAND_WITH_GRASS(110, Biomes.PLAINS, ForestShrublandWithGrass::class),
+    GRASS_WITH_FOREST_SHRUBLAND(120, Biomes.PLAINS, GrassWithForestShrubland::class),
+    SHRUBLAND(130, Biomes.DESERT, Shrubland::class),
+    GRASSLAND(140, Biomes.SAVANNA, Grassland::class),
+    SPARSE_VEGETATION(150, Biomes.DESERT, SparseVegetation::class),
+    FRESH_FLOODED_FOREST(160, Biomes.SWAMPLAND, FreshFloodedForest::class),
+    SALINE_FLOODED_FOREST(170, Biomes.SWAMPLAND, SalineFloodedForest::class),
+    FLOODED_GRASSLAND(180, Biomes.SWAMPLAND, FloodedGrassland::class),
+    URBAN(190, Biomes.PLAINS, Urban::class),
+    BARE(200, Biomes.DESERT, Bare::class),
+    WATER(210, Biomes.OCEAN, Water::class),
+    SNOW(220, Biomes.ICE_PLAINS, Snow::class),
+    NO_DATA(0, Biomes.PLAINS, Bare::class);
 
     companion object {
-        operator fun get(i: Int): GlobType {
-            return when (i) {
-                11 -> IRRIGATED_CROPS
-                14 -> RAINFED_CROPS
-                20 -> CROPLAND_WITH_VEGETATION
-                30 -> VEGETATION_WITH_CROPLAND
-                40 -> BROADLEAF_EVERGREEN
-                50 -> CLOSED_BROADLEAF_DECIDUOUS
-                60 -> OPEN_BROADLEAF_DECIDUOUS
-                70 -> CLOSED_NEEDLELEAF_EVERGREEN
-                90 -> OPEN_NEEDLELEAF
-                100 -> MIXED_BROAD_NEEDLELEAF
-                110 -> FOREST_SHRUBLAND_WITH_GRASS
-                120 -> GRASS_WITH_FOREST_SHRUBLAND
-                130 -> SHRUBLAND
-                140 -> GRASSLAND
-                150 -> SPARSE_VEGETATION
-                160 -> FRESH_FLOODED_FOREST
-                170 -> SALINE_FLOODED_FOREST
-                180 -> FLOODED_GRASSLAND
-                190 -> URBAN
-                200 -> BARE
-                210 -> WATER
-                220 -> SNOW
-                else -> NO_DATA
+        val TYPES = Array(256, { GlobType.NO_DATA })
+
+        init {
+            for (type in GlobType.values()) {
+                TYPES[type.id] = type
             }
+        }
+
+        operator fun get(id: Int): GlobType {
+            if (id in 0..255) {
+                return TYPES[id]
+            }
+            return NO_DATA
         }
     }
 }

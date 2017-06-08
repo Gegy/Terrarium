@@ -18,17 +18,17 @@ import java.util.Random
 
 class Grassland : GlobGenerator(GlobType.GRASSLAND) {
     companion object {
-        const val LAYER_GRASS = 0
-        const val LAYER_DIRT = 1
-        const val LAYER_PODZOL = 2
+        private const val LAYER_GRASS = 0
+        private const val LAYER_DIRT = 1
+        private const val LAYER_PODZOL = 2
 
-        val GRASS = Blocks.GRASS.defaultState
-        val DIRT = Blocks.DIRT.defaultState.withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT)
-        val PODZOL = Blocks.DIRT.defaultState.withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.PODZOL)
+        private val GRASS = Blocks.GRASS.defaultState
+        private val DIRT = Blocks.DIRT.defaultState.withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT)
+        private val PODZOL = Blocks.DIRT.defaultState.withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.PODZOL)
 
-        val TALL_GRASS = Blocks.TALLGRASS.defaultState.withProperty(BlockTallGrass.TYPE, BlockTallGrass.EnumType.GRASS)
-        val DEAD_BUSH = Blocks.TALLGRASS.defaultState.withProperty(BlockTallGrass.TYPE, BlockTallGrass.EnumType.DEAD_BUSH)
-        val DOUBLE_TALL_GRASS = Blocks.DOUBLE_PLANT.defaultState.withProperty(BlockDoublePlant.VARIANT, BlockDoublePlant.EnumPlantType.GRASS)
+        private val TALL_GRASS = Blocks.TALLGRASS.defaultState.withProperty(BlockTallGrass.TYPE, BlockTallGrass.EnumType.GRASS)
+        private val DEAD_BUSH = Blocks.TALLGRASS.defaultState.withProperty(BlockTallGrass.TYPE, BlockTallGrass.EnumType.DEAD_BUSH)
+        private val DOUBLE_TALL_GRASS = Blocks.DOUBLE_PLANT.defaultState.withProperty(BlockDoublePlant.VARIANT, BlockDoublePlant.EnumPlantType.GRASS)
     }
 
     lateinit var coverSelector: GenLayer
