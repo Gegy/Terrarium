@@ -6,6 +6,7 @@ import net.gegy1000.terrarium.server.map.glob.generator.layer.ReplaceRandomLayer
 import net.gegy1000.terrarium.server.map.glob.generator.layer.SelectionSeedLayer
 import net.minecraft.block.BlockDirt
 import net.minecraft.block.BlockLeaves
+import net.minecraft.block.BlockLiquid
 import net.minecraft.block.BlockOldLeaf
 import net.minecraft.block.BlockOldLog
 import net.minecraft.block.BlockPlanks
@@ -35,13 +36,14 @@ open class Forest(type: GlobType) : GlobGenerator(type) {
         val TAIGA_1 = WorldGenTaiga1()
         val TAIGA_2 = WorldGenTaiga2(false)
 
-        private const val LAYER_GRASS = 0
-        private const val LAYER_DIRT = 1
-        private const val LAYER_PODZOL = 2
+        const val LAYER_GRASS = 0
+        const val LAYER_DIRT = 1
+        const val LAYER_PODZOL = 2
 
-        private val GRASS = Blocks.GRASS.defaultState
-        private val DIRT = Blocks.DIRT.defaultState.withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT)
-        private val PODZOL = Blocks.DIRT.defaultState.withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.PODZOL)
+        val GRASS = Blocks.GRASS.defaultState
+        val COARSE_DIRT = Blocks.DIRT.defaultState.withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT)
+        val PODZOL = Blocks.DIRT.defaultState.withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.PODZOL)
+        val LILYPAD = Blocks.WATERLILY.defaultState
 
         private val TALL_GRASS = Blocks.TALLGRASS.defaultState.withProperty(BlockTallGrass.TYPE, BlockTallGrass.EnumType.GRASS)
     }
@@ -65,7 +67,14 @@ open class Forest(type: GlobType) : GlobGenerator(type) {
             val bufferIndex = localX + localZ * 16
             if (random.nextInt(4) == 0) {
                 val y = heightBuffer[bufferIndex]
-                primer.setBlockState(localX, y + 1, localZ, Forest.TALL_GRASS)
+                val state = primer.getBlockState(localX, y, localZ)
+                if (state.block is BlockLiquid) {
+                    if (random.nextInt(16) == 0) {
+                        primer.setBlockState(localX, y + 1, localZ, Forest.LILYPAD)
+                    }
+                } else {
+                    primer.setBlockState(localX, y + 1, localZ, Forest.TALL_GRASS)
+                }
             }
         }
     }
@@ -77,7 +86,7 @@ open class Forest(type: GlobType) : GlobGenerator(type) {
             val index = localX + localZ * 16
             cover[index] = when (coverLayer[index]) {
                 Forest.LAYER_GRASS -> Forest.GRASS
-                Forest.LAYER_DIRT -> Forest.DIRT
+                Forest.LAYER_DIRT -> Forest.COARSE_DIRT
                 else -> Forest.PODZOL
             }
         }
