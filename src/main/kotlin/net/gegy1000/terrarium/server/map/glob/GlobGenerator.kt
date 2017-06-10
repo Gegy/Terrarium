@@ -18,12 +18,12 @@ abstract class GlobGenerator(val type: GlobType) {
     protected val pos = BlockPos.MutableBlockPos()
 
     protected lateinit var world: World
-    protected lateinit var globBuffer: Array<GlobType>
+    internal lateinit var globBuffer: Array<GlobType>
+    internal lateinit var coverBuffer: Array<IBlockState>
+    internal lateinit var fillerBuffer: Array<IBlockState>
     protected lateinit var heightBuffer: IntArray
-    protected lateinit var coverBuffer: Array<IBlockState>
-    protected lateinit var fillerBuffer: Array<IBlockState>
 
-    fun initialize(world: World, globBuffer: Array<GlobType>, heightBuffer: IntArray, coverBuffer: Array<IBlockState>, fillerBuffer: Array<IBlockState>) {
+    open fun initialize(world: World, globBuffer: Array<GlobType>, heightBuffer: IntArray, coverBuffer: Array<IBlockState>, fillerBuffer: Array<IBlockState>) {
         this.world = world
         this.seed = world.seed
         this.globBuffer = globBuffer
@@ -71,7 +71,7 @@ abstract class GlobGenerator(val type: GlobType) {
         return this.pos
     }
 
-    protected inline fun iterate(lambda: (localX: Int, localZ: Int) -> Unit) {
+    internal inline fun iterate(lambda: (localX: Int, localZ: Int) -> Unit) {
         for (localZ in 0..15) {
             for (localX in 0..15) {
                 if (this.globBuffer[localX + localZ * 16] == this.type) {
@@ -87,7 +87,7 @@ abstract class GlobGenerator(val type: GlobType) {
         }
     }
 
-    protected inline fun coverLayer(buffer: Array<IBlockState>, x: Int, z: Int, layer: GenLayer, populate: (Int) -> IBlockState) {
+    internal inline fun coverLayer(buffer: Array<IBlockState>, x: Int, z: Int, layer: GenLayer, populate: (Int) -> IBlockState) {
         val sampled = this.sampleChunk(layer, x, z)
         this.iterate { localX: Int, localZ: Int ->
             val index = localX + localZ * 16

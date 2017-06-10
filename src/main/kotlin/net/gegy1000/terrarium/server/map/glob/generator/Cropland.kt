@@ -8,6 +8,7 @@ import net.gegy1000.terrarium.server.map.glob.generator.layer.SelectionSeedLayer
 import net.minecraft.block.BlockCrops
 import net.minecraft.block.BlockDirt
 import net.minecraft.block.BlockFarmland
+import net.minecraft.block.state.IBlockState
 import net.minecraft.init.Blocks
 import net.minecraft.world.chunk.ChunkPrimer
 import net.minecraft.world.gen.layer.GenLayer
@@ -17,10 +18,11 @@ import java.util.Random
 
 open class Cropland(type: GlobType) : GlobGenerator(type) {
     companion object {
+        const val CROP_COUNT = 3
+
         const val LAYER_WHEAT = 0
         const val LAYER_CARROTS = 1
         const val LAYER_POTATOES = 2
-        const val CROP_COUNT = 3
 
         const val LAYER_FENCE = 65535
 
@@ -28,11 +30,20 @@ open class Cropland(type: GlobType) : GlobGenerator(type) {
         val FARMLAND = Blocks.FARMLAND.defaultState.withProperty(BlockFarmland.MOISTURE, 7)
         val COARSE_DIRT = Blocks.DIRT.defaultState.withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT)
 
-        val WHEAT = Blocks.WHEAT.defaultState
-        val CARROTS = Blocks.CARROTS.defaultState
-        val POTATOES = Blocks.POTATOES.defaultState
+        private val WHEAT = Blocks.WHEAT.defaultState
+        private val CARROTS = Blocks.CARROTS.defaultState
+        private val POTATOES = Blocks.POTATOES.defaultState
 
-        val FENCE = Blocks.OAK_FENCE.defaultState
+        private val FENCE = Blocks.OAK_FENCE.defaultState
+
+        fun getState(cropType: Int): IBlockState {
+            return when (cropType) {
+                Cropland.LAYER_WHEAT -> Cropland.WHEAT
+                Cropland.LAYER_CARROTS -> Cropland.CARROTS
+                Cropland.LAYER_POTATOES -> Cropland.POTATOES
+                else -> Cropland.FENCE
+            }
+        }
     }
 
     lateinit var cropSelector: GenLayer
@@ -56,14 +67,9 @@ open class Cropland(type: GlobType) : GlobGenerator(type) {
             val age = random.nextInt(8)
             val bufferIndex = localX + localZ * 16
 
-            val y = heightBuffer[bufferIndex]
+            val y = this.heightBuffer[bufferIndex]
 
-            val state = when (cropLayer[bufferIndex]) {
-                Cropland.LAYER_WHEAT -> Cropland.WHEAT
-                Cropland.LAYER_CARROTS -> Cropland.CARROTS
-                Cropland.LAYER_POTATOES -> Cropland.POTATOES
-                else -> Cropland.FENCE
-            }
+            val state = Cropland.getState(cropLayer[bufferIndex])
 
             if (state.block is BlockCrops) {
                 if (random.nextInt(20) != 0) {
@@ -73,7 +79,7 @@ open class Cropland(type: GlobType) : GlobGenerator(type) {
                 }
             } else {
                 primer.setBlockState(localX, y, localZ, Cropland.COARSE_DIRT)
-                primer.setBlockState(localX, y + 1, localZ, Cropland.FENCE)
+                primer.setBlockState(localX, y + 1, localZ, state)
             }
         }
     }
