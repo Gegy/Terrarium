@@ -11,7 +11,7 @@ class Snow : GlobGenerator(GlobType.SNOW) {
         val SNOW: IBlockState = Blocks.SNOW.defaultState
     }
 
-    override fun getCover(x: Int, z: Int, random: Random) = SNOW
+    override fun getCoverAt(x: Int, z: Int, random: Random) = SNOW
 
-    override fun getFiller(x: Int, z: Int, random: Random) = SNOW
+    override fun getFillerAt(x: Int, z: Int, random: Random) = SNOW
 }

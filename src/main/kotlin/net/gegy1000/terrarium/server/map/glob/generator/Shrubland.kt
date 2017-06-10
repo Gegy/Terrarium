@@ -5,9 +5,7 @@ import net.gegy1000.terrarium.server.map.glob.GlobType
 import net.gegy1000.terrarium.server.map.glob.generator.layer.SelectionSeedLayer
 import net.minecraft.block.BlockDirt
 import net.minecraft.block.BlockTallGrass
-import net.minecraft.block.state.IBlockState
 import net.minecraft.init.Blocks
-import net.minecraft.world.World
 import net.minecraft.world.chunk.ChunkPrimer
 import net.minecraft.world.gen.layer.GenLayer
 import net.minecraft.world.gen.layer.GenLayerFuzzyZoom
@@ -31,33 +29,31 @@ class Shrubland : GlobGenerator(GlobType.SHRUBLAND) {
     lateinit var coverSelector: GenLayer
     lateinit var grassSelector: GenLayer
 
-    override fun createLayers(world: World) {
-        super.createLayers(world)
-
+    override fun createLayers() {
         var cover: GenLayer = SelectionSeedLayer(2, 1)
         cover = GenLayerVoronoiZoom(1000, cover)
         cover = GenLayerFuzzyZoom(3000, cover)
 
         this.coverSelector = cover
-        this.coverSelector.initWorldGenSeed(world.seed)
+        this.coverSelector.initWorldGenSeed(this.seed)
 
         var grass: GenLayer = SelectionSeedLayer(3, 3000)
         grass = GenLayerVoronoiZoom(1000, grass)
         grass = GenLayerFuzzyZoom(2000, grass)
 
         this.grassSelector = grass
-        this.grassSelector.initWorldGenSeed(world.seed)
+        this.grassSelector.initWorldGenSeed(this.seed)
     }
 
-    override fun coverDecorate(globBuffer: Array<GlobType>, heightBuffer: IntArray, primer: ChunkPrimer, random: Random, x: Int, z: Int) {
+    override fun coverDecorate(primer: ChunkPrimer, random: Random, x: Int, z: Int) {
         val grassLayer = this.sampleChunk(this.grassSelector, x, z)
 
-        this.foreach(globBuffer) { localX: Int, localZ: Int ->
+        this.iterate { localX: Int, localZ: Int ->
             val bufferIndex = localX + localZ * 16
             val grassType = grassLayer[bufferIndex]
 
             if (grassType != 0 && random.nextInt(4) == 0) {
-                val y = heightBuffer[bufferIndex]
+                val y = this.heightBuffer[bufferIndex]
 
                 if (grassType == 1) {
                     if (random.nextInt(8) == 0) {
@@ -74,12 +70,9 @@ class Shrubland : GlobGenerator(GlobType.SHRUBLAND) {
         }
     }
 
-    override fun getCover(glob: Array<GlobType>, cover: Array<IBlockState>, x: Int, z: Int, random: Random) {
-        val coverLayer = this.sampleChunk(this.coverSelector, x, z)
-
-        this.foreach(glob) { localX: Int, localZ: Int ->
-            val index = localX + localZ * 16
-            cover[index] = when (coverLayer[index]) {
+    override fun getCover(x: Int, z: Int, random: Random) {
+        this.coverLayer(this.coverBuffer, x, z, this.coverSelector) {
+            when (it) {
                 Shrubland.LAYER_SAND -> Shrubland.SAND
                 Shrubland.LAYER_DIRT -> Shrubland.DIRT
                 else -> Shrubland.SAND

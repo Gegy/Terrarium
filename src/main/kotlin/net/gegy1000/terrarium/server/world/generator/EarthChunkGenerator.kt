@@ -55,7 +55,7 @@ class EarthChunkGenerator(val world: World, seed: Long, settingsString: String) 
     init {
         GlobType.values().forEach {
             val generator = it.generator.createInstance()
-            generator.initialize(this.world)
+            generator.initialize(this.world, this.globBuffer, this.heightBuffer, this.coverBuffer, this.fillerBuffer)
             this.globGenerators.put(it, generator)
         }
     }
@@ -115,8 +115,8 @@ class EarthChunkGenerator(val world: World, seed: Long, settingsString: String) 
         val generators = this.globBuffer.toHashSet()
         generators.forEach {
             val generator = this.globGenerators[it]
-            generator?.getCover(this.globBuffer, this.coverBuffer, globalX, globalZ, this.random)
-            generator?.getFiller(this.globBuffer, this.fillerBuffer, globalX, globalZ, this.random)
+            generator?.getCover(globalX, globalZ, this.random)
+            generator?.getFiller(globalX, globalZ, this.random)
         }
 
         for (z in 0..15) {
@@ -133,7 +133,7 @@ class EarthChunkGenerator(val world: World, seed: Long, settingsString: String) 
             IntCache.resetIntCache()
 
             generators.forEach {
-                this.globGenerators[it]?.coverDecorate(this.globBuffer, this.heightBuffer, primer, this.random, globalX, globalZ)
+                this.globGenerators[it]?.coverDecorate(primer, this.random, globalX, globalZ)
             }
         }
     }
@@ -207,7 +207,7 @@ class EarthChunkGenerator(val world: World, seed: Long, settingsString: String) 
         if (this.settings.decorate) {
             ForgeEventFactory.onChunkPopulate(true, this, this.world, this.random, chunkX, chunkZ, false)
 
-            this.globGenerators[glob]?.decorate(this.world, this.random, x + 8, z + 8)
+            this.globGenerators[glob]?.decorate(this.random, x + 8, z + 8)
 
             if (TerrainGen.populate(this, this.world, this.random, chunkX, chunkZ, false, PopulateChunkEvent.Populate.EventType.ANIMALS)) {
                 WorldEntitySpawner.performWorldGenSpawning(this.world, biome, x + 8, z + 8, 16, 16, this.random)

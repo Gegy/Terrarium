@@ -5,7 +5,7 @@ import net.minecraft.block.state.IBlockState
 import java.util.Random
 
 class IrrigatedCrops : Cropland(GlobType.IRRIGATED_CROPS) {
-    override fun getCover(x: Int, z: Int, random: Random): IBlockState {
+    override fun getCoverAt(x: Int, z: Int, random: Random): IBlockState {
         if (x % 9 == 0 && z % 9 == 0) {
             return WATER
         }

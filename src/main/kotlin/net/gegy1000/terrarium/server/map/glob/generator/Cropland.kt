@@ -9,7 +9,6 @@ import net.minecraft.block.BlockCrops
 import net.minecraft.block.BlockDirt
 import net.minecraft.block.BlockFarmland
 import net.minecraft.init.Blocks
-import net.minecraft.world.World
 import net.minecraft.world.chunk.ChunkPrimer
 import net.minecraft.world.gen.layer.GenLayer
 import net.minecraft.world.gen.layer.GenLayerFuzzyZoom
@@ -38,7 +37,7 @@ open class Cropland(type: GlobType) : GlobGenerator(type) {
 
     lateinit var cropSelector: GenLayer
 
-    override fun createLayers(world: World) {
+    override fun createLayers() {
         var layer: GenLayer = SelectionSeedLayer(Cropland.CROP_COUNT, 1)
         layer = GenLayerVoronoiZoom(1000, layer)
         layer = GenLayerFuzzyZoom(2000, layer)
@@ -47,13 +46,13 @@ open class Cropland(type: GlobType) : GlobGenerator(type) {
         layer = ConnectHorizontalLayer(Cropland.LAYER_FENCE, 5000, layer)
 
         this.cropSelector = layer
-        this.cropSelector.initWorldGenSeed(world.seed)
+        this.cropSelector.initWorldGenSeed(this.seed)
     }
 
-    override fun coverDecorate(globBuffer: Array<GlobType>, heightBuffer: IntArray, primer: ChunkPrimer, random: Random, x: Int, z: Int) {
+    override fun coverDecorate(primer: ChunkPrimer, random: Random, x: Int, z: Int) {
         val cropLayer = this.sampleChunk(this.cropSelector, x, z)
 
-        this.foreach(globBuffer) { localX: Int, localZ: Int ->
+        this.iterate { localX: Int, localZ: Int ->
             val age = random.nextInt(8)
             val bufferIndex = localX + localZ * 16
 
@@ -79,5 +78,5 @@ open class Cropland(type: GlobType) : GlobGenerator(type) {
         }
     }
 
-    override fun getCover(x: Int, z: Int, random: Random) = Cropland.FARMLAND
+    override fun getCoverAt(x: Int, z: Int, random: Random) = Cropland.FARMLAND
 }

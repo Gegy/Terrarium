@@ -15,37 +15,48 @@ abstract class GlobGenerator(val type: GlobType) {
     val topBlock = this.type.biome.topBlock
     val fillerBlock = this.type.biome.fillerBlock
 
-    val pos = BlockPos.MutableBlockPos()
+    protected val pos = BlockPos.MutableBlockPos()
 
-    fun initialize(world: World) {
+    protected lateinit var world: World
+    protected lateinit var globBuffer: Array<GlobType>
+    protected lateinit var heightBuffer: IntArray
+    protected lateinit var coverBuffer: Array<IBlockState>
+    protected lateinit var fillerBuffer: Array<IBlockState>
+
+    fun initialize(world: World, globBuffer: Array<GlobType>, heightBuffer: IntArray, coverBuffer: Array<IBlockState>, fillerBuffer: Array<IBlockState>) {
+        this.world = world
         this.seed = world.seed
-        this.createLayers(world)
+        this.globBuffer = globBuffer
+        this.heightBuffer = heightBuffer
+        this.coverBuffer = coverBuffer
+        this.fillerBuffer = fillerBuffer
+        this.createLayers()
     }
 
-    protected open fun createLayers(world: World) {
+    protected open fun createLayers() {
     }
 
-    open fun decorate(world: World, random: Random, x: Int, z: Int) {
+    open fun decorate(random: Random, x: Int, z: Int) {
     }
 
-    open fun coverDecorate(globBuffer: Array<GlobType>, heightBuffer: IntArray, primer: ChunkPrimer, random: Random, x: Int, z: Int) {
+    open fun coverDecorate(primer: ChunkPrimer, random: Random, x: Int, z: Int) {
     }
 
-    open fun getCover(glob: Array<GlobType>, cover: Array<IBlockState>, x: Int, z: Int, random: Random) {
-        this.foreach(glob) { localX: Int, localZ: Int ->
-            cover[localX + localZ * 16] = this.getCover(x + localX, z + localZ, random)
+    open fun getCover(x: Int, z: Int, random: Random) {
+        this.iterate { localX: Int, localZ: Int ->
+            this.coverBuffer[localX + localZ * 16] = this.getCoverAt(x + localX, z + localZ, random)
         }
     }
 
-    protected open fun getCover(x: Int, z: Int, random: Random): IBlockState = this.topBlock
+    protected open fun getCoverAt(x: Int, z: Int, random: Random): IBlockState = this.topBlock
 
-    open fun getFiller(glob: Array<GlobType>, filler: Array<IBlockState>, x: Int, z: Int, random: Random) {
-        this.foreach(glob) { localX: Int, localZ: Int ->
-            filler[localX + localZ * 16] = this.getFiller(x + localX, z + localZ, random)
+    open fun getFiller(x: Int, z: Int, random: Random) {
+        this.iterate { localX: Int, localZ: Int ->
+            this.fillerBuffer[localX + localZ * 16] = this.getFillerAt(x + localX, z + localZ, random)
         }
     }
 
-    protected open fun getFiller(x: Int, z: Int, random: Random): IBlockState = this.fillerBlock
+    protected open fun getFillerAt(x: Int, z: Int, random: Random): IBlockState = this.fillerBlock
 
     protected fun <T> select(random: Random, vararg items: T) = items[random.nextInt(items.size)]
 
@@ -60,19 +71,27 @@ abstract class GlobGenerator(val type: GlobType) {
         return this.pos
     }
 
-    protected inline fun foreach(buffer: Array<GlobType>, lambda: (localX: Int, localZ: Int) -> Unit) {
+    protected inline fun iterate(lambda: (localX: Int, localZ: Int) -> Unit) {
         for (localZ in 0..15) {
             for (localX in 0..15) {
-                if (buffer[localX + localZ * 16] == this.type) {
+                if (this.globBuffer[localX + localZ * 16] == this.type) {
                     lambda(localX, localZ)
                 }
             }
         }
     }
 
-    protected inline fun decorateScatter(x: Int, z: Int, count: Int, world: World, random: Random, lambda: (pos: BlockPos) -> Unit) {
+    protected inline fun decorateScatter(x: Int, z: Int, count: Int, random: Random, lambda: (pos: BlockPos) -> Unit) {
         for (i in 0..count) {
-            lambda(world.getTopSolidOrLiquidBlock(this.scatterDecorate(x, z, random)))
+            lambda(this.world.getTopSolidOrLiquidBlock(this.scatterDecorate(x, z, random)))
+        }
+    }
+
+    protected inline fun coverLayer(buffer: Array<IBlockState>, x: Int, z: Int, layer: GenLayer, populate: (Int) -> IBlockState) {
+        val sampled = this.sampleChunk(layer, x, z)
+        this.iterate { localX: Int, localZ: Int ->
+            val index = localX + localZ * 16
+            buffer[index] = populate(sampled[index])
         }
     }
 }

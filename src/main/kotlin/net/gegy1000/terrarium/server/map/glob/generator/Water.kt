@@ -6,7 +6,6 @@ import net.gegy1000.terrarium.server.map.glob.generator.layer.SelectionSeedLayer
 import net.minecraft.block.BlockDirt
 import net.minecraft.block.state.IBlockState
 import net.minecraft.init.Blocks
-import net.minecraft.world.World
 import net.minecraft.world.gen.layer.GenLayer
 import net.minecraft.world.gen.layer.GenLayerFuzzyZoom
 import net.minecraft.world.gen.layer.GenLayerVoronoiZoom
@@ -24,9 +23,7 @@ class Water : GlobGenerator(GlobType.WATER) {
 
     lateinit var coverSelector: GenLayer
 
-    override fun createLayers(world: World) {
-        super.createLayers(world)
-
+    override fun createLayers() {
         var layer: GenLayer = SelectionSeedLayer(2, 1)
         layer = GenLayerFuzzyZoom(1000, layer)
         layer = CoverLayer(2000, layer)
@@ -34,17 +31,14 @@ class Water : GlobGenerator(GlobType.WATER) {
         layer = GenLayerFuzzyZoom(4000, layer)
 
         this.coverSelector = layer
-        this.coverSelector.initWorldGenSeed(world.seed)
+        this.coverSelector.initWorldGenSeed(this.seed)
     }
 
-    override fun getCover(x: Int, z: Int, random: Random) = WATER
+    override fun getCoverAt(x: Int, z: Int, random: Random) = WATER
 
-    override fun getFiller(glob: Array<GlobType>, filler: Array<IBlockState>, x: Int, z: Int, random: Random) {
-        val coverLayer = this.sampleChunk(this.coverSelector, x, z)
-
-        this.foreach(glob) { localX: Int, localZ: Int ->
-            val index = localX + localZ * 16
-            filler[index] = when (coverLayer[index]) {
+    override fun getFiller(x: Int, z: Int, random: Random) {
+        this.coverLayer(this.fillerBuffer, x, z, this.coverSelector) {
+            when (it) {
                 0 -> Water.SAND
                 1 -> Water.GRAVEL
                 2 -> Water.DIRT

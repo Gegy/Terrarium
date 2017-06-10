@@ -11,9 +11,7 @@ import net.minecraft.block.BlockOldLeaf
 import net.minecraft.block.BlockOldLog
 import net.minecraft.block.BlockPlanks
 import net.minecraft.block.BlockTallGrass
-import net.minecraft.block.state.IBlockState
 import net.minecraft.init.Blocks
-import net.minecraft.world.World
 import net.minecraft.world.chunk.ChunkPrimer
 import net.minecraft.world.gen.feature.WorldGenTaiga1
 import net.minecraft.world.gen.feature.WorldGenTaiga2
@@ -50,23 +48,21 @@ open class Forest(type: GlobType) : GlobGenerator(type) {
 
     lateinit var coverSelector: GenLayer
 
-    override fun createLayers(world: World) {
-        super.createLayers(world)
-
+    override fun createLayers() {
         var cover: GenLayer = SelectionSeedLayer(2, 1)
         cover = GenLayerVoronoiZoom(1000, cover)
         cover = ReplaceRandomLayer(replace = Forest.LAYER_DIRT, replacement = Forest.LAYER_PODZOL, chance = 4, seed = 2000, parent = cover)
         cover = GenLayerFuzzyZoom(3000, cover)
 
         this.coverSelector = cover
-        this.coverSelector.initWorldGenSeed(world.seed)
+        this.coverSelector.initWorldGenSeed(this.seed)
     }
 
-    override fun coverDecorate(globBuffer: Array<GlobType>, heightBuffer: IntArray, primer: ChunkPrimer, random: Random, x: Int, z: Int) {
-        this.foreach(globBuffer) { localX: Int, localZ: Int ->
+    override fun coverDecorate(primer: ChunkPrimer, random: Random, x: Int, z: Int) {
+        this.iterate { localX: Int, localZ: Int ->
             val bufferIndex = localX + localZ * 16
             if (random.nextInt(4) == 0) {
-                val y = heightBuffer[bufferIndex]
+                val y = this.heightBuffer[bufferIndex]
                 val state = primer.getBlockState(localX, y, localZ)
                 if (state.block is BlockLiquid) {
                     if (random.nextInt(16) == 0) {
@@ -79,12 +75,9 @@ open class Forest(type: GlobType) : GlobGenerator(type) {
         }
     }
 
-    override fun getCover(glob: Array<GlobType>, cover: Array<IBlockState>, x: Int, z: Int, random: Random) {
-        val coverLayer = this.sampleChunk(this.coverSelector, x, z)
-
-        this.foreach(glob) { localX: Int, localZ: Int ->
-            val index = localX + localZ * 16
-            cover[index] = when (coverLayer[index]) {
+    override fun getCover(x: Int, z: Int, random: Random) {
+        this.coverLayer(this.coverBuffer, x, z, this.coverSelector) {
+            when (it) {
                 Forest.LAYER_GRASS -> Forest.GRASS
                 Forest.LAYER_DIRT -> Forest.COARSE_DIRT
                 else -> Forest.PODZOL

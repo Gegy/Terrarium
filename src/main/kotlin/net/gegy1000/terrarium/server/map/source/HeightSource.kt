@@ -64,7 +64,7 @@ object HeightSource : ChunkMapperSource() {
     fun getTile(pos: HeightTilePos) = this.cache[pos]!!
 
     private fun loadTile(pos: HeightTilePos): HeightTile? {
-        if (this.validTiles.contains(pos)) {
+        if (this.validTiles.isEmpty() || this.validTiles.contains(pos)) {
             try {
                 val cache = File(HEIGHT_CACHE, pos.name)
                 if (cache.exists()) {
