@@ -7,7 +7,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath "net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT"
+        classpath "net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.1.2"
     }
 }
@@ -22,7 +22,7 @@ archivesBaseName = "terrarium"
 sourceCompatibility = targetCompatibility = "1.8"
 
 minecraft {
-    version = "1.11.2-13.20.0.2228"
+    version = "1.12-14.21.0.2321"
     runDir = "minecraft"
     mappings = "snapshot_20170415"
 }
@@ -57,7 +57,7 @@ processResources {
 String getModFile() {
     String path = ""
     FileTree tree = fileTree(dir: 'src/main/kotlin')
-    tree.include '**/*.kotlin'
+    tree.include '**/*.kt'
     tree.visit {element ->
         if (element.file.isFile()) {
             element.file.eachLine { String s ->

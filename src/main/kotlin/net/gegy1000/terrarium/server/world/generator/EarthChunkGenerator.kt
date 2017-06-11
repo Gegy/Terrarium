@@ -14,7 +14,7 @@ import net.minecraft.world.WorldEntitySpawner
 import net.minecraft.world.biome.Biome
 import net.minecraft.world.chunk.Chunk
 import net.minecraft.world.chunk.ChunkPrimer
-import net.minecraft.world.chunk.IChunkGenerator
+import net.minecraft.world.gen.IChunkGenerator
 import net.minecraft.world.gen.NoiseGeneratorPerlin
 import net.minecraft.world.gen.layer.IntCache
 import net.minecraftforge.event.ForgeEventFactory
@@ -228,5 +228,12 @@ class EarthChunkGenerator(val world: World, seed: Long, settingsString: String) 
     override fun generateStructures(chunk: Chunk, x: Int, z: Int) = false
 
     override fun recreateStructures(chunk: Chunk, x: Int, z: Int) {
+    }
+
+    /**
+     * isInsideStructure
+     */
+    override fun func_193414_a(world: World?, feature: String?, pos: BlockPos?): Boolean {
+        return false
     }
 }
