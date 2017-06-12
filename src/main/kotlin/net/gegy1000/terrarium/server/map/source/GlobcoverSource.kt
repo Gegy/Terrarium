@@ -8,17 +8,19 @@ import net.gegy1000.terrarium.Terrarium
 import net.gegy1000.terrarium.server.map.glob.GlobType
 import net.gegy1000.terrarium.server.map.source.GlobcoverSource.TILE_SIZE
 import net.minecraft.util.math.MathHelper
-import java.awt.image.BufferedImage
-import java.awt.image.DataBufferByte
+import java.io.DataInputStream
+import java.io.DataOutputStream
 import java.io.File
 import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.net.URL
 import java.util.concurrent.TimeUnit
-import javax.imageio.ImageIO
+import java.util.zip.GZIPInputStream
+import java.util.zip.GZIPOutputStream
 
-object GlobcoverSource : ChunkMapperSource() {
+object GlobcoverSource : TerrariumSource() {
     const val TILE_SIZE = 2560
 
     val GLOBCOVER_CACHE = File(CACHE_DIRECTORY, "globcover")
@@ -48,7 +50,7 @@ object GlobcoverSource : ChunkMapperSource() {
             if (cache.exists()) {
                 return this.loadTile(pos, FileInputStream(cache), false)
             } else {
-                val url = URL("$MAT/${pos.name}")
+                val url = URL("${INFO.baseURL}/${INFO.globEndpoint}/${pos.name}")
                 return this.loadTile(pos, url.openStream(), true)
             }
         } catch (e: Exception) {
@@ -58,34 +60,42 @@ object GlobcoverSource : ChunkMapperSource() {
     }
 
     private fun loadTile(pos: GlobTilePos, input: InputStream, save: Boolean): GlobTile {
-        val image = ImageIO.read(input)
-        val buffer = (image.raster.dataBuffer as DataBufferByte).data
+        val dataInput = DataInputStream(GZIPInputStream(input))
+        val width = dataInput.readUnsignedShort()
+        val height = dataInput.readUnsignedShort()
+        val buffer = ByteArray(width * height)
+        dataInput.readFully(buffer)
 
         if (save) {
-            launch(CommonPool) { saveTile(pos, image) }
+            launch(CommonPool) { saveTile(pos, width, height, buffer) }
         }
 
-        val offsetX = if (pos.tileX < 0) TILE_SIZE - image.width else 0
-        val offsetZ = if (pos.tileZ < 0) TILE_SIZE - image.height else 0
+        val offsetX = if (pos.tileX < 0) TILE_SIZE - width else 0
+        val offsetZ = if (pos.tileZ < 0) TILE_SIZE - height else 0
 
-        return GlobTile(buffer, offsetX, offsetZ, image.width, image.height)
+        return GlobTile(buffer, offsetX, offsetZ, width, height)
     }
 
-    private suspend fun saveTile(pos: GlobTilePos, image: BufferedImage) {
+    private suspend fun saveTile(pos: GlobTilePos, width: Int, height: Int, buffer: ByteArray) {
         if (!GLOBCOVER_CACHE.exists()) {
             GLOBCOVER_CACHE.mkdirs()
         }
+        val output = DataOutputStream(GZIPOutputStream(FileOutputStream(File(GLOBCOVER_CACHE, pos.name))))
         try {
-            ImageIO.write(image, "png", File(GLOBCOVER_CACHE, pos.name))
+            output.writeShort(width)
+            output.writeShort(height)
+            output.write(buffer)
         } catch (e: IOException) {
             Terrarium.LOGGER.error("Failed to save Globcover tile: ${pos.name}", e)
+        } finally {
+            output.close()
         }
     }
 }
 
 data class GlobTilePos(val tileX: Int, val tileZ: Int) {
     val name: String
-        get() = "f_${tileX}_${tileZ}_.txt"
+        get() = TerrariumSource.INFO.globQuery.format(tileX.toString(), tileZ.toString())
 
     val minX: Int
         get() = this.tileX * TILE_SIZE

@@ -60,7 +60,7 @@ class EarthChunkGenerator(val world: World, seed: Long, settingsString: String) 
         }
     }
 
-    override fun provideChunk(chunkX: Int, chunkZ: Int): Chunk {
+    override fun generateChunk(chunkX: Int, chunkZ: Int): Chunk {
         this.random.setSeed(chunkX.toLong() * 341873128712L + chunkZ.toLong() * 132897987541L)
 
         val primer = ChunkPrimer()
@@ -223,7 +223,7 @@ class EarthChunkGenerator(val world: World, seed: Long, settingsString: String) 
         return this.world.getBiome(pos).getSpawnableList(type)
     }
 
-    override fun getStrongholdGen(world: World, structureName: String, pos: BlockPos, map: Boolean) = pos
+    override fun getNearestStructurePos(world: World, structureName: String, pos: BlockPos, map: Boolean) = pos
 
     override fun generateStructures(chunk: Chunk, x: Int, z: Int) = false
 
