@@ -22,3 +22,6 @@ Or it can be used with a place name:
  - [NASA SRTM](https://www2.jpl.nasa.gov/srtm/): Global height data at 1:90m resolution
  - [ESA Globcover](http://due.esrin.esa.int/page_globcover.php): Global biome / cover data
  - [OpenStreetMap](https://openstreetmap.org): Map data
+
+## Thanks to
+[ChunkMapper](https://github.com/whamtet/chunkmapper/) - an inspiration for this rewrite, and providing data during the early stages of this mod.
