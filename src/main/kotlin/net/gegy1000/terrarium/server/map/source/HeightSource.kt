@@ -66,7 +66,7 @@ object HeightSource : TerrariumSource() {
             try {
                 val cache = File(HEIGHT_CACHE, pos.name)
                 if (cache.exists()) {
-                    return HeightTile(this.loadTile(pos, FileInputStream(cache), false))
+                    return HeightTile(this.loadTile(pos, FileInputStream(cache)))
                 } else {
                     val url = URL("${INFO.baseURL}/${INFO.heightsEndpoint}/${pos.name}")
                     return HeightTile(this.loadTile(pos, url.openStream(), true))
@@ -78,7 +78,7 @@ object HeightSource : TerrariumSource() {
         return null
     }
 
-    private fun loadTile(pos: HeightTilePos, input: InputStream, save: Boolean): ShortArray {
+    private fun loadTile(pos: HeightTilePos, input: InputStream, save: Boolean = false): ShortArray {
         val heightmap = ShortArray(TILE_SIZE * TILE_SIZE)
 
         val data = DataInputStream(GZIPInputStream(input))

@@ -66,7 +66,7 @@ abstract class MultiGlobGenerator(type: GlobType, vararg val entries: Entry) : G
             val index = localX + localZ * 16
             val sampledType = this.generatorMap[sampledTypes[index]]
 
-            this.coverBuffer[index] = sampledType!!.coverBuffer[index]
+            this.coverBuffer[index] = sampledType?.coverBuffer?.get(index) ?: Blocks.STONE.defaultState
         }
     }
 

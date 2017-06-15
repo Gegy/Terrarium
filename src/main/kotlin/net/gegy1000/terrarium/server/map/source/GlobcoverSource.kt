@@ -48,7 +48,7 @@ object GlobcoverSource : TerrariumSource() {
         try {
             val cache = File(GLOBCOVER_CACHE, pos.name)
             if (cache.exists()) {
-                return this.loadTile(pos, FileInputStream(cache), false)
+                return this.loadTile(pos, FileInputStream(cache))
             } else {
                 val url = URL("${INFO.baseURL}/${INFO.globEndpoint}/${pos.name}")
                 return this.loadTile(pos, url.openStream(), true)
@@ -59,7 +59,7 @@ object GlobcoverSource : TerrariumSource() {
         return null
     }
 
-    private fun loadTile(pos: GlobTilePos, input: InputStream, save: Boolean): GlobTile {
+    private fun loadTile(pos: GlobTilePos, input: InputStream, save: Boolean = false): GlobTile {
         val dataInput = DataInputStream(GZIPInputStream(input))
         val width = dataInput.readUnsignedShort()
         val height = dataInput.readUnsignedShort()

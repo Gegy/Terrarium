@@ -34,7 +34,7 @@ object Terrarium {
 
     @Mod.EventHandler
     fun onPreInit(event: FMLPreInitializationEvent) {
-        EarthWorldType.INSTANCE
+        EarthWorldType
         PROXY.onPreInit()
     }
 

@@ -1,0 +1,5 @@
+[out:json]
+[bbox:%s,%s,%s,%s];
+
+way["highway"="primary"]; out;
+node(w); out;

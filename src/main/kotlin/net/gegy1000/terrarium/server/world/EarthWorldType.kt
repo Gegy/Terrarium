@@ -11,11 +11,7 @@ import net.minecraft.world.WorldType
 import net.minecraftforge.fml.relauncher.Side
 import net.minecraftforge.fml.relauncher.SideOnly
 
-class EarthWorldType : WorldType("${Terrarium.MODID}:earth") {
-    companion object {
-        val INSTANCE = EarthWorldType()
-    }
-
+object EarthWorldType : WorldType("${Terrarium.MODID}:earth") {
     override fun getChunkGenerator(world: World, settings: String) = EarthChunkGenerator(world, world.seed, settings)
 
     override fun getBiomeProvider(world: World) = EarthBiomeProvider(world, EarthGenerationSettings.deserialize(world.worldInfo.generatorOptions))
