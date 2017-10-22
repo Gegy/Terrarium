@@ -8,8 +8,6 @@ import net.minecraft.world.gen.layer.GenLayer
 import java.util.Random
 
 abstract class GlobGenerator(val type: GlobType) {
-    open val scatterScale: Double = 1.0
-
     var seed: Long = 0
 
     val topBlock = this.type.biome.topBlock

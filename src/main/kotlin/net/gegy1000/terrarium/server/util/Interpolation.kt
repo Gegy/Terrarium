@@ -1,18 +1,63 @@
 package net.gegy1000.terrarium.server.util
 
-object Interpolation {
-    val buffer: ThreadLocal<DoubleArray> = ThreadLocal.withInitial({ DoubleArray(4) })
+import net.minecraft.util.math.MathHelper
+import java.awt.Point
 
-    fun bicubic(buffer: Array<DoubleArray>, scaleX: Double, scaleY: Double): Double {
-        val cubic = this.buffer.get()
-        cubic[0] = this.cubic(buffer[0], scaleY)
-        cubic[1] = this.cubic(buffer[1], scaleY)
-        cubic[2] = this.cubic(buffer[2], scaleY)
-        cubic[3] = this.cubic(buffer[3], scaleY)
-        return this.cubic(cubic, scaleX)
+
+object Interpolation {
+    fun cosine(y1: Double, y2: Double, intermediate: Double): Double {
+        val cos = (1.0 - MathHelper.cos((intermediate * Math.PI).toFloat())) / 2.0
+        return y1 * (1.0 - cos) + y2 * cos
     }
 
-    fun cubic(buffer: DoubleArray, scale: Double): Double {
-        return buffer[1] + 0.5 * scale * (buffer[2] - buffer[0] + scale * (2.0 * buffer[0] - 5.0 * buffer[1] + 4.0 * buffer[2] - buffer[3] + scale * (3.0 * (buffer[1] - buffer[2]) + buffer[3] - buffer[0])))
+    inline fun interpolateLine(originX: Double, originY: Double, targetX: Double, targetY: Double, thick: Boolean = false, set: (Point) -> Unit) {
+        val currentPoint = Point(MathHelper.floor(originX), MathHelper.floor(originY))
+
+        var horizontal = false
+
+        var deltaX = Math.max(1, Math.abs(MathHelper.floor(targetX) - MathHelper.floor(originX)))
+        var deltaY = Math.max(1, Math.abs(MathHelper.floor(targetY) - MathHelper.floor(originY)))
+
+        val signumX = Integer.signum(MathHelper.floor(targetX) - MathHelper.floor(originX))
+        val signumY = Integer.signum(MathHelper.floor(targetY) - MathHelper.floor(originY))
+
+        if (deltaY > deltaX) {
+            val tmp = deltaX
+            deltaX = deltaY
+            deltaY = tmp
+            horizontal = true
+        }
+
+        var longLength = (2 * deltaY - deltaX).toDouble()
+
+        for (i in 0..deltaX) {
+            set(currentPoint)
+
+            while (longLength >= 0) {
+                if (horizontal) {
+                    currentPoint.x += signumX
+                } else {
+                    currentPoint.y += signumY
+                }
+
+                if (thick) {
+                    set(currentPoint)
+                }
+
+                longLength -= 2 * deltaX
+            }
+
+            if (horizontal) {
+                currentPoint.y += signumY
+            } else {
+                currentPoint.x += signumX
+            }
+
+            if (thick) {
+                set(currentPoint)
+            }
+
+            longLength += 2 * deltaY
+        }
     }
 }

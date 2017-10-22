@@ -13,7 +13,6 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.world.chunk.Chunk
 import org.lwjgl.opengl.GL11
 
-//TODO: Build buffer and process chunks asynchronously
 class PreviewChunk(val world: PreviewWorld, val chunk: Chunk, val x: Int, val y: Int, val z: Int) {
     val renderDispatcher = Minecraft.getMinecraft().blockRendererDispatcher
 
@@ -77,7 +76,7 @@ class PreviewChunk(val world: PreviewWorld, val chunk: Chunk, val x: Int, val y:
 
         fun render() {
             val buffer = this.buffer
-            if (buffer != null) {
+            buffer?.let {
                 buffer.bindBuffer()
                 this.chunk.bindAttributes()
                 buffer.drawArrays(GL11.GL_QUADS)
@@ -113,6 +112,7 @@ class PreviewChunk(val world: PreviewWorld, val chunk: Chunk, val x: Int, val y:
         }
 
         fun rebuildLayer() {
+            // TODO: Create dedicated thread for chunk building
             this.dirty = false
             launch(CommonPool) { buildAsync() }
         }
@@ -146,6 +146,7 @@ class PreviewChunk(val world: PreviewWorld, val chunk: Chunk, val x: Int, val y:
 
         fun delete() {
             this.buffer?.deleteGlBuffers()
+            this.buffer = null
         }
     }
 }

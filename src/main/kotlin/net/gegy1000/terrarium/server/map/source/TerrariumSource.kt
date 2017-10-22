@@ -17,7 +17,7 @@ open class TerrariumSource {
 
         lateinit var INFO: TerrariumSource.Info
 
-        suspend fun loadInfo() {
+        fun loadInfo() {
             val url = URL(INFO_JSON)
             val input = InputStreamReader(url.openStream())
             try {

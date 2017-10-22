@@ -22,22 +22,20 @@ archivesBaseName = "terrarium"
 sourceCompatibility = targetCompatibility = "1.8"
 
 minecraft {
-    version = "1.12-14.21.0.2321"
+    version = "1.12-14.21.0.2331"
     runDir = "minecraft"
-    mappings = "stable_31"
+    mappings = "snapshot_20170616"
 }
 
 repositories {
 	mavenCentral()
     maven {
-	    url "http://mvn.rx14.co.uk/shadowfacts/"
+	    url "http://maven.shadowfacts.net/"
     }
 }
 
 dependencies {
-    compile "net.shadowfacts:Forgelin:1.4.2"
-    compile "org.jetbrains.kotlin:kotlin-stdlib"
-    compile "com.google.protobuf:protobuf-java:2.5.0"
+    compile "net.shadowfacts:Forgelin:1.5.1"
 }
 
 processResources {

@@ -1,6 +1,6 @@
 package net.gegy1000.terrarium.server
 
-import net.gegy1000.terrarium.server.util.Coordinates
+import net.gegy1000.terrarium.server.util.Coordinate
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings
 import net.gegy1000.terrarium.server.world.EarthWorldType
 import net.minecraftforge.event.world.WorldEvent
@@ -12,7 +12,7 @@ object ServerEventHandler {
         val world = event.world
         if (world.worldType is EarthWorldType) {
             val settings = EarthGenerationSettings.deserialize(world.worldInfo.generatorOptions)
-            world.spawnPoint = Coordinates.toBlockPos(27.988350, 86.923641, settings)
+            world.spawnPoint = Coordinate.fromLatLng(settings, 27.988350, 86.923641).toBlockPos()
         }
     }
 }

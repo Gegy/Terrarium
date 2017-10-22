@@ -3,3 +3,6 @@
 
 way["highway"="primary"]; out;
 node(w); out;
+
+way["natural"="coastline"]; out;
+node(w); out;

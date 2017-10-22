@@ -1,7 +1,5 @@
 package net.gegy1000.terrarium.client.gui
 
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.launch
 import net.gegy1000.terrarium.Terrarium
 import net.gegy1000.terrarium.client.preview.PreviewChunk
 import net.gegy1000.terrarium.client.preview.PreviewWorld
@@ -21,6 +19,7 @@ import net.minecraft.util.text.translation.I18n
 import net.minecraftforge.fml.relauncher.Side
 import net.minecraftforge.fml.relauncher.SideOnly
 import org.lwjgl.opengl.GL11
+import kotlin.concurrent.thread
 
 @SideOnly(Side.CLIENT)
 class CustomizeEarthGUI(val parent: GuiScreen) : GuiScreen() {
@@ -41,7 +40,7 @@ class CustomizeEarthGUI(val parent: GuiScreen) : GuiScreen() {
     var mouseDown = false
 
     init {
-        launch(CommonPool) {
+        thread(name = "Preview Chunk Load Thread", start = true, isDaemon = true) {
             val range = previewWorld.viewChunkRange
 
             val centerPos = previewWorld.centerPos
@@ -242,12 +241,12 @@ class CustomizeEarthGUI(val parent: GuiScreen) : GuiScreen() {
     private fun resetWorld() {
         this.previewWorld.updateGenerator(EarthWorldType.getChunkGenerator(this.previewWorld, ""))
 
-        this.previewChunks.forEach { it.markDirty() }
+        this.previewChunks.forEach(PreviewChunk::markDirty)
     }
 
     override fun onGuiClosed() {
         super.onGuiClosed()
 
-        this.previewChunks.forEach { it.delete() }
+        this.previewChunks.forEach(PreviewChunk::delete)
     }
 }

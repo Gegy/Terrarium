@@ -1,7 +1,7 @@
 package net.gegy1000.terrarium.client.preview
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap
-import net.gegy1000.terrarium.server.util.Coordinates
+import net.gegy1000.terrarium.server.util.Coordinate
 import net.gegy1000.terrarium.server.world.EarthWorldType
 import net.gegy1000.terrarium.server.world.generator.EarthChunkGenerator
 import net.minecraft.block.state.IBlockState
@@ -32,7 +32,7 @@ class PreviewWorld : World(SaveHandler, WorldInfo(worldSettings, "terrarium_prev
     var generator: EarthChunkGenerator
 
     val centerPos: ChunkPos
-        get() = ChunkPos(Coordinates.toBlockPos(27.988350, 86.923641, this.generator.settings))
+        get() = ChunkPos(Coordinate.fromLatLng(this.generator.settings,27.988350, 86.923641).toBlockPos())
 
     val centerBlockPos: BlockPos
         get() = BlockPos(this.centerPos.x shl 4, 0, this.centerPos.z shl 4)

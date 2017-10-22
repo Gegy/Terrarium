@@ -52,6 +52,8 @@ class EarthChunkGenerator(val world: World, seed: Long, settingsString: String) 
 
     var biomeBuffer: Array<Biome>? = null
 
+    val topHeight = this.world.height - 1
+
     init {
         GlobType.values().forEach {
             val generator = it.generator.createInstance()
@@ -82,7 +84,7 @@ class EarthChunkGenerator(val world: World, seed: Long, settingsString: String) 
 
     private fun populateBlocks(primer: ChunkPrimer, chunkX: Int, chunkZ: Int) {
         val oceanHeight = this.handler.oceanHeight
-        this.handler.getHeightRegion(this.heightBuffer, chunkX, chunkZ)
+        this.handler.populateHeightRegion(this.heightBuffer, chunkX, chunkZ)
 
         for (z in 0..15) {
             for (x in 0..15) {
@@ -110,13 +112,14 @@ class EarthChunkGenerator(val world: World, seed: Long, settingsString: String) 
         val globalZ = chunkZ shl 4
 
         this.depthBuffer = this.coverNoise.getRegion(this.depthBuffer, globalX.toDouble(), globalZ.toDouble(), 16, 16, scale * 2.0, scale * 2.0, 1.0)
-        this.handler.getGlobRegion(this.globBuffer, chunkX, chunkZ)
+        this.handler.populateGlobRegion(this.globBuffer, chunkX, chunkZ)
 
         val generators = this.globBuffer.toHashSet()
         generators.forEach {
-            val generator = this.globGenerators[it]
-            generator?.getCover(globalX, globalZ, this.random)
-            generator?.getFiller(globalX, globalZ, this.random)
+            this.globGenerators[it]?.let {
+                it.getCover(globalX, globalZ, this.random)
+                it.getFiller(globalX, globalZ, this.random)
+            }
         }
 
         for (z in 0..15) {
@@ -148,7 +151,7 @@ class EarthChunkGenerator(val world: World, seed: Long, settingsString: String) 
         val localX = x and 15
         val localZ = z and 15
 
-        for (localY in 255 downTo 0) {
+        for (localY in this.topHeight downTo 0) {
             if (localY <= rand.nextInt(5)) {
                 primer.setBlockState(localX, localY, localZ, BEDROCK)
             } else {
@@ -191,7 +194,7 @@ class EarthChunkGenerator(val world: World, seed: Long, settingsString: String) 
     override fun populate(chunkX: Int, chunkZ: Int) {
         BlockFalling.fallInstantly = true
 
-        this.handler.getGlobRegion(this.globBuffer, chunkX, chunkZ)
+        this.handler.populateGlobRegion(this.globBuffer, chunkX, chunkZ)
 
         val x = chunkX shl 4
         val z = chunkZ shl 4
@@ -230,10 +233,7 @@ class EarthChunkGenerator(val world: World, seed: Long, settingsString: String) 
     override fun recreateStructures(chunk: Chunk, x: Int, z: Int) {
     }
 
-    /**
-     * isInsideStructure
-     */
-    override fun func_193414_a(world: World?, feature: String?, pos: BlockPos?): Boolean {
+    override fun isInsideStructure(worldIn: World?, structureName: String?, pos: BlockPos?): Boolean {
         return false
     }
 }

@@ -6,7 +6,7 @@ import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.launch
 import net.gegy1000.terrarium.Terrarium
 import net.gegy1000.terrarium.server.map.glob.GlobType
-import net.gegy1000.terrarium.server.map.source.GlobcoverSource.TILE_SIZE
+import net.gegy1000.terrarium.server.util.Coordinate
 import net.minecraft.util.math.MathHelper
 import java.io.DataInputStream
 import java.io.DataOutputStream
@@ -28,23 +28,39 @@ object GlobcoverSource : TerrariumSource() {
     private val cache = CacheBuilder.newBuilder()
             .expireAfterAccess(4, TimeUnit.SECONDS)
             .maximumSize(3)
-            .build(object : CacheLoader<GlobTilePos, GlobTile>() {
-                override fun load(pos: GlobTilePos): GlobTile {
-                    return loadTile(pos) ?: GlobTile()
+            .build(object : CacheLoader<TilePos, Tile>() {
+                override fun load(pos: TilePos): Tile {
+                    return loadTile(pos) ?: Tile()
                 }
             })
 
-    operator fun get(x: Int, z: Int): GlobType {
-        val pos = GlobTilePos(MathHelper.intFloorDiv(x, TILE_SIZE), MathHelper.intFloorDiv(z, TILE_SIZE))
+    fun sampleArea(result: Array<GlobType>, minimumCoordinate: Coordinate, maximumCoordinate: Coordinate) {
+        val size = maximumCoordinate - minimumCoordinate
+        val width = size.globalX.toInt()
+        val height = size.globalZ.toInt()
+        if (result.size != width * height) {
+            throw IllegalStateException("Expected result array of size $width*$height, got ${result.size}")
+        }
+        // TODO: Come back to more performant, but broken algorithm
+        repeat(height) { y ->
+            repeat(width) { x ->
+                val globType = GlobcoverSource[minimumCoordinate.addGlobal(x.toDouble(), y.toDouble())]
+                result[x + y * width] = globType
+            }
+        }
+    }
+
+    operator fun get(coordinate: Coordinate): GlobType {
+        val pos = TilePos(MathHelper.floor(coordinate.globX / TILE_SIZE), MathHelper.floor(coordinate.globZ / TILE_SIZE))
         val tile = this.getTile(pos)
-        val localX = x - pos.minX
-        val localZ = z - pos.minZ
+        val localX = MathHelper.floor(coordinate.globX) - pos.minX
+        val localZ = MathHelper.floor(coordinate.globZ) - pos.minZ
         return tile[localX, localZ]
     }
 
-    fun getTile(pos: GlobTilePos) = this.cache[pos]!!
+    fun getTile(pos: TilePos) = this.cache[pos]!!
 
-    private fun loadTile(pos: GlobTilePos): GlobTile? {
+    private fun loadTile(pos: TilePos): Tile? {
         try {
             val cache = File(GLOBCOVER_CACHE, pos.name)
             if (cache.exists()) {
@@ -59,7 +75,7 @@ object GlobcoverSource : TerrariumSource() {
         return null
     }
 
-    private fun loadTile(pos: GlobTilePos, input: InputStream, save: Boolean = false): GlobTile {
+    private fun loadTile(pos: TilePos, input: InputStream, save: Boolean = false): Tile {
         val dataInput = DataInputStream(GZIPInputStream(input))
         val width = dataInput.readUnsignedShort()
         val height = dataInput.readUnsignedShort()
@@ -73,10 +89,10 @@ object GlobcoverSource : TerrariumSource() {
         val offsetX = if (pos.tileX < 0) TILE_SIZE - width else 0
         val offsetZ = if (pos.tileZ < 0) TILE_SIZE - height else 0
 
-        return GlobTile(buffer, offsetX, offsetZ, width, height)
+        return Tile(buffer, offsetX, offsetZ, width, height)
     }
 
-    private suspend fun saveTile(pos: GlobTilePos, width: Int, height: Int, buffer: ByteArray) {
+    private suspend fun saveTile(pos: TilePos, width: Int, height: Int, buffer: ByteArray) {
         if (!GLOBCOVER_CACHE.exists()) {
             GLOBCOVER_CACHE.mkdirs()
         }
@@ -91,18 +107,18 @@ object GlobcoverSource : TerrariumSource() {
             output.close()
         }
     }
-}
+    data class TilePos(val tileX: Int, val tileZ: Int) {
 
-data class GlobTilePos(val tileX: Int, val tileZ: Int) {
-    val name: String
-        get() = TerrariumSource.INFO.globQuery.format(tileX.toString(), tileZ.toString())
+        val name: String
+            get() = TerrariumSource.INFO.globQuery.format(tileX.toString(), tileZ.toString())
+        val minX: Int
+            get() = this.tileX * TILE_SIZE
+        val minZ: Int
+            get() = this.tileZ * TILE_SIZE
 
-    val minX: Int
-        get() = this.tileX * TILE_SIZE
-    val minZ: Int
-        get() = this.tileZ * TILE_SIZE
-}
+    }
+    data class Tile(val data: ByteArray = ByteArray(TILE_SIZE * TILE_SIZE), val offsetX: Int = 0, val offsetZ: Int = 0, val width: Int = 0, val height: Int = 0) {
+        operator fun get(x: Int, z: Int) = GlobType[this.data[(x - this.offsetX) + (z - this.offsetZ) * TILE_SIZE].toInt() and 0xFF]
 
-data class GlobTile(val data: ByteArray = ByteArray(TILE_SIZE * TILE_SIZE), val offsetX: Int = 0, val offsetZ: Int = 0, val width: Int = 0, val height: Int = 0) {
-    operator fun get(x: Int, z: Int) = GlobType[this.data[(x - this.offsetX) + (z - this.offsetZ) * TILE_SIZE].toInt() and 0xFF]
+    }
 }

@@ -5,9 +5,11 @@ import com.google.common.cache.CacheLoader
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.launch
 import net.gegy1000.terrarium.Terrarium
+import net.gegy1000.terrarium.server.util.Coordinate
 import net.minecraft.util.math.MathHelper
 import org.apache.http.HttpRequest
 import org.apache.http.HttpResponse
@@ -16,10 +18,11 @@ import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClientBuilder
+import java.io.DataInputStream
+import java.io.DataOutputStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.io.FileWriter
 import java.io.IOException
 import java.io.InputStream
 import java.io.InputStreamReader
@@ -29,11 +32,12 @@ import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 
 object OverpassSource {
-    const val TILE_SIZE = 128
-    const val SIZE_DEGREES = TILE_SIZE / 1200.0
+    const val SIZE_DEGREES = 0.2
 
     const val OVERPASS_ENDPOINT = "http://www.overpass-api.de/api/interpreter"
     const val QUERY_LOCATION = "/assets/terrarium/query/overpass_query.oql"
+
+    const val QUERY_VERSION = 1
 
     val GSON = Gson()
     val JSON_PARSER = JsonParser()
@@ -65,9 +69,9 @@ object OverpassSource {
     private val cache = CacheBuilder.newBuilder()
             .expireAfterAccess(4, TimeUnit.SECONDS)
             .maximumSize(4)
-            .build(object : CacheLoader<OverpassTilePos, OverpassTile>() {
-                override fun load(pos: OverpassTilePos): OverpassTile {
-                    return OverpassSource.loadTile(pos) ?: OverpassTile()
+            .build(object : CacheLoader<TilePos, Tile>() {
+                override fun load(pos: TilePos): Tile {
+                    return OverpassSource.loadTile(pos) ?: Tile()
                 }
             })
 
@@ -76,35 +80,72 @@ object OverpassSource {
         this.query = input.use { it.readText().replace("\n", "") }
     }
 
-    fun getTile(x: Int, z: Int): OverpassTile {
-        val pos = OverpassTilePos(-z * OverpassSource.SIZE_DEGREES, x * OverpassSource.SIZE_DEGREES)
-        return this.getTile(pos)
+    fun sampleArea(minCoordinate: Coordinate, maxCoordinate: Coordinate): Tile {
+        val minTilePos = this.getTilePos(minCoordinate)
+        val maxTilePos = this.getTilePos(maxCoordinate)
+
+        val elements = HashSet<Element>()
+
+        for (tileZ in minTilePos.tileZ..maxTilePos.tileZ) {
+            for (tileX in minTilePos.tileX..maxTilePos.tileX) {
+                elements.addAll(this.getTile(TilePos(tileX, tileZ)).elements)
+            }
+        }
+
+        return Tile(elements)
     }
 
-    fun getTile(pos: OverpassTilePos) = this.cache[pos]!!
+    fun getTilePos(coordinate: Coordinate): TilePos {
+        val tileX = MathHelper.floor(coordinate.longitude / OverpassSource.SIZE_DEGREES)
+        val tileZ = MathHelper.ceil(-coordinate.latitude / OverpassSource.SIZE_DEGREES)
+        return TilePos(tileX, tileZ)
+    }
 
-    fun loadTile(pos: OverpassTilePos): OverpassTile? {
+    fun getTile(pos: TilePos) = this.cache[pos]!!
+
+    fun loadTile(pos: TilePos): Tile? {
         try {
             val cache = File(OSM_CACHE, pos.name)
             if (cache.exists()) {
-                return this.loadTile(pos, GZIPInputStream(FileInputStream(cache)))
+                val metadata = File(OSM_CACHE, "${pos.name}.meta")
+                if (metadata.exists()) {
+                    var version = -1
+                    val metadataInput = DataInputStream(FileInputStream(metadata))
+                    metadataInput.use {
+                        version = metadataInput.readUnsignedShort()
+                    }
+                    if (version != QUERY_VERSION) {
+                        return this.requestTile(pos)
+                    } else {
+                        return this.loadTile(pos, GZIPInputStream(FileInputStream(cache)))
+                    }
+                }
             } else {
-                val post = HttpPost(OVERPASS_ENDPOINT)
-                post.entity = StringEntity(this.query.format(pos.latitude, pos.longitude, pos.maxLatitude, pos.maxLongitude))
-
-                val response = this.client.execute(post)
-
-                return this.loadTile(pos, response.entity.content, true)
+                return this.requestTile(pos)
             }
         } catch (e: IOException) {
-            Terrarium.LOGGER.error("Failed to download overpass map tile ${pos.name}")
+            Terrarium.LOGGER.error("Failed to download overpass map tile ${pos.name}", e)
         }
         return null
     }
 
-    private fun loadTile(pos: OverpassTilePos, input: InputStream, save: Boolean = false): OverpassTile? {
+    private fun requestTile(pos: TilePos): Tile? {
+        val post = HttpPost(OVERPASS_ENDPOINT)
+        post.entity = StringEntity(this.query.format(pos.latitude, pos.longitude, pos.maxLatitude, pos.maxLongitude))
+
+        val response = this.client.execute(post)
+        if (response.statusLine.statusCode == 429) {
+            Thread.sleep(150)
+            response.close()
+            return this.requestTile(pos)
+        }
+
+        return this.loadTile(pos, response.entity.content, true)
+    }
+
+    private fun loadTile(pos: TilePos, input: InputStream, save: Boolean = false): Tile? {
         try {
-            val elements = ArrayList<Element>()
+            val elements = HashSet<Element>()
 
             val root = JSON_PARSER.parse(InputStreamReader(input)).asJsonObject
             val elementsArray = root["elements"].asJsonArray
@@ -136,9 +177,9 @@ object OverpassSource {
                 launch(CommonPool) { saveTile(pos, root) }
             }
 
-            return OverpassTile(elements)
-        } catch (e: IOException) {
-            Terrarium.LOGGER.error("Failed to download overpass map tile ${pos.name}")
+            return Tile(elements)
+        } catch (e: Exception) {
+            Terrarium.LOGGER.error("Failed to download overpass map tile ${pos.name}", e)
         } finally {
             input.close()
         }
@@ -146,39 +187,56 @@ object OverpassSource {
         return null
     }
 
-    private fun saveTile(pos: OverpassTilePos, root: JsonObject) {
+    private fun saveTile(pos: TilePos, root: JsonObject) {
         if (!OSM_CACHE.exists()) {
             OSM_CACHE.mkdirs()
         }
 
         val cache = File(OSM_CACHE, pos.name)
+        val metadata = File(OSM_CACHE, "${pos.name}.meta")
+
         val output = OutputStreamWriter(GZIPOutputStream(FileOutputStream(cache)))
+        val metadataOutput = DataOutputStream(FileOutputStream(metadata))
 
         try {
-            GSON.toJson(root, FileWriter(cache))
+            GSON.toJson(root, output)
+            metadataOutput.writeShort(QUERY_VERSION)
         } catch (e: IOException) {
-            Terrarium.LOGGER.error("Failed to save overpass map tile ${pos.name}}")
+            Terrarium.LOGGER.error("Failed to save overpass map tile ${pos.name}}", e)
         } finally {
             output.close()
+            metadataOutput.close()
         }
     }
 
-    data class Element(val id: Int, val type: String, val latitude: Double, val longitude: Double, val nodes: List<Int>, val tags: Map<String, String>)
-}
+    data class Element(val id: Int, val type: String, val latitude: Double, val longitude: Double, val nodes: List<Int>, val tags: Map<String, String>) {
+        fun isType(key: String, value: String) = this.tags[key] == value
 
-class OverpassTile(val elements: List<OverpassSource.Element> = arrayListOf<OverpassSource.Element>())
+        override fun equals(other: Any?) = other is Element && other.id == id
 
-data class OverpassTilePos(val latitude: Double, val longitude: Double) {
-    val minX: Int
-        get() = MathHelper.floor(this.longitude / OverpassSource.SIZE_DEGREES)
-    val minZ: Int
-        get() = MathHelper.ceil(-this.latitude / OverpassSource.SIZE_DEGREES)
+        override fun hashCode() = id
+    }
 
-    val maxLatitude: Double
-        get() = this.latitude + OverpassSource.SIZE_DEGREES
-    val maxLongitude: Double
-        get() = this.longitude + OverpassSource.SIZE_DEGREES
+    class Tile(val elements: Set<Element> = hashSetOf()) {
+        val nodes = Int2ObjectArrayMap<Element>()
 
-    val name: String
-        get() = "${this.minX}_${this.minZ}.osm"
+        init {
+            this.elements.filter { it.type == "node" }.forEach { this.nodes.put(it.id, it) }
+        }
+    }
+
+    data class TilePos(val tileX: Int, val tileZ: Int) {
+        val latitude: Double
+            get() = -this.tileZ * OverpassSource.SIZE_DEGREES
+        val longitude: Double
+            get() = this.tileX * OverpassSource.SIZE_DEGREES
+
+        val maxLatitude: Double
+            get() = this.latitude + OverpassSource.SIZE_DEGREES
+        val maxLongitude: Double
+            get() = this.longitude + OverpassSource.SIZE_DEGREES
+
+        val name: String
+            get() = "${this.tileX}_${this.tileZ}.osm"
+    }
 }

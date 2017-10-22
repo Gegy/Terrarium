@@ -48,7 +48,7 @@ class EarthBiomeProvider(world: World, settings: EarthGenerationSettings) : Biom
             return newBiomes
         } else {
             if (chunk) {
-                this.handler.getGlobRegion(this.globBuffer, x shr 4, z shr 4)
+                this.handler.populateGlobRegion(this.globBuffer, x shr 4, z shr 4)
                 for (localZ in 0..15) {
                     for (localX in 0..15) {
                         val index = localX + localZ * 16
@@ -62,7 +62,7 @@ class EarthBiomeProvider(world: World, settings: EarthGenerationSettings) : Biom
                 val chunkMaxZ = (z + length) shr 4
                 for (chunkZ in chunkMinZ..chunkMaxZ) {
                     for (chunkX in chunkMinX..chunkMaxX) {
-                        this.handler.getGlobRegion(this.globBuffer, chunkZ, chunkX)
+                        this.handler.populateGlobRegion(this.globBuffer, chunkZ, chunkX)
                         for (localZ in Math.max(chunkZ shl 4, z)..Math.min(chunkZ + 1 shl 4, z + length)) {
                             for (localX in Math.max(chunkX shl 4, x)..Math.min(chunkX + 1 shl 4, x + width)) {
                                 val index = (localX - x) + (localZ - z) * 16
