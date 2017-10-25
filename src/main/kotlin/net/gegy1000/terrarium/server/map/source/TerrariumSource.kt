@@ -15,6 +15,7 @@ open class TerrariumSource {
 
         val CACHE_DIRECTORY = File(".", "mods/terrarium/cache/")
 
+        // TODO: Handle unset info
         lateinit var INFO: TerrariumSource.Info
 
         fun loadInfo() {

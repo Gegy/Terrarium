@@ -75,10 +75,7 @@ class EarthGenerationHandler(val world: World, val settings: EarthGenerationSett
                 val scaledX = localX * settings.scaleRatioX
                 val originX = MathHelper.floor(scaledX)
 
-                val sampleIndex = originX + originZ * width
-
-                // TODO: Scatter
-                result[localX + localZ * scaledWidth] = sample[sampleIndex]
+                result[localX + localZ * scaledWidth] = sample[originX + originZ * width]
             }
         }
     }
@@ -113,14 +110,9 @@ class EarthGenerationHandler(val world: World, val settings: EarthGenerationSett
 
             for (localZ in 0..15) {
                 val blockZ = z + localZ
-                val globalOriginZ = MathHelper.floor(blockZ * settings.scaleRatioZ)
-
                 for (localX in 0..15) {
                     val blockX = x + localX
-                    val globalOriginX = MathHelper.floor(blockX * settings.scaleRatioX)
-
-                    val region = this.regionHandler[globalOriginX, globalOriginZ]
-                    buffer[localX + localZ * 16] = region.getGlobType(blockX, blockZ)
+                    buffer[localX + localZ * 16] = getGlobScattered(blockX, blockZ)
                 }
             }
         } catch (e: Exception) {
@@ -129,7 +121,7 @@ class EarthGenerationHandler(val world: World, val settings: EarthGenerationSett
         }
     }
 
-    /*private fun getGlobScattered(x: Int, z: Int): GlobType {
+    private fun getGlobScattered(x: Int, z: Int): GlobType {
         val originGlob = this.getGlob(x, z)
 
         val range = MathHelper.ceil(this.scatterRange * originGlob.scatterScale)
@@ -144,5 +136,13 @@ class EarthGenerationHandler(val world: World, val settings: EarthGenerationSett
         }
 
         return scattered
-    }*/
+    }
+
+    private fun getGlob(x: Int, z: Int): GlobType {
+        val globalOriginX = MathHelper.floor(x * settings.scaleRatioX)
+        val globalOriginZ = MathHelper.floor(z * settings.scaleRatioZ)
+
+        val region = this.regionHandler[globalOriginX, globalOriginZ]
+        return region.getGlobType(x, z)
+    }
 }

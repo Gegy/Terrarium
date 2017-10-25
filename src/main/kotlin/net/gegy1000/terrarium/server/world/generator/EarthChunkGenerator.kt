@@ -133,9 +133,8 @@ class EarthChunkGenerator(val world: World, seed: Long, settingsString: String) 
         }
 
         if (this.settings.decorate) {
-            IntCache.resetIntCache()
-
             generators.forEach {
+                IntCache.resetIntCache()
                 this.globGenerators[it]?.coverDecorate(primer, this.random, globalX, globalZ)
             }
         }

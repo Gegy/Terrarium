@@ -18,8 +18,8 @@ class GenerationRegionHandler(val generator: EarthGenerationHandler) {
     }
 
     private val cache = CacheBuilder.newBuilder()
-            .expireAfterAccess(4, TimeUnit.SECONDS)
-            .maximumSize(4)
+            .expireAfterAccess(30, TimeUnit.SECONDS)
+            .maximumSize(9)
             .build(object : CacheLoader<RegionTilePos, GenerationRegion>() {
                 override fun load(pos: RegionTilePos) = generate(pos)
             })

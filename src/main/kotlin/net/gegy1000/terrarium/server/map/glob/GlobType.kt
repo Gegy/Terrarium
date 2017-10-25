@@ -26,7 +26,13 @@ import net.minecraft.init.Biomes
 import net.minecraft.world.biome.Biome
 import kotlin.reflect.KClass
 
-enum class GlobType(val id: Int, val biome: Biome, val generator: KClass<out GlobGenerator>, val scatterScale: Double = 1.0, val scatterTo: Boolean = true) {
+enum class GlobType(
+        val id: Int,
+        val biome: Biome,
+        val generator: KClass<out GlobGenerator>,
+        val scatterScale: Double = 1.0,
+        val scatterTo: Boolean = true
+) {
     IRRIGATED_CROPS(11, Biomes.FOREST, IrrigatedCrops::class),
     RAINFED_CROPS(14, Biomes.PLAINS, RainfedCrops::class),
     CROPLAND_WITH_VEGETATION(20, Biomes.PLAINS, CroplandWithVegetation::class),
@@ -49,6 +55,9 @@ enum class GlobType(val id: Int, val biome: Biome, val generator: KClass<out Glo
     BARE(200, Biomes.DESERT, Bare::class),
     WATER(210, Biomes.OCEAN, Water::class, scatterScale = 0.05, scatterTo = false),
     SNOW(220, Biomes.ICE_PLAINS, Snow::class),
+    COASTLINE_GENERIC(1, Biomes.PLAINS, Bare::class),
+    COASTLINE_UP(1, Biomes.PLAINS, Bare::class),
+    COASTLINE_DOWN(1, Biomes.PLAINS, Bare::class),
     NO_DATA(0, Biomes.PLAINS, Bare::class);
 
     companion object {

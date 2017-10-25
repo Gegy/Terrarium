@@ -42,18 +42,15 @@ class EarthBiomeProvider(world: World, settings: EarthGenerationSettings) : Biom
         if (newBiomes == null || newBiomes.size < width * length) {
             newBiomes = arrayOfNulls<Biome>(width * length)
         }
-        val chunk = width == 16 && length == 16 && x and 15 == 0 && z and 15 == 0
-        if (cache && chunk) {
+        val singleChunk = width == 16 && length == 16 && x and 15 == 0 && z and 15 == 0
+        if (cache && singleChunk) {
             System.arraycopy(this.biomeCache.getCachedBiomes(x, z), 0, newBiomes, 0, width * length)
             return newBiomes
         } else {
-            if (chunk) {
+            if (singleChunk) {
                 this.handler.populateGlobRegion(this.globBuffer, x shr 4, z shr 4)
-                for (localZ in 0..15) {
-                    for (localX in 0..15) {
-                        val index = localX + localZ * 16
-                        newBiomes[index] = this.globBuffer[index].biome
-                    }
+                for (i in 0..globBuffer.lastIndex) {
+                    newBiomes[i] = this.globBuffer[i].biome
                 }
             } else {
                 val chunkMinX = x shr 4
@@ -78,6 +75,7 @@ class EarthBiomeProvider(world: World, settings: EarthGenerationSettings) : Biom
 
     override fun areBiomesViable(x: Int, z: Int, radius: Int, allowed: List<Biome?>) = true
 
+    // TODO
     override fun findBiomePosition(x: Int, z: Int, radius: Int, biomes: List<Biome>, random: Random) = BlockPos(x, 0, z)
 
     override fun cleanupCache() = this.biomeCache.cleanupCache()
