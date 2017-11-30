@@ -22,7 +22,7 @@ class GeoTeleportCommand : CommandBase() {
     override fun execute(server: MinecraftServer, sender: ICommandSender, args: Array<out String>) {
         val player = CommandBase.getCommandSenderAsPlayer(sender)
 
-        if (player.world.worldType is EarthWorldType) {
+        if (player.world.worldType == EarthWorldType) {
             val argument = args.joinToString(" ").replace(",", " ")
             val coordinateInput = argument.split(Regex("\\s+"))
             val coordinates = mutableListOf<Double>()
@@ -40,7 +40,7 @@ class GeoTeleportCommand : CommandBase() {
                 }
             } else if (args.isNotEmpty()) {
                 if (player is EntityPlayerMP) {
-                    if (player.world.worldType is EarthWorldType) {
+                    if (player.world.worldType == EarthWorldType) {
                         val place = args.joinToString(" ")
                         val geocode = GeocodingSource[place]
 

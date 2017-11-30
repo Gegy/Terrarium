@@ -1,7 +1,7 @@
 package net.gegy1000.terrarium.server.world.generator
 
+import net.gegy1000.terrarium.server.capability.TerrariumCapabilities
 import net.gegy1000.terrarium.server.map.glob.GlobType
-import net.gegy1000.terrarium.server.world.EarthGenerationSettings
 import net.minecraft.init.Biomes
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
@@ -14,10 +14,11 @@ import net.minecraftforge.fml.relauncher.SideOnly
 import java.util.ArrayList
 import java.util.Random
 
-class EarthBiomeProvider(world: World, settings: EarthGenerationSettings) : BiomeProvider() {
+class EarthBiomeProvider(val world: World) : BiomeProvider() {
+    val handler by lazy { world.getCapability(TerrariumCapabilities.worldDataCapability, null)!!.generationHandler }
+
     val biomeCache = BiomeCache(this)
     val spawnBiomes = ArrayList(allowedBiomes)
-    val handler = EarthGenerationHandler(world, settings)
 
     var globBuffer = Array(256, { GlobType.NO_DATA })
 
@@ -75,7 +76,7 @@ class EarthBiomeProvider(world: World, settings: EarthGenerationSettings) : Biom
 
     override fun areBiomesViable(x: Int, z: Int, radius: Int, allowed: List<Biome?>) = true
 
-    // TODO
+    // TODO: Implement properly
     override fun findBiomePosition(x: Int, z: Int, radius: Int, biomes: List<Biome>, random: Random) = BlockPos(x, 0, z)
 
     override fun cleanupCache() = this.biomeCache.cleanupCache()

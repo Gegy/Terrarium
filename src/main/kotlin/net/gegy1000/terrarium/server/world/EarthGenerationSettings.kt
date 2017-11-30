@@ -28,14 +28,14 @@ data class EarthGenerationSettings(
         get() = scale * EarthGenerationHandler.REAL_SCALE
 
     val scaledWidth: Double
-        get() = finalScale * EarthGenerationHandler.WIDTH
+        get() = finalScale * EarthGenerationHandler.DATA_WIDTH
     val scaledHeight: Double
-        get() = finalScale * EarthGenerationHandler.HEIGHT
+        get() = finalScale * EarthGenerationHandler.DATA_HEIGHT
 
     val scaleRatioX: Double
-        get() = 1.0 / (this.scaledWidth - 1) * (EarthGenerationHandler.WIDTH - 1)
+        get() = 1.0 / (this.scaledWidth - 1) * (EarthGenerationHandler.DATA_WIDTH - 1)
     val scaleRatioZ: Double
-        get() = 1.0 / (this.scaledHeight - 1) * (EarthGenerationHandler.HEIGHT - 1)
+        get() = 1.0 / (this.scaledHeight - 1) * (EarthGenerationHandler.DATA_HEIGHT - 1)
 
     fun serialize() = GSON.toJson(this)
 }

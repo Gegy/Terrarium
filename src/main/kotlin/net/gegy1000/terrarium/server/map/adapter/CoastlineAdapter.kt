@@ -1,7 +1,7 @@
 package net.gegy1000.terrarium.server.map.adapter
 
 import net.gegy1000.terrarium.server.map.glob.GlobType
-import net.gegy1000.terrarium.server.map.source.OverpassSource.Tile
+import net.gegy1000.terrarium.server.map.source.osm.OverpassTileAccess
 import net.gegy1000.terrarium.server.util.Coordinate
 import net.gegy1000.terrarium.server.util.Interpolation
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings
@@ -19,7 +19,7 @@ object CoastlineAdapter : RegionAdapter {
     private const val COAST_UP = 4
     private const val COAST_DOWN = 8
 
-    override fun adaptGlobcover(settings: EarthGenerationSettings, overpassTile: Tile, globBuffer: Array<GlobType>, x: Int, y: Int, width: Int, height: Int) {
+    override fun adaptGlobcover(settings: EarthGenerationSettings, overpassTile: OverpassTileAccess, globBuffer: Array<GlobType>, x: Int, y: Int, width: Int, height: Int) {
         val coastlines = overpassTile.elements.filter { it.isType("natural", "coastline") }
 
         if (!coastlines.isEmpty()) {
@@ -61,7 +61,6 @@ object CoastlineAdapter : RegionAdapter {
                         val localY = point.y - y
                         if (localX >= 0 && localY >= 0 && localX < width && localY < height) {
                             landmap[localX + localY * width] = lineType
-                            // TODO: Handle areas too small to take up >2 pixels
                             if (coastType == COAST_UP) {
                                 if (localX > 0) {
                                     floodPoints.put(FloodPoint(localX - 1, localY), LAND)
@@ -131,6 +130,7 @@ object CoastlineAdapter : RegionAdapter {
         }
     }
 
+    // TODO: Remove, exists for debugging purposes
     private fun writeStage(x: Int, y: Int, stage: Int, width: Int, height: Int, coastlineMap: IntArray) {
         val image = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
         repeat(height) { iy ->

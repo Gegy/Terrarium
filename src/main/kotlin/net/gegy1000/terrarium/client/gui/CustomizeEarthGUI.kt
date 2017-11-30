@@ -239,7 +239,8 @@ class CustomizeEarthGUI(val parent: GuiScreen) : GuiScreen() {
     }
 
     private fun resetWorld() {
-        this.previewWorld.updateGenerator(EarthWorldType.getChunkGenerator(this.previewWorld, ""))
+        val settings = EarthGenerationSettings.deserialize("")
+        this.previewWorld.updateGenerator(settings, EarthWorldType.getChunkGenerator(this.previewWorld, settings.serialize()))
 
         this.previewChunks.forEach(PreviewChunk::markDirty)
     }

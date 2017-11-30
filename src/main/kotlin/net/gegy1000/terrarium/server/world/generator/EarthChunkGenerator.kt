@@ -1,5 +1,6 @@
 package net.gegy1000.terrarium.server.world.generator
 
+import net.gegy1000.terrarium.server.capability.TerrariumCapabilities
 import net.gegy1000.terrarium.server.map.glob.GlobGenerator
 import net.gegy1000.terrarium.server.map.glob.GlobType
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings
@@ -36,9 +37,10 @@ class EarthChunkGenerator(val world: World, seed: Long, settingsString: String) 
         private val WATER = Blocks.WATER.defaultState
     }
 
+    val handler by lazy { world.getCapability(TerrariumCapabilities.worldDataCapability, null)!!.generationHandler }
+
     val random = Random(seed)
     val settings = EarthGenerationSettings.deserialize(settingsString)
-    val handler = EarthGenerationHandler(this.world, this.settings)
     val coverNoise = NoiseGeneratorPerlin(this.random, 4)
     val pos = BlockPos.MutableBlockPos()
 

@@ -2,17 +2,16 @@ package net.gegy1000.terrarium.server.map
 
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
+import net.gegy1000.terrarium.server.capability.TerrariumWorldData
 import net.gegy1000.terrarium.server.map.adapter.CoastlineAdapter
 import net.gegy1000.terrarium.server.map.glob.GlobType
-import net.gegy1000.terrarium.server.map.source.GlobcoverSource
-import net.gegy1000.terrarium.server.map.source.HeightSource
-import net.gegy1000.terrarium.server.map.source.OverpassSource
+import net.gegy1000.terrarium.server.map.source.osm.OverpassTileAccess
 import net.gegy1000.terrarium.server.util.Coordinate
 import net.gegy1000.terrarium.server.world.generator.EarthGenerationHandler
 import net.minecraft.util.math.MathHelper
 import java.util.concurrent.TimeUnit
 
-class GenerationRegionHandler(val generator: EarthGenerationHandler) {
+class GenerationRegionHandler(val worldData: TerrariumWorldData, val generator: EarthGenerationHandler) {
     companion object {
         val adapters = arrayOf(CoastlineAdapter)
     }
@@ -43,7 +42,7 @@ class GenerationRegionHandler(val generator: EarthGenerationHandler) {
 
         val minCoordinate = position.getMinCoordinate(generator.settings)
         val maxCoordinate = position.getMaxCoordinate(generator.settings).addGlobal(2.0, 2.0)
-        val overpassTile = OverpassSource.sampleArea(minCoordinate, maxCoordinate)
+        val overpassTile = worldData.overpassSource.sampleArea(minCoordinate, maxCoordinate)
 
         val resultHeights = this.generateHeights(minCoordinate, maxCoordinate)
         val resultGlobs = this.generateGlobcover(overpassTile, minCoordinate, maxCoordinate)
@@ -52,7 +51,7 @@ class GenerationRegionHandler(val generator: EarthGenerationHandler) {
     }
 
     private fun generateHeights(minCoordinate: Coordinate, maxCoordinate: Coordinate): ShortArray {
-        HeightSource.sampleArea(sampledHeights, minCoordinate, maxCoordinate)
+        worldData.heightSource.sampleArea(sampledHeights, minCoordinate, maxCoordinate)
 
         val resultHeights = ShortArray(scaledDataSize * scaledDataSize)
         generator.scaleHeightRegion(resultHeights, sampledHeights, GenerationRegion.SAMPLE_SIZE + 1, GenerationRegion.SAMPLE_SIZE + 1, scaledDataSize, scaledDataSize)
@@ -60,8 +59,8 @@ class GenerationRegionHandler(val generator: EarthGenerationHandler) {
         return resultHeights
     }
 
-    private fun generateGlobcover(overpassTile: OverpassSource.Tile, minCoordinate: Coordinate, maxCoordinate: Coordinate): Array<GlobType> {
-        GlobcoverSource.sampleArea(sampledGlobs, minCoordinate, maxCoordinate)
+    private fun generateGlobcover(overpassTile: OverpassTileAccess, minCoordinate: Coordinate, maxCoordinate: Coordinate): Array<GlobType> {
+        worldData.globSource.sampleArea(sampledGlobs, minCoordinate, maxCoordinate)
 
         val resultGlobs = Array(scaledDataSize * scaledDataSize, { GlobType.NO_DATA })
         generator.scaleGlobRegion(resultGlobs, sampledGlobs, GenerationRegion.SAMPLE_SIZE + 1, GenerationRegion.SAMPLE_SIZE + 1, scaledDataSize, scaledDataSize)

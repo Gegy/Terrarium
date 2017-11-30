@@ -72,7 +72,7 @@ class PreviewChunk(val world: PreviewWorld, val chunk: Chunk, val x: Int, val y:
         var builder: BufferBuilder? = null
         var buffer: VertexBuffer? = null
 
-        var dirty = true
+        var dirty = false
 
         fun render() {
             val buffer = this.buffer

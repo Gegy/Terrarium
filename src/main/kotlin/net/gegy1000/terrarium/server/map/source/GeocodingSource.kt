@@ -10,6 +10,7 @@ import java.net.URL
 import java.net.URLEncoder
 import javax.net.ssl.HttpsURLConnection
 
+// TODO: Keep sources per world and use Coordinate instead of MapPoint
 object GeocodingSource {
     private val JSON_PARSER = JsonParser()
 
@@ -29,15 +30,11 @@ object GeocodingSource {
             if (root.has("results")) {
                 val results = root["results"].asJsonArray
 
-                results.forEach {
-                    val result = it.asJsonObject
+                results.map { it.asJsonObject }.filter { it.has("geometry") }.forEach { result ->
+                    val geometry = result["geometry"].asJsonObject
+                    val location = geometry["location"].asJsonObject
 
-                    if (result.has("geometry")) {
-                        val geometry = result["geometry"].asJsonObject
-                        val location = geometry["location"].asJsonObject
-
-                        return MapPoint(location["lat"].asDouble, location["lng"].asDouble)
-                    }
+                    return MapPoint(location["lat"].asDouble, location["lng"].asDouble)
                 }
             }
         } catch (e: IOException) {

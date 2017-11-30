@@ -2,8 +2,8 @@ package net.gegy1000.terrarium.client.preview
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap
 import net.gegy1000.terrarium.server.util.Coordinate
+import net.gegy1000.terrarium.server.world.EarthGenerationSettings
 import net.gegy1000.terrarium.server.world.EarthWorldType
-import net.gegy1000.terrarium.server.world.generator.EarthChunkGenerator
 import net.minecraft.block.state.IBlockState
 import net.minecraft.init.Blocks
 import net.minecraft.nbt.NBTTagCompound
@@ -29,10 +29,11 @@ class PreviewWorld : World(SaveHandler, WorldInfo(worldSettings, "terrarium_prev
     val viewChunkRange = 8
     val viewRange = this.viewChunkRange shl 4
 
-    var generator: EarthChunkGenerator
+    var settings = EarthGenerationSettings()
+    var generator: IChunkGenerator
 
     val centerPos: ChunkPos
-        get() = ChunkPos(Coordinate.fromLatLng(this.generator.settings,27.988350, 86.923641).toBlockPos())
+        get() = ChunkPos(Coordinate.fromLatLng(this.settings,27.988350, 86.923641).toBlockPos())
 
     val centerBlockPos: BlockPos
         get() = BlockPos(this.centerPos.x shl 4, 0, this.centerPos.z shl 4)
@@ -41,7 +42,7 @@ class PreviewWorld : World(SaveHandler, WorldInfo(worldSettings, "terrarium_prev
         val dimension = this.provider.dimension
         this.provider.setWorld(this)
         this.provider.dimension = dimension
-        this.generator = this.provider.createChunkGenerator() as EarthChunkGenerator
+        this.generator = this.provider.createChunkGenerator()
         this.chunkProvider = this.createChunkProvider()
     }
 
@@ -74,8 +75,9 @@ class PreviewWorld : World(SaveHandler, WorldInfo(worldSettings, "terrarium_prev
         return x - this.centerPos.x in range && z - this.centerPos.z in range
     }
 
-    fun updateGenerator(generator: EarthChunkGenerator) {
+    fun updateGenerator(settings: EarthGenerationSettings, generator: IChunkGenerator) {
         this.generator = generator
+        this.settings = settings
         val cache = this.chunkProvider as ChunkCache
         cache.generator = generator
         cache.clearChunks()

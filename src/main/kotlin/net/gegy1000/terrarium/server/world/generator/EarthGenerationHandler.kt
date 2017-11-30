@@ -1,23 +1,23 @@
 package net.gegy1000.terrarium.server.world.generator
 
 import net.gegy1000.terrarium.Terrarium
+import net.gegy1000.terrarium.server.capability.TerrariumWorldData
 import net.gegy1000.terrarium.server.map.GenerationRegionHandler
 import net.gegy1000.terrarium.server.map.RegionTilePos
 import net.gegy1000.terrarium.server.map.glob.GlobType
 import net.gegy1000.terrarium.server.util.Interpolation
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings
 import net.minecraft.util.math.MathHelper
-import net.minecraft.world.World
 import java.util.Random
 
-class EarthGenerationHandler(val world: World, val settings: EarthGenerationSettings) {
+class EarthGenerationHandler(worldData: TerrariumWorldData, val settings: EarthGenerationSettings, val maxHeight: Int) {
     companion object {
-        const val WIDTH = 432000
-        const val HEIGHT = 216000
+        const val DATA_WIDTH = 432000
+        const val DATA_HEIGHT = 216000
         const val REAL_SCALE = 92.766203
     }
 
-    val random = Random(this.world.seed)
+    val random = Random()
 
     val oceanHeight = this.settings.heightOffset + 1
     val scatterRange = (this.settings.scatterRange * this.settings.scale).toInt()
@@ -25,9 +25,7 @@ class EarthGenerationHandler(val world: World, val settings: EarthGenerationSett
     val finalScale = this.settings.scale * REAL_SCALE
     val heightScale = this.settings.scale * this.settings.terrainHeightScale
 
-    val maxHeight = this.world.height - 1
-
-    val regionHandler = GenerationRegionHandler(this)
+    val regionHandler = GenerationRegionHandler(worldData, this)
 
     fun initializeSeed(pos: RegionTilePos) {
         random.setSeed(pos.tileX.toLong() * 341873128712L + pos.tileZ.toLong() * 132897987541L)

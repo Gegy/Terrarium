@@ -1,20 +1,20 @@
 package net.gegy1000.terrarium.server
 
-import net.gegy1000.terrarium.server.map.source.HeightSource
-import net.gegy1000.terrarium.server.map.source.OverpassSource
-import net.gegy1000.terrarium.server.map.source.TerrariumSource
+import net.gegy1000.terrarium.server.capability.TerrariumCapabilities
+import net.gegy1000.terrarium.server.map.source.TerrariumData
+import net.gegy1000.terrarium.server.map.source.height.HeightSource
 import net.minecraftforge.common.MinecraftForge
 import kotlin.concurrent.thread
 
 open class ServerProxy {
     open fun onPreInit() {
         MinecraftForge.EVENT_BUS.register(ServerEventHandler)
+        TerrariumCapabilities.onPreInit()
 
         // TODO: Cache all remote data
         thread(name = "Terrarium Remote Load", start = true, isDaemon = true) {
-            OverpassSource.loadQuery()
-            TerrariumSource.loadInfo()
-            HeightSource.loadHeightPoints()
+            TerrariumData.loadInfo()
+            HeightSource.loadValidTiles()
         }
     }
 
