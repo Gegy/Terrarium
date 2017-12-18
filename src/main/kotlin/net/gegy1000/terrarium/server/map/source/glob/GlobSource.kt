@@ -13,6 +13,7 @@ import net.minecraft.util.math.MathHelper
 import java.io.DataInputStream
 import java.io.File
 import java.io.IOException
+import java.io.InputStream
 import java.net.URL
 import java.util.zip.GZIPInputStream
 
@@ -27,7 +28,7 @@ class GlobSource(override val settings: EarthGenerationSettings) : TiledSource<G
         get() = tileY * TILE_SIZE
 
     override val defaultTile
-            get() = GlobTileAccess(ByteArray(TILE_SIZE * TILE_SIZE), 0, 0, TILE_SIZE, TILE_SIZE)
+        get() = GlobTileAccess(ByteArray(TILE_SIZE * TILE_SIZE), 0, 0, TILE_SIZE, TILE_SIZE)
     override val cacheRoot = File(CachedRemoteSource.globalCacheRoot, "globcover")
 
     override fun loadTile(pos: DataTilePos): GlobTileAccess? {
@@ -73,7 +74,10 @@ class GlobSource(override val settings: EarthGenerationSettings) : TiledSource<G
         return tile.get(MathHelper.floor(coordinate.globX) - pos.minX, MathHelper.floor(coordinate.globZ) - pos.minZ)
     }
 
-    override fun getRemoteStream(key: DataTilePos) = GZIPInputStream(URL("${TerrariumData.INFO.baseURL}/${TerrariumData.INFO.globEndpoint}/${getCachedName(key)}").openStream())
+    override fun getRemoteStream(key: DataTilePos): InputStream {
+        val url = URL("${TerrariumData.INFO.baseURL}/${TerrariumData.INFO.globEndpoint}/${getCachedName(key)}")
+        return GZIPInputStream(url.openStream())
+    }
 
     override fun getCachedName(key: DataTilePos) = TerrariumData.INFO.globQuery.format(key.tileX.toString(), key.tileY.toString())
 }

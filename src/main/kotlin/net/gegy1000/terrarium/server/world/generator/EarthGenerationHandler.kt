@@ -32,12 +32,12 @@ class EarthGenerationHandler(worldData: TerrariumWorldData, val settings: EarthG
     }
 
     fun scaleHeightRegion(result: ShortArray, sample: ShortArray, width: Int, height: Int, scaledWidth: Int, scaledHeight: Int) {
-        for (localZ in 0..scaledHeight - 1) {
+        for (localZ in 0 until scaledHeight) {
             val scaledZ = localZ * settings.scaleRatioZ
             val originZ = MathHelper.floor(scaledZ)
             val intermediateZ = scaledZ - originZ
 
-            for (localX in 0..scaledWidth - 1) {
+            for (localX in 0 until scaledWidth) {
                 val scaledX = localX * settings.scaleRatioX
                 val originX = MathHelper.floor(scaledX)
                 val intermediateX = scaledX - originX
@@ -65,11 +65,11 @@ class EarthGenerationHandler(worldData: TerrariumWorldData, val settings: EarthG
     }
 
     fun scaleGlobRegion(result: Array<GlobType>, sample: Array<GlobType>, width: Int, height: Int, scaledWidth: Int, scaledHeight: Int) {
-        for (localZ in 0..scaledHeight - 1) {
+        for (localZ in 0 until scaledHeight) {
             val scaledZ = localZ * settings.scaleRatioZ
             val originZ = MathHelper.floor(scaledZ)
 
-            for (localX in 0..scaledWidth - 1) {
+            for (localX in 0 until scaledWidth) {
                 val scaledX = localX * settings.scaleRatioX
                 val originX = MathHelper.floor(scaledX)
 

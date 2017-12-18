@@ -16,14 +16,14 @@ import java.io.InputStream
 import java.net.URL
 import java.util.zip.GZIPInputStream
 
-class HeightSource(override val settings: EarthGenerationSettings) : TiledSource<HeightTileAccess>(TILE_SIZE, 8), ShortRasterSource, CachedRemoteSource {
+class HeightSource(override val settings: EarthGenerationSettings) : TiledSource<HeightTileAccess>(TILE_SIZE, 9), ShortRasterSource, CachedRemoteSource {
     companion object {
         const val TILE_SIZE = 1201
         private val validTiles = HashSet<DataTilePos>()
 
         fun loadValidTiles() {
             val url = URL("${TerrariumData.INFO.baseURL}/${TerrariumData.INFO.heightsEndpoint}/${TerrariumData.INFO.heightTiles}")
-            val input = DataInputStream(GZIPInputStream(url.openStream()))
+            val input = DataInputStream(GZIPInputStream(url.openStream().buffered()))
             try {
                 val count = input.readInt()
                 for (i in 1..count) {
@@ -54,10 +54,7 @@ class HeightSource(override val settings: EarthGenerationSettings) : TiledSource
             try {
                 val heightmap = ShortArray(TILE_SIZE * TILE_SIZE)
                 for (index in 0 until heightmap.size) {
-                    val height = input.readShort()
-                    if (height >= 0) {
-                        heightmap[index] = height
-                    }
+                    heightmap[index] = input.readShort()
                 }
                 return HeightTileAccess(heightmap, TILE_SIZE, TILE_SIZE)
             } catch (e: IOException) {
@@ -112,7 +109,9 @@ class HeightSource(override val settings: EarthGenerationSettings) : TiledSource
         repeat(height) { y ->
             repeat(width) { x ->
                 val heightValue = get(minimumCoordinate.addGlobal(x.toDouble(), y.toDouble()))
-                result[x + y * width] = heightValue
+                if (heightValue >= 0) {
+                    result[x + y * width] = heightValue
+                }
             }
         }
     }

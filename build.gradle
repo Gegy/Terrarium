@@ -29,6 +29,7 @@ minecraft {
 
 repositories {
 	mavenCentral()
+    jcenter()
     maven {
 	    url "http://maven.shadowfacts.net/"
     }
@@ -79,7 +80,7 @@ String getModField(String type, String mod_file) {
     file.eachLine { String s ->
         s = s.trim()
         if (s.startsWith(prefix)) {
-            s = s.substring(prefix.length(), s.length() - 2)
+            s = s.substring(prefix.length(), s.length() - 1)
             field = s
         }
     }

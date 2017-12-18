@@ -1,152 +1,217 @@
 package net.gegy1000.terrarium.client.preview
 
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.launch
-import net.minecraft.client.Minecraft
+import net.gegy1000.terrarium.Terrarium
+import net.gegy1000.terrarium.client.render.TerrariumVertexFormats
+import net.minecraft.block.state.IBlockState
 import net.minecraft.client.renderer.BufferBuilder
+import net.minecraft.client.renderer.GLAllocation
 import net.minecraft.client.renderer.GlStateManager
-import net.minecraft.client.renderer.OpenGlHelper
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats
+import net.minecraft.client.renderer.WorldVertexBufferUploader
 import net.minecraft.client.renderer.vertex.VertexBuffer
-import net.minecraft.util.BlockRenderLayer
-import net.minecraft.util.math.BlockPos
-import net.minecraft.world.chunk.Chunk
+import net.minecraft.init.Blocks
+import net.minecraft.util.EnumFacing
+import net.minecraft.util.EnumFacing.DOWN
+import net.minecraft.util.EnumFacing.EAST
+import net.minecraft.util.EnumFacing.NORTH
+import net.minecraft.util.EnumFacing.SOUTH
+import net.minecraft.util.EnumFacing.UP
+import net.minecraft.util.EnumFacing.WEST
+import net.minecraft.util.math.BlockPos.MutableBlockPos
+import net.minecraft.util.math.ChunkPos
+import net.minecraft.world.chunk.ChunkPrimer
 import org.lwjgl.opengl.GL11
+import java.util.concurrent.Future
 
-class PreviewChunk(val world: PreviewWorld, val chunk: Chunk, val x: Int, val y: Int, val z: Int) {
-    val renderDispatcher = Minecraft.getMinecraft().blockRendererDispatcher
+class PreviewChunk(val chunk: ChunkPrimer, val pos: ChunkPos, private val previewState: PreviewState) {
+    companion object {
+        private val FACES = arrayOf(EnumFacing.UP, EnumFacing.NORTH, EnumFacing.SOUTH, EnumFacing.WEST, EnumFacing.EAST)
+    }
 
-    val layers = Array(BlockRenderLayer.values().size, { Layer(this, BlockRenderLayer.values()[it]) })
+    private val globalPos = ChunkPos(pos.x shl 4, pos.z shl 4)
 
-    val empty: Boolean
-        get() = this.storage == null || this.storage.isEmpty
+    private var builderResult: Future<BufferBuilder?>? = previewState.executor.submit<BufferBuilder?> {
+        val builder = previewState.takeBuilder()
+        buildBlocks(builder)
+        builder
+    }
 
-    val globalX = this.x shl 4
-    val globalY = this.y shl 4
-    val globalZ = this.z shl 4
+    private var geometry: Geometry? = null
 
-    val storage = this.chunk.blockStorageArray[this.y]
+    fun performUpload() {
+        builderResult?.let { result ->
+            if (result.isDone) {
+                try {
+                    val builder = result.get()
 
-    fun renderLayer(blockLayer: BlockRenderLayer) {
-        if (!this.empty) {
-            this.layers[blockLayer.ordinal].render()
+                    geometry?.delete()
+                    geometry = buildGeometry(builder)
+
+                    builder?.let(previewState::resetBuilder)
+
+                    builderResult = null
+                } catch (e: Exception) {
+                    Terrarium.LOGGER.error("Failed to generate preview chunk geometry at $pos", e)
+                }
+            }
         }
     }
 
-    fun checkDirty(): Boolean {
-        if (!this.empty) {
-            return this.layers.any { it.checkDirty() }
-        }
-        return false
-    }
-
-    private fun bindAttributes() {
-        GlStateManager.glVertexPointer(3, GL11.GL_FLOAT, 28, 0)
-        GlStateManager.glColorPointer(4, GL11.GL_UNSIGNED_BYTE, 28, 12)
-        GlStateManager.glTexCoordPointer(2, GL11.GL_FLOAT, 28, 16)
-        OpenGlHelper.setClientActiveTexture(OpenGlHelper.lightmapTexUnit)
-        GlStateManager.glTexCoordPointer(2, GL11.GL_SHORT, 28, 24)
-        OpenGlHelper.setClientActiveTexture(OpenGlHelper.defaultTexUnit)
+    fun render() {
+        geometry?.render()
     }
 
     fun delete() {
-        this.layers.forEach { it.delete() }
+        geometry?.delete()
     }
 
-    fun markDirty() {
-        this.layers.forEach { it.dirty = true }
+    private fun buildGeometry(builder: BufferBuilder?): Geometry {
+        if (builder == null || builder.vertexCount == 0) {
+            builder?.finishDrawing()
+            return EmptyGeometry()
+        }
+        return buildDisplayList(builder)
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (other is PreviewChunk) {
-            return other.x == this.x && other.y == this.y && other.z == this.z
-        }
-        return false
+    private fun buildVbo(builder: BufferBuilder): VboGeometry {
+        val buffer = VertexBuffer(TerrariumVertexFormats.POSITION_COLOR_NORMAL)
+
+        builder.finishDrawing()
+        buffer.bufferData(builder.byteBuffer)
+
+        return VboGeometry(buffer)
     }
 
-    override fun hashCode(): Int {
-        return this.x shl 12 or this.z shl 4 or this.y
+    private fun buildDisplayList(builder: BufferBuilder): DisplayListGeometry {
+        val id = GLAllocation.generateDisplayLists(1)
+
+        builder.finishDrawing()
+        GlStateManager.glNewList(id, GL11.GL_COMPILE)
+        WorldVertexBufferUploader().draw(builder)
+        GlStateManager.glEndList()
+
+        return DisplayListGeometry(id)
     }
 
-    class Layer(val chunk: PreviewChunk, val layer: BlockRenderLayer) {
-        var builder: BufferBuilder? = null
-        var buffer: VertexBuffer? = null
+    private fun buildBlocks(builder: BufferBuilder) {
+        builder.begin(GL11.GL_QUADS, TerrariumVertexFormats.POSITION_COLOR_NORMAL)
 
-        var dirty = false
+        val pos = MutableBlockPos()
+        for (x in 0..15) {
+            for (z in 0..15) {
+                for (y in 0..255) {
+                    val state = chunk.getBlockState(x, y, z)
+                    if (state.block !== Blocks.AIR) {
+                        pos.setPos(globalPos.x + x, y, globalPos.z + z)
 
-        fun render() {
-            val buffer = this.buffer
-            buffer?.let {
-                buffer.bindBuffer()
-                this.chunk.bindAttributes()
-                buffer.drawArrays(GL11.GL_QUADS)
-                buffer.unbindBuffer()
-            }
-        }
+                        val faces = FACES.filter { facing ->
+                            val offset = pos.offset(facing)
+                            val neighbourState = if (x in 1..14 && z in 1..14 && y in 1..254) {
+                                chunk.getBlockState(offset.x and 15, offset.y, offset.z and 15)
+                            } else {
+                                previewState.getBlockState(offset)
+                            }
+                            neighbourState.block === Blocks.AIR
+                        }
 
-        fun checkDirty(): Boolean {
-            val builder = this.builder
-
-            if (builder != null) {
-                this.buffer?.deleteGlBuffers()
-
-                val buffer = VertexBuffer(DefaultVertexFormats.BLOCK)
-
-                buffer.bindBuffer()
-                this.chunk.bindAttributes()
-                buffer.unbindBuffer()
-
-                buffer.bufferData(builder.byteBuffer)
-
-                this.buffer = buffer
-                this.builder = null
-
-                return true
-            } else if (this.dirty) {
-                this.rebuildLayer()
-
-                return true
-            }
-
-            return false
-        }
-
-        fun rebuildLayer() {
-            // TODO: Create dedicated thread for chunk building
-            this.dirty = false
-            launch(CommonPool) { buildAsync() }
-        }
-
-        private suspend fun buildAsync() {
-            val builder = BufferBuilder(0x4000)
-            builder.begin(GL11.GL_QUADS, DefaultVertexFormats.BLOCK)
-
-            val pos = BlockPos.MutableBlockPos()
-
-            val globalX = this.chunk.globalX
-            val globalY = this.chunk.globalY
-            val globalZ = this.chunk.globalZ
-
-            for (x in 0..15) {
-                for (z in 0..15) {
-                    for (y in 0..15) {
-                        val state = this.chunk.storage[x, y, z]
-                        if (state.block.canRenderInLayer(state, this.layer)) {
-                            pos.setPos(globalX + x, globalY + y, globalZ + z)
-                            this.chunk.renderDispatcher.renderBlock(state, pos, this.chunk.world, builder)
+                        if (!faces.isEmpty()) {
+                            renderFaces(faces, state, pos, builder)
                         }
                     }
                 }
             }
-
-            builder.finishDrawing()
-
-            this.builder = builder
         }
 
-        fun delete() {
-            this.buffer?.deleteGlBuffers()
-            this.buffer = null
+        builder.setTranslation(0.0, 0.0, 0.0)
+    }
+
+    private fun renderFaces(faces: List<EnumFacing>, state: IBlockState, pos: MutableBlockPos, builder: BufferBuilder) {
+        val color = state.getMapColor(previewState, pos)
+        val red = (color.colorValue shr 16) and 0xFF
+        val green = (color.colorValue shr 8) and 0xFF
+        val blue = color.colorValue and 0xFF
+
+        builder.setTranslation(pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble())
+
+        faces.forEach { buildFace(builder, it, red, green, blue) }
+    }
+
+    private fun buildFace(builder: BufferBuilder, facing: EnumFacing, red: Int, green: Int, blue: Int) {
+        when (facing) {
+            NORTH -> {
+                builder.pos(0.0, 0.0, 0.0).color(red, green, blue, 255).normal(0.0F, 0.0F, -1.0F).endVertex()
+                builder.pos(0.0, 1.0, 0.0).color(red, green, blue, 255).normal(0.0F, 0.0F, -1.0F).endVertex()
+                builder.pos(1.0, 1.0, 0.0).color(red, green, blue, 255).normal(0.0F, 0.0F, -1.0F).endVertex()
+                builder.pos(1.0, 0.0, 0.0).color(red, green, blue, 255).normal(0.0F, 0.0F, -1.0F).endVertex()
+            }
+            SOUTH -> {
+                builder.pos(0.0, 0.0, 1.0).color(red, green, blue, 255).normal(0.0F, 0.0F, 1.0F).endVertex()
+                builder.pos(1.0, 0.0, 1.0).color(red, green, blue, 255).normal(0.0F, 0.0F, 1.0F).endVertex()
+                builder.pos(1.0, 1.0, 1.0).color(red, green, blue, 255).normal(0.0F, 0.0F, 1.0F).endVertex()
+                builder.pos(0.0, 1.0, 1.0).color(red, green, blue, 255).normal(0.0F, 0.0F, 1.0F).endVertex()
+            }
+            WEST -> {
+                builder.pos(0.0, 0.0, 0.0).color(red, green, blue, 255).normal(-1.0F, 0.0F, 0.0F).endVertex()
+                builder.pos(0.0, 0.0, 1.0).color(red, green, blue, 255).normal(-1.0F, 0.0F, 0.0F).endVertex()
+                builder.pos(0.0, 1.0, 1.0).color(red, green, blue, 255).normal(-1.0F, 0.0F, 0.0F).endVertex()
+                builder.pos(0.0, 1.0, 0.0).color(red, green, blue, 255).normal(-1.0F, 0.0F, 0.0F).endVertex()
+            }
+            EAST -> {
+                builder.pos(1.0, 1.0, 0.0).color(red, green, blue, 255).normal(1.0F, 0.0F, 0.0F).endVertex()
+                builder.pos(1.0, 1.0, 1.0).color(red, green, blue, 255).normal(1.0F, 0.0F, 0.0F).endVertex()
+                builder.pos(1.0, 0.0, 1.0).color(red, green, blue, 255).normal(1.0F, 0.0F, 0.0F).endVertex()
+                builder.pos(1.0, 0.0, 0.0).color(red, green, blue, 255).normal(1.0F, 0.0F, 0.0F).endVertex()
+            }
+            UP -> {
+                builder.pos(0.0, 1.0, 1.0).color(red, green, blue, 255).normal(0.0F, 1.0F, 0.0F).endVertex()
+                builder.pos(1.0, 1.0, 1.0).color(red, green, blue, 255).normal(0.0F, 1.0F, 0.0F).endVertex()
+                builder.pos(1.0, 1.0, 0.0).color(red, green, blue, 255).normal(0.0F, 1.0F, 0.0F).endVertex()
+                builder.pos(0.0, 1.0, 0.0).color(red, green, blue, 255).normal(0.0F, 1.0F, 0.0F).endVertex()
+            }
+            DOWN -> {
+                builder.pos(0.0, 0.0, 0.0).color(red, green, blue, 255).normal(0.0F, 1.0F, 0.0F).endVertex()
+                builder.pos(1.0, 0.0, 0.0).color(red, green, blue, 255).normal(0.0F, 1.0F, 0.0F).endVertex()
+                builder.pos(1.0, 0.0, 1.0).color(red, green, blue, 255).normal(0.0F, 1.0F, 0.0F).endVertex()
+                builder.pos(0.0, 0.0, 1.0).color(red, green, blue, 255).normal(0.0F, 1.0F, 0.0F).endVertex()
+            }
         }
+    }
+
+    interface Geometry {
+        fun render()
+
+        fun delete()
+    }
+
+    class VboGeometry(private val buffer: VertexBuffer) : Geometry {
+        override fun render() {
+            buffer.bindBuffer()
+
+            GlStateManager.glVertexPointer(3, GL11.GL_FLOAT, 28, 0)
+            GlStateManager.glColorPointer(4, GL11.GL_UNSIGNED_BYTE, 28, 12)
+            // TODO: Bind for nomal
+
+            buffer.drawArrays(GL11.GL_QUADS)
+            buffer.unbindBuffer()
+        }
+
+        override fun delete() {
+            buffer.deleteGlBuffers()
+        }
+    }
+
+    class DisplayListGeometry(private val id: Int) : Geometry {
+        override fun render() {
+            GlStateManager.callList(id)
+        }
+
+        override fun delete() {
+            GLAllocation.deleteDisplayLists(id)
+        }
+    }
+
+    class EmptyGeometry : Geometry {
+        override fun render() = Unit
+
+        override fun delete() = Unit
     }
 }

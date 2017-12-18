@@ -1,9 +1,12 @@
 package net.gegy1000.terrarium.server.world
 
 import com.google.gson.Gson
+import net.gegy1000.terrarium.Terrarium
 import net.gegy1000.terrarium.server.world.generator.EarthGenerationHandler
 
 data class EarthGenerationSettings(
+        var spawnLatitude: Double = 27.988350,
+        var spawnLongitude: Double = 86.923641,
         var mapFeatures: Boolean = true,
         var buildings: Boolean = true,
         var streets: Boolean = true,
@@ -20,7 +23,12 @@ data class EarthGenerationSettings(
             if (settings.isEmpty()) {
                 return EarthGenerationSettings()
             }
-            return GSON.fromJson(settings, EarthGenerationSettings::class.java)
+            try {
+                return GSON.fromJson(settings, EarthGenerationSettings::class.java)
+            } catch (e: Exception) {
+                Terrarium.LOGGER.error("Failed to parse settings string {}", settings, e)
+                return EarthGenerationSettings()
+            }
         }
     }
 

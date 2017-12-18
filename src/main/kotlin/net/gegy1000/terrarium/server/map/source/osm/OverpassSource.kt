@@ -176,7 +176,7 @@ class OverpassSource(override val settings: EarthGenerationSettings) : TiledSour
         if (file.exists()) {
             val metadataFile = File(cacheRoot, "${key.tileX}_${key.tileY}.osm.meta")
             if (metadataFile.exists()) {
-                val metadataInput = DataInputStream(FileInputStream(metadataFile))
+                val metadataInput = DataInputStream(FileInputStream(metadataFile).buffered())
                 val version = metadataInput.use { metadataInput.readUnsignedShort() }
                 return version == QUERY_VERSION
             }

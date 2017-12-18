@@ -18,7 +18,7 @@ class GenerationRegionHandler(val worldData: TerrariumWorldData, val generator: 
 
     private val cache = CacheBuilder.newBuilder()
             .expireAfterAccess(30, TimeUnit.SECONDS)
-            .maximumSize(9)
+            .maximumSize(5)
             .build(object : CacheLoader<RegionTilePos, GenerationRegion>() {
                 override fun load(pos: RegionTilePos) = generate(pos)
             })

@@ -26,15 +26,25 @@ interface CachedRemoteSource {
     fun getStream(key: DataTilePos): InputStream {
         val cachedFile = File(cacheRoot, getCachedName(key))
         if (!shouldLoadCache(key, cachedFile)) {
+            val remoteStream = getRemoteStream(key)
             try {
-                val remoteData = IOUtils.toByteArray(getRemoteStream(key))
+                val remoteData = IOUtils.toByteArray(remoteStream)
                 cacheData(key, cachedFile, remoteData)
                 return ByteArrayInputStream(remoteData)
             } catch (e: IOException) {
-                Terrarium.LOGGER.info("Failed to load tile data stream at $key", e)
+                Terrarium.LOGGER.info("Failed to load remote tile data stream at $key", e)
+            } finally {
+                remoteStream.close()
             }
         }
-        return GZIPInputStream(FileInputStream(cachedFile))
+
+        try {
+            return GZIPInputStream(FileInputStream(cachedFile)).buffered()
+        } catch (e: IOException) {
+            Terrarium.LOGGER.info("Failed to load local tile data stream at $key", e)
+        }
+
+        return ByteArrayInputStream(byteArrayOf())
     }
 
     private fun cacheData(key: DataTilePos, file: File, remoteData: ByteArray) {
@@ -42,9 +52,13 @@ interface CachedRemoteSource {
             if (!cacheRoot.exists()) {
                 cacheRoot.mkdirs()
             }
-            val output = GZIPOutputStream(FileOutputStream(file))
-            output.use { it.write(remoteData) }
-            cacheMetadata(key)
+            try {
+                val output = GZIPOutputStream(FileOutputStream(file))
+                output.use { it.write(remoteData) }
+                cacheMetadata(key)
+            } catch (e: Exception) {
+                Terrarium.LOGGER.error("Failed to cache tile at $key to $file", e)
+            }
         }
     }
 

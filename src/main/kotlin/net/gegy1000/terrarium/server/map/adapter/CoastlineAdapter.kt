@@ -19,12 +19,13 @@ object CoastlineAdapter : RegionAdapter {
     private const val COAST_UP = 4
     private const val COAST_DOWN = 8
 
+    // TODO: Optimize! It's possible that due to flood-fails, it causes all points to be visited, causing slow set access
     override fun adaptGlobcover(settings: EarthGenerationSettings, overpassTile: OverpassTileAccess, globBuffer: Array<GlobType>, x: Int, y: Int, width: Int, height: Int) {
         val coastlines = overpassTile.elements.filter { it.isType("natural", "coastline") }
 
         if (!coastlines.isEmpty()) {
             val landmap = IntArray(width * height) { if (globBuffer[it] == GlobType.WATER) OCEAN else LAND }
-            writeStage(x, y, 0, width, height, landmap)
+//            writeStage(x, y, 0, width, height, landmap)
 
             val floodPoints = HashMap<FloodPoint, Int>()
 
@@ -81,7 +82,7 @@ object CoastlineAdapter : RegionAdapter {
                 }
             }
 
-            writeStage(x, y, 1, width, height, landmap)
+//            writeStage(x, y, 1, width, height, landmap)
 
             floodPoints.forEach { (point, floodType) ->
                 val sampled = landmap[point.x + point.y * width]
@@ -90,7 +91,7 @@ object CoastlineAdapter : RegionAdapter {
                 }
             }
 
-            writeStage(x, y, 2, width, height, landmap)
+//            writeStage(x, y, 2, width, height, landmap)
 
             for (index in 0..globBuffer.lastIndex) {
                 val glob = globBuffer[index]
