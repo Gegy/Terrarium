@@ -1,10 +1,9 @@
 package net.gegy1000.terrarium.server.command
 
 import net.gegy1000.terrarium.Terrarium
-import net.gegy1000.terrarium.server.map.source.GeocodingSource
+import net.gegy1000.terrarium.server.capability.TerrariumCapabilities
 import net.gegy1000.terrarium.server.util.Coordinate
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings
-import net.gegy1000.terrarium.server.world.EarthWorldType
 import net.minecraft.command.CommandBase
 import net.minecraft.command.ICommandSender
 import net.minecraft.command.WrongUsageException
@@ -22,7 +21,10 @@ class GeoTeleportCommand : CommandBase() {
     override fun execute(server: MinecraftServer, sender: ICommandSender, args: Array<out String>) {
         val player = CommandBase.getCommandSenderAsPlayer(sender)
 
-        if (player.world.worldType == EarthWorldType) {
+        val terrariumData = player.world.getCapability(TerrariumCapabilities.worldDataCapability, null)
+        if (terrariumData != null) {
+            val settings = EarthGenerationSettings.deserialize(player.world.worldInfo.generatorOptions)
+
             val argument = args.joinToString(" ").replace(",", " ")
             val coordinateInput = argument.split(Regex("\\s+"))
             val coordinates = mutableListOf<Double>()
@@ -36,19 +38,17 @@ class GeoTeleportCommand : CommandBase() {
                     val latitude = coordinates[0]
                     val longitude = coordinates[1]
 
-                    this.teleport(player, latitude, longitude)
+                    this.teleport(player, Coordinate.fromLatLng(settings, latitude, longitude))
                 }
             } else if (args.isNotEmpty()) {
                 if (player is EntityPlayerMP) {
-                    if (player.world.worldType == EarthWorldType) {
-                        val place = args.joinToString(" ")
-                        val geocode = GeocodingSource[place]
+                    val place = args.joinToString(" ")
+                    val geocode = terrariumData.geocodingSource.get(place)
 
-                        if (geocode != null) {
-                            this.teleport(player, geocode.latitude, geocode.longitude)
-                        } else {
-                            throw WrongUsageException("commands.${Terrarium.MODID}:geotp.not_found", place)
-                        }
+                    if (geocode != null) {
+                        this.teleport(player, geocode)
+                    } else {
+                        throw WrongUsageException("commands.${Terrarium.MODID}:geotp.not_found", place)
                     }
                 }
             } else {
@@ -59,11 +59,7 @@ class GeoTeleportCommand : CommandBase() {
         }
     }
 
-    private fun teleport(player: EntityPlayerMP, latitude: Double, longitude: Double) {
-        val settings = EarthGenerationSettings.deserialize(player.world.worldInfo.generatorOptions)
-
-        val coordinate = Coordinate.fromLatLng(settings, latitude, longitude)
-
+    private fun teleport(player: EntityPlayerMP, coordinate: Coordinate) {
         val blockX = coordinate.blockX.toInt()
         val blockZ = coordinate.blockZ.toInt()
 
@@ -71,6 +67,6 @@ class GeoTeleportCommand : CommandBase() {
         val height = chunk.getHeightValue(blockX and 15, blockZ and 15)
 
         player.connection.setPlayerLocation(coordinate.blockX, height.toDouble(), coordinate.blockZ, 180.0F, 0.0F)
-        player.sendMessage(TextComponentTranslation("commands.${Terrarium.MODID}:geotp.success", latitude.toString(), longitude.toString()))
+        player.sendMessage(TextComponentTranslation("commands.${Terrarium.MODID}:geotp.success", coordinate.latitude.toString(), coordinate.longitude.toString()))
     }
 }

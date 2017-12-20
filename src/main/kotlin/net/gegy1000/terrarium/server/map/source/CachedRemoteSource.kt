@@ -24,14 +24,17 @@ interface CachedRemoteSource {
     val cacheRoot: File
 
     fun getStream(key: DataTilePos): InputStream {
+        // TODO: Check what's causing default to be returned
         val cachedFile = File(cacheRoot, getCachedName(key))
         if (!shouldLoadCache(key, cachedFile)) {
             val remoteStream = getRemoteStream(key)
             try {
                 val remoteData = IOUtils.toByteArray(remoteStream)
                 cacheData(key, cachedFile, remoteData)
+                LoadingStateHandler.putState(LoadingState.LOADING_ONLINE)
                 return ByteArrayInputStream(remoteData)
             } catch (e: IOException) {
+                LoadingStateHandler.putState(LoadingState.LOADING_NO_CONNECTION)
                 Terrarium.LOGGER.info("Failed to load remote tile data stream at $key", e)
             } finally {
                 remoteStream.close()
@@ -39,8 +42,10 @@ interface CachedRemoteSource {
         }
 
         try {
+            LoadingStateHandler.putState(LoadingState.LOADING_CACHED)
             return GZIPInputStream(FileInputStream(cachedFile)).buffered()
         } catch (e: IOException) {
+            LoadingStateHandler.putState(LoadingState.LOADING_NO_CONNECTION)
             Terrarium.LOGGER.info("Failed to load local tile data stream at $key", e)
         }
 

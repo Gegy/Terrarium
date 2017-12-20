@@ -1,5 +1,6 @@
 package net.gegy1000.terrarium.server.capability
 
+import net.gegy1000.terrarium.server.map.source.GeocodingSource
 import net.gegy1000.terrarium.server.map.source.glob.GlobSource
 import net.gegy1000.terrarium.server.map.source.height.HeightSource
 import net.gegy1000.terrarium.server.map.source.osm.OverpassSource
@@ -17,6 +18,7 @@ interface TerrariumWorldData : ICapabilityProvider {
     val heightSource: HeightSource
     val globSource: GlobSource
     val overpassSource: OverpassSource
+    val geocodingSource: GeocodingSource
 
     val tiledBufferSources: Set<TiledSource<*>>
 
@@ -28,6 +30,7 @@ interface TerrariumWorldData : ICapabilityProvider {
         override val heightSource = HeightSource(settings)
         override val globSource = GlobSource(settings)
         override val overpassSource = OverpassSource(settings)
+        override val geocodingSource = GeocodingSource(settings)
 
         override val tiledBufferSources: Set<TiledSource<*>> = setOf(heightSource, globSource, overpassSource)
 

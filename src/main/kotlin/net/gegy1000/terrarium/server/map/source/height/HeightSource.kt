@@ -45,7 +45,7 @@ class HeightSource(override val settings: EarthGenerationSettings) : TiledSource
         get() = (-tileY - 1) * 1200
 
     override val defaultTile: HeightTileAccess
-        get() = HeightTileAccess(ShortArray(1), 1, 1)
+        get() = HeightTileAccess(ShortArray(TILE_SIZE * TILE_SIZE), TILE_SIZE, TILE_SIZE)
     override val cacheRoot = File(CachedRemoteSource.globalCacheRoot, "heights")
 
     override fun loadTile(pos: DataTilePos): HeightTileAccess? {

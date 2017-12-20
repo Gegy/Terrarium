@@ -11,6 +11,14 @@ button.terrarium:setting_decorate.name=Decorate: %s
 slider.terrarium:setting_horizontal_scale.name=Horizontal Scale: %s
 slider.terrarium:setting_vertical_scale.name=Vertical Scale: %s
 
+state.cached.name=Retrieving Cached Data
+state.online.name=Retrieving Online Data
+state.no_connection.name=No Connection
+
+state.cached.tooltip=Loading geographical data from local cache
+state.online.tooltip=Loading geographical data from online cache
+state.no_connection.tooltip=Unable to load geographical data. Check your internet connection!
+
 # Commands
 
 commands.terrarium:geotp.usage=geotp <latitude> <longitude> OR geotp <place>

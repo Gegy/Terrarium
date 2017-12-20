@@ -3,18 +3,18 @@ package net.gegy1000.terrarium.server.map.source
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import net.gegy1000.terrarium.Terrarium
-import net.gegy1000.terrarium.server.map.MapPoint
+import net.gegy1000.terrarium.server.util.Coordinate
+import net.gegy1000.terrarium.server.world.EarthGenerationSettings
 import java.io.IOException
 import java.io.InputStreamReader
 import java.net.URL
 import java.net.URLEncoder
 import javax.net.ssl.HttpsURLConnection
 
-// TODO: Keep sources per world and use Coordinate instead of MapPoint
-object GeocodingSource {
+class GeocodingSource(override val settings: EarthGenerationSettings) : DataSource {
     private val JSON_PARSER = JsonParser()
 
-    operator fun get(place: String): MapPoint? {
+    fun get(place: String): Coordinate? {
         val request = "https://maps.googleapis.com/maps/api/geocode/json?address=${URLEncoder.encode(place, "UTF-8")}"
 
         val url = URL(request)
@@ -34,11 +34,11 @@ object GeocodingSource {
                     val geometry = result["geometry"].asJsonObject
                     val location = geometry["location"].asJsonObject
 
-                    return MapPoint(location["lat"].asDouble, location["lng"].asDouble)
+                    return Coordinate.fromLatLng(settings, location["lat"].asDouble, location["lng"].asDouble)
                 }
             }
         } catch (e: IOException) {
-            Terrarium.LOGGER.error("Failed to geocode $place", e)
+            Terrarium.LOGGER.error("Failed to retrieve geocode for $place", e)
         } finally {
             input.close()
         }

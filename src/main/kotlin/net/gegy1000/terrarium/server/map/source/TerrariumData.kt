@@ -14,8 +14,8 @@ object TerrariumData {
 
     val CACHE_DIRECTORY = File(".", "mods/terrarium/cache/")
 
-    // TODO: Handle unset info
-    lateinit var INFO: TerrariumData.Info
+    // TODO: Cache info
+    var INFO = TerrariumData.Info("", "", "%s_%s.mat", "", "%s%s.hgt", "")
 
     fun loadInfo() {
         val url = URL(INFO_JSON)
