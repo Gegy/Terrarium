@@ -67,7 +67,7 @@ class HeightSource(override val settings: EarthGenerationSettings) : TiledSource
     }
 
     override fun get(coordinate: Coordinate): Short {
-        val pos = DataTilePos(MathHelper.floor(coordinate.longitude), MathHelper.floor(coordinate.latitude))
+        val pos = getTilePos(coordinate)
         val tile = this.getTile(pos)
         return tile.get(MathHelper.floor(coordinate.globalX - pos.minX), MathHelper.floor(coordinate.globalZ - pos.minZ))
     }
@@ -106,14 +106,32 @@ class HeightSource(override val settings: EarthGenerationSettings) : TiledSource
             }
         }*/
         // TODO: Come back to more efficient, but broken algorithm
-        repeat(height) { y ->
-            repeat(width) { x ->
-                val heightValue = get(minimumCoordinate.addGlobal(x.toDouble(), y.toDouble()))
-                if (heightValue >= 0) {
-                    result[x + y * width] = heightValue
+        if (MathHelper.floor(minimumCoordinate.latitude) == MathHelper.floor(maximumCoordinate.latitude) && MathHelper.floor(minimumCoordinate.longitude) == MathHelper.floor(maximumCoordinate.longitude)) {
+            val pos = getTilePos(minimumCoordinate)
+            val tile = this.getTile(pos)
+            repeat(height) { y ->
+                repeat(width) { x ->
+                    val coordinate = minimumCoordinate.addGlobal(x.toDouble(), y.toDouble())
+                    val heightValue = tile.get(MathHelper.floor(coordinate.globalX - pos.minX), MathHelper.floor(coordinate.globalZ - pos.minZ))
+                    if (heightValue >= 0) {
+                        result[x + y * width] = heightValue
+                    }
+                }
+            }
+        } else {
+            repeat(height) { y ->
+                repeat(width) { x ->
+                    val heightValue = get(minimumCoordinate.addGlobal(x.toDouble(), y.toDouble()))
+                    if (heightValue >= 0) {
+                        result[x + y * width] = heightValue
+                    }
                 }
             }
         }
+    }
+
+    private fun getTilePos(coordinate: Coordinate): DataTilePos {
+        return DataTilePos(MathHelper.floor(coordinate.longitude), MathHelper.floor(coordinate.latitude))
     }
 
     override fun getRemoteStream(key: DataTilePos): InputStream {

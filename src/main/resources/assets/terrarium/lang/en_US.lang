@@ -19,6 +19,11 @@ state.cached.tooltip=Loading geographical data from local cache
 state.online.tooltip=Loading geographical data from online cache
 state.no_connection.tooltip=Unable to load geographical data. Check your internet connection!
 
+# Config
+
+config.terrarium.enable_data_status_icon=Enable Data Status Icon
+config.terrarium.enable_data_status_icon.tooltip=If true, the current status for data streaming will be displayed in the top left corner of the screen
+
 # Commands
 
 commands.terrarium:geotp.usage=geotp <latitude> <longitude> OR geotp <place>

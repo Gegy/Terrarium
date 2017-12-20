@@ -6,7 +6,7 @@ import java.awt.Point
 
 object Interpolation {
     fun cosine(y1: Double, y2: Double, intermediate: Double): Double {
-        val cos = (1.0 - MathHelper.cos((intermediate * Math.PI).toFloat())) / 2.0
+        val cos = (1.0 - Math.cos(intermediate * Math.PI)) / 2.0
         return y1 * (1.0 - cos) + y2 * cos
     }
 

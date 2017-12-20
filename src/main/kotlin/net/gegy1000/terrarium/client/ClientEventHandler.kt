@@ -1,6 +1,7 @@
 package net.gegy1000.terrarium.client
 
 import net.gegy1000.terrarium.Terrarium
+import net.gegy1000.terrarium.server.config.TerrariumConfig
 import net.gegy1000.terrarium.server.map.source.LoadingStateHandler
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.Gui
@@ -44,12 +45,15 @@ object ClientEventHandler : Gui() {
     }
 
     private fun drawLoadingState(mouseX: Int, mouseY: Int) {
+        if (!TerrariumConfig.dataStatusIcon) {
+            return
+        }
+
         val state = LoadingStateHandler.checkState()
 
         if (state != null) {
             val resolution = ScaledResolution(minecraft)
 
-            // TODO: Add config for overlay
             minecraft.textureManager.bindTexture(widgetsTexture)
 
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F)
