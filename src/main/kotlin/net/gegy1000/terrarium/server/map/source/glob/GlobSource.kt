@@ -75,9 +75,9 @@ class GlobSource(override val settings: EarthGenerationSettings) : TiledSource<G
     }
 
     override fun getRemoteStream(key: DataTilePos): InputStream {
-        val url = URL("${TerrariumData.INFO.baseURL}/${TerrariumData.INFO.globEndpoint}/${getCachedName(key)}")
+        val url = URL("${TerrariumData.info.baseURL}/${TerrariumData.info.globEndpoint}/${getCachedName(key)}")
         return GZIPInputStream(url.openStream())
     }
 
-    override fun getCachedName(key: DataTilePos) = TerrariumData.INFO.globQuery.format(key.tileX.toString(), key.tileY.toString())
+    override fun getCachedName(key: DataTilePos) = TerrariumData.info.globQuery.format(key.tileX.toString(), key.tileY.toString())
 }

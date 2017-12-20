@@ -16,7 +16,7 @@ import java.util.zip.GZIPOutputStream
 
 interface CachedRemoteSource {
     companion object {
-        val globalCacheRoot = File(".", "mods/terrarium/cache/")
+        val globalCacheRoot = TerrariumData.cacheRoot
 
         val cacheService = Executors.newSingleThreadExecutor(ThreadFactoryBuilder().setNameFormat("Terrarium Cache Service").setDaemon(true).build())
     }
@@ -24,7 +24,6 @@ interface CachedRemoteSource {
     val cacheRoot: File
 
     fun getStream(key: DataTilePos): InputStream {
-        // TODO: Check what's causing default to be returned
         val cachedFile = File(cacheRoot, getCachedName(key))
         if (!shouldLoadCache(key, cachedFile)) {
             val remoteStream = getRemoteStream(key)

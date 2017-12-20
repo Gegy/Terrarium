@@ -22,7 +22,7 @@ class HeightSource(override val settings: EarthGenerationSettings) : TiledSource
         private val validTiles = HashSet<DataTilePos>()
 
         fun loadValidTiles() {
-            val url = URL("${TerrariumData.INFO.baseURL}/${TerrariumData.INFO.heightsEndpoint}/${TerrariumData.INFO.heightTiles}")
+            val url = URL("${TerrariumData.info.baseURL}/${TerrariumData.info.heightsEndpoint}/${TerrariumData.info.heightTiles}")
             val input = DataInputStream(GZIPInputStream(url.openStream().buffered()))
             try {
                 val count = input.readInt()
@@ -118,7 +118,7 @@ class HeightSource(override val settings: EarthGenerationSettings) : TiledSource
 
     override fun getRemoteStream(key: DataTilePos): InputStream {
         val cachedName = getCachedName(key)
-        val url = URL("${TerrariumData.INFO.baseURL}/${TerrariumData.INFO.heightsEndpoint}/$cachedName")
+        val url = URL("${TerrariumData.info.baseURL}/${TerrariumData.info.heightsEndpoint}/$cachedName")
         return GZIPInputStream(url.openStream())
     }
 
@@ -136,6 +136,6 @@ class HeightSource(override val settings: EarthGenerationSettings) : TiledSource
             longitudeString = "0" + longitudeString
         }
 
-        return TerrariumData.INFO.heightsQuery.format("$latitudePrefix$latitudeString", "$longitudePrefix$longitudeString")
+        return TerrariumData.info.heightsQuery.format("$latitudePrefix$latitudeString", "$longitudePrefix$longitudeString")
     }
 }
