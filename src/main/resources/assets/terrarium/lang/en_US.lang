@@ -1,15 +1,15 @@
 # Generators
 
-generator.terrarium:earth=Terrarium
+generator.terrarium.earth=Terrarium
 
 # GUI
 
-options.terrarium:customize_earth_title.name=Customize Earth Generation
+options.terrarium.customize_earth_title.name=Customize Earth Generation
 
-button.terrarium:setting_buildings.name=Buildings: %s
-button.terrarium:setting_decorate.name=Decorate: %s
-slider.terrarium:setting_horizontal_scale.name=Horizontal Scale: %s
-slider.terrarium:setting_vertical_scale.name=Vertical Scale: %s
+button.terrarium.setting_buildings.name=Buildings: %s
+button.terrarium.setting_decorate.name=Decorate: %s
+slider.terrarium.setting_horizontal_scale.name=Horizontal Scale: %s
+slider.terrarium.setting_vertical_scale.name=Vertical Scale: %s
 
 state.cached.name=Retrieving Cached Data
 state.online.name=Retrieving Online Data
@@ -26,7 +26,8 @@ config.terrarium.enable_data_status_icon.tooltip=If true, the current status for
 
 # Commands
 
-commands.terrarium:geotp.usage=geotp <latitude> <longitude> OR geotp <place>
-commands.terrarium:geotp.wrong_world=Cannot use command in this world
-commands.terrarium:geotp.not_found=Could not find %s
-commands.terrarium:geotp.success=Successfully teleported to %s, %s
+commands.terrarium.geotp.usage=geotp <latitude> <longitude> OR geotp <place>
+commands.terrarium.geotp.wrong_world=Cannot use command in this world
+commands.terrarium.geotp.not_found=Could not find %s
+commands.terrarium.geotp.success=Successfully teleported to %s, %s
+commands.terrarium.geotp.error=An error occurred while finding %s: %s

@@ -8,11 +8,9 @@ buildscript {
     }
     dependencies {
         classpath "net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.1.2"
     }
 }
 
-apply plugin: "kotlin"
 apply plugin: "net.minecraftforge.gradle.forge"
 
 def mod_file = getModFile()
@@ -28,15 +26,11 @@ minecraft {
 }
 
 repositories {
-	mavenCentral()
+	  mavenCentral()
     jcenter()
-    maven {
-	    url "http://maven.shadowfacts.net/"
-    }
 }
 
 dependencies {
-    compile "net.shadowfacts:Forgelin:1.5.1"
 }
 
 processResources {
@@ -47,7 +41,7 @@ processResources {
         include "mcmod.info"
         expand "version": project.version, "mcversion": project.minecraft.version
     }
-        
+
     from (sourceSets.main.resources.srcDirs) {
         exclude "mcmod.info"
     }
@@ -55,14 +49,14 @@ processResources {
 
 String getModFile() {
     String path = ""
-    FileTree tree = fileTree(dir: 'src/main/kotlin')
-    tree.include '**/*.kt'
+    FileTree tree = fileTree(dir: 'src/main/java')
+    tree.include '**/*.java'
     tree.visit {element ->
         if (element.file.isFile()) {
             element.file.eachLine { String s ->
                 s = s.trim()
                 if (s.startsWith("@Mod")) {
-                    path = "src/main/kotlin/$element.relativePath"
+                    path = "src/main/java/$element.relativePath"
                 }
             }
         }
@@ -75,12 +69,12 @@ String getModField(String type, String mod_file) {
         return ""
     }
     String field = ""
-    String prefix = "const val $type = \""
+    String prefix = "public static final $type = \""
     File file = file(mod_file)
     file.eachLine { String s ->
         s = s.trim()
         if (s.startsWith(prefix)) {
-            s = s.substring(prefix.length(), s.length() - 1)
+            s = s.substring(prefix.length(), s.length() - 2)
             field = s
         }
     }
