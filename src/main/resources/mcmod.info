@@ -8,9 +8,7 @@
     "authorList": [
       "gegy1000"
     ],
-    "dependencies": [
-      "forgelin@[1.4.2,)"
-    ],
-    "credits": "ChunkMapper (whamtet), NASA, ESA, OpenStreetMap Contributors (C)"
+    "dependencies": [],
+    "credits": "pau101, ChunkMapper (whamtet), NASA, ESA, OpenStreetMap Contributors (C)"
   }
 ]

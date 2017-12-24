@@ -22,8 +22,10 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 
@@ -33,7 +35,9 @@ public class WorldPreview implements IBlockAccess {
 
     private final EarthGenerationSettings settings;
     private final ExecutorService executor;
-    private final BlockingQueue<BufferBuilder> builders;
+
+    private final BufferBuilder[] builders;
+    private final BlockingQueue<BufferBuilder> builderQueue;
 
     private final EarthChunkGenerator generator;
 
@@ -43,12 +47,15 @@ public class WorldPreview implements IBlockAccess {
     private final Long2ObjectMap<ChunkPrimer> chunkMap = new Long2ObjectOpenHashMap<>(VIEW_RANGE * 2 * VIEW_RANGE * 2);
 
     private List<PreviewChunk> previewChunks = null;
-    private int heightOffset = 96;
+    private int heightOffset = 64;
 
-    public WorldPreview(EarthGenerationSettings settings, ExecutorService executor, BlockingQueue<BufferBuilder> builders) {
+    public WorldPreview(EarthGenerationSettings settings, ExecutorService executor, BufferBuilder[] builders) {
         this.settings = settings;
         this.executor = executor;
         this.builders = builders;
+
+        this.builderQueue = new ArrayBlockingQueue<>(builders.length);
+        Collections.addAll(this.builderQueue, builders);
 
         this.generator = new EarthChunkGenerator(new PreviewDummyWorld(), 0, settings.serialize(), true);
         this.centerPos = new ChunkPos(Coordinate.fromLatLng(settings, settings.spawnLatitude, settings.spawnLongitude).toBlockPos(0));
@@ -77,9 +84,11 @@ public class WorldPreview implements IBlockAccess {
     private void performUploads(List<PreviewChunk> previewChunks) {
         long startTime = System.nanoTime();
         for (PreviewChunk chunk : previewChunks) {
-            this.returnBuilder(chunk.performUpload());
-            if (System.nanoTime() - startTime > 5000000) {
-                break;
+            if (chunk.isUploadReady()) {
+                this.returnBuilder(chunk.performUpload());
+                if (System.nanoTime() - startTime > 3000000) {
+                    break;
+                }
             }
         }
     }
@@ -88,6 +97,7 @@ public class WorldPreview implements IBlockAccess {
         List<PreviewChunk> previewChunks = this.previewChunks;
         if (previewChunks != null) {
             for (PreviewChunk chunk : previewChunks) {
+                chunk.cancelGeneration();
                 chunk.delete();
             }
         }
@@ -95,20 +105,20 @@ public class WorldPreview implements IBlockAccess {
 
     public BufferBuilder takeBuilder() {
         try {
-            return this.builders.take();
+            return this.builderQueue.take();
         } catch (InterruptedException e) {
             return new BufferBuilder(8);
         }
     }
 
     public void returnBuilder(BufferBuilder builder) {
-        if (builder != null) {
-            this.builders.add(builder);
+        if (builder != null && !this.builderQueue.contains(builder)) {
+            this.builderQueue.add(builder);
         }
     }
 
     private List<PreviewChunk> generateChunks() {
-        int maxHeight = 96;
+        int totalHeight = 0;
 
         List<ChunkPos> chunkPositions = new ArrayList<>();
         for (int z = -VIEW_RANGE; z <= VIEW_RANGE; z++) {
@@ -130,14 +140,11 @@ public class WorldPreview implements IBlockAccess {
         List<PreviewChunk> previewChunks = new ArrayList<>();
         for (ChunkPos pos : chunkPositions) {
             ChunkPrimer chunk = this.chunkMap.get(ChunkPos.asLong(pos.x, pos.z));
-            int chunkHeight = chunk.findGroundBlockIdx(8, 8) + 16;
-            if (chunkHeight > maxHeight) {
-                maxHeight = chunkHeight;
-            }
+            totalHeight += chunk.findGroundBlockIdx(8, 8) + 16;
             previewChunks.add(new PreviewChunk(chunk, pos, this));
         }
 
-        this.heightOffset = maxHeight;
+        this.heightOffset = totalHeight / previewChunks.size();
 
         return previewChunks;
     }

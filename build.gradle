@@ -20,13 +20,13 @@ archivesBaseName = "terrarium"
 sourceCompatibility = targetCompatibility = "1.8"
 
 minecraft {
-    version = "1.12-14.21.0.2331"
+    version = "1.12-14.21.1.2387"
     runDir = "minecraft"
-    mappings = "snapshot_20170616"
+    mappings = "snapshot_20171224"
 }
 
 repositories {
-	  mavenCentral()
+    mavenCentral()
     jcenter()
 }
 

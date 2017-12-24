@@ -32,6 +32,7 @@ public class PreviewChunk {
 
     private final IBlockAccess previewAccess;
 
+    private final Object buildLock = new Object();
     private Future<BufferBuilder> builderResult;
 
     private Geometry geometry;
@@ -43,26 +44,39 @@ public class PreviewChunk {
     }
 
     public void executeBuild(ExecutorService executor, Supplier<BufferBuilder> builderSupplier) {
-        this.builderResult = executor.submit(() -> {
-            BufferBuilder builder = builderSupplier.get();
-            this.buildBlocks(builder);
-            return builder;
-        });
+        synchronized (this.buildLock) {
+            this.builderResult = executor.submit(() -> {
+                BufferBuilder builder = builderSupplier.get();
+                this.buildBlocks(builder);
+                return builder;
+            });
+        }
     }
 
     public BufferBuilder performUpload() {
-        Future<BufferBuilder> result = this.builderResult;
+        BufferBuilder completedBuilder = this.getCompletedBuilder();
+        if (completedBuilder != null) {
+            Geometry oldGeometry = this.geometry;
+            if (oldGeometry != null) {
+                oldGeometry.delete();
+            }
+            this.geometry = this.buildGeometry(completedBuilder);
+        }
+        return completedBuilder;
+    }
+
+    public BufferBuilder getCompletedBuilder() {
+        Future<BufferBuilder> result;
+        synchronized (this.buildLock) {
+            result = this.builderResult;
+        }
+
         if (result != null && result.isDone()) {
             try {
                 BufferBuilder builder = result.get();
-
-                Geometry oldGeometry = this.geometry;
-                if (oldGeometry != null) {
-                    oldGeometry.delete();
+                synchronized (this.buildLock) {
+                    this.builderResult = null;
                 }
-
-                this.geometry = this.buildGeometry(builder);
-                this.builderResult = null;
 
                 return builder;
             } catch (Exception e) {
@@ -71,6 +85,11 @@ public class PreviewChunk {
         }
 
         return null;
+    }
+
+    public boolean isUploadReady() {
+        Future<BufferBuilder> result = this.builderResult;
+        return result != null && result.isDone();
     }
 
     private Geometry buildGeometry(BufferBuilder builder) {
@@ -106,6 +125,15 @@ public class PreviewChunk {
         Geometry geometry = this.geometry;
         if (geometry != null) {
             geometry.delete();
+        }
+    }
+
+    public void cancelGeneration() {
+        synchronized (this.buildLock) {
+            Future<BufferBuilder> builderResult = this.builderResult;
+            if (builderResult != null) {
+                builderResult.cancel(true);
+            }
         }
     }
 

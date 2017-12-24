@@ -5,6 +5,7 @@ generator.terrarium.earth=Terrarium
 # GUI
 
 options.terrarium.customize_earth_title.name=Customize Earth Generation
+options.terrarium.preview_earth_title.name=Preview Earth Generation
 
 button.terrarium.setting_buildings.name=Buildings: %s
 button.terrarium.setting_decorate.name=Decorate: %s

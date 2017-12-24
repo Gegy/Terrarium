@@ -9,10 +9,14 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.network.NetworkCheckHandler;
+import net.minecraftforge.fml.relauncher.Side;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@Mod(modid = Terrarium.MODID, name = "Terrarium", version = Terrarium.VERSION)
+import java.util.Map;
+
+@Mod(modid = Terrarium.MODID, name = "Terrarium", version = Terrarium.VERSION, acceptedMinecraftVersions = "[1.12]")
 public class Terrarium {
     public static final String MODID = "terrarium";
     public static final String VERSION = "1.0.0";
@@ -45,5 +49,10 @@ public class Terrarium {
     @Mod.EventHandler
     public static void onServerStarting(FMLServerStartingEvent event) {
         event.registerServerCommand(new GeoTeleportCommand());
+    }
+
+    @NetworkCheckHandler
+    public static boolean onCheckNetwork(Map<String, String> mods, Side side) {
+        return !mods.containsKey(Terrarium.MODID) || mods.get(Terrarium.MODID).equals(VERSION);
     }
 }
