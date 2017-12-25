@@ -39,6 +39,7 @@ public interface CachedRemoteSource {
             } catch (IOException e) {
                 LoadingStateHandler.putState(LoadingState.LOADING_NO_CONNECTION);
                 Terrarium.LOGGER.error("Failed to load remote tile data stream at {}", key, e);
+                return new ByteArrayInputStream(new byte[0]);
             }
         }
 

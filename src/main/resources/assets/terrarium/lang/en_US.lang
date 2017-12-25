@@ -20,6 +20,17 @@ state.cached.tooltip=Loading geographical data from local cache
 state.online.tooltip=Loading geographical data from online cache
 state.no_connection.tooltip=Unable to load geographical data. Check your internet connection!
 
+# Customization Settings
+
+setting.terrarium.scale.name=World Scale
+setting.terrarium.height_scale.name=Height Scale
+setting.terrarium.scatter.name=Scatter Range
+setting.terrarium.height_offset.name=Base Height
+setting.terrarium.decorate.name=Decorate
+setting.terrarium.map_features.name=Map Features
+setting.terrarium.buildings.name=Buildings
+setting.terrarium.streets.name=Streets
+
 # Config
 
 config.terrarium.enable_data_status_icon=Enable Data Status Icon

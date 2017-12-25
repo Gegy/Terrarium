@@ -57,7 +57,7 @@ public class WorldPreview implements IBlockAccess {
         this.builderQueue = new ArrayBlockingQueue<>(builders.length);
         Collections.addAll(this.builderQueue, builders);
 
-        this.generator = new EarthChunkGenerator(new PreviewDummyWorld(), 0, settings.serialize(), true);
+        this.generator = new EarthChunkGenerator(new PreviewDummyWorld(settings), 0, settings.serialize(), true);
         this.centerPos = new ChunkPos(Coordinate.fromLatLng(settings, settings.spawnLatitude, settings.spawnLongitude).toBlockPos(0));
         this.centerBlockPos = new BlockPos(this.centerPos.x << 4, 0, this.centerPos.z << 4);
 

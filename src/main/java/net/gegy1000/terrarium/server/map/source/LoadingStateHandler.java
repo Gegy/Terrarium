@@ -23,16 +23,16 @@ public class LoadingStateHandler {
         synchronized (LOCK) {
             Map<LoadingState, Integer> stateCounts = new EnumMap<>(LoadingState.class);
             for (StateEntry entry : STATE_BUFFER) {
-                int count = stateCounts.getOrDefault(entry.state, 0);
-                stateCounts.put(entry.state, count + 1);
+                int weight = stateCounts.getOrDefault(entry.state, 0);
+                stateCounts.put(entry.state, weight + entry.state.getWeight());
             }
             LoadingState relevantState = null;
-            int relevantCount = 0;
+            int relevantWeight = 0;
             for (Map.Entry<LoadingState, Integer> entry : stateCounts.entrySet()) {
-                int count = entry.getValue();
-                if (count > relevantCount) {
+                int weight = entry.getValue();
+                if (weight > relevantWeight) {
                     relevantState = entry.getKey();
-                    relevantCount = count;
+                    relevantWeight = weight;
                 }
             }
             return relevantState;

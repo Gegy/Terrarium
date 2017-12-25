@@ -80,7 +80,7 @@ public class EarthGenerationHandler {
     private GlobType getGlobScattered(int x, int z) {
         GlobType originGlob = this.getGlob(x, z);
 
-        int range = MathHelper.ceil(this.scatterRange * originGlob.getScatterRange());
+        int range = Math.max(1, MathHelper.ceil(this.scatterRange * originGlob.getScatterRange()));
 
         int scatterX = x + this.random.nextInt(range) - this.random.nextInt(range);
         int scatterZ = z + this.random.nextInt(range) - this.random.nextInt(range);

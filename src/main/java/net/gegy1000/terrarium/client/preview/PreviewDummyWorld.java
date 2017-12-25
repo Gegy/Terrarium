@@ -1,6 +1,7 @@
 package net.gegy1000.terrarium.client.preview;
 
 import net.gegy1000.terrarium.Terrarium;
+import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.world.GameType;
@@ -22,10 +23,8 @@ import java.io.File;
 
 @SideOnly(Side.CLIENT)
 public class PreviewDummyWorld extends World {
-    private static final WorldSettings SETTINGS = new WorldSettings(0, GameType.ADVENTURE, false, false, Terrarium.EARTH_TYPE);
-
-    public PreviewDummyWorld() {
-        super(new SaveHandler(), new WorldInfo(SETTINGS, "terrarium_preview"), new WorldProviderSurface(), new Profiler(), false);
+    public PreviewDummyWorld(EarthGenerationSettings settings) {
+        super(new SaveHandler(), new WorldInfo(createSettings(settings), "terrarium_preview"), new WorldProviderSurface(), new Profiler(), false);
 
         int dimension = this.provider.getDimension();
         this.provider.setWorld(this);
@@ -33,6 +32,12 @@ public class PreviewDummyWorld extends World {
         this.chunkProvider = this.createChunkProvider();
 
         this.initCapabilities();
+    }
+
+    private static WorldSettings createSettings(EarthGenerationSettings settings) {
+        WorldSettings worldSettings = new WorldSettings(0, GameType.ADVENTURE, false, false, Terrarium.EARTH_TYPE);
+        worldSettings.setGeneratorOptions(settings.serialize());
+        return worldSettings;
     }
 
     @Override

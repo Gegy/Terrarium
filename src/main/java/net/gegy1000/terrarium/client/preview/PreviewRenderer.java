@@ -33,7 +33,7 @@ public class PreviewRenderer {
         this.height = height;
     }
 
-    public void render(WorldPreview preview, float zoom, float rotation) {
+    public void render(WorldPreview preview, float zoom, float rotationX, float rotationY) {
         this.renderBackground();
 
         if (preview != null) {
@@ -54,8 +54,8 @@ public class PreviewRenderer {
 
             GlStateManager.translate(this.gui.width / scaleFactor / 2.0, (this.y + this.height / 2) / scaleFactor, 0.0);
             GlStateManager.scale(zoom, -zoom, zoom);
-            GlStateManager.rotate(15.0F, 1.0F, 0.0F, 0.0F);
-            GlStateManager.rotate(rotation, 0.0F, 1.0F, 0.0F);
+            GlStateManager.rotate(rotationX, 1.0F, 0.0F, 0.0F);
+            GlStateManager.rotate(rotationY, 0.0F, 1.0F, 0.0F);
 
             GlStateManager.translate(-centerPos.getX(), -preview.getHeightOffset(), -centerPos.getZ());
 
@@ -91,5 +91,21 @@ public class PreviewRenderer {
     public void scissor(double x, double y, double width, double height) {
         double scaleFactor = new ScaledResolution(MC).getScaleFactor();
         GL11.glScissor((int) (x * scaleFactor), (int) ((this.gui.height - (y + height)) * scaleFactor), (int) (width * scaleFactor), (int) (height * scaleFactor));
+    }
+
+    public double getX() {
+        return this.x;
+    }
+
+    public double getY() {
+        return this.y;
+    }
+
+    public double getWidth() {
+        return this.width;
+    }
+
+    public double getHeight() {
+        return this.height;
     }
 }

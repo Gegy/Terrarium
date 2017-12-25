@@ -1,4 +1,4 @@
-package net.gegy1000.terrarium.client.gui;
+package net.gegy1000.terrarium.client.gui.customization;
 
 import net.gegy1000.terrarium.client.preview.PreviewController;
 import net.gegy1000.terrarium.client.preview.PreviewRenderer;
@@ -14,9 +14,8 @@ public class PreviewEarthGui extends GuiScreen {
     private final WorldPreview preview;
     private final GuiScreen parent;
 
-    private final PreviewController controller = new PreviewController(0.4F, 1.5F);
-
     private PreviewRenderer renderer;
+    private PreviewController controller;
 
     public PreviewEarthGui(WorldPreview preview, GuiScreen parent) {
         this.preview = preview;
@@ -29,6 +28,7 @@ public class PreviewEarthGui extends GuiScreen {
         this.addButton(new GuiButton(0, this.width / 2 - 75, this.height - 28, 150, 20, I18n.translateToLocal("gui.done")));
 
         this.renderer = new PreviewRenderer(this, 8.0, 21.0, this.width - 16.0, this.height - 57.0);
+        this.controller = new PreviewController(this.renderer, 0.4F, 1.5F);
     }
 
     @Override
@@ -73,8 +73,12 @@ public class PreviewEarthGui extends GuiScreen {
         String title = I18n.translateToLocal("options.terrarium.preview_earth_title.name");
         this.drawCenteredString(this.fontRenderer, title, this.width / 2, 4, 0xFFFFFF);
 
+        float zoom = this.controller.getZoom(partialTicks);
+        float rotationX = this.controller.getRotationX(partialTicks);
+        float rotationY = this.controller.getRotationY(partialTicks);
+        this.renderer.render(this.preview, zoom, rotationX, rotationY);
+
         super.drawScreen(mouseX, mouseY, partialTicks);
-        this.renderer.render(this.preview, this.controller.getZoom(partialTicks), this.controller.getRotationX(partialTicks));
     }
 
     @Override

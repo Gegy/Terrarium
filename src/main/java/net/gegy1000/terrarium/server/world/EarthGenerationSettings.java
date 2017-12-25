@@ -16,7 +16,7 @@ public class EarthGenerationSettings {
     public boolean streets = true;
     public boolean decorate = true;
     public double terrainHeightScale = 1.0;
-    public double worldScale = 0.03;
+    public double worldScale = 1.0 / 35.0;
     public int heightOffset = 5;
     public int scatterRange = 200;
 

@@ -1,6 +1,17 @@
-package net.gegy1000.terrarium.client.gui;
+package net.gegy1000.terrarium.client.gui.customization;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import net.gegy1000.terrarium.client.gui.customization.setting.BuildingsValue;
+import net.gegy1000.terrarium.client.gui.customization.setting.CustomizationValue;
+import net.gegy1000.terrarium.client.gui.customization.setting.DecorateValue;
+import net.gegy1000.terrarium.client.gui.customization.setting.HeightOffsetValue;
+import net.gegy1000.terrarium.client.gui.customization.setting.HeightScaleValue;
+import net.gegy1000.terrarium.client.gui.customization.setting.MapFeaturesValue;
+import net.gegy1000.terrarium.client.gui.customization.setting.ScaleValue;
+import net.gegy1000.terrarium.client.gui.customization.setting.ScatterValue;
+import net.gegy1000.terrarium.client.gui.customization.setting.SliderWidget;
+import net.gegy1000.terrarium.client.gui.customization.setting.StreetsValue;
+import net.gegy1000.terrarium.client.gui.customization.setting.ToggleWidget;
 import net.gegy1000.terrarium.client.preview.PreviewController;
 import net.gegy1000.terrarium.client.preview.PreviewRenderer;
 import net.gegy1000.terrarium.client.preview.WorldPreview;
@@ -28,14 +39,23 @@ public class CustomizeEarthGui extends GuiScreen {
     private static final int PADDING_Y = 36;
 
     private final GuiCreateWorld parent;
+    private final EarthGenerationSettings settings;
 
-    private final EarthGenerationSettings settings = new EarthGenerationSettings();
+    private final CustomizationValue<Double> scaleValue;
+    private final CustomizationValue<Double> heightScaleValue;
+    private final CustomizationValue<Double> scatterValue;
+    private final CustomizationValue<Double> heightOffsetValue;
+
+    private final CustomizationValue<Boolean> decorateValue;
+    private final CustomizationValue<Boolean> mapFeaturesValue;
+
+    private final CustomizationValue<Boolean> buildingsValue;
+    private final CustomizationValue<Boolean> streetsValue;
 
     private final ExecutorService executor = Executors.newFixedThreadPool(3, new ThreadFactoryBuilder().setDaemon(true).setNameFormat("terrarium-preview-%d").build());
 
-    private final PreviewController controller = new PreviewController(0.3F, 1.0F);
-
     private PreviewRenderer renderer;
+    private PreviewController controller;
 
     private WorldPreview preview = null;
 
@@ -43,22 +63,42 @@ public class CustomizeEarthGui extends GuiScreen {
 
     public CustomizeEarthGui(GuiCreateWorld parent) {
         this.parent = parent;
+        this.settings = EarthGenerationSettings.deserialize(parent.chunkProviderSettingsJson);
+
+        this.scaleValue = new ScaleValue(this.settings, this::rebuildState);
+        this.heightScaleValue = new HeightScaleValue(this.settings, this::rebuildState);
+        this.scatterValue = new ScatterValue(this.settings, this::rebuildState);
+        this.heightOffsetValue = new HeightOffsetValue(this.settings, this::rebuildState);
+
+        this.decorateValue = new DecorateValue(this.settings, this::rebuildState);
+        this.mapFeaturesValue = new MapFeaturesValue(this.settings, this::rebuildState);
+        this.buildingsValue = new BuildingsValue(this.settings, this::rebuildState);
+        this.streetsValue = new StreetsValue(this.settings, this::rebuildState);
     }
 
     @Override
     public void initGui() {
-        this.controller.reset();
-
         int previewWidth = this.width - PADDING_X * 2;
         int previewHeight = this.height / 2 - PADDING_Y * 2;
         int previewX = PADDING_X;
         int previewY = this.height - previewHeight - PADDING_Y;
         this.renderer = new PreviewRenderer(this, previewX, previewY, previewWidth, previewHeight);
+        this.controller = new PreviewController(this.renderer, 0.3F, 1.0F);
 
         this.buttonList.clear();
         this.addButton(new GuiButton(CANCEL_BUTTON, this.width / 2 - 155, this.height - 28, 150, 20, I18n.translateToLocal("gui.cancel")));
         this.addButton(new GuiButton(DONE_BUTTON, this.width / 2 + 5, this.height - 28, 150, 20, I18n.translateToLocal("gui.done")));
         this.addButton(new GuiButton(PREVIEW_BUTTON, previewX + previewWidth - 20, previewY, 20, 20, "..."));
+
+        this.addButton(new SliderWidget(10, this.width / 2 - 155, 20, this.scaleValue, 1.0, 100.0, 1.0, 0.1));
+        this.addButton(new SliderWidget(11, this.width / 2 + 5, 20, this.heightScaleValue, 0.01, 4.0, 0.5, 0.1));
+        this.addButton(new SliderWidget(12, this.width / 2 - 155, 50, this.scatterValue, 1, 1000, 100.0, 1.0));
+        this.addButton(new SliderWidget(13, this.width / 2 + 5, 50, this.heightOffsetValue, 0, 128, 1.0, 1.0));
+
+        this.addButton(new ToggleWidget(14, this.width / 2 - 155, 80, this.decorateValue));
+        this.addButton(new ToggleWidget(15, this.width / 2 + 5, 80, this.mapFeaturesValue));
+        this.addButton(new ToggleWidget(16, this.width / 2 - 155, 110, this.buildingsValue));
+        this.addButton(new ToggleWidget(17, this.width / 2 + 5, 110, this.streetsValue));
 
         if (!this.freeze) {
             this.rebuildState();
@@ -129,7 +169,10 @@ public class CustomizeEarthGui extends GuiScreen {
         String title = I18n.translateToLocal("options.terrarium.customize_earth_title.name");
         this.drawCenteredString(this.fontRenderer, title, this.width / 2, 4, 0xFFFFFF);
 
-        this.renderer.render(this.preview, this.controller.getZoom(partialTicks), this.controller.getRotationX(partialTicks));
+        float zoom = this.controller.getZoom(partialTicks);
+        float rotationX = this.controller.getRotationX(partialTicks);
+        float rotationY = this.controller.getRotationY(partialTicks);
+        this.renderer.render(this.preview, zoom, rotationX, rotationY);
 
         super.drawScreen(mouseX, mouseY, partialTicks);
     }
