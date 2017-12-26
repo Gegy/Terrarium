@@ -18,6 +18,11 @@ public class DataTilePos {
     }
 
     @Override
+    public String toString() {
+        return "DataTilePos{tileX=" + this.tileX + ", tileY=" + this.tileY + '}';
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (obj instanceof DataTilePos) {
             DataTilePos pos = (DataTilePos) obj;

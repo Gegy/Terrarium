@@ -29,11 +29,16 @@ public class RegionTilePos {
     }
 
     public Coordinate getMinCoordinate(EarthGenerationSettings settings) {
-        return new Coordinate(settings, this.tileX * GenerationRegion.SIZE, this.tileZ * GenerationRegion.SIZE);
+        return Coordinate.fromBlock(settings, this.tileX * GenerationRegion.SIZE, this.tileZ * GenerationRegion.SIZE);
     }
 
     public Coordinate getMaxCoordinate(EarthGenerationSettings settings) {
-        return new Coordinate(settings, (this.tileX + 1.0) * GenerationRegion.SIZE, (this.tileZ + 1.0) * GenerationRegion.SIZE);
+        return Coordinate.fromBlock(settings, (this.tileX + 1.0) * GenerationRegion.SIZE, (this.tileZ + 1.0) * GenerationRegion.SIZE);
+    }
+
+    @Override
+    public String toString() {
+        return "RegionTilePos{tileX=" + this.tileX + ", tileZ=" + this.tileZ + '}';
     }
 
     @Override
@@ -47,6 +52,6 @@ public class RegionTilePos {
 
     @Override
     public int hashCode() {
-        return this.tileX << 16 | this.tileZ;
+        return (this.tileX * 31 + this.tileX) * 31;
     }
 }

@@ -147,6 +147,10 @@ public class OverpassSource extends TiledSource<OverpassTileAccess> implements C
 
     @Override
     public OverpassTileAccess loadTile(DataTilePos key) {
+        return this.loadTile(key, 0);
+    }
+
+    private OverpassTileAccess loadTile(DataTilePos key, int retries) {
         try (InputStreamReader input = new InputStreamReader(this.getStream(key))) {
             Set<Element> elements = new HashSet<>();
 
@@ -188,10 +192,12 @@ public class OverpassSource extends TiledSource<OverpassTileAccess> implements C
         } catch (JsonParseException e) {
             Terrarium.LOGGER.error("Failed to parse overpass map tile at {}, reloading", this.getCachedName(key), e);
             this.removeCache(key);
-            return this.loadTile(key);
+            if (retries < 2) {
+                return this.loadTile(key, retries + 1);
+            }
         }
 
-        return new OverpassTileAccess();
+        return null;
     }
 
     @Override

@@ -37,21 +37,17 @@ public class EarthGenerationHandler {
     }
 
     public void populateHeightRegion(int[] buffer, int chunkX, int chunkZ) {
-        double scale = this.settings.getInverseScale();
-
         int globalX = chunkX << 4;
         int globalZ = chunkZ << 4;
 
         try {
             for (int localZ = 0; localZ < 16; localZ++) {
                 int blockZ = globalZ + localZ;
-                int globalOriginZ = MathHelper.floor(blockZ * scale);
 
                 for (int localX = 0; localX < 16; localX++) {
                     int blockX = globalX + localX;
-                    int globalOriginX = MathHelper.floor(blockX * scale);
 
-                    GenerationRegion region = this.regionHandler.get(globalOriginX, globalOriginZ);
+                    GenerationRegion region = this.regionHandler.get(blockX, blockZ);
                     buffer[localX + localZ * 16] = region.getHeight(blockX, blockZ);
                 }
             }
@@ -95,11 +91,7 @@ public class EarthGenerationHandler {
     }
 
     private GlobType getGlob(int x, int z) {
-        double scale = this.settings.getInverseScale();
-        int globalOriginX = MathHelper.floor(x * scale);
-        int globalOriginZ = MathHelper.floor(z * scale);
-        GenerationRegion region = this.regionHandler.get(globalOriginX, globalOriginZ);
-        return region.getGlobType(x, z);
+        return this.regionHandler.get(x, z).getGlobType(x, z);
     }
 
     public EarthGenerationSettings getSettings() {

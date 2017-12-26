@@ -28,7 +28,7 @@ public interface CachedRemoteSource {
 
     String getCachedName(DataTilePos key);
 
-    default InputStream getStream(DataTilePos key) {
+    default InputStream getStream(DataTilePos key) throws IOException {
         File cachedFile = new File(this.getCacheRoot(), this.getCachedName(key));
         if (!this.shouldLoadCache(key, cachedFile)) {
             try (InputStream remoteStream = this.getRemoteStream(key)) {
@@ -39,7 +39,7 @@ public interface CachedRemoteSource {
             } catch (IOException e) {
                 LoadingStateHandler.putState(LoadingState.LOADING_NO_CONNECTION);
                 Terrarium.LOGGER.error("Failed to load remote tile data stream at {}", key, e);
-                return new ByteArrayInputStream(new byte[0]);
+                throw e;
             }
         }
 
@@ -48,10 +48,9 @@ public interface CachedRemoteSource {
             return new BufferedInputStream(new GZIPInputStream(new FileInputStream(cachedFile)));
         } catch (IOException e) {
             LoadingStateHandler.putState(LoadingState.LOADING_NO_CONNECTION);
-            Terrarium.LOGGER.info("Failed to load local tile data stream at {}", key, e);
+            Terrarium.LOGGER.error("Failed to load local tile data stream at {}", key, e);
+            throw e;
         }
-
-        return new ByteArrayInputStream(new byte[0]);
     }
 
     default void cacheMetadata(DataTilePos key) {

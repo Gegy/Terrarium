@@ -20,18 +20,18 @@ public class EarthScaleHandler {
         this.heightScale = this.settings.worldScale * this.settings.terrainHeightScale;
     }
 
-    public void scaleHeightRegion(short[] result, short[] sample, int width, int height, int scaledWidth, int scaledHeight) {
+    public void scaleHeightRegion(short[] scaledResult, short[] sample, int width, int height, int scaledWidth, int scaledHeight) {
         double scale = this.settings.getInverseScale();
 
-        for (int localZ = 0; localZ < scaledHeight; localZ++) {
-            double scaledZ = localZ * scale;
-            int originZ = MathHelper.floor(scaledZ);
-            double intermediateZ = scaledZ - originZ;
+        for (int scaledZ = 0; scaledZ < scaledHeight; scaledZ++) {
+            double sampleZ = scaledZ * scale;
+            int originZ = MathHelper.floor(sampleZ);
+            double intermediateZ = sampleZ - originZ;
 
-            for (int localX = 0; localX < scaledWidth; localX++) {
-                double scaledX = localX * scale;
-                int originX = MathHelper.floor(scaledX);
-                double intermediateX = scaledX - originX;
+            for (int scaledX = 0; scaledX < scaledWidth; scaledX++) {
+                double sampleX = scaledX * scale;
+                int originX = MathHelper.floor(sampleX);
+                double intermediateX = sampleX - originX;
 
                 int sampleIndex = originX + originZ * width;
 
@@ -43,29 +43,29 @@ public class EarthScaleHandler {
                 double y1 = Interpolation.cosine(current, south, intermediateZ);
                 double y2 = Interpolation.cosine(east, southEast, intermediateZ);
 
-                double interpolated = Interpolation.cosine(y1, y2, intermediateX);
-                int scaled = (int) (interpolated * this.heightScale);
+                double interpolatedHeight = Interpolation.cosine(y1, y2, intermediateX);
+                int scaled = (int) (interpolatedHeight * this.heightScale);
 
-                int resultIndex = localX + localZ * scaledWidth;
-                if (interpolated >= 0.0 && scaled < 1) {
-                    result[resultIndex] = (short) (this.settings.heightOffset + 1);
+                int resultIndex = scaledX + scaledZ * scaledWidth;
+                if (interpolatedHeight >= 0.0 && scaled < 1) {
+                    scaledResult[resultIndex] = (short) (this.settings.heightOffset + 1);
                 } else {
-                    result[resultIndex] = (short) MathHelper.clamp(scaled + this.settings.heightOffset, 0, this.maxHeight);
+                    scaledResult[resultIndex] = (short) MathHelper.clamp(scaled + this.settings.heightOffset, 0, this.maxHeight);
                 }
             }
         }
     }
 
-    public void scaleGlobRegion(GlobType[] result, GlobType[] sample, int width, int height, int scaledWidth, int scaledHeight) {
+    public void scaleGlobRegion(GlobType[] scaledResult, GlobType[] sample, int width, int height, int scaledWidth, int scaledHeight) {
         double scale = this.settings.getInverseScale();
 
-        for (int localZ = 0; localZ < scaledHeight; localZ++) {
-            int originZ = MathHelper.floor(localZ * scale);
+        for (int scaledZ = 0; scaledZ < scaledHeight; scaledZ++) {
+            int originZ = MathHelper.floor(scaledZ * scale);
 
-            for (int localX = 0; localX < scaledWidth; localX++) {
-                int originX = MathHelper.floor(localX * scale);
+            for (int scaledX = 0; scaledX < scaledWidth; scaledX++) {
+                int originX = MathHelper.floor(scaledX * scale);
 
-                result[localX + localZ * scaledWidth] = sample[originX + originZ * width];
+                scaledResult[scaledX + scaledZ * scaledWidth] = sample[originX + originZ * width];
             }
         }
     }

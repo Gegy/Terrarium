@@ -18,6 +18,10 @@ public class Coordinate {
         return new Coordinate(settings, longitude * 1200.0, -latitude * 1200.0);
     }
 
+    public static Coordinate fromBlock(EarthGenerationSettings settings, double blockX, double blockZ) {
+        return new Coordinate(settings, blockX * settings.getInverseScale(), blockZ * settings.getInverseScale());
+    }
+
     public double getGlobalX() {
         return this.globalX;
     }

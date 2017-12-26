@@ -113,8 +113,8 @@ public class HeightSource extends TiledSource<HeightTileAccess> implements Short
     @Override
     public void sampleArea(short[] data, Coordinate minimumCoordinate, Coordinate maximumCoordinate) {
         Coordinate size = maximumCoordinate.subtract(minimumCoordinate);
-        int width = (int) size.getGlobalX();
-        int height = (int) size.getGlobalZ();
+        int width = MathHelper.ceil(size.getGlobalX());
+        int height = MathHelper.ceil(size.getGlobalZ());
         if (data.length != width * height) {
             throw new IllegalArgumentException("Cannot sample to array of wrong size");
         }
