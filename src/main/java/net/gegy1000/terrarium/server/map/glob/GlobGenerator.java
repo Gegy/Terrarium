@@ -1,7 +1,12 @@
 package net.gegy1000.terrarium.server.map.glob;
 
 import net.gegy1000.terrarium.server.map.glob.generator.primer.GlobPrimer;
+import net.minecraft.block.BlockDirt;
+import net.minecraft.block.BlockDoublePlant;
+import net.minecraft.block.BlockLeaves;
+import net.minecraft.block.BlockTallGrass;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.layer.GenLayer;
@@ -11,6 +16,21 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public abstract class GlobGenerator {
+    protected static final IBlockState GRASS = Blocks.GRASS.getDefaultState();
+    protected static final IBlockState COARSE_DIRT = Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT);
+    protected static final IBlockState PODZOL = Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.PODZOL);
+    protected static final IBlockState GRAVEL = Blocks.GRAVEL.getDefaultState();
+    protected static final IBlockState SAND = Blocks.SAND.getDefaultState();
+    protected static final IBlockState CLAY = Blocks.CLAY.getDefaultState();
+
+    protected static final IBlockState TALL_GRASS = Blocks.TALLGRASS.getDefaultState().withProperty(BlockTallGrass.TYPE, BlockTallGrass.EnumType.GRASS);
+    protected static final IBlockState DEAD_BUSH = Blocks.DEADBUSH.getDefaultState();
+    protected static final IBlockState DOUBLE_TALL_GRASS = Blocks.DOUBLE_PLANT.getDefaultState().withProperty(BlockDoublePlant.VARIANT, BlockDoublePlant.EnumPlantType.GRASS);
+    protected static final IBlockState BUSH = Blocks.LEAVES.getDefaultState().withProperty(BlockLeaves.CHECK_DECAY, false).withProperty(BlockLeaves.DECAYABLE, false);
+
+    protected static final IBlockState WATER = Blocks.WATER.getDefaultState();
+    protected static final IBlockState LILYPAD = Blocks.WATERLILY.getDefaultState();
+
     protected final GlobType type;
 
     private final IBlockState topBlock;

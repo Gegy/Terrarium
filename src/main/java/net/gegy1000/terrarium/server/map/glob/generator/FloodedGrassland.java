@@ -21,13 +21,6 @@ public class FloodedGrassland extends GlobGenerator {
     private static final int LAYER_PODZOL = 1;
     private static final int LAYER_DIRT = 2;
 
-    private static final IBlockState WATER = Blocks.WATER.getDefaultState();
-    private static final IBlockState DIRT = Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT);
-    private static final IBlockState PODZOL = Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.PODZOL);
-
-    private static final IBlockState TALL_GRASS = Blocks.TALLGRASS.getDefaultState().withProperty(BlockTallGrass.TYPE, BlockTallGrass.EnumType.GRASS);
-    private static final IBlockState LILYPAD = Blocks.WATERLILY.getDefaultState();
-
     private GenLayer coverSelector;
     private GenLayer grassSelector;
 
@@ -77,16 +70,16 @@ public class FloodedGrassland extends GlobGenerator {
     public void getCover(Random random, int x, int z) {
         this.coverLayer(this.coverBuffer, x, z, this.coverSelector, type -> {
             switch (type) {
-                case FloodedGrassland.LAYER_WATER:
+                case LAYER_WATER:
                     if (random.nextInt(3) != 0) {
-                        return FloodedGrassland.WATER;
+                        return WATER;
                     } else {
-                        return FloodedGrassland.PODZOL;
+                        return PODZOL;
                     }
-                case FloodedGrassland.LAYER_PODZOL:
-                    return FloodedGrassland.PODZOL;
+                case LAYER_PODZOL:
+                    return PODZOL;
                 default:
-                    return FloodedGrassland.DIRT;
+                    return COARSE_DIRT;
             }
         });
     }

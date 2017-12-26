@@ -7,7 +7,7 @@ import net.minecraft.world.gen.layer.GenLayerVoronoiZoom;
 
 public class VegetationWithCropland extends MultiGlobGenerator {
     public VegetationWithCropland() {
-        super(GlobType.VEGETATION_WITH_CROPLAND, new Entry(GlobType.IRRIGATED_CROPS, 30),
+        super(GlobType.VEGETATION_WITH_CROPLAND, new Entry(GlobType.RAINFED_CROPS, 30),
                 new Entry(GlobType.GRASSLAND, 25),
                 new Entry(GlobType.SHRUBLAND, 25),
                 new Entry(GlobType.FOREST_SHRUBLAND_WITH_GRASS, 20));

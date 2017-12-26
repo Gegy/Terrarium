@@ -3,9 +3,7 @@ package net.gegy1000.terrarium.server.map.glob.generator;
 import net.gegy1000.terrarium.server.map.glob.GlobGenerator;
 import net.gegy1000.terrarium.server.map.glob.GlobType;
 import net.gegy1000.terrarium.server.map.glob.generator.layer.SelectionSeedLayer;
-import net.minecraft.block.BlockDirt;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
 import net.minecraft.world.gen.layer.GenLayer;
 import net.minecraft.world.gen.layer.GenLayerFuzzyZoom;
 import net.minecraft.world.gen.layer.GenLayerVoronoiZoom;
@@ -14,12 +12,6 @@ import net.minecraft.world.gen.layer.IntCache;
 import java.util.Random;
 
 public class Water extends GlobGenerator {
-    private static final IBlockState WATER = Blocks.WATER.getDefaultState();
-    private static final IBlockState SAND = Blocks.SAND.getDefaultState();
-    private static final IBlockState DIRT = Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT);
-    private static final IBlockState CLAY = Blocks.CLAY.getDefaultState();
-    private static final IBlockState GRAVEL = Blocks.GRAVEL.getDefaultState();
-
     private GenLayer coverSelector;
 
     public Water() {
@@ -52,11 +44,11 @@ public class Water extends GlobGenerator {
                 case 1:
                     return GRAVEL;
                 case 2:
-                    return DIRT;
+                    return COARSE_DIRT;
                 case 3:
                     return CLAY;
                 default:
-                    return DIRT;
+                    return COARSE_DIRT;
             }
         });
     }

@@ -3,9 +3,6 @@ package net.gegy1000.terrarium.server.map.glob.generator;
 import net.gegy1000.terrarium.server.map.glob.GlobGenerator;
 import net.gegy1000.terrarium.server.map.glob.GlobType;
 import net.gegy1000.terrarium.server.map.glob.generator.layer.SelectWeightedLayer;
-import net.minecraft.block.BlockDirt;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
 import net.minecraft.world.gen.layer.GenLayer;
 import net.minecraft.world.gen.layer.GenLayerFuzzyZoom;
 import net.minecraft.world.gen.layer.GenLayerVoronoiZoom;
@@ -16,10 +13,6 @@ public class Bare extends GlobGenerator {
     private static final int LAYER_DIRT = 0;
     private static final int LAYER_GRAVEL = 1;
     private static final int LAYER_SAND = 2;
-
-    private static final IBlockState DIRT = Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT);
-    private static final IBlockState GRAVEL = Blocks.GRAVEL.getDefaultState();
-    private static final IBlockState SAND = Blocks.SAND.getDefaultState();
 
     private GenLayer coverSelector;
 
@@ -45,13 +38,13 @@ public class Bare extends GlobGenerator {
         this.coverLayer(this.coverBuffer, x, z, this.coverSelector, type -> {
             switch (type) {
                 case LAYER_DIRT:
-                    return Bare.DIRT;
+                    return COARSE_DIRT;
                 case LAYER_GRAVEL:
-                    return Bare.GRAVEL;
+                    return GRAVEL;
                 case LAYER_SAND:
-                    return Bare.SAND;
+                    return SAND;
                 default:
-                    return Bare.DIRT;
+                    return COARSE_DIRT;
             }
         });
     }

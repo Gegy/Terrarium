@@ -2,14 +2,11 @@ package net.gegy1000.terrarium.server.map.glob.generator;
 
 import net.gegy1000.terrarium.server.map.glob.GlobType;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
 import net.minecraft.world.gen.feature.WorldGenTrees;
 
 import java.util.Random;
 
 public class FreshFloodedForest extends Forest {
-    private static final IBlockState WATER = Blocks.WATER.getDefaultState();
-
     public FreshFloodedForest() {
         super(GlobType.FRESH_FLOODED_FOREST);
     }

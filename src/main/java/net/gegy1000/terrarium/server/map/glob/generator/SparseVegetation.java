@@ -4,11 +4,7 @@ import net.gegy1000.terrarium.server.map.glob.GlobGenerator;
 import net.gegy1000.terrarium.server.map.glob.GlobType;
 import net.gegy1000.terrarium.server.map.glob.generator.layer.SelectionSeedLayer;
 import net.gegy1000.terrarium.server.map.glob.generator.primer.GlobPrimer;
-import net.minecraft.block.BlockDirt;
-import net.minecraft.block.BlockLeaves;
-import net.minecraft.block.BlockTallGrass;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
 import net.minecraft.world.gen.layer.GenLayer;
 import net.minecraft.world.gen.layer.GenLayerFuzzyZoom;
 import net.minecraft.world.gen.layer.GenLayerVoronoiZoom;
@@ -18,14 +14,6 @@ import java.util.Random;
 public class SparseVegetation extends GlobGenerator {
     private static final int LAYER_DIRT = 0;
     private static final int LAYER_SAND = 1;
-
-    private static final IBlockState SAND = Blocks.SAND.getDefaultState();
-    private static final IBlockState DIRT = Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT);
-
-    private static final IBlockState TALL_GRASS = Blocks.TALLGRASS.getDefaultState().withProperty(BlockTallGrass.TYPE, BlockTallGrass.EnumType.GRASS);
-    private static final IBlockState DEAD_BUSH = Blocks.DEADBUSH.getDefaultState();
-
-    private static final IBlockState BUSH = Blocks.LEAVES.getDefaultState().withProperty(BlockLeaves.CHECK_DECAY, false).withProperty(BlockLeaves.DECAYABLE, false);
 
     private GenLayer coverSelector;
     private GenLayer grassSelector;
@@ -59,8 +47,12 @@ public class SparseVegetation extends GlobGenerator {
             switch (grassLayer[point.index]) {
                 case 0:
                     if (random.nextInt(4) == 0) {
-                        IBlockState state = random.nextInt(16) == 0 ? SparseVegetation.DEAD_BUSH : SparseVegetation.TALL_GRASS;
-                        primer.setBlockState(point.localX, y + 1, point.localZ, state);
+                        IBlockState ground = primer.getBlockState(point.localX, y, point.localZ);
+                        if (ground == COARSE_DIRT) {
+                            primer.setBlockState(point.localX, y + 1, point.localZ, TALL_GRASS);
+                        } else if (random.nextInt(6) == 0) {
+                            primer.setBlockState(point.localX, y + 1, point.localZ, DEAD_BUSH);
+                        }
                     }
                     break;
                 case 1:
@@ -79,7 +71,7 @@ public class SparseVegetation extends GlobGenerator {
                 case LAYER_SAND:
                     return SAND;
                 case LAYER_DIRT:
-                    return DIRT;
+                    return COARSE_DIRT;
                 default:
                     return SAND;
             }

@@ -30,9 +30,9 @@ import java.lang.reflect.Constructor;
 
 public enum GlobType {
     IRRIGATED_CROPS(11, Biomes.FOREST, IrrigatedCrops.class),
-    RAINFED_CROPS(14, Biomes.PLAINS, RainfedCrops.class),
-    CROPLAND_WITH_VEGETATION(20, Biomes.PLAINS, CroplandWithVegetation.class),
-    VEGETATION_WITH_CROPLAND(30, Biomes.PLAINS, VegetationWithCropland.class),
+    RAINFED_CROPS(14, Biomes.FOREST, RainfedCrops.class),
+    CROPLAND_WITH_VEGETATION(20, Biomes.FOREST, CroplandWithVegetation.class),
+    VEGETATION_WITH_CROPLAND(30, Biomes.FOREST, VegetationWithCropland.class),
     BROADLEAF_EVERGREEN(40, Biomes.FOREST, BroadleafEvergreen.class),
     CLOSED_BROADLEAF_DECIDUOUS(50, Biomes.FOREST, ClosedBroadleafDeciduous.class),
     OPEN_BROADLEAF_DECIDUOUS(60, Biomes.FOREST, OpenBroadleafDeciduous.class),
@@ -57,7 +57,6 @@ public enum GlobType {
 
     private final int id;
     private final Biome biome;
-    private final Class<? extends GlobGenerator> generator;
     private final double scatterRange;
     private final boolean scatterTo;
 
@@ -66,13 +65,12 @@ public enum GlobType {
     GlobType(int id, Biome biome, Class<? extends GlobGenerator> generator, double scatterRange, boolean scatterTo) {
         this.id = id;
         this.biome = biome;
-        this.generator = generator;
         this.scatterRange = scatterRange;
         this.scatterTo = scatterTo;
 
         Constructor<? extends GlobGenerator> constructor = null;
         try {
-            constructor = this.generator.getDeclaredConstructor();
+            constructor = generator.getDeclaredConstructor();
         } catch (ReflectiveOperationException e) {
             Terrarium.LOGGER.error("Found no default constructor for generator {}", generator, e);
         }

@@ -5,13 +5,11 @@ import net.gegy1000.terrarium.server.map.glob.GlobType;
 import net.gegy1000.terrarium.server.map.glob.generator.layer.ReplaceRandomLayer;
 import net.gegy1000.terrarium.server.map.glob.generator.layer.SelectionSeedLayer;
 import net.gegy1000.terrarium.server.map.glob.generator.primer.GlobPrimer;
-import net.minecraft.block.BlockDirt;
 import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.BlockOldLeaf;
 import net.minecraft.block.BlockOldLog;
 import net.minecraft.block.BlockPlanks;
-import net.minecraft.block.BlockTallGrass;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.gen.feature.WorldGenTaiga1;
@@ -39,13 +37,6 @@ public class Forest extends GlobGenerator {
     protected static final int LAYER_GRASS = 0;
     protected static final int LAYER_DIRT = 1;
     protected static final int LAYER_PODZOL = 2;
-
-    protected static final IBlockState GRASS = Blocks.GRASS.getDefaultState();
-    protected static final IBlockState COARSE_DIRT = Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT);
-    protected static final IBlockState PODZOL = Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.PODZOL);
-    protected static final IBlockState LILYPAD = Blocks.WATERLILY.getDefaultState();
-
-    protected static final IBlockState TALL_GRASS = Blocks.TALLGRASS.getDefaultState().withProperty(BlockTallGrass.TYPE, BlockTallGrass.EnumType.GRASS);
 
     protected GenLayer coverSelector;
 
