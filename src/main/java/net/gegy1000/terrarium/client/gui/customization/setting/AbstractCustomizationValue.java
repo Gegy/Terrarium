@@ -4,6 +4,8 @@ import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
 import net.minecraft.util.text.translation.I18n;
 
 public abstract class AbstractCustomizationValue<T> implements CustomizationValue<T> {
+    private static final EarthGenerationSettings DEFAULT_SETTINGS = new EarthGenerationSettings();
+
     private final String name;
 
     private final EarthGenerationSettings settings;
@@ -17,7 +19,12 @@ public abstract class AbstractCustomizationValue<T> implements CustomizationValu
 
     @Override
     public String getLocalizedName() {
-        return I18n.translateToLocal(this.name);
+        return I18n.translateToLocal(this.name + ".name");
+    }
+
+    @Override
+    public String getLocalizedTooltip() {
+        return I18n.translateToLocal(this.name + ".tooltip");
     }
 
     @Override
@@ -31,6 +38,11 @@ public abstract class AbstractCustomizationValue<T> implements CustomizationValu
     @Override
     public T get() {
         return this.get(this.settings);
+    }
+
+    @Override
+    public T getDefault() {
+        return this.get(DEFAULT_SETTINGS);
     }
 
     protected abstract void set(EarthGenerationSettings settings, T value);

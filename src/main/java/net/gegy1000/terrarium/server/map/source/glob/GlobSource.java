@@ -3,6 +3,7 @@ package net.gegy1000.terrarium.server.map.source.glob;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.map.glob.GlobType;
 import net.gegy1000.terrarium.server.map.source.CachedRemoteSource;
+import net.gegy1000.terrarium.server.map.source.SourceException;
 import net.gegy1000.terrarium.server.map.source.TerrariumData;
 import net.gegy1000.terrarium.server.map.source.raster.RasterSource;
 import net.gegy1000.terrarium.server.map.source.tiled.DataTilePos;
@@ -47,7 +48,7 @@ public class GlobSource extends TiledSource<GlobTileAccess> implements RasterSou
     }
 
     @Override
-    public GlobTileAccess loadTile(DataTilePos key) {
+    public GlobTileAccess loadTile(DataTilePos key) throws SourceException {
         try (DataInputStream input = new DataInputStream(this.getStream(key))) {
             int width = input.readUnsignedShort();
             int height = input.readUnsignedShort();

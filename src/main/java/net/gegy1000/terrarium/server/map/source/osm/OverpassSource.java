@@ -9,6 +9,7 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.map.source.CachedRemoteSource;
+import net.gegy1000.terrarium.server.map.source.SourceException;
 import net.gegy1000.terrarium.server.map.source.tiled.DataTilePos;
 import net.gegy1000.terrarium.server.map.source.tiled.TiledSource;
 import net.gegy1000.terrarium.server.util.Coordinate;
@@ -146,11 +147,11 @@ public class OverpassSource extends TiledSource<OverpassTileAccess> implements C
     }
 
     @Override
-    public OverpassTileAccess loadTile(DataTilePos key) {
+    public OverpassTileAccess loadTile(DataTilePos key) throws SourceException {
         return this.loadTile(key, 0);
     }
 
-    private OverpassTileAccess loadTile(DataTilePos key, int retries) {
+    private OverpassTileAccess loadTile(DataTilePos key, int retries) throws SourceException {
         try (InputStreamReader input = new InputStreamReader(this.getStream(key))) {
             Set<Element> elements = new HashSet<>();
 

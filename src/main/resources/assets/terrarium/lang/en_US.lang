@@ -7,18 +7,13 @@ generator.terrarium.earth=Terrarium
 options.terrarium.customize_earth_title.name=Customize Earth Generation
 options.terrarium.preview_earth_title.name=Preview Earth Generation
 
-button.terrarium.setting_buildings.name=Buildings: %s
-button.terrarium.setting_decorate.name=Decorate: %s
-slider.terrarium.setting_horizontal_scale.name=Horizontal Scale: %s
-slider.terrarium.setting_vertical_scale.name=Vertical Scale: %s
+state.terrarium.cached.name=Retrieving Cached Data
+state.terrarium.online.name=Retrieving Online Data
+state.terrarium.no_connection.name=No Connection
 
-state.cached.name=Retrieving Cached Data
-state.online.name=Retrieving Online Data
-state.no_connection.name=No Connection
-
-state.cached.tooltip=Loading geographical data from local cache
-state.online.tooltip=Loading geographical data from online cache
-state.no_connection.tooltip=Unable to load geographical data. Check your internet connection!
+state.terrarium.cached.tooltip=Loading geographical data from local cache
+state.terrarium.online.tooltip=Loading geographical data from online cache
+state.terrarium.no_connection.tooltip=Unable to load geographical data. Check your internet connection!
 
 # Customization Settings
 
@@ -31,6 +26,18 @@ setting.terrarium.map_features.name=Map Features
 setting.terrarium.buildings.name=Buildings
 setting.terrarium.streets.name=Streets
 
+setting.terrarium.scale.tooltip=The amount of meters in real life representing one block in-game
+setting.terrarium.height_scale.tooltip=Elevation multiplier from meters to blocks
+setting.terrarium.scatter.tooltip=Range in meters that biomes should be scattered
+setting.terrarium.height_offset.tooltip=The height in-game that corresponds to sea-level
+setting.terrarium.decorate.tooltip=If enabled, decorations such as plants and trees will be placed
+setting.terrarium.map_features.tooltip=If enabled, all map features such as man-made structures will be generated
+setting.terrarium.buildings.tooltip=If enabled, buildings from OpenStreetMap will be generated
+setting.terrarium.streets.tooltip=If enabled, streets from OpenStreetMap will be generated
+
+setting.terrarium.slider_default.name=Default: %.2f, Range: [%.2f-%.2f]
+setting.terrarium.default.name=Default: %s
+
 # Config
 
 config.terrarium.enable_data_status_icon=Enable Data Status Icon
@@ -40,6 +47,6 @@ config.terrarium.enable_data_status_icon.tooltip=If true, the current status for
 
 commands.terrarium.geotp.usage=geotp <latitude> <longitude> OR geotp <place>
 commands.terrarium.geotp.wrong_world=Cannot use command in this world
-commands.terrarium.geotp.not_found=Could not find %s
+commands.terrarium.geotp.not_found=Could not find "%s"
 commands.terrarium.geotp.success=Successfully teleported to %s, %s
 commands.terrarium.geotp.error=An error occurred while finding %s: %s

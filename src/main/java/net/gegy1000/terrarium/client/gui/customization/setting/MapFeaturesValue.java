@@ -4,7 +4,7 @@ import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
 
 public class MapFeaturesValue extends AbstractCustomizationValue<Boolean> {
     public MapFeaturesValue(EarthGenerationSettings settings, Runnable onChanged) {
-        super("setting.terrarium.map_features.name", settings, onChanged);
+        super("setting.terrarium.map_features", settings, onChanged);
     }
 
     @Override

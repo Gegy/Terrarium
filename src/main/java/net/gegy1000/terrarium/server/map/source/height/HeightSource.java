@@ -2,6 +2,7 @@ package net.gegy1000.terrarium.server.map.source.height;
 
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.map.source.CachedRemoteSource;
+import net.gegy1000.terrarium.server.map.source.SourceException;
 import net.gegy1000.terrarium.server.map.source.TerrariumData;
 import net.gegy1000.terrarium.server.map.source.raster.ShortRasterSource;
 import net.gegy1000.terrarium.server.map.source.tiled.DataTilePos;
@@ -51,7 +52,7 @@ public class HeightSource extends TiledSource<HeightTileAccess> implements Short
     }
 
     @Override
-    public HeightTileAccess loadTile(DataTilePos key) {
+    public HeightTileAccess loadTile(DataTilePos key) throws SourceException {
         if (VALID_TILES.isEmpty() || VALID_TILES.contains(key)) {
             try (DataInputStream input = new DataInputStream(this.getStream(key))) {
                 short[] heightmap = new short[TILE_SIZE * TILE_SIZE];

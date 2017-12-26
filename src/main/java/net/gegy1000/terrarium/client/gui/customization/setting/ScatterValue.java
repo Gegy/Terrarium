@@ -4,7 +4,7 @@ import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
 
 public class ScatterValue extends AbstractCustomizationValue<Double> {
     public ScatterValue(EarthGenerationSettings settings, Runnable onChanged) {
-        super("setting.terrarium.scatter.name", settings, onChanged);
+        super("setting.terrarium.scatter", settings, onChanged);
     }
 
     @Override

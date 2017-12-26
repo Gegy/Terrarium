@@ -1,15 +1,22 @@
-package net.gegy1000.terrarium.client.gui.customization.setting;
+package net.gegy1000.terrarium.client.gui.widget;
 
+import com.google.common.collect.Lists;
+import net.gegy1000.terrarium.client.gui.customization.setting.CustomizationValue;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.translation.I18n;
+import net.minecraftforge.fml.client.config.GuiUtils;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.util.List;
+
 @SideOnly(Side.CLIENT)
-public class SliderWidget extends GuiButton {
+public class SliderWidget extends GuiButton implements TooltipRenderer {
     private final CustomizationValue<Double> setting;
 
     private final double min;
@@ -21,6 +28,8 @@ public class SliderWidget extends GuiButton {
     private double position;
 
     private boolean mouseDown;
+
+    private float hoverTime;
 
     public SliderWidget(int widgetId, int x, int y, CustomizationValue<Double> setting, double min, double max, double step, double fineStep) {
         super(widgetId, x, y, 150, 20, "");
@@ -44,6 +53,30 @@ public class SliderWidget extends GuiButton {
     }
 
     @Override
+    public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+        if (this.visible) {
+            super.drawButton(mc, mouseX, mouseY, partialTicks);
+
+            if (super.mousePressed(mc, mouseX, mouseY)) {
+                this.hoverTime += partialTicks;
+            } else {
+                this.hoverTime = 0;
+            }
+        }
+    }
+
+    @Override
+    public void renderTooltip(Minecraft mc, int mouseX, int mouseY, int width, int height) {
+        if (this.hoverTime >= 20) {
+            String name = TextFormatting.BLUE + this.setting.getLocalizedName();
+            String tooltip = TextFormatting.GRAY + this.setting.getLocalizedTooltip();
+            String defaults = TextFormatting.YELLOW + I18n.translateToLocalFormatted("setting.terrarium.slider_default.name", this.setting.getDefault(), this.min, this.max);
+            List<String> lines = Lists.newArrayList(name, tooltip, defaults);
+            GuiUtils.drawHoveringText(lines, mouseX, mouseY, width, height, -1, mc.fontRenderer);
+        }
+    }
+
+    @Override
     protected int getHoverState(boolean mouseOver) {
         return 0;
     }
@@ -53,6 +86,7 @@ public class SliderWidget extends GuiButton {
         if (this.visible) {
             if (this.mouseDown) {
                 this.setSliderPosition(MathHelper.clamp(this.getMousePosition(mouseX), 0.0, 1.0));
+                this.hoverTime = 0;
             }
 
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);

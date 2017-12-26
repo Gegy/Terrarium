@@ -1,9 +1,9 @@
 package net.gegy1000.terrarium.server.map.source;
 
 public enum LoadingState {
-    LOADING_CACHED("state.cached", 0, 1),
-    LOADING_ONLINE("state.online", 10, 3),
-    LOADING_NO_CONNECTION("state.no_connection", 20, 5);
+    LOADING_CACHED("state.terrarium.cached", 0, 1),
+    LOADING_ONLINE("state.terrarium.online", 10, 3),
+    LOADING_NO_CONNECTION("state.terrarium.no_connection", 20, 5);
 
     private final String languageKey;
     private final int textureY;

@@ -9,9 +9,10 @@ import net.gegy1000.terrarium.client.gui.customization.setting.HeightScaleValue;
 import net.gegy1000.terrarium.client.gui.customization.setting.MapFeaturesValue;
 import net.gegy1000.terrarium.client.gui.customization.setting.ScaleValue;
 import net.gegy1000.terrarium.client.gui.customization.setting.ScatterValue;
-import net.gegy1000.terrarium.client.gui.customization.setting.SliderWidget;
 import net.gegy1000.terrarium.client.gui.customization.setting.StreetsValue;
-import net.gegy1000.terrarium.client.gui.customization.setting.ToggleWidget;
+import net.gegy1000.terrarium.client.gui.widget.SliderWidget;
+import net.gegy1000.terrarium.client.gui.widget.ToggleWidget;
+import net.gegy1000.terrarium.client.gui.widget.TooltipRenderer;
 import net.gegy1000.terrarium.client.preview.PreviewController;
 import net.gegy1000.terrarium.client.preview.PreviewRenderer;
 import net.gegy1000.terrarium.client.preview.WorldPreview;
@@ -20,6 +21,7 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiCreateWorld;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -90,7 +92,7 @@ public class CustomizeEarthGui extends GuiScreen {
         this.addButton(new GuiButton(DONE_BUTTON, this.width / 2 + 5, this.height - 28, 150, 20, I18n.translateToLocal("gui.done")));
         this.addButton(new GuiButton(PREVIEW_BUTTON, previewX + previewWidth - 20, previewY, 20, 20, "..."));
 
-        this.addButton(new SliderWidget(10, this.width / 2 - 155, 20, this.scaleValue, 1.0, 100.0, 1.0, 0.1));
+        this.addButton(new SliderWidget(10, this.width / 2 - 155, 20, this.scaleValue, 1.0, 200.0, 5.0, 1.0));
         this.addButton(new SliderWidget(11, this.width / 2 + 5, 20, this.heightScaleValue, 0.01, 4.0, 0.5, 0.1));
         this.addButton(new SliderWidget(12, this.width / 2 - 155, 50, this.scatterValue, 1, 1000, 100.0, 1.0));
         this.addButton(new SliderWidget(13, this.width / 2 + 5, 50, this.heightOffsetValue, 0, 128, 1.0, 1.0));
@@ -175,6 +177,16 @@ public class CustomizeEarthGui extends GuiScreen {
         this.renderer.render(this.preview, zoom, rotationX, rotationY);
 
         super.drawScreen(mouseX, mouseY, partialTicks);
+
+        for (GuiButton element : this.buttonList) {
+            if (element instanceof TooltipRenderer) {
+                ((TooltipRenderer) element).renderTooltip(this.mc, mouseX, mouseY, this.width, this.height);
+
+                GlStateManager.disableLighting();
+                GlStateManager.disableDepth();
+                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+            }
+        }
     }
 
     private void rebuildState() {

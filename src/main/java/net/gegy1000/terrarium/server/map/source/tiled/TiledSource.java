@@ -7,6 +7,7 @@ import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.map.source.DataSource;
 import net.gegy1000.terrarium.server.map.source.LoadingState;
 import net.gegy1000.terrarium.server.map.source.LoadingStateHandler;
+import net.gegy1000.terrarium.server.map.source.SourceException;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -24,8 +25,15 @@ public abstract class TiledSource<T extends TiledDataAccess> implements DataSour
                 .build(new CacheLoader<DataTilePos, T>() {
                     @Override
                     public T load(DataTilePos key) {
-                        T tile = TiledSource.this.loadTile(key);
-                        return tile != null ? tile : TiledSource.this.getDefaultTile();
+                        try {
+                            T tile = TiledSource.this.loadTile(key);
+                            if (tile != null) {
+                                return tile;
+                            }
+                        } catch (SourceException e) {
+                            Terrarium.LOGGER.error("Failed to load from data source", e);
+                        }
+                        return TiledSource.this.getDefaultTile();
                     }
                 });
     }
@@ -44,7 +52,7 @@ public abstract class TiledSource<T extends TiledDataAccess> implements DataSour
         }
     }
 
-    public abstract T loadTile(DataTilePos key);
+    public abstract T loadTile(DataTilePos key) throws SourceException;
 
     protected abstract T getDefaultTile();
 }

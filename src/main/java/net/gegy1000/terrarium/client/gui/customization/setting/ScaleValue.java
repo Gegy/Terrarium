@@ -4,7 +4,7 @@ import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
 
 public class ScaleValue extends AbstractCustomizationValue<Double> {
     public ScaleValue(EarthGenerationSettings settings, Runnable onChanged) {
-        super("setting.terrarium.scale.name", settings, onChanged);
+        super("setting.terrarium.scale", settings, onChanged);
     }
 
     @Override

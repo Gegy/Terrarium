@@ -4,7 +4,7 @@ import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
 
 public class StreetsValue extends AbstractCustomizationValue<Boolean> {
     public StreetsValue(EarthGenerationSettings settings, Runnable onChanged) {
-        super("setting.terrarium.streets.name", settings, onChanged);
+        super("setting.terrarium.streets", settings, onChanged);
     }
 
     @Override

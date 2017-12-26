@@ -4,7 +4,7 @@ import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
 
 public class HeightOffsetValue extends AbstractCustomizationValue<Double> {
     public HeightOffsetValue(EarthGenerationSettings settings, Runnable onChanged) {
-        super("setting.terrarium.height_offset.name", settings, onChanged);
+        super("setting.terrarium.height_offset", settings, onChanged);
     }
 
     @Override

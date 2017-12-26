@@ -4,7 +4,7 @@ import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
 
 public class BuildingsValue extends AbstractCustomizationValue<Boolean> {
     public BuildingsValue(EarthGenerationSettings settings, Runnable onChanged) {
-        super("setting.terrarium.buildings.name", settings, onChanged);
+        super("setting.terrarium.buildings", settings, onChanged);
     }
 
     @Override

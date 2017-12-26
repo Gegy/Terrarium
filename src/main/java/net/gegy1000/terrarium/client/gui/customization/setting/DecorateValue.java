@@ -4,7 +4,7 @@ import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
 
 public class DecorateValue extends AbstractCustomizationValue<Boolean> {
     public DecorateValue(EarthGenerationSettings settings, Runnable onChanged) {
-        super("setting.terrarium.decorate.name", settings, onChanged);
+        super("setting.terrarium.decorate", settings, onChanged);
     }
 
     @Override
