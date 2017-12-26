@@ -125,7 +125,7 @@ public class GeoTeleportCommand extends CommandBase {
                 return geocode;
             } catch (IOException e) {
                 Terrarium.LOGGER.error("Failed to get geocode for {}", this.place, e);
-                throw new WrongUsageException("commands.terrarium.geotp.error", this.place, e.getMessage());
+                throw new WrongUsageException("commands.terrarium.geotp.error", this.place, e.getClass().getSimpleName(), e.getMessage());
             }
         }
     }

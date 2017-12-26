@@ -5,6 +5,7 @@ import net.gegy1000.terrarium.server.map.glob.GlobType;
 import net.gegy1000.terrarium.server.map.glob.generator.layer.SelectionSeedLayer;
 import net.gegy1000.terrarium.server.map.glob.generator.primer.GlobPrimer;
 import net.minecraft.block.BlockDirt;
+import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockTallGrass;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -24,7 +25,7 @@ public class SparseVegetation extends GlobGenerator {
     private static final IBlockState TALL_GRASS = Blocks.TALLGRASS.getDefaultState().withProperty(BlockTallGrass.TYPE, BlockTallGrass.EnumType.GRASS);
     private static final IBlockState DEAD_BUSH = Blocks.DEADBUSH.getDefaultState();
 
-    private static final IBlockState BUSH = Blocks.LEAVES.getDefaultState();
+    private static final IBlockState BUSH = Blocks.LEAVES.getDefaultState().withProperty(BlockLeaves.CHECK_DECAY, false).withProperty(BlockLeaves.DECAYABLE, false);
 
     private GenLayer coverSelector;
     private GenLayer grassSelector;

@@ -49,4 +49,4 @@ commands.terrarium.geotp.usage=geotp <latitude> <longitude> OR geotp <place>
 commands.terrarium.geotp.wrong_world=Cannot use command in this world
 commands.terrarium.geotp.not_found=Could not find "%s"
 commands.terrarium.geotp.success=Successfully teleported to %s, %s
-commands.terrarium.geotp.error=An error occurred while finding %s: %s
+commands.terrarium.geotp.error=An error occurred while finding "%s": %s: %s
