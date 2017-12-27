@@ -105,8 +105,9 @@ public class CoastlineAdapter implements RegionAdapter {
                 FloodFill.Point point = entry.getKey();
                 int floodType = entry.getValue();
                 int sampled = landmap[point.getX() + point.getZ() * width];
-                if (this.canFlood(sampled, floodType)) {
-                    FloodFill.floodVisit(landmap, width, height, point, new FillVisitor(floodType));
+                FillVisitor visitor = new FillVisitor(floodType);
+                if (visitor.canVisit(sampled)) {
+                    FloodFill.floodVisit(landmap, width, height, point, visitor);
                 }
             }
 
@@ -146,11 +147,6 @@ public class CoastlineAdapter implements RegionAdapter {
                 }
             }
         }
-    }
-
-    private boolean canFlood(int sampled, int flood) {
-        int landType = sampled & 3;
-        return (landType == LAND || landType == OCEAN) && (landType != (flood & 3) || (sampled & 252) == FREE_FLOOD);
     }
 
     private int getLineType(Coordinate currentCoordinate, Coordinate nextCoordinate) {

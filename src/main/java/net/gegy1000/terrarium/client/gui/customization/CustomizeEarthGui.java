@@ -11,6 +11,7 @@ import net.gegy1000.terrarium.client.gui.customization.setting.MapFeaturesValue;
 import net.gegy1000.terrarium.client.gui.customization.setting.ResourceGenerationValue;
 import net.gegy1000.terrarium.client.gui.customization.setting.ScaleValue;
 import net.gegy1000.terrarium.client.gui.customization.setting.ScatterValue;
+import net.gegy1000.terrarium.client.gui.customization.setting.SettingPreset;
 import net.gegy1000.terrarium.client.gui.customization.setting.StreetsValue;
 import net.gegy1000.terrarium.client.gui.widget.CustomizationList;
 import net.gegy1000.terrarium.client.preview.PreviewController;
@@ -36,7 +37,9 @@ public class CustomizeEarthGui extends GuiScreen {
     private static final int DONE_BUTTON = 1;
     private static final int PREVIEW_BUTTON = 2;
 
-    private static final int PADDING_X = 0;
+    private static final int PRESET_BUTTON = 3;
+    private static final int SPAWNPOINT_BUTTON = 4;
+
     private static final int PADDING_Y = 36;
 
     private final GuiCreateWorld parent;
@@ -100,6 +103,9 @@ public class CustomizeEarthGui extends GuiScreen {
         this.addButton(new GuiButton(DONE_BUTTON, this.width / 2 + 5, this.height - 28, 150, 20, I18n.translateToLocal("gui.done")));
         this.addButton(new GuiButton(PREVIEW_BUTTON, previewX + previewWidth - 20, previewY, 20, 20, "..."));
 
+        this.addButton(new GuiButton(PRESET_BUTTON, 4, this.height / 2 + 8, this.width / 2 - 6, 20, I18n.translateToLocal("gui.terrarium.preset")));
+        this.addButton(new GuiButton(SPAWNPOINT_BUTTON, this.width / 2 + 2, this.height / 2 + 8, this.width / 2 - 6, 20, I18n.translateToLocal("gui.terrarium.spawnpoint")));
+
         this.customizationList = new CustomizationList(this.mc, this);
         this.customizationList.addSlider(this.scaleValue, 1.0, 200.0, 5.0, 1.0);
         this.customizationList.addSlider(this.heightScaleValue, 0.01, 4.0, 0.5, 0.1);
@@ -136,6 +142,12 @@ public class CustomizeEarthGui extends GuiScreen {
                     break;
                 case PREVIEW_BUTTON:
                     this.previewLarge();
+                    break;
+                case PRESET_BUTTON:
+                    this.freeze = true;
+                    this.mc.displayGuiScreen(new SelectPresetGui(this));
+                    break;
+                case SPAWNPOINT_BUTTON:
                     break;
             }
         }
@@ -204,16 +216,6 @@ public class CustomizeEarthGui extends GuiScreen {
         super.drawScreen(mouseX, mouseY, partialTicks);
     }
 
-    private void rebuildState() {
-        this.deletePreview();
-
-        BufferBuilder[] builders = new BufferBuilder[8];
-        for (int i = 0; i < builders.length; i++) {
-            builders[i] = new BufferBuilder(0x4000);
-        }
-        this.preview = new WorldPreview(this.settings, this.executor, builders);
-    }
-
     @Override
     public void onGuiClosed() {
         if (!this.freeze) {
@@ -223,6 +225,21 @@ public class CustomizeEarthGui extends GuiScreen {
 
             this.deletePreview();
         }
+    }
+
+    public void applyPreset(SettingPreset preset) {
+        preset.apply(this.settings);
+        this.rebuildState();
+    }
+
+    private void rebuildState() {
+        this.deletePreview();
+
+        BufferBuilder[] builders = new BufferBuilder[8];
+        for (int i = 0; i < builders.length; i++) {
+            builders[i] = new BufferBuilder(0x4000);
+        }
+        this.preview = new WorldPreview(this.settings, this.executor, builders);
     }
 
     private void previewLarge() {

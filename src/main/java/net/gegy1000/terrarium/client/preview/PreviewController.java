@@ -39,7 +39,7 @@ public class PreviewController {
         this.prevZoom = this.zoom;
 
         if (!this.mouseDown) {
-            this.rotationY += 0.25F;
+            this.rotationY -= 0.25F;
         }
     }
 

@@ -1,0 +1,18 @@
+{
+  "name": "terrarium.survival",
+  "icon": "terrarium:survival",
+  "settings": {
+    "spawnLatitude": 27.988350,
+    "spawnLongitude": 86.923641,
+    "buildings": false,
+    "streets": false,
+    "decorate": true,
+    "worldScale": 0.0166,
+    "terrainHeightScale": 1.5,
+    "heightOffset": 64,
+    "scatterRange": 200,
+    "mapFeatures": true,
+    "caveGeneration": true,
+    "resourceGeneration": true
+  }
+}

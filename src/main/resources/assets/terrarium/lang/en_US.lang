@@ -5,11 +5,15 @@ generator.terrarium.earth=Terrarium
 # GUI
 
 gui.terrarium.accept=Accept
+gui.terrarium.preset=Select Preset
+gui.terrarium.spawnpoint=Set Spawnpoint
 
 gui.terrarium.remote_data_warning.1=Warning: Terrarium downloads data from the Internet!
 gui.terrarium.remote_data_warning.2=To generate chunks, GIS data is required for height and biomes.
 gui.terrarium.remote_data_warning.3=This may lead to large data usage, depending on the chunks generated.
 gui.terrarium.remote_data_warning.4=(Data is only requested for chunks that players view, and then is cached)
+
+gui.terrarium.select_preset.name=Select World Preset
 
 options.terrarium.customize_earth_title.name=Customize Earth Generation
 options.terrarium.preview_earth_title.name=Preview Earth Generation
@@ -49,6 +53,23 @@ setting.terrarium.resource_generation.tooltip=If enabled, resources will be rand
 setting.terrarium.slider_default.name=Default: %.2f, Range: [%.2f-%.2f]
 setting.terrarium.default.name=Default: %s
 setting.terrarium.slider_fine.name=Hold SHIFT to fine tune
+
+# Presets
+
+preset.terrarium.city.name=City
+preset.terrarium.city.desc=City
+
+preset.terrarium.default.name=Default
+preset.terrarium.default.desc=Default
+
+preset.terrarium.spikey.name=Spikey
+preset.terrarium.spikey.desc=Spikey
+
+preset.terrarium.survival_city.name=Survival City
+preset.terrarium.survival_city.desc=Survival City
+
+preset.terrarium.survival.name=Survival
+preset.terrarium.survival.desc=Survival
 
 # Config
 

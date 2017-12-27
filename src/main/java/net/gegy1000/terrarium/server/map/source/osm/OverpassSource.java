@@ -58,12 +58,9 @@ public class OverpassSource extends TiledSource<OverpassTileAccess> implements C
 
     private final CloseableHttpClient client = HttpClientBuilder.create()
             .addInterceptorFirst((HttpRequestInterceptor) (request, context) -> {
-                if (!request.containsHeader("Accept-Encoding")) {
-                    request.addHeader("Accent-Encoding", "gzip");
-                }
-                if (!request.containsHeader("User-Agent")) {
-                    request.addHeader("User-Agent", Terrarium.MODID);
-                }
+                request.setHeader("Accent-Encoding", "gzip");
+                request.setHeader("User-Agent", Terrarium.MODID);
+                request.setHeader("Referer", "https://github.com/gegy1000/Terrarium");
             }).addInterceptorFirst((HttpResponseInterceptor) (response, context) -> {
                 HttpEntity entity = response.getEntity();
                 Arrays.stream(entity.getContentEncoding().getElements())
