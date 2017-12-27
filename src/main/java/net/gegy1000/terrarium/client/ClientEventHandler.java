@@ -2,10 +2,13 @@ package net.gegy1000.terrarium.client;
 
 import com.google.common.collect.Lists;
 import net.gegy1000.terrarium.Terrarium;
+import net.gegy1000.terrarium.client.gui.RemoteDataWarningGui;
 import net.gegy1000.terrarium.server.config.TerrariumConfig;
 import net.gegy1000.terrarium.server.map.source.LoadingState;
 import net.gegy1000.terrarium.server.map.source.LoadingStateHandler;
+import net.gegy1000.terrarium.server.world.EarthWorldType;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -14,8 +17,11 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.translation.I18n;
+import net.minecraft.world.World;
+import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.client.config.GuiUtils;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -35,10 +41,19 @@ public class ClientEventHandler {
 
     private static int ticks = 0;
 
+    private static boolean awaitingLoad;
+
     @SubscribeEvent
     public static void onTick(TickEvent.ClientTickEvent event) {
-        if (event.phase == TickEvent.Phase.START) {
+        if (event.phase == TickEvent.Phase.END) {
             ticks++;
+
+            if (awaitingLoad && MC.player.ticksExisted > 10) {
+                awaitingLoad = false;
+                if (!TerrariumConfig.acceptedRemoteDataWarning) {
+                    MC.displayGuiScreen(new RemoteDataWarningGui(MC.currentScreen));
+                }
+            }
         }
     }
 
@@ -53,6 +68,23 @@ public class ClientEventHandler {
             GlStateManager.enableAlpha();
             drawLoadingState(Integer.MIN_VALUE, Integer.MIN_VALUE);
             GlStateManager.disableAlpha();
+        }
+    }
+
+    @SubscribeEvent
+    public static void onJoinWorld(WorldEvent.Load event) {
+        World world = event.getWorld();
+        if (world.isRemote && world.getWorldType() instanceof EarthWorldType) {
+            awaitingLoad = true;
+        }
+    }
+
+    @SubscribeEvent
+    public static void onGuiChange(GuiOpenEvent event) {
+        GuiScreen currentScreen = MC.currentScreen;
+        if (currentScreen instanceof RemoteDataWarningGui && !((RemoteDataWarningGui) currentScreen).isComplete()) {
+            event.setCanceled(true);
+            ((RemoteDataWarningGui) currentScreen).setParent(event.getGui());
         }
     }
 

@@ -4,6 +4,13 @@ generator.terrarium.earth=Terrarium
 
 # GUI
 
+gui.terrarium.accept=Accept
+
+gui.terrarium.remote_data_warning.1=Warning: Terrarium downloads data from the Internet!
+gui.terrarium.remote_data_warning.2=To generate chunks, GIS data is required for height and biomes.
+gui.terrarium.remote_data_warning.3=This may lead to large data usage, depending on the chunks generated.
+gui.terrarium.remote_data_warning.4=(Data is only requested for chunks that players view, and then is cached)
+
 options.terrarium.customize_earth_title.name=Customize Earth Generation
 options.terrarium.preview_earth_title.name=Preview Earth Generation
 
@@ -47,6 +54,8 @@ setting.terrarium.slider_fine.name=Hold SHIFT to fine tune
 
 config.terrarium.enable_data_status_icon=Enable Data Status Icon
 config.terrarium.enable_data_status_icon.tooltip=If true, the current status for data streaming will be displayed in the top left corner of the screen
+config.terrarium.accept_remote_data=Accepted Remote Data Warning
+config.terrarium.accept_remote_data.tooltip=If true, you will no longer be warned about remote data usage. (Automatically set through GUI)
 
 # Commands
 
