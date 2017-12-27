@@ -51,7 +51,8 @@ public enum GlobType {
     BARE(200, Biomes.DESERT, Bare.class),
     WATER(210, Biomes.OCEAN, Water.class, 0.05, false),
     SNOW(220, Biomes.ICE_PLAINS, Snow.class),
-    NO_DATA(0, Biomes.PLAINS, Bare.class);
+    NO_DATA(0, Biomes.PLAINS, Bare.class),
+    UNSELECTED(-1, Biomes.DEFAULT, Bare.class);
 
     private static final GlobType[] TYPES = new GlobType[256];
 
@@ -108,7 +109,9 @@ public enum GlobType {
 
     static {
         for (GlobType type : GlobType.values()) {
-            TYPES[type.id] = type;
+            if (type.id >= 0) {
+                TYPES[type.id] = type;
+            }
         }
     }
 

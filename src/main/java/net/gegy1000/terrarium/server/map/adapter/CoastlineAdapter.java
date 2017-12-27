@@ -1,22 +1,21 @@
 package net.gegy1000.terrarium.server.map.adapter;
 
-import com.google.common.collect.Sets;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.gegy1000.terrarium.server.map.glob.GlobType;
 import net.gegy1000.terrarium.server.map.source.osm.OverpassSource;
 import net.gegy1000.terrarium.server.map.source.osm.OverpassTileAccess;
 import net.gegy1000.terrarium.server.util.Coordinate;
+import net.gegy1000.terrarium.server.util.FloodFill;
 import net.gegy1000.terrarium.server.util.Interpolation;
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
 import java.util.stream.Collectors;
 
 public class CoastlineAdapter implements RegionAdapter {
@@ -40,7 +39,7 @@ public class CoastlineAdapter implements RegionAdapter {
                 landmap[i] = globBuffer[i] == GlobType.WATER ? OCEAN : LAND;
             }
 
-            Object2IntMap<FloodPoint> floodPoints = new Object2IntOpenHashMap<>();
+            Object2IntMap<FloodFill.Point> floodPoints = new Object2IntOpenHashMap<>();
 
             for (OverpassSource.Element coastline : coastlines) {
                 List<OverpassSource.Element> nodes = coastline.collectNodes(overpassTile);
@@ -76,21 +75,7 @@ public class CoastlineAdapter implements RegionAdapter {
                         if (localX >= 0 && localZ >= 0 && localX < width && localZ < height) {
                             landmap[localX + localZ * width] = lineType;
 
-                            for (int neighbourZ = -1; neighbourZ <= 1; neighbourZ++) {
-                                for (int neighbourX = -1; neighbourX <= 1; neighbourX++) {
-                                    if (neighbourX != 0 || neighbourZ != 0) {
-                                        int globalX = localX + neighbourX;
-                                        int globalZ = localZ + neighbourZ;
-                                        if (globalX >= 0 && globalZ >= 0 && globalX < width && globalZ < height) {
-                                            int index = globalX + globalZ * width;
-                                            int sample = landmap[index];
-                                            if ((sample & 3) != COAST) {
-                                                landmap[index] = sample | FREE_FLOOD;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                            this.freeNeighbours(width, height, landmap, localX, localZ);
 
                             points.add(point);
                         }
@@ -104,11 +89,11 @@ public class CoastlineAdapter implements RegionAdapter {
                             if (coastType != 0) {
                                 if (localX > 0) {
                                     int left = coastType == COAST_UP ? LAND : OCEAN;
-                                    floodPoints.put(new FloodPoint(localX - 1, localZ), left);
+                                    floodPoints.put(new FloodFill.Point(localX - 1, localZ), left);
                                 }
                                 if (localX < width - 1) {
                                     int right = coastType == COAST_UP ? OCEAN : LAND;
-                                    floodPoints.put(new FloodPoint(localX + 1, localZ), right);
+                                    floodPoints.put(new FloodFill.Point(localX + 1, localZ), right);
                                 }
                             }
                         }
@@ -116,75 +101,50 @@ public class CoastlineAdapter implements RegionAdapter {
                 }
             }
 
-            for (Map.Entry<FloodPoint, Integer> entry : floodPoints.entrySet()) {
-                FloodPoint point = entry.getKey();
+            for (Map.Entry<FloodFill.Point, Integer> entry : floodPoints.entrySet()) {
+                FloodFill.Point point = entry.getKey();
                 int floodType = entry.getValue();
-                int sampled = landmap[point.x + point.z * width];
+                int sampled = landmap[point.getX() + point.getZ() * width];
                 if (this.canFlood(sampled, floodType)) {
-                    this.floodFill(landmap, width, height, point, floodType);
+                    FloodFill.floodVisit(landmap, width, height, point, new FillVisitor(floodType));
                 }
             }
 
+            List<FloodFill.Point> unselectedPoints = new LinkedList<>();
             for (int i = 0; i < globBuffer.length; i++) {
                 GlobType glob = globBuffer[i];
                 int landType = landmap[i] & 3;
                 if (landType == OCEAN) {
                     globBuffer[i] = GlobType.WATER;
                 } else if (glob == GlobType.WATER) {
-                    // TODO: Select proper glob type based on neighbours
-                    globBuffer[i] = GlobType.GRASSLAND;
+                    globBuffer[i] = GlobType.UNSELECTED;
+                    unselectedPoints.add(new FloodFill.Point(i % width, i / width));
                 }
             }
-        }
-    }
 
-    private void floodFill(int[] landmap, int width, int height, FloodPoint origin, int floodType) {
-        Stack<FloodPoint> points = new Stack<>();
-        Set<FloodPoint> visitedPoints = Sets.newHashSet(origin);
-        points.push(origin);
-
-        while (!points.isEmpty()) {
-            FloodPoint currentPoint = points.pop();
-            int index = currentPoint.x + currentPoint.z * width;
-            if ((landmap[index] & 252) == FREE_FLOOD) {
-                landmap[index] = floodType | FREE_FLOOD;
-            } else {
-                landmap[index] = floodType;
-            }
-
-            if (currentPoint.x > 0) {
-                int neighbourX = currentPoint.x - 1;
-                int neighbourZ = currentPoint.z;
-                int sampled = landmap[neighbourX + neighbourZ * width];
-                this.visitNeighbour(points, visitedPoints, sampled, floodType, neighbourX, neighbourZ);
-            }
-            if (currentPoint.z > 0) {
-                int neighbourX = currentPoint.x;
-                int neighbourZ = currentPoint.z - 1;
-                int sampled = landmap[neighbourX + neighbourZ * width];
-                this.visitNeighbour(points, visitedPoints, sampled, floodType, neighbourX, neighbourZ);
-            }
-
-            if (currentPoint.x < width - 1) {
-                int neighbourX = currentPoint.x + 1;
-                int neighbourZ = currentPoint.z;
-                int sampled = landmap[neighbourX + neighbourZ * width];
-                this.visitNeighbour(points, visitedPoints, sampled, floodType, neighbourX, neighbourZ);
-            }
-            if (currentPoint.z < height - 1) {
-                int neighbourX = currentPoint.x;
-                int neighbourZ = currentPoint.z + 1;
-                int sampled = landmap[neighbourX + neighbourZ * width];
-                this.visitNeighbour(points, visitedPoints, sampled, floodType, neighbourX, neighbourZ);
+            for (FloodFill.Point point : unselectedPoints) {
+                GlobSelectVisitor visitor = new GlobSelectVisitor();
+                FloodFill.floodVisit(globBuffer, width, height, point, visitor);
+                globBuffer[point.getX() + point.getZ() * width] = visitor.getResult();
             }
         }
     }
 
-    private void visitNeighbour(Stack<FloodPoint> points, Set<FloodPoint> visitedPoints, int sampled, int floodType, int neighbourX, int neighbourY) {
-        FloodPoint neighbourPoint = new FloodPoint(neighbourX, neighbourY);
-        if (this.canFlood(sampled, floodType) && !visitedPoints.contains(neighbourPoint)) {
-            points.push(neighbourPoint);
-            visitedPoints.add(neighbourPoint);
+    private void freeNeighbours(int width, int height, int[] landmap, int localX, int localZ) {
+        for (int neighbourZ = -1; neighbourZ <= 1; neighbourZ++) {
+            for (int neighbourX = -1; neighbourX <= 1; neighbourX++) {
+                if (neighbourX != 0 || neighbourZ != 0) {
+                    int globalX = localX + neighbourX;
+                    int globalZ = localZ + neighbourZ;
+                    if (globalX >= 0 && globalZ >= 0 && globalX < width && globalZ < height) {
+                        int index = globalX + globalZ * width;
+                        int sample = landmap[index];
+                        if ((sample & 3) != COAST) {
+                            landmap[index] = sample | FREE_FLOOD;
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -204,27 +164,47 @@ public class CoastlineAdapter implements RegionAdapter {
         return COAST;
     }
 
-    private class FloodPoint {
-        private final int x;
-        private final int z;
+    private class FillVisitor implements FloodFill.IntVisitor {
+        private final int floodType;
 
-        private FloodPoint(int x, int z) {
-            this.x = x;
-            this.z = z;
+        private FillVisitor(int floodType) {
+            this.floodType = floodType;
         }
 
         @Override
-        public boolean equals(Object obj) {
-            if (obj instanceof FloodPoint) {
-                FloodPoint point = (FloodPoint) obj;
-                return point.x == this.x && point.z == this.z;
+        public int visit(FloodFill.Point point, int sampled) {
+            if ((sampled & 252) == FREE_FLOOD) {
+                return this.floodType | FREE_FLOOD;
             }
-            return false;
+            return this.floodType;
         }
 
         @Override
-        public int hashCode() {
-            return this.x + this.z * 12000;
+        public boolean canVisit(int sampled) {
+            int landType = sampled & 3;
+            return (landType == LAND || landType == OCEAN) && (landType != (this.floodType & 3) || (sampled & 252) == FREE_FLOOD);
+        }
+    }
+
+    private class GlobSelectVisitor implements FloodFill.Visitor<GlobType> {
+        private GlobType result = GlobType.RAINFED_CROPS;
+
+        @Override
+        public GlobType visit(FloodFill.Point point, GlobType sampled) {
+            if (sampled != GlobType.UNSELECTED) {
+                this.result = sampled;
+                return null;
+            }
+            return sampled;
+        }
+
+        @Override
+        public boolean canVisit(GlobType sampled) {
+            return sampled != GlobType.WATER;
+        }
+
+        public GlobType getResult() {
+            return this.result;
         }
     }
 }
