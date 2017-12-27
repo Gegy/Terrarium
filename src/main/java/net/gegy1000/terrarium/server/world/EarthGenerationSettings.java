@@ -11,7 +11,6 @@ public class EarthGenerationSettings {
 
     public double spawnLatitude = 27.988350;
     public double spawnLongitude = 86.923641;
-    public boolean mapFeatures = true;
     public boolean buildings = true;
     public boolean streets = true;
     public boolean decorate = true;
@@ -19,6 +18,9 @@ public class EarthGenerationSettings {
     public double worldScale = 1.0 / 35.0;
     public int heightOffset = 5;
     public int scatterRange = 200;
+    public boolean mapFeatures = false;
+    public boolean caveGeneration = false;
+    public boolean resourceGeneration = false;
 
     public static EarthGenerationSettings deserialize(String settings) {
         if (Strings.isNullOrEmpty(settings)) {

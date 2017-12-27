@@ -132,7 +132,8 @@ public class EarthChunkGenerator implements IChunkGenerator {
             }
         }
 
-        if (this.settings.mapFeatures) {
+        if (!this.fastGenerate) {
+
         }
     }
 
@@ -242,7 +243,7 @@ public class EarthChunkGenerator implements IChunkGenerator {
         GlobType glob = this.globBuffer[255];
         Biome biome = glob.getBiome();
 
-        if (this.settings.decorate) {
+        if (this.settings.decorate && !this.fastGenerate) {
             ForgeEventFactory.onChunkPopulate(true, this, this.world, this.random, chunkX, chunkZ, false);
 
             GlobGenerator generator = this.generators.get(glob);

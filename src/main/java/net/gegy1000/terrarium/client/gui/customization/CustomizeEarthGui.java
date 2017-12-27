@@ -2,11 +2,13 @@ package net.gegy1000.terrarium.client.gui.customization;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.gegy1000.terrarium.client.gui.customization.setting.BuildingsValue;
+import net.gegy1000.terrarium.client.gui.customization.setting.CaveGenValue;
 import net.gegy1000.terrarium.client.gui.customization.setting.CustomizationValue;
 import net.gegy1000.terrarium.client.gui.customization.setting.DecorateValue;
 import net.gegy1000.terrarium.client.gui.customization.setting.HeightOffsetValue;
 import net.gegy1000.terrarium.client.gui.customization.setting.HeightScaleValue;
 import net.gegy1000.terrarium.client.gui.customization.setting.MapFeaturesValue;
+import net.gegy1000.terrarium.client.gui.customization.setting.ResourceGenerationValue;
 import net.gegy1000.terrarium.client.gui.customization.setting.ScaleValue;
 import net.gegy1000.terrarium.client.gui.customization.setting.ScatterValue;
 import net.gegy1000.terrarium.client.gui.customization.setting.StreetsValue;
@@ -49,10 +51,13 @@ public class CustomizeEarthGui extends GuiScreen {
     private final CustomizationValue<Double> heightOffsetValue;
 
     private final CustomizationValue<Boolean> decorateValue;
-    private final CustomizationValue<Boolean> mapFeaturesValue;
+    private final CustomizationValue<Boolean> resourceGenerationValue;
 
     private final CustomizationValue<Boolean> buildingsValue;
     private final CustomizationValue<Boolean> streetsValue;
+
+    private final CustomizationValue<Boolean> caveGenValue;
+    private final CustomizationValue<Boolean> mapFeaturesValue;
 
     private final ExecutorService executor = Executors.newFixedThreadPool(3, new ThreadFactoryBuilder().setDaemon(true).setNameFormat("terrarium-preview-%d").build());
 
@@ -72,10 +77,14 @@ public class CustomizeEarthGui extends GuiScreen {
         this.scatterValue = new ScatterValue(this.settings, this::rebuildState);
         this.heightOffsetValue = new HeightOffsetValue(this.settings, this::rebuildState);
 
-        this.decorateValue = new DecorateValue(this.settings, this::rebuildState);
-        this.mapFeaturesValue = new MapFeaturesValue(this.settings, this::rebuildState);
         this.buildingsValue = new BuildingsValue(this.settings, this::rebuildState);
         this.streetsValue = new StreetsValue(this.settings, this::rebuildState);
+
+        this.decorateValue = new DecorateValue(this.settings, this::rebuildState);
+        this.resourceGenerationValue = new ResourceGenerationValue(this.settings, this::rebuildState);
+
+        this.mapFeaturesValue = new MapFeaturesValue(this.settings, this::rebuildState);
+        this.caveGenValue = new CaveGenValue(this.settings, this::rebuildState);
     }
 
     @Override
@@ -97,10 +106,13 @@ public class CustomizeEarthGui extends GuiScreen {
         this.addButton(new SliderWidget(12, this.width / 2 - 155, 50, this.scatterValue, 1, 1000, 100.0, 1.0));
         this.addButton(new SliderWidget(13, this.width / 2 + 5, 50, this.heightOffsetValue, 0, 128, 1.0, 1.0));
 
-        this.addButton(new ToggleWidget(14, this.width / 2 - 155, 80, this.decorateValue));
-        this.addButton(new ToggleWidget(15, this.width / 2 + 5, 80, this.mapFeaturesValue));
-        this.addButton(new ToggleWidget(16, this.width / 2 - 155, 110, this.buildingsValue));
-        this.addButton(new ToggleWidget(17, this.width / 2 + 5, 110, this.streetsValue));
+        this.addButton(new ToggleWidget(14, this.width / 2 - 155, 80, this.buildingsValue));
+        this.addButton(new ToggleWidget(15, this.width / 2 + 5, 80, this.streetsValue));
+
+        this.addButton(new ToggleWidget(16, this.width / 2 - 155, 110, this.decorateValue));
+        this.addButton(new ToggleWidget(17, this.width / 2 + 5, 110, this.resourceGenerationValue));
+        this.addButton(new ToggleWidget(18, this.width / 2 - 155, 140, this.mapFeaturesValue));
+        this.addButton(new ToggleWidget(19, this.width / 2 + 5, 140, this.caveGenValue));
 
         if (!this.freeze) {
             this.rebuildState();
