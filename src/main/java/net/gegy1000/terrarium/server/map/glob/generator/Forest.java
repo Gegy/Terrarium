@@ -3,6 +3,7 @@ package net.gegy1000.terrarium.server.map.glob.generator;
 import net.gegy1000.terrarium.server.map.glob.GlobGenerator;
 import net.gegy1000.terrarium.server.map.glob.GlobType;
 import net.gegy1000.terrarium.server.map.glob.generator.layer.ReplaceRandomLayer;
+import net.gegy1000.terrarium.server.map.glob.generator.layer.SelectWeightedLayer;
 import net.gegy1000.terrarium.server.map.glob.generator.layer.SelectionSeedLayer;
 import net.gegy1000.terrarium.server.map.glob.generator.primer.GlobPrimer;
 import net.minecraft.block.BlockLeaves;
@@ -39,6 +40,7 @@ public class Forest extends GlobGenerator {
     protected static final int LAYER_PODZOL = 2;
 
     protected GenLayer coverSelector;
+    protected GenLayer clearingSelector;
 
     public Forest(GlobType type) {
         super(type);
@@ -53,6 +55,19 @@ public class Forest extends GlobGenerator {
 
         this.coverSelector = cover;
         this.coverSelector.initWorldGenSeed(this.seed);
+
+        GenLayer clearing = new SelectWeightedLayer(2,
+                new SelectWeightedLayer.Entry(0, 6),
+                new SelectWeightedLayer.Entry(1, 4));
+        clearing = new GenLayerVoronoiZoom(4000, clearing);
+        clearing = new GenLayerFuzzyZoom(5000, clearing);
+        clearing = new ReplaceRandomLayer(0, 2, 16, 6000, clearing);
+        clearing = new ReplaceRandomLayer(1, 0, 10, 7000, clearing);
+        clearing = new GenLayerVoronoiZoom(8000, clearing);
+        clearing = new GenLayerFuzzyZoom(9000, clearing);
+
+        this.clearingSelector = clearing;
+        this.clearingSelector.initWorldGenSeed(this.seed);
     }
 
     @Override

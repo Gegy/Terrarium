@@ -12,7 +12,9 @@ public class MixedBroadNeedleleaf extends Forest {
 
     @Override
     public void decorate(Random random, int x, int z) {
-        this.decorateScatter(random, x, z, this.range(random, 6, 8), pos -> {
+        int[] clearingLayer = this.sampleChunk(this.clearingSelector, x, z);
+
+        this.decorateScatter(random, clearingLayer, x, z, this.range(random, 6, 8), pos -> {
             int type = random.nextInt(4);
             switch (type) {
                 case 0: {

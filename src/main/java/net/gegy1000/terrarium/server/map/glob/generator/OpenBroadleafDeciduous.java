@@ -12,7 +12,9 @@ public class OpenBroadleafDeciduous extends Forest {
 
     @Override
     public void decorate(Random random, int x, int z) {
-        this.decorateScatter(random, x, z, this.range(random, 3, 6), pos -> {
+        int[] clearingLayer = this.sampleChunk(this.clearingSelector, x, z);
+
+        this.decorateScatter(random, clearingLayer, x, z, this.range(random, 3, 6), pos -> {
             if (random.nextInt(10) != 0) {
                 int height = this.range(random, 3, 6);
                 if (random.nextInt(10) == 0) {

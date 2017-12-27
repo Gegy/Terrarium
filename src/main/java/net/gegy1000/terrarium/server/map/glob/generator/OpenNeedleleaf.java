@@ -12,7 +12,9 @@ public class OpenNeedleleaf extends Forest {
 
     @Override
     public void decorate(Random random, int x, int z) {
-        this.decorateScatter(random, x, z, this.range(random, 6, 8), pos -> {
+        int[] clearingLayer = this.sampleChunk(this.clearingSelector, x, z);
+
+        this.decorateScatter(random, clearingLayer, x, z, this.range(random, 6, 8), pos -> {
             if (random.nextInt(8) != 0) {
                 if (random.nextInt(3) == 0) {
                     TAIGA_1.generate(this.world, random, pos);

@@ -110,9 +110,18 @@ public abstract class GlobGenerator {
         return this.pos;
     }
 
-    protected void decorateScatter(Random random, int x, int z, int count, Consumer<BlockPos> pos) {
+    protected void decorateScatter(Random random, int x, int z, int count, Consumer<BlockPos> decorator) {
         for (int i = 0; i < count; i++) {
-            pos.accept(this.world.getTopSolidOrLiquidBlock(this.scatterDecorate(random, x, z)));
+            decorator.accept(this.world.getTopSolidOrLiquidBlock(this.scatterDecorate(random, x, z)));
+        }
+    }
+
+    protected void decorateScatter(Random random, int[] layer, int x, int z, int count, Consumer<BlockPos> decorator) {
+        for (int i = 0; i < count; i++) {
+            BlockPos pos = this.scatterDecorate(random, x, z);
+            if (layer[(pos.getX() - x) + (pos.getZ() - z) * 16] == 0) {
+                decorator.accept(this.world.getTopSolidOrLiquidBlock(pos));
+            }
         }
     }
 
