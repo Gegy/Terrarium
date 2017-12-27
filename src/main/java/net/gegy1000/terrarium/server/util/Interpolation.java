@@ -32,7 +32,7 @@ public class Interpolation {
         double longLength = 2 * deltaY - deltaX;
 
         for (int i = 0; i <= deltaX; i++) {
-            points.accept(currentPoint);
+            points.accept(new Point(currentPoint));
 
             while (longLength >= 0) {
                 if (horizontal) {
@@ -42,7 +42,7 @@ public class Interpolation {
                 }
 
                 if (thick) {
-                    points.accept(currentPoint);
+                    points.accept(new Point(currentPoint));
                 }
 
                 longLength -= 2 * deltaX;
@@ -55,7 +55,7 @@ public class Interpolation {
             }
 
             if (thick) {
-                points.accept(currentPoint);
+                points.accept(new Point(currentPoint));
             }
 
             longLength += 2 * deltaY;

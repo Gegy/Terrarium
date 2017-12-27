@@ -3,7 +3,6 @@ package net.gegy1000.terrarium.server.map.adapter;
 import com.google.common.collect.Sets;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.map.glob.GlobType;
 import net.gegy1000.terrarium.server.map.source.osm.OverpassSource;
 import net.gegy1000.terrarium.server.map.source.osm.OverpassTileAccess;
@@ -12,10 +11,8 @@ import net.gegy1000.terrarium.server.util.Interpolation;
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
 import net.minecraft.util.math.MathHelper;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.awt.Point;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,8 +26,8 @@ public class CoastlineAdapter implements RegionAdapter {
 
     private static final int COAST_UP = 4;
     private static final int COAST_DOWN = 8;
+    private static final int FREE_FLOOD = 16;
 
-    // TODO: Optimize! It's possible that due to flood-fails, it causes all points to be visited, causing slow set access
     @Override
     public void adaptGlobcover(EarthGenerationSettings settings, OverpassTileAccess overpassTile, GlobType[] globBuffer, int x, int z, int width, int height) {
         List<OverpassSource.Element> coastlines = overpassTile.getElements().stream()
@@ -42,8 +39,6 @@ public class CoastlineAdapter implements RegionAdapter {
             for (int i = 0; i < landmap.length; i++) {
                 landmap[i] = globBuffer[i] == GlobType.WATER ? OCEAN : LAND;
             }
-
-//            this.writeStage(x, z, 0, width, height, landmap);
 
             Object2IntMap<FloodPoint> floodPoints = new Object2IntOpenHashMap<>();
 
@@ -60,7 +55,7 @@ public class CoastlineAdapter implements RegionAdapter {
                     double originZ = currentCoordinate.getBlockZ();
 
                     Coordinate nextCoordinate = Coordinate.fromLatLng(settings, next.getLatitude(), next.getLongitude());
-                    while (Math.abs(nextCoordinate.getBlockZ() - originX) < 2.0 && Math.abs(nextCoordinate.getBlockZ() - originZ) < 1.0) {
+                    while (Math.abs(nextCoordinate.getBlockX() - originX) < 3.0 && Math.abs(nextCoordinate.getBlockZ() - originZ) < 3.0) {
                         if (++nodeIndex >= nodes.size()) {
                             break;
                         }
@@ -72,27 +67,54 @@ public class CoastlineAdapter implements RegionAdapter {
                     double targetZ = nextCoordinate.getBlockZ();
 
                     int lineType = this.getLineType(currentCoordinate, nextCoordinate);
-                    int coastType = lineType & 12;
+                    int coastType = lineType & 252;
 
+                    List<Point> points = new ArrayList<>();
                     Interpolation.interpolateLine(originX, originZ, targetX, targetZ, false, point -> {
                         int localX = point.x - x;
                         int localZ = point.y - z;
                         if (localX >= 0 && localZ >= 0 && localX < width && localZ < height) {
                             landmap[localX + localZ * width] = lineType;
-                            if (localX > 0) {
-                                int left = coastType == COAST_UP ? LAND : OCEAN;
-                                floodPoints.put(new FloodPoint(localX - 1, localZ), left);
+
+                            for (int neighbourZ = -1; neighbourZ <= 1; neighbourZ++) {
+                                for (int neighbourX = -1; neighbourX <= 1; neighbourX++) {
+                                    if (neighbourX != 0 || neighbourZ != 0) {
+                                        int globalX = localX + neighbourX;
+                                        int globalZ = localZ + neighbourZ;
+                                        if (globalX >= 0 && globalZ >= 0 && globalX < width && globalZ < height) {
+                                            int index = globalX + globalZ * width;
+                                            int sample = landmap[index];
+                                            if ((sample & 3) != COAST) {
+                                                landmap[index] = sample | FREE_FLOOD;
+                                            }
+                                        }
+                                    }
+                                }
                             }
-                            if (localX < width - 1) {
-                                int right = coastType == COAST_UP ? OCEAN : LAND;
-                                floodPoints.put(new FloodPoint(localX + 1, localZ), right);
-                            }
+
+                            points.add(point);
                         }
                     });
+
+                    if (points.size() > 2) {
+                        for (int i = 1; i < points.size() - 1; i++) {
+                            Point point = points.get(i);
+                            int localX = point.x - x;
+                            int localZ = point.y - z;
+                            if (coastType != 0) {
+                                if (localX > 0) {
+                                    int left = coastType == COAST_UP ? LAND : OCEAN;
+                                    floodPoints.put(new FloodPoint(localX - 1, localZ), left);
+                                }
+                                if (localX < width - 1) {
+                                    int right = coastType == COAST_UP ? OCEAN : LAND;
+                                    floodPoints.put(new FloodPoint(localX + 1, localZ), right);
+                                }
+                            }
+                        }
+                    }
                 }
             }
-
-//            this.writeStage(x, z, 1, width, height, landmap);
 
             for (Map.Entry<FloodPoint, Integer> entry : floodPoints.entrySet()) {
                 FloodPoint point = entry.getKey();
@@ -102,8 +124,6 @@ public class CoastlineAdapter implements RegionAdapter {
                     this.floodFill(landmap, width, height, point, floodType);
                 }
             }
-
-//            this.writeStage(x, z, 2, width, height, landmap);
 
             for (int i = 0; i < globBuffer.length; i++) {
                 GlobType glob = globBuffer[i];
@@ -125,7 +145,12 @@ public class CoastlineAdapter implements RegionAdapter {
 
         while (!points.isEmpty()) {
             FloodPoint currentPoint = points.pop();
-            landmap[currentPoint.x + currentPoint.z * width] = floodType;
+            int index = currentPoint.x + currentPoint.z * width;
+            if ((landmap[index] & 252) == FREE_FLOOD) {
+                landmap[index] = floodType | FREE_FLOOD;
+            } else {
+                landmap[index] = floodType;
+            }
 
             if (currentPoint.x > 0) {
                 int neighbourX = currentPoint.x - 1;
@@ -163,41 +188,9 @@ public class CoastlineAdapter implements RegionAdapter {
         }
     }
 
-    // TODO: Remove, exists for debugging purposes
-    private void writeStage(int x, int z, int stage, int width, int height, int[] coastlineMap) {
-        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        for (int imageY = 0; imageY < height; imageY++) {
-            for (int imageX = 0; imageX < width; imageX++) {
-                int color = this.getColor(coastlineMap[imageX + imageY * width]);
-                image.setRGB(imageX, imageY, color);
-            }
-        }
-
-        try {
-            ImageIO.write(image, "png", new File("stages/" + x + "_" + z + "_" + stage + ".png"));
-        } catch (IOException e) {
-            Terrarium.LOGGER.error("Failed to write coastline stage image at {}, {} ({})", x, z, stage, e);
-        }
-    }
-
-    private int getColor(int sampled) {
-        switch (sampled) {
-            case OCEAN:
-                return 0x0000FF;
-            case LAND:
-                return 0x00FF00;
-            case COAST | COAST_UP:
-                return 0xFF0000;
-            case COAST | COAST_DOWN:
-                return 0x00FFFF;
-            default:
-                return 0xFFFFFF;
-        }
-    }
-
     private boolean canFlood(int sampled, int flood) {
         int landType = sampled & 3;
-        return (landType == LAND || landType == OCEAN) && landType != (flood & 3);
+        return (landType == LAND || landType == OCEAN) && (landType != (flood & 3) || (sampled & 252) == FREE_FLOOD);
     }
 
     private int getLineType(Coordinate currentCoordinate, Coordinate nextCoordinate) {

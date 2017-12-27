@@ -48,7 +48,7 @@ public class ClientEventHandler {
         if (event.phase == TickEvent.Phase.END) {
             ticks++;
 
-            if (awaitingLoad && MC.player.ticksExisted > 10) {
+            if (awaitingLoad && MC.player != null && MC.player.ticksExisted > 10) {
                 awaitingLoad = false;
                 if (!TerrariumConfig.acceptedRemoteDataWarning) {
                     MC.displayGuiScreen(new RemoteDataWarningGui(MC.currentScreen));
@@ -74,7 +74,7 @@ public class ClientEventHandler {
     @SubscribeEvent
     public static void onJoinWorld(WorldEvent.Load event) {
         World world = event.getWorld();
-        if (world.isRemote && world.getWorldType() instanceof EarthWorldType) {
+        if (world.isRemote && world.getWorldType() instanceof EarthWorldType && MC.isIntegratedServerRunning()) {
             awaitingLoad = true;
         }
     }
