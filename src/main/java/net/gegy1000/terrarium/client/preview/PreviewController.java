@@ -12,7 +12,7 @@ public class PreviewController {
     private final float minZoom;
     private final float maxZoom;
 
-    private float rotationX = 15.0F;
+    private float rotationX = 10.0F;
     private float prevRotationX = this.rotationX;
 
     private float rotationY = 45.0F;
@@ -38,9 +38,6 @@ public class PreviewController {
         this.prevRotationY = this.rotationY;
         this.prevZoom = this.zoom;
 
-        int scroll = Mouse.getDWheel();
-        this.zoom = MathHelper.clamp(this.zoom + scroll / 1600.0F, this.minZoom, this.maxZoom);
-
         if (!this.mouseDown) {
             this.rotationY += 0.25F;
         }
@@ -63,13 +60,18 @@ public class PreviewController {
             this.rotationY += (mouseX - this.prevMouseX) * 0.5F;
             this.rotationX += (mouseY - this.prevMouseY) * 0.5F;
 
-            this.rotationX = MathHelper.clamp(this.rotationX, 15.0F, 50.0F);
+            this.rotationX = MathHelper.clamp(this.rotationX, 10.0F, 50.0F);
         }
     }
 
     public void updateMouse(int mouseX, int mouseY) {
         this.prevMouseX = mouseX;
         this.prevMouseY = mouseY;
+
+        int scroll = Mouse.getDWheel();
+        if (this.isSelected(mouseX, mouseY)) {
+            this.zoom = MathHelper.clamp(this.zoom + scroll / 1600.0F, this.minZoom, this.maxZoom);
+        }
     }
 
     public float getRotationX(float partialTicks) {

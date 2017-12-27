@@ -72,6 +72,9 @@ public class SliderWidget extends GuiButton implements TooltipRenderer {
             String tooltip = TextFormatting.GRAY + this.setting.getLocalizedTooltip();
             String defaults = TextFormatting.YELLOW + I18n.translateToLocalFormatted("setting.terrarium.slider_default.name", this.setting.getDefault(), this.min, this.max);
             List<String> lines = Lists.newArrayList(name, tooltip, defaults);
+            if (Math.abs(this.step - this.fineStep) > 1E-6) {
+                lines.add(TextFormatting.DARK_GRAY.toString() + TextFormatting.ITALIC + I18n.translateToLocal("setting.terrarium.slider_fine.name"));
+            }
             GuiUtils.drawHoveringText(lines, mouseX, mouseY, width, height, -1, mc.fontRenderer);
         }
     }

@@ -41,6 +41,7 @@ setting.terrarium.resource_generation.tooltip=If enabled, resources will be rand
 
 setting.terrarium.slider_default.name=Default: %.2f, Range: [%.2f-%.2f]
 setting.terrarium.default.name=Default: %s
+setting.terrarium.slider_fine.name=Hold SHIFT to fine tune
 
 # Config
 

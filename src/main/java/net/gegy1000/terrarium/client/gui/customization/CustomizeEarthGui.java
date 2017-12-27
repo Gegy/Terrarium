@@ -12,9 +12,7 @@ import net.gegy1000.terrarium.client.gui.customization.setting.ResourceGeneratio
 import net.gegy1000.terrarium.client.gui.customization.setting.ScaleValue;
 import net.gegy1000.terrarium.client.gui.customization.setting.ScatterValue;
 import net.gegy1000.terrarium.client.gui.customization.setting.StreetsValue;
-import net.gegy1000.terrarium.client.gui.widget.SliderWidget;
-import net.gegy1000.terrarium.client.gui.widget.ToggleWidget;
-import net.gegy1000.terrarium.client.gui.widget.TooltipRenderer;
+import net.gegy1000.terrarium.client.gui.widget.CustomizationList;
 import net.gegy1000.terrarium.client.preview.PreviewController;
 import net.gegy1000.terrarium.client.preview.PreviewRenderer;
 import net.gegy1000.terrarium.client.preview.WorldPreview;
@@ -23,7 +21,6 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiCreateWorld;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -39,7 +36,7 @@ public class CustomizeEarthGui extends GuiScreen {
     private static final int DONE_BUTTON = 1;
     private static final int PREVIEW_BUTTON = 2;
 
-    private static final int PADDING_X = 14;
+    private static final int PADDING_X = 0;
     private static final int PADDING_Y = 36;
 
     private final GuiCreateWorld parent;
@@ -60,6 +57,8 @@ public class CustomizeEarthGui extends GuiScreen {
     private final CustomizationValue<Boolean> mapFeaturesValue;
 
     private final ExecutorService executor = Executors.newFixedThreadPool(3, new ThreadFactoryBuilder().setDaemon(true).setNameFormat("terrarium-preview-%d").build());
+
+    private CustomizationList customizationList;
 
     private PreviewRenderer renderer;
     private PreviewController controller;
@@ -89,9 +88,9 @@ public class CustomizeEarthGui extends GuiScreen {
 
     @Override
     public void initGui() {
-        int previewWidth = this.width - PADDING_X * 2;
+        int previewWidth = this.width;
         int previewHeight = this.height / 2 - PADDING_Y * 2;
-        int previewX = PADDING_X;
+        int previewX = 0;
         int previewY = this.height - previewHeight - PADDING_Y;
         this.renderer = new PreviewRenderer(this, previewX, previewY, previewWidth, previewHeight);
         this.controller = new PreviewController(this.renderer, 0.3F, 1.0F);
@@ -101,18 +100,21 @@ public class CustomizeEarthGui extends GuiScreen {
         this.addButton(new GuiButton(DONE_BUTTON, this.width / 2 + 5, this.height - 28, 150, 20, I18n.translateToLocal("gui.done")));
         this.addButton(new GuiButton(PREVIEW_BUTTON, previewX + previewWidth - 20, previewY, 20, 20, "..."));
 
-        this.addButton(new SliderWidget(10, this.width / 2 - 155, 20, this.scaleValue, 1.0, 200.0, 5.0, 1.0));
-        this.addButton(new SliderWidget(11, this.width / 2 + 5, 20, this.heightScaleValue, 0.01, 4.0, 0.5, 0.1));
-        this.addButton(new SliderWidget(12, this.width / 2 - 155, 50, this.scatterValue, 1, 1000, 100.0, 1.0));
-        this.addButton(new SliderWidget(13, this.width / 2 + 5, 50, this.heightOffsetValue, 0, 128, 1.0, 1.0));
+        this.customizationList = new CustomizationList(this.mc, this);
+        this.customizationList.addSlider(this.scaleValue, 1.0, 200.0, 5.0, 1.0);
+        this.customizationList.addSlider(this.heightScaleValue, 0.01, 4.0, 0.5, 0.1);
+        this.customizationList.addSlider(this.scatterValue, 1, 1000, 100, 1);
+        this.customizationList.addSlider(this.heightOffsetValue, 0, 128, 1, 1);
 
-        this.addButton(new ToggleWidget(14, this.width / 2 - 155, 80, this.buildingsValue));
-        this.addButton(new ToggleWidget(15, this.width / 2 + 5, 80, this.streetsValue));
+        this.customizationList.addToggle(this.buildingsValue);
+        this.customizationList.addToggle(this.streetsValue);
 
-        this.addButton(new ToggleWidget(16, this.width / 2 - 155, 110, this.decorateValue));
-        this.addButton(new ToggleWidget(17, this.width / 2 + 5, 110, this.resourceGenerationValue));
-        this.addButton(new ToggleWidget(18, this.width / 2 - 155, 140, this.mapFeaturesValue));
-        this.addButton(new ToggleWidget(19, this.width / 2 + 5, 140, this.caveGenValue));
+        this.customizationList.addToggle(this.decorateValue);
+        this.customizationList.addToggle(this.resourceGenerationValue);
+        this.customizationList.addToggle(this.mapFeaturesValue);
+        this.customizationList.addToggle(this.caveGenValue);
+
+        this.customizationList.buildEntries();
 
         if (!this.freeze) {
             this.rebuildState();
@@ -151,6 +153,7 @@ public class CustomizeEarthGui extends GuiScreen {
         super.mouseClicked(mouseX, mouseY, mouseButton);
 
         this.controller.mouseClicked(mouseX, mouseY, mouseButton);
+        this.customizationList.mouseClicked(mouseX, mouseY, mouseButton);
     }
 
     @Override
@@ -158,6 +161,7 @@ public class CustomizeEarthGui extends GuiScreen {
         super.mouseReleased(mouseX, mouseY, mouseButton);
 
         this.controller.mouseReleased(mouseX, mouseY, mouseButton);
+        this.customizationList.mouseReleased(mouseX, mouseY, mouseButton);
     }
 
     @Override
@@ -165,6 +169,13 @@ public class CustomizeEarthGui extends GuiScreen {
         super.mouseClickMove(mouseX, mouseY, mouseButton, timeSinceLastClick);
 
         this.controller.mouseDragged(mouseX, mouseY, mouseButton);
+    }
+
+    @Override
+    public void handleMouseInput() throws IOException {
+        super.handleMouseInput();
+
+        this.customizationList.handleMouseInput();
     }
 
     @Override
@@ -180,6 +191,8 @@ public class CustomizeEarthGui extends GuiScreen {
 
         this.drawDefaultBackground();
 
+        this.customizationList.drawScreen(mouseX, mouseY, partialTicks);
+
         String title = I18n.translateToLocal("options.terrarium.customize_earth_title.name");
         this.drawCenteredString(this.fontRenderer, title, this.width / 2, 4, 0xFFFFFF);
 
@@ -189,16 +202,6 @@ public class CustomizeEarthGui extends GuiScreen {
         this.renderer.render(this.preview, zoom, rotationX, rotationY);
 
         super.drawScreen(mouseX, mouseY, partialTicks);
-
-        for (GuiButton element : this.buttonList) {
-            if (element instanceof TooltipRenderer) {
-                ((TooltipRenderer) element).renderTooltip(this.mc, mouseX, mouseY, this.width, this.height);
-
-                GlStateManager.disableLighting();
-                GlStateManager.disableDepth();
-                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            }
-        }
     }
 
     private void rebuildState() {
