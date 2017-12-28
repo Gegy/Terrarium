@@ -16,12 +16,12 @@ import java.io.PrintWriter;
 import java.net.URL;
 
 public class TerrariumData {
-    private static String INFO_JSON = "https://gist.githubusercontent.com/gegy1000/0a0ac9ec610d6d9716d43820a0825a6d/raw/terrarium_info.json";
+    private final static String INFO_JSON = "https://gist.githubusercontent.com/gegy1000/0a0ac9ec610d6d9716d43820a0825a6d/raw/terrarium_info.json";
 
-    private static Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private final static Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    public static File CACHE_ROOT = new File(".", "mods/terrarium/cache/");
-    private static File INFO_CACHE = new File(CACHE_ROOT, "terrarium_info.json");
+    public static final File CACHE_ROOT = new File(".", "mods/terrarium/cache/");
+    private static final File INFO_CACHE = new File(CACHE_ROOT, "terrarium_info.json");
 
     public static TerrariumData.Info info = new TerrariumData.Info("", "", "%s_%s.mat", "", "%s%s.hgt", "", "http://tile.openstreetmap.org", "%s/%s/%s.png");
 
