@@ -1,12 +1,12 @@
 package net.gegy1000.terrarium.client.gui.widget;
 
 import com.google.common.collect.Lists;
+import net.gegy1000.terrarium.client.gui.GuiRenderUtils;
 import net.gegy1000.terrarium.client.gui.customization.setting.CustomizationValue;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.translation.I18n;
-import net.minecraftforge.fml.client.config.GuiUtils;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -46,7 +46,7 @@ public class ToggleWidget extends GuiButton implements TooltipRenderer {
             String tooltip = TextFormatting.GRAY + this.setting.getLocalizedTooltip();
             String defaults = TextFormatting.YELLOW + I18n.translateToLocalFormatted("setting.terrarium.default.name", this.setting.getDefault());
             List<String> lines = Lists.newArrayList(name, tooltip, defaults);
-            GuiUtils.drawHoveringText(lines, mouseX, mouseY, width, height, -1, mc.fontRenderer);
+            GuiRenderUtils.drawTooltip(lines, mouseX, mouseY);
         }
     }
 

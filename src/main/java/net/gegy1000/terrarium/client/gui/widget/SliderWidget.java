@@ -1,6 +1,7 @@
 package net.gegy1000.terrarium.client.gui.widget;
 
 import com.google.common.collect.Lists;
+import net.gegy1000.terrarium.client.gui.GuiRenderUtils;
 import net.gegy1000.terrarium.client.gui.customization.setting.CustomizationValue;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
@@ -9,7 +10,6 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.translation.I18n;
-import net.minecraftforge.fml.client.config.GuiUtils;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -75,7 +75,7 @@ public class SliderWidget extends GuiButton implements TooltipRenderer {
             if (Math.abs(this.step - this.fineStep) > 1E-6) {
                 lines.add(TextFormatting.DARK_GRAY.toString() + TextFormatting.ITALIC + I18n.translateToLocal("setting.terrarium.slider_fine.name"));
             }
-            GuiUtils.drawHoveringText(lines, mouseX, mouseY, width, height, -1, mc.fontRenderer);
+            GuiRenderUtils.drawTooltip(lines, mouseX, mouseY);
         }
     }
 
