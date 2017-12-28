@@ -148,6 +148,8 @@ public class CustomizeEarthGui extends GuiScreen {
                     this.mc.displayGuiScreen(new SelectPresetGui(this));
                     break;
                 case SPAWNPOINT_BUTTON:
+                    this.freeze = true;
+                    this.mc.displayGuiScreen(new SelectSpawnpointGui(this));
                     break;
             }
         }
@@ -232,6 +234,12 @@ public class CustomizeEarthGui extends GuiScreen {
         this.rebuildState();
     }
 
+    public void applySpawnpoint(double latitude, double longitude) {
+        this.settings.spawnLatitude = latitude;
+        this.settings.spawnLongitude = longitude;
+        this.rebuildState();
+    }
+
     private void rebuildState() {
         this.deletePreview();
 
@@ -254,5 +262,9 @@ public class CustomizeEarthGui extends GuiScreen {
         if (preview != null) {
             preview.delete();
         }
+    }
+
+    public EarthGenerationSettings getSettings() {
+        return this.settings;
     }
 }

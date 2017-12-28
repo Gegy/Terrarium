@@ -39,7 +39,7 @@ public class LoadingScreenOverlay {
             GuiRenderUtils.drawCenteredString(header, x, y, 0xFFFFFF);
             GuiRenderUtils.drawCenteredString(TextFormatting.GRAY + "NASA SRTM,", x, y + 11, 0xFFFFFF);
             GuiRenderUtils.drawCenteredString(TextFormatting.GRAY + "ESA GlobCover,", x, y + 20, 0xFFFFFF);
-            GuiRenderUtils.drawCenteredString(TextFormatting.GRAY + "OpenStreetMap Contributors©", x, y + 29, 0xFFFFFF);
+            GuiRenderUtils.drawCenteredString(TextFormatting.GRAY + "© OpenStreetMap Contributors", x, y + 29, 0xFFFFFF);
         }
     }
 

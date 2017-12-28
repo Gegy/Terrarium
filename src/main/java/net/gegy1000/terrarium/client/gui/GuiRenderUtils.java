@@ -1,11 +1,13 @@
 package net.gegy1000.terrarium.client.gui;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraftforge.fml.client.config.GuiUtils;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 
@@ -24,5 +26,13 @@ public class GuiRenderUtils {
         GlStateManager.disableLighting();
         GlStateManager.disableDepth();
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+    }
+
+    public static void scissor(double x, double y, double width, double height) {
+        GuiScreen screen = MC.currentScreen;
+        if (screen != null) {
+            double scaleFactor = new ScaledResolution(MC).getScaleFactor();
+            GL11.glScissor((int) (x * scaleFactor), (int) ((screen.height - (y + height)) * scaleFactor), (int) (width * scaleFactor), (int) (height * scaleFactor));
+        }
     }
 }

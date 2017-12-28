@@ -16,14 +16,14 @@ import java.io.PrintWriter;
 import java.net.URL;
 
 public class TerrariumData {
-    private static final String INFO_JSON = "https://gist.githubusercontent.com/gegy1000/0a0ac9ec610d6d9716d43820a0825a6d/raw/terrarium_info.json";
+    private static String INFO_JSON = "https://gist.githubusercontent.com/gegy1000/0a0ac9ec610d6d9716d43820a0825a6d/raw/terrarium_info.json";
 
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private static Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    public static final File CACHE_ROOT = new File(".", "mods/terrarium/cache/");
-    private static final File INFO_CACHE = new File(CACHE_ROOT, "terrarium_info.json");
+    public static File CACHE_ROOT = new File(".", "mods/terrarium/cache/");
+    private static File INFO_CACHE = new File(CACHE_ROOT, "terrarium_info.json");
 
-    public static TerrariumData.Info info = new TerrariumData.Info("", "", "%s_%s.mat", "", "%s%s.hgt", "");
+    public static TerrariumData.Info info = new TerrariumData.Info("", "", "%s_%s.mat", "", "%s%s.hgt", "", "http://tile.openstreetmap.org", "%s/%s/%s.png");
 
     public static void loadInfo() {
         if (!CACHE_ROOT.exists()) {
@@ -50,7 +50,8 @@ public class TerrariumData {
 
     private static TerrariumData.Info loadInfo(InputStream input) throws IOException {
         try (InputStreamReader reader = new InputStreamReader(new BufferedInputStream(input))) {
-            return GSON.fromJson(reader, TerrariumData.Info.class);
+            Info info = GSON.fromJson(reader, Info.class);
+            return info.merge(TerrariumData.info);
         }
     }
 
@@ -64,25 +65,31 @@ public class TerrariumData {
 
     public static class Info {
         @SerializedName("base_url")
-        private final String baseURL;
+        private String baseURL;
         @SerializedName("glob_endpoint")
-        private final String globEndpoint;
+        private String globEndpoint;
         @SerializedName("glob_query")
-        private final String globQuery;
+        private String globQuery;
         @SerializedName("heights_endpoint")
-        private final String heightsEndpoint;
+        private String heightsEndpoint;
         @SerializedName("heights_query")
-        private final String heightsQuery;
+        private String heightsQuery;
         @SerializedName("height_tiles")
-        private final String heightTiles;
+        private String heightTiles;
+        @SerializedName("raster_map_endpoint")
+        private String rasterMapEndpoint;
+        @SerializedName("raster_map_query")
+        private String rasterMapQuery;
 
-        public Info(String baseURL, String globEndpoint, String globQuery, String heightsEndpoint, String heightsQuery, String heightTiles) {
+        public Info(String baseURL, String globEndpoint, String globQuery, String heightsEndpoint, String heightsQuery, String heightTiles, String rasterMapEndpoint, String rasterMapQuery) {
             this.baseURL = baseURL;
             this.globEndpoint = globEndpoint;
             this.globQuery = globQuery;
             this.heightsEndpoint = heightsEndpoint;
             this.heightsQuery = heightsQuery;
             this.heightTiles = heightTiles;
+            this.rasterMapEndpoint = rasterMapEndpoint;
+            this.rasterMapQuery = rasterMapQuery;
         }
 
         public String getBaseURL() {
@@ -107,6 +114,42 @@ public class TerrariumData {
 
         public String getHeightTiles() {
             return this.heightTiles;
+        }
+
+        public String getRasterMapEndpoint() {
+            return this.rasterMapEndpoint;
+        }
+
+        public String getRasterMapQuery() {
+            return this.rasterMapQuery;
+        }
+
+        public Info merge(Info info) {
+            if (this.baseURL == null) {
+                this.baseURL = info.baseURL;
+            }
+            if (this.globEndpoint == null) {
+                this.globEndpoint = info.globEndpoint;
+            }
+            if (this.globQuery == null) {
+                this.globQuery = info.globQuery;
+            }
+            if (this.heightsEndpoint == null) {
+                this.heightsEndpoint = info.heightsEndpoint;
+            }
+            if (this.heightsQuery == null) {
+                this.heightsQuery = info.heightsQuery;
+            }
+            if (this.heightTiles == null) {
+                this.heightTiles = info.heightTiles;
+            }
+            if (this.rasterMapEndpoint == null) {
+                this.rasterMapEndpoint = info.rasterMapEndpoint;
+            }
+            if (this.rasterMapQuery == null) {
+                this.rasterMapQuery = info.rasterMapQuery;
+            }
+            return this;
         }
     }
 }

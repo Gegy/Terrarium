@@ -9,7 +9,6 @@ import net.gegy1000.terrarium.server.map.source.LoadingState;
 import net.gegy1000.terrarium.server.map.source.LoadingStateHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
@@ -32,8 +31,6 @@ public class LoadingStateOverlay {
             LoadingState state = LoadingStateHandler.checkState();
 
             if (state != null) {
-                ScaledResolution resolution = new ScaledResolution(MC);
-
                 MC.getTextureManager().bindTexture(WIDGETS_TEXTURE);
 
                 GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);

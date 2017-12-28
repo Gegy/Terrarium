@@ -1,5 +1,6 @@
 package net.gegy1000.terrarium.client.preview;
 
+import net.gegy1000.terrarium.client.gui.GuiRenderUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
@@ -46,7 +47,7 @@ public class PreviewRenderer {
             GlStateManager.scale(scaleFactor, scaleFactor, scaleFactor);
 
             GL11.glEnable(GL11.GL_SCISSOR_TEST);
-            this.scissor(this.x, this.y, this.width, this.height);
+            GuiRenderUtils.scissor(this.x, this.y, this.width, this.height);
 
             GlStateManager.enableRescaleNormal();
             GlStateManager.disableTexture2D();
@@ -86,11 +87,6 @@ public class PreviewRenderer {
         buffer.pos(this.x + this.width, this.y, 0.0).tex((this.x + this.width) / tileSize, this.y / tileSize).endVertex();
         buffer.pos(this.x, this.y, 0.0).tex(this.x / tileSize, this.y / tileSize).endVertex();
         tessellator.draw();
-    }
-
-    public void scissor(double x, double y, double width, double height) {
-        double scaleFactor = new ScaledResolution(MC).getScaleFactor();
-        GL11.glScissor((int) (x * scaleFactor), (int) ((this.gui.height - (y + height)) * scaleFactor), (int) (width * scaleFactor), (int) (height * scaleFactor));
     }
 
     public double getX() {
