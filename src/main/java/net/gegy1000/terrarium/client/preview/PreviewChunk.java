@@ -2,6 +2,7 @@ package net.gegy1000.terrarium.client.preview;
 
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.client.render.TerrariumVertexFormats;
+import net.minecraft.block.BlockGrass;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GLAllocation;
@@ -11,14 +12,19 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.ColorizerGrass;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.function.Supplier;
@@ -26,8 +32,11 @@ import java.util.function.Supplier;
 @SideOnly(Side.CLIENT)
 public class PreviewChunk {
     private static final EnumFacing[] PREVIEW_FACES = new EnumFacing[] { EnumFacing.UP, EnumFacing.NORTH, EnumFacing.SOUTH, EnumFacing.WEST, EnumFacing.EAST };
+    private static final Map<Biome, Integer> BIOME_GRASS_COLORS = new HashMap<>();
 
     private final ChunkPrimer chunk;
+    private final Biome[] biomes;
+
     private final ChunkPos pos;
 
     private final IBlockAccess previewAccess;
@@ -37,8 +46,22 @@ public class PreviewChunk {
 
     private Geometry geometry;
 
-    public PreviewChunk(ChunkPrimer chunk, ChunkPos pos, IBlockAccess previewAccess) {
+    static {
+        for (Biome biome : Biome.REGISTRY) {
+            try {
+                float temperature = MathHelper.clamp(biome.getTemperature(BlockPos.ORIGIN), 0.0F, 1.0F);
+                float rainfall = MathHelper.clamp(biome.getRainfall(), 0.0F, 1.0F);
+                int color = ColorizerGrass.getGrassColor(temperature, rainfall);
+                BIOME_GRASS_COLORS.put(biome, color);
+            } catch (Exception e) {
+                Terrarium.LOGGER.error("Failed to get {} grass color", biome.getBiomeName(), e);
+            }
+        }
+    }
+
+    public PreviewChunk(ChunkPrimer chunk, Biome[] biomes, ChunkPos pos, IBlockAccess previewAccess) {
         this.chunk = chunk;
+        this.biomes = biomes;
         this.pos = pos;
         this.previewAccess = previewAccess;
     }
@@ -148,6 +171,7 @@ public class PreviewChunk {
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
         for (int z = 0; z < 16; z++) {
             for (int x = 0; x < 16; x++) {
+                Biome biome = this.biomes[x + z * 16];
                 for (int y = 0; y < 256; y++) {
                     IBlockState state = chunk.getBlockState(x, y, z);
                     if (state.getBlock() != Blocks.AIR) {
@@ -168,7 +192,7 @@ public class PreviewChunk {
                         }
 
                         if (!faces.isEmpty()) {
-                            this.buildFaces(builder, faces, state, pos);
+                            this.buildFaces(builder, faces, state, biome, pos);
                         }
                     }
                 }
@@ -178,8 +202,8 @@ public class PreviewChunk {
         builder.setTranslation(0.0, 0.0, 0.0);
     }
 
-    private void buildFaces(BufferBuilder builder, List<EnumFacing> faces, IBlockState state, BlockPos pos) {
-        int color = state.getMapColor(this.previewAccess, pos).colorValue;
+    private void buildFaces(BufferBuilder builder, List<EnumFacing> faces, IBlockState state, Biome biome, BlockPos pos) {
+        int color = this.getBlockColor(state, biome, pos);
         int red = (color >> 16) & 0xFF;
         int green = (color >> 8) & 0xFF;
         int blue = color & 0xFF;
@@ -188,6 +212,14 @@ public class PreviewChunk {
 
         for (EnumFacing face : faces) {
             this.buildFace(builder, face, red, green, blue);
+        }
+    }
+
+    private int getBlockColor(IBlockState state, Biome biome, BlockPos pos) {
+        if (!(state.getBlock() instanceof BlockGrass)) {
+            return state.getMapColor(this.previewAccess, pos).colorValue;
+        } else {
+            return BIOME_GRASS_COLORS.getOrDefault(biome, 0);
         }
     }
 

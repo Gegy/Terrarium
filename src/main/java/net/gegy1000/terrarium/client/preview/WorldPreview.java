@@ -44,7 +44,7 @@ public class WorldPreview implements IBlockAccess {
     private final ChunkPos centerPos;
     private final BlockPos centerBlockPos;
 
-    private final Long2ObjectMap<ChunkPrimer> chunkMap = new Long2ObjectOpenHashMap<>(VIEW_RANGE * 2 * VIEW_RANGE * 2);
+    private final Long2ObjectMap<ChunkData> chunkMap = new Long2ObjectOpenHashMap<>(VIEW_RANGE * 2 * VIEW_RANGE * 2);
 
     private List<PreviewChunk> previewChunks = null;
     private int heightOffset = 64;
@@ -62,11 +62,15 @@ public class WorldPreview implements IBlockAccess {
         this.centerBlockPos = new BlockPos(this.centerPos.x << 4, 0, this.centerPos.z << 4);
 
         this.executor.submit(() -> {
-            List<PreviewChunk> chunks = this.generateChunks();
-            for (PreviewChunk chunk : chunks) {
-                chunk.executeBuild(executor, this::takeBuilder);
+            try {
+                List<PreviewChunk> chunks = this.generateChunks();
+                for (PreviewChunk chunk : chunks) {
+                    chunk.executeBuild(executor, this::takeBuilder);
+                }
+                this.previewChunks = chunks;
+            } catch (Exception e) {
+                Terrarium.LOGGER.error("Failed to generate preview chunks", e);
             }
-            this.previewChunks = chunks;
         });
     }
 
@@ -124,8 +128,10 @@ public class WorldPreview implements IBlockAccess {
         for (int z = -VIEW_RANGE; z <= VIEW_RANGE; z++) {
             for (int x = -VIEW_RANGE; x <= VIEW_RANGE; x++) {
                 ChunkPos pos = new ChunkPos(this.centerPos.x + x, this.centerPos.z + z);
+
                 ChunkPrimer chunk = this.generator.generatePrimer(pos.x, pos.z);
-                this.chunkMap.put(ChunkPos.asLong(pos.x, pos.z), chunk);
+                Biome[] biomes = this.generator.generateBiomes(new Biome[256], pos.x, pos.z);
+                this.chunkMap.put(ChunkPos.asLong(pos.x, pos.z), new ChunkData(chunk, biomes));
 
                 chunkPositions.add(pos);
             }
@@ -139,9 +145,9 @@ public class WorldPreview implements IBlockAccess {
 
         List<PreviewChunk> previewChunks = new ArrayList<>();
         for (ChunkPos pos : chunkPositions) {
-            ChunkPrimer chunk = this.chunkMap.get(ChunkPos.asLong(pos.x, pos.z));
-            totalHeight += chunk.findGroundBlockIdx(8, 8) + 16;
-            previewChunks.add(new PreviewChunk(chunk, pos, this));
+            ChunkData chunk = this.chunkMap.get(ChunkPos.asLong(pos.x, pos.z));
+            totalHeight += chunk.primer.findGroundBlockIdx(8, 8) + 16;
+            previewChunks.add(new PreviewChunk(chunk.primer, chunk.biomes, pos, this));
         }
 
         this.heightOffset = totalHeight / previewChunks.size();
@@ -164,9 +170,9 @@ public class WorldPreview implements IBlockAccess {
         if (pos.getY() > 255 || pos.getY() < 0) {
             return Blocks.AIR.getDefaultState();
         }
-        ChunkPrimer chunk = this.chunkMap.get(ChunkPos.asLong(pos.getX() >> 4, pos.getZ() >> 4));
+        ChunkData chunk = this.chunkMap.get(ChunkPos.asLong(pos.getX() >> 4, pos.getZ() >> 4));
         if (chunk != null) {
-            return chunk.getBlockState(pos.getX() & 15, pos.getY() & 255, pos.getZ() & 15);
+            return chunk.primer.getBlockState(pos.getX() & 15, pos.getY() & 255, pos.getZ() & 15);
         }
         return Blocks.STONE.getDefaultState();
     }
@@ -203,5 +209,15 @@ public class WorldPreview implements IBlockAccess {
 
     public int getHeightOffset() {
         return this.heightOffset;
+    }
+
+    private class ChunkData {
+        private final ChunkPrimer primer;
+        private final Biome[] biomes;
+
+        private ChunkData(ChunkPrimer primer, Biome[] biomes) {
+            this.primer = primer;
+            this.biomes = biomes;
+        }
     }
 }

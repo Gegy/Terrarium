@@ -88,7 +88,7 @@ public class EarthChunkGenerator implements IChunkGenerator {
     @Override
     public Chunk generateChunk(int chunkX, int chunkZ) {
         ChunkPrimer primer = this.generatePrimer(chunkX, chunkZ);
-        this.biomeBuffer = this.world.getBiomeProvider().getBiomes(this.biomeBuffer, chunkX << 4, chunkZ << 4, 16, 16);
+        this.biomeBuffer = this.generateBiomes(this.biomeBuffer, chunkX, chunkZ);
 
         Chunk chunk = new Chunk(this.world, primer, chunkX, chunkZ);
 
@@ -112,6 +112,10 @@ public class EarthChunkGenerator implements IChunkGenerator {
         this.generateBiome(primer, chunkX, chunkZ);
 
         return primer;
+    }
+
+    public Biome[] generateBiomes(Biome[] biomeBuffer, int chunkX, int chunkZ) {
+        return this.world.getBiomeProvider().getBiomes(biomeBuffer, chunkX << 4, chunkZ << 4, 16, 16);
     }
 
     private void populateBlocks(ChunkPrimer primer, int chunkX, int chunkZ) {
