@@ -67,6 +67,10 @@ public class GenerationRegionHandler {
         return this.adapters.remove(adapter);
     }
 
+    public List<RegionAdapter> getAdapters() {
+        return this.adapters;
+    }
+
     public GenerationRegion get(int blockX, int blockZ) {
         return this.get(new RegionTilePos(Math.floorDiv(blockX, GenerationRegion.SIZE), Math.floorDiv(blockZ, GenerationRegion.SIZE)));
     }

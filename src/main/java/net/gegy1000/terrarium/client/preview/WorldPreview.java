@@ -80,7 +80,7 @@ public class WorldPreview implements IBlockAccess {
             this.performUploads(previewChunks);
 
             for (PreviewChunk chunk : previewChunks) {
-                chunk.render();
+                chunk.render(this.centerBlockPos.getX(), this.centerBlockPos.getZ());
             }
         }
     }

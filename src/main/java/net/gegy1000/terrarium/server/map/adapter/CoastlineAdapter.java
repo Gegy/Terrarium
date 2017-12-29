@@ -122,8 +122,10 @@ public class CoastlineAdapter implements RegionAdapter {
                 GlobType glob = globBuffer[i];
                 int landType = landmap[i] & 3;
                 if (landType == OCEAN) {
-                    globBuffer[i] = GlobType.WATER;
-                    heightBuffer[i] = 1;
+                    if (globBuffer[i] != GlobType.WATER) {
+                        globBuffer[i] = GlobType.WATER;
+                        heightBuffer[i] = 1;
+                    }
                 } else if (glob == GlobType.WATER) {
                     globBuffer[i] = GlobType.UNSELECTED;
                     unselectedPoints.add(new FloodFill.Point(i % width, i / width));

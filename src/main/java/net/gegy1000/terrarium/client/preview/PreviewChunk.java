@@ -38,6 +38,8 @@ public class PreviewChunk {
     private final Biome[] biomes;
 
     private final ChunkPos pos;
+    private final int globalX;
+    private final int globalZ;
 
     private final IBlockAccess previewAccess;
 
@@ -64,6 +66,9 @@ public class PreviewChunk {
         this.biomes = biomes;
         this.pos = pos;
         this.previewAccess = previewAccess;
+
+        this.globalX = this.pos.getXStart();
+        this.globalZ = this.pos.getZStart();
     }
 
     public void executeBuild(ExecutorService executor, Supplier<BufferBuilder> builderSupplier) {
@@ -137,10 +142,13 @@ public class PreviewChunk {
         return new DisplayListGeometry(id);
     }
 
-    public void render() {
+    public void render(int cameraX, int cameraZ) {
         Geometry geometry = this.geometry;
         if (geometry != null) {
+            GlStateManager.pushMatrix();
+            GlStateManager.translate(this.globalX - cameraX, 0.0, this.globalZ - cameraZ);
             geometry.render();
+            GlStateManager.popMatrix();
         }
     }
 
@@ -165,8 +173,8 @@ public class PreviewChunk {
 
         ChunkPrimer chunk = this.chunk;
         IBlockAccess previewAccess = this.previewAccess;
-        int globalX = this.pos.x << 4;
-        int globalZ = this.pos.z << 4;
+        int globalX = this.globalX;
+        int globalZ = this.globalZ;
 
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
         for (int z = 0; z < 16; z++) {
@@ -192,7 +200,7 @@ public class PreviewChunk {
                         }
 
                         if (!faces.isEmpty()) {
-                            this.buildFaces(builder, faces, state, biome, pos);
+                            this.buildFaces(builder, faces, state, biome, pos, x, z);
                         }
                     }
                 }
@@ -202,13 +210,13 @@ public class PreviewChunk {
         builder.setTranslation(0.0, 0.0, 0.0);
     }
 
-    private void buildFaces(BufferBuilder builder, List<EnumFacing> faces, IBlockState state, Biome biome, BlockPos pos) {
+    private void buildFaces(BufferBuilder builder, List<EnumFacing> faces, IBlockState state, Biome biome, BlockPos pos, int x, int z) {
         int color = this.getBlockColor(state, biome, pos);
         int red = (color >> 16) & 0xFF;
         int green = (color >> 8) & 0xFF;
         int blue = color & 0xFF;
 
-        builder.setTranslation(pos.getX(), pos.getY(), pos.getZ());
+        builder.setTranslation(x, pos.getY(), z);
 
         for (EnumFacing face : faces) {
             this.buildFace(builder, face, red, green, blue);

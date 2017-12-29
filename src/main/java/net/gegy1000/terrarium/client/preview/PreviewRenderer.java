@@ -10,7 +10,6 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
@@ -41,8 +40,6 @@ public class PreviewRenderer {
             ScaledResolution resolution = new ScaledResolution(MC);
             double scaleFactor = resolution.getScaleFactor();
 
-            BlockPos centerPos = preview.getCenterBlockPos();
-
             GlStateManager.pushMatrix();
             GlStateManager.scale(scaleFactor, scaleFactor, scaleFactor);
 
@@ -58,7 +55,7 @@ public class PreviewRenderer {
             GlStateManager.rotate(rotationX, 1.0F, 0.0F, 0.0F);
             GlStateManager.rotate(rotationY, 0.0F, 1.0F, 0.0F);
 
-            GlStateManager.translate(-centerPos.getX(), -preview.getHeightOffset(), -centerPos.getZ());
+            GlStateManager.translate(0.0, -preview.getHeightOffset(), 0.0);
 
             RenderHelper.enableStandardItemLighting();
 
