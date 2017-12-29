@@ -19,6 +19,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponseInterceptor;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.GzipDecompressingEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -67,7 +68,13 @@ public class OverpassSource extends TiledSource<OverpassTileAccess> implements C
                         .filter(element -> element.getName().equalsIgnoreCase("gzip"))
                         .findFirst()
                         .ifPresent(element -> response.setEntity(new GzipDecompressingEntity(entity)));
-            }).build();
+            })
+            .setDefaultRequestConfig(RequestConfig.custom()
+                    .setConnectTimeout(1000)
+                    .setConnectionRequestTimeout(1000)
+                    .setSocketTimeout(30000)
+                    .build())
+            .build();
 
     private final EarthGenerationSettings settings;
 

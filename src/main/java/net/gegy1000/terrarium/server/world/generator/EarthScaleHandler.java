@@ -8,14 +8,10 @@ import net.minecraft.util.math.MathHelper;
 public class EarthScaleHandler {
     private final EarthGenerationSettings settings;
 
-    private final int maxHeight;
-
     private final double heightScale;
 
-    public EarthScaleHandler(EarthGenerationSettings settings, int maxHeight) {
+    public EarthScaleHandler(EarthGenerationSettings settings) {
         this.settings = settings;
-
-        this.maxHeight = maxHeight;
 
         this.heightScale = this.settings.worldScale * this.settings.terrainHeightScale;
     }
@@ -44,13 +40,13 @@ public class EarthScaleHandler {
                 double y2 = Interpolation.cosine(east, southEast, intermediateZ);
 
                 double interpolatedHeight = Interpolation.cosine(y1, y2, intermediateX);
-                int scaled = (int) (interpolatedHeight * this.heightScale);
+                short scaled = (short) (interpolatedHeight * this.heightScale);
 
                 int resultIndex = scaledX + scaledZ * scaledWidth;
                 if (interpolatedHeight >= 0.0 && scaled < 1) {
-                    scaledResult[resultIndex] = (short) (this.settings.heightOffset + 1);
+                    scaledResult[resultIndex] = 1;
                 } else {
-                    scaledResult[resultIndex] = (short) MathHelper.clamp(scaled + this.settings.heightOffset, 0, this.maxHeight);
+                    scaledResult[resultIndex] = scaled;
                 }
             }
         }

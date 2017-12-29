@@ -17,6 +17,8 @@ public class EarthGenerationHandler {
     private final EarthScaleHandler scaleHandler;
     private final GenerationRegionHandler regionHandler;
 
+    private final int maxHeight;
+
     private final int oceanHeight;
     private final int scatterRange;
 
@@ -24,8 +26,9 @@ public class EarthGenerationHandler {
 
     public EarthGenerationHandler(TerrariumWorldData worldData, EarthGenerationSettings settings, int maxHeight) {
         this.settings = settings;
+        this.maxHeight = maxHeight;
 
-        this.scaleHandler = new EarthScaleHandler(settings, maxHeight);
+        this.scaleHandler = new EarthScaleHandler(settings);
         this.regionHandler = new GenerationRegionHandler(worldData, this, this.scaleHandler);
 
         this.oceanHeight = this.settings.heightOffset + 1;
@@ -48,7 +51,8 @@ public class EarthGenerationHandler {
                     int blockX = globalX + localX;
 
                     GenerationRegion region = this.regionHandler.get(blockX, blockZ);
-                    buffer[localX + localZ * 16] = region.getHeight(blockX, blockZ);
+                    int offsetHeight = region.getHeight(blockX, blockZ) + this.settings.heightOffset;
+                    buffer[localX + localZ * 16] = MathHelper.clamp(offsetHeight, 0, this.maxHeight);
                 }
             }
         } catch (Exception e) {

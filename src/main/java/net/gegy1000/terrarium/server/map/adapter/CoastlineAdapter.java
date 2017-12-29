@@ -2,6 +2,7 @@ package net.gegy1000.terrarium.server.map.adapter;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import net.gegy1000.terrarium.server.map.RegionData;
 import net.gegy1000.terrarium.server.map.glob.GlobType;
 import net.gegy1000.terrarium.server.map.source.osm.OverpassSource;
 import net.gegy1000.terrarium.server.map.source.osm.OverpassTileAccess;
@@ -28,7 +29,12 @@ public class CoastlineAdapter implements RegionAdapter {
     private static final int FREE_FLOOD = 16;
 
     @Override
-    public void adaptGlobcover(EarthGenerationSettings settings, OverpassTileAccess overpassTile, GlobType[] globBuffer, int x, int z, int width, int height) {
+    public void adapt(EarthGenerationSettings settings, RegionData data, int x, int z, int width, int height) {
+        OverpassTileAccess overpassTile = data.getOverpassTile();
+
+        short[] heightBuffer = data.getHeights();
+        GlobType[] globBuffer = data.getGlobcover();
+
         List<OverpassSource.Element> coastlines = overpassTile.getElements().stream()
                 .filter(element -> element.isType("natural", "coastline"))
                 .collect(Collectors.toList());
@@ -117,6 +123,7 @@ public class CoastlineAdapter implements RegionAdapter {
                 int landType = landmap[i] & 3;
                 if (landType == OCEAN) {
                     globBuffer[i] = GlobType.WATER;
+                    heightBuffer[i] = 1;
                 } else if (glob == GlobType.WATER) {
                     globBuffer[i] = GlobType.UNSELECTED;
                     unselectedPoints.add(new FloodFill.Point(i % width, i / width));

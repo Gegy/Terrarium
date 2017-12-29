@@ -90,7 +90,19 @@ public class GenerationRegionHandler {
         short[] heights = this.generateHeights(minCoordinate, maxCoordinate);
         GlobType[] globcover = this.generateGlobcover(overpassTile, minCoordinate, maxCoordinate);
 
-        return new GenerationRegion(pos, heights, globcover);
+        RegionData data = new RegionData(heights, globcover, overpassTile);
+
+        int originX = MathHelper.floor(minCoordinate.getBlockX());
+        int originZ = MathHelper.floor(minCoordinate.getBlockZ());
+        for (RegionAdapter adapter : this.adapters) {
+            try {
+                adapter.adapt(this.generationHandler.getSettings(), data, originX, originZ, GenerationRegion.SIZE, GenerationRegion.SIZE);
+            } catch (Exception e) {
+                Terrarium.LOGGER.error("Failed to run adapter {}", adapter, e);
+            }
+        }
+
+        return new GenerationRegion(pos, data);
     }
 
     private short[] generateHeights(Coordinate minCoordinate, Coordinate maxCoordinate) {
@@ -108,23 +120,12 @@ public class GenerationRegionHandler {
         GlobType[] resultGlobs = ArrayUtils.defaulted(new GlobType[GenerationRegion.SIZE * GenerationRegion.SIZE], GlobType.NO_DATA);
         this.scaleHandler.scaleGlobRegion(resultGlobs, this.sampledGlobs, this.sampledDataSize, this.sampledDataSize, GenerationRegion.SIZE, GenerationRegion.SIZE);
 
-        int originX = MathHelper.floor(minCoordinate.getBlockX());
-        int originZ = MathHelper.floor(minCoordinate.getBlockZ());
-        for (RegionAdapter adapter : this.adapters) {
-            try {
-                adapter.adaptGlobcover(this.generationHandler.getSettings(), overpassTile, resultGlobs, originX, originZ, GenerationRegion.SIZE, GenerationRegion.SIZE);
-            } catch (Exception e) {
-                Terrarium.LOGGER.error("Failed to run adapter {}", adapter, e);
-            }
-        }
-
         return resultGlobs;
     }
 
     private GenerationRegion createDefaultRegion(RegionTilePos pos) {
-        Coordinate minCoordinate = pos.getMinCoordinate(this.generationHandler.getSettings());
         short[] heights = new short[GenerationRegion.SIZE * GenerationRegion.SIZE];
         GlobType[] globcover = ArrayUtils.defaulted(new GlobType[GenerationRegion.SIZE * GenerationRegion.SIZE], GlobType.NO_DATA);
-        return new GenerationRegion(pos, heights, globcover);
+        return new GenerationRegion(pos, new RegionData(heights, globcover, new OverpassTileAccess()));
     }
 }

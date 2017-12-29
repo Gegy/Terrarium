@@ -11,12 +11,12 @@ public class GenerationRegion {
     private final short[] heights;
     private final GlobType[] globcover;
 
-    public GenerationRegion(RegionTilePos pos, short[] heights, GlobType[] globcover) {
+    public GenerationRegion(RegionTilePos pos, RegionData data) {
         this.pos = pos;
         this.minBlockX = pos.getMinX();
         this.minBlockZ = pos.getMinZ();
-        this.heights = heights;
-        this.globcover = globcover;
+        this.heights = data.getHeights();
+        this.globcover = data.getGlobcover();
     }
 
     public RegionTilePos getPos() {
