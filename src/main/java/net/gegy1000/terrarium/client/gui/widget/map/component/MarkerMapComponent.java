@@ -33,7 +33,7 @@ public class MarkerMapComponent implements MapComponent {
             int markerY = this.marker.getY(map.getCameraZoom()) - map.getCameraY();
 
             Minecraft.getMinecraft().getTextureManager().bindTexture(WIDGETS_TEXTURE);
-            Gui.drawScaledCustomSizeModalRect(markerX - 8 * scale, markerY - 16 * scale, 0.0F, 32.0F, 16, 16, 16 * scale, 16 * scale, 256, 256);
+            Gui.drawScaledCustomSizeModalRect(markerX - 4 * scale, markerY - 8 * scale, 0.0F, 32.0F, 16, 16, 8 * scale, 8 * scale, 256, 256);
         }
     }
 

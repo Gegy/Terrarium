@@ -1,7 +1,7 @@
 [out:json]
-[bbox:%s,%s,%s,%s];
+[timeout:30][maxsize:5242880][bbox:%s,%s,%s,%s];
 
-way["highway"="primary"]; out;
+way["highway"]; out;
 node(w); out;
 
 way["natural"="coastline"]; out;

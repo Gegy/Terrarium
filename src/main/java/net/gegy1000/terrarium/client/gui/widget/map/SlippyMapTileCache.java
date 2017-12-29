@@ -24,8 +24,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 
 @SideOnly(Side.CLIENT)
 public class SlippyMapTileCache {
@@ -48,6 +50,8 @@ public class SlippyMapTileCache {
                 }
             });
 
+    private final Queue<InputStream> loadingStreams = new LinkedBlockingQueue<>();
+
     public SlippyMapTile getTile(SlippyMapTilePos pos) {
         try {
             return this.tileCache.get(pos);
@@ -59,7 +63,16 @@ public class SlippyMapTileCache {
     }
 
     public void shutdown() {
+        this.tileCache.invalidateAll();
         this.loadingService.shutdownNow();
+
+        while (!this.loadingStreams.isEmpty()) {
+            try {
+                this.loadingStreams.poll().close();
+            } catch (IOException e) {
+                Terrarium.LOGGER.warn("Failed to close loading map stream", e);
+            }
+        }
     }
 
     private BufferedImage downloadImage(SlippyMapTilePos pos) {
@@ -80,11 +93,14 @@ public class SlippyMapTileCache {
         URL url = new URL(TerrariumData.info.getRasterMapEndpoint() + "/" + query);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setConnectTimeout(1000);
+        connection.setReadTimeout(5000);
         connection.setRequestProperty("User-Agent", Terrarium.MODID);
-        connection.setRequestProperty("Accept-Encoding", "gzip");
-        try (InputStream input = connection.getInputStream()) {
+        InputStream stream = connection.getInputStream();
+        this.loadingStreams.add(stream);
+        try (InputStream input = new BufferedInputStream(stream)) {
             byte[] data = IOUtils.toByteArray(input);
             this.cacheData(cacheFile, data);
+            this.loadingStreams.remove(stream);
             return new ByteArrayInputStream(data);
         }
     }
