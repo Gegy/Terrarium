@@ -61,6 +61,9 @@ public class WorldPreview implements IBlockAccess {
             try {
                 List<PreviewChunk> chunks = this.generateChunks();
                 for (PreviewChunk chunk : chunks) {
+                    if (this.executor.isTerminated() || this.executor.isShutdown()) {
+                        break;
+                    }
                     chunk.executeBuild(this.executor, this::takeBuilder);
                 }
                 this.previewChunks = chunks;

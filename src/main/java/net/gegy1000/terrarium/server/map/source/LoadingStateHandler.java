@@ -13,9 +13,21 @@ public class LoadingStateHandler {
     private static final Object LOCK = new Object();
 
     public static void putState(LoadingState state) {
+        StateEntry entry = LoadingStateHandler.makeState(state);
+        LoadingStateHandler.breakState(entry);
+    }
+
+    public static StateEntry makeState(LoadingState state) {
+        StateEntry entry = new StateEntry(state);
         synchronized (LOCK) {
-            STATE_BUFFER.add(new StateEntry(state, System.currentTimeMillis()));
+            STATE_BUFFER.add(entry);
         }
+        return entry;
+    }
+
+    public static void breakState(StateEntry entry) {
+        entry.completed = true;
+        entry.completedTime = System.currentTimeMillis();
     }
 
     public static LoadingState checkState() {
@@ -45,17 +57,18 @@ public class LoadingStateHandler {
         }
     }
 
-    private static class StateEntry {
+    public static class StateEntry {
         private final LoadingState state;
-        private final long time;
 
-        private StateEntry(LoadingState state, long time) {
+        private boolean completed;
+        private long completedTime;
+
+        private StateEntry(LoadingState state) {
             this.state = state;
-            this.time = time;
         }
 
         public boolean hasExpired() {
-            return System.currentTimeMillis() - this.time > STATE_LIFETIME;
+            return this.completed && System.currentTimeMillis() - this.completedTime > STATE_LIFETIME;
         }
     }
 }

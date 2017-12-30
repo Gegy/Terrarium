@@ -5,6 +5,7 @@ import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.map.source.tiled.DataTilePos;
 import org.apache.commons.io.IOUtils;
 
+import javax.swing.plaf.nimbus.State;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -31,12 +32,14 @@ public interface CachedRemoteSource {
     default InputStream getStream(DataTilePos key) throws NoDataException {
         File cachedFile = new File(this.getCacheRoot(), this.getCachedName(key));
         if (!this.shouldLoadCache(key, cachedFile)) {
+            LoadingStateHandler.StateEntry onlineEntry = LoadingStateHandler.makeState(LoadingState.LOADING_ONLINE);
             try (InputStream remoteStream = this.getRemoteStream(key)) {
-                LoadingStateHandler.putState(LoadingState.LOADING_ONLINE);
                 byte[] remoteData = IOUtils.toByteArray(remoteStream);
                 this.cacheData(key, cachedFile, remoteData);
+                LoadingStateHandler.breakState(onlineEntry);
                 return new ByteArrayInputStream(remoteData);
             } catch (IOException e) {
+                LoadingStateHandler.breakState(onlineEntry);
                 LoadingStateHandler.putState(LoadingState.LOADING_NO_CONNECTION);
                 Terrarium.LOGGER.error("Failed to load remote tile data stream at {}", key, e);
                 throw new NoDataException("Loading remotely failed", e);
