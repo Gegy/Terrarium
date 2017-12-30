@@ -112,7 +112,7 @@ public class CoastlineAdapter implements RegionAdapter {
                 int floodType = entry.getValue();
                 int sampled = landmap[point.getX() + point.getZ() * width];
                 FillVisitor visitor = new FillVisitor(floodType);
-                if (visitor.canVisit(sampled)) {
+                if (visitor.canVisit(point, sampled)) {
                     FloodFill.floodVisit(landmap, width, height, point, visitor);
                 }
             }
@@ -127,7 +127,7 @@ public class CoastlineAdapter implements RegionAdapter {
                         heightBuffer[i] = 1;
                     }
                 } else if (glob == GlobType.WATER) {
-                    globBuffer[i] = GlobType.UNSELECTED;
+                    globBuffer[i] = GlobType.PROCESSING;
                     unselectedPoints.add(new FloodFill.Point(i % width, i / width));
                 }
             }
@@ -185,7 +185,7 @@ public class CoastlineAdapter implements RegionAdapter {
         }
 
         @Override
-        public boolean canVisit(int sampled) {
+        public boolean canVisit(FloodFill.Point point, int sampled) {
             int landType = sampled & 3;
             return (landType == LAND || landType == OCEAN) && (landType != (this.floodType & 3) || (sampled & 252) == FREE_FLOOD);
         }
@@ -196,7 +196,7 @@ public class CoastlineAdapter implements RegionAdapter {
 
         @Override
         public GlobType visit(FloodFill.Point point, GlobType sampled) {
-            if (sampled != GlobType.UNSELECTED) {
+            if (sampled != GlobType.PROCESSING) {
                 this.result = sampled;
                 return null;
             }
@@ -204,7 +204,7 @@ public class CoastlineAdapter implements RegionAdapter {
         }
 
         @Override
-        public boolean canVisit(GlobType sampled) {
+        public boolean canVisit(FloodFill.Point point, GlobType sampled) {
             return sampled != GlobType.WATER;
         }
 

@@ -52,7 +52,7 @@ public enum GlobType {
     WATER(210, Biomes.OCEAN, Water.class, 0.05, false),
     SNOW(220, Biomes.ICE_PLAINS, Snow.class),
     NO_DATA(0, Biomes.PLAINS, Bare.class),
-    UNSELECTED(-1, Biomes.DEFAULT, Bare.class);
+    PROCESSING(-1, Biomes.DEFAULT, Bare.class);
 
     private static final GlobType[] TYPES = new GlobType[256];
 

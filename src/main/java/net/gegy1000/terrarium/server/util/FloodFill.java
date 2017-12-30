@@ -1,7 +1,6 @@
 package net.gegy1000.terrarium.server.util;
 
-import com.google.common.collect.Sets;
-
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
@@ -9,7 +8,8 @@ import java.util.Set;
 public class FloodFill {
     public static void floodVisit(int[] map, int width, int height, Point origin, IntVisitor visitor) {
         Queue<Point> points = new LinkedList<>();
-        Set<Point> visitedPoints = Sets.newHashSet(origin);
+        Set<Point> visitedPoints = new HashSet<>(1);
+        visitedPoints.add(origin);
         points.add(origin);
 
         while (!points.isEmpty()) {
@@ -49,9 +49,53 @@ public class FloodFill {
         }
     }
 
+    public static void floodVisit(short[] map, int width, int height, Point origin, ShortVisitor visitor) {
+        Queue<Point> points = new LinkedList<>();
+        Set<Point> visitedPoints = new HashSet<>(1);
+        visitedPoints.add(origin);
+        points.add(origin);
+
+        while (!points.isEmpty()) {
+            Point currentPoint = points.poll();
+            int index = currentPoint.x + currentPoint.z * width;
+            short value = map[index];
+            short visited = visitor.visit(currentPoint, value);
+            if (value != visited) {
+                map[index] = visited;
+            }
+
+            if (currentPoint.x > 0) {
+                int neighbourX = currentPoint.x - 1;
+                int neighbourZ = currentPoint.z;
+                short sampled = map[neighbourX + neighbourZ * width];
+                FloodFill.visitNeighbour(points, visitedPoints, sampled, neighbourX, neighbourZ, visitor);
+            }
+            if (currentPoint.z > 0) {
+                int neighbourX = currentPoint.x;
+                int neighbourZ = currentPoint.z - 1;
+                short sampled = map[neighbourX + neighbourZ * width];
+                FloodFill.visitNeighbour(points, visitedPoints, sampled, neighbourX, neighbourZ, visitor);
+            }
+
+            if (currentPoint.x < width - 1) {
+                int neighbourX = currentPoint.x + 1;
+                int neighbourZ = currentPoint.z;
+                short sampled = map[neighbourX + neighbourZ * width];
+                FloodFill.visitNeighbour(points, visitedPoints, sampled, neighbourX, neighbourZ, visitor);
+            }
+            if (currentPoint.z < height - 1) {
+                int neighbourX = currentPoint.x;
+                int neighbourZ = currentPoint.z + 1;
+                short sampled = map[neighbourX + neighbourZ * width];
+                FloodFill.visitNeighbour(points, visitedPoints, sampled, neighbourX, neighbourZ, visitor);
+            }
+        }
+    }
+
     public static <T> void floodVisit(T[] map, int width, int height, Point origin, Visitor<T> visitor) {
         Queue<Point> points = new LinkedList<>();
-        Set<Point> visitedPoints = Sets.newHashSet(origin);
+        Set<Point> visitedPoints = new HashSet<>(1);
+        visitedPoints.add(origin);
         points.add(origin);
 
         while (!points.isEmpty()) {
@@ -96,7 +140,15 @@ public class FloodFill {
 
     private static void visitNeighbour(Queue<Point> points, Set<Point> visitedPoints, int sampled, int neighbourX, int neighbourY, IntVisitor visitor) {
         Point neighbourPoint = new Point(neighbourX, neighbourY);
-        if (visitor.canVisit(sampled) && !visitedPoints.contains(neighbourPoint)) {
+        if (visitor.canVisit(neighbourPoint, sampled) && !visitedPoints.contains(neighbourPoint)) {
+            points.add(neighbourPoint);
+            visitedPoints.add(neighbourPoint);
+        }
+    }
+
+    private static void visitNeighbour(Queue<Point> points, Set<Point> visitedPoints, short sampled, int neighbourX, int neighbourY, ShortVisitor visitor) {
+        Point neighbourPoint = new Point(neighbourX, neighbourY);
+        if (visitor.canVisit(neighbourPoint, sampled) && !visitedPoints.contains(neighbourPoint)) {
             points.add(neighbourPoint);
             visitedPoints.add(neighbourPoint);
         }
@@ -104,7 +156,7 @@ public class FloodFill {
 
     private static <T> void visitNeighbour(Queue<Point> points, Set<Point> visitedPoints, T sampled, int neighbourX, int neighbourY, Visitor<T> visitor) {
         Point neighbourPoint = new Point(neighbourX, neighbourY);
-        if (visitor.canVisit(sampled) && !visitedPoints.contains(neighbourPoint)) {
+        if (visitor.canVisit(neighbourPoint, sampled) && !visitedPoints.contains(neighbourPoint)) {
             points.add(neighbourPoint);
             visitedPoints.add(neighbourPoint);
         }
@@ -113,13 +165,19 @@ public class FloodFill {
     public interface Visitor<T> {
         T visit(Point point, T sampled);
 
-        boolean canVisit(T sampled);
+        boolean canVisit(Point point, T sampled);
     }
 
     public interface IntVisitor {
         int visit(Point point, int sampled);
 
-        boolean canVisit(int sampled);
+        boolean canVisit(Point point, int sampled);
+    }
+
+    public interface ShortVisitor {
+        short visit(Point point, short sampled);
+
+        boolean canVisit(Point point, short sampled);
     }
 
     public static class Point {

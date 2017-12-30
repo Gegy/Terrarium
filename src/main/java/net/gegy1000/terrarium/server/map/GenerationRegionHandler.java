@@ -7,6 +7,7 @@ import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.map.adapter.CoastlineAdapter;
 import net.gegy1000.terrarium.server.map.adapter.RegionAdapter;
+import net.gegy1000.terrarium.server.map.adapter.WaterFlattenAdapter;
 import net.gegy1000.terrarium.server.map.glob.GlobType;
 import net.gegy1000.terrarium.server.map.source.osm.OverpassTileAccess;
 import net.gegy1000.terrarium.server.util.ArrayUtils;
@@ -57,6 +58,7 @@ public class GenerationRegionHandler {
         this.sampledGlobs = ArrayUtils.defaulted(new GlobType[this.sampledDataSize * this.sampledDataSize], GlobType.NO_DATA);
 
         this.adapters.add(new CoastlineAdapter());
+        this.adapters.add(new WaterFlattenAdapter());
     }
 
     public void addAdapter(RegionAdapter adapter) {
