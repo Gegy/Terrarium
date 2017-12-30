@@ -1,5 +1,6 @@
 package net.gegy1000.terrarium.client.preview;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.gegy1000.terrarium.Terrarium;
@@ -28,15 +29,14 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @SideOnly(Side.CLIENT)
 public class WorldPreview implements IBlockAccess {
     private static final int VIEW_RANGE = 12;
 
-    private final EarthGenerationSettings settings;
-    private final ExecutorService executor;
+    private final ExecutorService executor = Executors.newFixedThreadPool(3, new ThreadFactoryBuilder().setDaemon(true).setNameFormat("terrarium-preview-%d").build());
 
-    private final BufferBuilder[] builders;
     private final BlockingQueue<BufferBuilder> builderQueue;
 
     private final EarthChunkGenerator generator;
@@ -49,11 +49,7 @@ public class WorldPreview implements IBlockAccess {
     private List<PreviewChunk> previewChunks = null;
     private int heightOffset = 64;
 
-    public WorldPreview(EarthGenerationSettings settings, ExecutorService executor, BufferBuilder[] builders) {
-        this.settings = settings;
-        this.executor = executor;
-        this.builders = builders;
-
+    public WorldPreview(EarthGenerationSettings settings, BufferBuilder[] builders) {
         this.builderQueue = new ArrayBlockingQueue<>(builders.length);
         Collections.addAll(this.builderQueue, builders);
 
@@ -65,7 +61,7 @@ public class WorldPreview implements IBlockAccess {
             try {
                 List<PreviewChunk> chunks = this.generateChunks();
                 for (PreviewChunk chunk : chunks) {
-                    chunk.executeBuild(executor, this::takeBuilder);
+                    chunk.executeBuild(this.executor, this::takeBuilder);
                 }
                 this.previewChunks = chunks;
             } catch (Exception e) {
@@ -74,7 +70,7 @@ public class WorldPreview implements IBlockAccess {
         });
     }
 
-    public void render() {
+    public void renderChunks() {
         List<PreviewChunk> previewChunks = this.previewChunks;
         if (previewChunks != null) {
             this.performUploads(previewChunks);
@@ -105,18 +101,22 @@ public class WorldPreview implements IBlockAccess {
                 chunk.delete();
             }
         }
+        this.executor.shutdown();
     }
 
     public BufferBuilder takeBuilder() {
         try {
             return this.builderQueue.take();
         } catch (InterruptedException e) {
-            return new BufferBuilder(8);
+            return null;
         }
     }
 
     public void returnBuilder(BufferBuilder builder) {
-        if (builder != null && !this.builderQueue.contains(builder)) {
+        if (builder != null) {
+            if (this.builderQueue.contains(builder)) {
+                throw new IllegalArgumentException("Cannot return already returned builder!");
+            }
             this.builderQueue.add(builder);
         }
     }
@@ -201,10 +201,6 @@ public class WorldPreview implements IBlockAccess {
     @Override
     public boolean isSideSolid(BlockPos pos, EnumFacing side, boolean _default) {
         return this.getBlockState(pos).isFullCube();
-    }
-
-    public BlockPos getCenterBlockPos() {
-        return this.centerBlockPos;
     }
 
     public int getHeightOffset() {

@@ -75,6 +75,9 @@ public class PreviewChunk {
         synchronized (this.buildLock) {
             this.builderResult = executor.submit(() -> {
                 BufferBuilder builder = builderSupplier.get();
+                if (builder == null) {
+                    return null;
+                }
                 this.buildBlocks(builder);
                 return builder;
             });
@@ -116,8 +119,10 @@ public class PreviewChunk {
     }
 
     public boolean isUploadReady() {
-        Future<BufferBuilder> result = this.builderResult;
-        return result != null && result.isDone();
+        synchronized (this.buildLock) {
+            Future<BufferBuilder> result = this.builderResult;
+            return result != null && result.isDone();
+        }
     }
 
     private Geometry buildGeometry(BufferBuilder builder) {
@@ -162,7 +167,7 @@ public class PreviewChunk {
     public void cancelGeneration() {
         synchronized (this.buildLock) {
             Future<BufferBuilder> builderResult = this.builderResult;
-            if (builderResult != null) {
+            if (builderResult != null && !builderResult.isDone()) {
                 builderResult.cancel(true);
             }
         }

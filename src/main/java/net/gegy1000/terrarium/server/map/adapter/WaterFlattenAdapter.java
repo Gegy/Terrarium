@@ -101,7 +101,7 @@ public class WaterFlattenAdapter implements RegionAdapter {
             int deltaZ = point.getZ() - this.origin.getZ();
             double distance = (double) (deltaX * deltaX + deltaZ * deltaZ);
             double scale = MathHelper.clamp(distance / this.rangeSquared, 0.0, 1.0);
-            return (short) MathHelper.ceil(this.target + (sampled - this.target) * scale);
+            return (short) MathHelper.floor(this.target + (sampled - this.target) * scale);
         }
 
         @Override

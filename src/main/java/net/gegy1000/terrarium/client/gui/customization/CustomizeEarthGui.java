@@ -1,6 +1,5 @@
 package net.gegy1000.terrarium.client.gui.customization;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.gegy1000.terrarium.client.gui.customization.setting.BuildingsValue;
 import net.gegy1000.terrarium.client.gui.customization.setting.CaveGenValue;
 import net.gegy1000.terrarium.client.gui.customization.setting.CustomizationValue;
@@ -28,8 +27,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.input.Keyboard;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @SideOnly(Side.CLIENT)
 public class CustomizeEarthGui extends GuiScreen {
@@ -58,8 +55,6 @@ public class CustomizeEarthGui extends GuiScreen {
 
     private final CustomizationValue<Boolean> caveGenValue;
     private final CustomizationValue<Boolean> mapFeaturesValue;
-
-    private final ExecutorService executor = Executors.newFixedThreadPool(3, new ThreadFactoryBuilder().setDaemon(true).setNameFormat("terrarium-preview-%d").build());
 
     private CustomizationList customizationList;
 
@@ -223,8 +218,6 @@ public class CustomizeEarthGui extends GuiScreen {
         if (!this.freeze) {
             super.onGuiClosed();
 
-            this.executor.shutdownNow();
-
             this.deletePreview();
         }
     }
@@ -247,7 +240,7 @@ public class CustomizeEarthGui extends GuiScreen {
         for (int i = 0; i < builders.length; i++) {
             builders[i] = new BufferBuilder(0x4000);
         }
-        this.preview = new WorldPreview(this.settings, this.executor, builders);
+        this.preview = new WorldPreview(this.settings, builders);
     }
 
     private void previewLarge() {

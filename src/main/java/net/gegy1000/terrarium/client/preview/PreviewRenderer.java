@@ -59,7 +59,7 @@ public class PreviewRenderer {
 
             RenderHelper.enableStandardItemLighting();
 
-            preview.render();
+            preview.renderChunks();
 
             GlStateManager.disableLighting();
             GlStateManager.disableDepth();

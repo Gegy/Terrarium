@@ -64,7 +64,7 @@ public class SlippyMapTileCache {
 
     public void shutdown() {
         this.tileCache.invalidateAll();
-        this.loadingService.shutdownNow();
+        this.loadingService.shutdown();
 
         while (!this.loadingStreams.isEmpty()) {
             try {
