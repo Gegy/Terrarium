@@ -2,7 +2,6 @@ package net.gegy1000.terrarium.server.map.adapter;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import net.gegy1000.terrarium.server.map.GenerationRegion;
 import net.gegy1000.terrarium.server.map.RegionData;
 import net.gegy1000.terrarium.server.map.glob.GlobType;
 import net.gegy1000.terrarium.server.map.source.osm.OverpassSource;
@@ -13,11 +12,7 @@ import net.gegy1000.terrarium.server.util.Interpolation;
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
 import net.minecraft.util.math.MathHelper;
 
-import javax.imageio.ImageIO;
 import java.awt.Point;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -137,37 +132,11 @@ public class CoastlineAdapter implements RegionAdapter {
                 }
             }
 
-            draw(globBuffer, x, z, 0);
             for (FloodFill.Point point : unselectedPoints) {
                 GlobSelectVisitor visitor = new GlobSelectVisitor();
                 FloodFill.floodVisit(globBuffer, width, height, point, visitor);
                 globBuffer[point.getX() + point.getZ() * width] = visitor.getResult();
             }
-            draw(globBuffer, x, z, 1);
-        }
-    }
-
-    private void draw(GlobType[] buffer, int x, int z, int s) {
-        BufferedImage image = new BufferedImage(GenerationRegion.SIZE, GenerationRegion.SIZE, BufferedImage.TYPE_INT_RGB);
-        for (int localZ = 0; localZ < GenerationRegion.SIZE; localZ++) {
-            for (int localX = 0; localX < GenerationRegion.SIZE; localX++) {
-                GlobType globType = buffer[localX + localZ * GenerationRegion.SIZE];
-                int colour = 0x00FF00;
-                switch (globType) {
-                    case WATER:
-                        colour = 0x0000FF;
-                        break;
-                    case PROCESSING:
-                        colour = 0xFFFF00;
-                        break;
-                }
-                image.setRGB(localX, localZ, colour);
-            }
-        }
-        try {
-            ImageIO.write(image, "png", new File("stages/glob_" + x + "_" + z + "_" + s +".png"));
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 

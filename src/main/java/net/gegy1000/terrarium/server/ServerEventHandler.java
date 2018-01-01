@@ -19,7 +19,7 @@ public class ServerEventHandler {
         World world = event.getWorld();
         if (world.getWorldType() instanceof EarthWorldType) {
             EarthGenerationSettings settings = EarthGenerationSettings.deserialize(world.getWorldInfo().getGeneratorOptions());
-            world.setSpawnPoint(Coordinate.fromLatLng(settings, settings.spawnLatitude, settings.spawnLongitude).toBlockPos(0));
+            world.setSpawnPoint(Coordinate.fromLatLng(settings, settings.spawnLatitude, settings.spawnLongitude).toBlockPos());
         }
     }
 

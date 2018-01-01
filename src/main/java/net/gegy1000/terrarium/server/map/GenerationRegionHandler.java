@@ -9,6 +9,8 @@ import net.gegy1000.terrarium.server.map.adapter.CoastlineAdapter;
 import net.gegy1000.terrarium.server.map.adapter.RegionAdapter;
 import net.gegy1000.terrarium.server.map.adapter.WaterFlattenAdapter;
 import net.gegy1000.terrarium.server.map.glob.GlobType;
+import net.gegy1000.terrarium.server.map.source.osm.DetailedOverpassSource;
+import net.gegy1000.terrarium.server.map.source.osm.GeneralOverpassSource;
 import net.gegy1000.terrarium.server.map.source.osm.OverpassTileAccess;
 import net.gegy1000.terrarium.server.util.ArrayUtils;
 import net.gegy1000.terrarium.server.util.Coordinate;
@@ -104,7 +106,17 @@ public class GenerationRegionHandler {
         Coordinate minCoordinate = pos.getMinCoordinate(settings);
         Coordinate maxCoordinate = pos.getMaxCoordinate(settings);
 
-        OverpassTileAccess overpassTile = this.worldData.getOverpassSource().sampleArea(minCoordinate, maxCoordinate);
+        OverpassTileAccess overpassTile = this.worldData.getOutlineOverpassSource().sampleArea(minCoordinate, maxCoordinate);
+
+        GeneralOverpassSource generalOverpassSource = this.worldData.getGeneralOverpassSource();
+        if (generalOverpassSource.shouldSample()) {
+            overpassTile = overpassTile.merge(generalOverpassSource.sampleArea(minCoordinate, maxCoordinate));
+        }
+
+        DetailedOverpassSource detailedOverpassSource = this.worldData.getDetailedOverpassSource();
+        if (detailedOverpassSource.shouldSample()) {
+            overpassTile = overpassTile.merge(detailedOverpassSource.sampleArea(minCoordinate, maxCoordinate));
+        }
 
         short[] heights = this.generateHeights(minCoordinate, maxCoordinate);
         GlobType[] globcover = this.generateGlobcover(minCoordinate, maxCoordinate);

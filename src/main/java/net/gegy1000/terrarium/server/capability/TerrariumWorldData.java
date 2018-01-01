@@ -4,7 +4,9 @@ import com.google.common.collect.Sets;
 import net.gegy1000.terrarium.server.map.source.GeocodingSource;
 import net.gegy1000.terrarium.server.map.source.glob.GlobSource;
 import net.gegy1000.terrarium.server.map.source.height.HeightSource;
-import net.gegy1000.terrarium.server.map.source.osm.OverpassSource;
+import net.gegy1000.terrarium.server.map.source.osm.DetailedOverpassSource;
+import net.gegy1000.terrarium.server.map.source.osm.GeneralOverpassSource;
+import net.gegy1000.terrarium.server.map.source.osm.OutlineOverpassSource;
 import net.gegy1000.terrarium.server.map.source.tiled.TiledSource;
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
 import net.gegy1000.terrarium.server.world.generator.EarthGenerationHandler;
@@ -23,7 +25,11 @@ public interface TerrariumWorldData extends ICapabilityProvider {
 
     GlobSource getGlobSource();
 
-    OverpassSource getOverpassSource();
+    DetailedOverpassSource getDetailedOverpassSource();
+
+    GeneralOverpassSource getGeneralOverpassSource();
+
+    OutlineOverpassSource getOutlineOverpassSource();
 
     GeocodingSource getGeocodingSource();
 
@@ -35,8 +41,11 @@ public interface TerrariumWorldData extends ICapabilityProvider {
 
         private final HeightSource heightSource;
         private final GlobSource globSource;
-        private final OverpassSource overpassSource;
         private final GeocodingSource geocodingSource;
+
+        private final DetailedOverpassSource detailedOverpassSource;
+        private final GeneralOverpassSource generalOverpassSource;
+        private final OutlineOverpassSource outlineOverpassSource;
 
         private final Set<TiledSource<?>> tiledSources;
 
@@ -46,12 +55,20 @@ public interface TerrariumWorldData extends ICapabilityProvider {
 
             this.heightSource = new HeightSource(this.settings);
             this.globSource = new GlobSource(this.settings);
-            this.overpassSource = new OverpassSource(this.settings);
             this.geocodingSource = new GeocodingSource(this.settings);
 
-            this.tiledSources = Collections.unmodifiableSet(Sets.newHashSet(this.heightSource, this.globSource, this.overpassSource));
+            this.detailedOverpassSource = new DetailedOverpassSource(this.settings);
+            this.generalOverpassSource = new GeneralOverpassSource(this.settings);
+            this.outlineOverpassSource = new OutlineOverpassSource(this.settings);
 
-            this.overpassSource.loadQuery();
+            this.tiledSources = Collections.unmodifiableSet(Sets.newHashSet(
+                    this.heightSource, this.globSource,
+                    this.detailedOverpassSource, this.generalOverpassSource, this.outlineOverpassSource
+            ));
+
+            this.detailedOverpassSource.loadQuery();
+            this.generalOverpassSource.loadQuery();
+            this.outlineOverpassSource.loadQuery();
         }
 
         @Override
@@ -70,8 +87,18 @@ public interface TerrariumWorldData extends ICapabilityProvider {
         }
 
         @Override
-        public OverpassSource getOverpassSource() {
-            return this.overpassSource;
+        public DetailedOverpassSource getDetailedOverpassSource() {
+            return this.detailedOverpassSource;
+        }
+
+        @Override
+        public GeneralOverpassSource getGeneralOverpassSource() {
+            return this.generalOverpassSource;
+        }
+
+        @Override
+        public OutlineOverpassSource getOutlineOverpassSource() {
+            return this.outlineOverpassSource;
         }
 
         @Override

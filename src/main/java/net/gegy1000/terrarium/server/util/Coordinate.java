@@ -78,7 +78,7 @@ public class Coordinate {
         return new Coordinate(this.settings, this.globalX - coordinate.globalX, this.globalZ - coordinate.globalZ);
     }
 
-    public BlockPos toBlockPos(int y) {
-        return new BlockPos(this.getBlockX(), y, this.getBlockZ());
+    public BlockPos toBlockPos() {
+        return new BlockPos(this.getBlockX(), 0, this.getBlockZ());
     }
 }

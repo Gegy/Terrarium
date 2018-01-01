@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 public class LoadingStateHandler {
-    private static final long STATE_LIFETIME = 2000;
-
     private static final List<StateEntry> STATE_BUFFER = new LinkedList<>();
 
     private static final Object LOCK = new Object();
@@ -68,7 +66,7 @@ public class LoadingStateHandler {
         }
 
         public boolean hasExpired() {
-            return this.completed && System.currentTimeMillis() - this.completedTime > STATE_LIFETIME;
+            return this.completed && System.currentTimeMillis() - this.completedTime > this.state.getLifetime();
         }
     }
 }

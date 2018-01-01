@@ -1,0 +1,8 @@
+[out:json]
+[timeout:15][maxsize:5242880][bbox:%s,%s,%s,%s];
+
+way["highway"~"trunk|motorway"]; out;
+node(w); out;
+
+way["natural"="coastline"]; out;
+node(w); out;

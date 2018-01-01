@@ -1,0 +1,11 @@
+[out:json]
+[timeout:15][maxsize:5242880][bbox:%s,%s,%s,%s];
+
+way["highway"]["highway"!~"trunk|motorway"]; out;
+node(w); out;
+
+way["railway"]["railway"!="no"]; out;
+node(w); out;
+
+way["landuse"]; out;
+node(w); out;

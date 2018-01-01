@@ -1,5 +1,7 @@
 package net.gegy1000.terrarium.server.util;
 
+import net.gegy1000.terrarium.server.map.GenerationRegion;
+
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -183,10 +185,12 @@ public class FloodFill {
     public static class Point {
         private final int x;
         private final int z;
+        private final int hash;
 
         public Point(int x, int z) {
             this.x = x;
             this.z = z;
+            this.hash = x + z * GenerationRegion.SIZE;
         }
 
         public int getX() {
@@ -208,7 +212,7 @@ public class FloodFill {
 
         @Override
         public int hashCode() {
-            return this.x + this.z * 12000;
+            return this.hash;
         }
     }
 }

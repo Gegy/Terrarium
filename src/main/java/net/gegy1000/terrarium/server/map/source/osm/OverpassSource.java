@@ -5,8 +5,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.longs.LongArrayList;
+import it.unimi.dsi.fastutil.longs.LongIterator;
+import it.unimi.dsi.fastutil.longs.LongList;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.map.source.CachedRemoteSource;
 import net.gegy1000.terrarium.server.map.source.SourceException;
@@ -46,14 +47,9 @@ import java.util.Map;
 import java.util.Set;
 
 public class OverpassSource extends TiledSource<OverpassTileAccess> implements CachedRemoteSource {
-    public static final double TILE_SIZE_DEGREES = 0.2;
-
     private static final File CACHE_ROOT = new File(CachedRemoteSource.GLOBAL_CACHE_ROOT, "osm");
 
     private static final String OVERPASS_ENDPOINT = "http://www.overpass-api.de/api/interpreter";
-    private static final String QUERY_LOCATION = "/assets/terrarium/query/overpass_query.oql";
-
-    private static final int QUERY_VERSION = 1;
 
     private static final JsonParser JSON_PARSER = new JsonParser();
 
@@ -78,15 +74,28 @@ public class OverpassSource extends TiledSource<OverpassTileAccess> implements C
 
     private final EarthGenerationSettings settings;
 
+    private final File cacheRoot;
+
+    private final String queryLocation;
+    private final int queryVersion;
+
+    private final boolean shouldSample;
+
     private String query;
 
-    public OverpassSource(EarthGenerationSettings settings) {
-        super(TILE_SIZE_DEGREES, 4);
+    public OverpassSource(EarthGenerationSettings settings, double tileSize, String cacheRoot, String queryLocation, int queryVersion) {
+        super(tileSize, 4);
         this.settings = settings;
+        this.cacheRoot = new File(CACHE_ROOT, cacheRoot);
+        this.queryLocation = queryLocation;
+        this.queryVersion = queryVersion;
+
+        this.shouldSample = Coordinate.fromLatLng(settings, tileSize, tileSize).getBlockX() > 512;
     }
 
     public void loadQuery() {
-        try (BufferedReader input = new BufferedReader(new InputStreamReader(OverpassSource.class.getResourceAsStream(QUERY_LOCATION)))) {
+        String queryLocation = this.queryLocation;
+        try (BufferedReader input = new BufferedReader(new InputStreamReader(OverpassSource.class.getResourceAsStream(queryLocation)))) {
             StringBuilder query = new StringBuilder();
             List<String> lines = IOUtils.readLines(input);
             for (String line : lines) {
@@ -94,13 +103,13 @@ public class OverpassSource extends TiledSource<OverpassTileAccess> implements C
             }
             this.query = query.toString();
         } catch (IOException e) {
-            Terrarium.LOGGER.error("Failed to load Overpass query", e);
+            Terrarium.LOGGER.error("Failed to load Overpass query at {}", queryLocation, e);
         }
     }
 
     @Override
     public File getCacheRoot() {
-        return CACHE_ROOT;
+        return this.cacheRoot;
     }
 
     public OverpassTileAccess sampleArea(Coordinate minCoordinate, Coordinate maxCoordinate) {
@@ -166,9 +175,9 @@ public class OverpassSource extends TiledSource<OverpassTileAccess> implements C
                 JsonObject elementObject = element.getAsJsonObject();
 
                 Map<String, String> tags = new HashMap<>();
-                IntList nodes = new IntArrayList();
+                LongList nodes = new LongArrayList();
 
-                int id = elementObject.get("id").getAsInt();
+                long id = elementObject.get("id").getAsLong();
                 String type = elementObject.get("type").getAsString();
 
                 double latitude = elementObject.has("lat") ? elementObject.get("lat").getAsDouble() : 0.0;
@@ -184,7 +193,7 @@ public class OverpassSource extends TiledSource<OverpassTileAccess> implements C
                 if (elementObject.has("nodes")) {
                     JsonArray nodesArray = elementObject.get("nodes").getAsJsonArray();
                     for (JsonElement nodeElement : nodesArray) {
-                        nodes.add(nodeElement.getAsInt());
+                        nodes.add(nodeElement.getAsLong());
                     }
                 }
 
@@ -219,7 +228,7 @@ public class OverpassSource extends TiledSource<OverpassTileAccess> implements C
     public void cacheMetadata(DataTilePos key) {
         File metadataFile = new File(this.getCacheRoot(), String.format("%s_%s.meta", key.getTileX(), key.getTileY()));
         try (DataOutputStream output = new DataOutputStream(new FileOutputStream(metadataFile))) {
-            output.writeShort(QUERY_VERSION);
+            output.writeShort(this.queryVersion);
         } catch (IOException e) {
             Terrarium.LOGGER.error("Failed to cache OSM tile metadata at {}", key, e);
         }
@@ -231,7 +240,7 @@ public class OverpassSource extends TiledSource<OverpassTileAccess> implements C
             File metadataFile = new File(this.getCacheRoot(), String.format("%s_%s.meta", key.getTileX(), key.getTileY()));
             if (metadataFile.exists()) {
                 try (DataInputStream input = new DataInputStream(new BufferedInputStream(new FileInputStream(metadataFile)))) {
-                    return input.readUnsignedShort() == QUERY_VERSION;
+                    return input.readUnsignedShort() == this.queryVersion;
                 } catch (IOException e) {
                     Terrarium.LOGGER.error("Failed to write OSM tile metadata at {}", key, e);
                 }
@@ -240,37 +249,41 @@ public class OverpassSource extends TiledSource<OverpassTileAccess> implements C
         return false;
     }
 
+    public boolean shouldSample() {
+        return this.shouldSample;
+    }
+
     private DataTilePos getTilePos(Coordinate coordinate) {
-        int tileX = MathHelper.floor(coordinate.getLongitude() / OverpassSource.TILE_SIZE_DEGREES);
-        int tileZ = MathHelper.ceil(-coordinate.getLatitude() / OverpassSource.TILE_SIZE_DEGREES);
+        int tileX = MathHelper.floor(coordinate.getLongitude() / this.getTileSize());
+        int tileZ = MathHelper.ceil(-coordinate.getLatitude() / this.getTileSize());
         return new DataTilePos(tileX, tileZ);
     }
 
     private double getLatitude(DataTilePos pos) {
-        return -pos.getTileY() * OverpassSource.TILE_SIZE_DEGREES;
+        return -pos.getTileY() * this.getTileSize();
     }
 
     private double getLongitude(DataTilePos pos) {
-        return pos.getTileX() * OverpassSource.TILE_SIZE_DEGREES;
+        return pos.getTileX() * this.getTileSize();
     }
 
     private double getMaxLatitude(DataTilePos pos) {
-        return this.getLatitude(pos) + OverpassSource.TILE_SIZE_DEGREES;
+        return this.getLatitude(pos) + this.getTileSize();
     }
 
     private double getMaxLongitude(DataTilePos pos) {
-        return this.getLongitude(pos) + OverpassSource.TILE_SIZE_DEGREES;
+        return this.getLongitude(pos) + this.getTileSize();
     }
 
     public static class Element {
-        private final int id;
+        private final long id;
         private final String type;
         private final double latitude;
         private final double longitude;
-        private final IntList nodes;
+        private final LongList nodes;
         private final Map<String, String> tags;
 
-        public Element(int id, String type, double latitude, double longitude, IntList nodes, Map<String, String> tags) {
+        public Element(long id, String type, double latitude, double longitude, LongList nodes, Map<String, String> tags) {
             this.id = id;
             this.type = type;
             this.latitude = latitude;
@@ -279,7 +292,7 @@ public class OverpassSource extends TiledSource<OverpassTileAccess> implements C
             this.tags = tags;
         }
 
-        public int getId() {
+        public long getId() {
             return this.id;
         }
 
@@ -295,14 +308,15 @@ public class OverpassSource extends TiledSource<OverpassTileAccess> implements C
             return this.longitude;
         }
 
-        public IntList getNodes() {
+        public LongList getNodes() {
             return this.nodes;
         }
 
         public List<Element> collectNodes(OverpassTileAccess nodeAccess) {
             List<Element> nodes = new ArrayList<>(this.nodes.size());
-            for (int id : this.nodes) {
-                nodes.add(nodeAccess.getNode(id));
+            LongIterator iterator = this.nodes.iterator();
+            while (iterator.hasNext()) {
+                nodes.add(nodeAccess.getNode(iterator.nextLong()));
             }
             return nodes;
         }
@@ -322,7 +336,7 @@ public class OverpassSource extends TiledSource<OverpassTileAccess> implements C
 
         @Override
         public int hashCode() {
-            return this.id * 31;
+            return (int) (this.id * 31);
         }
     }
 }

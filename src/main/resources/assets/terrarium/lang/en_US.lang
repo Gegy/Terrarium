@@ -25,7 +25,7 @@ state.terrarium.online.name=Retrieving Online Data
 state.terrarium.no_connection.name=No Connection
 
 state.terrarium.cached.tooltip=Loading geographical data from local cache
-state.terrarium.online.tooltip=Loading geographical data from online cache
+state.terrarium.online.tooltip=Loading geographical data from online source
 state.terrarium.no_connection.tooltip=Unable to load geographical data. Check your internet connection!
 
 # Customization Settings
