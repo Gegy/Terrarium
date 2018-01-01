@@ -23,15 +23,15 @@ public class GenerationRegion {
         return this.pos;
     }
 
-    public int getHeight(int scaledX, int scaledZ) {
-        int localX = scaledX - this.minBlockX;
-        int localZ = scaledZ - this.minBlockZ;
+    public int getHeight(int blockX, int blockZ) {
+        int localX = blockX - this.minBlockX;
+        int localZ = blockZ - this.minBlockZ;
         return this.heights[localX + localZ * GenerationRegion.SIZE];
     }
 
-    public GlobType getGlobType(int scaledX, int scaledZ) {
-        int localX = scaledX - this.minBlockX;
-        int localZ = scaledZ - this.minBlockZ;
+    public GlobType getGlobType(int blockX, int blockZ) {
+        int localX = blockX - this.minBlockX;
+        int localZ = blockZ - this.minBlockZ;
         return this.globcover[localX + localZ * GenerationRegion.SIZE];
     }
 }

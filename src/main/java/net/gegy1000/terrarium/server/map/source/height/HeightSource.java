@@ -30,7 +30,7 @@ public class HeightSource extends TiledSource<HeightTileAccess> implements Short
     private final EarthGenerationSettings settings;
 
     public HeightSource(EarthGenerationSettings settings) {
-        super(TILE_SIZE, 9);
+        super(1200, 9);
         this.settings = settings;
     }
 
@@ -108,15 +108,18 @@ public class HeightSource extends TiledSource<HeightTileAccess> implements Short
     public short get(Coordinate coordinate) {
         DataTilePos pos = this.getTilePos(coordinate);
         HeightTileAccess tile = this.getTile(pos);
-        return tile.get(MathHelper.floor(coordinate.getGlobalX() - this.getMinX(pos)), MathHelper.floor(coordinate.getGlobalZ() - this.getMinZ(pos)));
+        return tile.get(MathHelper.floor(coordinate.getGlobalX()) - this.getMinX(pos), MathHelper.floor(coordinate.getGlobalZ()) - this.getMinZ(pos));
     }
 
     @Override
     public void sampleArea(short[] data, Coordinate minimumCoordinate, Coordinate maximumCoordinate) {
         Coordinate size = maximumCoordinate.subtract(minimumCoordinate);
-        int width = MathHelper.ceil(size.getGlobalX());
-        int height = MathHelper.ceil(size.getGlobalZ());
-        if (data.length != width * height) {
+        if (Math.abs(size.getGlobalX() - size.getGlobalZ()) > 1e-4) {
+            throw new IllegalArgumentException("Cannot sample area where width != height");
+        }
+        int sampleSize = MathHelper.ceil(size.getGlobalX());
+        double sampleStep = size.getGlobalX() / sampleSize;
+        if (data.length != sampleSize * sampleSize) {
             throw new IllegalArgumentException("Cannot sample to array of wrong size");
         }
         /*val minimumX = MathHelper.floor(minimumCoordinate.globalX)
@@ -146,29 +149,11 @@ public class HeightSource extends TiledSource<HeightTileAccess> implements Short
             }
         }*/
         // TODO: Come back to more efficient, but broken algorithm
-        boolean tileEqualLat = MathHelper.floor(minimumCoordinate.getLatitude()) == MathHelper.floor(maximumCoordinate.getLatitude());
-        boolean tileEqualLong = MathHelper.floor(minimumCoordinate.getLongitude()) == MathHelper.floor(maximumCoordinate.getLongitude());
-        if (tileEqualLat && tileEqualLong) {
-            DataTilePos pos = this.getTilePos(minimumCoordinate);
-            HeightTileAccess tile = this.getTile(pos);
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    Coordinate coordinate = minimumCoordinate.add(x, y);
-                    int tileX = MathHelper.floor(coordinate.getGlobalX() - this.getMinX(pos));
-                    int tileZ = MathHelper.floor(coordinate.getGlobalZ() - this.getMinZ(pos));
-                    short heightValue = tile.get(tileX, tileZ);
-                    if (heightValue >= 0) {
-                        data[x + y * width] = heightValue;
-                    }
-                }
-            }
-        } else {
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    short heightValue = this.get(minimumCoordinate.add(x, y));
-                    if (heightValue >= 0) {
-                        data[x + y * width] = heightValue;
-                    }
+        for (int z = 0; z < sampleSize; z++) {
+            for (int x = 0; x < sampleSize; x++) {
+                short heightValue = this.get(minimumCoordinate.add(x * sampleStep, z * sampleStep));
+                if (heightValue >= 0) {
+                    data[x + z * sampleSize] = heightValue;
                 }
             }
         }

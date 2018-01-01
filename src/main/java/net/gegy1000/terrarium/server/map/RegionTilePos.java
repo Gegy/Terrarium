@@ -33,7 +33,7 @@ public class RegionTilePos {
     }
 
     public Coordinate getMaxCoordinate(EarthGenerationSettings settings) {
-        return Coordinate.fromBlock(settings, (this.tileX + 1.0) * GenerationRegion.SIZE, (this.tileZ + 1.0) * GenerationRegion.SIZE);
+        return this.getMinCoordinate(settings).addBlock(GenerationRegion.SIZE, GenerationRegion.SIZE);
     }
 
     @Override

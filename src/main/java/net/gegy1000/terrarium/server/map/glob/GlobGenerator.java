@@ -74,7 +74,7 @@ public abstract class GlobGenerator {
     }
 
     public void getCover(Random random, int x, int z) {
-        this.iterate(point -> this.coverBuffer[point.index] = this.getCoverAt(random, x + point.localX, z + point.localX));
+        this.iterate(point -> this.coverBuffer[point.index] = this.getCoverAt(random, x + point.localX, z + point.localZ));
     }
 
     protected IBlockState getCoverAt(Random random, int x, int z) {

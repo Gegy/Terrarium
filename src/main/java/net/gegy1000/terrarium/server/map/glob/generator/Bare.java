@@ -16,8 +16,8 @@ public class Bare extends GlobGenerator {
 
     private GenLayer coverSelector;
 
-    public Bare() {
-        super(GlobType.BARE);
+    public Bare(GlobType type) {
+        super(type);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package net.gegy1000.terrarium.client.gui.widget.map;
 
+import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -31,13 +32,13 @@ public class SlippyMapPoint {
 
     public int getX(int zoom) {
         double maximumX = SlippyMap.TILE_SIZE * (1 << zoom);
-        return (int) Math.floor((this.longitude + 180) / 360 * maximumX);
+        return MathHelper.floor((this.longitude + 180) / 360 * maximumX);
     }
 
     public int getY(int zoom) {
         double maximumY = SlippyMap.TILE_SIZE * (1 << zoom);
         double angle = Math.toRadians(this.latitude);
-        return (int) Math.floor((1.0 - Math.log(Math.tan(angle) + 1.0 / Math.cos(angle)) / Math.PI) / 2.0 * maximumY);
+        return MathHelper.floor((1.0 - Math.log(Math.tan(angle) + 1.0 / Math.cos(angle)) / Math.PI) / 2.0 * maximumY);
     }
 
     public SlippyMapPoint translate(int x, int y, int zoom) {

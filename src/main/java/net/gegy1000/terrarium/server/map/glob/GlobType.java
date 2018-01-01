@@ -6,6 +6,7 @@ import net.gegy1000.terrarium.server.map.glob.generator.BroadleafEvergreen;
 import net.gegy1000.terrarium.server.map.glob.generator.ClosedBroadleafDeciduous;
 import net.gegy1000.terrarium.server.map.glob.generator.ClosedNeedleleafEvergreen;
 import net.gegy1000.terrarium.server.map.glob.generator.CroplandWithVegetation;
+import net.gegy1000.terrarium.server.map.glob.generator.Debug;
 import net.gegy1000.terrarium.server.map.glob.generator.FloodedGrassland;
 import net.gegy1000.terrarium.server.map.glob.generator.ForestShrublandWithGrass;
 import net.gegy1000.terrarium.server.map.glob.generator.FreshFloodedForest;
@@ -52,7 +53,8 @@ public enum GlobType {
     WATER(210, Biomes.OCEAN, Water.class, 0.05, false),
     SNOW(220, Biomes.ICE_PLAINS, Snow.class),
     NO_DATA(0, Biomes.PLAINS, Bare.class),
-    PROCESSING(-1, Biomes.DEFAULT, Bare.class);
+    PROCESSING(-1, Biomes.DEFAULT, Bare.class),
+    DEBUG(-1, Biomes.DEFAULT, Debug.class, 0.0, false);
 
     private static final GlobType[] TYPES = new GlobType[256];
 
@@ -70,10 +72,18 @@ public enum GlobType {
         this.scatterTo = scatterTo;
 
         Constructor<? extends GlobGenerator> constructor = null;
+
         try {
-            constructor = generator.getDeclaredConstructor();
+            constructor = generator.getDeclaredConstructor(GlobType.class);
         } catch (ReflectiveOperationException e) {
-            Terrarium.LOGGER.error("Found no default constructor for generator {}", generator, e);
+        }
+
+        if (constructor == null) {
+            try {
+                constructor = generator.getDeclaredConstructor();
+            } catch (ReflectiveOperationException e) {
+                Terrarium.LOGGER.error("Found no default constructor for generator {}", generator, e);
+            }
         }
 
         this.generatorConstructor = constructor;
@@ -93,9 +103,13 @@ public enum GlobType {
 
     public GlobGenerator createGenerator() {
         try {
-            return this.generatorConstructor.newInstance();
+            if (this.generatorConstructor.getParameterCount() == 1) {
+                return this.generatorConstructor.newInstance(this);
+            } else {
+                return this.generatorConstructor.newInstance();
+            }
         } catch (Exception e) {
-            return new Bare();
+            return new Bare(this);
         }
     }
 

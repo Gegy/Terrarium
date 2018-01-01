@@ -62,6 +62,18 @@ public class Coordinate {
         return new Coordinate(this.settings, this.globalX + coordinate.globalX, this.globalZ + coordinate.globalZ);
     }
 
+    public Coordinate addBlock(double blockX, double blockZ) {
+        double offsetX = blockX * this.settings.getInverseScale();
+        double offsetZ = blockZ * this.settings.getInverseScale();
+        return new Coordinate(this.settings, this.globalX + offsetX, this.globalZ + offsetZ);
+    }
+
+    public Coordinate addGlob(double globX, double globZ) {
+        double offsetX = globX * 10.0 / 3.0;
+        double offsetZ = globZ * 10.0 / 3.0;
+        return new Coordinate(this.settings, this.globalX + offsetX, this.globalZ + offsetZ);
+    }
+
     public Coordinate subtract(Coordinate coordinate) {
         return new Coordinate(this.settings, this.globalX - coordinate.globalX, this.globalZ - coordinate.globalZ);
     }
