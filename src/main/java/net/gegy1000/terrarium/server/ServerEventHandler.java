@@ -6,6 +6,7 @@ import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.util.Coordinate;
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
 import net.gegy1000.terrarium.server.world.EarthWorldType;
+import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.world.WorldEvent;
@@ -26,7 +27,7 @@ public class ServerEventHandler {
     @SubscribeEvent
     public static void onAttachWorldCapabilities(AttachCapabilitiesEvent<World> event) {
         World world = event.getObject();
-        if (world.getWorldType() instanceof EarthWorldType) {
+        if (world.getWorldType() instanceof EarthWorldType && world.provider.getDimensionType() == DimensionType.OVERWORLD) {
             event.addCapability(TerrariumCapabilities.WORLD_DATA_ID, new TerrariumWorldData.Implementation(world));
         }
     }

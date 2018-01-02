@@ -81,4 +81,10 @@ public class Coordinate {
     public BlockPos toBlockPos() {
         return new BlockPos(this.getBlockX(), 0, this.getBlockZ());
     }
+
+    public boolean inBounds() {
+        double latitude = this.getLatitude();
+        double longitude = this.getLongitude();
+        return latitude >= -90.0 && longitude >= -180.0 && latitude <= 90.0 && longitude <= 180.0;
+    }
 }

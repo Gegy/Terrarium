@@ -106,6 +106,10 @@ public class GenerationRegionHandler {
         Coordinate minCoordinate = pos.getMinCoordinate(settings);
         Coordinate maxCoordinate = pos.getMaxCoordinate(settings);
 
+        if (!minCoordinate.inBounds() || !maxCoordinate.inBounds()) {
+            return this.createDefaultRegion(pos);
+        }
+
         OverpassTileAccess overpassTile = this.worldData.getOutlineOverpassSource().sampleArea(minCoordinate, maxCoordinate);
 
         GeneralOverpassSource generalOverpassSource = this.worldData.getGeneralOverpassSource();
