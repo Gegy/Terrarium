@@ -59,7 +59,7 @@ public class GenerationRegionHandler {
         this.generationHandler = generationHandler;
         this.scaleHandler = scaleHandler;
 
-        this.regionSize = Coordinate.fromBlock(generationHandler.getSettings(), GenerationRegion.SIZE, GenerationRegion.SIZE);
+        this.regionSize = Coordinate.fromBlock(generationHandler.getSettings(), GenerationRegion.BUFFERED_SIZE, GenerationRegion.BUFFERED_SIZE);
         if (this.regionSize.getGlobalX() != this.regionSize.getGlobalZ()) {
             throw new IllegalStateException("Cannot generate region where width != height");
         }
@@ -103,8 +103,8 @@ public class GenerationRegionHandler {
         this.generationHandler.initializeSeed(pos);
 
         EarthGenerationSettings settings = this.generationHandler.getSettings();
-        Coordinate minCoordinate = pos.getMinCoordinate(settings);
-        Coordinate maxCoordinate = pos.getMaxCoordinate(settings);
+        Coordinate minCoordinate = pos.getMinCoordinate(settings).addBlock(-GenerationRegion.BUFFER, -GenerationRegion.BUFFER);
+        Coordinate maxCoordinate = pos.getMaxCoordinate(settings).addBlock(GenerationRegion.BUFFER, GenerationRegion.BUFFER);
 
         if (!minCoordinate.inBounds() || !maxCoordinate.inBounds()) {
             return this.createDefaultRegion(pos);
@@ -131,7 +131,7 @@ public class GenerationRegionHandler {
         int originZ = MathHelper.floor(minCoordinate.getBlockZ());
         for (RegionAdapter adapter : this.adapters) {
             try {
-                adapter.adapt(this.generationHandler.getSettings(), data, originX, originZ, GenerationRegion.SIZE, GenerationRegion.SIZE);
+                adapter.adapt(this.generationHandler.getSettings(), data, originX, originZ, GenerationRegion.BUFFERED_SIZE, GenerationRegion.BUFFERED_SIZE);
             } catch (Exception e) {
                 Terrarium.LOGGER.error("Failed to run adapter {}", adapter, e);
             }
@@ -143,7 +143,7 @@ public class GenerationRegionHandler {
     private short[] generateHeights(Coordinate minCoordinate, Coordinate maxCoordinate) {
         this.worldData.getHeightSource().sampleArea(this.sampledHeights, minCoordinate, maxCoordinate.add(1.0, 1.0));
 
-        short[] resultHeights = new short[GenerationRegion.SIZE * GenerationRegion.SIZE];
+        short[] resultHeights = new short[GenerationRegion.BUFFERED_SIZE * GenerationRegion.BUFFERED_SIZE];
         this.scaleHandler.scaleHeightRegion(resultHeights, this.sampledHeights, this.heightSampleSize, this.regionSize);
 
         return resultHeights;
@@ -152,15 +152,15 @@ public class GenerationRegionHandler {
     private GlobType[] generateGlobcover(Coordinate minCoordinate, Coordinate maxCoordinate) {
         this.worldData.getGlobSource().sampleArea(this.sampledGlobs, minCoordinate, maxCoordinate);
 
-        GlobType[] resultGlobs = ArrayUtils.defaulted(new GlobType[GenerationRegion.SIZE * GenerationRegion.SIZE], GlobType.NO_DATA);
+        GlobType[] resultGlobs = ArrayUtils.defaulted(new GlobType[GenerationRegion.BUFFERED_SIZE * GenerationRegion.BUFFERED_SIZE], GlobType.NO_DATA);
         this.scaleHandler.scaleGlobRegion(resultGlobs, this.sampledGlobs, this.globSampleSize, this.regionSize);
 
         return resultGlobs;
     }
 
     private GenerationRegion createDefaultRegion(RegionTilePos pos) {
-        short[] heights = new short[GenerationRegion.SIZE * GenerationRegion.SIZE];
-        GlobType[] globcover = ArrayUtils.defaulted(new GlobType[GenerationRegion.SIZE * GenerationRegion.SIZE], GlobType.NO_DATA);
+        short[] heights = new short[GenerationRegion.BUFFERED_SIZE * GenerationRegion.BUFFERED_SIZE];
+        GlobType[] globcover = ArrayUtils.defaulted(new GlobType[GenerationRegion.BUFFERED_SIZE * GenerationRegion.BUFFERED_SIZE], GlobType.NO_DATA);
         return new GenerationRegion(pos, new RegionData(heights, globcover, new OverpassTileAccess()));
     }
 }

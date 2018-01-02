@@ -190,7 +190,7 @@ public class FloodFill {
         public Point(int x, int z) {
             this.x = x;
             this.z = z;
-            this.hash = x + z * GenerationRegion.SIZE;
+            this.hash = x + z * GenerationRegion.BUFFERED_SIZE;
         }
 
         public int getX() {

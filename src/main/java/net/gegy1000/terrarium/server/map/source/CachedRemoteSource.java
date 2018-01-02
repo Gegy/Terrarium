@@ -24,7 +24,7 @@ public interface CachedRemoteSource {
 
     File getCacheRoot();
 
-    InputStream getRemoteStream(DataTilePos key) throws IOException, NoDataException;
+    InputStream getRemoteStream(DataTilePos key) throws IOException;
 
     String getCachedName(DataTilePos key);
 

@@ -10,7 +10,6 @@ import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.longs.LongList;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.map.source.CachedRemoteSource;
-import net.gegy1000.terrarium.server.map.source.NoDataException;
 import net.gegy1000.terrarium.server.map.source.SourceException;
 import net.gegy1000.terrarium.server.map.source.tiled.DataTilePos;
 import net.gegy1000.terrarium.server.map.source.tiled.TiledSource;
@@ -132,7 +131,7 @@ public class OverpassSource extends TiledSource<OverpassTileAccess> implements C
     }
 
     @Override
-    public InputStream getRemoteStream(DataTilePos key) throws IOException, NoDataException {
+    public InputStream getRemoteStream(DataTilePos key) throws IOException {
         HttpPost post = new HttpPost(OVERPASS_ENDPOINT);
         double minLatitude = this.getLatitude(key);
         double minLongitude = this.getLongitude(key);
@@ -308,10 +307,6 @@ public class OverpassSource extends TiledSource<OverpassTileAccess> implements C
 
         public double getLongitude() {
             return this.longitude;
-        }
-
-        public LongList getNodes() {
-            return this.nodes;
         }
 
         public List<Element> collectNodes(OverpassTileAccess nodeAccess) {

@@ -3,7 +3,10 @@ package net.gegy1000.terrarium.server.map;
 import net.gegy1000.terrarium.server.map.glob.GlobType;
 
 public class GenerationRegion {
+    public static final int BUFFER = 16;
+
     public static final int SIZE = 512;
+    public static final int BUFFERED_SIZE = SIZE + BUFFER * 2;
 
     private final RegionTilePos pos;
     private final int minBlockX;
@@ -13,8 +16,8 @@ public class GenerationRegion {
 
     public GenerationRegion(RegionTilePos pos, RegionData data) {
         this.pos = pos;
-        this.minBlockX = pos.getMinX();
-        this.minBlockZ = pos.getMinZ();
+        this.minBlockX = pos.getMinX() - BUFFER;
+        this.minBlockZ = pos.getMinZ() - BUFFER;
         this.heights = data.getHeights();
         this.globcover = data.getGlobcover();
     }
@@ -26,12 +29,12 @@ public class GenerationRegion {
     public int getHeight(int blockX, int blockZ) {
         int localX = blockX - this.minBlockX;
         int localZ = blockZ - this.minBlockZ;
-        return this.heights[localX + localZ * GenerationRegion.SIZE];
+        return this.heights[localX + localZ * GenerationRegion.BUFFERED_SIZE];
     }
 
     public GlobType getGlobType(int blockX, int blockZ) {
         int localX = blockX - this.minBlockX;
         int localZ = blockZ - this.minBlockZ;
-        return this.globcover[localX + localZ * GenerationRegion.SIZE];
+        return this.globcover[localX + localZ * GenerationRegion.BUFFERED_SIZE];
     }
 }
