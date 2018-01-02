@@ -110,7 +110,7 @@ public class CoastlineAdapter implements RegionAdapter {
             for (Map.Entry<FloodFill.Point, Integer> entry : floodPoints.entrySet()) {
                 FloodFill.Point point = entry.getKey();
                 int floodType = entry.getValue();
-                int sampled = landmap[point.getX() + point.getZ() * width];
+                int sampled = landmap[point.getX() + point.getY() * width];
                 FillVisitor visitor = new FillVisitor(floodType);
                 if (visitor.canVisit(point, sampled)) {
                     FloodFill.floodVisit(landmap, width, height, point, visitor);
@@ -135,7 +135,7 @@ public class CoastlineAdapter implements RegionAdapter {
             for (FloodFill.Point point : unselectedPoints) {
                 GlobSelectVisitor visitor = new GlobSelectVisitor();
                 FloodFill.floodVisit(globBuffer, width, height, point, visitor);
-                globBuffer[point.getX() + point.getZ() * width] = visitor.getResult();
+                globBuffer[point.getX() + point.getY() * width] = visitor.getResult();
             }
         }
     }

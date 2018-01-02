@@ -48,14 +48,14 @@ public class WaterFlattenAdapter implements RegionAdapter {
 
         for (FloodFill.Point point : waterPoints) {
             int x = point.getX();
-            int z = point.getZ();
+            int z = point.getY();
             int index = x + z * width;
 
             heightBuffer[index] = targetHeight;
 
             boolean canEffect = true;
             for (FloodFill.Point sourcePoint : sourcePoints) {
-                if (Math.abs(point.getX() - sourcePoint.getX()) + Math.abs(point.getZ() - sourcePoint.getZ()) < this.flattenRange) {
+                if (Math.abs(point.getX() - sourcePoint.getX()) + Math.abs(point.getY() - sourcePoint.getY()) < this.flattenRange) {
                     canEffect = false;
                     break;
                 }
@@ -92,7 +92,7 @@ public class WaterFlattenAdapter implements RegionAdapter {
 
         @Override
         public GlobType visit(FloodFill.Point point, GlobType sampled) {
-            this.totalHeight += this.heightBuffer[point.getX() + point.getZ() * this.width];
+            this.totalHeight += this.heightBuffer[point.getX() + point.getY() * this.width];
             this.visitedPoints.add(point);
             return GlobType.PROCESSING;
         }
@@ -127,7 +127,7 @@ public class WaterFlattenAdapter implements RegionAdapter {
         @Override
         public short visit(FloodFill.Point point, short sampled) {
             int deltaX = point.getX() - this.origin.getX();
-            int deltaZ = point.getZ() - this.origin.getZ();
+            int deltaZ = point.getY() - this.origin.getY();
             double distance = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
             double scale = MathHelper.clamp(distance / this.range, 0.0, 1.0);
             return (short) MathHelper.floor(this.target + (sampled - this.target) * scale);
@@ -139,7 +139,7 @@ public class WaterFlattenAdapter implements RegionAdapter {
                 return false;
             }
             int deltaX = Math.abs(point.getX() - this.origin.getX());
-            int deltaZ = Math.abs(point.getZ() - this.origin.getZ());
+            int deltaZ = Math.abs(point.getY() - this.origin.getY());
             return deltaX <= this.range && deltaZ <= this.range;
         }
     }
