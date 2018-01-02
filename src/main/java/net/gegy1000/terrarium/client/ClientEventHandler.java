@@ -5,9 +5,13 @@ import net.gegy1000.terrarium.client.gui.RemoteDataWarningGui;
 import net.gegy1000.terrarium.server.config.TerrariumConfig;
 import net.gegy1000.terrarium.server.world.EarthWorldType;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiCreateWorld;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldType;
 import net.minecraftforge.client.event.GuiOpenEvent;
+import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -52,6 +56,18 @@ public class ClientEventHandler {
         if (currentScreen instanceof RemoteDataWarningGui && !((RemoteDataWarningGui) currentScreen).isComplete()) {
             event.setCanceled(true);
             ((RemoteDataWarningGui) currentScreen).setParent(event.getGui());
+        }
+    }
+
+    @SubscribeEvent
+    public static void onGuiButton(GuiScreenEvent.ActionPerformedEvent.Post event) {
+        GuiScreen currentScreen = event.getGui();
+        if (currentScreen instanceof GuiCreateWorld && event.getButton().id == 5) {
+            GuiButton structuresButton = event.getButtonList().get(4);
+            int selectedWorldIndex = ClientProxy.getSelectedWorldType((GuiCreateWorld) currentScreen);
+            if (WorldType.WORLD_TYPES[selectedWorldIndex] instanceof EarthWorldType) {
+                structuresButton.visible = false;
+            }
         }
     }
 

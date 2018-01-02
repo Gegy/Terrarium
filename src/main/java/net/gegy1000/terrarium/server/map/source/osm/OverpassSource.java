@@ -10,6 +10,7 @@ import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.longs.LongList;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.map.source.CachedRemoteSource;
+import net.gegy1000.terrarium.server.map.source.NoDataException;
 import net.gegy1000.terrarium.server.map.source.SourceException;
 import net.gegy1000.terrarium.server.map.source.tiled.DataTilePos;
 import net.gegy1000.terrarium.server.map.source.tiled.TiledSource;
@@ -113,6 +114,13 @@ public class OverpassSource extends TiledSource<OverpassTileAccess> implements C
     }
 
     public OverpassTileAccess sampleArea(Coordinate minCoordinate, Coordinate maxCoordinate) {
+        try {
+            this.checkBounds(minCoordinate.getLatitude(), minCoordinate.getLongitude(), maxCoordinate.getLatitude(), maxCoordinate.getLongitude());
+        } catch (NoDataException e) {
+            Terrarium.LOGGER.error("Cannot sample in area", e);
+            return new OverpassTileAccess();
+        }
+
         DataTilePos minTilePos = this.getTilePos(minCoordinate);
         DataTilePos maxTilePos = this.getTilePos(maxCoordinate);
 
@@ -131,12 +139,15 @@ public class OverpassSource extends TiledSource<OverpassTileAccess> implements C
     }
 
     @Override
-    public InputStream getRemoteStream(DataTilePos key) throws IOException {
+    public InputStream getRemoteStream(DataTilePos key) throws IOException, NoDataException {
         HttpPost post = new HttpPost(OVERPASS_ENDPOINT);
         double minLatitude = this.getLatitude(key);
         double minLongitude = this.getLongitude(key);
         double maxLatitude = this.getMaxLatitude(key);
         double maxLongitude = this.getMaxLongitude(key);
+
+        this.checkBounds(minLatitude, minLongitude, maxLatitude, maxLongitude);
+
         post.setEntity(new StringEntity(String.format(this.query, minLatitude, minLongitude, maxLatitude, maxLongitude)));
 
         CloseableHttpResponse response = this.client.execute(post);
@@ -251,6 +262,16 @@ public class OverpassSource extends TiledSource<OverpassTileAccess> implements C
 
     public boolean shouldSample() {
         return this.shouldSample;
+    }
+
+    private void checkBounds(double minLatitude, double minLongitude, double maxLatitude, double maxLongitude) throws NoDataException {
+        if (minLatitude < -90.0 || maxLatitude > 90.0) {
+            throw new NoDataException("Cannot get overpass tile with latitude bounds exceeding -90.0 or +90.0");
+        }
+
+        if (minLongitude < -18.0 || maxLongitude > 180.0) {
+            throw new NoDataException("Cannot get overpass tile with latitude bounds exceeding -180.0 or +180.0");
+        }
     }
 
     private DataTilePos getTilePos(Coordinate coordinate) {

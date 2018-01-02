@@ -114,8 +114,10 @@ public class SliderWidget extends GuiButton implements TooltipRenderer {
 
     @Override
     public void mouseReleased(int mouseX, int mouseY) {
-        this.mouseDown = false;
-        this.setting.set(this.toValue(this.position));
+        if (this.mouseDown) {
+            this.mouseDown = false;
+            this.setting.set(this.toValue(this.position));
+        }
     }
 
     private double step(double position) {

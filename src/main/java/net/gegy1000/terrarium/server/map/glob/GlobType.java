@@ -50,7 +50,7 @@ public enum GlobType {
     FLOODED_GRASSLAND(180, Biomes.SWAMPLAND, FloodedGrassland.class),
     URBAN(190, Biomes.PLAINS, Urban.class),
     BARE(200, Biomes.DESERT, Bare.class),
-    WATER(210, Biomes.OCEAN, Water.class, 0.05, false),
+    WATER(210, Biomes.OCEAN, Water.class, 0.0, false),
     SNOW(220, Biomes.ICE_PLAINS, Snow.class),
     NO_DATA(0, Biomes.PLAINS, Bare.class),
     PROCESSING(-1, Biomes.DEFAULT, Bare.class),

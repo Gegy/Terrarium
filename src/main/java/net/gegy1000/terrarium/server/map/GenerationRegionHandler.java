@@ -71,7 +71,7 @@ public class GenerationRegionHandler {
         this.sampledGlobs = ArrayUtils.defaulted(new GlobType[this.globSampleSize * this.globSampleSize], GlobType.NO_DATA);
 
         this.adapters.add(new CoastlineAdapter());
-        this.adapters.add(new WaterFlattenAdapter());
+        this.adapters.add(new WaterFlattenAdapter(16));
     }
 
     public void addAdapter(RegionAdapter adapter) {

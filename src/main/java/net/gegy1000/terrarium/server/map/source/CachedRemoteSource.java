@@ -5,7 +5,6 @@ import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.map.source.tiled.DataTilePos;
 import org.apache.commons.io.IOUtils;
 
-import javax.swing.plaf.nimbus.State;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -25,7 +24,7 @@ public interface CachedRemoteSource {
 
     File getCacheRoot();
 
-    InputStream getRemoteStream(DataTilePos key) throws IOException;
+    InputStream getRemoteStream(DataTilePos key) throws IOException, NoDataException;
 
     String getCachedName(DataTilePos key);
 
