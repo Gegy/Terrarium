@@ -4,7 +4,7 @@ import net.minecraft.world.gen.layer.GenLayer;
 import net.minecraft.world.gen.layer.IntCache;
 
 public class SelectionSeedLayer extends GenLayer {
-    private int range;
+    private final int range;
 
     public SelectionSeedLayer(int range, long seed) {
         super(seed);

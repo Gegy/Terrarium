@@ -22,7 +22,6 @@ public class PresetList extends GuiListExtended {
     private static final ResourceLocation FALLBACK_ICON = new ResourceLocation(Terrarium.MODID, "textures/preset/fallback.png");
     private static final ResourceLocation ICON_OVERLAY = new ResourceLocation("textures/gui/world_selection.png");
 
-    private final Minecraft mc;
     private final SelectPresetGui parent;
 
     private final List<SettingPreset> presets;
@@ -32,7 +31,7 @@ public class PresetList extends GuiListExtended {
 
     public PresetList(Minecraft mc, SelectPresetGui parent) {
         super(mc, parent.width, parent.height, 32, parent.height - 64, 36);
-        this.mc = mc;
+        Minecraft mc1 = mc;
         this.parent = parent;
 
         this.presets = SettingPreset.getRegistry().getValues();

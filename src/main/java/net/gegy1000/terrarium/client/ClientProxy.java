@@ -14,16 +14,6 @@ public class ClientProxy extends ServerProxy {
     private static Field selectedWorldType;
 
     @Override
-    public void onPreInit() {
-        super.onPreInit();
-    }
-
-    @Override
-    public void onInit() {
-        super.onInit();
-    }
-
-    @Override
     public void onPostInit() {
         super.onPostInit();
 

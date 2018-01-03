@@ -36,7 +36,7 @@ public abstract class GlobGenerator {
     private final IBlockState topBlock;
     private final IBlockState fillerBlock;
 
-    protected BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+    protected final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 
     protected World world;
     public GlobType[] globBuffer;
@@ -87,10 +87,6 @@ public abstract class GlobGenerator {
 
     protected IBlockState getFillerAt(Random random, int x, int z) {
         return this.fillerBlock;
-    }
-
-    protected <T> T select(Random random, T... items) {
-        return items[random.nextInt(items.length)];
     }
 
     protected int range(Random random, int minimum, int maximum) {

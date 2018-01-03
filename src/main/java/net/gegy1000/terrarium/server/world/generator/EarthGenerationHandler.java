@@ -14,7 +14,6 @@ import java.util.Random;
 public class EarthGenerationHandler {
     private final EarthGenerationSettings settings;
 
-    private final EarthScaleHandler scaleHandler;
     private final GenerationRegionHandler regionHandler;
 
     private final int maxHeight;
@@ -28,8 +27,7 @@ public class EarthGenerationHandler {
         this.settings = settings;
         this.maxHeight = maxHeight;
 
-        this.scaleHandler = new EarthScaleHandler(settings);
-        this.regionHandler = new GenerationRegionHandler(worldData, this, this.scaleHandler);
+        this.regionHandler = new GenerationRegionHandler(worldData, this, new EarthScaleHandler(settings));
 
         this.oceanHeight = this.settings.heightOffset + 1;
         this.scatterRange = MathHelper.floor(this.settings.scatterRange * this.settings.worldScale);

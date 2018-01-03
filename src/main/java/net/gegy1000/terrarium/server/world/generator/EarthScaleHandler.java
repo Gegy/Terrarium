@@ -7,14 +7,10 @@ import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
 import net.minecraft.util.math.MathHelper;
 
 public class EarthScaleHandler {
-    private final EarthGenerationSettings settings;
-
     private final double heightScale;
 
     public EarthScaleHandler(EarthGenerationSettings settings) {
-        this.settings = settings;
-
-        this.heightScale = this.settings.worldScale * this.settings.terrainHeightScale;
+        this.heightScale = settings.worldScale * settings.terrainHeightScale;
     }
 
     public void scaleHeightRegion(short[] scaledResult, short[] sample, int sampleSize, Coordinate regionSize) {

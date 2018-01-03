@@ -32,7 +32,7 @@ public class EarthBiomeProvider extends BiomeProvider {
     private final BiomeCache biomeCache = new BiomeCache(this);
     private final List<Biome> spawnBiomes = new ArrayList<>(allowedBiomes);
 
-    private GlobType[] globBuffer = ArrayUtils.defaulted(new GlobType[256], GlobType.NO_DATA);
+    private final GlobType[] globBuffer = ArrayUtils.defaulted(new GlobType[256], GlobType.NO_DATA);
 
     public EarthBiomeProvider(World world) {
         this.world = world;
@@ -55,7 +55,7 @@ public class EarthBiomeProvider extends BiomeProvider {
 
     @Override
     public Biome[] getBiomesForGeneration(Biome[] biomes, int x, int z, int width, int height) {
-        if (biomes == null || biomes.length < width * height) {
+        if (biomes.length < width * height) {
             biomes = new Biome[256];
         }
         Arrays.fill(biomes, Biomes.OCEAN);

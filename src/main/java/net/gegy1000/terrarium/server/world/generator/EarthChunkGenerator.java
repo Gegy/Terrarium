@@ -54,10 +54,10 @@ public class EarthChunkGenerator implements IChunkGenerator {
     private final Map<GlobType, GlobGenerator> generators = new EnumMap<>(GlobType.class);
 
     private double[] depthBuffer = new double[256];
-    private int[] heightBuffer = new int[256];
-    private GlobType[] globBuffer = ArrayUtils.defaulted(new GlobType[256], GlobType.NO_DATA);
-    private IBlockState[] coverBuffer = ArrayUtils.defaulted(new IBlockState[256], STONE);
-    private IBlockState[] fillerBuffer = ArrayUtils.defaulted(new IBlockState[256], STONE);
+    private final int[] heightBuffer = new int[256];
+    private final GlobType[] globBuffer = ArrayUtils.defaulted(new GlobType[256], GlobType.NO_DATA);
+    private final IBlockState[] coverBuffer = ArrayUtils.defaulted(new IBlockState[256], STONE);
+    private final IBlockState[] fillerBuffer = ArrayUtils.defaulted(new IBlockState[256], STONE);
 
     private Biome[] biomeBuffer = null;
 
