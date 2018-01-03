@@ -121,7 +121,7 @@ public class FloodFill {
         public Point(int x, int y) {
             this.x = x;
             this.y = y;
-            this.hash = (x + y * 31) * 31;
+            this.hash = x + y << 16;
         }
 
         public int getX() {

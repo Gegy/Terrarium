@@ -2,6 +2,8 @@ package net.gegy1000.terrarium.server.world;
 
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.client.gui.customization.CustomizeEarthGui;
+import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
+import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.generator.EarthBiomeProvider;
 import net.gegy1000.terrarium.server.world.generator.EarthChunkGenerator;
 import net.minecraft.client.Minecraft;
@@ -14,6 +16,8 @@ import net.minecraft.world.biome.BiomeProviderSingle;
 import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import java.util.Random;
 
 public class EarthWorldType extends WorldType {
     public EarthWorldType() {
@@ -37,6 +41,12 @@ public class EarthWorldType extends WorldType {
     @SideOnly(Side.CLIENT)
     public void onCustomizeButton(Minecraft mc, GuiCreateWorld parent) {
         mc.displayGuiScreen(new CustomizeEarthGui(parent));
+    }
+
+    @Override
+    public boolean handleSlimeSpawnReduction(Random random, World world) {
+        TerrariumWorldData worldData = world.getCapability(TerrariumCapabilities.worldDataCapability, null);
+        return worldData != null && worldData.getGenerationHandler().getSettings().heightOffset >= 40;
     }
 
     @Override
