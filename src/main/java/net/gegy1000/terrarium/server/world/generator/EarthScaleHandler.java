@@ -24,7 +24,6 @@ public class EarthScaleHandler {
             throw new IllegalArgumentException("Cannot scale region where width != height");
         }
 
-        // todo why
         this.heightScale = Math.round(regionSize.getGlobalX()) / regionSize.getBlockX();
         this.globScale = Math.round(regionSize.getGlobX()) / regionSize.getBlockX();
 

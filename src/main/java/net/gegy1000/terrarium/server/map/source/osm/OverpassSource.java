@@ -1,14 +1,12 @@
 package net.gegy1000.terrarium.server.map.source.osm;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
-import it.unimi.dsi.fastutil.longs.LongArrayList;
-import it.unimi.dsi.fastutil.longs.LongIterator;
-import it.unimi.dsi.fastutil.longs.LongList;
+import de.topobyte.osm4j.core.model.iface.OsmNode;
+import de.topobyte.osm4j.core.model.iface.OsmWay;
+import gnu.trove.map.TLongObjectMap;
+import gnu.trove.map.hash.TLongObjectHashMap;
 import net.gegy1000.terrarium.Terrarium;
+import net.gegy1000.terrarium.server.map.osm.OsmDataParser;
 import net.gegy1000.terrarium.server.map.source.CachedRemoteSource;
 import net.gegy1000.terrarium.server.map.source.SourceException;
 import net.gegy1000.terrarium.server.map.source.tiled.DataTilePos;
@@ -38,20 +36,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class OverpassSource extends TiledSource<OverpassTileAccess> implements CachedRemoteSource {
     private static final File CACHE_ROOT = new File(CachedRemoteSource.GLOBAL_CACHE_ROOT, "osm");
 
     private static final String OVERPASS_ENDPOINT = "http://www.overpass-api.de/api/interpreter";
-
-    private static final JsonParser JSON_PARSER = new JsonParser();
 
     private final CloseableHttpClient client = HttpClientBuilder.create()
             .addInterceptorFirst((HttpRequestInterceptor) (request, context) -> {
@@ -116,18 +107,20 @@ public class OverpassSource extends TiledSource<OverpassTileAccess> implements C
         DataTilePos minTilePos = this.getTilePos(minCoordinate);
         DataTilePos maxTilePos = this.getTilePos(maxCoordinate);
 
-        Set<Element> elements = new HashSet<>();
+        TLongObjectMap<OsmNode> nodes = new TLongObjectHashMap<>();
+        TLongObjectMap<OsmWay> ways = new TLongObjectHashMap<>();
 
         for (int tileZ = minTilePos.getTileY(); tileZ <= maxTilePos.getTileY(); tileZ++) {
             for (int tileX = minTilePos.getTileX(); tileX <= maxTilePos.getTileX(); tileX++) {
                 OverpassTileAccess tile = this.getTile(new DataTilePos(tileX, tileZ));
                 if (tile != null) {
-                    elements.addAll(tile.getElements());
+                    nodes.putAll(tile.getNodes());
+                    ways.putAll(tile.getWays());
                 }
             }
         }
 
-        return new OverpassTileAccess(elements);
+        return new OverpassTileAccess(nodes, ways);
     }
 
     @Override
@@ -166,42 +159,8 @@ public class OverpassSource extends TiledSource<OverpassTileAccess> implements C
     }
 
     private OverpassTileAccess loadTile(DataTilePos key, int retries) throws SourceException {
-        try (InputStreamReader input = new InputStreamReader(this.getStream(key))) {
-            Set<Element> elements = new HashSet<>();
-
-            JsonObject root = JSON_PARSER.parse(input).getAsJsonObject();
-            JsonArray elementsArray = root.getAsJsonArray("elements");
-
-            for (JsonElement element : elementsArray) {
-                JsonObject elementObject = element.getAsJsonObject();
-
-                Map<String, String> tags = new HashMap<>();
-                LongList nodes = new LongArrayList();
-
-                long id = elementObject.get("id").getAsLong();
-                String type = elementObject.get("type").getAsString();
-
-                double latitude = elementObject.has("lat") ? elementObject.get("lat").getAsDouble() : 0.0;
-                double longitude = elementObject.has("lon") ? elementObject.get("lon").getAsDouble() : 0.0;
-
-                if (elementObject.has("tags")) {
-                    JsonObject tagsObject = elementObject.getAsJsonObject("tags");
-                    for (Map.Entry<String, JsonElement> entry : tagsObject.entrySet()) {
-                        tags.put(entry.getKey(), entry.getValue().getAsString());
-                    }
-                }
-
-                if (elementObject.has("nodes")) {
-                    JsonArray nodesArray = elementObject.get("nodes").getAsJsonArray();
-                    for (JsonElement nodeElement : nodesArray) {
-                        nodes.add(nodeElement.getAsLong());
-                    }
-                }
-
-                elements.add(new Element(id, type, latitude, longitude, nodes, tags));
-            }
-
-            return new OverpassTileAccess(elements);
+        try {
+            return OsmDataParser.parse(this.getStream(key));
         } catch (IOException e) {
             Terrarium.LOGGER.error("Failed to load overpass map tile at {}", this.getCachedName(key), e);
         } catch (JsonParseException e) {
@@ -211,7 +170,6 @@ public class OverpassSource extends TiledSource<OverpassTileAccess> implements C
                 return this.loadTile(key, retries + 1);
             }
         }
-
         return null;
     }
 
@@ -274,66 +232,5 @@ public class OverpassSource extends TiledSource<OverpassTileAccess> implements C
 
     private double getMaxLongitude(DataTilePos pos) {
         return this.getLongitude(pos) + this.getTileSize();
-    }
-
-    public static class Element {
-        private final long id;
-        private final String type;
-        private final double latitude;
-        private final double longitude;
-        private final LongList nodes;
-        private final Map<String, String> tags;
-
-        public Element(long id, String type, double latitude, double longitude, LongList nodes, Map<String, String> tags) {
-            this.id = id;
-            this.type = type;
-            this.latitude = latitude;
-            this.longitude = longitude;
-            this.nodes = nodes;
-            this.tags = tags;
-        }
-
-        public long getId() {
-            return this.id;
-        }
-
-        public String getType() {
-            return this.type;
-        }
-
-        public double getLatitude() {
-            return this.latitude;
-        }
-
-        public double getLongitude() {
-            return this.longitude;
-        }
-
-        public List<Element> collectNodes(OverpassTileAccess nodeAccess) {
-            List<Element> nodes = new ArrayList<>(this.nodes.size());
-            LongIterator iterator = this.nodes.iterator();
-            while (iterator.hasNext()) {
-                nodes.add(nodeAccess.getNode(iterator.nextLong()));
-            }
-            return nodes;
-        }
-
-        public Map<String, String> getTags() {
-            return this.tags;
-        }
-
-        public boolean isType(String key, String value) {
-            return value.equals(this.tags.get(key));
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            return obj instanceof Element && ((Element) obj).id == this.id;
-        }
-
-        @Override
-        public int hashCode() {
-            return (int) (this.id * 31);
-        }
     }
 }

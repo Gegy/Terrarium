@@ -1,40 +1,72 @@
 package net.gegy1000.terrarium.server.map.source.osm;
 
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import de.topobyte.osm4j.core.dataset.InMemoryMapDataSet;
+import de.topobyte.osm4j.core.model.iface.OsmNode;
+import de.topobyte.osm4j.core.model.iface.OsmRelation;
+import de.topobyte.osm4j.core.model.iface.OsmWay;
+import de.topobyte.osm4j.core.resolve.EntityNotFoundException;
+import de.topobyte.osm4j.core.resolve.OsmEntityProvider;
+import gnu.trove.map.TLongObjectMap;
+import gnu.trove.map.hash.TLongObjectHashMap;
 import net.gegy1000.terrarium.server.map.source.tiled.TiledDataAccess;
 
-import java.util.HashSet;
-import java.util.Set;
+public class OverpassTileAccess implements OsmEntityProvider, TiledDataAccess {
+    private final TLongObjectMap<OsmNode> nodes;
+    private final TLongObjectMap<OsmWay> ways;
 
-public class OverpassTileAccess implements TiledDataAccess {
-    private final Set<OverpassSource.Element> elements;
-    private final Long2ObjectMap<OverpassSource.Element> nodes;
+    public OverpassTileAccess(TLongObjectMap<OsmNode> nodes, TLongObjectMap<OsmWay> ways) {
+        this.nodes = nodes;
+        this.ways = ways;
+    }
 
-    public OverpassTileAccess(Set<OverpassSource.Element> elements) {
-        this.elements = elements;
-        this.nodes = new Long2ObjectOpenHashMap<>();
-        this.elements.stream()
-                .filter(element -> element.getType().equals("node"))
-                .forEach(element -> this.nodes.put(element.getId(), element));
+    public OverpassTileAccess(InMemoryMapDataSet data) {
+        this(data.getNodes(), data.getWays());
     }
 
     public OverpassTileAccess() {
-        this(new HashSet<>());
+        this(new TLongObjectHashMap<>(), new TLongObjectHashMap<>());
     }
 
-    public Set<OverpassSource.Element> getElements() {
-        return this.elements;
+    public TLongObjectMap<OsmNode> getNodes() {
+        return this.nodes;
     }
 
-    public OverpassSource.Element getNode(long id) {
-        return this.nodes.get(id);
+    public TLongObjectMap<OsmWay> getWays() {
+        return this.ways;
     }
 
     public OverpassTileAccess merge(OverpassTileAccess tile) {
-        Set<OverpassSource.Element> elements = new HashSet<>(this.elements.size() + tile.elements.size());
-        elements.addAll(this.elements);
-        elements.addAll(tile.elements);
-        return new OverpassTileAccess(elements);
+        TLongObjectMap<OsmNode> nodes = new TLongObjectHashMap<>(this.nodes.size() + tile.nodes.size());
+        nodes.putAll(this.nodes);
+        nodes.putAll(tile.nodes);
+
+        TLongObjectMap<OsmWay> ways = new TLongObjectHashMap<>(this.ways.size() + tile.ways.size());
+        ways.putAll(this.ways);
+        ways.putAll(tile.ways);
+
+        return new OverpassTileAccess(nodes, ways);
+    }
+
+    @Override
+    public OsmNode getNode(long id) throws EntityNotFoundException {
+        OsmNode node = this.nodes.get(id);
+        if (node == null) {
+            throw new EntityNotFoundException("Node with id " + id + " not found");
+        }
+        return node;
+    }
+
+    @Override
+    public OsmWay getWay(long id) throws EntityNotFoundException {
+        OsmWay way = this.ways.get(id);
+        if (way == null) {
+            throw new EntityNotFoundException("Way with id " + id + " not found");
+        }
+        return way;
+    }
+
+    @Override
+    public OsmRelation getRelation(long id) throws EntityNotFoundException {
+        throw new EntityNotFoundException("Relation with id " + id + " not found");
     }
 }

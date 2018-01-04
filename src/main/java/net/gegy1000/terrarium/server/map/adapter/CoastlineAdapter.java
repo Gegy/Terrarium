@@ -1,10 +1,12 @@
 package net.gegy1000.terrarium.server.map.adapter;
 
+import com.vividsolutions.jts.geom.LineString;
+import de.topobyte.osm4j.core.model.iface.OsmWay;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.gegy1000.terrarium.server.map.RegionData;
 import net.gegy1000.terrarium.server.map.glob.GlobType;
-import net.gegy1000.terrarium.server.map.source.osm.OverpassSource;
+import net.gegy1000.terrarium.server.map.osm.OsmDataParser;
 import net.gegy1000.terrarium.server.map.source.osm.OverpassTileAccess;
 import net.gegy1000.terrarium.server.util.Coordinate;
 import net.gegy1000.terrarium.server.util.FloodFill;
@@ -12,7 +14,7 @@ import net.gegy1000.terrarium.server.util.Interpolation;
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
 import net.minecraft.util.math.MathHelper;
 
-import java.awt.Point;
+import com.vividsolutions.jts.geom.Point;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -35,8 +37,8 @@ public class CoastlineAdapter implements RegionAdapter {
         short[] heightBuffer = data.getHeights();
         GlobType[] globBuffer = data.getGlobcover();
 
-        List<OverpassSource.Element> coastlines = overpassTile.getElements().stream()
-                .filter(element -> element.isType("natural", "coastline"))
+        List<OsmWay> coastlines = overpassTile.getWays().valueCollection().stream()
+                .filter(way -> OsmDataParser.hasTag(way, "natural", "coastline"))
                 .collect(Collectors.toList());
 
         if (!coastlines.isEmpty()) {
@@ -47,63 +49,11 @@ public class CoastlineAdapter implements RegionAdapter {
 
             Object2IntMap<FloodFill.Point> floodPoints = new Object2IntOpenHashMap<>();
 
-            for (OverpassSource.Element coastline : coastlines) {
-                List<OverpassSource.Element> nodes = coastline.collectNodes(overpassTile);
+            for (OsmWay coastline : coastlines) {
+                List<LineString> lines = OsmDataParser.createLines(overpassTile, coastline);
 
-                for (int nodeIndex = 1; nodeIndex < nodes.size(); nodeIndex++) {
-                    OverpassSource.Element current = nodes.get(nodeIndex - 1);
-                    OverpassSource.Element next = nodes.get(nodeIndex);
-
-                    Coordinate currentCoordinate = Coordinate.fromLatLng(settings, current.getLatitude(), current.getLongitude());
-
-                    double originX = currentCoordinate.getBlockX();
-                    double originZ = currentCoordinate.getBlockZ();
-
-                    Coordinate nextCoordinate = Coordinate.fromLatLng(settings, next.getLatitude(), next.getLongitude());
-                    while (Math.abs(nextCoordinate.getBlockX() - originX) < 3.0 && Math.abs(nextCoordinate.getBlockZ() - originZ) < 3.0) {
-                        if (++nodeIndex >= nodes.size()) {
-                            break;
-                        }
-                        OverpassSource.Element node = nodes.get(nodeIndex);
-                        nextCoordinate = Coordinate.fromLatLng(settings, node.getLatitude(), node.getLongitude());
-                    }
-
-                    double targetX = nextCoordinate.getBlockX();
-                    double targetZ = nextCoordinate.getBlockZ();
-
-                    int lineType = this.getLineType(currentCoordinate, nextCoordinate);
-                    int coastType = lineType & 252;
-
-                    List<Point> points = new ArrayList<>();
-                    Interpolation.interpolateLine(originX, originZ, targetX, targetZ, false, point -> {
-                        int localX = point.x - x;
-                        int localZ = point.y - z;
-                        if (localX >= 0 && localZ >= 0 && localX < width && localZ < height) {
-                            landmap[localX + localZ * width] = lineType;
-
-                            this.freeNeighbours(width, height, landmap, localX, localZ);
-
-                            points.add(point);
-                        }
-                    });
-
-                    if (points.size() > 2) {
-                        for (int i = 1; i < points.size() - 1; i++) {
-                            Point point = points.get(i);
-                            int localX = point.x - x;
-                            int localZ = point.y - z;
-                            if (coastType != 0) {
-                                if (localX > 0) {
-                                    int left = coastType == COAST_UP ? LAND : OCEAN;
-                                    floodPoints.put(new FloodFill.Point(localX - 1, localZ), left);
-                                }
-                                if (localX < width - 1) {
-                                    int right = coastType == COAST_UP ? OCEAN : LAND;
-                                    floodPoints.put(new FloodFill.Point(localX + 1, localZ), right);
-                                }
-                            }
-                        }
-                    }
+                for (LineString line : lines) {
+                    this.drawLine(settings, x, z, width, height, landmap, floodPoints, line);
                 }
             }
 
@@ -136,6 +86,64 @@ public class CoastlineAdapter implements RegionAdapter {
                 GlobSelectVisitor visitor = new GlobSelectVisitor();
                 FloodFill.floodVisit(globBuffer, width, height, point, visitor);
                 globBuffer[point.getX() + point.getY() * width] = visitor.getResult();
+            }
+        }
+    }
+
+    private void drawLine(EarthGenerationSettings settings, int x, int y, int width, int height, int[] landmap, Object2IntMap<FloodFill.Point> floodPoints, LineString line) {
+        for (int nodeIndex = 1; nodeIndex < line.getNumPoints(); nodeIndex++) {
+            Point current = line.getPointN(nodeIndex - 1);
+            Point next = line.getPointN(nodeIndex);
+
+            Coordinate currentCoordinate = Coordinate.fromLatLng(settings, current.getX(), current.getY());
+
+            double originX = currentCoordinate.getBlockX();
+            double originY = currentCoordinate.getBlockZ();
+
+            Coordinate nextCoordinate = Coordinate.fromLatLng(settings, next.getX(), next.getY());
+            while (Math.abs(nextCoordinate.getBlockX() - originX) < 3.0 && Math.abs(nextCoordinate.getBlockZ() - originY) < 3.0) {
+                if (++nodeIndex >= line.getNumPoints()) {
+                    break;
+                }
+                Point node = line.getPointN(nodeIndex);
+                nextCoordinate = Coordinate.fromLatLng(settings, node.getX(), node.getY());
+            }
+
+            double targetX = nextCoordinate.getBlockX();
+            double targetY = nextCoordinate.getBlockZ();
+
+            int lineType = this.getLineType(currentCoordinate, nextCoordinate);
+            int coastType = lineType & 252;
+
+            List<FloodFill.Point> points = new ArrayList<>();
+            Interpolation.interpolateLine(originX, originY, targetX, targetY, false, point -> {
+                int localX = point.x - x;
+                int localY = point.y - y;
+                if (localX >= 0 && localY >= 0 && localX < width && localY < height) {
+                    landmap[localX + localY * width] = lineType;
+
+                    this.freeNeighbours(width, height, landmap, localX, localY);
+
+                    points.add(new FloodFill.Point(point.x, point.y));
+                }
+            });
+
+            if (points.size() > 2) {
+                for (int i = 1; i < points.size() - 1; i++) {
+                    FloodFill.Point point = points.get(i);
+                    int localX = point.getX() - x;
+                    int localY = point.getY() - y;
+                    if (coastType != 0) {
+                        if (localX > 0) {
+                            int left = coastType == COAST_UP ? LAND : OCEAN;
+                            floodPoints.put(new FloodFill.Point(localX - 1, localY), left);
+                        }
+                        if (localX < width - 1) {
+                            int right = coastType == COAST_UP ? OCEAN : LAND;
+                            floodPoints.put(new FloodFill.Point(localX + 1, localY), right);
+                        }
+                    }
+                }
             }
         }
     }
