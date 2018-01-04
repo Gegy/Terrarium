@@ -91,9 +91,8 @@ public class GlobSource extends TiledSource<GlobTileAccess> implements RasterSou
     }
 
     @Override
-    public void sampleArea(GlobType[] data, Coordinate minimumCoordinate, Coordinate maximumCoordinate) {
+    public void sampleArea(GlobType[] data, Coordinate coordinate, Coordinate size) {
         // TODO: Come back to more performant, but broken algorithm
-        Coordinate size = maximumCoordinate.subtract(minimumCoordinate);
         if (Math.abs(size.getGlobalX() - size.getGlobalZ()) > 1e-4) {
             throw new IllegalArgumentException("Cannot sample area where width != height");
         }
@@ -104,7 +103,7 @@ public class GlobSource extends TiledSource<GlobTileAccess> implements RasterSou
         }
         for (int y = 0; y < sampleSize; y++) {
             for (int x = 0; x < sampleSize; x++) {
-                data[x + y * sampleSize] = this.get(minimumCoordinate.addGlob(x * sampleStep, y * sampleStep));
+                data[x + y * sampleSize] = this.get(coordinate.addGlob(x * sampleStep, y * sampleStep));
             }
         }
     }

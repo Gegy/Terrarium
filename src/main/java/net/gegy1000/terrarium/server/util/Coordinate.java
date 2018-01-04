@@ -22,6 +22,10 @@ public class Coordinate {
         return new Coordinate(settings, blockX * settings.getInverseScale(), blockZ * settings.getInverseScale());
     }
 
+    public static Coordinate fromGlob(EarthGenerationSettings settings, double globX, double globZ) {
+        return new Coordinate(settings, globX / 0.3, globZ / 0.3);
+    }
+
     public double getGlobalX() {
         return this.globalX;
     }
@@ -39,11 +43,11 @@ public class Coordinate {
     }
 
     public double getGlobX() {
-        return this.globalX * 3.0 / 10.0;
+        return this.globalX * 0.3;
     }
 
     public double getGlobZ() {
-        return this.globalZ * 3.0 / 10.0;
+        return this.globalZ * 0.3;
     }
 
     public double getBlockX() {
@@ -69,8 +73,8 @@ public class Coordinate {
     }
 
     public Coordinate addGlob(double globX, double globZ) {
-        double offsetX = globX * 10.0 / 3.0;
-        double offsetZ = globZ * 10.0 / 3.0;
+        double offsetX = globX / 0.3;
+        double offsetZ = globZ / 0.3;
         return new Coordinate(this.settings, this.globalX + offsetX, this.globalZ + offsetZ);
     }
 

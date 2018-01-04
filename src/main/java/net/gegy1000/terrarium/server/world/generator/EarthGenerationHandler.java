@@ -27,7 +27,7 @@ public class EarthGenerationHandler {
         this.settings = settings;
         this.maxHeight = maxHeight;
 
-        this.regionHandler = new GenerationRegionHandler(worldData, this, new EarthScaleHandler(settings));
+        this.regionHandler = new GenerationRegionHandler(worldData, this);
 
         this.oceanHeight = this.settings.heightOffset + 1;
         this.scatterRange = MathHelper.floor(this.settings.scatterRange * this.settings.worldScale);

@@ -7,44 +7,59 @@ import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
 import net.minecraft.util.math.MathHelper;
 
 public class EarthScaleHandler {
+    private static final int HEIGHT_BUFFER = 1;
+
     private final double heightScale;
+    private final double globScale;
 
-    public EarthScaleHandler(EarthGenerationSettings settings) {
-        this.heightScale = settings.worldScale * settings.terrainHeightScale;
-    }
+    private final int scaledSize;
 
-    public void scaleHeightRegion(short[] scaledResult, short[] sample, int sampleSize, Coordinate regionSize) {
+    private final int heightSampleSize;
+    private final int globSampleSize;
+
+    private final double terrainHeightScale;
+
+    public EarthScaleHandler(EarthGenerationSettings settings, Coordinate regionSize, Coordinate bufferedRegionSize) {
         if (Math.abs(regionSize.getGlobalX() - regionSize.getGlobalZ()) > 1e-4) {
             throw new IllegalArgumentException("Cannot scale region where width != height");
         }
 
-        double scale = (sampleSize - 1.0) / (regionSize.getBlockZ());
-        int scaledSize = MathHelper.floor(regionSize.getBlockX());
+        // todo why
+        this.heightScale = Math.round(regionSize.getGlobalX()) / regionSize.getBlockX();
+        this.globScale = Math.round(regionSize.getGlobX()) / regionSize.getBlockX();
 
-        for (int scaledZ = 0; scaledZ < scaledSize; scaledZ++) {
-            double sampleZ = scaledZ * scale;
+        this.scaledSize = MathHelper.floor(bufferedRegionSize.getBlockX());
+        this.heightSampleSize = MathHelper.floor((this.scaledSize - 1) * this.heightScale) + HEIGHT_BUFFER + 1;
+        this.globSampleSize = MathHelper.floor((this.scaledSize - 1) * this.globScale) + 1;
+
+        this.terrainHeightScale = settings.worldScale * settings.terrainHeightScale;
+    }
+
+    public void scaleHeightRegion(short[] scaledResult, short[] sample) {
+        for (int scaledZ = 0; scaledZ < this.scaledSize; scaledZ++) {
+            double sampleZ = scaledZ * this.heightScale;
             int originZ = MathHelper.floor(sampleZ);
             double intermediateZ = sampleZ - originZ;
 
-            for (int scaledX = 0; scaledX < scaledSize; scaledX++) {
-                double sampleX = scaledX * scale;
+            for (int scaledX = 0; scaledX < this.scaledSize; scaledX++) {
+                double sampleX = scaledX * this.heightScale;
                 int originX = MathHelper.floor(sampleX);
                 double intermediateX = sampleX - originX;
 
-                int sampleIndex = originX + originZ * sampleSize;
+                int sampleIndex = originX + originZ * this.heightSampleSize;
 
                 double current = sample[sampleIndex];
-                double south = sample[sampleIndex + sampleSize];
+                double south = sample[sampleIndex + this.heightSampleSize];
                 double east = sample[sampleIndex + 1];
-                double southEast = sample[sampleIndex + sampleSize + 1];
+                double southEast = sample[sampleIndex + this.heightSampleSize + 1];
 
                 double y1 = Interpolation.cosine(current, south, intermediateZ);
                 double y2 = Interpolation.cosine(east, southEast, intermediateZ);
 
                 double interpolatedHeight = Interpolation.cosine(y1, y2, intermediateX);
-                short scaled = (short) (interpolatedHeight * this.heightScale);
+                short scaled = (short) (interpolatedHeight * this.terrainHeightScale);
 
-                int resultIndex = scaledX + scaledZ * scaledSize;
+                int resultIndex = scaledX + scaledZ * this.scaledSize;
                 if (interpolatedHeight >= 0.0 && scaled < 1) {
                     scaledResult[resultIndex] = 1;
                 } else {
@@ -54,22 +69,21 @@ public class EarthScaleHandler {
         }
     }
 
-    public void scaleGlobRegion(GlobType[] scaledResult, GlobType[] sample, int sampleSize, Coordinate regionSize) {
-        if (Math.abs(regionSize.getGlobalX() - regionSize.getGlobalZ()) > 1e-4) {
-            throw new IllegalArgumentException("Cannot scale region where width != height");
-        }
-
-        double scale = (sampleSize - 1.0) / (regionSize.getBlockZ());
-        int scaledSize = MathHelper.floor(regionSize.getBlockX());
-
-        for (int scaledZ = 0; scaledZ < scaledSize; scaledZ++) {
-            int originZ = MathHelper.floor(scaledZ * scale);
-
-            for (int scaledX = 0; scaledX < scaledSize; scaledX++) {
-                int originX = MathHelper.floor(scaledX * scale);
-
-                scaledResult[scaledX + scaledZ * scaledSize] = sample[originX + originZ * sampleSize];
+    public void scaleGlobRegion(GlobType[] scaledResult, GlobType[] sample) {
+        for (int scaledZ = 0; scaledZ < this.scaledSize; scaledZ++) {
+            int originZ = MathHelper.floor(scaledZ * this.globScale);
+            for (int scaledX = 0; scaledX < this.scaledSize; scaledX++) {
+                int originX = MathHelper.floor(scaledX * this.globScale);
+                scaledResult[scaledX + scaledZ * this.scaledSize] = sample[originX + originZ * this.globSampleSize];
             }
         }
+    }
+
+    public int getHeightSampleSize() {
+        return this.heightSampleSize;
+    }
+
+    public int getGlobSampleSize() {
+        return this.globSampleSize;
     }
 }

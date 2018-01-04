@@ -116,12 +116,10 @@ public class FloodFill {
     public static class Point {
         private final int x;
         private final int y;
-        private final int hash;
 
         public Point(int x, int y) {
             this.x = x;
             this.y = y;
-            this.hash = x + y << 16;
         }
 
         public int getX() {
@@ -143,7 +141,7 @@ public class FloodFill {
 
         @Override
         public int hashCode() {
-            return this.hash;
+            return this.x ^ (this.y << 16);
         }
     }
 

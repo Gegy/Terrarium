@@ -112,8 +112,7 @@ public class HeightSource extends TiledSource<HeightTileAccess> implements Short
     }
 
     @Override
-    public void sampleArea(short[] data, Coordinate minimumCoordinate, Coordinate maximumCoordinate) {
-        Coordinate size = maximumCoordinate.subtract(minimumCoordinate);
+    public void sampleArea(short[] data, Coordinate coordinate, Coordinate size) {
         if (Math.abs(size.getGlobalX() - size.getGlobalZ()) > 1e-4) {
             throw new IllegalArgumentException("Cannot sample area where width != height");
         }
@@ -151,8 +150,9 @@ public class HeightSource extends TiledSource<HeightTileAccess> implements Short
         // TODO: Come back to more efficient, but broken algorithm
         for (int z = 0; z < sampleSize; z++) {
             for (int x = 0; x < sampleSize; x++) {
-                short heightValue = this.get(minimumCoordinate.add(x * sampleStep, z * sampleStep));
+                short heightValue = this.get(coordinate.add(x * sampleStep, z * sampleStep));
                 if (heightValue >= 0) {
+                    // TODO: Possibly interpolate?
                     data[x + z * sampleSize] = heightValue;
                 }
             }
