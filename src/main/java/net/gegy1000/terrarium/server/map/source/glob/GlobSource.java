@@ -1,7 +1,7 @@
 package net.gegy1000.terrarium.server.map.source.glob;
 
 import net.gegy1000.terrarium.Terrarium;
-import net.gegy1000.terrarium.server.map.glob.GlobType;
+import net.gegy1000.terrarium.server.map.cover.CoverType;
 import net.gegy1000.terrarium.server.map.source.CachedRemoteSource;
 import net.gegy1000.terrarium.server.map.source.SourceException;
 import net.gegy1000.terrarium.server.map.source.TerrariumData;
@@ -19,7 +19,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.zip.GZIPInputStream;
 
-public class GlobSource extends TiledSource<GlobTileAccess> implements RasterSource<GlobType>, CachedRemoteSource {
+public class GlobSource extends TiledSource<GlobTileAccess> implements RasterSource<CoverType>, CachedRemoteSource {
     public static final int TILE_SIZE = 2560;
 
     private static final File CACHE_ROOT = new File(CachedRemoteSource.GLOBAL_CACHE_ROOT, "globcover");
@@ -78,7 +78,7 @@ public class GlobSource extends TiledSource<GlobTileAccess> implements RasterSou
     }
 
     @Override
-    public GlobType get(Coordinate coordinate) {
+    public CoverType get(Coordinate coordinate) {
         double globX = coordinate.getGlobX();
         double globZ = coordinate.getGlobZ();
 
@@ -91,7 +91,7 @@ public class GlobSource extends TiledSource<GlobTileAccess> implements RasterSou
     }
 
     @Override
-    public void sampleArea(GlobType[] data, Coordinate coordinate, Coordinate size) {
+    public void sampleArea(CoverType[] data, Coordinate coordinate, Coordinate size) {
         // TODO: Come back to more performant, but broken algorithm
         if (Math.abs(size.getGlobalX() - size.getGlobalZ()) > 1e-4) {
             throw new IllegalArgumentException("Cannot sample area where width != height");

@@ -1,6 +1,7 @@
 # Generators
 
 generator.terrarium.earth=Terrarium
+generator.terrarium.debug=Terrarium Debug
 
 # GUI
 

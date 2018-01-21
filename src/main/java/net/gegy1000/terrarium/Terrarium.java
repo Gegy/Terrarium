@@ -2,6 +2,7 @@ package net.gegy1000.terrarium;
 
 import net.gegy1000.terrarium.server.ServerProxy;
 import net.gegy1000.terrarium.server.command.GeoTeleportCommand;
+import net.gegy1000.terrarium.server.world.CoverDebugWorldType;
 import net.gegy1000.terrarium.server.world.EarthWorldType;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -30,6 +31,7 @@ public class Terrarium {
     public static ServerProxy PROXY;
 
     public static final EarthWorldType EARTH_TYPE = new EarthWorldType();
+    public static final CoverDebugWorldType COVER_DEBUG_TYPE = new CoverDebugWorldType();
 
     @Mod.EventHandler
     public static void onPreInit(FMLPreInitializationEvent event) {

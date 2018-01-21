@@ -38,6 +38,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class OverpassSource extends TiledSource<OverpassTileAccess> implements CachedRemoteSource {
     private static final File CACHE_ROOT = new File(CachedRemoteSource.GLOBAL_CACHE_ROOT, "osm");
@@ -104,8 +105,8 @@ public class OverpassSource extends TiledSource<OverpassTileAccess> implements C
     }
 
     public OverpassTileAccess sampleArea(Coordinate minCoordinate, Coordinate maxCoordinate) {
-        DataTilePos minTilePos = this.getTilePos(minCoordinate);
-        DataTilePos maxTilePos = this.getTilePos(maxCoordinate);
+        DataTilePos minTilePos = this.getTilePos(minCoordinate.add(-8.0, -8.0));
+        DataTilePos maxTilePos = this.getTilePos(maxCoordinate.add(8.0, 8.0));
 
         TLongObjectMap<OsmNode> nodes = new TLongObjectHashMap<>();
         TLongObjectMap<OsmWay> ways = new TLongObjectHashMap<>();
@@ -126,12 +127,14 @@ public class OverpassSource extends TiledSource<OverpassTileAccess> implements C
     @Override
     public InputStream getRemoteStream(DataTilePos key) throws IOException {
         HttpPost post = new HttpPost(OVERPASS_ENDPOINT);
-        double minLatitude = this.getLatitude(key);
-        double minLongitude = this.getLongitude(key);
-        double maxLatitude = this.getMaxLatitude(key);
-        double maxLongitude = this.getMaxLongitude(key);
+        double minLatitude = this.getLatitude(key) - 0.0005;
+        double minLongitude = this.getLongitude(key) - 0.0005;
+        double maxLatitude = this.getMaxLatitude(key) + 0.0005;
+        double maxLongitude = this.getMaxLongitude(key) + 0.0005;
 
-        post.setEntity(new StringEntity(String.format(this.query, minLatitude, minLongitude, maxLatitude, maxLongitude)));
+        String bbox = minLatitude + "," + minLongitude + "," + maxLatitude + "," + maxLongitude;
+        String formattedQuery = this.query.replaceAll(Pattern.quote("{{bbox}}"), bbox);
+        post.setEntity(new StringEntity(formattedQuery));
 
         CloseableHttpResponse response = this.client.execute(post);
         if (response.getStatusLine().getStatusCode() == 429) {

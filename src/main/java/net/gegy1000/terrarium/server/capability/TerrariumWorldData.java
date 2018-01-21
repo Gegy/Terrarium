@@ -51,7 +51,7 @@ public interface TerrariumWorldData extends ICapabilityProvider {
 
         public Implementation(World world) {
             this.settings = EarthGenerationSettings.deserialize(world.getWorldInfo().getGeneratorOptions());
-            this.generationHandler = new EarthGenerationHandler(this, this.settings, world.getHeight() - 1);
+            this.generationHandler = new EarthGenerationHandler(world.getSeed(), this, this.settings, world.getHeight() - 1);
 
             this.heightSource = new HeightSource(this.settings);
             this.globSource = new GlobSource(this.settings);

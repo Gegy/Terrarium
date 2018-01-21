@@ -4,14 +4,14 @@ import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.map.GenerationRegion;
 import net.gegy1000.terrarium.server.map.GenerationRegionHandler;
-import net.gegy1000.terrarium.server.map.RegionTilePos;
-import net.gegy1000.terrarium.server.map.glob.GlobType;
+import net.gegy1000.terrarium.server.map.cover.CoverType;
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.Random;
 
 public class EarthGenerationHandler {
+    private final long worldSeed;
     private final EarthGenerationSettings settings;
 
     private final GenerationRegionHandler regionHandler;
@@ -23,7 +23,8 @@ public class EarthGenerationHandler {
 
     private final Random random = new Random();
 
-    public EarthGenerationHandler(TerrariumWorldData worldData, EarthGenerationSettings settings, int maxHeight) {
+    public EarthGenerationHandler(long worldSeed, TerrariumWorldData worldData, EarthGenerationSettings settings, int maxHeight) {
+        this.worldSeed = worldSeed;
         this.settings = settings;
         this.maxHeight = maxHeight;
 
@@ -33,11 +34,14 @@ public class EarthGenerationHandler {
         this.scatterRange = MathHelper.floor(this.settings.scatterRange * this.settings.worldScale);
     }
 
-    public void initializeSeed(RegionTilePos pos) {
-        this.random.setSeed(pos.getTileX() * 341873128712L + pos.getTileZ() * 132897987541L);
+    private void initializeSeed(int chunkX, int chunkZ) {
+        long seed = chunkX * 132897987541L + chunkZ * 341873128712L;
+        this.random.setSeed(seed ^ this.worldSeed);
     }
 
     public void populateHeightRegion(int[] buffer, int chunkX, int chunkZ) {
+        this.initializeSeed(chunkX, chunkZ);
+
         int globalX = chunkX << 4;
         int globalZ = chunkZ << 4;
 
@@ -58,7 +62,9 @@ public class EarthGenerationHandler {
         }
     }
 
-    public void populateGlobRegion(GlobType[] buffer, int chunkX, int chunkZ) {
+    public void populateCoverRegion(CoverType[] buffer, int chunkX, int chunkZ) {
+        this.initializeSeed(chunkX, chunkZ);
+
         int globalX = chunkX << 4;
         int globalZ = chunkZ << 4;
 
@@ -67,33 +73,33 @@ public class EarthGenerationHandler {
                 int blockZ = globalZ + localZ;
                 for (int localX = 0; localX < 16; localX++) {
                     int blockX = globalX + localX;
-                    buffer[localX + localZ * 16] = this.getGlobScattered(blockX, blockZ);
+                    buffer[localX + localZ * 16] = this.getCoverScattered(blockX, blockZ);
                 }
             }
         } catch (Exception e) {
-            Terrarium.LOGGER.error("Failed to populate globcover region for {}, {}", chunkX, chunkZ, e);
+            Terrarium.LOGGER.error("Failed to populate cover region for {}, {}", chunkX, chunkZ, e);
         }
     }
 
-    private GlobType getGlobScattered(int x, int z) {
-        GlobType originGlob = this.getGlob(x, z);
+    private CoverType getCoverScattered(int x, int z) {
+        CoverType originCover = this.getCover(x, z);
 
-        int range = Math.max(1, MathHelper.ceil(this.scatterRange * originGlob.getScatterRange()));
+        int range = Math.max(1, MathHelper.ceil(this.scatterRange * originCover.getScatterRange()));
 
         int scatterX = x + this.random.nextInt(range) - this.random.nextInt(range);
         int scatterZ = z + this.random.nextInt(range) - this.random.nextInt(range);
 
-        GlobType scattered = this.getGlob(scatterX, scatterZ);
+        CoverType scattered = this.getCover(scatterX, scatterZ);
 
         if (!scattered.canScatterTo()) {
-            return originGlob;
+            return originCover;
         }
 
         return scattered;
     }
 
-    private GlobType getGlob(int x, int z) {
-        return this.regionHandler.get(x, z).getGlobType(x, z);
+    private CoverType getCover(int x, int z) {
+        return this.regionHandler.get(x, z).getCoverType(x, z);
     }
 
     public EarthGenerationSettings getSettings() {

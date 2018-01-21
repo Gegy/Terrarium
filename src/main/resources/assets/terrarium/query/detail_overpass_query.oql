@@ -1,16 +1,13 @@
 [out:json]
-[timeout:15][maxsize:8388608][bbox:%s,%s,%s,%s];
+[timeout:15][maxsize:8388608];
 
-way["highway"]["highway"!~"trunk|motorway"]; out;
-node(w); out;
-
-way["building"]["building"!="no"]; out;
-node(w); out;
-
-way["building:part"]; out;
-node(w); out;
-
-way["natural"]["natural"!="coastline"]["natural"!="water"]; out;
+(
+    way({{bbox}})["highway"]["highway"!~"trunk|motorway"];
+    way({{bbox}})["building"]["building"!="no"];
+    way({{bbox}})["building:part"];
+    way({{bbox}})["natural"]["natural"!="coastline"]["natural"!="water"];
+);
+out;
 node(w); out;
 
 node["amenity"]["amenity"!="no"]; out;

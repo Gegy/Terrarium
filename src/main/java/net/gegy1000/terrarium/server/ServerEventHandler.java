@@ -4,8 +4,10 @@ import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.util.Coordinate;
+import net.gegy1000.terrarium.server.world.CoverDebugWorldType;
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
 import net.gegy1000.terrarium.server.world.EarthWorldType;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
@@ -21,6 +23,8 @@ public class ServerEventHandler {
         if (world.getWorldType() instanceof EarthWorldType) {
             EarthGenerationSettings settings = EarthGenerationSettings.deserialize(world.getWorldInfo().getGeneratorOptions());
             world.setSpawnPoint(Coordinate.fromLatLng(settings, settings.spawnLatitude, settings.spawnLongitude).toBlockPos());
+        } else if (world.getWorldType() instanceof CoverDebugWorldType) {
+            world.setSpawnPoint(BlockPos.ORIGIN);
         }
     }
 

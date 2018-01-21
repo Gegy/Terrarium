@@ -1,7 +1,7 @@
 package net.gegy1000.terrarium.server.map.adapter;
 
 import net.gegy1000.terrarium.server.map.RegionData;
-import net.gegy1000.terrarium.server.map.glob.GlobType;
+import net.gegy1000.terrarium.server.map.cover.CoverType;
 import net.gegy1000.terrarium.server.util.FloodFill;
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
 import net.minecraft.util.math.MathHelper;
@@ -21,29 +21,29 @@ public class WaterFlattenAdapter implements RegionAdapter {
     @Override
     public void adapt(EarthGenerationSettings settings, RegionData data, int x, int z, int width, int height) {
         short[] heightBuffer = data.getHeights();
-        GlobType[] globBuffer = data.getGlobcover();
+        CoverType[] coverBuffer = data.getCover();
 
         for (int localZ = 0; localZ < height; localZ++) {
             for (int localX = 0; localX < width; localX++) {
-                if (globBuffer[localX + localZ * width] == GlobType.WATER) {
+                if (coverBuffer[localX + localZ * width] == CoverType.WATER) {
                     AverageGlobHeightVisitor visitor = new AverageGlobHeightVisitor(heightBuffer, width);
-                    FloodFill.floodVisit(globBuffer, width, height, new FloodFill.Point(localX, localZ), visitor);
+                    FloodFill.floodVisit(coverBuffer, width, height, new FloodFill.Point(localX, localZ), visitor);
 
                     List<FloodFill.Point> waterPoints = visitor.getVisitedPoints();
                     short averageHeight = visitor.getAverageHeight();
-                    this.flattenArea(waterPoints, averageHeight, heightBuffer, globBuffer, width, height);
+                    this.flattenArea(waterPoints, averageHeight, heightBuffer, coverBuffer, width, height);
                 }
             }
         }
 
-        for (int i = 0; i < globBuffer.length; i++) {
-            if (globBuffer[i] == GlobType.PROCESSING) {
-                globBuffer[i] = GlobType.WATER;
+        for (int i = 0; i < coverBuffer.length; i++) {
+            if (coverBuffer[i] == CoverType.PROCESSING) {
+                coverBuffer[i] = CoverType.WATER;
             }
         }
     }
 
-    private void flattenArea(List<FloodFill.Point> waterPoints, short targetHeight, short[] heightBuffer, GlobType[] globBuffer, int width, int height) {
+    private void flattenArea(List<FloodFill.Point> waterPoints, short targetHeight, short[] heightBuffer, CoverType[] globBuffer, int width, int height) {
         Set<FloodFill.Point> sourcePoints = new HashSet<>();
 
         for (FloodFill.Point point : waterPoints) {
@@ -69,15 +69,15 @@ public class WaterFlattenAdapter implements RegionAdapter {
         }
     }
 
-    private boolean hasNeighbouringLand(int x, int z, GlobType[] globBuffer, int width, int height) {
+    private boolean hasNeighbouringLand(int x, int z, CoverType[] globBuffer, int width, int height) {
         int index = x + z * width;
-        return (x > 0 && globBuffer[index - 1] != GlobType.PROCESSING)
-                || (x < width - 1 && globBuffer[index + 1] != GlobType.PROCESSING)
-                || (z > 0 && globBuffer[index - width] != GlobType.PROCESSING)
-                || (z < height - 1 && globBuffer[index + width] != GlobType.PROCESSING);
+        return (x > 0 && globBuffer[index - 1] != CoverType.PROCESSING)
+                || (x < width - 1 && globBuffer[index + 1] != CoverType.PROCESSING)
+                || (z > 0 && globBuffer[index - width] != CoverType.PROCESSING)
+                || (z < height - 1 && globBuffer[index + width] != CoverType.PROCESSING);
     }
 
-    private class AverageGlobHeightVisitor implements FloodFill.Visitor<GlobType> {
+    private class AverageGlobHeightVisitor implements FloodFill.Visitor<CoverType> {
         private final short[] heightBuffer;
         private final int width;
 
@@ -91,15 +91,15 @@ public class WaterFlattenAdapter implements RegionAdapter {
         }
 
         @Override
-        public GlobType visit(FloodFill.Point point, GlobType sampled) {
+        public CoverType visit(FloodFill.Point point, CoverType sampled) {
             this.totalHeight += this.heightBuffer[point.getX() + point.getY() * this.width];
             this.visitedPoints.add(point);
-            return GlobType.PROCESSING;
+            return CoverType.PROCESSING;
         }
 
         @Override
-        public boolean canVisit(FloodFill.Point point, GlobType sampled) {
-            return sampled == GlobType.WATER;
+        public boolean canVisit(FloodFill.Point point, CoverType sampled) {
+            return sampled == CoverType.WATER;
         }
 
         public short getAverageHeight() {
@@ -129,6 +129,9 @@ public class WaterFlattenAdapter implements RegionAdapter {
             int deltaX = point.getX() - this.origin.getX();
             int deltaZ = point.getY() - this.origin.getY();
             double distance = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
+            if (distance <= 1.5) {
+                return this.target;
+            }
             double scale = MathHelper.clamp(distance / this.range, 0.0, 1.0);
             return (short) MathHelper.floor(this.target + (sampled - this.target) * scale);
         }

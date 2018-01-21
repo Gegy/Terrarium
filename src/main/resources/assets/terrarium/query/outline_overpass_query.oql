@@ -1,8 +1,9 @@
 [out:json]
-[timeout:15][maxsize:5242880][bbox:%s,%s,%s,%s];
+[timeout:15][maxsize:5242880];
 
-way["highway"~"trunk|motorway"]; out;
-node(w); out;
-
-way["natural"="coastline"]; out;
+(
+    way({{bbox}})["highway"~"trunk|motorway"];
+    way({{bbox}})["natural"="coastline"];
+);
+out;
 node(w); out;

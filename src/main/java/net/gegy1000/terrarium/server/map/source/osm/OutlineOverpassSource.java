@@ -7,6 +7,6 @@ public class OutlineOverpassSource extends OverpassSource {
     private static final int QUERY_VERSION = 1;
 
     public OutlineOverpassSource(EarthGenerationSettings settings) {
-        super(settings, 0.2, "outline", QUERY_LOCATION, QUERY_VERSION);
+        super(settings, 0.3, "outline", QUERY_LOCATION, QUERY_VERSION);
     }
 }

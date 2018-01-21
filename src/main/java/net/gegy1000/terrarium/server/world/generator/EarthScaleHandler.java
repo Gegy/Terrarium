@@ -1,6 +1,6 @@
 package net.gegy1000.terrarium.server.world.generator;
 
-import net.gegy1000.terrarium.server.map.glob.GlobType;
+import net.gegy1000.terrarium.server.map.cover.CoverType;
 import net.gegy1000.terrarium.server.util.Coordinate;
 import net.gegy1000.terrarium.server.util.Interpolation;
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
@@ -68,7 +68,7 @@ public class EarthScaleHandler {
         }
     }
 
-    public void scaleGlobRegion(GlobType[] scaledResult, GlobType[] sample) {
+    public void scaleGlobRegion(CoverType[] scaledResult, CoverType[] sample) {
         for (int scaledZ = 0; scaledZ < this.scaledSize; scaledZ++) {
             int originZ = MathHelper.floor(scaledZ * this.globScale);
             for (int scaledX = 0; scaledX < this.scaledSize; scaledX++) {

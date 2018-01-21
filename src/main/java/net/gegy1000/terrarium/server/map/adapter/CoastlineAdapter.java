@@ -1,11 +1,13 @@
 package net.gegy1000.terrarium.server.map.adapter;
 
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.Point;
 import de.topobyte.osm4j.core.model.iface.OsmWay;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.gegy1000.terrarium.server.map.RegionData;
-import net.gegy1000.terrarium.server.map.glob.GlobType;
+import net.gegy1000.terrarium.server.map.adapter.debug.DebugImageWriter;
+import net.gegy1000.terrarium.server.map.cover.CoverType;
 import net.gegy1000.terrarium.server.map.osm.OsmDataParser;
 import net.gegy1000.terrarium.server.map.source.osm.OverpassTileAccess;
 import net.gegy1000.terrarium.server.util.Coordinate;
@@ -14,28 +16,32 @@ import net.gegy1000.terrarium.server.util.Interpolation;
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
 import net.minecraft.util.math.MathHelper;
 
-import com.vividsolutions.jts.geom.Point;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class CoastlineAdapter implements RegionAdapter {
-    private static final int OCEAN = 0;
-    private static final int LAND = 1;
-    private static final int COAST = 2;
+    public static final int OCEAN = 0;
+    public static final int LAND = 1;
+    public static final int COAST = 2;
 
-    private static final int COAST_UP = 4;
-    private static final int COAST_DOWN = 8;
-    private static final int FREE_FLOOD = 16;
+    public static final int COAST_UP = 4;
+    public static final int COAST_DOWN = 8;
+    public static final int FREE_FLOOD = 16;
+    public static final int COAST_IGNORE = 32;
+
+    public static final int LAND_TYPE_MASK = 3;
+    public static final int COAST_TYPE_MASK = 252;
 
     @Override
     public void adapt(EarthGenerationSettings settings, RegionData data, int x, int z, int width, int height) {
         OverpassTileAccess overpassTile = data.getOverpassTile();
 
         short[] heightBuffer = data.getHeights();
-        GlobType[] globBuffer = data.getGlobcover();
+        CoverType[] coverBuffer = data.getCover();
 
         List<OsmWay> coastlines = overpassTile.getWays().valueCollection().stream()
                 .filter(way -> OsmDataParser.hasTag(way, "natural", "coastline"))
@@ -44,56 +50,40 @@ public class CoastlineAdapter implements RegionAdapter {
         if (!coastlines.isEmpty()) {
             int[] landmap = new int[width * height];
             for (int i = 0; i < landmap.length; i++) {
-                landmap[i] = globBuffer[i] == GlobType.WATER ? OCEAN : LAND;
+                landmap[i] = coverBuffer[i] == CoverType.WATER ? OCEAN : LAND;
             }
 
-            Object2IntMap<FloodFill.Point> floodPoints = new Object2IntOpenHashMap<>();
+            DebugImageWriter.write(x + "_" + z + "_0_init", landmap, DebugImageWriter.COASTLINE, width, height);
 
             for (OsmWay coastline : coastlines) {
+                List<Point> linePoints = new LinkedList<>();
                 List<LineString> lines = OsmDataParser.createLines(overpassTile, coastline);
 
                 for (LineString line : lines) {
-                    this.drawLine(settings, x, z, width, height, landmap, floodPoints, line);
-                }
-            }
-
-            for (Map.Entry<FloodFill.Point, Integer> entry : floodPoints.entrySet()) {
-                FloodFill.Point point = entry.getKey();
-                int floodType = entry.getValue();
-                int sampled = landmap[point.getX() + point.getY() * width];
-                FillVisitor visitor = new FillVisitor(floodType);
-                if (visitor.canVisit(point, sampled)) {
-                    FloodFill.floodVisit(landmap, width, height, point, visitor);
-                }
-            }
-
-            List<FloodFill.Point> unselectedPoints = new LinkedList<>();
-            for (int i = 0; i < globBuffer.length; i++) {
-                GlobType glob = globBuffer[i];
-                int landType = landmap[i] & 3;
-                if (landType == OCEAN) {
-                    if (globBuffer[i] != GlobType.WATER) {
-                        globBuffer[i] = GlobType.WATER;
-                        heightBuffer[i] = 1;
+                    for (int i = 0; i < line.getNumPoints(); i++) {
+                        linePoints.add(line.getPointN(i));
                     }
-                } else if (landType == LAND && glob == GlobType.WATER) {
-                    globBuffer[i] = GlobType.PROCESSING;
-                    unselectedPoints.add(new FloodFill.Point(i % width, i / width));
                 }
+
+                this.rasterizeLine(settings, x, z, width, height, landmap, linePoints);
             }
 
-            for (FloodFill.Point point : unselectedPoints) {
-                GlobSelectVisitor visitor = new GlobSelectVisitor();
-                FloodFill.floodVisit(globBuffer, width, height, point, visitor);
-                globBuffer[point.getX() + point.getY() * width] = visitor.getResult();
-            }
+            this.removeProblematicLines(width, height, landmap);
+
+            DebugImageWriter.write(x + "_" + z + "_1_lines", landmap, DebugImageWriter.COASTLINE, width, height);
+
+            this.floodFillMap(width, height, landmap);
+
+            DebugImageWriter.write(x + "_" + z + "_2_flooded", landmap, DebugImageWriter.COASTLINE, width, height);
+
+            this.processFloodedMap(width, height, heightBuffer, coverBuffer, landmap);
         }
     }
 
-    private void drawLine(EarthGenerationSettings settings, int x, int y, int width, int height, int[] landmap, Object2IntMap<FloodFill.Point> floodPoints, LineString line) {
-        for (int nodeIndex = 1; nodeIndex < line.getNumPoints(); nodeIndex++) {
-            Point current = line.getPointN(nodeIndex - 1);
-            Point next = line.getPointN(nodeIndex);
+    private void rasterizeLine(EarthGenerationSettings settings, int x, int y, int width, int height, int[] landmap, List<Point> line) {
+        for (int nodeIndex = 1; nodeIndex < line.size(); nodeIndex++) {
+            Point current = line.get(nodeIndex - 1);
+            Point next = line.get(nodeIndex);
 
             Coordinate currentCoordinate = Coordinate.fromLatLng(settings, current.getX(), current.getY());
 
@@ -102,10 +92,10 @@ public class CoastlineAdapter implements RegionAdapter {
 
             Coordinate nextCoordinate = Coordinate.fromLatLng(settings, next.getX(), next.getY());
             while (Math.abs(nextCoordinate.getBlockX() - originX) < 3.0 && Math.abs(nextCoordinate.getBlockZ() - originY) < 3.0) {
-                if (++nodeIndex >= line.getNumPoints()) {
+                if (++nodeIndex >= line.size()) {
                     break;
                 }
-                Point node = line.getPointN(nodeIndex);
+                Point node = line.get(nodeIndex);
                 nextCoordinate = Coordinate.fromLatLng(settings, node.getX(), node.getY());
             }
 
@@ -113,14 +103,14 @@ public class CoastlineAdapter implements RegionAdapter {
             double targetY = nextCoordinate.getBlockZ();
 
             int lineType = this.getLineType(currentCoordinate, nextCoordinate);
-            int coastType = lineType & 252;
+            int coastType = lineType & COAST_TYPE_MASK;
 
             List<FloodFill.Point> points = new ArrayList<>();
             Interpolation.interpolateLine(originX, originY, targetX, targetY, false, point -> {
                 int localX = point.x - x;
                 int localY = point.y - y;
                 if (localX >= 0 && localY >= 0 && localX < width && localY < height) {
-                    landmap[localX + localY * width] = lineType;
+                    landmap[localX + localY * width] = COAST | COAST_IGNORE;
 
                     this.freeNeighbours(width, height, landmap, localX, localY);
 
@@ -134,13 +124,53 @@ public class CoastlineAdapter implements RegionAdapter {
                     int localX = point.getX() - x;
                     int localY = point.getY() - y;
                     if (coastType != 0) {
-                        if (localX > 0) {
-                            int left = coastType == COAST_UP ? LAND : OCEAN;
-                            floodPoints.put(new FloodFill.Point(localX - 1, localY), left);
+                        landmap[localX + localY * width] = lineType;
+                    }
+                }
+            }
+        }
+    }
+
+    private void freeNeighbours(int width, int height, int[] landmap, int localX, int localY) {
+        this.iterateNeighbours(localX, localY, width, height, true, neighbourIndex -> {
+            int sample = landmap[neighbourIndex];
+            if ((sample & LAND_TYPE_MASK) != COAST) {
+                landmap[neighbourIndex] = sample | FREE_FLOOD;
+            }
+        });
+    }
+
+    private void removeProblematicLines(int width, int height, int[] landmap) {
+        for (int localY = 0; localY < height; localY++) {
+            for (int localX = 0; localX < width; localX++) {
+                int index = localX + localY * width;
+                int coastType = landmap[index] & COAST_TYPE_MASK;
+
+                if (this.isFillingCoastType(coastType)) {
+                    this.iterateNeighbours(localX, localY, width, height, false, neighbourIndex -> {
+                        int neighbour = landmap[neighbourIndex];
+                        int neighbourCoastType = neighbour & COAST_TYPE_MASK;
+
+                        if (this.isFillingCoastType(neighbourCoastType) && coastType != neighbourCoastType) {
+                            landmap[neighbourIndex] = COAST | COAST_IGNORE;
+                            landmap[index] = COAST | COAST_IGNORE;
                         }
-                        if (localX < width - 1) {
-                            int right = coastType == COAST_UP ? OCEAN : LAND;
-                            floodPoints.put(new FloodFill.Point(localX + 1, localY), right);
+                    });
+                }
+            }
+        }
+    }
+
+    private void iterateNeighbours(int originX, int originY, int width, int height, boolean corners, Consumer<Integer> neighbourIndex) {
+        for (int neighbourY = -1; neighbourY <= 1; neighbourY++) {
+            for (int neighbourX = -1; neighbourX <= 1; neighbourX++) {
+                if (neighbourX != 0 || neighbourY != 0) {
+                    if (corners || (neighbourX != 0 && neighbourY != 0)) {
+                        int globalX = originX + neighbourX;
+                        int globalY = originY + neighbourY;
+                        if (globalX >= 0 && globalY >= 0 && globalX < width && globalY < height) {
+                            int index = globalX + globalY * width;
+                            neighbourIndex.accept(index);
                         }
                     }
                 }
@@ -148,21 +178,64 @@ public class CoastlineAdapter implements RegionAdapter {
         }
     }
 
-    private void freeNeighbours(int width, int height, int[] landmap, int localX, int localZ) {
-        for (int neighbourZ = -1; neighbourZ <= 1; neighbourZ++) {
-            for (int neighbourX = -1; neighbourX <= 1; neighbourX++) {
-                if (neighbourX != 0 || neighbourZ != 0) {
-                    int globalX = localX + neighbourX;
-                    int globalZ = localZ + neighbourZ;
-                    if (globalX >= 0 && globalZ >= 0 && globalX < width && globalZ < height) {
-                        int index = globalX + globalZ * width;
-                        int sample = landmap[index];
-                        if ((sample & 3) != COAST) {
-                            landmap[index] = sample | FREE_FLOOD;
-                        }
+    private void floodFillMap(int width, int height, int[] landmap) {
+        Object2IntMap<FloodFill.Point> floodSources = this.createFloodSources(width, height, landmap);
+
+        for (Map.Entry<FloodFill.Point, Integer> entry : floodSources.entrySet()) {
+            FloodFill.Point point = entry.getKey();
+            int floodType = entry.getValue();
+            int sampled = landmap[point.getX() + point.getY() * width];
+            FillVisitor visitor = new FillVisitor(floodType);
+            if (visitor.canVisit(point, sampled)) {
+                FloodFill.floodVisit(landmap, width, height, point, visitor);
+            }
+        }
+    }
+
+    private Object2IntMap<FloodFill.Point> createFloodSources(int width, int height, int[] landmap) {
+        Object2IntMap<FloodFill.Point> floodSources = new Object2IntOpenHashMap<>();
+
+        for (int localY = 0; localY < height; localY++) {
+            for (int localX = 0; localX < width; localX++) {
+                int coastType = landmap[localX + localY * width] & COAST_TYPE_MASK;
+                if (this.isFillingCoastType(coastType)) {
+                    if (localX > 0) {
+                        int left = coastType == COAST_UP ? LAND : OCEAN;
+                        floodSources.put(new FloodFill.Point(localX - 1, localY), left);
+                    }
+                    if (localX < width - 1) {
+                        int right = coastType == COAST_UP ? OCEAN : LAND;
+                        floodSources.put(new FloodFill.Point(localX + 1, localY), right);
                     }
                 }
             }
+        }
+
+        return floodSources;
+    }
+
+    private void processFloodedMap(int width, int height, short[] heightBuffer, CoverType[] coverBuffer, int[] landmap) {
+        List<FloodFill.Point> unselectedPoints = new LinkedList<>();
+        for (int i = 0; i < coverBuffer.length; i++) {
+            CoverType glob = coverBuffer[i];
+            int sample = landmap[i];
+            int landType = sample & LAND_TYPE_MASK;
+            int coastType = sample & COAST_TYPE_MASK;
+            if (landType == OCEAN) {
+                if (coverBuffer[i] != CoverType.WATER) {
+                    coverBuffer[i] = CoverType.WATER;
+                    heightBuffer[i] = 1;
+                }
+            } else if ((landType == LAND || landType == COAST && coastType != FREE_FLOOD) && glob == CoverType.WATER) {
+                coverBuffer[i] = CoverType.PROCESSING;
+                unselectedPoints.add(new FloodFill.Point(i % width, i / width));
+            }
+        }
+
+        for (FloodFill.Point point : unselectedPoints) {
+            GlobSelectVisitor visitor = new GlobSelectVisitor();
+            FloodFill.floodVisit(coverBuffer, width, height, point, visitor);
+            coverBuffer[point.getX() + point.getY() * width] = visitor.getResult();
         }
     }
 
@@ -177,6 +250,11 @@ public class CoastlineAdapter implements RegionAdapter {
         return COAST;
     }
 
+    private boolean isFillingCoastType(int lineType) {
+        int coastType = lineType & COAST_TYPE_MASK;
+        return coastType == COAST_UP || coastType == COAST_DOWN;
+    }
+
     private class FillVisitor implements FloodFill.IntVisitor {
         private final int floodType;
 
@@ -186,7 +264,7 @@ public class CoastlineAdapter implements RegionAdapter {
 
         @Override
         public int visit(FloodFill.Point point, int sampled) {
-            if ((sampled & 252) == FREE_FLOOD) {
+            if ((sampled & COAST_TYPE_MASK) == FREE_FLOOD) {
                 return this.floodType | FREE_FLOOD;
             }
             return this.floodType;
@@ -194,17 +272,17 @@ public class CoastlineAdapter implements RegionAdapter {
 
         @Override
         public boolean canVisit(FloodFill.Point point, int sampled) {
-            int landType = sampled & 3;
-            return (landType == LAND || landType == OCEAN) && (landType != (this.floodType & 3) || (sampled & 252) == FREE_FLOOD);
+            int landType = sampled & LAND_TYPE_MASK;
+            return (landType == LAND || landType == OCEAN) && (landType != (this.floodType & 3) || (sampled & COAST_TYPE_MASK) == FREE_FLOOD);
         }
     }
 
-    private class GlobSelectVisitor implements FloodFill.Visitor<GlobType> {
-        private GlobType result = null;
+    private class GlobSelectVisitor implements FloodFill.Visitor<CoverType> {
+        private CoverType result = null;
 
         @Override
-        public GlobType visit(FloodFill.Point point, GlobType sampled) {
-            if (sampled != GlobType.PROCESSING) {
+        public CoverType visit(FloodFill.Point point, CoverType sampled) {
+            if (sampled != CoverType.PROCESSING) {
                 this.result = sampled;
                 return null;
             }
@@ -212,13 +290,13 @@ public class CoastlineAdapter implements RegionAdapter {
         }
 
         @Override
-        public boolean canVisit(FloodFill.Point point, GlobType sampled) {
-            return sampled != GlobType.WATER;
+        public boolean canVisit(FloodFill.Point point, CoverType sampled) {
+            return sampled != CoverType.WATER;
         }
 
-        public GlobType getResult() {
+        public CoverType getResult() {
             if (this.result == null) {
-                return GlobType.RAINFED_CROPS;
+                return CoverType.RAINFED_CROPS;
             }
             return this.result;
         }

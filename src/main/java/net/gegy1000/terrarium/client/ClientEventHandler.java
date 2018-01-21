@@ -3,6 +3,7 @@ package net.gegy1000.terrarium.client;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.client.gui.RemoteDataWarningGui;
 import net.gegy1000.terrarium.server.config.TerrariumConfig;
+import net.gegy1000.terrarium.server.world.CoverDebugWorldType;
 import net.gegy1000.terrarium.server.world.EarthWorldType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
@@ -65,8 +66,11 @@ public class ClientEventHandler {
         if (currentScreen instanceof GuiCreateWorld && event.getButton().id == 5) {
             GuiButton structuresButton = event.getButtonList().get(4);
             int selectedWorldIndex = ClientProxy.getSelectedWorldType((GuiCreateWorld) currentScreen);
-            if (WorldType.WORLD_TYPES[selectedWorldIndex] instanceof EarthWorldType) {
+            WorldType worldType = WorldType.WORLD_TYPES[selectedWorldIndex];
+            if (worldType instanceof EarthWorldType) {
                 structuresButton.visible = false;
+            } else if (worldType instanceof CoverDebugWorldType && !GuiScreen.isShiftKeyDown()) {
+                ClientProxy.actionPerformed(currentScreen, event.getButton());
             }
         }
     }
