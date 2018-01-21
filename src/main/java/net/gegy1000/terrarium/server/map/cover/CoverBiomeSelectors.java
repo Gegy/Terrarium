@@ -77,11 +77,11 @@ public class CoverBiomeSelectors {
             case FRIGID:
             case SUBTROPICS:
             case TEMPERATE:
-                return Biomes.DESERT;
+                return Biomes.SAVANNA;
             case TROPICS:
                 return Biomes.PLAINS;
         }
-        return Biomes.DESERT;
+        return Biomes.SAVANNA;
     };
 
     public static final Function<LatitudinalZone, Biome> GRASSLAND_SELECTOR = zone -> {

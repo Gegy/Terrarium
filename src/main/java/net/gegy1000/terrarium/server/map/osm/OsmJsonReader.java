@@ -18,6 +18,7 @@ import de.topobyte.osm4j.core.model.impl.Tag;
 import de.topobyte.osm4j.core.model.impl.Way;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TLongArrayList;
+import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,15 +49,17 @@ public class OsmJsonReader implements OsmReader {
             throw new OsmInputException("handler not set");
         }
 
+        String data = null;
         try (InputStreamReader reader = new InputStreamReader(this.input)) {
-            JsonObject root = JSON_PARSER.parse(reader).getAsJsonObject();
+            data = IOUtils.toString(reader);
+            JsonObject root = JSON_PARSER.parse(data).getAsJsonObject();
             JsonArray elementsArray = root.getAsJsonArray("elements");
 
             for (JsonElement element : elementsArray) {
                 this.parseElement(element.getAsJsonObject());
             }
         } catch (IOException e) {
-            throw new OsmInputException("error while parsing json data", e);
+            throw new OsmInputException("error while parsing json data: " + data, e);
         }
 
         try {

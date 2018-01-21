@@ -3,11 +3,14 @@ package net.gegy1000.terrarium.server.world.generator;
 import net.gegy1000.terrarium.server.map.cover.CoverType;
 import net.gegy1000.terrarium.server.util.Coordinate;
 import net.gegy1000.terrarium.server.util.Interpolation;
+import net.gegy1000.terrarium.server.util.Voronoi;
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
 import net.minecraft.util.math.MathHelper;
 
 public class EarthScaleHandler {
     private static final int HEIGHT_BUFFER = 1;
+
+    private static final Voronoi GLOB_VORONOI = new Voronoi(Voronoi.DistanceFunc.EUCLIDEAN, 1.2, 4, 1000);
 
     private final double heightScale;
     private final double globScale;
@@ -69,13 +72,7 @@ public class EarthScaleHandler {
     }
 
     public void scaleGlobRegion(CoverType[] scaledResult, CoverType[] sample) {
-        for (int scaledZ = 0; scaledZ < this.scaledSize; scaledZ++) {
-            int originZ = MathHelper.floor(scaledZ * this.globScale);
-            for (int scaledX = 0; scaledX < this.scaledSize; scaledX++) {
-                int originX = MathHelper.floor(scaledX * this.globScale);
-                scaledResult[scaledX + scaledZ * this.scaledSize] = sample[originX + originZ * this.globSampleSize];
-            }
-        }
+        GLOB_VORONOI.scale(sample, scaledResult, this.globSampleSize, this.globSampleSize, this.scaledSize, this.scaledSize);
     }
 
     public int getHeightSampleSize() {
