@@ -149,39 +149,45 @@ public abstract class CoverGenerator {
         return layer.getInts(x, z, 16, 16);
     }
 
-    protected BlockPos scatterDecorate(Random random, int x, int z) {
+    protected ChunkPoint scatterDecorate(Random random) {
         int scatterX = random.nextInt(16);
         int scatterZ = random.nextInt(16);
-        this.pos.setPos(x + scatterX, 0, z + scatterZ);
-        return this.pos;
+        return new ChunkPoint(scatterX, scatterZ);
     }
 
     protected void decorateScatter(Random random, int x, int z, int count, Consumer<BlockPos> decorator) {
         for (int i = 0; i < count; i++) {
-            BlockPos pos = this.scatterDecorate(random, x, z);
-            if (!this.tryPlace(pos)) {
-                continue;
+            ChunkPoint scattered = this.scatterDecorate(random);
+
+            if (this.globBuffer[scattered.index] == this.getType()) {
+                this.pos.setPos(x + scattered.localX, 0, z + scattered.localZ);
+
+                if (this.tryPlace(this.pos)) {
+                    BlockPos topBlock = this.world.getHeight(this.pos);
+                    if (!this.world.isAirBlock(topBlock)) {
+                        this.world.setBlockToAir(topBlock);
+                    }
+                    decorator.accept(topBlock);
+                }
             }
-            BlockPos topBlock = this.world.getTopSolidOrLiquidBlock(pos);
-            if (!this.world.isAirBlock(topBlock)) {
-                this.world.setBlockToAir(topBlock);
-            }
-            decorator.accept(topBlock);
         }
     }
 
     protected void decorateScatterSample(Random random, int x, int z, int count, Consumer<DecoratePoint> decorator) {
         for (int i = 0; i < count; i++) {
-            BlockPos pos = this.scatterDecorate(random, x, z);
-            if (!this.tryPlace(pos)) {
-                continue;
+            ChunkPoint scattered = this.scatterDecorate(random);
+
+            if (this.globBuffer[scattered.index] == this.getType()) {
+                this.pos.setPos(x + scattered.localX, 0, z + scattered.localZ);
+
+                if (this.tryPlace(this.pos)) {
+                    BlockPos topBlock = this.world.getHeight(this.pos);
+                    if (!this.world.isAirBlock(topBlock)) {
+                        this.world.setBlockToAir(topBlock);
+                    }
+                    decorator.accept(new DecoratePoint(scattered, topBlock));
+                }
             }
-            ChunkPoint chunkPoint = new ChunkPoint(pos.getX() - x, pos.getZ() - z);
-            BlockPos topBlock = this.world.getHeight(pos);
-            if (!this.world.isAirBlock(topBlock)) {
-                this.world.setBlockToAir(topBlock);
-            }
-            decorator.accept(new DecoratePoint(chunkPoint, topBlock));
         }
     }
 

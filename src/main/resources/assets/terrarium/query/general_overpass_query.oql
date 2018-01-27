@@ -1,5 +1,5 @@
 [out:json]
-[timeout:15][maxsize:5242880];
+[timeout:15][maxsize:16777216];
 
 (
     way({{bbox}})["landuse"];

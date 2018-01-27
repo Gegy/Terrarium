@@ -3,23 +3,26 @@ package net.gegy1000.terrarium.server.map;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Lists;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.map.adapter.CoastlineAdapter;
-import net.gegy1000.terrarium.server.map.adapter.RegionAdapter;
 import net.gegy1000.terrarium.server.map.adapter.WaterFlattenAdapter;
-import net.gegy1000.terrarium.server.map.cover.CoverType;
-import net.gegy1000.terrarium.server.map.source.osm.DetailedOverpassSource;
-import net.gegy1000.terrarium.server.map.source.osm.GeneralOverpassSource;
 import net.gegy1000.terrarium.server.map.source.osm.OverpassTileAccess;
-import net.gegy1000.terrarium.server.util.ArrayUtils;
+import net.gegy1000.terrarium.server.map.system.RegionPopulationSystem;
+import net.gegy1000.terrarium.server.map.system.component.TerrariumComponentTypes;
+import net.gegy1000.terrarium.server.map.system.populator.CoverRegionPopulator;
+import net.gegy1000.terrarium.server.map.system.populator.HeightRegionPopulator;
+import net.gegy1000.terrarium.server.map.system.populator.OverpassRegionPopulator;
+import net.gegy1000.terrarium.server.map.system.sampler.DataSampler;
+import net.gegy1000.terrarium.server.map.system.sampler.GlobSampler;
+import net.gegy1000.terrarium.server.map.system.sampler.HeightSampler;
+import net.gegy1000.terrarium.server.map.system.sampler.OverpassSampler;
 import net.gegy1000.terrarium.server.util.Coordinate;
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
 import net.gegy1000.terrarium.server.world.generator.EarthGenerationHandler;
-import net.gegy1000.terrarium.server.world.generator.EarthScaleHandler;
-import net.minecraft.util.math.MathHelper;
 
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -27,14 +30,12 @@ import java.util.concurrent.TimeUnit;
 public class GenerationRegionHandler {
     private final TerrariumWorldData worldData;
     private final EarthGenerationHandler generationHandler;
-    private final EarthScaleHandler scaleHandler;
 
-    private final short[] sampledHeights;
-    private final CoverType[] sampledCover;
+    private final Coordinate bufferedRegionSize;
 
     private final LoadingCache<RegionTilePos, GenerationRegion> cache = CacheBuilder.newBuilder()
             .expireAfterAccess(30, TimeUnit.SECONDS)
-            .maximumSize(5)
+            .maximumSize(8)
             .build(new CacheLoader<RegionTilePos, GenerationRegion>() {
                 @Override
                 public GenerationRegion load(RegionTilePos key) {
@@ -47,41 +48,29 @@ public class GenerationRegionHandler {
                 }
             });
 
-    private final List<RegionAdapter> adapters = new LinkedList<>();
+    private final RegionPopulationSystem populationSystem;
 
     public GenerationRegionHandler(TerrariumWorldData worldData, EarthGenerationHandler generationHandler) {
         this.worldData = worldData;
         this.generationHandler = generationHandler;
 
-        Coordinate regionSize = Coordinate.fromBlock(generationHandler.getSettings(), GenerationRegion.SIZE, GenerationRegion.SIZE);
-        Coordinate bufferedRegionSize = Coordinate.fromBlock(generationHandler.getSettings(), GenerationRegion.BUFFERED_SIZE, GenerationRegion.BUFFERED_SIZE);
+        this.bufferedRegionSize = Coordinate.fromBlock(generationHandler.getSettings(), GenerationRegion.BUFFERED_SIZE, GenerationRegion.BUFFERED_SIZE);
 
-        if (regionSize.getGlobalX() != regionSize.getGlobalZ() || bufferedRegionSize.getGlobalX() != bufferedRegionSize.getGlobalZ()) {
-            throw new IllegalStateException("Cannot generate region where width != height");
-        }
+        HeightSampler heightSampler = new HeightSampler(worldData.getHeightSource());
+        GlobSampler coverSampler = new GlobSampler(worldData.getGlobSource());
+        List<DataSampler<OverpassTileAccess>> overpassSamplers = Lists.newArrayList(
+                new OverpassSampler(worldData.getOutlineOverpassSource()),
+                new OverpassSampler(worldData.getGeneralOverpassSource()),
+                new OverpassSampler(worldData.getDetailedOverpassSource())
+        );
 
-        this.scaleHandler = new EarthScaleHandler(generationHandler.getSettings(), regionSize, bufferedRegionSize);
-
-        int heightSampleSize = this.scaleHandler.getHeightSampleSize();
-        int globSampleSize = this.scaleHandler.getGlobSampleSize();
-
-        this.sampledHeights = new short[heightSampleSize * heightSampleSize];
-        this.sampledCover = ArrayUtils.defaulted(new CoverType[globSampleSize * globSampleSize], CoverType.NO_DATA);
-
-        this.adapters.add(new CoastlineAdapter());
-        this.adapters.add(new WaterFlattenAdapter(16));
-    }
-
-    public void addAdapter(RegionAdapter adapter) {
-        this.adapters.add(adapter);
-    }
-
-    public boolean removeAdapter(RegionAdapter adapter) {
-        return this.adapters.remove(adapter);
-    }
-
-    public List<RegionAdapter> getAdapters() {
-        return this.adapters;
+        this.populationSystem = RegionPopulationSystem.builder(generationHandler.getSettings())
+                .withComponent(TerrariumComponentTypes.HEIGHT, new HeightRegionPopulator(heightSampler))
+                .withComponent(TerrariumComponentTypes.COVER, new CoverRegionPopulator(coverSampler))
+                .withComponent(TerrariumComponentTypes.OVERPASS, new OverpassRegionPopulator(overpassSamplers))
+                .withAdapter(new CoastlineAdapter())
+                .withAdapter(new WaterFlattenAdapter(16))
+                .build();
     }
 
     public GenerationRegion get(int blockX, int blockZ) {
@@ -99,67 +88,18 @@ public class GenerationRegionHandler {
 
     private GenerationRegion generate(RegionTilePos pos) {
         EarthGenerationSettings settings = this.generationHandler.getSettings();
-        Coordinate minCoordinate = pos.getMinCoordinate(settings).addBlock(-GenerationRegion.BUFFER, -GenerationRegion.BUFFER);
-        Coordinate maxCoordinate = pos.getMaxCoordinate(settings).addBlock(GenerationRegion.BUFFER, GenerationRegion.BUFFER);
 
-        if (!minCoordinate.inBounds() || !maxCoordinate.inBounds()) {
+        Coordinate minCoordinate = pos.getMinBufferedCoordinate(settings);
+        Coordinate maxCoordinate = pos.getMaxBufferedCoordinate(settings);
+        if (!minCoordinate.inWorldBounds() || !maxCoordinate.inWorldBounds()) {
             return this.createDefaultRegion(pos);
         }
 
-        OverpassTileAccess overpassTile = this.worldData.getOutlineOverpassSource().sampleArea(minCoordinate, maxCoordinate);
-
-        GeneralOverpassSource generalOverpassSource = this.worldData.getGeneralOverpassSource();
-        if (generalOverpassSource.shouldSample()) {
-            overpassTile = overpassTile.merge(generalOverpassSource.sampleArea(minCoordinate, maxCoordinate));
-        }
-
-        DetailedOverpassSource detailedOverpassSource = this.worldData.getDetailedOverpassSource();
-        if (detailedOverpassSource.shouldSample()) {
-            overpassTile = overpassTile.merge(detailedOverpassSource.sampleArea(minCoordinate, maxCoordinate));
-        }
-
-        short[] heights = this.generateHeights(minCoordinate);
-        CoverType[] cover = this.generateCover(minCoordinate);
-
-        RegionData data = new RegionData(heights, cover, overpassTile);
-
-        int originX = MathHelper.floor(minCoordinate.getBlockX());
-        int originZ = MathHelper.floor(minCoordinate.getBlockZ());
-        for (RegionAdapter adapter : this.adapters) {
-            try {
-                adapter.adapt(this.generationHandler.getSettings(), data, originX, originZ, GenerationRegion.BUFFERED_SIZE, GenerationRegion.BUFFERED_SIZE);
-            } catch (Exception e) {
-                Terrarium.LOGGER.error("Failed to run adapter {}", adapter, e);
-            }
-        }
-
+        RegionData data = this.populationSystem.populateData(pos, this.bufferedRegionSize, GenerationRegion.BUFFERED_SIZE, GenerationRegion.BUFFERED_SIZE);
         return new GenerationRegion(pos, data);
     }
 
-    private short[] generateHeights(Coordinate minCoordinate) {
-        int sampleSize = this.scaleHandler.getHeightSampleSize();
-        this.worldData.getHeightSource().sampleArea(this.sampledHeights, minCoordinate, new Coordinate(this.generationHandler.getSettings(), sampleSize, sampleSize));
-
-        short[] resultHeights = new short[GenerationRegion.BUFFERED_SIZE * GenerationRegion.BUFFERED_SIZE];
-        this.scaleHandler.scaleHeightRegion(resultHeights, this.sampledHeights);
-
-        return resultHeights;
-    }
-
-    private CoverType[] generateCover(Coordinate minCoordinate) {
-        int sampleSize = this.scaleHandler.getGlobSampleSize();
-        Coordinate size = Coordinate.fromGlob(this.generationHandler.getSettings(), sampleSize, sampleSize);
-        this.worldData.getGlobSource().sampleArea(this.sampledCover, minCoordinate, size);
-
-        CoverType[] resultCover = ArrayUtils.defaulted(new CoverType[GenerationRegion.BUFFERED_SIZE * GenerationRegion.BUFFERED_SIZE], CoverType.NO_DATA);
-        this.scaleHandler.scaleGlobRegion(resultCover, this.sampledCover);
-
-        return resultCover;
-    }
-
     private GenerationRegion createDefaultRegion(RegionTilePos pos) {
-        short[] heights = new short[GenerationRegion.BUFFERED_SIZE * GenerationRegion.BUFFERED_SIZE];
-        CoverType[] globcover = ArrayUtils.defaulted(new CoverType[GenerationRegion.BUFFERED_SIZE * GenerationRegion.BUFFERED_SIZE], CoverType.NO_DATA);
-        return new GenerationRegion(pos, new RegionData(heights, globcover, new OverpassTileAccess()));
+        return new GenerationRegion(pos, new RegionData(Collections.emptyMap()));
     }
 }

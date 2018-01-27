@@ -44,7 +44,7 @@ setting.terrarium.resource_generation.name=Resource Generation
 
 setting.terrarium.scale.tooltip=The amount of meters in real life representing one block in-game
 setting.terrarium.height_scale.tooltip=Elevation multiplier from meters to blocks
-setting.terrarium.scatter.tooltip=Range in meters that biomes should be scattered
+setting.terrarium.scatter.tooltip=Range in blocks that biomes should be scattered
 setting.terrarium.height_offset.tooltip=The height in-game that corresponds to sea-level
 setting.terrarium.decorate.tooltip=If enabled, decorations such as plants and trees will be placed
 setting.terrarium.map_features.tooltip=If enabled, all vanilla map feature such as temples will be generated

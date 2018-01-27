@@ -27,7 +27,12 @@ public class HeightTileAccess implements ShortRasterDataAccess {
     }
 
     @Override
-    public short get(int x, int y) {
+    public short getShort(int x, int y) {
         return this.data[x + y * this.width];
+    }
+
+    @Override
+    public short[] getShortData() {
+        return this.data;
     }
 }

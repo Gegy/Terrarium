@@ -32,8 +32,16 @@ public class RegionTilePos {
         return Coordinate.fromBlock(settings, this.tileX * GenerationRegion.SIZE, this.tileZ * GenerationRegion.SIZE);
     }
 
+    public Coordinate getMinBufferedCoordinate(EarthGenerationSettings settings) {
+        return this.getMinCoordinate(settings).addBlock(-GenerationRegion.BUFFER, -GenerationRegion.BUFFER);
+    }
+
     public Coordinate getMaxCoordinate(EarthGenerationSettings settings) {
         return this.getMinCoordinate(settings).addBlock(GenerationRegion.SIZE, GenerationRegion.SIZE);
+    }
+
+    public Coordinate getMaxBufferedCoordinate(EarthGenerationSettings settings) {
+        return this.getMinBufferedCoordinate(settings).addBlock(GenerationRegion.BUFFERED_SIZE, GenerationRegion.BUFFERED_SIZE);
     }
 
     @Override

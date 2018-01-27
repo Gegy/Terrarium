@@ -24,45 +24,41 @@ public class Voronoi {
         this.seed = this.random.nextLong() ^ this.random.nextLong();
     }
 
-    public <T> T[] scale(T[] input, T[] output, int width, int height, int scaledWidth, int scaledHeight) {
-        this.random.setSeed(this.seed);
+    public <T> T[] scale(T[] input, T[] output, int seedOffsetX, int seedOffsetY,
+                         int width, int height, int scaledWidth, int scaledHeight,
+                         double scaleFactorX, double scaleFactorY, double originOffsetX, double originOffsetY
+    ) {
+        double scaledOffsetX = originOffsetX / scaleFactorX;
+        double scaledOffsetY = originOffsetY / scaleFactorY;
 
-        double scaleX = (double) scaledWidth / width;
-        double scaleY = (double) scaledHeight / height;
+        for (int scaledY = 0; scaledY < scaledHeight; scaledY++) {
+            double sampleY = scaledY * scaleFactorY + originOffsetX;
+            int originY = MathHelper.floor(sampleY);
 
-        double stepX = scaleX / MathHelper.ceil(scaleX);
-        double stepY = scaleY / MathHelper.ceil(scaleY);
+            for (int scaledX = 0; scaledX < scaledWidth; scaledX++) {
+                double sampleX = scaledX * scaleFactorX + originOffsetY;
+                int originX = MathHelper.floor(sampleX);
 
-        for (int y = 0; y < height; y++) {
-            double scaledY = y * scaleY;
-            for (int x = 0; x < width; x++) {
-                double scaledX = x * scaleX;
-
-                for (double localY = scaledY; localY < scaledY + MathHelper.ceil(scaleY); localY += stepY) {
-                    int originY = MathHelper.floor(localY);
-                    for (double localX = scaledX; localX < scaledX + MathHelper.ceil(scaleX); localX += stepX) {
-                        int originX = MathHelper.floor(localX);
-
-                        T cellValue = this.getCellValue(input, width, height, scaleX, scaleY, x, y, localX, localY);
-                        output[originX + originY * scaledWidth] = cellValue;
-                    }
-                }
+                T cellValue = this.getCellValue(input, seedOffsetX, seedOffsetY, originX, originY, scaledX + scaledOffsetX, scaledY + scaledOffsetY, width, height, scaleFactorX, scaleFactorY);
+                output[scaledX + scaledY * scaledWidth] = cellValue;
             }
         }
 
         return output;
     }
 
-    private <T> T getCellValue(T[] input, int width, int height, double scaleX, double scaleY, int x, int y, double localX, double localY) {
+    private <T> T getCellValue(T[] input, int seedOffsetX, int seedOffsetY,
+                               int originX, int originY, double scaledX, double scaledY,
+                               int width, int height, double scaleFactorX, double scaleFactorY
+    ) {
         T cellValue = null;
         double selectionDistance = Double.MAX_VALUE;
-        for (int neighbourY = y - 1; neighbourY <= y + 1; neighbourY++) {
-            for (int neighbourX = x - 1; neighbourX <= x + 1; neighbourX++) {
-                this.random.setSeed(this.getCellSeed(neighbourX, neighbourY, this.seed));
-                double fuzzedX = this.fuzzPoint(neighbourX) * scaleX;
-                double fuzzedY = this.fuzzPoint(neighbourY) * scaleY;
-                // TODO: This *might* need to be origin or things break?
-                double distance = this.distanceFunc.get(localX, localY, fuzzedX, fuzzedY);
+        for (int neighbourY = originY - 1; neighbourY <= originY + 1; neighbourY++) {
+            for (int neighbourX = originX - 1; neighbourX <= originX + 1; neighbourX++) {
+                this.random.setSeed(this.getCellSeed(neighbourX + seedOffsetX, neighbourY + seedOffsetY, this.seed));
+                double fuzzedX = this.fuzzPoint(neighbourX) / scaleFactorX;
+                double fuzzedY = this.fuzzPoint(neighbourY) / scaleFactorY;
+                double distance = this.distanceFunc.get(scaledX, scaledY, fuzzedX, fuzzedY);
                 if (distance < selectionDistance) {
                     selectionDistance = distance;
                     cellValue = this.getClamped(input, width, height, neighbourX, neighbourY);

@@ -2,6 +2,7 @@ package net.gegy1000.terrarium.server.map.adapter.debug;
 
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.map.adapter.CoastlineAdapter;
+import net.gegy1000.terrarium.server.map.cover.CoverType;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -33,6 +34,8 @@ public class DebugImageWriter {
         return 0;
     };
 
+    public static final ColorSelector<CoverType> COVER_MAP = CoverType::getColor;
+
     public static final boolean ENABLED = false;
 
     private static final File DEBUG_OUTPUT = new File(".", "terrarium_debug");
@@ -49,6 +52,24 @@ public class DebugImageWriter {
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
                     int sampledValue = buffer[x + y * width];
+                    image.setRGB(x, y, selector.getColor(sampledValue));
+                }
+            }
+
+            try {
+                ImageIO.write(image, "png", new File(DEBUG_OUTPUT, fileName + ".png"));
+            } catch (IOException e) {
+                Terrarium.LOGGER.error("Failed to write debug image {}", fileName, e);
+            }
+        }
+    }
+
+    public static <T> void write(String fileName, T[] buffer, ColorSelector<T> selector, int width, int height) {
+        if (ENABLED) {
+            BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    T sampledValue = buffer[x + y * width];
                     image.setRGB(x, y, selector.getColor(sampledValue));
                 }
             }

@@ -4,12 +4,9 @@ import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.map.source.CachedRemoteSource;
 import net.gegy1000.terrarium.server.map.source.SourceException;
 import net.gegy1000.terrarium.server.map.source.TerrariumData;
-import net.gegy1000.terrarium.server.map.source.raster.ShortRasterSource;
 import net.gegy1000.terrarium.server.map.source.tiled.DataTilePos;
 import net.gegy1000.terrarium.server.map.source.tiled.TiledSource;
-import net.gegy1000.terrarium.server.util.Coordinate;
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
-import net.minecraft.util.math.MathHelper;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
@@ -21,7 +18,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
-public class HeightSource extends TiledSource<HeightTileAccess> implements ShortRasterSource, CachedRemoteSource {
+public class HeightSource extends TiledSource<HeightTileAccess> implements CachedRemoteSource {
     public static final int TILE_SIZE = 1201;
 
     private static final File CACHE_ROOT = new File(CachedRemoteSource.GLOBAL_CACHE_ROOT, "heights");
@@ -105,74 +102,7 @@ public class HeightSource extends TiledSource<HeightTileAccess> implements Short
     }
 
     @Override
-    public short get(Coordinate coordinate) {
-        DataTilePos pos = this.getTilePos(coordinate);
-        HeightTileAccess tile = this.getTile(pos);
-        return tile.get(MathHelper.floor(coordinate.getGlobalX()) - this.getMinX(pos), MathHelper.floor(coordinate.getGlobalZ()) - this.getMinZ(pos));
-    }
-
-    @Override
-    public void sampleArea(short[] data, Coordinate coordinate, Coordinate size) {
-        if (Math.abs(size.getGlobalX() - size.getGlobalZ()) > 1e-4) {
-            throw new IllegalArgumentException("Cannot sample area where width != height");
-        }
-        int sampleSize = MathHelper.ceil(size.getGlobalX());
-        double sampleStep = size.getGlobalX() / sampleSize;
-        if (data.length != sampleSize * sampleSize) {
-            throw new IllegalArgumentException("Cannot sample to array of wrong size");
-        }
-        /*val minimumX = MathHelper.floor(minimumCoordinate.globalX)
-        val minimumZ = MathHelper.floor(minimumCoordinate.globalZ)
-        val maximumX = MathHelper.floor(maximumCoordinate.globalX)
-        val maximumZ = MathHelper.floor(maximumCoordinate.globalZ)
-        for (tileLatitude in MathHelper.floor(minimumCoordinate.latitude)..MathHelper.floor(maximumCoordinate.latitude)) {
-            for (tileLongitude in MathHelper.floor(minimumCoordinate.longitude)..MathHelper.floor(maximumCoordinate.longitude)) {
-                val pos = DataTilePos(tileLongitude, tileLatitude)
-                val minX = pos.tileX * 1200
-                val minZ = (-pos.tileY - 1) * 1200
-                val tile = this.getTile(pos)
-                val minSampleZ = Math.max(0, minimumZ - minZ)
-                val maxSampleZ = Math.min(1200, maximumZ - minZ)
-                val minSampleX = Math.max(0, minimumX - minX)
-                val maxSampleX = Math.min(1200, maximumX - minX)
-                for (z in minSampleZ..maxSampleZ - 1) {
-                    val globalZ = z + minZ
-                    val resultZ = globalZ - minimumZ
-                    val resultIndexZ = resultZ * width
-                    for (x in minSampleX..maxSampleX - 1) {
-                        val globalX = x + minX
-                        val resultX = globalX - minimumX
-                        result[resultX + resultIndexZ] = tile.get(x, z)
-                    }
-                }
-            }
-        }*/
-        // TODO: Come back to more efficient, but broken algorithm
-        for (int z = 0; z < sampleSize; z++) {
-            for (int x = 0; x < sampleSize; x++) {
-                short heightValue = this.get(coordinate.add(x * sampleStep, z * sampleStep));
-                if (heightValue >= 0) {
-                    // TODO: Possibly interpolate?
-                    data[x + z * sampleSize] = heightValue;
-                }
-            }
-        }
-    }
-
-    @Override
     public EarthGenerationSettings getSettings() {
         return this.settings;
-    }
-
-    private int getMinX(DataTilePos pos) {
-        return pos.getTileX() * 1200;
-    }
-
-    private int getMinZ(DataTilePos pos) {
-        return (-pos.getTileY() - 1) * 1200;
-    }
-
-    private DataTilePos getTilePos(Coordinate coordinate) {
-        return new DataTilePos(MathHelper.floor(coordinate.getLongitude()), MathHelper.floor(coordinate.getLatitude()));
     }
 }

@@ -8,4 +8,6 @@ public interface RasterDataAccess<T> extends TiledDataAccess {
     int getHeight();
 
     T get(int x, int y);
+
+    T[] getData();
 }

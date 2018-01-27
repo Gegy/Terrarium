@@ -28,8 +28,8 @@ public class GeocodingSource implements DataSource {
 
         URL url = new URL(request);
         HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-        connection.setConnectTimeout(5000);
-        connection.setReadTimeout(5000);
+        connection.setConnectTimeout(8000);
+        connection.setReadTimeout(8000);
         connection.setRequestMethod("GET");
         connection.setRequestProperty("User-Agent", Terrarium.MODID);
 

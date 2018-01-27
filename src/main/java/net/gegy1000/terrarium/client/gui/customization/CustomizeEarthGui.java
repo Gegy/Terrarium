@@ -104,7 +104,7 @@ public class CustomizeEarthGui extends GuiScreen {
         this.customizationList = new CustomizationList(this.mc, this);
         this.customizationList.addSlider(this.scaleValue, 1.0, 200.0, 5.0, 1.0);
         this.customizationList.addSlider(this.heightScaleValue, 0.01, 4.0, 0.5, 0.1);
-        this.customizationList.addSlider(this.scatterValue, 1, 1000, 100, 1);
+        this.customizationList.addSlider(this.scatterValue, 0, 32, 1, 1);
         this.customizationList.addSlider(this.heightOffsetValue, 0, 128, 1, 1);
 
         this.customizationList.addToggle(this.buildingsValue);

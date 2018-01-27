@@ -28,13 +28,10 @@ public class CoverDebugChunkGenerator extends TerrariumChunkGenerator {
     }
 
     @Override
-    protected void populateCoverRegion(CoverType[] coverBuffer, int chunkX, int chunkZ) {
-        int globalX = chunkX << 4;
-        int globalZ = chunkZ << 4;
-
-        for (int localZ = 0; localZ < 16; localZ++) {
-            for (int localX = 0; localX < 16; localX++) {
-                coverBuffer[localX + localZ * 16] = DebugMap.getCover(localX + globalX, localZ + globalZ).getCoverType();
+    protected void populateCoverDirect(CoverType[] coverBuffer, int globalX, int globalZ, int width, int height) {
+        for (int localZ = 0; localZ < height; localZ++) {
+            for (int localX = 0; localX < width; localX++) {
+                coverBuffer[localX + localZ * width] = DebugMap.getCover(localX + globalX, localZ + globalZ).getCoverType();
             }
         }
     }

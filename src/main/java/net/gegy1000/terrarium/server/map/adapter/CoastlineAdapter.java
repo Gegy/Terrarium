@@ -6,10 +6,12 @@ import de.topobyte.osm4j.core.model.iface.OsmWay;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.gegy1000.terrarium.server.map.RegionData;
-import net.gegy1000.terrarium.server.map.adapter.debug.DebugImageWriter;
 import net.gegy1000.terrarium.server.map.cover.CoverType;
 import net.gegy1000.terrarium.server.map.osm.OsmDataParser;
+import net.gegy1000.terrarium.server.map.source.glob.CoverTileAccess;
+import net.gegy1000.terrarium.server.map.source.height.HeightTileAccess;
 import net.gegy1000.terrarium.server.map.source.osm.OverpassTileAccess;
+import net.gegy1000.terrarium.server.map.system.component.TerrariumComponentTypes;
 import net.gegy1000.terrarium.server.util.Coordinate;
 import net.gegy1000.terrarium.server.util.FloodFill;
 import net.gegy1000.terrarium.server.util.Interpolation;
@@ -38,10 +40,16 @@ public class CoastlineAdapter implements RegionAdapter {
 
     @Override
     public void adapt(EarthGenerationSettings settings, RegionData data, int x, int z, int width, int height) {
-        OverpassTileAccess overpassTile = data.getOverpassTile();
+        HeightTileAccess heightTile = data.get(TerrariumComponentTypes.HEIGHT);
+        CoverTileAccess coverTile = data.get(TerrariumComponentTypes.COVER);
+        OverpassTileAccess overpassTile = data.get(TerrariumComponentTypes.OVERPASS);
 
-        short[] heightBuffer = data.getHeights();
-        CoverType[] coverBuffer = data.getCover();
+        if (heightTile == null || coverTile == null || overpassTile == null) {
+            return;
+        }
+
+        short[] heightBuffer = heightTile.getShortData();
+        CoverType[] coverBuffer = coverTile.getData();
 
         List<OsmWay> coastlines = overpassTile.getWays().valueCollection().stream()
                 .filter(way -> OsmDataParser.hasTag(way, "natural", "coastline"))
@@ -52,8 +60,6 @@ public class CoastlineAdapter implements RegionAdapter {
             for (int i = 0; i < landmap.length; i++) {
                 landmap[i] = coverBuffer[i] == CoverType.WATER ? OCEAN : LAND;
             }
-
-            DebugImageWriter.write(x + "_" + z + "_0_init", landmap, DebugImageWriter.COASTLINE, width, height);
 
             for (OsmWay coastline : coastlines) {
                 List<Point> linePoints = new LinkedList<>();
@@ -70,11 +76,7 @@ public class CoastlineAdapter implements RegionAdapter {
 
             this.removeProblematicLines(width, height, landmap);
 
-            DebugImageWriter.write(x + "_" + z + "_1_lines", landmap, DebugImageWriter.COASTLINE, width, height);
-
             this.floodFillMap(width, height, landmap);
-
-            DebugImageWriter.write(x + "_" + z + "_2_flooded", landmap, DebugImageWriter.COASTLINE, width, height);
 
             this.processFloodedMap(width, height, heightBuffer, coverBuffer, landmap);
         }

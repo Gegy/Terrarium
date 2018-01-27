@@ -3,6 +3,7 @@ package net.gegy1000.terrarium.server.map.osm;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import de.topobyte.osm4j.core.access.OsmHandler;
 import de.topobyte.osm4j.core.access.OsmInputException;
@@ -58,7 +59,7 @@ public class OsmJsonReader implements OsmReader {
             for (JsonElement element : elementsArray) {
                 this.parseElement(element.getAsJsonObject());
             }
-        } catch (IOException e) {
+        } catch (IOException | JsonParseException e) {
             throw new OsmInputException("error while parsing json data: " + data, e);
         }
 

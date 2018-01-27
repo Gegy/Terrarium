@@ -215,24 +215,29 @@ public abstract class TerrariumChunkGenerator implements IChunkGenerator {
     public void populate(int chunkX, int chunkZ) {
         BlockFalling.fallInstantly = true;
 
-        this.populateCoverRegion(this.globBuffer, chunkX, chunkZ);
-
         int x = chunkX << 4;
         int z = chunkZ << 4;
+
+        this.populateCoverDirect(this.globBuffer, x + 8, z + 8, 16, 16);
 
         this.initializeChunkSeed(chunkX, chunkZ);
 
         LatitudinalZone zone = this.getLatitudinalZone(x, z);
 
-        CoverType glob = this.globBuffer[255];
-        Biome biome = glob.getBiome(zone);
+        CoverType cover = this.globBuffer[136];
+        Biome biome = cover.getBiome(zone);
 
         if (this.shouldDecorate() && !this.shouldFastGenerate()) {
             ForgeEventFactory.onChunkPopulate(true, this, this.world, this.random, chunkX, chunkZ, false);
 
-            CoverGenerator generator = this.generators.get(glob);
-            if (generator != null) {
-                generator.decorate(this.random, zone, x + 8, z + 8);
+            Set<CoverType> types = new HashSet<>();
+            Collections.addAll(types, this.globBuffer);
+
+            for (CoverType type : types) {
+                CoverGenerator generator = this.generators.get(type);
+                if (generator != null) {
+                    generator.decorate(this.random, zone, x + 8, z + 8);
+                }
             }
 
             if (TerrainGen.populate(this, this.world, this.random, chunkX, chunkZ, false, PopulateChunkEvent.Populate.EventType.ANIMALS)) {
@@ -254,7 +259,11 @@ public abstract class TerrariumChunkGenerator implements IChunkGenerator {
 
     protected abstract void populateHeightRegion(int[] heightBuffer, int chunkX, int chunkZ);
 
-    protected abstract void populateCoverRegion(CoverType[] coverBuffer, int chunkX, int chunkZ);
+    protected void populateCoverRegion(CoverType[] coverBuffer, int chunkX, int chunkZ) {
+        this.populateCoverDirect(coverBuffer, chunkX << 4, chunkZ << 4, 16, 16);
+    }
+
+    protected abstract void populateCoverDirect(CoverType[] coverBuffer, int globalX, int globalZ, int width, int height);
 
     protected abstract LatitudinalZone getLatitudinalZone(int x, int z);
 

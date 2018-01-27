@@ -70,6 +70,11 @@ public class EarthChunkGenerator extends TerrariumChunkGenerator {
     }
 
     @Override
+    protected void populateCoverDirect(CoverType[] coverBuffer, int globalX, int globalZ, int width, int height) {
+        this.generationHandler.get().populateCoverDirect(coverBuffer, globalX, globalZ, width, height);
+    }
+
+    @Override
     protected LatitudinalZone getLatitudinalZone(int x, int z) {
         int offset = this.random.nextInt(128) - this.random.nextInt(128);
         Coordinate chunkCoordinate = Coordinate.fromBlock(this.settings, x + 8, z + 8 + offset);

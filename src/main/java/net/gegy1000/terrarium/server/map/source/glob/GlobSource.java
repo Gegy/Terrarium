@@ -5,12 +5,10 @@ import net.gegy1000.terrarium.server.map.cover.CoverType;
 import net.gegy1000.terrarium.server.map.source.CachedRemoteSource;
 import net.gegy1000.terrarium.server.map.source.SourceException;
 import net.gegy1000.terrarium.server.map.source.TerrariumData;
-import net.gegy1000.terrarium.server.map.source.raster.RasterSource;
 import net.gegy1000.terrarium.server.map.source.tiled.DataTilePos;
 import net.gegy1000.terrarium.server.map.source.tiled.TiledSource;
-import net.gegy1000.terrarium.server.util.Coordinate;
+import net.gegy1000.terrarium.server.util.ArrayUtils;
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
-import net.minecraft.util.math.MathHelper;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -19,7 +17,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.zip.GZIPInputStream;
 
-public class GlobSource extends TiledSource<GlobTileAccess> implements RasterSource<CoverType>, CachedRemoteSource {
+public class GlobSource extends TiledSource<CoverTileAccess> implements CachedRemoteSource {
     public static final int TILE_SIZE = 2560;
 
     private static final File CACHE_ROOT = new File(CachedRemoteSource.GLOBAL_CACHE_ROOT, "globcover");
@@ -48,7 +46,7 @@ public class GlobSource extends TiledSource<GlobTileAccess> implements RasterSou
     }
 
     @Override
-    public GlobTileAccess loadTile(DataTilePos key) throws SourceException {
+    public CoverTileAccess loadTile(DataTilePos key) throws SourceException {
         try (DataInputStream input = new DataInputStream(this.getStream(key))) {
             int width = input.readUnsignedShort();
             int height = input.readUnsignedShort();
@@ -59,7 +57,7 @@ public class GlobSource extends TiledSource<GlobTileAccess> implements RasterSou
             byte[] buffer = new byte[width * height];
             input.readFully(buffer);
 
-            return new GlobTileAccess(buffer, offsetX, offsetZ, width, height);
+            return CoverTileAccess.loadGlob(buffer, offsetX, offsetZ, width, height);
         } catch (IOException e) {
             Terrarium.LOGGER.error("Failed to parse heights tile at {}", key, e);
         }
@@ -68,51 +66,13 @@ public class GlobSource extends TiledSource<GlobTileAccess> implements RasterSou
     }
 
     @Override
-    protected GlobTileAccess getDefaultTile() {
-        return new GlobTileAccess(new byte[TILE_SIZE * TILE_SIZE], 0, 0, TILE_SIZE, TILE_SIZE);
+    protected CoverTileAccess getDefaultTile() {
+        CoverType[] backingData = ArrayUtils.defaulted(new CoverType[TILE_SIZE * TILE_SIZE], CoverType.NO_DATA);
+        return new CoverTileAccess(backingData, 0, 0, TILE_SIZE, TILE_SIZE);
     }
 
     @Override
     public EarthGenerationSettings getSettings() {
         return this.settings;
-    }
-
-    @Override
-    public CoverType get(Coordinate coordinate) {
-        double globX = coordinate.getGlobX();
-        double globZ = coordinate.getGlobZ();
-
-        int tileX = MathHelper.floor(globX / TILE_SIZE);
-        int tileY = MathHelper.floor(globZ / TILE_SIZE);
-        DataTilePos pos = new DataTilePos(tileX, tileY);
-        GlobTileAccess tile = this.getTile(pos);
-
-        return tile.get(MathHelper.floor(globX) - this.getMinX(pos), MathHelper.floor(globZ) - this.getMinZ(pos));
-    }
-
-    @Override
-    public void sampleArea(CoverType[] data, Coordinate coordinate, Coordinate size) {
-        // TODO: Come back to more performant, but broken algorithm
-        if (Math.abs(size.getGlobalX() - size.getGlobalZ()) > 1e-4) {
-            throw new IllegalArgumentException("Cannot sample area where width != height");
-        }
-        int sampleSize = MathHelper.ceil(size.getGlobX());
-        double sampleStep = size.getGlobX() / sampleSize;
-        if (data.length != sampleSize * sampleSize) {
-            throw new IllegalArgumentException("Cannot sample to array of wrong size");
-        }
-        for (int y = 0; y < sampleSize; y++) {
-            for (int x = 0; x < sampleSize; x++) {
-                data[x + y * sampleSize] = this.get(coordinate.addGlob(x * sampleStep, y * sampleStep));
-            }
-        }
-    }
-
-    private int getMinX(DataTilePos pos) {
-        return pos.getTileX() * TILE_SIZE;
-    }
-
-    private int getMinZ(DataTilePos pos) {
-        return pos.getTileY() * TILE_SIZE;
     }
 }

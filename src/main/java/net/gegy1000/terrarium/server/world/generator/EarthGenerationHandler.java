@@ -5,6 +5,9 @@ import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.map.GenerationRegion;
 import net.gegy1000.terrarium.server.map.GenerationRegionHandler;
 import net.gegy1000.terrarium.server.map.cover.CoverType;
+import net.gegy1000.terrarium.server.map.source.glob.CoverTileAccess;
+import net.gegy1000.terrarium.server.map.source.height.HeightTileAccess;
+import net.gegy1000.terrarium.server.map.system.component.TerrariumComponentTypes;
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
 import net.minecraft.util.math.MathHelper;
 
@@ -19,7 +22,6 @@ public class EarthGenerationHandler {
     private final int maxHeight;
 
     private final int oceanHeight;
-    private final int scatterRange;
 
     private final Random random = new Random();
 
@@ -31,7 +33,6 @@ public class EarthGenerationHandler {
         this.regionHandler = new GenerationRegionHandler(worldData, this);
 
         this.oceanHeight = this.settings.heightOffset + 1;
-        this.scatterRange = MathHelper.floor(this.settings.scatterRange * this.settings.worldScale);
     }
 
     private void initializeSeed(int chunkX, int chunkZ) {
@@ -53,8 +54,13 @@ public class EarthGenerationHandler {
                     int blockX = globalX + localX;
 
                     GenerationRegion region = this.regionHandler.get(blockX, blockZ);
-                    int offsetHeight = region.getHeight(blockX, blockZ) + this.settings.heightOffset;
-                    buffer[localX + localZ * 16] = MathHelper.clamp(offsetHeight, 0, this.maxHeight);
+                    HeightTileAccess heightTile = region.getData().get(TerrariumComponentTypes.HEIGHT);
+
+                    if (heightTile != null) {
+                        short height = heightTile.getShort(blockX - region.getMinX(), blockZ - region.getMinZ());
+                        int offsetHeight = height + this.settings.heightOffset;
+                        buffer[localX + localZ * 16] = MathHelper.clamp(offsetHeight, 0, this.maxHeight);
+                    }
                 }
             }
         } catch (Exception e) {
@@ -81,10 +87,28 @@ public class EarthGenerationHandler {
         }
     }
 
+    public void populateCoverDirect(CoverType[] buffer, int globalX, int globalZ, int width, int height) {
+        if (buffer.length != width * height) {
+            throw new IllegalArgumentException("Given width and height that do not match given buffer size");
+        }
+
+        try {
+            for (int localZ = 0; localZ < height; localZ++) {
+                int blockZ = globalZ + localZ;
+                for (int localX = 0; localX < width; localX++) {
+                    int blockX = globalX + localX;
+                    buffer[localX + localZ * width] = this.getCover(blockX, blockZ);
+                }
+            }
+        } catch (Exception e) {
+            Terrarium.LOGGER.error("Failed to populate cover region at {}, {}", globalX, globalZ, e);
+        }
+    }
+
     private CoverType getCoverScattered(int x, int z) {
         CoverType originCover = this.getCover(x, z);
 
-        int range = Math.max(1, MathHelper.ceil(this.scatterRange * originCover.getScatterRange()));
+        int range = Math.max(1, MathHelper.ceil(this.settings.scatterRange * originCover.getScatterRange()));
 
         int scatterX = x + this.random.nextInt(range) - this.random.nextInt(range);
         int scatterZ = z + this.random.nextInt(range) - this.random.nextInt(range);
@@ -99,7 +123,14 @@ public class EarthGenerationHandler {
     }
 
     private CoverType getCover(int x, int z) {
-        return this.regionHandler.get(x, z).getCoverType(x, z);
+        GenerationRegion region = this.regionHandler.get(x, z);
+        CoverTileAccess coverTile = region.getData().get(TerrariumComponentTypes.COVER);
+
+        if (coverTile != null) {
+            return coverTile.get(x - region.getMinX(), z - region.getMinZ());
+        }
+
+        return CoverType.NO_DATA;
     }
 
     public EarthGenerationSettings getSettings() {

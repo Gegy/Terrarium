@@ -1,10 +1,5 @@
 package net.gegy1000.terrarium.server.map.source.osm;
 
-import com.google.gson.JsonParseException;
-import de.topobyte.osm4j.core.model.iface.OsmNode;
-import de.topobyte.osm4j.core.model.iface.OsmWay;
-import gnu.trove.map.TLongObjectMap;
-import gnu.trove.map.hash.TLongObjectHashMap;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.map.osm.OsmDataParser;
 import net.gegy1000.terrarium.server.map.source.CachedRemoteSource;
@@ -13,7 +8,6 @@ import net.gegy1000.terrarium.server.map.source.tiled.DataTilePos;
 import net.gegy1000.terrarium.server.map.source.tiled.TiledSource;
 import net.gegy1000.terrarium.server.util.Coordinate;
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
-import net.minecraft.util.math.MathHelper;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpRequestInterceptor;
@@ -104,26 +98,6 @@ public class OverpassSource extends TiledSource<OverpassTileAccess> implements C
         return this.cacheRoot;
     }
 
-    public OverpassTileAccess sampleArea(Coordinate minCoordinate, Coordinate maxCoordinate) {
-        DataTilePos minTilePos = this.getTilePos(minCoordinate.add(-8.0, -8.0));
-        DataTilePos maxTilePos = this.getTilePos(maxCoordinate.add(8.0, 8.0));
-
-        TLongObjectMap<OsmNode> nodes = new TLongObjectHashMap<>();
-        TLongObjectMap<OsmWay> ways = new TLongObjectHashMap<>();
-
-        for (int tileZ = minTilePos.getTileY(); tileZ <= maxTilePos.getTileY(); tileZ++) {
-            for (int tileX = minTilePos.getTileX(); tileX <= maxTilePos.getTileX(); tileX++) {
-                OverpassTileAccess tile = this.getTile(new DataTilePos(tileX, tileZ));
-                if (tile != null) {
-                    nodes.putAll(tile.getNodes());
-                    ways.putAll(tile.getWays());
-                }
-            }
-        }
-
-        return new OverpassTileAccess(nodes, ways);
-    }
-
     @Override
     public InputStream getRemoteStream(DataTilePos key) throws IOException {
         HttpPost post = new HttpPost(OVERPASS_ENDPOINT);
@@ -132,7 +106,7 @@ public class OverpassSource extends TiledSource<OverpassTileAccess> implements C
         double maxLatitude = this.getMaxLatitude(key) + 0.0005;
         double maxLongitude = this.getMaxLongitude(key) + 0.0005;
 
-        String bbox = minLatitude + "," + minLongitude + "," + maxLatitude + "," + maxLongitude;
+        String bbox = String.format("%.6f,%.6f,%.6f,%.6f", minLatitude, minLongitude, maxLatitude, maxLongitude);
         String formattedQuery = this.query.replaceAll(Pattern.quote("{{bbox}}"), bbox);
         post.setEntity(new StringEntity(formattedQuery));
 
@@ -166,7 +140,7 @@ public class OverpassSource extends TiledSource<OverpassTileAccess> implements C
             return OsmDataParser.parse(this.getStream(key));
         } catch (IOException e) {
             Terrarium.LOGGER.error("Failed to load overpass map tile at {}", this.getCachedName(key), e);
-        } catch (JsonParseException e) {
+        } catch (RuntimeException e) {
             Terrarium.LOGGER.error("Failed to parse overpass map tile at {}, reloading", this.getCachedName(key), e);
             this.removeCache(key);
             if (retries < 2) {
@@ -213,12 +187,6 @@ public class OverpassSource extends TiledSource<OverpassTileAccess> implements C
 
     public boolean shouldSample() {
         return this.shouldSample;
-    }
-
-    private DataTilePos getTilePos(Coordinate coordinate) {
-        int tileX = MathHelper.floor(coordinate.getLongitude() / this.getTileSize());
-        int tileZ = MathHelper.ceil(-coordinate.getLatitude() / this.getTileSize());
-        return new DataTilePos(tileX, tileZ);
     }
 
     private double getLatitude(DataTilePos pos) {

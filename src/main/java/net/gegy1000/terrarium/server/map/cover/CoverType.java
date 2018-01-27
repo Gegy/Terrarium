@@ -32,31 +32,31 @@ import java.lang.reflect.Constructor;
 import java.util.function.Function;
 
 public enum CoverType {
-    IRRIGATED_CROPS(11, CoverBiomeSelectors.BROADLEAF_FOREST_SELECTOR, IrrigatedCropsCover.class),
-    RAINFED_CROPS(14, CoverBiomeSelectors.BROADLEAF_FOREST_SELECTOR, RainfedCropsCover.class),
-    CROPLAND_WITH_VEGETATION(20, CoverBiomeSelectors.FOREST_SHRUBLAND_SELECTOR, CroplandWithVegetationCover.class),
-    VEGETATION_WITH_CROPLAND(30, CoverBiomeSelectors.FOREST_SHRUBLAND_SELECTOR, VegetationWithCroplandCover.class),
-    BROADLEAF_EVERGREEN(40, CoverBiomeSelectors.BROADLEAF_FOREST_SELECTOR, BroadleafEvergreenCover.class),
-    CLOSED_BROADLEAF_DECIDUOUS(50, CoverBiomeSelectors.BROADLEAF_FOREST_SELECTOR, ClosedBroadleafDeciduousCover.class),
-    OPEN_BROADLEAF_DECIDUOUS(60, CoverBiomeSelectors.BROADLEAF_FOREST_SELECTOR, OpenBroadleafDeciduousCover.class),
-    CLOSED_NEEDLELEAF_EVERGREEN(70, CoverBiomeSelectors.NEEDLELEAF_FOREST_SELECTOR, ClosedNeedleleafEvergreenCover.class),
-    OPEN_NEEDLELEAF(90, CoverBiomeSelectors.NEEDLELEAF_FOREST_SELECTOR, OpenNeedleleafCover.class),
-    MIXED_BROAD_NEEDLELEAF(100, Biomes.FOREST, MixedBroadNeedleleafCover.class),
-    FOREST_SHRUBLAND_WITH_GRASS(110, CoverBiomeSelectors.FOREST_SHRUBLAND_SELECTOR, ForestShrublandWithGrassCover.class),
-    GRASS_WITH_FOREST_SHRUBLAND(120, CoverBiomeSelectors.FOREST_SHRUBLAND_SELECTOR, GrassWithForestShrublandCover.class),
-    SHRUBLAND(130, CoverBiomeSelectors.SHRUBLAND_SELECTOR, ShrublandCover.class),
-    GRASSLAND(140, CoverBiomeSelectors.GRASSLAND_SELECTOR, GrasslandCover.class),
-    SPARSE_VEGETATION(150, CoverBiomeSelectors.GRASSLAND_SELECTOR, SparseVegetationCover.class),
-    FRESH_FLOODED_FOREST(160, CoverBiomeSelectors.FLOODED_SELECTOR, FreshFloodedForestCover.class),
-    SALINE_FLOODED_FOREST(170, CoverBiomeSelectors.SALINE_FLOODED_SELECTOR, SalineFloodedForestCover.class),
-    FLOODED_GRASSLAND(180, CoverBiomeSelectors.FLOODED_SELECTOR, FloodedGrasslandCover.class),
-    URBAN(190, Biomes.PLAINS, UrbanCover.class),
-    BARE(200, Biomes.DESERT, BareCover.class),
-    WATER(210, zone -> Biomes.OCEAN, WaterCover.class, 0.0, false),
-    SNOW(220, Biomes.ICE_PLAINS, SnowCover.class),
-    NO_DATA(0, Biomes.PLAINS, BareCover.class),
-    PROCESSING(-1, Biomes.DEFAULT, BareCover.class),
-    DEBUG(-1, zone -> Biomes.DEFAULT, DebugCover.class, 0.0, false);
+    IRRIGATED_CROPS(11, CoverBiomeSelectors.BROADLEAF_FOREST_SELECTOR, IrrigatedCropsCover.class, 0xAAEFEF),
+    RAINFED_CROPS(14, CoverBiomeSelectors.BROADLEAF_FOREST_SELECTOR, RainfedCropsCover.class, 0xFFFF63),
+    CROPLAND_WITH_VEGETATION(20, CoverBiomeSelectors.FOREST_SHRUBLAND_SELECTOR, CroplandWithVegetationCover.class, 0xDCEF63),
+    VEGETATION_WITH_CROPLAND(30, CoverBiomeSelectors.FOREST_SHRUBLAND_SELECTOR, VegetationWithCroplandCover.class, 0xCDCD64),
+    BROADLEAF_EVERGREEN(40, CoverBiomeSelectors.BROADLEAF_FOREST_SELECTOR, BroadleafEvergreenCover.class, 0x006300),
+    CLOSED_BROADLEAF_DECIDUOUS(50, CoverBiomeSelectors.BROADLEAF_FOREST_SELECTOR, ClosedBroadleafDeciduousCover.class, 0x009F00),
+    OPEN_BROADLEAF_DECIDUOUS(60, CoverBiomeSelectors.BROADLEAF_FOREST_SELECTOR, OpenBroadleafDeciduousCover.class, 0xAAC700),
+    CLOSED_NEEDLELEAF_EVERGREEN(70, CoverBiomeSelectors.NEEDLELEAF_FOREST_SELECTOR, ClosedNeedleleafEvergreenCover.class, 0x003B00),
+    OPEN_NEEDLELEAF(90, CoverBiomeSelectors.NEEDLELEAF_FOREST_SELECTOR, OpenNeedleleafCover.class, 0x286300),
+    MIXED_BROAD_NEEDLELEAF(100, Biomes.FOREST, MixedBroadNeedleleafCover.class, 0x788300),
+    FOREST_SHRUBLAND_WITH_GRASS(110, CoverBiomeSelectors.FOREST_SHRUBLAND_SELECTOR, ForestShrublandWithGrassCover.class, 0x8D9F00),
+    GRASS_WITH_FOREST_SHRUBLAND(120, CoverBiomeSelectors.FOREST_SHRUBLAND_SELECTOR, GrassWithForestShrublandCover.class, 0xBD9500),
+    SHRUBLAND(130, CoverBiomeSelectors.SHRUBLAND_SELECTOR, ShrublandCover.class, 0x956300),
+    GRASSLAND(140, CoverBiomeSelectors.GRASSLAND_SELECTOR, GrasslandCover.class, 0xFFB431),
+    SPARSE_VEGETATION(150, CoverBiomeSelectors.GRASSLAND_SELECTOR, SparseVegetationCover.class, 0xFFEBAE),
+    FRESH_FLOODED_FOREST(160, CoverBiomeSelectors.FLOODED_SELECTOR, FreshFloodedForestCover.class, 0x00785A),
+    SALINE_FLOODED_FOREST(170, CoverBiomeSelectors.SALINE_FLOODED_SELECTOR, SalineFloodedForestCover.class, 0x009578),
+    FLOODED_GRASSLAND(180, CoverBiomeSelectors.FLOODED_SELECTOR, FloodedGrasslandCover.class, 0x00DC83),
+    URBAN(190, Biomes.PLAINS, UrbanCover.class, 0xC31300),
+    BARE(200, Biomes.DESERT, BareCover.class, 0xFFF5D6),
+    WATER(210, zone -> Biomes.OCEAN, WaterCover.class, 0.0, false, 0x0046C7),
+    SNOW(220, Biomes.ICE_PLAINS, SnowCover.class, 0xFFFFFF),
+    NO_DATA(0, Biomes.PLAINS, BareCover.class, 0),
+    PROCESSING(-1, Biomes.DEFAULT, BareCover.class, 0),
+    DEBUG(-1, zone -> Biomes.DEFAULT, DebugCover.class, 0.0, false, 0);
 
     public static final CoverType[] TYPES = values();
     private static final CoverType[] GLOB_TYPES = new CoverType[256];
@@ -66,15 +66,17 @@ public enum CoverType {
     private final Biome defaultBiome;
     private final double scatterRange;
     private final boolean scatterTo;
+    private final int color;
 
     private final Constructor<? extends CoverGenerator> generatorConstructor;
 
-    CoverType(int globId, Function<LatitudinalZone, Biome> biome, Class<? extends CoverGenerator> generator, double scatterRange, boolean scatterTo) {
+    CoverType(int globId, Function<LatitudinalZone, Biome> biome, Class<? extends CoverGenerator> generator, double scatterRange, boolean scatterTo, int color) {
         this.id = globId;
         this.biomeProvider = biome;
         this.defaultBiome = biome.apply(LatitudinalZone.TEMPERATE);
         this.scatterRange = scatterRange;
         this.scatterTo = scatterTo;
+        this.color = color;
 
         Constructor<? extends CoverGenerator> constructor = null;
 
@@ -94,12 +96,12 @@ public enum CoverType {
         this.generatorConstructor = constructor;
     }
 
-    CoverType(int id, Biome biome, Class<? extends CoverGenerator> generator) {
-        this(id, zone -> biome, generator, 1.0, true);
+    CoverType(int id, Biome biome, Class<? extends CoverGenerator> generator, int color) {
+        this(id, zone -> biome, generator, 1.0, true, color);
     }
 
-    CoverType(int id, Function<LatitudinalZone, Biome> biome, Class<? extends CoverGenerator> generator) {
-        this(id, biome, generator, 1.0, true);
+    CoverType(int id, Function<LatitudinalZone, Biome> biome, Class<? extends CoverGenerator> generator, int color) {
+        this(id, biome, generator, 1.0, true, color);
     }
 
     public int getId() {
@@ -132,6 +134,10 @@ public enum CoverType {
 
     public boolean canScatterTo() {
         return this.scatterTo;
+    }
+
+    public int getColor() {
+        return this.color;
     }
 
     static {

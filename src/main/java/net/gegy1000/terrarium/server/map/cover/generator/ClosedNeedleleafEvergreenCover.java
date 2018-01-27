@@ -41,18 +41,18 @@ public class ClosedNeedleleafEvergreenCover extends ClosedForestCover {
     private int getSpruceCount(Random random, LatitudinalZone zone) {
         switch (zone) {
             case TEMPERATE:
-                return this.range(random, 12, 14);
+                return this.range(random, 7, 9);
             default:
-                return this.range(random, 11, 12);
+                return this.range(random, 6, 7);
         }
     }
 
     private int getBirchCount(Random random, LatitudinalZone zone) {
         switch (zone) {
             case FRIGID:
-                return this.range(random, 6, 10);
+                return this.range(random, 4, 6);
             default:
-                return this.range(random, 14, 16);
+                return this.range(random, 6, 9);
         }
     }
 }

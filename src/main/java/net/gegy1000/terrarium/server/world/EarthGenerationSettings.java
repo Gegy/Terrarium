@@ -17,7 +17,7 @@ public class EarthGenerationSettings {
     public double worldScale = 1.0 / 35.0;
     public double terrainHeightScale = 1.0;
     public int heightOffset = 5;
-    public int scatterRange = 100;
+    public int scatterRange = 12;
     public boolean mapFeatures = false;
     public boolean caveGeneration = false;
     public boolean resourceGeneration = false;

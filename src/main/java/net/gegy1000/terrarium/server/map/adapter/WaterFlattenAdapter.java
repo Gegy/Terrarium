@@ -2,6 +2,9 @@ package net.gegy1000.terrarium.server.map.adapter;
 
 import net.gegy1000.terrarium.server.map.RegionData;
 import net.gegy1000.terrarium.server.map.cover.CoverType;
+import net.gegy1000.terrarium.server.map.source.glob.CoverTileAccess;
+import net.gegy1000.terrarium.server.map.source.height.HeightTileAccess;
+import net.gegy1000.terrarium.server.map.system.component.TerrariumComponentTypes;
 import net.gegy1000.terrarium.server.util.FloodFill;
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
 import net.minecraft.util.math.MathHelper;
@@ -20,8 +23,15 @@ public class WaterFlattenAdapter implements RegionAdapter {
 
     @Override
     public void adapt(EarthGenerationSettings settings, RegionData data, int x, int z, int width, int height) {
-        short[] heightBuffer = data.getHeights();
-        CoverType[] coverBuffer = data.getCover();
+        HeightTileAccess heightTile = data.get(TerrariumComponentTypes.HEIGHT);
+        CoverTileAccess coverTile = data.get(TerrariumComponentTypes.COVER);
+
+        if (heightTile == null || coverTile == null) {
+            return;
+        }
+
+        short[] heightBuffer = heightTile.getShortData();
+        CoverType[] coverBuffer = coverTile.getData();
 
         for (int localZ = 0; localZ < height; localZ++) {
             for (int localX = 0; localX < width; localX++) {
@@ -55,7 +65,7 @@ public class WaterFlattenAdapter implements RegionAdapter {
 
             boolean canEffect = true;
             for (FloodFill.Point sourcePoint : sourcePoints) {
-                if (Math.abs(point.getX() - sourcePoint.getX()) + Math.abs(point.getY() - sourcePoint.getY()) < this.flattenRange) {
+                if (Math.abs(point.getX() - sourcePoint.getX()) + Math.abs(point.getY() - sourcePoint.getY()) < 4) {
                     canEffect = false;
                     break;
                 }
@@ -120,7 +130,7 @@ public class WaterFlattenAdapter implements RegionAdapter {
         private AffectAreaVisitor(FloodFill.Point origin, int range, short target) {
             this.origin = origin;
 
-            this.range = range;
+            this.range = range * range;
             this.target = target;
         }
 
@@ -128,8 +138,8 @@ public class WaterFlattenAdapter implements RegionAdapter {
         public short visit(FloodFill.Point point, short sampled) {
             int deltaX = point.getX() - this.origin.getX();
             int deltaZ = point.getY() - this.origin.getY();
-            double distance = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
-            if (distance <= 1.5) {
+            double distance = deltaX * deltaX + deltaZ * deltaZ;
+            if (distance <= 5.0 * 5.0) {
                 return this.target;
             }
             double scale = MathHelper.clamp(distance / this.range, 0.0, 1.0);

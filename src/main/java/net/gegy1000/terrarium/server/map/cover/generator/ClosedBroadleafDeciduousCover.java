@@ -53,22 +53,22 @@ public class ClosedBroadleafDeciduousCover extends ClosedForestCover {
     private int getOakCount(Random random, LatitudinalZone zone) {
         switch (zone) {
             case SUBTROPICS:
-                return this.range(random, 6, 7);
+                return this.range(random, 5, 7);
             case TROPICS:
-                return this.range(random, 5, 6);
+                return this.range(random, 4, 6);
             case FRIGID:
-                return this.range(random, 4, 5);
+                return this.range(random, 3, 5);
             default:
-                return this.range(random, 7, 9);
+                return this.range(random, 6, 9);
         }
     }
 
     private int getBirchCount(Random random, LatitudinalZone zone) {
         switch (zone) {
             case TEMPERATE:
-                return this.range(random, 5, 7);
+                return this.range(random, 4, 7);
             case FRIGID:
-                return this.range(random, 3, 4);
+                return this.range(random, 2, 4);
             default:
                 return 0;
         }
@@ -77,13 +77,13 @@ public class ClosedBroadleafDeciduousCover extends ClosedForestCover {
     private int getJungleCount(Random random, LatitudinalZone zone) {
         switch (zone) {
             case SUBTROPICS:
-                return this.range(random, 6, 7);
+                return this.range(random, 5, 7);
             case TROPICS:
-                return this.range(random, 7, 9);
+                return this.range(random, 6, 9);
             case FRIGID:
                 return 0;
             default:
-                return this.range(random, -1, 3);
+                return this.range(random, -2, 3);
         }
     }
 }
