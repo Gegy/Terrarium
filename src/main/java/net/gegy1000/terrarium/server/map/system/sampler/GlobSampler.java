@@ -7,7 +7,6 @@ import net.gegy1000.terrarium.server.map.source.tiled.DataTilePos;
 import net.gegy1000.terrarium.server.map.source.tiled.TiledSource;
 import net.gegy1000.terrarium.server.util.ArrayUtils;
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
-import net.minecraft.util.math.MathHelper;
 
 public class GlobSampler implements DataSampler<CoverType[]> {
     private final TiledSource<? extends RasterDataAccess<CoverType>> globSource;
@@ -18,25 +17,30 @@ public class GlobSampler implements DataSampler<CoverType[]> {
 
     @Override
     public CoverType[] sample(EarthGenerationSettings settings, int x, int z, int width, int height) {
-        // TODO: Come back to more efficient, but broken algorithm
         CoverType[] output = ArrayUtils.defaulted(new CoverType[width * height], CoverType.NO_DATA);
-        for (int localZ = 0; localZ < height; localZ++) {
-            for (int localX = 0; localX < width; localX++) {
-                output[localX + localZ * width] = this.getCover(x + localX, z + localZ);
+
+        for (int tileZ = Math.floorDiv(z, GlobSource.TILE_SIZE); tileZ <= Math.floorDiv(z + width, GlobSource.TILE_SIZE); tileZ++) {
+            for (int tileX = Math.floorDiv(x, GlobSource.TILE_SIZE); tileX <= Math.floorDiv(x + width, GlobSource.TILE_SIZE); tileX++) {
+                DataTilePos pos = new DataTilePos(tileX, tileZ);
+                RasterDataAccess<CoverType> tile = this.globSource.getTile(pos);
+                int minTileX = pos.getTileX() * GlobSource.TILE_SIZE;
+                int minTileZ = pos.getTileY() * GlobSource.TILE_SIZE;
+
+                int minSampleX = Math.max(0, x - minTileX);
+                int minSampleZ = Math.max(0, z - minTileZ);
+                int maxSampleX = Math.min(GlobSource.TILE_SIZE, (x + width) - minTileX);
+                int maxSampleZ = Math.min(GlobSource.TILE_SIZE, (z + height) - minTileZ);
+
+                for (int localZ = minSampleZ; localZ < maxSampleZ; localZ++) {
+                    int resultZ = (localZ + minTileZ) - z;
+                    for (int localX = minSampleX; localX < maxSampleX; localX++) {
+                        int resultX = (localX + minTileX) - x;
+                        output[resultX + resultZ * width] = tile.get(localX, localZ);
+                    }
+                }
             }
         }
+
         return output;
-    }
-
-    private CoverType getCover(double globX, double globZ) {
-        int roundedGlobX = MathHelper.floor(globX);
-        int roundedGlobZ = MathHelper.floor(globZ);
-
-        DataTilePos pos = new DataTilePos(Math.floorDiv(roundedGlobX, GlobSource.TILE_SIZE), Math.floorDiv(roundedGlobZ, GlobSource.TILE_SIZE));
-        RasterDataAccess<CoverType> tile = this.globSource.getTile(pos);
-
-        int minTileX = pos.getTileX() * GlobSource.TILE_SIZE;
-        int minTileZ = pos.getTileY() * GlobSource.TILE_SIZE;
-        return tile.get(roundedGlobX - minTileX, roundedGlobZ - minTileZ);
     }
 }
