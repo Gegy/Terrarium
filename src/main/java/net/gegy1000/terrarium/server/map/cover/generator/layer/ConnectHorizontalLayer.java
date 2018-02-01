@@ -28,23 +28,28 @@ public class ConnectHorizontalLayer extends GenLayer {
                 int sample = parent[parentX + parentZ * sampleWidth];
                 int type = sample;
                 if (sample != this.connect) {
-                    boolean east = parent[(parentX + 1) + parentZ * sampleWidth] == this.connect;
-                    boolean west = parent[(parentX - 1) + parentZ * sampleWidth] == this.connect;
-                    boolean south = parent[parentX + (parentZ + 1) * sampleWidth] == this.connect;
-                    if (east && south) {
-                        if (parent[(parentX + 1) + (parentZ + 1) * sampleWidth] != this.connect) {
-                            type = this.connect;
-                        }
-                    } else if (west && south) {
-                        if (parent[(parentX - 1) + (parentZ + 1) * sampleWidth] != this.connect) {
-                            type = this.connect;
-                        }
-                    }
+                    type = this.connect(sampleWidth, parent, parentX, parentZ, type);
                 }
                 result[x + z * areaWidth] = type;
             }
         }
 
         return result;
+    }
+
+    private int connect(int sampleWidth, int[] parent, int parentX, int parentZ, int type) {
+        boolean east = parent[(parentX + 1) + parentZ * sampleWidth] == this.connect;
+        boolean west = parent[(parentX - 1) + parentZ * sampleWidth] == this.connect;
+        boolean south = parent[parentX + (parentZ + 1) * sampleWidth] == this.connect;
+        if (east && south) {
+            if (parent[(parentX + 1) + (parentZ + 1) * sampleWidth] != this.connect) {
+                type = this.connect;
+            }
+        } else if (west && south) {
+            if (parent[(parentX - 1) + (parentZ + 1) * sampleWidth] != this.connect) {
+                type = this.connect;
+            }
+        }
+        return type;
     }
 }

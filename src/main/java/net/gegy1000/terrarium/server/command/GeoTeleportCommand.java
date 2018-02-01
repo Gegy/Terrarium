@@ -1,6 +1,6 @@
 package net.gegy1000.terrarium.server.command;
 
-import joptsimple.internal.Strings;
+import com.google.common.base.Strings;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
@@ -54,28 +54,32 @@ public class GeoTeleportCommand extends CommandBase {
     }
 
     private CommandLocation parseLocation(ICommandSender sender, String[] input) throws WrongUsageException {
+        CommandLocation location = this.parseCoordinateLocation(input);
+
+        if (location == null) {
+            String place = String.join(" ", input);
+            if (Strings.isNullOrEmpty(place)) {
+                throw new WrongUsageException(this.getUsage(sender));
+            }
+            location = new GeocodeLocation(place);
+        }
+
+        return location;
+    }
+
+    private CommandLocation parseCoordinateLocation(String[] input) {
         if (input.length == 2) {
-            boolean valid = true;
             double[] coordinates = new double[2];
             for (int i = 0; i < 2; i++) {
                 try {
                     coordinates[i] = Double.parseDouble(input[i]);
                 } catch (NumberFormatException e) {
-                    valid = false;
-                    break;
+                    return null;
                 }
             }
-            if (valid) {
-                return new CoordinateLocation(coordinates[0], coordinates[1]);
-            }
+            return new CoordinateLocation(coordinates[0], coordinates[1]);
         }
-
-        String place = String.join(" ", input);
-        if (Strings.isNullOrEmpty(place)) {
-            throw new WrongUsageException(this.getUsage(sender));
-        }
-
-        return new GeocodeLocation(place);
+        return null;
     }
 
     private void teleport(EntityPlayerMP player, Coordinate coordinate) {

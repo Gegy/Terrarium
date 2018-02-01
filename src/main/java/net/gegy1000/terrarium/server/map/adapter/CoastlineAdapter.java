@@ -93,10 +93,7 @@ public class CoastlineAdapter implements RegionAdapter {
             double originY = currentCoordinate.getBlockZ();
 
             Coordinate nextCoordinate = Coordinate.fromLatLng(settings, next.getX(), next.getY());
-            while (Math.abs(nextCoordinate.getBlockX() - originX) < 3.0 && Math.abs(nextCoordinate.getBlockZ() - originY) < 3.0) {
-                if (++nodeIndex >= line.size()) {
-                    break;
-                }
+            while (Math.abs(nextCoordinate.getBlockX() - originX) < 3.0 && Math.abs(nextCoordinate.getBlockZ() - originY) < 3.0 && ++nodeIndex < line.size()) {
                 Point node = line.get(nodeIndex);
                 nextCoordinate = Coordinate.fromLatLng(settings, node.getX(), node.getY());
             }
@@ -107,27 +104,31 @@ public class CoastlineAdapter implements RegionAdapter {
             int lineType = this.getLineType(currentCoordinate, nextCoordinate);
             int coastType = lineType & COAST_TYPE_MASK;
 
-            List<FloodFill.Point> points = new ArrayList<>();
-            Interpolation.interpolateLine(originX, originY, targetX, targetY, false, point -> {
-                int localX = point.x - x;
-                int localY = point.y - y;
-                if (localX >= 0 && localY >= 0 && localX < width && localY < height) {
-                    landmap[localX + localY * width] = COAST | COAST_IGNORE;
+            this.rasterizeLineSegment(x, y, width, height, landmap, originX, originY, targetX, targetY, lineType, coastType);
+        }
+    }
 
-                    this.freeNeighbours(width, height, landmap, localX, localY);
+    private void rasterizeLineSegment(int x, int y, int width, int height, int[] landmap, double originX, double originY, double targetX, double targetY, int lineType, int coastType) {
+        List<FloodFill.Point> points = new ArrayList<>();
+        Interpolation.interpolateLine(originX, originY, targetX, targetY, false, point -> {
+            int localX = point.x - x;
+            int localY = point.y - y;
+            if (localX >= 0 && localY >= 0 && localX < width && localY < height) {
+                landmap[localX + localY * width] = COAST | COAST_IGNORE;
 
-                    points.add(new FloodFill.Point(point.x, point.y));
-                }
-            });
+                this.freeNeighbours(width, height, landmap, localX, localY);
 
-            if (points.size() > 2) {
-                for (int i = 1; i < points.size() - 1; i++) {
-                    FloodFill.Point point = points.get(i);
-                    int localX = point.getX() - x;
-                    int localY = point.getY() - y;
-                    if (coastType != 0) {
-                        landmap[localX + localY * width] = lineType;
-                    }
+                points.add(new FloodFill.Point(point.x, point.y));
+            }
+        });
+
+        if (points.size() > 2) {
+            for (int i = 1; i < points.size() - 1; i++) {
+                FloodFill.Point point = points.get(i);
+                int localX = point.getX() - x;
+                int localY = point.getY() - y;
+                if (coastType != 0) {
+                    landmap[localX + localY * width] = lineType;
                 }
             }
         }
@@ -167,7 +168,7 @@ public class CoastlineAdapter implements RegionAdapter {
         for (int neighbourY = -1; neighbourY <= 1; neighbourY++) {
             for (int neighbourX = -1; neighbourX <= 1; neighbourX++) {
                 if (neighbourX != 0 || neighbourY != 0) {
-                    if (corners || (neighbourX != 0 && neighbourY != 0)) {
+                    if (corners || this.isNeighbourCorner(neighbourX, neighbourY)) {
                         int globalX = originX + neighbourX;
                         int globalY = originY + neighbourY;
                         if (globalX >= 0 && globalY >= 0 && globalX < width && globalY < height) {
@@ -178,6 +179,10 @@ public class CoastlineAdapter implements RegionAdapter {
                 }
             }
         }
+    }
+
+    private boolean isNeighbourCorner(int neighbourX, int neighbourY) {
+        return neighbourX != 0 && neighbourY != 0;
     }
 
     private void floodFillMap(int width, int height, int[] landmap) {

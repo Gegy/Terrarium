@@ -39,25 +39,29 @@ public class SmallShrubGenerator extends WorldGenAbstractTree {
                 }
                 this.setBlockAndNotifyAdequately(world, position.up(height), this.leaves);
 
-                for (int z = -1; z <= 1; z++) {
-                    for (int x = -1; x <= 1; x++) {
-                        if (Math.abs(x) != Math.abs(z) || random.nextInt(4) == 0) {
-                            if (x == 0 && z == 0) {
-                                continue;
-                            }
-                            BlockPos leafPosition = position.add(x, height - 1, z);
-                            if (this.canGrowInto(world.getBlockState(leafPosition).getBlock())) {
-                                this.setBlockAndNotifyAdequately(world, leafPosition, this.leaves);
-                            }
-                        }
-                    }
-                }
+                this.generateLeaves(world, random, position, height);
 
                 return true;
             }
         }
 
         return false;
+    }
+
+    private void generateLeaves(World world, Random random, BlockPos position, int height) {
+        for (int z = -1; z <= 1; z++) {
+            for (int x = -1; x <= 1; x++) {
+                if (Math.abs(x) != Math.abs(z) || random.nextInt(4) == 0) {
+                    if (x == 0 && z == 0) {
+                        continue;
+                    }
+                    BlockPos leafPosition = position.add(x, height - 1, z);
+                    if (this.canGrowInto(world.getBlockState(leafPosition).getBlock())) {
+                        this.setBlockAndNotifyAdequately(world, leafPosition, this.leaves);
+                    }
+                }
+            }
+        }
     }
 
     @Override

@@ -25,6 +25,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -86,12 +87,12 @@ public class WorldPreview implements IBlockAccess {
 
     private void performUploads(List<PreviewChunk> previewChunks) {
         long startTime = System.nanoTime();
-        for (PreviewChunk chunk : previewChunks) {
+
+        Iterator<PreviewChunk> iterator = previewChunks.iterator();
+        while (System.nanoTime() - startTime < 3000000 && iterator.hasNext()) {
+            PreviewChunk chunk = iterator.next();
             if (chunk.isUploadReady()) {
                 this.returnBuilder(chunk.performUpload());
-                if (System.nanoTime() - startTime > 3000000) {
-                    break;
-                }
             }
         }
     }

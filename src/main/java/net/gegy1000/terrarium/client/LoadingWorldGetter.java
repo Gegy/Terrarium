@@ -39,19 +39,20 @@ public class LoadingWorldGetter {
     }
 
     public static WorldType getLoadingWorldType() {
+        WorldType worldType = null;
         if (MC.world != null) {
-            return MC.world.getWorldType();
+            worldType = MC.world.getWorldType();
         } else if (MC.getIntegratedServer() != null) {
             try {
                 WorldSettings serverSettings = LoadingWorldGetter.getServerSettings(MC.getIntegratedServer());
                 if (serverSettings != null) {
-                    return serverSettings.getTerrainType();
+                    worldType = serverSettings.getTerrainType();
                 }
             } catch (Exception e) {
                 Terrarium.LOGGER.warn("Failed to get IntegratedServer world settings", e);
             }
         }
-        return null;
+        return worldType;
     }
 
     private static WorldSettings getServerSettings(IntegratedServer server) throws Exception {

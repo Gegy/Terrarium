@@ -188,31 +188,35 @@ public class PreviewChunk {
                 for (int y = 0; y < 256; y++) {
                     IBlockState state = chunk.getBlockState(x, y, z);
                     if (state.getBlock() != Blocks.AIR) {
-                        pos.setPos(globalX + x, y, globalZ + z);
-
-                        List<EnumFacing> faces = new ArrayList<>(6);
-                        for (EnumFacing facing : PREVIEW_FACES) {
-                            BlockPos offset = pos.offset(facing);
-                            IBlockState neighbourState;
-                            if (x > 0 && x < 15 && z > 0 && z < 15 && y > 0 && y < 255) {
-                                neighbourState = chunk.getBlockState(offset.getX() & 15, offset.getY(), offset.getZ() & 15);
-                            } else {
-                                neighbourState = previewAccess.getBlockState(offset);
-                            }
-                            if (neighbourState.getBlock() == Blocks.AIR) {
-                                faces.add(facing);
-                            }
-                        }
-
-                        if (!faces.isEmpty()) {
-                            this.buildFaces(builder, faces, state, biome, pos, x, z);
-                        }
+                        this.buildBlock(builder, chunk, previewAccess, globalX, globalZ, pos, z, x, biome, y, state);
                     }
                 }
             }
         }
 
         builder.setTranslation(0.0, 0.0, 0.0);
+    }
+
+    private void buildBlock(BufferBuilder builder, ChunkPrimer chunk, IBlockAccess previewAccess, int globalX, int globalZ, BlockPos.MutableBlockPos pos, int z, int x, Biome biome, int y, IBlockState state) {
+        pos.setPos(globalX + x, y, globalZ + z);
+
+        List<EnumFacing> faces = new ArrayList<>(6);
+        for (EnumFacing facing : PREVIEW_FACES) {
+            BlockPos offset = pos.offset(facing);
+            IBlockState neighbourState;
+            if (x > 0 && x < 15 && z > 0 && z < 15 && y > 0 && y < 255) {
+                neighbourState = chunk.getBlockState(offset.getX() & 15, offset.getY(), offset.getZ() & 15);
+            } else {
+                neighbourState = previewAccess.getBlockState(offset);
+            }
+            if (neighbourState.getBlock() == Blocks.AIR) {
+                faces.add(facing);
+            }
+        }
+
+        if (!faces.isEmpty()) {
+            this.buildFaces(builder, faces, state, biome, pos, x, z);
+        }
     }
 
     private void buildFaces(BufferBuilder builder, List<EnumFacing> faces, IBlockState state, Biome biome, BlockPos pos, int x, int z) {

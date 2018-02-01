@@ -66,7 +66,7 @@ public class SlippyMapTile {
         }
     }
 
-    public boolean ready() {
-        return this.getLocation() != null;
+    public boolean isReady() {
+        return this.getLocation() != null && this.getTransition() > 0.99;
     }
 }

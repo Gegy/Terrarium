@@ -28,14 +28,7 @@ public class TallShrubGenerator extends WorldGenAbstractTree {
         int leavesOrigin = height - rand.nextInt(2) - 1;
         int baseHeight = 1;
 
-        if (position.getY() >= 1 && position.getY() + height + 1 <= 256) {
-            for (int y = position.getY(); y <= position.getY() + 1 + height; y++) {
-                int intersectionRange = y - position.getY() < baseHeight ? 0 : 3;
-                if (this.checkIntersection(world, position, y, intersectionRange)) {
-                    return false;
-                }
-            }
-
+        if (this.canGenerate(world, position, height, baseHeight)) {
             BlockPos down = position.down();
             IBlockState state = world.getBlockState(down);
             boolean onSoil = state.getBlock().canSustainPlant(state, world, down, EnumFacing.UP, (BlockSapling) Blocks.SAPLING);
@@ -51,6 +44,18 @@ public class TallShrubGenerator extends WorldGenAbstractTree {
         }
 
         return false;
+    }
+
+    private boolean canGenerate(World world, BlockPos position, int height, int baseHeight) {
+        if (position.getY() >= 1 && position.getY() + height + 1 <= 256) {
+            for (int y = position.getY(); y <= position.getY() + 1 + height; y++) {
+                int intersectionRange = y - position.getY() < baseHeight ? 0 : 3;
+                if (this.checkIntersection(world, position, y, intersectionRange)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private void generateLeaves(World world, BlockPos position, int leavesOrigin, int height, int baseHeight) {
