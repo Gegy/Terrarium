@@ -1,6 +1,7 @@
 package net.gegy1000.terrarium.server.capability;
 
 import com.google.common.collect.Sets;
+import net.gegy1000.terrarium.server.map.GenerationRegionHandler;
 import net.gegy1000.terrarium.server.map.source.GeocodingSource;
 import net.gegy1000.terrarium.server.map.source.glob.GlobSource;
 import net.gegy1000.terrarium.server.map.source.height.HeightSource;
@@ -9,7 +10,6 @@ import net.gegy1000.terrarium.server.map.source.osm.GeneralOverpassSource;
 import net.gegy1000.terrarium.server.map.source.osm.OutlineOverpassSource;
 import net.gegy1000.terrarium.server.map.source.tiled.TiledSource;
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
-import net.gegy1000.terrarium.server.world.generator.EarthGenerationHandler;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
@@ -19,7 +19,9 @@ import java.util.Collections;
 import java.util.Set;
 
 public interface TerrariumWorldData extends ICapabilityProvider {
-    EarthGenerationHandler getGenerationHandler();
+    EarthGenerationSettings getSettings();
+
+    GenerationRegionHandler getRegionHandler();
 
     HeightSource getHeightSource();
 
@@ -37,7 +39,7 @@ public interface TerrariumWorldData extends ICapabilityProvider {
 
     class Implementation implements TerrariumWorldData {
         private final EarthGenerationSettings settings;
-        private final EarthGenerationHandler generationHandler;
+        private final GenerationRegionHandler regionHandler;
 
         private final HeightSource heightSource;
         private final GlobSource globSource;
@@ -65,7 +67,7 @@ public interface TerrariumWorldData extends ICapabilityProvider {
                     this.detailedOverpassSource, this.generalOverpassSource, this.outlineOverpassSource
             ));
 
-            this.generationHandler = new EarthGenerationHandler(world.getSeed(), this, this.settings, world.getHeight() - 1);
+            this.regionHandler = new GenerationRegionHandler(this.settings, this);
 
             this.detailedOverpassSource.loadQuery();
             this.generalOverpassSource.loadQuery();
@@ -73,8 +75,13 @@ public interface TerrariumWorldData extends ICapabilityProvider {
         }
 
         @Override
-        public EarthGenerationHandler getGenerationHandler() {
-            return this.generationHandler;
+        public EarthGenerationSettings getSettings() {
+            return this.settings;
+        }
+
+        @Override
+        public GenerationRegionHandler getRegionHandler() {
+            return this.regionHandler;
         }
 
         @Override

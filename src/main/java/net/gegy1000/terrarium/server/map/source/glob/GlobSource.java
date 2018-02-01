@@ -4,7 +4,7 @@ import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.map.cover.CoverType;
 import net.gegy1000.terrarium.server.map.source.CachedRemoteSource;
 import net.gegy1000.terrarium.server.map.source.SourceException;
-import net.gegy1000.terrarium.server.map.source.TerrariumData;
+import net.gegy1000.terrarium.server.map.source.TerrariumRemoteData;
 import net.gegy1000.terrarium.server.map.source.tiled.DataTilePos;
 import net.gegy1000.terrarium.server.map.source.tiled.TiledSource;
 import net.gegy1000.terrarium.server.util.ArrayUtils;
@@ -36,13 +36,13 @@ public class GlobSource extends TiledSource<CoverTileAccess> implements CachedRe
 
     @Override
     public InputStream getRemoteStream(DataTilePos key) throws IOException {
-        URL url = new URL(String.format("%s/%s/%s", TerrariumData.info.getBaseURL(), TerrariumData.info.getGlobEndpoint(), this.getCachedName(key)));
+        URL url = new URL(String.format("%s/%s/%s", TerrariumRemoteData.info.getBaseURL(), TerrariumRemoteData.info.getGlobEndpoint(), this.getCachedName(key)));
         return new GZIPInputStream(url.openStream());
     }
 
     @Override
     public String getCachedName(DataTilePos key) {
-        return String.format(TerrariumData.info.getGlobQuery(), key.getTileX(), key.getTileY());
+        return String.format(TerrariumRemoteData.info.getGlobQuery(), key.getTileX(), key.getTileY());
     }
 
     @Override

@@ -19,7 +19,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 public interface CachedRemoteSource {
-    File GLOBAL_CACHE_ROOT = TerrariumData.CACHE_ROOT;
+    File GLOBAL_CACHE_ROOT = TerrariumRemoteData.CACHE_ROOT;
     ExecutorService CACHE_SERVICE = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("Terrarium Cache Service").setDaemon(true).build());
 
     File getCacheRoot();

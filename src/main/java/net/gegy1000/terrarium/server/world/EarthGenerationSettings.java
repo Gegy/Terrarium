@@ -63,6 +63,10 @@ public class EarthGenerationSettings {
         return 1.0 / this.getFinalScale();
     }
 
+    public int getOceanHeight() {
+        return this.heightOffset + 1;
+    }
+
     public String serialize() {
         return GSON.toJson(this);
     }

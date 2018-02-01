@@ -49,7 +49,6 @@ public class CoverTileAccess implements RasterDataAccess<CoverType>, TiledDataAc
         return this.cover[(x - this.offsetX) + (y - this.offsetZ) * this.width];
     }
 
-    // TODO: Remove
     @Override
     public CoverType[] getData() {
         return this.cover;

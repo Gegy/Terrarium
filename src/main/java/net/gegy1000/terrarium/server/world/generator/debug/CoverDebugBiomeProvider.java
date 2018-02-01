@@ -1,29 +1,21 @@
 package net.gegy1000.terrarium.server.world.generator.debug;
 
-import net.gegy1000.terrarium.server.map.LatitudinalZone;
-import net.gegy1000.terrarium.server.map.cover.CoverType;
-import net.gegy1000.terrarium.server.world.generator.TerrariumBiomeProvider;
+import net.gegy1000.terrarium.server.world.generator.CoveredBiomeProvider;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
 
-public class CoverDebugBiomeProvider extends TerrariumBiomeProvider {
+public class CoverDebugBiomeProvider extends CoveredBiomeProvider {
     public CoverDebugBiomeProvider(World world) {
         super(world);
     }
 
     @Override
-    protected void populateCoverRegion(CoverType[] coverBuffer, int chunkX, int chunkZ) {
-        int globalX = chunkX << 4;
-        int globalZ = chunkZ << 4;
-
+    protected void populateChunk(Biome[] biomes, int x, int z) {
         for (int localZ = 0; localZ < 16; localZ++) {
             for (int localX = 0; localX < 16; localX++) {
-                coverBuffer[localX + localZ * 16] = DebugMap.getCover(localX + globalX, localZ + globalZ).getCoverType();
+                DebugMap.DebugCover cover = DebugMap.getCover(localX + x, localZ + z);
+                biomes[localX + localZ * 16] = cover.getCoverType().getBiome(cover.getZone());
             }
         }
-    }
-
-    @Override
-    protected LatitudinalZone getZone(int x, int z) {
-        return DebugMap.getCover(x, z).getZone();
     }
 }

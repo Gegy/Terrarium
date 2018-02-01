@@ -1,7 +1,7 @@
 package net.gegy1000.terrarium.server;
 
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
-import net.gegy1000.terrarium.server.map.source.TerrariumData;
+import net.gegy1000.terrarium.server.map.source.TerrariumRemoteData;
 import net.gegy1000.terrarium.server.map.source.height.HeightSource;
 
 public class ServerProxy {
@@ -9,7 +9,7 @@ public class ServerProxy {
         TerrariumCapabilities.onPreInit();
 
         Thread thread = new Thread(() -> {
-            TerrariumData.loadInfo();
+            TerrariumRemoteData.loadInfo();
             HeightSource.loadValidTiles();
         }, "Terrarium Remote Load");
         thread.setDaemon(true);

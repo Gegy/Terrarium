@@ -20,7 +20,6 @@ import net.gegy1000.terrarium.server.map.system.sampler.HeightSampler;
 import net.gegy1000.terrarium.server.map.system.sampler.OverpassSampler;
 import net.gegy1000.terrarium.server.util.Coordinate;
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
-import net.gegy1000.terrarium.server.world.generator.EarthGenerationHandler;
 
 import java.util.Collections;
 import java.util.List;
@@ -28,8 +27,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 public class GenerationRegionHandler {
+    private final EarthGenerationSettings settings;
     private final TerrariumWorldData worldData;
-    private final EarthGenerationHandler generationHandler;
 
     private final Coordinate bufferedRegionSize;
 
@@ -50,11 +49,11 @@ public class GenerationRegionHandler {
 
     private final RegionPopulationSystem populationSystem;
 
-    public GenerationRegionHandler(TerrariumWorldData worldData, EarthGenerationHandler generationHandler) {
+    public GenerationRegionHandler(EarthGenerationSettings settings, TerrariumWorldData worldData) {
+        this.settings = settings;
         this.worldData = worldData;
-        this.generationHandler = generationHandler;
 
-        this.bufferedRegionSize = Coordinate.fromBlock(generationHandler.getSettings(), GenerationRegion.BUFFERED_SIZE, GenerationRegion.BUFFERED_SIZE);
+        this.bufferedRegionSize = Coordinate.fromBlock(settings, GenerationRegion.BUFFERED_SIZE, GenerationRegion.BUFFERED_SIZE);
 
         HeightSampler heightSampler = new HeightSampler(worldData.getHeightSource());
         GlobSampler coverSampler = new GlobSampler(worldData.getGlobSource());
@@ -64,7 +63,7 @@ public class GenerationRegionHandler {
                 new OverpassSampler(worldData.getDetailedOverpassSource())
         );
 
-        this.populationSystem = RegionPopulationSystem.builder(generationHandler.getSettings())
+        this.populationSystem = RegionPopulationSystem.builder(settings)
                 .withComponent(TerrariumComponentTypes.HEIGHT, new HeightRegionPopulator(heightSampler))
                 .withComponent(TerrariumComponentTypes.COVER, new CoverRegionPopulator(coverSampler))
                 .withComponent(TerrariumComponentTypes.OVERPASS, new OverpassRegionPopulator(overpassSamplers))
@@ -87,10 +86,9 @@ public class GenerationRegionHandler {
     }
 
     private GenerationRegion generate(RegionTilePos pos) {
-        EarthGenerationSettings settings = this.generationHandler.getSettings();
+        Coordinate minCoordinate = pos.getMinBufferedCoordinate(this.settings);
+        Coordinate maxCoordinate = pos.getMaxBufferedCoordinate(this.settings);
 
-        Coordinate minCoordinate = pos.getMinBufferedCoordinate(settings);
-        Coordinate maxCoordinate = pos.getMaxBufferedCoordinate(settings);
         if (!minCoordinate.inWorldBounds() || !maxCoordinate.inWorldBounds()) {
             return this.createDefaultRegion(pos);
         }

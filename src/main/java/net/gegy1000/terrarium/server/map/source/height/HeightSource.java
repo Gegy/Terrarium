@@ -3,7 +3,7 @@ package net.gegy1000.terrarium.server.map.source.height;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.map.source.CachedRemoteSource;
 import net.gegy1000.terrarium.server.map.source.SourceException;
-import net.gegy1000.terrarium.server.map.source.TerrariumData;
+import net.gegy1000.terrarium.server.map.source.TerrariumRemoteData;
 import net.gegy1000.terrarium.server.map.source.tiled.DataTilePos;
 import net.gegy1000.terrarium.server.map.source.tiled.TiledSource;
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
@@ -45,7 +45,7 @@ public class HeightSource extends TiledSource<HeightTileAccess> implements Cache
     }
 
     private static URL getTilesURL() throws IOException {
-        return new URL(String.format("%s/%s/%s", TerrariumData.info.getBaseURL(), TerrariumData.info.getHeightsEndpoint(), TerrariumData.info.getHeightTiles()));
+        return new URL(String.format("%s/%s/%s", TerrariumRemoteData.info.getBaseURL(), TerrariumRemoteData.info.getHeightsEndpoint(), TerrariumRemoteData.info.getHeightTiles()));
     }
 
     @Override
@@ -77,7 +77,7 @@ public class HeightSource extends TiledSource<HeightTileAccess> implements Cache
     @Override
     public InputStream getRemoteStream(DataTilePos key) throws IOException {
         String cachedName = this.getCachedName(key);
-        URL url = new URL(String.format("%s/%s/%s", TerrariumData.info.getBaseURL(), TerrariumData.info.getHeightsEndpoint(), cachedName));
+        URL url = new URL(String.format("%s/%s/%s", TerrariumRemoteData.info.getBaseURL(), TerrariumRemoteData.info.getHeightsEndpoint(), cachedName));
         return new GZIPInputStream(url.openStream());
     }
 
@@ -98,7 +98,7 @@ public class HeightSource extends TiledSource<HeightTileAccess> implements Cache
         }
         longitudeString.insert(0, longitudePrefix);
 
-        return String.format(TerrariumData.info.getHeightsQuery(), latitudeString.toString(), longitudeString.toString());
+        return String.format(TerrariumRemoteData.info.getHeightsQuery(), latitudeString.toString(), longitudeString.toString());
     }
 
     @Override

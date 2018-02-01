@@ -15,7 +15,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
 
-public class TerrariumData {
+public class TerrariumRemoteData {
     private final static String INFO_JSON = "https://gist.githubusercontent.com/gegy1000/0a0ac9ec610d6d9716d43820a0825a6d/raw/terrarium_info.json";
 
     private final static Gson GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -23,7 +23,7 @@ public class TerrariumData {
     public static final File CACHE_ROOT = new File(".", "mods/terrarium/cache/");
     private static final File INFO_CACHE = new File(CACHE_ROOT, "terrarium_info.json");
 
-    public static TerrariumData.Info info = new TerrariumData.Info("", "", "%s_%s.mat", "", "%s%s.hgt", "", "http://tile.openstreetmap.org", "%s/%s/%s.png");
+    public static TerrariumRemoteData.Info info = new TerrariumRemoteData.Info("", "", "%s_%s.mat", "", "%s%s.hgt", "", "http://tile.openstreetmap.org", "%s/%s/%s.png");
 
     public static void loadInfo() {
         if (!CACHE_ROOT.exists()) {
@@ -32,11 +32,11 @@ public class TerrariumData {
 
         try {
             URL url = new URL(INFO_JSON);
-            info = TerrariumData.loadInfo(url.openStream());
-            TerrariumData.cacheInfo(info);
+            info = TerrariumRemoteData.loadInfo(url.openStream());
+            TerrariumRemoteData.cacheInfo(info);
         } catch (IOException e) {
             Terrarium.LOGGER.error("Failed to load remote Terrarium info, checking cache", e);
-            TerrariumData.loadCachedInfo();
+            TerrariumRemoteData.loadCachedInfo();
         }
     }
 
@@ -48,14 +48,14 @@ public class TerrariumData {
         }
     }
 
-    private static TerrariumData.Info loadInfo(InputStream input) throws IOException {
+    private static TerrariumRemoteData.Info loadInfo(InputStream input) throws IOException {
         try (InputStreamReader reader = new InputStreamReader(new BufferedInputStream(input))) {
             Info info = GSON.fromJson(reader, Info.class);
-            return info.merge(TerrariumData.info);
+            return info.merge(TerrariumRemoteData.info);
         }
     }
 
-    private static void cacheInfo(TerrariumData.Info info) {
+    private static void cacheInfo(TerrariumRemoteData.Info info) {
         try (PrintWriter output = new PrintWriter(new FileOutputStream(INFO_CACHE))) {
             output.write(GSON.toJson(info));
         } catch (IOException e) {

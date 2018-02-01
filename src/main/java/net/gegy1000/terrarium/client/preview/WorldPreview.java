@@ -53,7 +53,7 @@ public class WorldPreview implements IBlockAccess {
         this.builderQueue = new ArrayBlockingQueue<>(builders.length);
         Collections.addAll(this.builderQueue, builders);
 
-        this.generator = new EarthChunkGenerator(new PreviewDummyWorld(settings), 0, settings.serialize(), true);
+        this.generator = new EarthChunkGenerator(new PreviewDummyWorld(settings), 0, settings, true);
         this.centerPos = new ChunkPos(Coordinate.fromLatLng(settings, settings.spawnLatitude, settings.spawnLongitude).toBlockPos());
         this.centerBlockPos = new BlockPos(this.centerPos.x << 4, 0, this.centerPos.z << 4);
 
@@ -133,7 +133,7 @@ public class WorldPreview implements IBlockAccess {
                 ChunkPos pos = new ChunkPos(this.centerPos.x + x, this.centerPos.z + z);
 
                 ChunkPrimer chunk = this.generator.generatePrimer(pos.x, pos.z);
-                Biome[] biomes = this.generator.generateBiomes(new Biome[256], pos.x, pos.z);
+                Biome[] biomes = this.generator.populateBiomes(new Biome[256], pos.x, pos.z);
                 this.chunkMap.put(ChunkPos.asLong(pos.x, pos.z), new ChunkData(chunk, biomes));
 
                 chunkPositions.add(pos);

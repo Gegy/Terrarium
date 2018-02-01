@@ -26,7 +26,7 @@ public class EarthWorldType extends WorldType {
 
     @Override
     public IChunkGenerator getChunkGenerator(World world, String settings) {
-        return new EarthChunkGenerator(world, world.getSeed(), settings, false);
+        return new EarthChunkGenerator(world, world.getSeed(), EarthGenerationSettings.deserialize(settings), false);
     }
 
     @Override
@@ -46,7 +46,7 @@ public class EarthWorldType extends WorldType {
     @Override
     public boolean handleSlimeSpawnReduction(Random random, World world) {
         TerrariumWorldData worldData = world.getCapability(TerrariumCapabilities.worldDataCapability, null);
-        return worldData != null && worldData.getGenerationHandler().getSettings().heightOffset >= 40;
+        return worldData != null && worldData.getSettings().heightOffset >= 40;
     }
 
     @Override
