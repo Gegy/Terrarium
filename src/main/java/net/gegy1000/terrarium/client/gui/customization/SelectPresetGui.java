@@ -27,8 +27,8 @@ public class SelectPresetGui extends GuiScreen {
     public void initGui() {
         this.presetList = new PresetList(this.mc, this);
 
-        this.selectButton = this.addButton(new GuiButton(SELECT_BUTTON, this.width / 2 - 155, this.height - 28, 150, 20, I18n.translateToLocal("gui.done")));
-        this.addButton(new GuiButton(CANCEL_BUTTON, this.width / 2 + 5, this.height - 28, 150, 20, I18n.translateToLocal("gui.cancel")));
+        this.selectButton = this.addButton(new GuiButton(SELECT_BUTTON, this.width / 2 - 154, this.height - 28, 150, 20, I18n.translateToLocal("gui.done")));
+        this.addButton(new GuiButton(CANCEL_BUTTON, this.width / 2 + 4, this.height - 28, 150, 20, I18n.translateToLocal("gui.cancel")));
 
         this.selectButton.enabled = false;
     }

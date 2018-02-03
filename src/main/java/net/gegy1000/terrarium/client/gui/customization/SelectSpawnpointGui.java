@@ -35,8 +35,8 @@ public class SelectSpawnpointGui extends GuiScreen {
         this.markerComponent = new MarkerMapComponent(new SlippyMapPoint(settings.spawnLatitude, settings.spawnLongitude));
         this.mapWidget.addComponent(this.markerComponent);
 
-        this.addButton(new GuiButton(SELECT_BUTTON, this.width / 2 - 155, this.height - 28, 150, 20, I18n.translateToLocal("gui.done")));
-        this.addButton(new GuiButton(CANCEL_BUTTON, this.width / 2 + 5, this.height - 28, 150, 20, I18n.translateToLocal("gui.cancel")));
+        this.addButton(new GuiButton(SELECT_BUTTON, this.width / 2 - 154, this.height - 28, 150, 20, I18n.translateToLocal("gui.done")));
+        this.addButton(new GuiButton(CANCEL_BUTTON, this.width / 2 + 4, this.height - 28, 150, 20, I18n.translateToLocal("gui.cancel")));
     }
 
     @Override

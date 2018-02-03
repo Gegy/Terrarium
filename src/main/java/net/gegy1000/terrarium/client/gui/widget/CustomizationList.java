@@ -3,24 +3,25 @@ package net.gegy1000.terrarium.client.gui.widget;
 import net.gegy1000.terrarium.client.gui.customization.setting.CustomizationValue;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiListExtended;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class CustomizationList extends GuiListExtended {
-    private final Minecraft mc;
+@SideOnly(Side.CLIENT)
+public class CustomizationList extends ListWidget {
+    private final Minecraft client;
     private final GuiScreen parent;
 
     private final List<GuiButton> widgets = new ArrayList<>();
+    private final List<SingleWidgetEntry> entries = new ArrayList<>();
 
-    private final List<DoubleWidgetEntry> entries = new ArrayList<>();
-
-    public CustomizationList(Minecraft mc, GuiScreen parent) {
-        super(mc, parent.width, parent.height, 25, parent.height / 2, 20);
-        this.mc = mc;
+    public CustomizationList(Minecraft client, GuiScreen parent, int x, int y, int width, int height) {
+        super(client, parent.width, parent.height, x, y, width, height, 20);
+        this.client = client;
         this.parent = parent;
     }
 
@@ -34,10 +35,8 @@ public class CustomizationList extends GuiListExtended {
 
     public void buildEntries() {
         this.entries.clear();
-        for (int i = 0; i < this.widgets.size(); i += 2) {
-            GuiButton primary = this.widgets.get(i);
-            GuiButton secondary = i < this.widgets.size() ? this.widgets.get(i + 1) : null;
-            this.entries.add(new DoubleWidgetEntry(primary, secondary));
+        for (GuiButton widget : this.widgets) {
+            this.entries.add(new SingleWidgetEntry(widget));
         }
     }
 
@@ -46,20 +45,10 @@ public class CustomizationList extends GuiListExtended {
         super.drawScreen(mouseX, mouseY, partialTicks);
 
         if (this.isMouseYWithinSlotBounds(mouseY)) {
-            for (DoubleWidgetEntry element : this.entries) {
+            for (SingleWidgetEntry element : this.entries) {
                 element.drawTooltip(mouseX, mouseY);
             }
         }
-    }
-
-    @Override
-    public int getListWidth() {
-        return this.parent.width;
-    }
-
-    @Override
-    protected int getScrollBarX() {
-        return this.width - 6;
     }
 
     @Override
@@ -72,13 +61,11 @@ public class CustomizationList extends GuiListExtended {
         return this.entries.size();
     }
 
-    public class DoubleWidgetEntry implements IGuiListEntry {
-        private final GuiButton primary;
-        private final GuiButton secondary;
+    public class SingleWidgetEntry implements IGuiListEntry {
+        private final GuiButton button;
 
-        public DoubleWidgetEntry(GuiButton primary, GuiButton secondary) {
-            this.primary = primary;
-            this.secondary = secondary;
+        public SingleWidgetEntry(GuiButton button) {
+            this.button = button;
         }
 
         @Override
@@ -87,50 +74,36 @@ public class CustomizationList extends GuiListExtended {
 
         @Override
         public void drawEntry(int slotIndex, int x, int y, int listWidth, int slotHeight, int mouseX, int mouseY, boolean isSelected, float partialTicks) {
-            if (this.primary != null) {
-                this.primary.width = listWidth / 2 - 6;
-                this.primary.x = 4;
-                this.primary.y = y;
-                this.primary.drawButton(CustomizationList.this.mc, mouseX, mouseY, partialTicks);
-            }
-
-            if (this.secondary != null) {
-                this.secondary.width = listWidth / 2 - 6;
-                this.secondary.x = listWidth / 2 + 2;
-                this.secondary.y = y;
-                this.secondary.drawButton(CustomizationList.this.mc, mouseX, mouseY, partialTicks);
+            if (this.button != null) {
+                this.button.width = listWidth - 10;
+                this.button.x = CustomizationList.this.left + 5;
+                this.button.y = y;
+                this.button.drawButton(CustomizationList.this.client, mouseX, mouseY, partialTicks);
             }
         }
 
         @Override
         public boolean mousePressed(int slotIndex, int mouseX, int mouseY, int mouseEvent, int relativeX, int relativeY) {
-            return (this.primary != null && this.primary.mousePressed(CustomizationList.this.mc, mouseX, mouseY))
-                    || (this.secondary != null && this.secondary.mousePressed(CustomizationList.this.mc, mouseX, mouseY));
+            return this.button != null && this.button.mousePressed(CustomizationList.this.client, mouseX, mouseY);
         }
 
         @Override
         public void mouseReleased(int slotIndex, int mouseX, int mouseY, int mouseEvent, int relativeX, int relativeY) {
-            if (this.primary != null) {
-                this.primary.mouseReleased(mouseX, mouseY);
-            }
-            if (this.secondary != null) {
-                this.secondary.mouseReleased(mouseX, mouseY);
+            if (this.button != null) {
+                this.button.mouseReleased(mouseX, mouseY);
             }
         }
 
         public void drawTooltip(int mouseX, int mouseY) {
-            if (this.primary instanceof TooltipRenderer) {
-                this.drawTooltip((TooltipRenderer) this.primary, mouseX, mouseY);
-            }
-            if (this.secondary instanceof TooltipRenderer) {
-                this.drawTooltip((TooltipRenderer) this.secondary, mouseX, mouseY);
+            if (this.button instanceof TooltipRenderer) {
+                this.drawTooltip((TooltipRenderer) this.button, mouseX, mouseY);
             }
         }
 
         private void drawTooltip(TooltipRenderer renderer, int mouseX, int mouseY) {
             int width = CustomizationList.this.parent.width;
             int height = CustomizationList.this.parent.height;
-            renderer.renderTooltip(CustomizationList.this.mc, mouseX, mouseY, width, height);
+            renderer.renderTooltip(CustomizationList.this.client, mouseX, mouseY, width, height);
 
             GlStateManager.disableLighting();
             GlStateManager.disableDepth();

@@ -50,7 +50,7 @@ public class PreviewRenderer {
             GlStateManager.disableTexture2D();
             GlStateManager.enableDepth();
 
-            GlStateManager.translate(this.gui.width / scaleFactor / 2.0, (this.y + this.height / 2) / scaleFactor, 0.0);
+            GlStateManager.translate((this.x + this.gui.width) / 2.0 / scaleFactor, (this.y + this.height) / 2.0 / scaleFactor, 0.0);
             GlStateManager.scale(zoom, -zoom, zoom);
             GlStateManager.rotate(rotationX, 1.0F, 0.0F, 0.0F);
             GlStateManager.rotate(rotationY, 0.0F, 1.0F, 0.0F);
@@ -70,6 +70,8 @@ public class PreviewRenderer {
 
             GlStateManager.popMatrix();
         }
+
+        this.renderEdges();
     }
 
     private void renderBackground() {
@@ -84,6 +86,36 @@ public class PreviewRenderer {
         buffer.pos(this.x + this.width, this.y, 0.0).tex((this.x + this.width) / tileSize, this.y / tileSize).endVertex();
         buffer.pos(this.x, this.y, 0.0).tex(this.x / tileSize, this.y / tileSize).endVertex();
         tessellator.draw();
+    }
+
+    private void renderEdges() {
+        GlStateManager.disableTexture2D();
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
+        GlStateManager.disableAlpha();
+        GlStateManager.shadeModel(GL11.GL_SMOOTH);
+
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder buffer = tessellator.getBuffer();
+
+        buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+        buffer.pos(this.x, this.y + this.height, 0.0).color(0, 0, 0, 255).endVertex();
+        buffer.pos(this.x + this.width, this.y + this.height, 0.0).color(0, 0, 0, 255).endVertex();
+        buffer.pos(this.x + this.width, this.y + this.height - 4, 0.0).color(0, 0, 0, 0).endVertex();
+        buffer.pos(this.x, this.y + this.height - 4, 0.0).color(0, 0, 0, 0).endVertex();
+        tessellator.draw();
+
+        buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+        buffer.pos(this.x, this.y + 4, 0.0).color(0, 0, 0, 0).endVertex();
+        buffer.pos(this.x + this.width, this.y + 4, 0.0).color(0, 0, 0, 0).endVertex();
+        buffer.pos(this.x + this.width, this.y, 0.0).color(0, 0, 0, 255).endVertex();
+        buffer.pos(this.x, this.y, 0.0).color(0, 0, 0, 255).endVertex();
+        tessellator.draw();
+
+        GlStateManager.shadeModel(GL11.GL_FLAT);
+        GlStateManager.enableAlpha();
+        GlStateManager.disableBlend();
+        GlStateManager.enableTexture2D();
     }
 
     public double getX() {

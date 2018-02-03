@@ -6,8 +6,8 @@ generator.terrarium.debug=Terrarium Debug
 # GUI
 
 gui.terrarium.accept=Accept
-gui.terrarium.preset=Select Preset
-gui.terrarium.spawnpoint=Set Spawnpoint
+gui.terrarium.preset=Set Preset
+gui.terrarium.spawnpoint=Set Spawn
 
 gui.terrarium.remote_data_warning.1=Warning: Terrarium downloads data from the Internet!
 gui.terrarium.remote_data_warning.2=To generate chunks, GIS data is required for height and biomes.

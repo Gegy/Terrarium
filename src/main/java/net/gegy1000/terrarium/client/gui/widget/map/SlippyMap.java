@@ -84,7 +84,7 @@ public class SlippyMap {
             if (image != null && image.isReady()) {
                 tiles.add(pos);
             }
-            if (pos.getZoom() >= MIN_ZOOM && (image == null || !image.isReady())) {
+            if (pos.getZoom() >= MIN_ZOOM && (image == null || !image.isReady() || image.getTransition() < 1.0)) {
                 this.cascadeTile(tiles, new SlippyMapTilePos(pos.getX() >> 1, pos.getY() >> 1, pos.getZoom() - 1));
             }
         }
