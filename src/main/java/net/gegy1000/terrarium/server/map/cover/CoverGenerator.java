@@ -32,8 +32,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public abstract class CoverGenerator {
-    protected static final int MOUNTAINOUS_SLOPE = 20;
-    protected static final int CLIFF_SLOPE = 70;
+    public static final int MOUNTAINOUS_SLOPE = 20;
+    public static final int CLIFF_SLOPE = 70;
 
     protected static final IBlockState GRASS = Blocks.GRASS.getDefaultState();
     protected static final IBlockState COARSE_DIRT = Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT);

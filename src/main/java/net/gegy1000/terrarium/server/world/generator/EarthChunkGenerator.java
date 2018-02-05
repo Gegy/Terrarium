@@ -1,5 +1,6 @@
 package net.gegy1000.terrarium.server.world.generator;
 
+import com.google.common.collect.ImmutableList;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.map.GenerationRegionHandler;
@@ -16,6 +17,8 @@ import net.gegy1000.terrarium.server.util.ArrayUtils;
 import net.gegy1000.terrarium.server.util.Coordinate;
 import net.gegy1000.terrarium.server.util.Lazy;
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
+import net.gegy1000.terrarium.server.world.decorator.BoulderDecorator;
+import net.gegy1000.terrarium.server.world.decorator.TerrariumWorldDecorator;
 import net.minecraft.block.BlockFalling;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EnumCreatureType;
@@ -59,6 +62,7 @@ public class EarthChunkGenerator extends CoveredChunkGenerator {
     private final CoverChunkDataProvider coverProvider;
 
     private final Map<CoverType, CoverGenerator> generators;
+    private final List<TerrariumWorldDecorator> decorators;
 
     public EarthChunkGenerator(World world, long seed, EarthGenerationSettings settings, boolean fastGenerate) {
         super(world, settings.getOceanHeight());
@@ -87,6 +91,8 @@ public class EarthChunkGenerator extends CoveredChunkGenerator {
         int[] heightBuffer = this.heightProvider.getResultStore();
         byte[] slopeBuffer = this.slopeProvider.getResultStore();
         this.generators = super.createGenerators(coverBuffer, heightBuffer, slopeBuffer, this.coverBlockBuffer, this.fillerBlockBuffer, false);
+
+        this.decorators = ImmutableList.of(new BoulderDecorator());
     }
 
     @Override
@@ -187,6 +193,7 @@ public class EarthChunkGenerator extends CoveredChunkGenerator {
         this.slopeProvider.populate(this.regionHandler.get(), this.world, globalX + 8, globalZ + 8);
 
         CoverChunkDataProvider.Data coverData = this.coverProvider.getResultStore();
+        byte[] slopeData = this.slopeProvider.getResultStore();
 
         LatitudinalZone zone = this.getLatitudinalZone(globalX, globalZ);
 
@@ -195,6 +202,10 @@ public class EarthChunkGenerator extends CoveredChunkGenerator {
 
         if (this.settings.decorate && !this.fastGenerate) {
             ForgeEventFactory.onChunkPopulate(true, this, this.world, this.random, chunkX, chunkZ, false);
+
+            for (TerrariumWorldDecorator decorator : this.decorators) {
+                decorator.decorate(this.world, this.random, coverData.getCoverData(), slopeData, globalX, globalZ);
+            }
 
             Set<CoverType> coverTypes = coverData.getTypes();
             for (CoverType type : coverTypes) {
