@@ -14,9 +14,17 @@ public class HeightRegionPopulator extends BufferedScalingPopulator<HeightTileAc
 
     private final DataSampler<short[]> heightSampler;
 
-    public HeightRegionPopulator(DataSampler<short[]> heightSampler) {
-        super(LOWER_SAMPLE_BUFFER, UPPER_SAMPLE_BUFFER, Coordinate::getGlobalX, Coordinate::getGlobalZ);
+    private final Interpolation.Method interpolationMethod;
+    private final double[][] sampleBuffer;
+
+    public HeightRegionPopulator(DataSampler<short[]> heightSampler, Interpolation.Method interpolationMethod) {
+        super(LOWER_SAMPLE_BUFFER + interpolationMethod.getBackward(), UPPER_SAMPLE_BUFFER + interpolationMethod.getForward(), Coordinate::getGlobalX, Coordinate::getGlobalZ);
         this.heightSampler = heightSampler;
+
+        this.interpolationMethod = interpolationMethod;
+
+        int pointCount = interpolationMethod.getPointCount();
+        this.sampleBuffer = new double[pointCount][pointCount];
     }
 
     @Override
@@ -44,12 +52,12 @@ public class HeightRegionPopulator extends BufferedScalingPopulator<HeightTileAc
         short[] resultHeights = new short[width * height];
 
         for (int scaledZ = 0; scaledZ < height; scaledZ++) {
-            double sampleZ = scaledZ * scaleFactorZ + originOffsetZ + LOWER_SAMPLE_BUFFER;
+            double sampleZ = scaledZ * scaleFactorZ + originOffsetZ + this.lowerSampleBuffer;
             int originZ = MathHelper.floor(sampleZ);
             double intermediateZ = sampleZ - originZ;
 
             for (int scaledX = 0; scaledX < width; scaledX++) {
-                double sampleX = scaledX * scaleFactorX + originOffsetX + LOWER_SAMPLE_BUFFER;
+                double sampleX = scaledX * scaleFactorX + originOffsetX + this.lowerSampleBuffer;
                 int originX = MathHelper.floor(sampleX);
                 double intermediateX = sampleX - originX;
 
@@ -62,18 +70,17 @@ public class HeightRegionPopulator extends BufferedScalingPopulator<HeightTileAc
     }
 
     private short interpolatePoint(short[] sampledHeights, int sampleWidth, int originX, int originZ, double intermediateX, double intermediateZ) {
-        int sampleIndex = originX + originZ * sampleWidth;
+        int baseIndex = originX + originZ * sampleWidth;
 
-        double current = sampledHeights[sampleIndex];
-        double south = sampledHeights[sampleIndex + sampleWidth];
-        double east = sampledHeights[sampleIndex + 1];
-        double southEast = sampledHeights[sampleIndex + sampleWidth + 1];
+        int backward = this.interpolationMethod.getBackward();
+        int pointCount = this.interpolationMethod.getPointCount();
+        for (int sampleZ = 0; sampleZ < pointCount; sampleZ++) {
+            for (int sampleX = 0; sampleX < pointCount; sampleX++) {
+                int sampleIndex = baseIndex + (sampleX - backward) + (sampleZ - backward) * sampleWidth;
+                this.sampleBuffer[sampleX][sampleZ] = sampledHeights[sampleIndex];
+            }
+        }
 
-        double y1 = Interpolation.cosine(current, south, intermediateZ);
-        double y2 = Interpolation.cosine(east, southEast, intermediateZ);
-
-        double interpolatedHeight = Interpolation.cosine(y1, y2, intermediateX);
-
-        return (short) interpolatedHeight;
+        return (short) this.interpolationMethod.lerp2d(this.sampleBuffer, intermediateX, intermediateZ);
     }
 }

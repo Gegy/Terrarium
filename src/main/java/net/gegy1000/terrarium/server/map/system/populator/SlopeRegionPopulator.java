@@ -69,10 +69,10 @@ public class SlopeRegionPopulator extends BufferedScalingPopulator<SlopeTileAcce
         double east = sampledHeights[sampleIndex + 1];
         double southEast = sampledHeights[sampleIndex + sampleWidth + 1];
 
-        double y1 = Interpolation.linear(current, south, intermediateZ);
-        double y2 = Interpolation.linear(east, southEast, intermediateZ);
+        double y1 = Interpolation.Method.LINEAR.lerp(current, south, intermediateZ);
+        double y2 = Interpolation.Method.LINEAR.lerp(east, southEast, intermediateZ);
 
-        double interpolatedHeight = Interpolation.linear(y1, y2, intermediateX);
+        double interpolatedHeight = Interpolation.Method.LINEAR.lerp(y1, y2, intermediateX);
 
         return (byte) interpolatedHeight;
     }

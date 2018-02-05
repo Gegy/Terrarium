@@ -8,8 +8,8 @@ import net.minecraft.util.math.MathHelper;
 import java.util.function.Function;
 
 public abstract class BufferedScalingPopulator<T> implements RegionPopulator<T> {
-    private final int lowerSampleBuffer;
-    private final int upperSampleBuffer;
+    protected final int lowerSampleBuffer;
+    protected final int upperSampleBuffer;
 
     private final Function<Coordinate, Double> sampleXCoordinate;
     private final Function<Coordinate, Double> sampleZCoordinate;

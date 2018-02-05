@@ -21,6 +21,7 @@ import net.gegy1000.terrarium.server.map.system.sampler.HeightSampler;
 import net.gegy1000.terrarium.server.map.system.sampler.OverpassSampler;
 import net.gegy1000.terrarium.server.map.system.sampler.SlopeSampler;
 import net.gegy1000.terrarium.server.util.Coordinate;
+import net.gegy1000.terrarium.server.util.Interpolation;
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
 
 import java.util.Collections;
@@ -66,8 +67,16 @@ public class GenerationRegionHandler {
                 new OverpassSampler(worldData.getDetailedOverpassSource())
         );
 
+        Interpolation.Method interpolationMethod = Interpolation.Method.CUBIC;
+        double scale = 1.0 / settings.worldScale;
+        if (scale >= 45.0) {
+            interpolationMethod = Interpolation.Method.LINEAR;
+        } else if (scale >= 20.0) {
+            interpolationMethod = Interpolation.Method.COSINE;
+        }
+
         this.populationSystem = RegionPopulationSystem.builder(settings)
-                .withComponent(TerrariumComponentTypes.HEIGHT, new HeightRegionPopulator(heightSampler))
+                .withComponent(TerrariumComponentTypes.HEIGHT, new HeightRegionPopulator(heightSampler, interpolationMethod))
                 .withComponent(TerrariumComponentTypes.SLOPE, new SlopeRegionPopulator(slopeSampler))
                 .withComponent(TerrariumComponentTypes.COVER, new CoverRegionPopulator(coverSampler))
                 .withComponent(TerrariumComponentTypes.OVERPASS, new OverpassRegionPopulator(overpassSamplers))
