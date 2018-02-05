@@ -105,7 +105,7 @@ public class FloodedGrasslandCover extends CoverGenerator {
     }
 
     @Override
-    protected IBlockState getFillerAt(Random random, int x, int z) {
+    protected IBlockState getFillerAt(Random random, int x, int z, byte slope) {
         return COARSE_DIRT;
     }
 }

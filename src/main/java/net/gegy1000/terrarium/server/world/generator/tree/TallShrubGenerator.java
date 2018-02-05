@@ -31,7 +31,7 @@ public class TallShrubGenerator extends WorldGenAbstractTree {
         if (this.canGenerate(world, position, height, baseHeight)) {
             BlockPos down = position.down();
             IBlockState state = world.getBlockState(down);
-            boolean onSoil = state.getBlock().canSustainPlant(state, world, down, EnumFacing.UP, (BlockSapling) Blocks.SAPLING);
+            boolean onSoil = state.getBlock().canSustainPlant(state, world, down, EnumFacing.UP, (BlockSapling) Blocks.SAPLING) || state.getMaterial() == Material.SAND;
 
             if (onSoil && position.getY() < 256 - height - 1) {
                 state.getBlock().onPlantGrow(state, world, down, position);

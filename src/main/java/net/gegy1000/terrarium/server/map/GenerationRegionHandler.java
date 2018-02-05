@@ -14,10 +14,12 @@ import net.gegy1000.terrarium.server.map.system.component.TerrariumComponentType
 import net.gegy1000.terrarium.server.map.system.populator.CoverRegionPopulator;
 import net.gegy1000.terrarium.server.map.system.populator.HeightRegionPopulator;
 import net.gegy1000.terrarium.server.map.system.populator.OverpassRegionPopulator;
+import net.gegy1000.terrarium.server.map.system.populator.SlopeRegionPopulator;
 import net.gegy1000.terrarium.server.map.system.sampler.DataSampler;
 import net.gegy1000.terrarium.server.map.system.sampler.GlobSampler;
 import net.gegy1000.terrarium.server.map.system.sampler.HeightSampler;
 import net.gegy1000.terrarium.server.map.system.sampler.OverpassSampler;
+import net.gegy1000.terrarium.server.map.system.sampler.SlopeSampler;
 import net.gegy1000.terrarium.server.util.Coordinate;
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
 
@@ -56,6 +58,7 @@ public class GenerationRegionHandler {
         this.bufferedRegionSize = Coordinate.fromBlock(settings, GenerationRegion.BUFFERED_SIZE, GenerationRegion.BUFFERED_SIZE);
 
         HeightSampler heightSampler = new HeightSampler(worldData.getHeightSource());
+        SlopeSampler slopeSampler = new SlopeSampler(heightSampler);
         GlobSampler coverSampler = new GlobSampler(worldData.getGlobSource());
         List<DataSampler<OverpassTileAccess>> overpassSamplers = Lists.newArrayList(
                 new OverpassSampler(worldData.getOutlineOverpassSource()),
@@ -65,6 +68,7 @@ public class GenerationRegionHandler {
 
         this.populationSystem = RegionPopulationSystem.builder(settings)
                 .withComponent(TerrariumComponentTypes.HEIGHT, new HeightRegionPopulator(heightSampler))
+                .withComponent(TerrariumComponentTypes.SLOPE, new SlopeRegionPopulator(slopeSampler))
                 .withComponent(TerrariumComponentTypes.COVER, new CoverRegionPopulator(coverSampler))
                 .withComponent(TerrariumComponentTypes.OVERPASS, new OverpassRegionPopulator(overpassSamplers))
                 .withAdapter(new CoastlineAdapter())

@@ -1,33 +1,33 @@
 package net.gegy1000.terrarium.server.map.system.populator;
 
 import net.gegy1000.terrarium.server.map.RegionTilePos;
-import net.gegy1000.terrarium.server.map.source.height.HeightTileAccess;
+import net.gegy1000.terrarium.server.map.source.height.SlopeTileAccess;
 import net.gegy1000.terrarium.server.map.system.sampler.DataSampler;
 import net.gegy1000.terrarium.server.util.Coordinate;
 import net.gegy1000.terrarium.server.util.Interpolation;
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
 import net.minecraft.util.math.MathHelper;
 
-public class HeightRegionPopulator extends BufferedScalingPopulator<HeightTileAccess> {
+public class SlopeRegionPopulator extends BufferedScalingPopulator<SlopeTileAccess> {
     private static final int LOWER_SAMPLE_BUFFER = 0;
     private static final int UPPER_SAMPLE_BUFFER = 1;
 
-    private final DataSampler<short[]> heightSampler;
+    private final DataSampler<byte[]> slopeSampler;
 
-    public HeightRegionPopulator(DataSampler<short[]> heightSampler) {
+    public SlopeRegionPopulator(DataSampler<byte[]> slopeSampler) {
         super(LOWER_SAMPLE_BUFFER, UPPER_SAMPLE_BUFFER, Coordinate::getGlobalX, Coordinate::getGlobalZ);
-        this.heightSampler = heightSampler;
+        this.slopeSampler = slopeSampler;
     }
 
     @Override
-    protected HeightTileAccess populate(EarthGenerationSettings settings, RegionTilePos pos, int minSampleX, int minSampleZ,
+    protected SlopeTileAccess populate(EarthGenerationSettings settings, RegionTilePos pos, int minSampleX, int minSampleZ,
                                         int sampleWidth, int sampleHeight, int width, int height,
                                         double scaleFactorX, double scaleFactorZ, double originOffsetX, double originOffsetZ
     ) {
-        short[] sampledHeights = this.heightSampler.sample(settings, minSampleX, minSampleZ, sampleWidth, sampleHeight);
-        short[] resultHeights = this.scaleHeightRegion(sampledHeights, sampleWidth, width, height, scaleFactorX, scaleFactorZ, originOffsetX, originOffsetZ);
+        byte[] sampledHeights = this.slopeSampler.sample(settings, minSampleX, minSampleZ, sampleWidth, sampleHeight);
+        byte[] resultHeights = this.scaleHeightRegion(sampledHeights, sampleWidth, width, height, scaleFactorX, scaleFactorZ, originOffsetX, originOffsetZ);
 
-        return new HeightTileAccess(resultHeights, width, height);
+        return new SlopeTileAccess(resultHeights, width, height);
     }
 
     @Override
@@ -40,8 +40,8 @@ public class HeightRegionPopulator extends BufferedScalingPopulator<HeightTileAc
         return regionSize.getGlobalZ() / regionSize.getBlockZ();
     }
 
-    private short[] scaleHeightRegion(short[] sampledHeights, int sampleWidth, int width, int height, double scaleFactorX, double scaleFactorZ, double originOffsetX, double originOffsetZ) {
-        short[] resultHeights = new short[width * height];
+    private byte[] scaleHeightRegion(byte[] sampledHeights, int sampleWidth, int width, int height, double scaleFactorX, double scaleFactorZ, double originOffsetX, double originOffsetZ) {
+        byte[] resultHeights = new byte[width * height];
 
         for (int scaledZ = 0; scaledZ < height; scaledZ++) {
             double sampleZ = scaledZ * scaleFactorZ + originOffsetZ + LOWER_SAMPLE_BUFFER;
@@ -53,7 +53,7 @@ public class HeightRegionPopulator extends BufferedScalingPopulator<HeightTileAc
                 int originX = MathHelper.floor(sampleX);
                 double intermediateX = sampleX - originX;
 
-                short heightValue = this.interpolatePoint(sampledHeights, sampleWidth, originX, originZ, intermediateX, intermediateZ);
+                byte heightValue = this.interpolatePoint(sampledHeights, sampleWidth, originX, originZ, intermediateX, intermediateZ);
                 resultHeights[scaledX + scaledZ * width] = heightValue;
             }
         }
@@ -61,7 +61,7 @@ public class HeightRegionPopulator extends BufferedScalingPopulator<HeightTileAc
         return resultHeights;
     }
 
-    private short interpolatePoint(short[] sampledHeights, int sampleWidth, int originX, int originZ, double intermediateX, double intermediateZ) {
+    private byte interpolatePoint(byte[] sampledHeights, int sampleWidth, int originX, int originZ, double intermediateX, double intermediateZ) {
         int sampleIndex = originX + originZ * sampleWidth;
 
         double current = sampledHeights[sampleIndex];
@@ -69,11 +69,11 @@ public class HeightRegionPopulator extends BufferedScalingPopulator<HeightTileAc
         double east = sampledHeights[sampleIndex + 1];
         double southEast = sampledHeights[sampleIndex + sampleWidth + 1];
 
-        double y1 = Interpolation.cosine(current, south, intermediateZ);
-        double y2 = Interpolation.cosine(east, southEast, intermediateZ);
+        double y1 = Interpolation.linear(current, south, intermediateZ);
+        double y2 = Interpolation.linear(east, southEast, intermediateZ);
 
-        double interpolatedHeight = Interpolation.cosine(y1, y2, intermediateX);
+        double interpolatedHeight = Interpolation.linear(y1, y2, intermediateX);
 
-        return (short) interpolatedHeight;
+        return (byte) interpolatedHeight;
     }
 }

@@ -30,8 +30,8 @@ public abstract class MultiCoverGenerator extends CoverGenerator {
     }
 
     @Override
-    public void initialize(World world, CoverType[] globBuffer, int[] heightBuffer, IBlockState[] coverBuffer, IBlockState[] fillerBuffer, boolean debug) {
-        super.initialize(world, globBuffer, heightBuffer, coverBuffer, fillerBuffer, debug);
+    public void initialize(World world, CoverType[] globBuffer, int[] heightBuffer, byte[] slopeBuffer, IBlockState[] coverBuffer, IBlockState[] fillerBuffer, boolean debug) {
+        super.initialize(world, globBuffer, heightBuffer, slopeBuffer, coverBuffer, fillerBuffer, debug);
 
         for (Entry entry : this.entries) {
             CoverGenerator generator = entry.type.createGenerator();
@@ -40,7 +40,7 @@ public abstract class MultiCoverGenerator extends CoverGenerator {
             CoverType[] newGlobBuffer = ArrayUtils.defaulted(new CoverType[256], CoverType.NO_DATA);
             IBlockState[] newCoverBuffer = ArrayUtils.defaulted(new IBlockState[256], Blocks.STONE.getDefaultState());
             IBlockState[] newFillerBuffer = ArrayUtils.defaulted(new IBlockState[256], Blocks.STONE.getDefaultState());
-            generator.initialize(world, newGlobBuffer, heightBuffer, newCoverBuffer, newFillerBuffer, debug);
+            generator.initialize(world, newGlobBuffer, heightBuffer, slopeBuffer, newCoverBuffer, newFillerBuffer, debug);
         }
     }
 

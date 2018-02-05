@@ -32,12 +32,18 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public abstract class CoverGenerator {
+    protected static final int MOUNTAINOUS_SLOPE = 20;
+
     protected static final IBlockState GRASS = Blocks.GRASS.getDefaultState();
     protected static final IBlockState COARSE_DIRT = Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT);
     protected static final IBlockState PODZOL = Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.PODZOL);
     protected static final IBlockState GRAVEL = Blocks.GRAVEL.getDefaultState();
     protected static final IBlockState SAND = Blocks.SAND.getDefaultState();
     protected static final IBlockState CLAY = Blocks.CLAY.getDefaultState();
+
+    protected static final IBlockState COBBLESTONE = Blocks.COBBLESTONE.getDefaultState();
+    protected static final IBlockState HARDENED_CLAY = Blocks.HARDENED_CLAY.getDefaultState();
+    protected static final IBlockState SANDSTONE = Blocks.SANDSTONE.getDefaultState();
 
     protected static final IBlockState TALL_GRASS = Blocks.TALLGRASS.getDefaultState().withProperty(BlockTallGrass.TYPE, BlockTallGrass.EnumType.GRASS);
     protected static final IBlockState DEAD_BUSH = Blocks.DEADBUSH.getDefaultState();
@@ -88,6 +94,7 @@ public abstract class CoverGenerator {
     protected World world;
     public CoverType[] globBuffer;
     protected int[] heightBuffer;
+    protected byte[] slopeBuffer;
     public IBlockState[] coverBuffer;
     public IBlockState[] fillerBuffer;
 
@@ -104,11 +111,12 @@ public abstract class CoverGenerator {
         this.fillerBlock = defaultBiome.fillerBlock;
     }
 
-    public void initialize(World world, CoverType[] globBuffer, int[] heightBuffer, IBlockState[] coverBuffer, IBlockState[] fillerBuffer, boolean debug) {
+    public void initialize(World world, CoverType[] globBuffer, int[] heightBuffer, byte[] slopeBuffer, IBlockState[] coverBuffer, IBlockState[] fillerBuffer, boolean debug) {
         this.world = world;
         this.seed = world.getSeed();
         this.globBuffer = globBuffer;
         this.heightBuffer = heightBuffer;
+        this.slopeBuffer = slopeBuffer;
         this.coverBuffer = coverBuffer;
         this.fillerBuffer = fillerBuffer;
 
@@ -125,18 +133,18 @@ public abstract class CoverGenerator {
     }
 
     public void getCover(Random random, int x, int z) {
-        this.iterate(point -> this.coverBuffer[point.index] = this.getCoverAt(random, x + point.localX, z + point.localZ));
+        this.iterate(point -> this.coverBuffer[point.index] = this.getCoverAt(random, x + point.localX, z + point.localZ, this.slopeBuffer[point.index]));
     }
 
-    protected IBlockState getCoverAt(Random random, int x, int z) {
+    protected IBlockState getCoverAt(Random random, int x, int z, byte slope) {
         return this.topBlock;
     }
 
     public void getFiller(Random random, int x, int z) {
-        this.iterate(point -> this.fillerBuffer[point.index] = this.getFillerAt(random, x + point.localX, z + point.localZ));
+        this.iterate(point -> this.fillerBuffer[point.index] = this.getFillerAt(random, x + point.localX, z + point.localZ, this.slopeBuffer[point.index]));
     }
 
-    protected IBlockState getFillerAt(Random random, int x, int z) {
+    protected IBlockState getFillerAt(Random random, int x, int z, byte slope) {
         return this.fillerBlock;
     }
 
@@ -222,9 +230,13 @@ public abstract class CoverGenerator {
         this.intersectionPoints.clear();
     }
 
-    protected void coverLayer(IBlockState[] buffer, int x, int z, GenLayer layer, Function<Integer, IBlockState> populate) {
+    protected void coverLayer(IBlockState[] buffer, int x, int z, GenLayer layer, Function<CoverPoint, IBlockState> populate) {
         int[] sampled = this.sampleChunk(layer, x, z);
-        this.iterate(point -> buffer[point.index] = populate.apply(sampled[point.index]));
+        this.iterate(point -> {
+            int coverType = sampled[point.index];
+            byte slope = this.slopeBuffer[point.index];
+            buffer[point.index] = populate.apply(new CoverPoint(coverType, slope));
+        });
     }
 
     protected void iterate(Consumer<ChunkPoint> handlePoint) {
@@ -249,6 +261,24 @@ public abstract class CoverGenerator {
         public DecoratePoint(ChunkPoint chunk, BlockPos pos) {
             this.chunk = chunk;
             this.pos = pos;
+        }
+    }
+
+    public static class CoverPoint {
+        private final int coverType;
+        private final byte slope;
+
+        public CoverPoint(int coverType, byte slope) {
+            this.coverType = coverType;
+            this.slope = slope;
+        }
+
+        public int getCoverType() {
+            return this.coverType;
+        }
+
+        public int getSlope() {
+            return this.slope & 0xFF;
         }
     }
 

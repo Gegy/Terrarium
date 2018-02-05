@@ -31,14 +31,14 @@ public class WaterCover extends CoverGenerator {
     }
 
     @Override
-    protected IBlockState getCoverAt(Random random, int x, int z) {
+    protected IBlockState getCoverAt(Random random, int x, int z, byte slope) {
         return WATER;
     }
 
     @Override
     public void getFiller(Random random, int x, int z) {
         this.coverLayer(this.fillerBuffer, x, z, this.coverSelector, type -> {
-            switch (type) {
+            switch (type.getCoverType()) {
                 case 0:
                     return SAND;
                 case 1:

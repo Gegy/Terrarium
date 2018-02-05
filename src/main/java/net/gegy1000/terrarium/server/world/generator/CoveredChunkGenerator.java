@@ -34,11 +34,11 @@ public abstract class CoveredChunkGenerator implements IChunkGenerator {
         this.coverMap = new PseudoRandomMap(world, COVER_SEED);
     }
 
-    protected final Map<CoverType, CoverGenerator> createGenerators(CoverType[] coverBuffer, int[] heightBuffer, IBlockState[] coverBlockBuffer, IBlockState[] fillerBlockBuffer, boolean debug) {
+    protected final Map<CoverType, CoverGenerator> createGenerators(CoverType[] coverBuffer, int[] heightBuffer, byte[] slopeBuffer, IBlockState[] coverBlockBuffer, IBlockState[] fillerBlockBuffer, boolean debug) {
         Map<CoverType, CoverGenerator> generators = new EnumMap<>(CoverType.class);
         for (CoverType coverType : CoverType.values()) {
             CoverGenerator generator = coverType.createGenerator();
-            generator.initialize(this.world, coverBuffer, heightBuffer, coverBlockBuffer, fillerBlockBuffer, debug);
+            generator.initialize(this.world, coverBuffer, heightBuffer, slopeBuffer, coverBlockBuffer, fillerBlockBuffer, debug);
             generators.put(coverType, generator);
         }
         return generators;

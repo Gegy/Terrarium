@@ -50,9 +50,10 @@ public class CoverDebugChunkGenerator extends CoveredChunkGenerator {
         this.coverNoise = new NoiseGeneratorPerlin(this.random, 4);
 
         int[] heightBuffer = new int[256];
+        byte[] slopeBuffer = new byte[256];
         Arrays.fill(heightBuffer, LAND_HEIGHT);
 
-        this.generators = super.createGenerators(this.coverBuffer, heightBuffer, this.coverBlockBuffer, this.fillerBlockBuffer, true);
+        this.generators = super.createGenerators(this.coverBuffer, heightBuffer, slopeBuffer, this.coverBlockBuffer, this.fillerBlockBuffer, true);
     }
 
     @Override

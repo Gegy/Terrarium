@@ -1,8 +1,11 @@
 package net.gegy1000.terrarium.server.map.cover.generator;
 
+import net.gegy1000.terrarium.server.map.LatitudinalZone;
 import net.gegy1000.terrarium.server.map.cover.CoverGenerator;
 import net.gegy1000.terrarium.server.map.cover.CoverType;
 import net.gegy1000.terrarium.server.map.cover.generator.layer.SelectWeightedLayer;
+import net.gegy1000.terrarium.server.map.cover.generator.primer.GlobPrimer;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.gen.layer.GenLayer;
 import net.minecraft.world.gen.layer.GenLayerFuzzyZoom;
 import net.minecraft.world.gen.layer.GenLayerVoronoiZoom;
@@ -34,17 +37,49 @@ public class BareCover extends CoverGenerator {
     }
 
     @Override
+    public void decorate(Random random, LatitudinalZone zone, int x, int z) {
+        this.preventIntersection(5);
+
+        this.decorateScatterSample(random, x, z, this.range(random, -16, 1), point -> {
+            if (this.slopeBuffer[point.chunk.index] < MOUNTAINOUS_SLOPE) {
+                OAK_TALL_SHRUB.generate(this.world, random, point.pos);
+            }
+        });
+
+        this.stopIntersectionPrevention();
+    }
+
+    @Override
+    public void coverDecorate(GlobPrimer primer, Random random, int x, int z) {
+        this.iterate(point -> {
+            byte slope = this.slopeBuffer[point.index];
+            if (slope < MOUNTAINOUS_SLOPE && random.nextInt(250) == 0) {
+                int y = this.heightBuffer[point.index];
+                primer.setBlockState(point.localX, y + 1, point.localZ, DEAD_BUSH);
+            }
+        });
+    }
+
+    @Override
     public void getCover(Random random, int x, int z) {
-        this.coverLayer(this.coverBuffer, x, z, this.coverSelector, type -> {
-            switch (type) {
-                case LAYER_DIRT:
-                    return COARSE_DIRT;
+        this.getCover(this.coverBuffer, x, z);
+    }
+
+    @Override
+    public void getFiller(Random random, int x, int z) {
+        this.getCover(this.fillerBuffer, x, z);
+    }
+
+    private void getCover(IBlockState[] buffer, int x, int z) {
+        this.coverLayer(buffer, x, z, this.coverSelector, type -> {
+            int slope = type.getSlope();
+            switch (type.getCoverType()) {
                 case LAYER_GRAVEL:
-                    return GRAVEL;
+                    return slope >= MOUNTAINOUS_SLOPE ? COBBLESTONE : GRAVEL;
                 case LAYER_SAND:
-                    return SAND;
+                    return slope >= MOUNTAINOUS_SLOPE ? SANDSTONE : SAND;
                 default:
-                    return COARSE_DIRT;
+                    return slope >= MOUNTAINOUS_SLOPE ? HARDENED_CLAY : SAND;
             }
         });
     }

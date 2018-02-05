@@ -50,7 +50,7 @@ public class RainfedCropsCover extends CoverGenerator {
     @Override
     public void getCover(Random random, int x, int z) {
         this.coverLayer(this.coverBuffer, x, z, this.coverSelector, type -> {
-            switch (type) {
+            switch (type.getCoverType()) {
                 case LAYER_GRASS:
                     return GRASS;
                 default:
@@ -81,7 +81,7 @@ public class RainfedCropsCover extends CoverGenerator {
     }
 
     @Override
-    protected IBlockState getCoverAt(Random random, int x, int z) {
+    protected IBlockState getCoverAt(Random random, int x, int z, byte slope) {
         return GRASS;
     }
 }

@@ -4,6 +4,7 @@ import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.map.cover.CoverType;
 import net.gegy1000.terrarium.server.map.source.glob.CoverTileAccess;
 import net.gegy1000.terrarium.server.map.source.height.HeightTileAccess;
+import net.gegy1000.terrarium.server.map.source.height.SlopeTileAccess;
 import net.gegy1000.terrarium.server.map.source.osm.OverpassTileAccess;
 import net.gegy1000.terrarium.server.util.ArrayUtils;
 import net.minecraft.util.ResourceLocation;
@@ -15,6 +16,15 @@ public class TerrariumComponentTypes {
         @Override
         public HeightTileAccess createDefaultData(int width, int height) {
             return new HeightTileAccess(new short[width * height], width, height);
+        }
+    };
+
+    public static final RegionComponentType<SlopeTileAccess> SLOPE = new AbstractComponentType<SlopeTileAccess>(
+            new ResourceLocation(Terrarium.MODID, "slope")
+    ) {
+        @Override
+        public SlopeTileAccess createDefaultData(int width, int height) {
+            return new SlopeTileAccess(new byte[width * height], width, height);
         }
     };
 

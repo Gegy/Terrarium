@@ -13,12 +13,12 @@ public class DebugCover extends CoverGenerator {
     }
 
     @Override
-    protected IBlockState getCoverAt(Random random, int x, int z) {
+    protected IBlockState getCoverAt(Random random, int x, int z, byte slope) {
         return Blocks.QUARTZ_BLOCK.getDefaultState();
     }
 
     @Override
-    protected IBlockState getFillerAt(Random random, int x, int z) {
+    protected IBlockState getFillerAt(Random random, int x, int z, byte slope) {
         return Blocks.QUARTZ_BLOCK.getDefaultState();
     }
 }

@@ -78,7 +78,7 @@ public class SparseVegetationCover extends CoverGenerator {
     @Override
     public void getCover(Random random, int x, int z) {
         this.coverLayer(this.coverBuffer, x, z, this.coverSelector, type -> {
-            switch (type) {
+            switch (type.getCoverType()) {
                 case LAYER_GRASS:
                     return GRASS;
                 case LAYER_DIRT:

@@ -10,6 +10,7 @@ import net.gegy1000.terrarium.server.map.cover.generator.primer.GlobChunkPrimer;
 import net.gegy1000.terrarium.server.map.cover.generator.primer.GlobPrimer;
 import net.gegy1000.terrarium.server.map.system.chunk.CoverChunkDataProvider;
 import net.gegy1000.terrarium.server.map.system.chunk.HeightChunkDataProvider;
+import net.gegy1000.terrarium.server.map.system.chunk.SlopeChunkDataProvider;
 import net.gegy1000.terrarium.server.map.system.component.TerrariumComponentTypes;
 import net.gegy1000.terrarium.server.util.ArrayUtils;
 import net.gegy1000.terrarium.server.util.Coordinate;
@@ -54,6 +55,7 @@ public class EarthChunkGenerator extends CoveredChunkGenerator {
     private final Lazy<GenerationRegionHandler> regionHandler;
 
     private final HeightChunkDataProvider heightProvider;
+    private final SlopeChunkDataProvider slopeProvider;
     private final CoverChunkDataProvider coverProvider;
 
     private final Map<CoverType, CoverGenerator> generators;
@@ -70,6 +72,7 @@ public class EarthChunkGenerator extends CoveredChunkGenerator {
         this.zoneScatterMap = new PseudoRandomMap(world, ZONE_SCATTER_SEED);
 
         this.heightProvider = new HeightChunkDataProvider(this.settings, TerrariumComponentTypes.HEIGHT);
+        this.slopeProvider = new SlopeChunkDataProvider(TerrariumComponentTypes.SLOPE);
         this.coverProvider = new CoverChunkDataProvider(this.settings, world, TerrariumComponentTypes.COVER);
 
         this.regionHandler = new Lazy<>(() -> {
@@ -82,7 +85,8 @@ public class EarthChunkGenerator extends CoveredChunkGenerator {
 
         CoverType[] coverBuffer = this.coverProvider.getResultStore().getCoverData();
         int[] heightBuffer = this.heightProvider.getResultStore();
-        this.generators = super.createGenerators(coverBuffer, heightBuffer, this.coverBlockBuffer, this.fillerBlockBuffer, false);
+        byte[] slopeBuffer = this.slopeProvider.getResultStore();
+        this.generators = super.createGenerators(coverBuffer, heightBuffer, slopeBuffer, this.coverBlockBuffer, this.fillerBlockBuffer, false);
     }
 
     @Override
@@ -117,6 +121,7 @@ public class EarthChunkGenerator extends CoveredChunkGenerator {
     private void populateBlocks(ChunkPrimer primer, int chunkX, int chunkZ) {
         int oceanHeight = this.settings.getOceanHeight();
         this.heightProvider.populate(this.regionHandler.get(), this.world, chunkX << 4, chunkZ << 4);
+        this.slopeProvider.populate(this.regionHandler.get(), this.world, chunkX << 4, chunkZ << 4);
 
         int[] heightData = this.heightProvider.getResultStore();
         for (int z = 0; z < 16; z++) {
@@ -179,6 +184,7 @@ public class EarthChunkGenerator extends CoveredChunkGenerator {
         int globalZ = chunkZ << 4;
 
         this.coverProvider.populate(this.regionHandler.get(), this.world, globalX + 8, globalZ + 8);
+        this.slopeProvider.populate(this.regionHandler.get(), this.world, globalX + 8, globalZ + 8);
 
         CoverChunkDataProvider.Data coverData = this.coverProvider.getResultStore();
 

@@ -22,6 +22,7 @@ public class HeightChunkDataProvider implements ChunkDataProvider<int[]> {
 
     @Override
     public void populate(GenerationRegionHandler regionHandler, World world, int originX, int originZ) {
+        double terrainHeightScale = this.settings.terrainHeightScale * this.settings.worldScale;
         int maxWorldHeight = world.getHeight();
 
         try {
@@ -36,7 +37,13 @@ public class HeightChunkDataProvider implements ChunkDataProvider<int[]> {
 
                     if (heightTile != null) {
                         short height = heightTile.getShort(blockX - region.getMinX(), blockZ - region.getMinZ());
-                        this.heightmap[localX + localZ * 16] = Math.min(height + this.settings.heightOffset, maxWorldHeight - 1);
+                        short scaled = (short) (height * terrainHeightScale);
+
+                        if (height >= 0 && scaled < 1) {
+                            scaled = 1;
+                        }
+
+                        this.heightmap[localX + localZ * 16] = Math.min(scaled + this.settings.heightOffset, maxWorldHeight - 1);
                     }
                 }
             }

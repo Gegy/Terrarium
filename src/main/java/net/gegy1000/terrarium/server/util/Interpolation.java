@@ -6,9 +6,13 @@ import java.awt.Point;
 import java.util.function.Consumer;
 
 public class Interpolation {
-    public static double cosine(double originY, double targetY, double intermediate) {
+    public static double cosine(double origin, double target, double intermediate) {
         double cos = (1.0 - Math.cos(intermediate * Math.PI)) / 2.0;
-        return originY * (1.0 - cos) + targetY * cos;
+        return origin * (1.0 - cos) + target * cos;
+    }
+
+    public static double linear(double origin, double target, double intermediate) {
+        return origin + (target - origin) * intermediate;
     }
 
     public static void interpolateLine(double originX, double originY, double targetX, double targetY, boolean thick, Consumer<Point> points) {
