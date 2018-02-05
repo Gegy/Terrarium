@@ -19,7 +19,7 @@ public class FreshFloodedForestCover extends FloodedForestCover {
         int[] clearingLayer = this.sampleChunk(this.clearingSelector, x, z);
         int[] heightOffsetLayer = this.sampleChunk(this.heightOffsetSelector, x, z);
 
-        this.decorateScatterSample(random, x, z, this.range(random, 12, 14), point -> {
+        this.decorateScatterSample(random, x, z, this.range(random, 10, 14), point -> {
             int index = point.chunk.index;
             if (clearingLayer[index] == 0) {
                 int height = this.range(random, 5, 8) + this.sampleHeightOffset(heightOffsetLayer, point.chunk);

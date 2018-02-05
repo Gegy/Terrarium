@@ -33,6 +33,7 @@ import java.util.function.Function;
 
 public abstract class CoverGenerator {
     protected static final int MOUNTAINOUS_SLOPE = 20;
+    protected static final int CLIFF_SLOPE = 70;
 
     protected static final IBlockState GRASS = Blocks.GRASS.getDefaultState();
     protected static final IBlockState COARSE_DIRT = Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT);
@@ -170,7 +171,7 @@ public abstract class CoverGenerator {
             if (this.globBuffer[scattered.index] == this.getType()) {
                 this.pos.setPos(x + scattered.localX, 0, z + scattered.localZ);
 
-                if (this.tryPlace(this.pos)) {
+                if (this.tryPlace(random, this.pos, scattered)) {
                     BlockPos topBlock = this.world.getHeight(this.pos);
                     if (!this.world.isAirBlock(topBlock)) {
                         this.world.setBlockToAir(topBlock);
@@ -188,7 +189,7 @@ public abstract class CoverGenerator {
             if (this.globBuffer[scattered.index] == this.getType()) {
                 this.pos.setPos(x + scattered.localX, 0, z + scattered.localZ);
 
-                if (this.tryPlace(this.pos)) {
+                if (this.tryPlace(random, this.pos, scattered)) {
                     BlockPos topBlock = this.world.getHeight(this.pos);
                     if (!this.world.isAirBlock(topBlock)) {
                         this.world.setBlockToAir(topBlock);
@@ -199,14 +200,14 @@ public abstract class CoverGenerator {
         }
     }
 
-    protected boolean tryPlace(BlockPos pos) {
+    protected boolean tryPlace(Random random, BlockPos pos, ChunkPoint point) {
         if (this.intersectionRange > 0) {
             if (this.checkHorizontalIntersection(pos)) {
                 return false;
             }
             this.intersectionPoints.add(pos.toImmutable());
         }
-        return true;
+        return this.slopeBuffer[point.index] < MOUNTAINOUS_SLOPE || random.nextInt(2) == 0;
     }
 
     protected boolean checkHorizontalIntersection(BlockPos pos) {
@@ -232,10 +233,21 @@ public abstract class CoverGenerator {
 
     protected void coverLayer(IBlockState[] buffer, int x, int z, GenLayer layer, Function<CoverPoint, IBlockState> populate) {
         int[] sampled = this.sampleChunk(layer, x, z);
+        boolean adaptCliff = this.shouldCliffChangeMaterial();
         this.iterate(point -> {
             int coverType = sampled[point.index];
-            byte slope = this.slopeBuffer[point.index];
-            buffer[point.index] = populate.apply(new CoverPoint(coverType, slope));
+            int slope = this.slopeBuffer[point.index] & 0xFF;
+            IBlockState state = populate.apply(new CoverPoint(coverType, slope));
+            if (adaptCliff && slope >= CLIFF_SLOPE) {
+                if (state == GRASS || state == PODZOL) {
+                    state = COARSE_DIRT;
+                } else if (state == COARSE_DIRT) {
+                    state = COBBLESTONE;
+                } else if (state == SAND) {
+                    state = SANDSTONE;
+                }
+            }
+            buffer[point.index] = state;
         });
     }
 
@@ -248,6 +260,10 @@ public abstract class CoverGenerator {
                 }
             }
         }
+    }
+
+    protected boolean shouldCliffChangeMaterial() {
+        return true;
     }
 
     public CoverType getType() {
@@ -266,9 +282,9 @@ public abstract class CoverGenerator {
 
     public static class CoverPoint {
         private final int coverType;
-        private final byte slope;
+        private final int slope;
 
-        public CoverPoint(int coverType, byte slope) {
+        public CoverPoint(int coverType, int slope) {
             this.coverType = coverType;
             this.slope = slope;
         }
@@ -278,7 +294,7 @@ public abstract class CoverGenerator {
         }
 
         public int getSlope() {
-            return this.slope & 0xFF;
+            return this.slope;
         }
     }
 

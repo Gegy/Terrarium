@@ -13,7 +13,7 @@ public class BroadleafEvergreenCover extends ForestCover {
 
     @Override
     public void decorate(Random random, LatitudinalZone zone, int x, int z) {
-        this.preventIntersection(1);
+        this.preventIntersection(zone == LatitudinalZone.TROPICS ? 1 : 2);
 
         int[] clearingLayer = this.sampleChunk(this.clearingSelector, x, z);
         int[] heightOffsetLayer = this.sampleChunk(this.heightOffsetSelector, x, z);
@@ -84,7 +84,7 @@ public class BroadleafEvergreenCover extends ForestCover {
     private int getJungleCount(Random random, LatitudinalZone zone) {
         switch (zone) {
             case SUBTROPICS:
-                return this.range(random, 1, 5);
+                return this.range(random, 1, 4);
             case TROPICS:
                 return this.range(random, 3, 7);
             case FRIGID:

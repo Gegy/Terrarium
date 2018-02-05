@@ -13,7 +13,7 @@ public class ClosedBroadleafDeciduousCover extends ClosedForestCover {
 
     @Override
     public void decorate(Random random, LatitudinalZone zone, int x, int z) {
-        this.preventIntersection(1);
+        this.preventIntersection(zone == LatitudinalZone.TROPICS ? 1 : 2);
 
         int[] heightOffsetLayer = this.sampleChunk(this.heightOffsetSelector, x, z);
 
