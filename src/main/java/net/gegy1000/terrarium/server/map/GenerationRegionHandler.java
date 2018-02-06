@@ -23,9 +23,11 @@ import net.gegy1000.terrarium.server.map.system.sampler.SlopeSampler;
 import net.gegy1000.terrarium.server.util.Coordinate;
 import net.gegy1000.terrarium.server.util.Interpolation;
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
+import net.minecraft.world.World;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -52,7 +54,7 @@ public class GenerationRegionHandler {
 
     private final RegionPopulationSystem populationSystem;
 
-    public GenerationRegionHandler(EarthGenerationSettings settings, TerrariumWorldData worldData) {
+    public GenerationRegionHandler(World world, EarthGenerationSettings settings, TerrariumWorldData worldData) {
         this.settings = settings;
         this.worldData = worldData;
 
@@ -75,8 +77,9 @@ public class GenerationRegionHandler {
             interpolationMethod = Interpolation.Method.COSINE;
         }
 
+        Random random = new Random(world.getSeed());
         this.populationSystem = RegionPopulationSystem.builder(settings)
-                .withComponent(TerrariumComponentTypes.HEIGHT, new HeightRegionPopulator(heightSampler, interpolationMethod))
+                .withComponent(TerrariumComponentTypes.HEIGHT, new HeightRegionPopulator(random, heightSampler, interpolationMethod))
                 .withComponent(TerrariumComponentTypes.SLOPE, new SlopeRegionPopulator(slopeSampler))
                 .withComponent(TerrariumComponentTypes.COVER, new CoverRegionPopulator(coverSampler))
                 .withComponent(TerrariumComponentTypes.OVERPASS, new OverpassRegionPopulator(overpassSamplers))

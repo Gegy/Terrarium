@@ -7,6 +7,7 @@ import net.gegy1000.terrarium.client.gui.customization.setting.DecorateValue;
 import net.gegy1000.terrarium.client.gui.customization.setting.HeightOffsetValue;
 import net.gegy1000.terrarium.client.gui.customization.setting.HeightScaleValue;
 import net.gegy1000.terrarium.client.gui.customization.setting.MapFeaturesValue;
+import net.gegy1000.terrarium.client.gui.customization.setting.NoiseScaleValue;
 import net.gegy1000.terrarium.client.gui.customization.setting.ResourceGenerationValue;
 import net.gegy1000.terrarium.client.gui.customization.setting.ScaleValue;
 import net.gegy1000.terrarium.client.gui.customization.setting.ScatterValue;
@@ -48,6 +49,7 @@ public class CustomizeEarthGui extends GuiScreen {
     private final CustomizationValue<Double> heightScaleValue;
     private final CustomizationValue<Double> scatterValue;
     private final CustomizationValue<Double> heightOffsetValue;
+    private final CustomizationValue<Double> noiseScaleValue;
 
     private final CustomizationValue<Boolean> decorateValue;
     private final CustomizationValue<Boolean> resourceGenerationValue;
@@ -71,19 +73,21 @@ public class CustomizeEarthGui extends GuiScreen {
         this.parent = parent;
         this.settings = EarthGenerationSettings.deserialize(parent.chunkProviderSettingsJson);
 
-        this.scaleValue = new ScaleValue(this.settings, this::rebuildState);
-        this.heightScaleValue = new HeightScaleValue(this.settings, this::rebuildState);
-        this.scatterValue = new ScatterValue(this.settings, this::rebuildState);
-        this.heightOffsetValue = new HeightOffsetValue(this.settings, this::rebuildState);
+        Runnable onSettingChange = this::rebuildState;
+        this.scaleValue = new ScaleValue(this.settings, onSettingChange);
+        this.heightScaleValue = new HeightScaleValue(this.settings, onSettingChange);
+        this.scatterValue = new ScatterValue(this.settings, onSettingChange);
+        this.heightOffsetValue = new HeightOffsetValue(this.settings, onSettingChange);
+        this.noiseScaleValue = new NoiseScaleValue(this.settings, onSettingChange);
 
-        this.buildingsValue = new BuildingsValue(this.settings, this::rebuildState);
-        this.streetsValue = new StreetsValue(this.settings, this::rebuildState);
+        this.buildingsValue = new BuildingsValue(this.settings, onSettingChange);
+        this.streetsValue = new StreetsValue(this.settings, onSettingChange);
 
-        this.decorateValue = new DecorateValue(this.settings, this::rebuildState);
-        this.resourceGenerationValue = new ResourceGenerationValue(this.settings, this::rebuildState);
+        this.decorateValue = new DecorateValue(this.settings, onSettingChange);
+        this.resourceGenerationValue = new ResourceGenerationValue(this.settings, onSettingChange);
 
-        this.mapFeaturesValue = new MapFeaturesValue(this.settings, this::rebuildState);
-        this.caveGenValue = new CaveGenValue(this.settings, this::rebuildState);
+        this.mapFeaturesValue = new MapFeaturesValue(this.settings, onSettingChange);
+        this.caveGenValue = new CaveGenValue(this.settings, onSettingChange);
     }
 
     @Override
@@ -109,6 +113,7 @@ public class CustomizeEarthGui extends GuiScreen {
         this.customizationList.addSlider(this.heightScaleValue, 0.01, 10.0, 0.5, 0.1);
         this.customizationList.addSlider(this.scatterValue, 0, 32, 1, 1);
         this.customizationList.addSlider(this.heightOffsetValue, 0, 128, 1, 1);
+        this.customizationList.addSlider(this.noiseScaleValue, 0.0, 3.0, 0.5, 0.1);
 
         this.customizationList.addToggle(this.buildingsValue);
         this.customizationList.addToggle(this.streetsValue);

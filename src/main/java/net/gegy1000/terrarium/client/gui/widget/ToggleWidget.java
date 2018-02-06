@@ -55,6 +55,11 @@ public class ToggleWidget extends GuiButton implements TooltipRenderer {
         this.setting.set(state);
 
         String stateKey = I18n.translateToLocal(this.state ? "gui.yes" : "gui.no");
+        if (this.state) {
+            stateKey = TextFormatting.GREEN + stateKey;
+        } else {
+            stateKey = TextFormatting.RED + stateKey;
+        }
         this.displayString = String.format("%s: %s", this.setting.getLocalizedName(), stateKey);
     }
 

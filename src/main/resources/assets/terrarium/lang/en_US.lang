@@ -41,6 +41,7 @@ setting.terrarium.buildings.name=Buildings
 setting.terrarium.streets.name=Streets
 setting.terrarium.cave_gen.name=Cave Generation
 setting.terrarium.resource_generation.name=Resource Generation
+setting.terrarium.noise_scale.name=Noise Scale
 
 setting.terrarium.scale.tooltip=The amount of meters in real life representing one block in-game
 setting.terrarium.height_scale.tooltip=Elevation multiplier from meters to blocks
@@ -52,6 +53,7 @@ setting.terrarium.buildings.tooltip=If enabled, buildings from OpenStreetMap wil
 setting.terrarium.streets.tooltip=If enabled, streets from OpenStreetMap will be generated
 setting.terrarium.cave_gen.tooltip=If enabled, caves and ravines will be generated randomly
 setting.terrarium.resource_generation.tooltip=If enabled, resources will be randomly generated throughout in the world
+setting.terrarium.noise_scale.tooltip=Multiplier for the effect of random noise generation in height to be applied to the world. 0 = no noise, 1 = default noise
 
 setting.terrarium.slider_default.name=Default: %.2f, Range: [%.2f-%.2f]
 setting.terrarium.default.name=Default: %s

@@ -7,6 +7,9 @@ import net.gegy1000.terrarium.server.util.Coordinate;
 import net.gegy1000.terrarium.server.util.Interpolation;
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.gen.NoiseGeneratorOctaves;
+
+import java.util.Random;
 
 public class HeightRegionPopulator extends BufferedScalingPopulator<HeightTileAccess> {
     private static final int LOWER_SAMPLE_BUFFER = 0;
@@ -17,7 +20,10 @@ public class HeightRegionPopulator extends BufferedScalingPopulator<HeightTileAc
     private final Interpolation.Method interpolationMethod;
     private final double[][] sampleBuffer;
 
-    public HeightRegionPopulator(DataSampler<short[]> heightSampler, Interpolation.Method interpolationMethod) {
+    private final NoiseGeneratorOctaves heightNoise;
+    private final double noiseMax;
+
+    public HeightRegionPopulator(Random random, DataSampler<short[]> heightSampler, Interpolation.Method interpolationMethod) {
         super(LOWER_SAMPLE_BUFFER + interpolationMethod.getBackward(), UPPER_SAMPLE_BUFFER + interpolationMethod.getForward(), Coordinate::getGlobalX, Coordinate::getGlobalZ);
         this.heightSampler = heightSampler;
 
@@ -25,6 +31,17 @@ public class HeightRegionPopulator extends BufferedScalingPopulator<HeightTileAc
 
         int pointCount = interpolationMethod.getPointCount();
         this.sampleBuffer = new double[pointCount][pointCount];
+
+        int octaves = 2;
+        this.heightNoise = new NoiseGeneratorOctaves(random, octaves);
+
+        double max = 0.0;
+        double scale = 1.0;
+        for (int i = 0; i < octaves; i++) {
+            max += scale * 2;
+            scale /= 2.0;
+        }
+        this.noiseMax = max;
     }
 
     @Override
@@ -34,6 +51,17 @@ public class HeightRegionPopulator extends BufferedScalingPopulator<HeightTileAc
     ) {
         short[] sampledHeights = this.heightSampler.sample(settings, minSampleX, minSampleZ, sampleWidth, sampleHeight);
         short[] resultHeights = this.scaleHeightRegion(sampledHeights, sampleWidth, width, height, scaleFactorX, scaleFactorZ, originOffsetX, originOffsetZ);
+
+        Coordinate minRegionCoordinate = pos.getMinBufferedCoordinate(settings);
+        int minX = MathHelper.floor(minRegionCoordinate.getBlockX());
+        int minZ = MathHelper.floor(minRegionCoordinate.getBlockZ());
+
+        double noiseScale = (1.0 / settings.terrainHeightScale) * settings.noiseScale;
+        double[] noise = new double[width * height];
+        this.heightNoise.generateNoiseOctaves(noise, minZ, minX, width, height, 0.08, 0.08, 0.0);
+        for (int i = 0; i < noise.length; i++) {
+            resultHeights[i] += (noise[i] + this.noiseMax) / (this.noiseMax * 2.0) * noiseScale * 35.0;
+        }
 
         return new HeightTileAccess(resultHeights, width, height);
     }

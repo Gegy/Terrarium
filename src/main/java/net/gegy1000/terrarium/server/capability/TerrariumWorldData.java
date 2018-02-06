@@ -67,7 +67,7 @@ public interface TerrariumWorldData extends ICapabilityProvider {
                     this.detailedOverpassSource, this.generalOverpassSource, this.outlineOverpassSource
             ));
 
-            this.regionHandler = new GenerationRegionHandler(this.settings, this);
+            this.regionHandler = new GenerationRegionHandler(world, this.settings, this);
 
             this.detailedOverpassSource.loadQuery();
             this.generalOverpassSource.loadQuery();

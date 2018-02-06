@@ -21,7 +21,7 @@ public class GuiRenderUtils {
 
     public static void drawTooltip(List<String> lines, int mouseX, int mouseY) {
         ScaledResolution resolution = new ScaledResolution(MC);
-        GuiUtils.drawHoveringText(lines, mouseX, mouseY, resolution.getScaledWidth(), resolution.getScaledHeight(), -1, MC.fontRenderer);
+        GuiUtils.drawHoveringText(lines, mouseX, mouseY, resolution.getScaledWidth(), resolution.getScaledHeight(), 350, MC.fontRenderer);
 
         GlStateManager.disableLighting();
         GlStateManager.disableDepth();

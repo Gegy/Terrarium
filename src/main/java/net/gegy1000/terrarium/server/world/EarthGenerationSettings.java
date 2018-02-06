@@ -16,6 +16,7 @@ public class EarthGenerationSettings {
     public boolean decorate = true;
     public double worldScale = 1.0 / 35.0;
     public double terrainHeightScale = 1.0;
+    public double noiseScale = 1.0;
     public int heightOffset = 5;
     public int scatterRange = 12;
     public boolean mapFeatures = false;
@@ -26,18 +27,19 @@ public class EarthGenerationSettings {
     }
 
     public EarthGenerationSettings(double spawnLatitude, double spawnLongitude,
-                                   boolean buildings, boolean streets, boolean decorate,
-                                   double worldScale, double terrainHeightScale, int heightOffset, int scatterRange,
+                                   boolean buildings, boolean streets, boolean decorate, int scatterRange,
+                                   double worldScale, double terrainHeightScale, double noiseScale, int heightOffset,
                                    boolean mapFeatures, boolean caveGeneration, boolean resourceGeneration) {
         this.spawnLatitude = spawnLatitude;
         this.spawnLongitude = spawnLongitude;
         this.buildings = buildings;
         this.streets = streets;
         this.decorate = decorate;
+        this.scatterRange = scatterRange;
         this.worldScale = worldScale;
         this.terrainHeightScale = terrainHeightScale;
+        this.noiseScale = noiseScale;
         this.heightOffset = heightOffset;
-        this.scatterRange = scatterRange;
         this.mapFeatures = mapFeatures;
         this.caveGeneration = caveGeneration;
         this.resourceGeneration = resourceGeneration;

@@ -6,6 +6,7 @@ import net.gegy1000.terrarium.server.map.GenerationRegionHandler;
 import net.gegy1000.terrarium.server.map.source.raster.ShortRasterDataAccess;
 import net.gegy1000.terrarium.server.map.system.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 public class HeightChunkDataProvider implements ChunkDataProvider<int[]> {
@@ -43,7 +44,7 @@ public class HeightChunkDataProvider implements ChunkDataProvider<int[]> {
                             scaled = 1;
                         }
 
-                        this.heightmap[localX + localZ * 16] = Math.min(scaled + this.settings.heightOffset, maxWorldHeight - 1);
+                        this.heightmap[localX + localZ * 16] = MathHelper.clamp(scaled + this.settings.heightOffset, 0, maxWorldHeight - 1);
                     }
                 }
             }
