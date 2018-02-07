@@ -81,7 +81,7 @@ public class RainfedCropsCover extends CoverGenerator {
     }
 
     @Override
-    protected IBlockState getCoverAt(Random random, int x, int z, byte slope) {
+    protected IBlockState getCoverAt(Random random, int x, int z, int slope) {
         return GRASS;
     }
 }

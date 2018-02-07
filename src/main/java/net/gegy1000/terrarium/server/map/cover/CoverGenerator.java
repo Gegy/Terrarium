@@ -34,6 +34,7 @@ import java.util.function.Function;
 public abstract class CoverGenerator {
     public static final int MOUNTAINOUS_SLOPE = 20;
     public static final int CLIFF_SLOPE = 70;
+    public static final int EXTREME_CLIFF_SLOPE = 150;
 
     protected static final IBlockState GRASS = Blocks.GRASS.getDefaultState();
     protected static final IBlockState COARSE_DIRT = Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT);
@@ -134,18 +135,18 @@ public abstract class CoverGenerator {
     }
 
     public void getCover(Random random, int x, int z) {
-        this.iterate(point -> this.coverBuffer[point.index] = this.getCoverAt(random, x + point.localX, z + point.localZ, this.slopeBuffer[point.index]));
+        this.iterate(point -> this.coverBuffer[point.index] = this.getCoverAt(random, x + point.localX, z + point.localZ, this.slopeBuffer[point.index] & 0xFF));
     }
 
-    protected IBlockState getCoverAt(Random random, int x, int z, byte slope) {
+    protected IBlockState getCoverAt(Random random, int x, int z, int slope) {
         return this.topBlock;
     }
 
     public void getFiller(Random random, int x, int z) {
-        this.iterate(point -> this.fillerBuffer[point.index] = this.getFillerAt(random, x + point.localX, z + point.localZ, this.slopeBuffer[point.index]));
+        this.iterate(point -> this.fillerBuffer[point.index] = this.getFillerAt(random, x + point.localX, z + point.localZ, this.slopeBuffer[point.index] & 0xFF));
     }
 
-    protected IBlockState getFillerAt(Random random, int x, int z, byte slope) {
+    protected IBlockState getFillerAt(Random random, int x, int z, int slope) {
         return this.fillerBlock;
     }
 

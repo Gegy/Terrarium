@@ -76,7 +76,7 @@ public class IrrigatedCropsCover extends CoverGenerator {
     }
 
     @Override
-    protected IBlockState getCoverAt(Random random, int x, int z, byte slope) {
+    protected IBlockState getCoverAt(Random random, int x, int z, int slope) {
         if (x % 9 == 0 && z % 9 == 0) {
             return WATER;
         }

@@ -81,7 +81,7 @@ public abstract class FloodedForestCover extends ForestCover {
     public abstract boolean hasPodzol();
 
     @Override
-    protected IBlockState getFillerAt(Random random, int x, int z, byte slope) {
+    protected IBlockState getFillerAt(Random random, int x, int z, int slope) {
         return COARSE_DIRT;
     }
 }
