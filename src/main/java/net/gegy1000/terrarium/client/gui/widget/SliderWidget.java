@@ -67,7 +67,7 @@ public class SliderWidget extends GuiButton implements TooltipRenderer {
 
     @Override
     public void renderTooltip(Minecraft mc, int mouseX, int mouseY, int width, int height) {
-        if (this.hoverTime >= 20) {
+        if (this.hoverTime >= 15) {
             String name = TextFormatting.BLUE + this.setting.getLocalizedName();
             String tooltip = TextFormatting.GRAY + this.setting.getLocalizedTooltip();
             String defaults = TextFormatting.YELLOW + I18n.translateToLocalFormatted("setting.terrarium.slider_default.name", this.setting.getDefault(), this.min, this.max);
