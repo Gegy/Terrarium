@@ -8,12 +8,29 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenTrees;
 
+import java.util.Random;
+
 public class GenerousTreeGenerator extends WorldGenTrees {
     private final boolean beans;
 
     public GenerousTreeGenerator(boolean notify, int height, IBlockState wood, IBlockState leaves, boolean vines, boolean beans) {
         super(notify, height, wood, leaves, vines);
         this.beans = beans;
+    }
+
+    @Override
+    public boolean generate(World world, Random rand, BlockPos position) {
+        IBlockState previousGround = world.getBlockState(position.down());
+        boolean replacedGround = false;
+        if (previousGround.getBlock() == Blocks.SAND) {
+            world.setBlockState(position.down(), Blocks.DIRT.getDefaultState());
+            replacedGround = true;
+        }
+        boolean result = super.generate(world, rand, position);
+        if (replacedGround) {
+            world.setBlockState(position.down(), previousGround);
+        }
+        return result;
     }
 
     @Override

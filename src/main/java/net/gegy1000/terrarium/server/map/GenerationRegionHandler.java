@@ -38,8 +38,8 @@ public class GenerationRegionHandler {
     private final Coordinate bufferedRegionSize;
 
     private final LoadingCache<RegionTilePos, GenerationRegion> cache = CacheBuilder.newBuilder()
-            .expireAfterAccess(30, TimeUnit.SECONDS)
-            .maximumSize(8)
+            .expireAfterAccess(2, TimeUnit.MINUTES)
+            .maximumSize(12)
             .build(new CacheLoader<RegionTilePos, GenerationRegion>() {
                 @Override
                 public GenerationRegion load(RegionTilePos key) {

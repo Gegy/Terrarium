@@ -1,5 +1,6 @@
 package net.gegy1000.terrarium.client.gui.customization;
 
+import net.gegy1000.terrarium.client.gui.customization.setting.BeachSizeValue;
 import net.gegy1000.terrarium.client.gui.customization.setting.BuildingsValue;
 import net.gegy1000.terrarium.client.gui.customization.setting.CaveGenValue;
 import net.gegy1000.terrarium.client.gui.customization.setting.CustomizationValue;
@@ -60,6 +61,8 @@ public class CustomizeEarthGui extends GuiScreen {
     private final CustomizationValue<Boolean> caveGenValue;
     private final CustomizationValue<Boolean> mapFeaturesValue;
 
+    private final CustomizationValue<Double> beachSizeValue;
+
     private CustomizationList customizationList;
 
     private PreviewRenderer renderer;
@@ -88,6 +91,8 @@ public class CustomizeEarthGui extends GuiScreen {
 
         this.mapFeaturesValue = new MapFeaturesValue(this.settings, onSettingChange);
         this.caveGenValue = new CaveGenValue(this.settings, onSettingChange);
+
+        this.beachSizeValue = new BeachSizeValue(this.settings, onSettingChange);
     }
 
     @Override
@@ -114,6 +119,7 @@ public class CustomizeEarthGui extends GuiScreen {
         this.customizationList.addSlider(this.scatterValue, 0, 32, 1, 1);
         this.customizationList.addSlider(this.heightOffsetValue, 0, 128, 1, 1);
         this.customizationList.addSlider(this.noiseScaleValue, 0.0, 3.0, 0.5, 0.1);
+        this.customizationList.addSlider(this.beachSizeValue, 0, 8, 1, 1);
 
         this.customizationList.addToggle(this.buildingsValue);
         this.customizationList.addToggle(this.streetsValue);

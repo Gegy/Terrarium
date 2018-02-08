@@ -30,18 +30,22 @@ public class WaterFlattenAdapter implements RegionAdapter {
             return;
         }
 
+        int minHeightRange = MathHelper.floor(1.0 / (settings.terrainHeightScale * settings.worldScale));
+
         short[] heightBuffer = heightTile.getShortData();
         CoverType[] coverBuffer = coverTile.getData();
 
         for (int localZ = 0; localZ < height; localZ++) {
             for (int localX = 0; localX < width; localX++) {
                 if (coverBuffer[localX + localZ * width] == CoverType.WATER) {
-                    AverageGlobHeightVisitor visitor = new AverageGlobHeightVisitor(heightBuffer, width);
+                    AverageCoverHeightVisitor visitor = new AverageCoverHeightVisitor(heightBuffer, width);
                     FloodFill.floodVisit(coverBuffer, width, height, new FloodFill.Point(localX, localZ), visitor);
 
                     List<FloodFill.Point> waterPoints = visitor.getVisitedPoints();
-                    short averageHeight = visitor.getAverageHeight();
-                    this.flattenArea(waterPoints, averageHeight, heightBuffer, coverBuffer, width, height);
+                    if (!waterPoints.isEmpty()) {
+                        short averageHeight = visitor.getAverageHeight();
+                        this.flattenArea(waterPoints, minHeightRange, averageHeight, heightBuffer, coverBuffer, width, height);
+                    }
                 }
             }
         }
@@ -53,7 +57,7 @@ public class WaterFlattenAdapter implements RegionAdapter {
         }
     }
 
-    private void flattenArea(List<FloodFill.Point> waterPoints, short targetHeight, short[] heightBuffer, CoverType[] globBuffer, int width, int height) {
+    private void flattenArea(List<FloodFill.Point> waterPoints, int minHeightRange, short targetHeight, short[] heightBuffer, CoverType[] coverBuffer, int width, int height) {
         Set<FloodFill.Point> sourcePoints = new HashSet<>();
 
         for (FloodFill.Point point : waterPoints) {
@@ -65,29 +69,38 @@ public class WaterFlattenAdapter implements RegionAdapter {
 
             boolean canEffect = true;
             for (FloodFill.Point sourcePoint : sourcePoints) {
-                if (Math.abs(point.getX() - sourcePoint.getX()) + Math.abs(point.getY() - sourcePoint.getY()) < 4) {
+                if (Math.abs(point.getX() - sourcePoint.getX()) + Math.abs(point.getY() - sourcePoint.getY()) < 6) {
                     canEffect = false;
                     break;
                 }
             }
 
-            if (canEffect && this.hasNeighbouringLand(x, z, globBuffer, width, height)) {
+            if (canEffect && !this.isAlreadyFlattened(x, z, minHeightRange, targetHeight, heightBuffer, width, height)
+                    && this.hasNeighbouringLand(x, z, coverBuffer, width, height)) {
                 sourcePoints.add(point);
-                AffectAreaVisitor visitor = new AffectAreaVisitor(point, this.flattenRange, targetHeight);
+                AffectAreaVisitor visitor = new AffectAreaVisitor(point, this.flattenRange, minHeightRange, targetHeight);
                 FloodFill.floodVisit(heightBuffer, width, height, point, visitor);
             }
         }
     }
 
-    private boolean hasNeighbouringLand(int x, int z, CoverType[] globBuffer, int width, int height) {
+    private boolean isAlreadyFlattened(int x, int z, int minHeightRange, short targetHeight, short[] heightBuffer, int width, int height) {
         int index = x + z * width;
-        return (x > 0 && globBuffer[index - 1] != CoverType.PROCESSING)
-                || (x < width - 1 && globBuffer[index + 1] != CoverType.PROCESSING)
-                || (z > 0 && globBuffer[index - width] != CoverType.PROCESSING)
-                || (z < height - 1 && globBuffer[index + width] != CoverType.PROCESSING);
+        return (x <= 0 || Math.abs(heightBuffer[index - 1] - targetHeight) <= minHeightRange)
+                && (x >= width - 1 || Math.abs(heightBuffer[index + 1] - targetHeight) <= minHeightRange)
+                && (z <= 0 || Math.abs(heightBuffer[index - width] - targetHeight) <= minHeightRange)
+                && (z >= height - 1 || Math.abs(heightBuffer[index + width] - targetHeight) <= minHeightRange);
     }
 
-    private class AverageGlobHeightVisitor implements FloodFill.Visitor<CoverType> {
+    private boolean hasNeighbouringLand(int x, int z, CoverType[] coverBuffer, int width, int height) {
+        int index = x + z * width;
+        return (x > 0 && coverBuffer[index - 1] != CoverType.PROCESSING)
+                || (x < width - 1 && coverBuffer[index + 1] != CoverType.PROCESSING)
+                || (z > 0 && coverBuffer[index - width] != CoverType.PROCESSING)
+                || (z < height - 1 && coverBuffer[index + width] != CoverType.PROCESSING);
+    }
+
+    private class AverageCoverHeightVisitor implements FloodFill.Visitor<CoverType> {
         private final short[] heightBuffer;
         private final int width;
 
@@ -95,7 +108,7 @@ public class WaterFlattenAdapter implements RegionAdapter {
 
         private long totalHeight;
 
-        private AverageGlobHeightVisitor(short[] heightBuffer, int width) {
+        private AverageCoverHeightVisitor(short[] heightBuffer, int width) {
             this.heightBuffer = heightBuffer;
             this.width = width;
         }
@@ -125,12 +138,14 @@ public class WaterFlattenAdapter implements RegionAdapter {
         private final FloodFill.Point origin;
 
         private final int range;
+        private final int minHeightRange;
         private final short target;
 
-        private AffectAreaVisitor(FloodFill.Point origin, int range, short target) {
+        private AffectAreaVisitor(FloodFill.Point origin, int range, int minHeightRange, short target) {
             this.origin = origin;
 
             this.range = range * range;
+            this.minHeightRange = minHeightRange;
             this.target = target;
         }
 
@@ -148,7 +163,7 @@ public class WaterFlattenAdapter implements RegionAdapter {
 
         @Override
         public boolean canVisit(FloodFill.Point point, short sampled) {
-            if (sampled == this.target) {
+            if (Math.abs(sampled - this.target) <= this.minHeightRange) {
                 return false;
             }
             int deltaX = Math.abs(point.getX() - this.origin.getX());

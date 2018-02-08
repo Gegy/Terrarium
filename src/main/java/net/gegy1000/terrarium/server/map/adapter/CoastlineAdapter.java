@@ -79,6 +79,8 @@ public class CoastlineAdapter implements RegionAdapter {
             this.floodFillMap(width, height, landmap);
 
             this.processFloodedMap(width, height, heightBuffer, coverBuffer, landmap);
+
+            this.createBeaches(width, height, coverBuffer, landmap, settings.beachSize);
         }
     }
 
@@ -223,19 +225,22 @@ public class CoastlineAdapter implements RegionAdapter {
 
     private void processFloodedMap(int width, int height, short[] heightBuffer, CoverType[] coverBuffer, int[] landmap) {
         List<FloodFill.Point> unselectedPoints = new LinkedList<>();
-        for (int i = 0; i < coverBuffer.length; i++) {
-            CoverType glob = coverBuffer[i];
-            int sample = landmap[i];
-            int landType = sample & LAND_TYPE_MASK;
-            int coastType = sample & COAST_TYPE_MASK;
-            if (landType == OCEAN) {
-                if (coverBuffer[i] != CoverType.WATER) {
-                    coverBuffer[i] = CoverType.WATER;
-                    heightBuffer[i] = 1;
+        for (int localY = 0; localY < height; localY++) {
+            for (int localX = 0; localX < width; localX++) {
+                int index = localX + localY * width;
+                CoverType cover = coverBuffer[index];
+                int sample = landmap[index];
+                int landType = sample & LAND_TYPE_MASK;
+                int coastType = sample & COAST_TYPE_MASK;
+                if (landType == OCEAN) {
+                    if (cover != CoverType.WATER) {
+                        coverBuffer[index] = CoverType.WATER;
+                        heightBuffer[index] = 1;
+                    }
+                } else if ((landType == LAND || landType == COAST && coastType != FREE_FLOOD) && cover == CoverType.WATER) {
+                    coverBuffer[index] = CoverType.PROCESSING;
+                    unselectedPoints.add(new FloodFill.Point(localX, localY));
                 }
-            } else if ((landType == LAND || landType == COAST && coastType != FREE_FLOOD) && glob == CoverType.WATER) {
-                coverBuffer[i] = CoverType.PROCESSING;
-                unselectedPoints.add(new FloodFill.Point(i % width, i / width));
             }
         }
 
@@ -243,6 +248,36 @@ public class CoastlineAdapter implements RegionAdapter {
             GlobSelectVisitor visitor = new GlobSelectVisitor();
             FloodFill.floodVisit(coverBuffer, width, height, point, visitor);
             coverBuffer[point.getX() + point.getY() * width] = visitor.getResult();
+        }
+    }
+
+    private void createBeaches(int width, int height, CoverType[] coverBuffer, int[] landmap, int beachSize) {
+        if (beachSize > 0) {
+            for (int localY = 0; localY < height; localY++) {
+                for (int localX = 0; localX < width; localX++) {
+                    int sample = landmap[localX + localY * width];
+                    if ((sample & LAND_TYPE_MASK) == COAST && (sample & COAST_TYPE_MASK) != FREE_FLOOD) {
+                        this.spreadBeach(beachSize - 1, width, height, localX, localY, landmap, coverBuffer);
+                    }
+                }
+            }
+        }
+    }
+
+    private void spreadBeach(int beachSize, int width, int height, int localX, int localY, int[] landmap, CoverType[] coverBuffer) {
+        for (int beachY = -beachSize; beachY <= beachSize; beachY++) {
+            int globalY = localY + beachY;
+            if (globalY >= 0 && globalY < height) {
+                for (int beachX = -beachSize; beachX <= beachSize; beachX++) {
+                    int globalX = localX + beachX;
+                    if (globalX >= 0 && globalX < width) {
+                        int beachIndex = globalX + globalY * width;
+                        if (landmap[beachIndex] != OCEAN) {
+                            coverBuffer[beachIndex] = CoverType.BEACH;
+                        }
+                    }
+                }
+            }
         }
     }
 

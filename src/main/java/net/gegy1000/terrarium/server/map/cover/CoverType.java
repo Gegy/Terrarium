@@ -3,6 +3,7 @@ package net.gegy1000.terrarium.server.map.cover;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.map.LatitudinalZone;
 import net.gegy1000.terrarium.server.map.cover.generator.BareCover;
+import net.gegy1000.terrarium.server.map.cover.generator.BeachCover;
 import net.gegy1000.terrarium.server.map.cover.generator.BroadleafEvergreenCover;
 import net.gegy1000.terrarium.server.map.cover.generator.ClosedBroadleafDeciduousCover;
 import net.gegy1000.terrarium.server.map.cover.generator.ClosedNeedleleafEvergreenCover;
@@ -55,6 +56,7 @@ public enum CoverType {
     WATER(210, zone -> Biomes.OCEAN, WaterCover.class, 0.0, false, 0x0046C7),
     SNOW(220, Biomes.ICE_PLAINS, SnowCover.class, 0xFFFFFF),
     NO_DATA(0, Biomes.PLAINS, BareCover.class, 0),
+    BEACH(-1, zone -> Biomes.BEACH, BeachCover.class, 0.35, false, 0xFFF5D6),
     PROCESSING(-1, Biomes.DEFAULT, BareCover.class, 0),
     DEBUG(-1, zone -> Biomes.DEFAULT, DebugCover.class, 0.0, false, 0);
 
