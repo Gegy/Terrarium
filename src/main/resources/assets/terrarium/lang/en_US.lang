@@ -57,8 +57,7 @@ setting.terrarium.resource_generation.tooltip=If enabled, resources will be rand
 setting.terrarium.noise_scale.tooltip=Multiplier for the effect of random noise generation in height to be applied to the world. 0 = no noise, 1 = default noise
 setting.terrarium.beach.tooltip=Radius in blocks for beaches to be generated around coastlines
 
-setting.terrarium.slider_default.name=Default: %.2f, Range: [%.2f-%.2f]
-setting.terrarium.default.name=Default: %s
+setting.terrarium.slider_range.name=Range: [%.2f-%.2f]
 setting.terrarium.slider_fine.name=Hold SHIFT to fine tune
 
 # Presets

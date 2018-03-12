@@ -3,10 +3,12 @@ package net.gegy1000.terrarium.client.gui.customization;
 import net.gegy1000.terrarium.client.gui.widget.map.SlippyMapPoint;
 import net.gegy1000.terrarium.client.gui.widget.map.SlippyMapWidget;
 import net.gegy1000.terrarium.client.gui.widget.map.component.MarkerMapComponent;
-import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
+import net.gegy1000.terrarium.server.world.coordinate.SpawnpointDefinition;
+import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
+import net.gegy1000.terrarium.server.world.generator.customization.PropertyContainer;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.util.text.translation.I18n;
+import net.minecraft.client.resources.I18n;
 
 import java.io.IOException;
 
@@ -14,12 +16,12 @@ public class SelectSpawnpointGui extends GuiScreen {
     private static final int SELECT_BUTTON = 0;
     private static final int CANCEL_BUTTON = 1;
 
-    private final CustomizeEarthGui parent;
+    private final TerrariumCustomizationGui parent;
 
     private SlippyMapWidget mapWidget;
     private MarkerMapComponent markerComponent;
 
-    public SelectSpawnpointGui(CustomizeEarthGui parent) {
+    public SelectSpawnpointGui(TerrariumCustomizationGui parent) {
         this.parent = parent;
     }
 
@@ -31,12 +33,17 @@ public class SelectSpawnpointGui extends GuiScreen {
 
         this.mapWidget = new SlippyMapWidget(20, 20, this.width - 40, this.height - 60);
 
-        EarthGenerationSettings settings = this.parent.getSettings();
-        this.markerComponent = new MarkerMapComponent(new SlippyMapPoint(settings.spawnLatitude, settings.spawnLongitude));
+        GenerationSettings settings = this.parent.getSettings();
+        PropertyContainer properties = settings.getProperties();
+        SpawnpointDefinition spawnpointDefinition = settings.getGenerator().getSpawnpointDefinition();
+
+        double spawnpointX = properties.getDouble(spawnpointDefinition.getPropertyX());
+        double spawnpointZ = properties.getDouble(spawnpointDefinition.getPropertyZ());
+        this.markerComponent = new MarkerMapComponent(new SlippyMapPoint(spawnpointX, spawnpointZ));
         this.mapWidget.addComponent(this.markerComponent);
 
-        this.addButton(new GuiButton(SELECT_BUTTON, this.width / 2 - 154, this.height - 28, 150, 20, I18n.translateToLocal("gui.done")));
-        this.addButton(new GuiButton(CANCEL_BUTTON, this.width / 2 + 4, this.height - 28, 150, 20, I18n.translateToLocal("gui.cancel")));
+        this.addButton(new GuiButton(SELECT_BUTTON, this.width / 2 - 154, this.height - 28, 150, 20, I18n.format("gui.done")));
+        this.addButton(new GuiButton(CANCEL_BUTTON, this.width / 2 + 4, this.height - 28, 150, 20, I18n.format("gui.cancel")));
     }
 
     @Override
@@ -46,7 +53,7 @@ public class SelectSpawnpointGui extends GuiScreen {
             if (button.id == SELECT_BUTTON) {
                 SlippyMapPoint marker = this.markerComponent.getMarker();
                 if (marker != null) {
-                    this.parent.applySpawnpoint(marker.getLatitude(), marker.getLongitude());
+                    this.parent.applySpawnpoint(marker.getSpawnpointX(), marker.getSpawnpointZ());
                 }
             }
         }
@@ -56,7 +63,7 @@ public class SelectSpawnpointGui extends GuiScreen {
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         super.drawDefaultBackground();
         this.mapWidget.draw(mouseX, mouseY, partialTicks);
-        this.drawCenteredString(this.fontRenderer, I18n.translateToLocal("gui.terrarium.spawnpoint"), this.width / 2, 4, 0xFFFFFF);
+        this.drawCenteredString(this.fontRenderer, I18n.format("gui.terrarium.spawnpoint"), this.width / 2, 4, 0xFFFFFF);
         super.drawScreen(mouseX, mouseY, partialTicks);
     }
 

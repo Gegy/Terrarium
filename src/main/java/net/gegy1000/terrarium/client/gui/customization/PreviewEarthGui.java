@@ -5,7 +5,7 @@ import net.gegy1000.terrarium.client.preview.PreviewRenderer;
 import net.gegy1000.terrarium.client.preview.WorldPreview;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.util.text.translation.I18n;
+import net.minecraft.client.resources.I18n;
 import org.lwjgl.input.Keyboard;
 
 import java.io.IOException;
@@ -25,7 +25,7 @@ public class PreviewEarthGui extends GuiScreen {
     @Override
     public void initGui() {
         this.buttonList.clear();
-        this.addButton(new GuiButton(0, this.width / 2 - 75, this.height - 28, 150, 20, I18n.translateToLocal("gui.done")));
+        this.addButton(new GuiButton(0, this.width / 2 - 75, this.height - 28, 150, 20, I18n.format("gui.done")));
 
         this.renderer = new PreviewRenderer(this, 8.0, 21.0, this.width - 16.0, this.height - 57.0);
         this.controller = new PreviewController(this.renderer, 0.4F, 1.5F);
@@ -70,7 +70,7 @@ public class PreviewEarthGui extends GuiScreen {
 
         this.drawDefaultBackground();
 
-        String title = I18n.translateToLocal("options.terrarium.preview_earth_title.name");
+        String title = I18n.format("options.terrarium.preview_earth_title.name");
         this.drawCenteredString(this.fontRenderer, title, this.width / 2, 4, 0xFFFFFF);
 
         float zoom = this.controller.getZoom(partialTicks);

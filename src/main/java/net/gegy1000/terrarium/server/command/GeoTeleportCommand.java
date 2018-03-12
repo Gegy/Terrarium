@@ -4,8 +4,8 @@ import com.google.common.base.Strings;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
-import net.gegy1000.terrarium.server.util.Coordinate;
-import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
+import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
+import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -15,8 +15,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.chunk.Chunk;
-
-import java.io.IOException;
 
 public class GeoTeleportCommand extends CommandBase {
     @Override
@@ -40,7 +38,7 @@ public class GeoTeleportCommand extends CommandBase {
 
         TerrariumWorldData worldData = player.world.getCapability(TerrariumCapabilities.worldDataCapability, null);
         if (worldData != null) {
-            EarthGenerationSettings settings = EarthGenerationSettings.deserialize(player.world.getWorldInfo().getGeneratorOptions());
+            GenerationSettings settings = worldData.getSettings();
 
             String argument = String.join(" ", args).replace(',', ' ');
             String[] locationInput = argument.split("\\s+");
@@ -90,25 +88,25 @@ public class GeoTeleportCommand extends CommandBase {
         int height = chunk.getHeightValue(blockX & 15, blockZ & 15);
 
         player.connection.setPlayerLocation(coordinate.getBlockX(), height + 0.5, coordinate.getBlockZ(), 180.0F, 0.0F);
-        player.sendMessage(new TextComponentTranslation("commands.terrarium.geotp.success", coordinate.getLatitude(), coordinate.getLongitude()));
+        player.sendMessage(new TextComponentTranslation("commands.terrarium.geotp.success", coordinate.getX(), coordinate.getZ()));
     }
 
     private interface CommandLocation {
-        Coordinate getCoordinate(TerrariumWorldData worldData, EarthGenerationSettings settings) throws CommandException;
+        Coordinate getCoordinate(TerrariumWorldData worldData, GenerationSettings settings) throws CommandException;
     }
 
     private class CoordinateLocation implements CommandLocation {
-        private final double latitude;
-        private final double longitude;
+        private final double x;
+        private final double z;
 
-        private CoordinateLocation(double latitude, double longitude) {
-            this.latitude = latitude;
-            this.longitude = longitude;
+        private CoordinateLocation(double x, double z) {
+            this.x = x;
+            this.z = z;
         }
 
         @Override
-        public Coordinate getCoordinate(TerrariumWorldData worldData, EarthGenerationSettings settings) {
-            return Coordinate.fromLatLng(settings, this.latitude, this.longitude);
+        public Coordinate getCoordinate(TerrariumWorldData worldData, GenerationSettings settings) {
+            return new Coordinate(worldData.getNavigationalState(), this.x, this.z);
         }
     }
 
@@ -120,14 +118,14 @@ public class GeoTeleportCommand extends CommandBase {
         }
 
         @Override
-        public Coordinate getCoordinate(TerrariumWorldData worldData, EarthGenerationSettings settings) throws CommandException {
+        public Coordinate getCoordinate(TerrariumWorldData worldData, GenerationSettings settings) throws CommandException {
             try {
-                Coordinate geocode = worldData.getGeocodingSource().get(this.place);
+                Coordinate geocode = worldData.getGeocoder().get(this.place);
                 if (geocode == null) {
                     throw new WrongUsageException("commands.terrarium.geotp.not_found", this.place);
                 }
                 return geocode;
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Terrarium.LOGGER.error("Failed to get geocode for {}", this.place, e);
                 throw new WrongUsageException("commands.terrarium.geotp.error", this.place, e.getClass().getSimpleName(), e.getMessage());
             }

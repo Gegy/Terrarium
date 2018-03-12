@@ -1,82 +1,74 @@
 package net.gegy1000.terrarium.server.capability;
 
-import com.google.common.collect.Sets;
-import net.gegy1000.terrarium.server.map.GenerationRegionHandler;
-import net.gegy1000.terrarium.server.map.source.GeocodingSource;
-import net.gegy1000.terrarium.server.map.source.glob.GlobSource;
-import net.gegy1000.terrarium.server.map.source.height.HeightSource;
-import net.gegy1000.terrarium.server.map.source.osm.DetailedOverpassSource;
-import net.gegy1000.terrarium.server.map.source.osm.GeneralOverpassSource;
-import net.gegy1000.terrarium.server.map.source.osm.OutlineOverpassSource;
-import net.gegy1000.terrarium.server.map.source.tiled.TiledSource;
-import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
+import com.google.common.collect.ImmutableMap;
+import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
+import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
+import net.gegy1000.terrarium.server.world.generator.TerrariumGenerator;
+import net.gegy1000.terrarium.server.world.generator.TerrariumGeneratorRegistry;
+import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
+import net.gegy1000.terrarium.server.world.pipeline.RegionDataSystem;
+import net.gegy1000.terrarium.server.world.pipeline.source.Geocoder;
+import net.gegy1000.terrarium.server.world.region.GenerationRegionHandler;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 
-import java.util.Collections;
-import java.util.Set;
-
 public interface TerrariumWorldData extends ICapabilityProvider {
-    EarthGenerationSettings getSettings();
+    GenerationSettings getSettings();
+
+    RegionDataSystem getDataSystem();
 
     GenerationRegionHandler getRegionHandler();
 
-    HeightSource getHeightSource();
+    Geocoder getGeocoder();
 
-    GlobSource getGlobSource();
+    Coordinate getSpawnpoint();
 
-    DetailedOverpassSource getDetailedOverpassSource();
+    CoordinateState getNavigationalState();
 
-    GeneralOverpassSource getGeneralOverpassSource();
-
-    OutlineOverpassSource getOutlineOverpassSource();
-
-    GeocodingSource getGeocodingSource();
-
-    Set<TiledSource<?>> getTiledSources();
+    CoordinateState getCoordinateState(String coordinateKey);
 
     class Implementation implements TerrariumWorldData {
-        private final EarthGenerationSettings settings;
+        private final GenerationSettings settings;
+        private final TerrariumGenerator generator;
+        private final RegionDataSystem dataSystem;
         private final GenerationRegionHandler regionHandler;
+        private final Geocoder geocoder;
 
-        private final HeightSource heightSource;
-        private final GlobSource globSource;
-        private final GeocodingSource geocodingSource;
-
-        private final DetailedOverpassSource detailedOverpassSource;
-        private final GeneralOverpassSource generalOverpassSource;
-        private final OutlineOverpassSource outlineOverpassSource;
-
-        private final Set<TiledSource<?>> tiledSources;
+        private final ImmutableMap<String, CoordinateState> coordinateStates;
+        private final Coordinate spawnpoint;
+        private final CoordinateState navigationalState;
 
         public Implementation(World world) {
-            this.settings = EarthGenerationSettings.deserialize(world.getWorldInfo().getGeneratorOptions());
+            this.settings = GenerationSettings.deserialize(world.getWorldInfo().getGeneratorOptions());
+            this.generator = this.settings.getGenerator();
 
-            this.heightSource = new HeightSource(this.settings);
-            this.globSource = new GlobSource(this.settings);
-            this.geocodingSource = new GeocodingSource(this.settings);
+            this.coordinateStates = ImmutableMap.copyOf(this.generator.buildCoordinateStates(this, world));
 
-            this.detailedOverpassSource = new DetailedOverpassSource(this.settings);
-            this.generalOverpassSource = new GeneralOverpassSource(this.settings);
-            this.outlineOverpassSource = new OutlineOverpassSource(this.settings);
+            String navigationalStateKey = this.generator.getNavigationalStateKey();
+            this.navigationalState = this.coordinateStates.get(navigationalStateKey);
+            if (this.navigationalState == null) {
+                ResourceLocation generatorIdentifier = TerrariumGeneratorRegistry.getIdentifier(this.generator);
+                throw new IllegalStateException("Navigational state " + navigationalStateKey + " did not exist on " + generatorIdentifier);
+            }
 
-            this.tiledSources = Collections.unmodifiableSet(Sets.newHashSet(
-                    this.heightSource, this.globSource,
-                    this.detailedOverpassSource, this.generalOverpassSource, this.outlineOverpassSource
-            ));
+            this.spawnpoint = this.generator.getSpawnpointDefinition().createSpawnpoint(this.settings, this.navigationalState);
 
-            this.regionHandler = new GenerationRegionHandler(world, this.settings, this);
-
-            this.detailedOverpassSource.loadQuery();
-            this.generalOverpassSource.loadQuery();
-            this.outlineOverpassSource.loadQuery();
+            this.dataSystem = this.generator.buildDataSystem(this, world);
+            this.geocoder = this.generator.createGeocoder(this, world);
+            this.regionHandler = new GenerationRegionHandler(this.settings, this.dataSystem);
         }
 
         @Override
-        public EarthGenerationSettings getSettings() {
+        public GenerationSettings getSettings() {
             return this.settings;
+        }
+
+        @Override
+        public RegionDataSystem getDataSystem() {
+            return this.dataSystem;
         }
 
         @Override
@@ -85,38 +77,23 @@ public interface TerrariumWorldData extends ICapabilityProvider {
         }
 
         @Override
-        public HeightSource getHeightSource() {
-            return this.heightSource;
+        public Geocoder getGeocoder() {
+            return this.geocoder;
         }
 
         @Override
-        public GlobSource getGlobSource() {
-            return this.globSource;
+        public Coordinate getSpawnpoint() {
+            return this.spawnpoint;
         }
 
         @Override
-        public DetailedOverpassSource getDetailedOverpassSource() {
-            return this.detailedOverpassSource;
+        public CoordinateState getNavigationalState() {
+            return this.navigationalState;
         }
 
         @Override
-        public GeneralOverpassSource getGeneralOverpassSource() {
-            return this.generalOverpassSource;
-        }
-
-        @Override
-        public OutlineOverpassSource getOutlineOverpassSource() {
-            return this.outlineOverpassSource;
-        }
-
-        @Override
-        public GeocodingSource getGeocodingSource() {
-            return this.geocodingSource;
-        }
-
-        @Override
-        public Set<TiledSource<?>> getTiledSources() {
-            return this.tiledSources;
+        public CoordinateState getCoordinateState(String coordinateKey) {
+            return this.coordinateStates.get(coordinateKey);
         }
 
         @Override

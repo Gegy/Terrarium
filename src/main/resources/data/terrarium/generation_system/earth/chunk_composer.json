@@ -1,0 +1,41 @@
+{
+  "surface_composers": [
+    {
+      "type": "terrarium:heightmap_composer",
+      "height_component": "terrarium:height",
+      "block": "minecraft:stone"
+    },
+    {
+      "type": "terrarium:fill_ocean",
+      "height_component": "terrarium:height",
+      "block": "minecraft:water",
+      "level": "@height_origin"
+    },
+    {
+      "type": "terrarium:cover_surface",
+      "height_component": "terrarium:height",
+      "slope_component": "terrarium:slope",
+      "cover_component": "terrarium:cover",
+      "decorate": "@enable_decoration",
+      "replace_block": "minecraft:stone"
+    },
+    {
+      "type": "terrarium:add_bedrock",
+      "block": "minecraft:bedrock",
+      "scatter_range": 5
+    }
+  ],
+  "decoration_composers": [
+    {
+      "type": "terrarium:cover_decorator",
+      "apply_if": "@enable_decoration",
+      "height_component": "terrarium:height",
+      "slope_component": "terrarium:slope",
+      "cover_component": "terrarium:cover"
+    }
+  ],
+  "biome_composer": {
+    "type": "terrarium:biome_cover",
+    "cover_component": "terrarium:cover"
+  }
+}

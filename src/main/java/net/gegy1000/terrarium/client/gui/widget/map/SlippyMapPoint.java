@@ -4,6 +4,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+// TODO: Handle map without latitude/longitude
 @SideOnly(Side.CLIENT)
 public class SlippyMapPoint {
     private final double latitude;
@@ -22,11 +23,11 @@ public class SlippyMapPoint {
         this.latitude = Math.toDegrees(Math.atan(Math.sinh(Math.PI - (2.0 * Math.PI * y) / maximumY)));
     }
 
-    public double getLatitude() {
+    public double getSpawnpointX() {
         return this.latitude;
     }
 
-    public double getLongitude() {
+    public double getSpawnpointZ() {
         return this.longitude;
     }
 

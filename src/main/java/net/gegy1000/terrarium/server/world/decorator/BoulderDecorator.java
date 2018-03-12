@@ -1,8 +1,8 @@
 package net.gegy1000.terrarium.server.world.decorator;
 
-import net.gegy1000.terrarium.server.map.cover.CoverGenerator;
-import net.gegy1000.terrarium.server.map.cover.CoverType;
-import net.gegy1000.terrarium.server.world.generator.BoulderGenerator;
+import net.gegy1000.terrarium.server.world.cover.CoverGenerator;
+import net.gegy1000.terrarium.server.world.cover.CoverType;
+import net.gegy1000.terrarium.server.world.feature.BoulderGenerator;
 import net.minecraft.block.BlockStone;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
@@ -10,6 +10,7 @@ import net.minecraft.world.World;
 
 import java.util.Random;
 
+// TODO: Implement again
 public class BoulderDecorator implements TerrariumWorldDecorator {
     private static final BoulderGenerator BOULDER_GENERATOR = new BoulderGenerator(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.ANDESITE), 0);
 

@@ -1,6 +1,5 @@
 package net.gegy1000.terrarium.client.gui.widget;
 
-import net.gegy1000.terrarium.client.gui.customization.setting.CustomizationValue;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -12,30 +11,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SideOnly(Side.CLIENT)
-public class CustomizationList extends ListWidget {
+public class CustomizationList extends ListGuiWidget {
     private final Minecraft client;
     private final GuiScreen parent;
 
-    private final List<GuiButton> widgets = new ArrayList<>();
     private final List<SingleWidgetEntry> entries = new ArrayList<>();
 
-    public CustomizationList(Minecraft client, GuiScreen parent, int x, int y, int width, int height) {
+    public CustomizationList(Minecraft client, GuiScreen parent, int x, int y, int width, int height, List<GuiButton> widgets) {
         super(client, parent.width, parent.height, x, y, width, height, 20);
         this.client = client;
         this.parent = parent;
-    }
 
-    public void addSlider(CustomizationValue<Double> value, double min, double max, double step, double fineStep) {
-        this.widgets.add(new SliderWidget(0, 0, 0, value, min, max, step, fineStep));
-    }
-
-    public void addToggle(CustomizationValue<Boolean> value) {
-        this.widgets.add(new ToggleWidget(0, 0, 0, value));
-    }
-
-    public void buildEntries() {
-        this.entries.clear();
-        for (GuiButton widget : this.widgets) {
+        for (GuiButton widget : widgets) {
             this.entries.add(new SingleWidgetEntry(widget));
         }
     }

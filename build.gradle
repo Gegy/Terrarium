@@ -89,7 +89,7 @@ String getModField(String type, String mod_file) {
     return ""
   }
   String field = ""
-  String prefix = "public static final $type = \""
+  String prefix = "public static final String $type = \""
   File file = file(mod_file)
   file.eachLine { String s ->
     s = s.trim()

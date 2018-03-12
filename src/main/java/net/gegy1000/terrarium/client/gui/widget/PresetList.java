@@ -1,8 +1,10 @@
 package net.gegy1000.terrarium.client.gui.widget;
 
+import com.google.common.collect.ImmutableList;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.client.gui.customization.SelectPresetGui;
-import net.gegy1000.terrarium.client.gui.customization.setting.SettingPreset;
+import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPreset;
+import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPresetRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiListExtended;
@@ -14,9 +16,6 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @SideOnly(Side.CLIENT)
 public class PresetList extends GuiListExtended {
     private static final ResourceLocation FALLBACK_ICON = new ResourceLocation(Terrarium.MODID, "textures/preset/fallback.png");
@@ -24,21 +23,22 @@ public class PresetList extends GuiListExtended {
 
     private final SelectPresetGui parent;
 
-    private final List<SettingPreset> presets;
-    private final List<PresetEntry> entries = new ArrayList<>();
+    private final ImmutableList<TerrariumPreset> presets;
+    private final ImmutableList<PresetEntry> entries;
 
     private int selectedIndex = -1;
 
     public PresetList(Minecraft mc, SelectPresetGui parent) {
         super(mc, parent.width, parent.height, 32, parent.height - 64, 36);
-        Minecraft mc1 = mc;
         this.parent = parent;
 
-        this.presets = SettingPreset.getRegistry().getValues();
+        this.presets = ImmutableList.copyOf(TerrariumPresetRegistry.getPresets());
 
-        for (SettingPreset preset : this.presets) {
-            this.entries.add(new PresetEntry(mc, preset));
+        ImmutableList.Builder<PresetEntry> entryBuilder = ImmutableList.builder();
+        for (TerrariumPreset preset : this.presets) {
+            entryBuilder.add(new PresetEntry(mc, preset));
         }
+        this.entries = entryBuilder.build();
     }
 
     public void selectPreset(int index) {
@@ -78,12 +78,12 @@ public class PresetList extends GuiListExtended {
     public class PresetEntry implements IGuiListEntry {
         private final Minecraft mc;
 
-        private final SettingPreset preset;
+        private final TerrariumPreset preset;
         private final ResourceLocation icon;
 
         private long lastClickTime;
 
-        public PresetEntry(Minecraft mc, SettingPreset preset) {
+        public PresetEntry(Minecraft mc, TerrariumPreset preset) {
             this.mc = mc;
             this.preset = preset;
 
@@ -96,12 +96,10 @@ public class PresetList extends GuiListExtended {
 
         @Override
         public void drawEntry(int slotIndex, int x, int y, int listWidth, int slotHeight, int mouseX, int mouseY, boolean isSelected, float partialTicks) {
-            // TODO: Note
             this.mc.fontRenderer.drawString(this.preset.getLocalizedName(), x + 32 + 3, y + 1, 0xFFFFFF);
             String description = TextFormatting.DARK_GRAY + this.preset.getLocalizedDescription();
             this.mc.fontRenderer.drawString(description, x + 32 + 3, y + this.mc.fontRenderer.FONT_HEIGHT + 3, 0xFFFFFF);
-            String note = TextFormatting.YELLOW + "";
-            this.mc.fontRenderer.drawString(note, x + 32 + 3, y + this.mc.fontRenderer.FONT_HEIGHT + this.mc.fontRenderer.FONT_HEIGHT + 3, 0xFFFFFF);
+
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 
             TextureManager textureManager = this.mc.getTextureManager();

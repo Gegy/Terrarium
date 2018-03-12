@@ -4,9 +4,10 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.gegy1000.terrarium.Terrarium;
-import net.gegy1000.terrarium.server.util.Coordinate;
-import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
-import net.gegy1000.terrarium.server.world.generator.EarthChunkGenerator;
+import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
+import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
+import net.gegy1000.terrarium.server.world.chunk.ComposableChunkGenerator;
+import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.init.Biomes;
@@ -23,6 +24,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -40,7 +42,7 @@ public class WorldPreview implements IBlockAccess {
 
     private final BlockingQueue<BufferBuilder> builderQueue;
 
-    private final EarthChunkGenerator generator;
+    private final ComposableChunkGenerator chunkGenerator;
 
     private final ChunkPos centerPos;
     private final BlockPos centerBlockPos;
@@ -50,12 +52,18 @@ public class WorldPreview implements IBlockAccess {
     private List<PreviewChunk> previewChunks = null;
     private int heightOffset = 64;
 
-    public WorldPreview(EarthGenerationSettings settings, BufferBuilder[] builders) {
+    public WorldPreview(GenerationSettings settings, BufferBuilder[] builders) {
         this.builderQueue = new ArrayBlockingQueue<>(builders.length);
         Collections.addAll(this.builderQueue, builders);
 
-        this.generator = new EarthChunkGenerator(new PreviewDummyWorld(settings), 0, settings, true);
-        this.centerPos = new ChunkPos(Coordinate.fromLatLng(settings, settings.spawnLatitude, settings.spawnLongitude).toBlockPos());
+        PreviewDummyWorld world = new PreviewDummyWorld(settings);
+        TerrariumWorldData worldData = world.getCapability(TerrariumCapabilities.worldDataCapability, null);
+        if (worldData == null) {
+            throw new IllegalStateException("Failed to get world data capability from preview world");
+        }
+
+        this.chunkGenerator = new ComposableChunkGenerator(world);
+        this.centerPos = new ChunkPos(worldData.getSpawnpoint().toBlockPos());
         this.centerBlockPos = new BlockPos(this.centerPos.x << 4, 0, this.centerPos.z << 4);
 
         this.executor.submit(() -> {
@@ -133,8 +141,8 @@ public class WorldPreview implements IBlockAccess {
             for (int x = -VIEW_RANGE; x <= VIEW_RANGE; x++) {
                 ChunkPos pos = new ChunkPos(this.centerPos.x + x, this.centerPos.z + z);
 
-                ChunkPrimer chunk = this.generator.generatePrimer(pos.x, pos.z);
-                Biome[] biomes = this.generator.populateBiomes(new Biome[256], pos.x, pos.z);
+                ChunkPrimer chunk = this.chunkGenerator.generatePrimer(pos.x, pos.z);
+                Biome[] biomes = Arrays.copyOf(this.chunkGenerator.provideBiomes(pos.x, pos.z), 256);
                 this.chunkMap.put(ChunkPos.asLong(pos.x, pos.z), new ChunkData(chunk, biomes));
 
                 chunkPositions.add(pos);

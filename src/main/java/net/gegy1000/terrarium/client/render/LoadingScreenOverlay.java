@@ -9,9 +9,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiDownloadTerrain;
 import net.minecraft.client.gui.GuiScreenWorking;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -35,7 +35,7 @@ public class LoadingScreenOverlay {
             int x = resolution.getScaledWidth() / 2;
             int y = resolution.getScaledHeight() - 40;
 
-            String header = TextFormatting.YELLOW.toString() + TextFormatting.BOLD + I18n.translateToLocal("gui.terrarium.credits");
+            String header = TextFormatting.YELLOW.toString() + TextFormatting.BOLD + I18n.format("gui.terrarium.credits");
             GuiRenderUtils.drawCenteredString(header, x, y, 0xFFFFFF);
             GuiRenderUtils.drawCenteredString(TextFormatting.GRAY + "NASA SRTM,", x, y + 11, 0xFFFFFF);
             GuiRenderUtils.drawCenteredString(TextFormatting.GRAY + "ESA GlobCover,", x, y + 20, 0xFFFFFF);
