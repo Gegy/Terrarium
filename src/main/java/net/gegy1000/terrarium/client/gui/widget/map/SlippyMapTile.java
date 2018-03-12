@@ -24,11 +24,6 @@ public class SlippyMapTile {
         this.pos = pos;
     }
 
-    public SlippyMapTile(SlippyMapTilePos pos, BufferedImage image) {
-        this(pos);
-        this.supplyImage(image);
-    }
-
     public void update(float partialTicks) {
         if (this.transition < 1.0F) {
             this.transition = MathHelper.clamp(this.transition + partialTicks * 0.1F, 0.0F, 1.0F);

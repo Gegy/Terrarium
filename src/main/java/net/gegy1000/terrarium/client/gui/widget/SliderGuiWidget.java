@@ -69,7 +69,7 @@ public class SliderGuiWidget extends GuiButton implements TooltipRenderer {
     }
 
     @Override
-    public void renderTooltip(Minecraft mc, int mouseX, int mouseY, int width, int height) {
+    public void renderTooltip(int mouseX, int mouseY) {
         if (this.hoverTime >= 15) {
             String name = TextFormatting.BLUE + this.propertyKey.getLocalizedName();
             String tooltip = TextFormatting.GRAY + this.propertyKey.getLocalizedTooltip();

@@ -62,5 +62,4 @@ public class LoadingStateOverlay {
             GlStateManager.disableAlpha();
         }
     }
-
 }

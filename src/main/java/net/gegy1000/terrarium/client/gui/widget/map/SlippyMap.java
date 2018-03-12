@@ -141,10 +141,6 @@ public class SlippyMap {
             }
         }
 
-        public SlippyMapPoint getOrigin() {
-            return this.origin;
-        }
-
         public int getX() {
             return this.origin.getX(this.zoom);
         }

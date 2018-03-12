@@ -18,8 +18,6 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 public interface TerrariumWorldData extends ICapabilityProvider {
     GenerationSettings getSettings();
 
-    RegionDataSystem getDataSystem();
-
     GenerationRegionHandler getRegionHandler();
 
     Geocoder getGeocoder();
@@ -64,11 +62,6 @@ public interface TerrariumWorldData extends ICapabilityProvider {
         @Override
         public GenerationSettings getSettings() {
             return this.settings;
-        }
-
-        @Override
-        public RegionDataSystem getDataSystem() {
-            return this.dataSystem;
         }
 
         @Override

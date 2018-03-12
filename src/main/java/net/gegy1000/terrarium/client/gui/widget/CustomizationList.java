@@ -90,7 +90,7 @@ public class CustomizationList extends ListGuiWidget {
         private void drawTooltip(TooltipRenderer renderer, int mouseX, int mouseY) {
             int width = CustomizationList.this.parent.width;
             int height = CustomizationList.this.parent.height;
-            renderer.renderTooltip(CustomizationList.this.client, mouseX, mouseY, width, height);
+            renderer.renderTooltip(mouseX, mouseY);
 
             GlStateManager.disableLighting();
             GlStateManager.disableDepth();

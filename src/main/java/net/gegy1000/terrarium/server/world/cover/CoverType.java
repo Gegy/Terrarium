@@ -85,6 +85,7 @@ public enum CoverType {
         try {
             constructor = generator.getDeclaredConstructor(CoverType.class);
         } catch (ReflectiveOperationException e) {
+            Terrarium.LOGGER.trace("Cover generator {} did not have constructor with CoverType, testing for empty", generator);
         }
 
         if (constructor == null) {
