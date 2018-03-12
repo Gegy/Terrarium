@@ -98,10 +98,10 @@ public class TerrariumCustomizationGui extends GuiScreen {
         List<CustomizationCategory> categories = this.settings.getGenerator().getCategories();
         for (CustomizationCategory category : categories) {
             List<GuiButton> currentWidgets = new ArrayList<>();
+            currentWidgets.add(upLevelButton);
             for (CustomizationWidget widget : category.getWidgets()) {
                 currentWidgets.add(widget.createWidget(this.settings, 0, 0, 0));
             }
-            currentWidgets.add(upLevelButton);
 
             CustomizationList currentList = new CustomizationList(this.mc, this, PADDING_X, TOP_OFFSET, previewWidth, previewHeight, currentWidgets);
 

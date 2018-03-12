@@ -29,53 +29,50 @@ state.terrarium.cached.tooltip=Loading geographical data from local cache
 state.terrarium.online.tooltip=Loading geographical data from online source
 state.terrarium.no_connection.tooltip=Unable to load geographical data. Check your internet connection!
 
-# Customization Settings
+# Customization Categories
 
-setting.terrarium.scale.name=World Scale
-setting.terrarium.height_scale.name=Height Scale
-setting.terrarium.scatter.name=Scatter Range
-setting.terrarium.height_offset.name=Sea Level
-setting.terrarium.decorate.name=Decorate
-setting.terrarium.map_features.name=Vanilla Map Features
-setting.terrarium.buildings.name=Buildings
-setting.terrarium.streets.name=Streets
-setting.terrarium.cave_gen.name=Cave Generation
-setting.terrarium.resource_generation.name=Resource Generation
-setting.terrarium.noise_scale.name=Noise Scale
-setting.terrarium.beach_size.name=Beach Size
+category.terrarium.world.name=World Properties
+category.terrarium.features.name=Feature Properties
 
-setting.terrarium.scale.tooltip=The amount of meters in real life representing one block in-game
-setting.terrarium.height_scale.tooltip=Elevation multiplier from meters to blocks
-setting.terrarium.scatter.tooltip=Range in blocks that biomes should be scattered
-setting.terrarium.height_offset.tooltip=The height in-game that corresponds to sea-level
-setting.terrarium.decorate.tooltip=If enabled, decorations such as plants and trees will be placed
-setting.terrarium.map_features.tooltip=If enabled, all vanilla map feature such as temples will be generated
-setting.terrarium.buildings.tooltip=If enabled, buildings from OpenStreetMap will be generated
-setting.terrarium.streets.tooltip=If enabled, streets from OpenStreetMap will be generated
-setting.terrarium.cave_gen.tooltip=If enabled, caves and ravines will be generated randomly
-setting.terrarium.resource_generation.tooltip=If enabled, resources will be randomly generated throughout in the world
-setting.terrarium.noise_scale.tooltip=Multiplier for the effect of random noise generation in height to be applied to the world. 0 = no noise, 1 = default noise
-setting.terrarium.beach.tooltip=Radius in blocks for beaches to be generated around coastlines
+# World Properties
 
-setting.terrarium.slider_range.name=Range: [%.2f-%.2f]
-setting.terrarium.slider_fine.name=Hold SHIFT to fine tune
+property.terrarium.world_scale.name=World Scale
+property.terrarium.height_scale.name=Height Scale
+property.terrarium.noise_scale.name=Noise Scale
+property.terrarium.scatter_range.name=Scatter Range
+property.terrarium.height_origin.name=Height Origin
+property.terrarium.beach_size.name=Beach Size
+
+property.terrarium.world_scale.tooltip=The amount of meters in real life representing one block in-game
+property.terrarium.height_scale.tooltip=Elevation multiplier from meters to blocks
+property.terrarium.noise_scale.tooltip=Multiplier for the effect of random noise generation in height to be applied to the world. 0 = no noise, 1 = default noise
+property.terrarium.scatter_range.tooltip=Range in blocks that biomes should be scattered
+property.terrarium.height_origin.tooltip=The height in-game that corresponds to sea-level
+property.terrarium.beach_size.tooltip=Radius in blocks for beaches to be generated around coastlines
+
+# Feature Properties
+
+property.terrarium.enable_decoration.name=Enable Decoration
+property.terrarium.enable_buildings.name=Enable Buildings
+property.terrarium.enable_streets.name=Enable Streets
+property.terrarium.enable_vanilla_features.name=Enable Vanilla Features
+property.terrarium.enable_cave_generation.name=Enable Cave Generation
+property.terrarium.enable_resource_generation.name=Enable Resource Generation
+
+property.terrarium.enable_decoration.tooltip=If enabled, decorations such as plants and trees will be placed
+property.terrarium.enable_buildings.tooltip=If enabled, buildings from OpenStreetMap will be generated
+property.terrarium.enable_streets.tooltip=If enabled, streets from OpenStreetMap will be generated
+property.terrarium.enable_vanilla_features.tooltip=If enabled, all vanilla map features such as temples will be generated
+property.terrarium.enable_cave_generation.tooltip=If enabled, caves and ravines will be generated randomly
+property.terrarium.enable_resource_generation.tooltip=If enabled, resources will be randomly generated throughout in the world
+
+property.terrarium.slider_range.name=Range: [%.2f-%.2f]
+property.terrarium.slider_fine.name=Hold SHIFT to fine tune
 
 # Presets
 
-preset.terrarium.city.name=City
-preset.terrarium.city.desc=City
-
-preset.terrarium.default.name=Default
-preset.terrarium.default.desc=Default
-
-preset.terrarium.spikey.name=Spikey
-preset.terrarium.spikey.desc=Spikey
-
-preset.terrarium.survival_city.name=Survival City
-preset.terrarium.survival_city.desc=Survival City
-
-preset.terrarium.survival.name=Survival
-preset.terrarium.survival.desc=Survival
+preset.earth_default.name=Earth: Default
+preset.earth_default.desc=Default Earth generator
 
 # Config
 

@@ -73,10 +73,10 @@ public class SliderGuiWidget extends GuiButton implements TooltipRenderer {
         if (this.hoverTime >= 15) {
             String name = TextFormatting.BLUE + this.propertyKey.getLocalizedName();
             String tooltip = TextFormatting.GRAY + this.propertyKey.getLocalizedTooltip();
-            String defaults = TextFormatting.YELLOW + I18n.format("setting.terrarium.slider_range.name", this.min, this.max);
+            String defaults = TextFormatting.YELLOW + I18n.format("property.terrarium.slider_range.name", this.min, this.max);
             List<String> lines = Lists.newArrayList(name, tooltip, defaults);
             if (Math.abs(this.step - this.fineStep) > 1E-6) {
-                lines.add(TextFormatting.DARK_GRAY.toString() + TextFormatting.ITALIC + I18n.format("setting.terrarium.slider_fine.name"));
+                lines.add(TextFormatting.DARK_GRAY.toString() + TextFormatting.ITALIC + I18n.format("property.terrarium.slider_fine.name"));
             }
             GuiRenderUtils.drawTooltip(lines, mouseX, mouseY);
         }

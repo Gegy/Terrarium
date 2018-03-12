@@ -37,6 +37,14 @@ public class GoogleGeocoder implements Geocoder {
 
         try (InputStreamReader input = new InputStreamReader(connection.getInputStream())) {
             JsonObject root = (JsonObject) JSON_PARSER.parse(input);
+
+            if (root.has("status")) {
+                String status = root.get("status").getAsString();
+                if (status.equalsIgnoreCase("OVER_QUERY_LIMIT")) {
+                    throw new IOException("Reached query limit for Google Geocoder API! Try again in a few minutes");
+                }
+            }
+
             if (root.has("results")) {
                 JsonArray results = root.getAsJsonArray("results");
                 for (JsonElement element : results) {
@@ -48,9 +56,9 @@ public class GoogleGeocoder implements Geocoder {
                         return new Coordinate(this.latLngCoordinateState, location.get("lat").getAsDouble(), location.get("lng").getAsDouble());
                     }
                 }
-            } else {
-                Terrarium.LOGGER.warn("Got geocoder response with no results");
             }
+
+            Terrarium.LOGGER.warn("Got geocoder response for {} with no result: {}", place, root);
         }
 
         return null;

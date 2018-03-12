@@ -119,16 +119,18 @@ public class GeoTeleportCommand extends CommandBase {
 
         @Override
         public Coordinate getCoordinate(TerrariumWorldData worldData, GenerationSettings settings) throws CommandException {
+            Coordinate geocode;
             try {
-                Coordinate geocode = worldData.getGeocoder().get(this.place);
-                if (geocode == null) {
-                    throw new WrongUsageException("commands.terrarium.geotp.not_found", this.place);
-                }
-                return geocode;
+                geocode = worldData.getGeocoder().get(this.place);
             } catch (Exception e) {
                 Terrarium.LOGGER.error("Failed to get geocode for {}", this.place, e);
                 throw new WrongUsageException("commands.terrarium.geotp.error", this.place, e.getClass().getSimpleName(), e.getMessage());
             }
+
+            if (geocode == null) {
+                throw new WrongUsageException("commands.terrarium.geotp.not_found", this.place);
+            }
+            return geocode;
         }
     }
 }
