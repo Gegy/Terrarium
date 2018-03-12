@@ -17,6 +17,9 @@
   },
   "customization": "terrarium:generation_system/earth/customization.json",
   "coordinate_system": "terrarium:generation_system/earth/coordinate_system.json",
-  "data_system": "terrarium:generation_system/earth/data_system.json",
+  "data_system": {
+    "components": "terrarium:generation_system/earth/data_components.json",
+    "adapters": "terrarium:generation_system/earth/data_adapters.json"
+  },
   "chunk_composer": "terrarium:generation_system/earth/chunk_composer.json"
 }

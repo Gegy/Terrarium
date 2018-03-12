@@ -1,4 +1,0 @@
-{
-  "components": "terrarium:generation_system/earth/data_components.json",
-  "adapters": "terrarium:generation_system/earth/data_adapters.json"
-}
