@@ -9,8 +9,6 @@ gui.terrarium.remote_data_warning.2=To generate chunks, GIS data may be required
 gui.terrarium.remote_data_warning.3=This can lead to large data usage, depending on the chunks generated.
 gui.terrarium.remote_data_warning.4=(Data is only requested for chunks that players view, and then is cached)
 
-gui.terrarium.credits=Terrarium data provided by:
-
 gui.terrarium.select_preset.name=Select World Preset
 
 options.terrarium.customize_world_title.name=Customize World Generation

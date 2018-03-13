@@ -3,6 +3,10 @@
 generator.terrarium.earth=Earth
 generator.terrarium.debug=Earth Debug
 
+# GUI
+
+gui.earth.credits=Terrarium data provided by:
+
 # Customization Categories
 
 category.terrarium.world.name=World Properties

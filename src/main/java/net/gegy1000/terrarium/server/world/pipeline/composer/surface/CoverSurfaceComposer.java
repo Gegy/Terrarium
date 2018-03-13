@@ -135,10 +135,6 @@ public class CoverSurfaceComposer implements SurfaceComposer {
                         currentTop = AIR;
                         currentFiller = this.replaceBlock;
                     }
-                    // TODO: What is the impact of this code? We have a separate composer for handling ocean
-//                    if (localY < this.oceanHeight && currentTop.getMaterial() == Material.AIR) {
-//                        currentTop = WATER;
-//                    }
                     depth = soilDepth;
 
                     primer.setBlockState(localX, localY, localZ, currentTop);
