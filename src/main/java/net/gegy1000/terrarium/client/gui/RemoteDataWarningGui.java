@@ -18,6 +18,7 @@ public class RemoteDataWarningGui extends GuiScreen {
     private GuiScreen parent;
     private boolean complete;
 
+    // TODO: Generify
     public RemoteDataWarningGui(GuiScreen parent) {
         super();
         this.parent = parent;

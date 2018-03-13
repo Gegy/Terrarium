@@ -1,6 +1,6 @@
 package net.gegy1000.terrarium.server.world.cover;
 
-import net.gegy1000.terrarium.server.world.LatitudinalZone;
+import net.gegy1000.earth.server.world.cover.LatitudinalZone;
 import net.minecraft.init.Biomes;
 import net.minecraft.world.biome.Biome;
 

@@ -2,7 +2,7 @@ package net.gegy1000.terrarium.server.world.pipeline.composer.biome;
 
 import com.google.gson.JsonObject;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
-import net.gegy1000.terrarium.server.world.LatitudinalZone;
+import net.gegy1000.earth.server.world.cover.LatitudinalZone;
 import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;

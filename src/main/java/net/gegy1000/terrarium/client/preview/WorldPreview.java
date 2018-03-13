@@ -40,6 +40,8 @@ public class WorldPreview implements IBlockAccess {
 
     private final ExecutorService executor = Executors.newFixedThreadPool(3, new ThreadFactoryBuilder().setDaemon(true).setNameFormat("terrarium-preview-%d").build());
 
+    private final WorldType worldType;
+
     private final BlockingQueue<BufferBuilder> builderQueue;
 
     private final ComposableChunkGenerator chunkGenerator;
@@ -52,11 +54,13 @@ public class WorldPreview implements IBlockAccess {
     private List<PreviewChunk> previewChunks = null;
     private int heightOffset = 64;
 
-    public WorldPreview(GenerationSettings settings, BufferBuilder[] builders) {
+    public WorldPreview(WorldType worldType, GenerationSettings settings, BufferBuilder[] builders) {
+        this.worldType = worldType;
+
         this.builderQueue = new ArrayBlockingQueue<>(builders.length);
         Collections.addAll(this.builderQueue, builders);
 
-        PreviewDummyWorld world = new PreviewDummyWorld(settings);
+        PreviewDummyWorld world = new PreviewDummyWorld(this.worldType, settings);
         TerrariumWorldData worldData = world.getCapability(TerrariumCapabilities.worldDataCapability, null);
         if (worldData == null) {
             throw new IllegalStateException("Failed to get world data capability from preview world");
@@ -207,7 +211,7 @@ public class WorldPreview implements IBlockAccess {
 
     @Override
     public WorldType getWorldType() {
-        return Terrarium.EARTH_TYPE;
+        return this.worldType;
     }
 
     @Override

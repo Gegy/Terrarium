@@ -18,7 +18,8 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 public interface CachedRemoteSource {
-    File GLOBAL_CACHE_ROOT = TerrariumRemoteData.CACHE_ROOT;
+    File GLOBAL_CACHE_ROOT = new File(".", "mods/terrarium/cache/");
+
     ExecutorService CACHE_SERVICE = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("Terrarium Cache Service").setDaemon(true).build());
 
     File getCacheRoot();
@@ -28,7 +29,11 @@ public interface CachedRemoteSource {
     String getCachedName(DataTilePos key);
 
     default InputStream getStream(DataTilePos key) throws NoDataException {
-        File cachedFile = new File(this.getCacheRoot(), this.getCachedName(key));
+        File cacheRoot = this.getCacheRoot();
+        if (!cacheRoot.exists()) {
+            cacheRoot.mkdirs();
+        }
+        File cachedFile = new File(cacheRoot, this.getCachedName(key));
         if (!this.shouldLoadCache(key, cachedFile)) {
             LoadingStateHandler.StateEntry onlineEntry = LoadingStateHandler.makeState(LoadingState.LOADING_ONLINE);
             try (InputStream remoteStream = this.getRemoteStream(key)) {

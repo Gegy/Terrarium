@@ -4,8 +4,9 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import net.gegy1000.earth.server.world.pipeline.source.EarthRemoteData;
 import net.gegy1000.terrarium.Terrarium;
-import net.gegy1000.terrarium.server.world.pipeline.source.TerrariumRemoteData;
+import net.gegy1000.terrarium.server.world.pipeline.source.CachedRemoteSource;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.io.IOUtils;
@@ -31,7 +32,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 @SideOnly(Side.CLIENT)
 public class SlippyMapTileCache {
-    private static final File CACHE_ROOT = new File(TerrariumRemoteData.CACHE_ROOT, "carto");
+    private static final File CACHE_ROOT = new File(CachedRemoteSource.GLOBAL_CACHE_ROOT, "carto");
     private static final int CACHE_SIZE = 256;
 
     private final ExecutorService loadingService = Executors.newFixedThreadPool(2, new ThreadFactoryBuilder()
@@ -89,8 +90,9 @@ public class SlippyMapTileCache {
         if (cacheFile.exists()) {
             return new BufferedInputStream(new FileInputStream(cacheFile));
         }
-        String query = String.format(TerrariumRemoteData.info.getRasterMapQuery(), pos.getZoom(), pos.getX(), pos.getY());
-        URL url = new URL(TerrariumRemoteData.info.getRasterMapEndpoint() + "/" + query);
+        // TODO: Dependency on earth module: extract out into map providers
+        String query = String.format(EarthRemoteData.info.getRasterMapQuery(), pos.getZoom(), pos.getX(), pos.getY());
+        URL url = new URL(EarthRemoteData.info.getRasterMapEndpoint() + "/" + query);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setConnectTimeout(1000);
         connection.setReadTimeout(5000);

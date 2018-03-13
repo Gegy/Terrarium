@@ -3,8 +3,7 @@ package net.gegy1000.terrarium.client;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.client.gui.RemoteDataWarningGui;
 import net.gegy1000.terrarium.server.config.TerrariumConfig;
-import net.gegy1000.terrarium.server.world.CoverDebugWorldType;
-import net.gegy1000.terrarium.server.world.EarthWorldType;
+import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiCreateWorld;
@@ -46,7 +45,7 @@ public class ClientEventHandler {
     @SubscribeEvent
     public static void onJoinWorld(WorldEvent.Load event) {
         World world = event.getWorld();
-        if (world.isRemote && world.getWorldType() instanceof EarthWorldType && MC.isIntegratedServerRunning()) {
+        if (world.isRemote && world.getWorldType() instanceof TerrariumWorldType && MC.isIntegratedServerRunning()) {
             awaitingLoad = true;
         }
     }
@@ -67,10 +66,13 @@ public class ClientEventHandler {
             GuiButton structuresButton = event.getButtonList().get(4);
             int selectedWorldIndex = ClientProxy.getSelectedWorldType((GuiCreateWorld) currentScreen);
             WorldType worldType = WorldType.WORLD_TYPES[selectedWorldIndex];
-            if (worldType instanceof EarthWorldType) {
-                structuresButton.visible = false;
-            } else if (worldType instanceof CoverDebugWorldType && !GuiScreen.isShiftKeyDown()) {
-                ClientProxy.actionPerformed(currentScreen, event.getButton());
+            if (worldType instanceof TerrariumWorldType) {
+                TerrariumWorldType terrariumWorldType = (TerrariumWorldType) worldType;
+                if (terrariumWorldType.isHidden() && !GuiScreen.isShiftKeyDown()) {
+                    ClientProxy.actionPerformed(currentScreen, event.getButton());
+                } else {
+                    structuresButton.visible = false;
+                }
             }
         }
     }

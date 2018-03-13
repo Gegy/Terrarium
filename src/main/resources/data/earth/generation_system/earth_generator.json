@@ -1,0 +1,25 @@
+{
+  "identifier": "earth:earth_generator",
+  "constants": {
+    "earth_circumference": 40075000.0,
+    "srtm_width": {
+      "terrarium:mul": {"left": 1200, "right": 360}
+    },
+    "srtm_scale": {
+      "terrarium:div": {
+        "left": "@earth_circumference",
+        "right": "@srtm_width"
+      }
+    },
+    "glob_ratio": {
+      "terrarium:div": {"left": 10.0, "right": 3.0}
+    }
+  },
+  "customization": "earth:generation_system/earth/customization.json",
+  "coordinate_system": "earth:generation_system/earth/coordinate_system.json",
+  "data_system": {
+    "components": "earth:generation_system/earth/data_components.json",
+    "adapters": "earth:generation_system/earth/data_adapters.json"
+  },
+  "chunk_composer": "earth:generation_system/earth/chunk_composer.json"
+}

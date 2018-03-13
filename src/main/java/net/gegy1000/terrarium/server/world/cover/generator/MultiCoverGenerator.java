@@ -2,7 +2,7 @@ package net.gegy1000.terrarium.server.world.cover.generator;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.gegy1000.terrarium.server.world.LatitudinalZone;
+import net.gegy1000.earth.server.world.cover.LatitudinalZone;
 import net.gegy1000.terrarium.server.world.cover.CoverGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectWeightedLayer;

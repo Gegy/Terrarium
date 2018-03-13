@@ -1,6 +1,6 @@
 package net.gegy1000.terrarium.server.world.cover;
 
-import net.gegy1000.terrarium.server.world.LatitudinalZone;
+import net.gegy1000.earth.server.world.cover.LatitudinalZone;
 import net.gegy1000.terrarium.server.world.cover.generator.primer.GlobPrimer;
 import net.gegy1000.terrarium.server.world.feature.tree.GenerousDenseShrubGenerator;
 import net.gegy1000.terrarium.server.world.feature.tree.GenerousPineGenerator;

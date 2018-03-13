@@ -1,6 +1,6 @@
 package net.gegy1000.terrarium.server.world.chunk;
 
-import net.gegy1000.terrarium.server.world.LatitudinalZone;
+import net.gegy1000.earth.server.world.cover.LatitudinalZone;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 
 import java.util.ArrayList;

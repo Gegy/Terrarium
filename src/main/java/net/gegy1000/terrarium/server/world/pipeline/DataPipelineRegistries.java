@@ -8,12 +8,10 @@ import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.BeachAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.HeightNoiseAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.HeightTransformAdapter;
-import net.gegy1000.terrarium.server.world.pipeline.adapter.OsmCoastlineAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.RegionAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.WaterFlattenAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.debug.DebugRegionBorderAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.populator.OverpassRegionPopulator;
 import net.gegy1000.terrarium.server.world.pipeline.populator.RegionPopulator;
 import net.gegy1000.terrarium.server.world.pipeline.populator.ScaledByteRegionPopulator;
 import net.gegy1000.terrarium.server.world.pipeline.populator.ScaledCoverRegionPopulator;
@@ -21,14 +19,9 @@ import net.gegy1000.terrarium.server.world.pipeline.populator.ScaledShortRegionP
 import net.gegy1000.terrarium.server.world.pipeline.sampler.ByteTileSampler;
 import net.gegy1000.terrarium.server.world.pipeline.sampler.CoverTileSampler;
 import net.gegy1000.terrarium.server.world.pipeline.sampler.DataSampler;
-import net.gegy1000.terrarium.server.world.pipeline.sampler.OsmSampler;
 import net.gegy1000.terrarium.server.world.pipeline.sampler.ShortTileSampler;
 import net.gegy1000.terrarium.server.world.pipeline.sampler.SlopeTileSampler;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
-import net.gegy1000.terrarium.server.world.pipeline.source.earth.GlobSource;
-import net.gegy1000.terrarium.server.world.pipeline.source.earth.SRTMHeightSource;
-import net.gegy1000.terrarium.server.world.pipeline.source.earth.osm.OverpassSource;
-import net.gegy1000.terrarium.server.world.pipeline.source.earth.tile.OsmTileAccess;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ByteRasterTileAccess;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTileAccess;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTileAccess;
@@ -82,21 +75,10 @@ public class DataPipelineRegistries {
                 return new CoverRasterTileAccess(data, width, height);
             }
         });
-
-        event.register(new ResourceLocation(Terrarium.MODID, "osm"), new RegionComponentType<OsmTileAccess>(OsmTileAccess.class) {
-            @Override
-            public OsmTileAccess createDefaultData(int width, int height) {
-                return new OsmTileAccess();
-            }
-        });
     }
 
     @SubscribeEvent
     public static void onRegisterSources(SourceEvent event) {
-        // TODO: Move to Earth module
-        event.register(new ResourceLocation(Terrarium.MODID, "srtm_raster_source"), new SRTMHeightSource.Parser());
-        event.register(new ResourceLocation(Terrarium.MODID, "glob_raster_source"), new GlobSource.Parser());
-        event.register(new ResourceLocation(Terrarium.MODID, "overpass_source"), new OverpassSource.Parser());
     }
 
     @SubscribeEvent
@@ -107,14 +89,11 @@ public class DataPipelineRegistries {
         event.register(new ResourceLocation(Terrarium.MODID, "byte_raster_sampler"), new ByteTileSampler.Parser());
 
         event.register(new ResourceLocation(Terrarium.MODID, "slope_raster_sampler"), new SlopeTileSampler.Parser());
-
-        event.register(new ResourceLocation(Terrarium.MODID, "osm_sampler"), new OsmSampler.Parser());
     }
 
     @SubscribeEvent
     public static void onRegisterPopulators(PopulatorEvent event) {
         event.register(new ResourceLocation(Terrarium.MODID, "scaled_cover_populator"), new ScaledCoverRegionPopulator.Parser());
-        event.register(new ResourceLocation(Terrarium.MODID, "overpass_populator"), new OverpassRegionPopulator.Parser());
 
         event.register(new ResourceLocation(Terrarium.MODID, "scaled_short_populator"), new ScaledShortRegionPopulator.Parser());
         event.register(new ResourceLocation(Terrarium.MODID, "scaled_byte_populator"), new ScaledByteRegionPopulator.Parser());
@@ -127,7 +106,6 @@ public class DataPipelineRegistries {
         event.register(new ResourceLocation(Terrarium.MODID, "transform_heights"), new HeightTransformAdapter.Parser());
         event.register(new ResourceLocation(Terrarium.MODID, "beaches"), new BeachAdapter.Parser());
         event.register(new ResourceLocation(Terrarium.MODID, "water_edge_flatten"), new WaterFlattenAdapter.Parser());
-        event.register(new ResourceLocation(Terrarium.MODID, "osm_coastlines"), new OsmCoastlineAdapter.Parser());
     }
 
     public static RegionComponentType<?> getComponentType(ResourceLocation identifier) {

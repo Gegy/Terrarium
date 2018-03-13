@@ -1,0 +1,38 @@
+{
+  "states": {
+    "earth_lat_lng": {
+      "type": "terrarium:lat_lng",
+      "world_scale": "@world_scale",
+      "latlng_line": {
+        "terrarium:mul": {
+          "left": "@srtm_scale",
+          "right": 1200.0
+        }
+      }
+    },
+    "srtm_raster": {
+      "type": "terrarium:world_scaled",
+      "world_scale": "@world_scale",
+      "scale_multiplier": "@srtm_scale"
+    },
+    "globcover_raster": {
+      "type": "terrarium:world_scaled",
+      "world_scale": "@world_scale",
+      "scale_multiplier": {
+        "terrarium:mul": {
+          "left": "@srtm_scale",
+          "right": "@glob_ratio"
+        }
+      }
+    }
+  },
+  "navigational_state": "earth_lat_lng",
+  "spawnpoint": {
+    "x": "spawn_latitude",
+    "z": "spawn_longitude"
+  },
+  "geocoder": {
+    "type": "earth:google_geocoder",
+    "lat_lng_coordinate": "earth_lat_lng"
+  }
+}

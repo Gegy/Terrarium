@@ -19,6 +19,7 @@ import net.minecraft.client.gui.GuiCreateWorld;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.world.WorldType;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.input.Keyboard;
@@ -41,6 +42,8 @@ public class TerrariumCustomizationGui extends GuiScreen {
     private static final int PADDING_X = 5;
 
     private final GuiCreateWorld parent;
+
+    private final WorldType worldType;
     private final TerrariumGenerator generator;
 
     private GenerationSettings settings;
@@ -55,8 +58,9 @@ public class TerrariumCustomizationGui extends GuiScreen {
 
     private boolean freeze;
 
-    public TerrariumCustomizationGui(GuiCreateWorld parent, TerrariumGenerator generator, TerrariumPreset defaultPreset) {
+    public TerrariumCustomizationGui(GuiCreateWorld parent, WorldType worldType, TerrariumGenerator generator, TerrariumPreset defaultPreset) {
         this.parent = parent;
+        this.worldType = worldType;
         this.generator = generator;
         if (defaultPreset.getGenerator() != generator) {
             throw new IllegalArgumentException("Cannot customize world with preset of wrong generator type");
@@ -206,7 +210,7 @@ public class TerrariumCustomizationGui extends GuiScreen {
 
         this.activeList.drawScreen(mouseX, mouseY, partialTicks);
 
-        String title = I18n.format("options.terrarium.customize_earth_title.name");
+        String title = I18n.format("options.terrarium.customize_world_title.name");
         this.drawCenteredString(this.fontRenderer, title, this.width / 2, 20, 0xFFFFFF);
 
         super.drawScreen(mouseX, mouseY, partialTicks);
@@ -241,13 +245,13 @@ public class TerrariumCustomizationGui extends GuiScreen {
         for (int i = 0; i < builders.length; i++) {
             builders[i] = new BufferBuilder(0x4000);
         }
-        this.preview = new WorldPreview(this.settings, builders);
+        this.preview = new WorldPreview(this.worldType, this.settings, builders);
     }
 
     private void previewLarge() {
         if (this.preview != null) {
             this.freeze = true;
-            this.mc.displayGuiScreen(new PreviewEarthGui(this.preview, this));
+            this.mc.displayGuiScreen(new PreviewWorldGui(this.preview, this));
         }
     }
 

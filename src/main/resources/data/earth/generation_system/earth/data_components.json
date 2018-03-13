@@ -1,0 +1,83 @@
+[
+  {
+    "type": "terrarium:height",
+    "populator": {
+      "type": "terrarium:scaled_short_populator",
+      "sampler": {
+        "type": "terrarium:short_raster_sampler",
+        "source": {"type": "earth:srtm_raster_source", "tile_coordinate": "srtm_raster", "cache": "srtm_heights"}
+      },
+      "interpolation_method": {
+        "earth:earth_interpolation_method": {"world_scale": "@world_scale"}
+      },
+      "coordinate": "srtm_raster"
+    }
+  },
+  {
+    "type": "terrarium:slope",
+    "populator": {
+      "type": "terrarium:scaled_byte_populator",
+      "sampler": {
+        "type": "terrarium:slope_raster_sampler",
+        "height_source": {"type": "earth:srtm_raster_source", "tile_coordinate": "srtm_raster", "cache": "srtm_heights"}
+      },
+      "interpolation_method": "linear",
+      "coordinate": "srtm_raster"
+    }
+  },
+  {
+    "type": "terrarium:cover",
+    "populator": {
+      "type": "terrarium:scaled_cover_populator",
+      "sampler": {
+        "type": "terrarium:cover_raster_sampler",
+        "source": {"type": "earth:glob_raster_source", "tile_coordinate": "globcover_raster", "cache": "globcover"}
+      },
+      "coordinate": "globcover_raster"
+    }
+  },
+  {
+    "type": "earth:osm",
+    "populator": {
+      "type": "earth:overpass_populator",
+      "samplers": [
+        {
+          "type": "earth:osm_sampler",
+          "lat_lng_coordinate": "earth_lat_lng",
+          "source": {
+            "type": "earth:overpass_source",
+            "cache": "osm/outline",
+            "query": "earth:query/outline_overpass_query.oql",
+            "query_version": 1,
+            "tile_size_latlng": 0.3,
+            "lat_lng_coordinate": "earth_lat_lng"
+          }
+        },
+        {
+          "type": "earth:osm_sampler",
+          "lat_lng_coordinate": "earth_lat_lng",
+          "source": {
+            "type": "earth:overpass_source",
+            "cache": "osm/general",
+            "query": "earth:query/general_overpass_query.oql",
+            "query_version": 2,
+            "tile_size_latlng": 0.1,
+            "lat_lng_coordinate": "earth_lat_lng"
+          }
+        },
+        {
+          "type": "earth:osm_sampler",
+          "lat_lng_coordinate": "earth_lat_lng",
+          "source": {
+            "type": "earth:overpass_source",
+            "cache": "osm/detailed",
+            "query": "earth:query/detail_overpass_query.oql",
+            "query_version": 2,
+            "tile_size_latlng": 0.05,
+            "lat_lng_coordinate": "earth_lat_lng"
+          }
+        }
+      ]
+    }
+  }
+]

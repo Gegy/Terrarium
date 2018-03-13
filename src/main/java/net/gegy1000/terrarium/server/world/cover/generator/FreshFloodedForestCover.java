@@ -1,6 +1,6 @@
 package net.gegy1000.terrarium.server.world.cover.generator;
 
-import net.gegy1000.terrarium.server.world.LatitudinalZone;
+import net.gegy1000.earth.server.world.cover.LatitudinalZone;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.feature.tree.GenerousTreeGenerator;
 import net.minecraft.block.state.IBlockState;

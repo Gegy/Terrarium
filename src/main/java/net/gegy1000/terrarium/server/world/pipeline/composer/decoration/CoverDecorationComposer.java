@@ -3,7 +3,7 @@ package net.gegy1000.terrarium.server.world.pipeline.composer.decoration;
 import com.google.gson.JsonObject;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.util.ArrayUtils;
-import net.gegy1000.terrarium.server.world.LatitudinalZone;
+import net.gegy1000.earth.server.world.cover.LatitudinalZone;
 import net.gegy1000.terrarium.server.world.chunk.PseudoRandomMap;
 import net.gegy1000.terrarium.server.world.cover.CoverGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;

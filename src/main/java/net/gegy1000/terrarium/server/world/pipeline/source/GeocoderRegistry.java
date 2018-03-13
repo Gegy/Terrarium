@@ -2,9 +2,7 @@ package net.gegy1000.terrarium.server.world.pipeline.source;
 
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.event.TerrariumRegistryEvent;
-import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
-import net.gegy1000.terrarium.server.world.pipeline.source.earth.GoogleGeocoder;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
@@ -23,10 +21,6 @@ public class GeocoderRegistry {
 
     @SubscribeEvent
     public static void onRegisterGeocoders(Event event) {
-        event.register(new ResourceLocation(Terrarium.MODID, "google_geocoder"), (settings, world, valueParser, objectRoot) -> {
-            CoordinateState latLngCoordinate = valueParser.parseCoordinateState(objectRoot, "lat_lng_coordinate");
-            return new GoogleGeocoder(latLngCoordinate);
-        });
     }
 
     public static InstanceObjectParser<Geocoder> getGeocoder(ResourceLocation identifier) {

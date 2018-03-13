@@ -21,8 +21,6 @@ public class TerrariumPresetRegistry {
 
     public static final TerrariumPreset DEFAULT = new TerrariumPreset("default", new ResourceLocation(Terrarium.MODID, "default"), new GenerationSettings.Default());
 
-    public static TerrariumPreset EARTH_DEFAULT = DEFAULT;
-
     public static void onInit() {
         MinecraftForge.EVENT_BUS.post(new Event(PRESETS));
     }
@@ -34,8 +32,6 @@ public class TerrariumPresetRegistry {
         for (JsonDiscoverer.Result<TerrariumPreset> result : discoveredPresets) {
             event.register(result.getKey(), result.getParsed());
         }
-
-        EARTH_DEFAULT =  TerrariumPresetRegistry.get(new ResourceLocation(Terrarium.MODID, "earth_default"));
     }
 
     public static TerrariumPreset get(ResourceLocation identifier) {

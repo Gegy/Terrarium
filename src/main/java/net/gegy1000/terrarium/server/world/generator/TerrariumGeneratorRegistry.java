@@ -19,8 +19,6 @@ public class TerrariumGeneratorRegistry {
 
     public static final TerrariumGenerator DEFAULT = new TerrariumGenerator.Default();
 
-    public static TerrariumGenerator EARTH = DEFAULT;
-
     private static final JsonDiscoverer<JsonTerrariumGenerator> DISCOVERER = new JsonDiscoverer<>(JsonTerrariumGenerator::parseGenerator);
 
     public static void onInit() {
@@ -35,8 +33,6 @@ public class TerrariumGeneratorRegistry {
             JsonTerrariumGenerator generator = result.getParsed();
             event.register(generator.getIdentifier(), generator);
         }
-
-        EARTH = TerrariumGeneratorRegistry.get(new ResourceLocation(Terrarium.MODID, "earth_generator"));
     }
 
     public static TerrariumGenerator get(ResourceLocation identifier) {

@@ -2,7 +2,6 @@ package net.gegy1000.terrarium.server.world.pipeline.adapter.debug;
 
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.pipeline.adapter.OsmCoastlineAdapter;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -10,30 +9,6 @@ import java.io.File;
 import java.io.IOException;
 
 public class DebugImageWriter {
-    public static final ColorSelector<Integer> COASTLINE = value -> {
-        int coastType = value & OsmCoastlineAdapter.COAST_TYPE_MASK;
-        switch (coastType) {
-            case OsmCoastlineAdapter.FREE_FLOOD:
-                return 0x404040;
-            case OsmCoastlineAdapter.COAST_UP:
-                return 0xFF0000;
-            case OsmCoastlineAdapter.COAST_DOWN:
-                return 0xFFFF00;
-            case OsmCoastlineAdapter.COAST_IGNORE:
-                return 0xFFFFFF;
-        }
-        int landType = value & OsmCoastlineAdapter.LAND_TYPE_MASK;
-        switch (landType) {
-            case OsmCoastlineAdapter.OCEAN:
-                return 0x0000FF;
-            case OsmCoastlineAdapter.LAND:
-                return 0x00FF00;
-            case OsmCoastlineAdapter.COAST:
-                return 0x009000;
-        }
-        return 0;
-    };
-
     public static final ColorSelector<Short> HEIGHT_MAP = value -> {
         int grayscale = ((int) value * 255 / 6000) & 0xFF;
         return grayscale << 16 | grayscale << 8 | grayscale;

@@ -1,25 +1,20 @@
-# Generators
-
-generator.terrarium.earth=Terrarium
-generator.terrarium.debug=Terrarium Debug
-
 # GUI
 
 gui.terrarium.accept=Accept
 gui.terrarium.preset=Set Preset
 gui.terrarium.spawnpoint=Set Spawn
 
-gui.terrarium.remote_data_warning.1=Warning: Terrarium downloads data from the Internet!
-gui.terrarium.remote_data_warning.2=To generate chunks, GIS data is required for height and biomes.
-gui.terrarium.remote_data_warning.3=This may lead to large data usage, depending on the chunks generated.
+gui.terrarium.remote_data_warning.1=Warning: Terrarium may download data from the Internet!
+gui.terrarium.remote_data_warning.2=To generate chunks, GIS data may be required for height and biomes.
+gui.terrarium.remote_data_warning.3=This can lead to large data usage, depending on the chunks generated.
 gui.terrarium.remote_data_warning.4=(Data is only requested for chunks that players view, and then is cached)
 
 gui.terrarium.credits=Terrarium data provided by:
 
 gui.terrarium.select_preset.name=Select World Preset
 
-options.terrarium.customize_earth_title.name=Customize Earth Generation
-options.terrarium.preview_earth_title.name=Preview Earth Generation
+options.terrarium.customize_world_title.name=Customize World Generation
+options.terrarium.preview_world_title.name=Preview World Generation
 
 state.terrarium.cached.name=Retrieving Cached Data
 state.terrarium.online.name=Retrieving Online Data
@@ -29,50 +24,8 @@ state.terrarium.cached.tooltip=Loading geographical data from local cache
 state.terrarium.online.tooltip=Loading geographical data from online source
 state.terrarium.no_connection.tooltip=Unable to load geographical data. Check your internet connection!
 
-# Customization Categories
-
-category.terrarium.world.name=World Properties
-category.terrarium.features.name=Feature Properties
-
-# World Properties
-
-property.terrarium.world_scale.name=World Scale
-property.terrarium.height_scale.name=Height Scale
-property.terrarium.noise_scale.name=Noise Scale
-property.terrarium.scatter_range.name=Scatter Range
-property.terrarium.height_origin.name=Height Origin
-property.terrarium.beach_size.name=Beach Size
-
-property.terrarium.world_scale.tooltip=The amount of meters in real life representing one block in-game
-property.terrarium.height_scale.tooltip=Elevation multiplier from meters to blocks
-property.terrarium.noise_scale.tooltip=Multiplier for the effect of random noise generation in height to be applied to the world. 0 = no noise, 1 = default noise
-property.terrarium.scatter_range.tooltip=Range in blocks that biomes should be scattered
-property.terrarium.height_origin.tooltip=The height in-game that corresponds to sea-level
-property.terrarium.beach_size.tooltip=Radius in blocks for beaches to be generated around coastlines
-
-# Feature Properties
-
-property.terrarium.enable_decoration.name=Enable Decoration
-property.terrarium.enable_buildings.name=Enable Buildings
-property.terrarium.enable_streets.name=Enable Streets
-property.terrarium.enable_vanilla_features.name=Enable Vanilla Features
-property.terrarium.enable_cave_generation.name=Enable Cave Generation
-property.terrarium.enable_resource_generation.name=Enable Resource Generation
-
-property.terrarium.enable_decoration.tooltip=If enabled, decorations such as plants and trees will be placed
-property.terrarium.enable_buildings.tooltip=If enabled, buildings from OpenStreetMap will be generated
-property.terrarium.enable_streets.tooltip=If enabled, streets from OpenStreetMap will be generated
-property.terrarium.enable_vanilla_features.tooltip=If enabled, all vanilla map features such as temples will be generated
-property.terrarium.enable_cave_generation.tooltip=If enabled, caves and ravines will be generated randomly
-property.terrarium.enable_resource_generation.tooltip=If enabled, resources will be randomly generated throughout in the world
-
 property.terrarium.slider_range.name=Range: [%.2f-%.2f]
 property.terrarium.slider_fine.name=Hold SHIFT to fine tune
-
-# Presets
-
-preset.earth_default.name=Earth: Default
-preset.earth_default.desc=Default Earth generator
 
 # Config
 
