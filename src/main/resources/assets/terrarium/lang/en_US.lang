@@ -5,9 +5,9 @@ gui.terrarium.preset=Set Preset
 gui.terrarium.spawnpoint=Set Spawn
 
 gui.terrarium.remote_data_warning.1=Warning: Terrarium may download data from the Internet!
-gui.terrarium.remote_data_warning.2=To generate chunks, GIS data may be required for height and biomes.
+gui.terrarium.remote_data_warning.2=Various data may be required for chunk generation.
 gui.terrarium.remote_data_warning.3=This can lead to large data usage, depending on the chunks generated.
-gui.terrarium.remote_data_warning.4=(Data is only requested for chunks that players view, and then is cached)
+gui.terrarium.remote_data_warning.4=(Data is only requested for chunks that players view, and is then cached)
 
 gui.terrarium.select_preset.name=Select World Preset
 
