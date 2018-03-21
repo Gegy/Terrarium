@@ -16,6 +16,7 @@
       "height_component": "terrarium:height",
       "slope_component": "terrarium:slope",
       "cover_component": "terrarium:cover",
+      "cover_bundle": "cover_types",
       "decorate": "@enable_decoration",
       "replace_block": "minecraft:stone"
     },
@@ -31,7 +32,8 @@
       "apply_if": "@enable_decoration",
       "height_component": "terrarium:height",
       "slope_component": "terrarium:slope",
-      "cover_component": "terrarium:cover"
+      "cover_component": "terrarium:cover",
+      "cover_bundle": "cover_types"
     }
   ],
   "biome_composer": {

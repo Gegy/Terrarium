@@ -1,15 +1,11 @@
 package net.gegy1000.terrarium.server.world.cover;
 
-import net.gegy1000.earth.server.world.cover.LatitudinalZone;
-import net.gegy1000.terrarium.server.world.cover.generator.primer.GlobPrimer;
 import net.gegy1000.terrarium.server.world.feature.tree.GenerousDenseShrubGenerator;
 import net.gegy1000.terrarium.server.world.feature.tree.GenerousPineGenerator;
 import net.gegy1000.terrarium.server.world.feature.tree.GenerousTaigaGenerator;
 import net.gegy1000.terrarium.server.world.feature.tree.SmallShrubGenerator;
 import net.gegy1000.terrarium.server.world.feature.tree.TallShrubGenerator;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ByteRasterTileAccess;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTileAccess;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTileAccess;
 import net.minecraft.block.BlockDirt;
 import net.minecraft.block.BlockDoublePlant;
 import net.minecraft.block.BlockLeaves;
@@ -22,17 +18,11 @@ import net.minecraft.block.BlockTallGrass;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.feature.WorldGenerator;
 import net.minecraft.world.gen.layer.GenLayer;
 import net.minecraft.world.gen.layer.IntCache;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 public abstract class CoverGenerator {
     public static final int MOUNTAINOUS_SLOPE = 20;
@@ -89,237 +79,38 @@ public abstract class CoverGenerator {
     protected static final WorldGenerator OAK_DENSE_SHRUB = new GenerousDenseShrubGenerator(OAK_LOG, OAK_LEAF);
     protected static final WorldGenerator JUNGLE_DENSE_SHRUB = new GenerousDenseShrubGenerator(JUNGLE_LOG, JUNGLE_LEAF);
 
-    protected final CoverType type;
+    protected final BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
 
-    private final IBlockState topBlock;
-    private final IBlockState fillerBlock;
+    protected final CoverGenerationContext context;
 
-    protected final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+    protected final CoverType coverType;
 
-    protected World world;
-    public CoverType[] coverBuffer;
-    protected short[] heightBuffer;
-    protected byte[] slopeBuffer;
-    public IBlockState[] coverBlockBuffer;
-    public IBlockState[] fillerBlockBuffer;
-
-    protected long seed;
-
-    private final List<BlockPos> intersectionPoints = new ArrayList<>(16);
-    private int intersectionRange = -1;
-
-    protected CoverGenerator(CoverType type) {
-        this.type = type;
-
-        Biome defaultBiome = type.getDefaultBiome();
-        this.topBlock = defaultBiome.topBlock;
-        this.fillerBlock = defaultBiome.fillerBlock;
+    protected CoverGenerator(CoverGenerationContext context, CoverType coverType) {
+        this.context = context;
+        this.coverType = coverType;
     }
 
-    public void initialize(
-            World world,
-            CoverRasterTileAccess coverRaster, ShortRasterTileAccess heightRaster, ByteRasterTileAccess slopeRaster,
-            IBlockState[] coverBlockBuffer, IBlockState[] fillerBlockBuffer,
-            boolean debug
-    ) {
-        this.world = world;
-        this.seed = world.getSeed();
-        this.coverBuffer = coverRaster.getData();
-        this.heightBuffer = heightRaster.getShortData();
-        this.slopeBuffer = slopeRaster.getByteData();
-        this.coverBlockBuffer = coverBlockBuffer;
-        this.fillerBlockBuffer = fillerBlockBuffer;
-
-        this.createLayers(debug);
+    protected final void iterateChunk(PointConsumer handler) {
+        CoverRasterTileAccess coverRaster = this.context.getCoverRaster();
+        for (int localZ = 0; localZ < 16; localZ++) {
+            for (int localX = 0; localX < 16; localX++) {
+                if (coverRaster.get(localX, localZ) == this.coverType) {
+                    handler.handlePoint(localX, localZ);
+                }
+            }
+        }
     }
 
-    protected void createLayers(boolean debug) {
-    }
-
-    public void decorate(Random random, LatitudinalZone zone, int x, int z) {
-    }
-
-    public void coverDecorate(GlobPrimer primer, Random random, int x, int z) {
-    }
-
-    public void getCover(Random random, int x, int z) {
-        this.iterate(point -> this.coverBlockBuffer[point.index] = this.getCoverAt(random, x + point.localX, z + point.localZ, this.slopeBuffer[point.index] & 0xFF));
-    }
-
-    protected IBlockState getCoverAt(Random random, int x, int z, int slope) {
-        return this.topBlock;
-    }
-
-    public void getFiller(Random random, int x, int z) {
-        this.iterate(point -> this.fillerBlockBuffer[point.index] = this.getFillerAt(random, x + point.localX, z + point.localZ, this.slopeBuffer[point.index] & 0xFF));
-    }
-
-    protected IBlockState getFillerAt(Random random, int x, int z, int slope) {
-        return this.fillerBlock;
-    }
-
-    protected int range(Random random, int minimum, int maximum) {
+    protected final int range(Random random, int minimum, int maximum) {
         return random.nextInt((maximum - minimum) + 1) + minimum;
     }
 
-    protected int[] sampleChunk(GenLayer layer, int x, int z) {
+    protected final int[] sampleChunk(GenLayer layer, int x, int z) {
         IntCache.resetIntCache();
         return layer.getInts(x, z, 16, 16);
     }
 
-    protected ChunkPoint scatterDecorate(Random random) {
-        int scatterX = random.nextInt(16);
-        int scatterZ = random.nextInt(16);
-        return new ChunkPoint(scatterX, scatterZ);
-    }
-
-    protected void decorateScatter(Random random, int x, int z, int count, Consumer<BlockPos> decorator) {
-        for (int i = 0; i < count; i++) {
-            ChunkPoint scattered = this.scatterDecorate(random);
-
-            if (this.coverBuffer[scattered.index] == this.getType()) {
-                this.pos.setPos(x + scattered.localX, 0, z + scattered.localZ);
-
-                if (this.tryPlace(random, this.pos, scattered)) {
-                    BlockPos topBlock = this.world.getHeight(this.pos);
-                    if (!this.world.isAirBlock(topBlock)) {
-                        this.world.setBlockToAir(topBlock);
-                    }
-                    decorator.accept(topBlock);
-                }
-            }
-        }
-    }
-
-    protected void decorateScatterSample(Random random, int x, int z, int count, Consumer<DecoratePoint> decorator) {
-        for (int i = 0; i < count; i++) {
-            ChunkPoint scattered = this.scatterDecorate(random);
-
-            if (this.coverBuffer[scattered.index] == this.getType()) {
-                this.pos.setPos(x + scattered.localX, 0, z + scattered.localZ);
-
-                if (this.tryPlace(random, this.pos, scattered)) {
-                    BlockPos topBlock = this.world.getHeight(this.pos);
-                    if (!this.world.isAirBlock(topBlock)) {
-                        this.world.setBlockToAir(topBlock);
-                    }
-                    decorator.accept(new DecoratePoint(scattered, topBlock));
-                }
-            }
-        }
-    }
-
-    protected boolean tryPlace(Random random, BlockPos pos, ChunkPoint point) {
-        if (this.intersectionRange > 0) {
-            if (this.checkHorizontalIntersection(pos)) {
-                return false;
-            }
-            this.intersectionPoints.add(pos.toImmutable());
-        }
-        return this.slopeBuffer[point.index] < MOUNTAINOUS_SLOPE || random.nextInt(2) == 0;
-    }
-
-    protected boolean checkHorizontalIntersection(BlockPos pos) {
-        int range = this.intersectionRange;
-        for (BlockPos intersectionPoint : this.intersectionPoints) {
-            int deltaX = Math.abs(intersectionPoint.getX() - pos.getX());
-            int deltaZ = Math.abs(intersectionPoint.getZ() - pos.getZ());
-            if (deltaX <= range && deltaZ <= range) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    protected void preventIntersection(int range) {
-        this.intersectionRange = range;
-    }
-
-    protected void stopIntersectionPrevention() {
-        this.intersectionRange = -1;
-        this.intersectionPoints.clear();
-    }
-
-    protected void coverLayer(IBlockState[] buffer, int x, int z, GenLayer layer, Function<CoverPoint, IBlockState> populate) {
-        int[] sampled = this.sampleChunk(layer, x, z);
-        boolean adaptCliff = this.shouldCliffChangeMaterial();
-        this.iterate(point -> {
-            int coverType = sampled[point.index];
-            int slope = this.slopeBuffer[point.index] & 0xFF;
-            IBlockState state = populate.apply(new CoverPoint(coverType, slope));
-            if (adaptCliff && slope >= CLIFF_SLOPE) {
-                if (state == GRASS || state == PODZOL) {
-                    state = COARSE_DIRT;
-                } else if (state == COARSE_DIRT) {
-                    state = COBBLESTONE;
-                } else if (state == SAND) {
-                    state = SANDSTONE;
-                }
-            }
-            buffer[point.index] = state;
-        });
-    }
-
-    protected void iterate(Consumer<ChunkPoint> handlePoint) {
-        for (int localZ = 0; localZ < 16; localZ++) {
-            for (int localX = 0; localX < 16; localX++) {
-                int index = localX + localZ * 16;
-                if (this.coverBuffer[index] == this.type) {
-                    handlePoint.accept(new ChunkPoint(localX, localZ, index));
-                }
-            }
-        }
-    }
-
-    protected boolean shouldCliffChangeMaterial() {
-        return true;
-    }
-
-    public CoverType getType() {
-        return this.type;
-    }
-
-    public static class DecoratePoint {
-        public final ChunkPoint chunk;
-        public final BlockPos pos;
-
-        public DecoratePoint(ChunkPoint chunk, BlockPos pos) {
-            this.chunk = chunk;
-            this.pos = pos;
-        }
-    }
-
-    public static class CoverPoint {
-        private final int coverType;
-        private final int slope;
-
-        public CoverPoint(int coverType, int slope) {
-            this.coverType = coverType;
-            this.slope = slope;
-        }
-
-        public int getCoverType() {
-            return this.coverType;
-        }
-
-        public int getSlope() {
-            return this.slope;
-        }
-    }
-
-    public static class ChunkPoint {
-        public final int localX;
-        public final int localZ;
-        public final int index;
-
-        public ChunkPoint(int localX, int localZ, int index) {
-            this.localX = localX;
-            this.localZ = localZ;
-            this.index = index;
-        }
-
-        public ChunkPoint(int localX, int localZ) {
-            this(localX, localZ, localX + localZ * 16);
-        }
+    protected interface PointConsumer {
+        void handlePoint(int localX, int localZ);
     }
 }

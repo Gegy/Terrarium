@@ -34,6 +34,10 @@ public class ByteRasterTileAccess implements TiledDataAccess, RasterDataAccess<B
         return this.data[x + y * this.width];
     }
 
+    public int getUnsigned(int x, int y) {
+        return this.getByte(x, y) & 0xFF;
+    }
+
     @Override
     public Byte[] getData() {
         byte[] data = this.getByteData();

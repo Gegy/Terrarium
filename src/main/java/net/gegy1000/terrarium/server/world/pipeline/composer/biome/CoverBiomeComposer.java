@@ -2,7 +2,7 @@ package net.gegy1000.terrarium.server.world.pipeline.composer.biome;
 
 import com.google.gson.JsonObject;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
-import net.gegy1000.earth.server.world.cover.LatitudinalZone;
+import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
@@ -22,11 +22,14 @@ public class CoverBiomeComposer implements BiomeComposer {
 
     @Override
     public Biome[] getBiomes(GenerationRegionHandler regionHandler, int chunkX, int chunkZ) {
+        int globalX = chunkX << 4;
+        int globalZ = chunkZ << 4;
+
         CoverRasterTileAccess coverRaster = regionHandler.getCachedChunkRaster(this.coverComponent);
         for (int localZ = 0; localZ < 16; localZ++) {
             for (int localX = 0; localX < 16; localX++) {
-                // TODO: Handle latitudinal zones
-                this.biomeBuffer[localX + localZ * 16] = coverRaster.get(localX, localZ).getBiome(LatitudinalZone.TROPICS);
+                CoverType coverType = coverRaster.get(localX, localZ);
+                this.biomeBuffer[localX + localZ * 16] = coverType.getBiome(globalX + localX, globalZ + localZ);
             }
         }
 

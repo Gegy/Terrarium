@@ -8,6 +8,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
+import net.gegy1000.terrarium.server.world.bundle.IdBundle;
+import net.gegy1000.terrarium.server.world.bundle.JsonBundle;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateStateRegistry;
 import net.gegy1000.terrarium.server.world.coordinate.SpawnpointDefinition;
@@ -47,6 +49,7 @@ public class JsonTerrariumGenerator implements TerrariumGenerator {
     private final ImmutableMap<String, ParsableInstanceObject<CoordinateState>> coordinateStates;
     private final ImmutableList<AttachedComponent.Parsable<?>> components;
     private final ImmutableList<ParsableInstanceObject<RegionAdapter>> adapters;
+    private final ImmutableMap<String, IdBundle> bundles;
     private final String navigationalStateKey;
     private final SpawnpointDefinition spawnpointDefinition;
     private final ParsableInstanceObject<Geocoder> geocoder;
@@ -61,6 +64,7 @@ public class JsonTerrariumGenerator implements TerrariumGenerator {
             Map<String, ParsableInstanceObject<CoordinateState>> coordinateStates,
             List<AttachedComponent.Parsable<?>> components,
             List<ParsableInstanceObject<RegionAdapter>> adapters,
+            Map<String, IdBundle> bundles,
             String navigationalStateKey,
             SpawnpointDefinition spawnpointDefinition,
             ParsableInstanceObject<Geocoder> geocoder,
@@ -74,6 +78,7 @@ public class JsonTerrariumGenerator implements TerrariumGenerator {
         this.coordinateStates = ImmutableMap.copyOf(coordinateStates);
         this.components = ImmutableList.copyOf(components);
         this.adapters = ImmutableList.copyOf(adapters);
+        this.bundles = ImmutableMap.copyOf(bundles);
         this.navigationalStateKey = navigationalStateKey;
         this.spawnpointDefinition = spawnpointDefinition;
         this.geocoder = geocoder;
@@ -126,6 +131,17 @@ public class JsonTerrariumGenerator implements TerrariumGenerator {
             JsonArray adaptersArray = TerrariumJsonUtils.parseRemoteArray(dataSystemRoot, "adapters");
             List<ParsableInstanceObject<RegionAdapter>> adapterParsers = JsonTerrariumGenerator.parseAdapters(adaptersArray);
 
+            JsonArray bundlesArray = TerrariumJsonUtils.parseRemoteArray(dataSystemRoot, "bundles");
+            Map<String, IdBundle> bundles = new HashMap<>();
+            for (JsonElement element : bundlesArray) {
+                if (element.isJsonObject()) {
+                    JsonBundle bundle = JsonBundle.parse(element.getAsJsonObject());
+                    bundles.put(bundle.getIdentifier(), bundle);
+                } else {
+                    Terrarium.LOGGER.warn("Ignored invalid bundle {}", element);
+                }
+            }
+
             JsonObject chunkComposerRoot = TerrariumJsonUtils.parseRemoteObject(root, "chunk_composer");
 
             JsonArray surfaceComposersArray = TerrariumJsonUtils.parseRemoteArray(chunkComposerRoot, "surface_composers");
@@ -143,6 +159,7 @@ public class JsonTerrariumGenerator implements TerrariumGenerator {
             return new JsonTerrariumGenerator(
                     identifier, categories,
                     coordinateStateParsers, componentParsers, adapterParsers,
+                    bundles,
                     navigationalStateKey, spawnpointDefinition, geocoder,
                     surfaceComposers, decorationComposers, biomeComposer,
                     constants);
@@ -352,6 +369,11 @@ public class JsonTerrariumGenerator implements TerrariumGenerator {
     @Override
     public Geocoder createGeocoder(TerrariumWorldData worldData, World world) {
         return this.geocoder.parse(worldData, world, this.createParser(worldData, world));
+    }
+
+    @Override
+    public IdBundle getBundle(String identifier) {
+        return this.bundles.get(identifier);
     }
 
     @Override

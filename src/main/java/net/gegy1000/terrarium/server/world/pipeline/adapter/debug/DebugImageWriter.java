@@ -1,7 +1,6 @@
 package net.gegy1000.terrarium.server.world.pipeline.adapter.debug;
 
 import net.gegy1000.terrarium.Terrarium;
-import net.gegy1000.terrarium.server.world.cover.CoverType;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -13,8 +12,6 @@ public class DebugImageWriter {
         int grayscale = ((int) value * 255 / 6000) & 0xFF;
         return grayscale << 16 | grayscale << 8 | grayscale;
     };
-
-    public static final ColorSelector<CoverType> COVER_MAP = CoverType::getColor;
 
     public static final boolean ENABLED = false;
 

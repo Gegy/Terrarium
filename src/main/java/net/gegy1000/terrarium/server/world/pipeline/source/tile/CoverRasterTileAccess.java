@@ -2,6 +2,7 @@ package net.gegy1000.terrarium.server.world.pipeline.source.tile;
 
 import net.gegy1000.terrarium.server.util.ArrayUtils;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
+import net.gegy1000.terrarium.server.world.cover.CoverTypeRegistry;
 
 public class CoverRasterTileAccess implements RasterDataAccess<CoverType>, TiledDataAccess {
     private final CoverType[] cover;
@@ -26,15 +27,7 @@ public class CoverRasterTileAccess implements RasterDataAccess<CoverType>, Tiled
     }
 
     public CoverRasterTileAccess(int width, int height) {
-        this(ArrayUtils.defaulted(new CoverType[width * height], CoverType.NO_DATA), width, height);
-    }
-
-    public static CoverRasterTileAccess loadGlob(byte[] data, int offsetX, int offsetZ, int width, int height) {
-        CoverType[] cover = new CoverType[data.length];
-        for (int i = 0; i < data.length; i++) {
-            cover[i] = CoverType.getGlob(data[i] & 0xFF);
-        }
-        return new CoverRasterTileAccess(cover, offsetX, offsetZ, width, height);
+        this(ArrayUtils.defaulted(new CoverType[width * height], CoverTypeRegistry.PLACEHOLDER), width, height);
     }
 
     @Override

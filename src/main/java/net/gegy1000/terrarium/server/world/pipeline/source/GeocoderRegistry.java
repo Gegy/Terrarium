@@ -8,6 +8,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,6 +26,10 @@ public class GeocoderRegistry {
 
     public static InstanceObjectParser<Geocoder> getGeocoder(ResourceLocation identifier) {
         return GEOCODERS.get(identifier);
+    }
+
+    public static Map<ResourceLocation, InstanceObjectParser<Geocoder>> getRegistry() {
+        return Collections.unmodifiableMap(GEOCODERS);
     }
 
     public static final class Event extends TerrariumRegistryEvent<InstanceObjectParser<Geocoder>> {

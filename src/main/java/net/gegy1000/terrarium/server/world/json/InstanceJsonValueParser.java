@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
+import net.gegy1000.terrarium.server.world.bundle.IdBundle;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.generator.customization.PropertyContainer;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
@@ -20,7 +21,9 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public class InstanceJsonValueParser extends PropertyJsonValueParser {
     private final PropertyContainer[] propertyContainers;
@@ -114,5 +117,24 @@ public class InstanceJsonValueParser extends PropertyJsonValueParser {
             throw new IllegalStateException("Coordinate state with key " + coordinateKey + " does not exist");
         }
         return state;
+    }
+
+    public <T> Collection<T> parseIdBundle(JsonObject root, String key, Map<ResourceLocation, T> registry) {
+        String bundleKey = JsonUtils.getString(root, key);
+        IdBundle bundle = this.worldData.getSettings().getGenerator().getBundle(bundleKey);
+        if (bundle == null)  {
+            throw new JsonSyntaxException("Bundle with key " + bundleKey + " did not exist on generator");
+        }
+        return bundle.getRegistryEntries(registry);
+    }
+
+
+    public <T> T parseRegistryEntry(JsonObject root, String key, Map<ResourceLocation, T> registry) {
+        String entryKey = JsonUtils.getString(root, key);
+        T entry = registry.get(new ResourceLocation(entryKey));
+        if (entry == null) {
+            throw new JsonSyntaxException("Entry " + entryKey + " does not exist in registry!");
+        }
+        return entry;
     }
 }

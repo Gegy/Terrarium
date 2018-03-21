@@ -2,6 +2,7 @@ package net.gegy1000.terrarium.server;
 
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateStateRegistry;
+import net.gegy1000.terrarium.server.world.cover.CoverTypeRegistry;
 import net.gegy1000.terrarium.server.world.generator.TerrariumGeneratorRegistry;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPresetRegistry;
 import net.gegy1000.terrarium.server.world.generator.customization.WidgetParseHandler;
@@ -25,6 +26,7 @@ public class ServerProxy {
         ProgressManager.ProgressBar registryBar = ProgressManager.push("Loading Terrarium Registries", 4);
 
         registryBar.step("Preparation");
+        CoverTypeRegistry.onInit();
         ValueProviderRegistry.onInit();
         CoordinateStateRegistry.onInit();
         WidgetParseHandler.onInit();

@@ -6,12 +6,14 @@ import com.vividsolutions.jts.geom.Point;
 import de.topobyte.osm4j.core.model.iface.OsmWay;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import net.gegy1000.earth.server.world.cover.EarthCoverRegistry;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.util.FloodFill;
 import net.gegy1000.terrarium.server.util.Interpolation;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
+import net.gegy1000.terrarium.server.world.cover.CoverTypeRegistry;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
@@ -98,7 +100,7 @@ public class OsmCoastlineAdapter implements RegionAdapter {
         if (!coastlines.isEmpty()) {
             int[] landmap = new int[width * height];
             for (int i = 0; i < landmap.length; i++) {
-                landmap[i] = coverBuffer[i] == CoverType.WATER ? OCEAN : LAND;
+                landmap[i] = coverBuffer[i] == EarthCoverRegistry.WATER ? OCEAN : LAND;
             }
 
             for (OsmWay coastline : coastlines) {
@@ -271,12 +273,12 @@ public class OsmCoastlineAdapter implements RegionAdapter {
                 int landType = sample & LAND_TYPE_MASK;
                 int coastType = sample & COAST_TYPE_MASK;
                 if (landType == OCEAN) {
-                    if (cover != CoverType.WATER) {
-                        coverBuffer[index] = CoverType.WATER;
+                    if (cover != EarthCoverRegistry.WATER) {
+                        coverBuffer[index] = EarthCoverRegistry.WATER;
                         heightBuffer[index] = 1;
                     }
-                } else if ((landType == LAND || landType == COAST && coastType != FREE_FLOOD) && cover == CoverType.WATER) {
-                    coverBuffer[index] = CoverType.PROCESSING;
+                } else if ((landType == LAND || landType == COAST && coastType != FREE_FLOOD) && cover == EarthCoverRegistry.WATER) {
+                    coverBuffer[index] = CoverTypeRegistry.PLACEHOLDER;
                     unselectedPoints.add(new FloodFill.Point(localX, localY));
                 }
             }
@@ -332,7 +334,7 @@ public class OsmCoastlineAdapter implements RegionAdapter {
 
         @Override
         public CoverType visit(FloodFill.Point point, CoverType sampled) {
-            if (sampled != CoverType.PROCESSING) {
+            if (sampled != CoverTypeRegistry.PLACEHOLDER) {
                 this.result = sampled;
                 return null;
             }
@@ -341,12 +343,12 @@ public class OsmCoastlineAdapter implements RegionAdapter {
 
         @Override
         public boolean canVisit(FloodFill.Point point, CoverType sampled) {
-            return sampled != CoverType.WATER;
+            return sampled != EarthCoverRegistry.WATER;
         }
 
         public CoverType getResult() {
             if (this.result == null) {
-                return CoverType.RAINFED_CROPS;
+                return EarthCoverRegistry.RAINFED_CROPS;
             }
             return this.result;
         }

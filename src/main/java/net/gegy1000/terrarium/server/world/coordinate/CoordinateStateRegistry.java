@@ -8,6 +8,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,6 +46,10 @@ public class CoordinateStateRegistry {
 
     public static InstanceObjectParser<CoordinateState> get(ResourceLocation key) {
         return STATES.get(key);
+    }
+
+    public static Map<ResourceLocation, InstanceObjectParser<CoordinateState>> getRegistry() {
+        return Collections.unmodifiableMap(STATES);
     }
 
     public static final class Event extends TerrariumRegistryEvent<InstanceObjectParser<CoordinateState>> {

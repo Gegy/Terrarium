@@ -10,6 +10,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +42,10 @@ public class TerrariumGeneratorRegistry {
 
     public static ResourceLocation getIdentifier(TerrariumGenerator generator) {
         return GENERATORS.inverse().get(generator);
+    }
+
+    public static Map<ResourceLocation, TerrariumGenerator> getRegistry() {
+        return Collections.unmodifiableMap(GENERATORS);
     }
 
     public static final class Event extends TerrariumRegistryEvent<TerrariumGenerator> {

@@ -13,6 +13,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -64,6 +65,10 @@ public class WidgetParseHandler {
         } catch (ClassCastException e) {
             throw new JsonSyntaxException("Property " + propertyKey + " of wrong type " + property.getType());
         }
+    }
+
+    public static Map<ResourceLocation, WidgetParser<?>> getRegistry() {
+        return Collections.unmodifiableMap(WIDGET_PARSERS);
     }
 
     public static final class Event extends TerrariumRegistryEvent<WidgetParser<?>> {

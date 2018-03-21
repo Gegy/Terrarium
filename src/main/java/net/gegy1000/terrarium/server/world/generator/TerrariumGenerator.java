@@ -2,6 +2,7 @@ package net.gegy1000.terrarium.server.world.generator;
 
 import com.google.common.collect.ImmutableList;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
+import net.gegy1000.terrarium.server.world.bundle.IdBundle;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.coordinate.SpawnpointDefinition;
 import net.gegy1000.terrarium.server.world.generator.customization.CustomizationCategory;
@@ -28,6 +29,8 @@ public interface TerrariumGenerator {
     SpawnpointDefinition getSpawnpointDefinition();
 
     Geocoder createGeocoder(TerrariumWorldData worldData, World world);
+
+    IdBundle getBundle(String identifier);
 
     List<SurfaceComposer> createSurfaceComposers(TerrariumWorldData worldData, World world);
 
@@ -64,6 +67,11 @@ public interface TerrariumGenerator {
         @Override
         public Geocoder createGeocoder(TerrariumWorldData worldData, World world) {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public IdBundle getBundle(String identifier) {
+            return null;
         }
 
         @Override

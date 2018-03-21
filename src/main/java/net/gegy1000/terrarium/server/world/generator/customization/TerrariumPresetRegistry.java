@@ -9,6 +9,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,10 @@ public class TerrariumPresetRegistry {
 
     public static Collection<TerrariumPreset> getPresets() {
         return PRESETS.values();
+    }
+
+    public static Map<ResourceLocation, TerrariumPreset> getRegistry() {
+        return Collections.unmodifiableMap(PRESETS);
     }
 
     public static final class Event extends TerrariumRegistryEvent<TerrariumPreset> {

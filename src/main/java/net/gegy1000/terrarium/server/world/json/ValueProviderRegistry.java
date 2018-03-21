@@ -8,6 +8,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,6 +30,10 @@ public class ValueProviderRegistry {
 
     public static ValueProvider<?> get(ResourceLocation identifier) {
         return PROVIDERS.get(identifier);
+    }
+
+    public static Map<ResourceLocation, ValueProvider<?>> getRegistry() {
+        return Collections.unmodifiableMap(PROVIDERS);
     }
 
     public static final class Event extends TerrariumRegistryEvent<ValueProvider<?>> {

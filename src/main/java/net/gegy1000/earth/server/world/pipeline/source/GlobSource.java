@@ -1,12 +1,14 @@
 package net.gegy1000.earth.server.world.pipeline.source;
 
 import com.google.gson.JsonObject;
+import net.gegy1000.earth.server.world.cover.EarthCoverRegistry;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.util.ArrayUtils;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
+import net.gegy1000.terrarium.server.world.cover.CoverTypeRegistry;
 import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
 import net.gegy1000.terrarium.server.world.pipeline.source.CachedRemoteSource;
@@ -62,7 +64,11 @@ public class GlobSource extends TiledDataSource<CoverRasterTileAccess> implement
             byte[] buffer = new byte[width * height];
             input.readFully(buffer);
 
-            return CoverRasterTileAccess.loadGlob(buffer, offsetX, offsetZ, width, height);
+            CoverType[] cover = new CoverType[buffer.length];
+            for (int i = 0; i < buffer.length; i++) {
+                cover[i] = EarthCoverRegistry.Glob.get(buffer[i]).getCoverType();
+            }
+            return new CoverRasterTileAccess(cover, offsetX, offsetZ, width, height);
         } catch (IOException e) {
             Terrarium.LOGGER.error("Failed to parse heights tile at {}", key, e);
         }
@@ -77,7 +83,7 @@ public class GlobSource extends TiledDataSource<CoverRasterTileAccess> implement
 
     @Override
     protected CoverRasterTileAccess getDefaultTile() {
-        CoverType[] backingData = ArrayUtils.defaulted(new CoverType[TILE_SIZE * TILE_SIZE], CoverType.NO_DATA);
+        CoverType[] backingData = ArrayUtils.defaulted(new CoverType[TILE_SIZE * TILE_SIZE], CoverTypeRegistry.PLACEHOLDER);
         return new CoverRasterTileAccess(backingData, 0, 0, TILE_SIZE, TILE_SIZE);
     }
 

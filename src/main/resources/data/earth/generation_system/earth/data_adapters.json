@@ -27,12 +27,15 @@
   {
     "type": "terrarium:beaches",
     "cover_component": "terrarium:cover",
-    "beach_size": "@beach_size"
+    "beach_size": "@beach_size",
+    "water_cover": "earth:water",
+    "beach_cover": "earth:beach"
   },
   {
     "type": "terrarium:water_edge_flatten",
     "height_component": "terrarium:height",
     "cover_component": "terrarium:cover",
-    "flatten_range": 16
+    "flatten_range": 16,
+    "water_cover": "earth:water"
   }
 ]

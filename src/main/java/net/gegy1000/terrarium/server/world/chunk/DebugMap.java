@@ -1,7 +1,9 @@
 package net.gegy1000.terrarium.server.world.chunk;
 
+import net.gegy1000.earth.server.world.cover.EarthCoverRegistry;
 import net.gegy1000.earth.server.world.cover.LatitudinalZone;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
+import net.gegy1000.terrarium.server.world.cover.CoverTypeRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +33,7 @@ public class DebugMap {
             }
         }
 
-        return new DebugCover(CoverType.DEBUG, LatitudinalZone.TEMPERATE);
+        return new DebugCover(CoverTypeRegistry.DEBUG, LatitudinalZone.TEMPERATE);
     }
 
     public static String[] getSign(int x, int z) {
@@ -58,7 +60,7 @@ public class DebugMap {
         List<String> lines = new ArrayList<>();
 
         String zoneName = cover.getZone().name().toLowerCase(Locale.ENGLISH);
-        String coverType = cover.getCoverType().name().toLowerCase(Locale.ENGLISH);
+        String coverType = cover.getCoverType().getClass().getName().toLowerCase(Locale.ENGLISH);
         String[] coverWords = coverType.split("_");
 
         lines.add(zoneName);
@@ -80,11 +82,11 @@ public class DebugMap {
     }
 
     private static DebugCover getGridCover(int gridX, int gridZ) {
-        int effectiveGridX = gridX + CoverType.TYPES.length / 2;
+        int effectiveGridX = gridX + EarthCoverRegistry.Glob.TYPES.length / 2;
         int effectiveGridZ = gridZ + LatitudinalZone.ZONES.length / 2;
 
-        if (effectiveGridX >= 0 && effectiveGridX < CoverType.TYPES.length && effectiveGridZ >= 0 && effectiveGridZ < LatitudinalZone.ZONES.length) {
-            CoverType coverType = CoverType.TYPES[effectiveGridX];
+        if (effectiveGridX >= 0 && effectiveGridX < EarthCoverRegistry.Glob.TYPES.length && effectiveGridZ >= 0 && effectiveGridZ < LatitudinalZone.ZONES.length) {
+            CoverType coverType = EarthCoverRegistry.Glob.TYPES[effectiveGridX].getCoverType();
             LatitudinalZone zone = LatitudinalZone.ZONES[effectiveGridZ];
             return new DebugCover(coverType, zone);
         }
