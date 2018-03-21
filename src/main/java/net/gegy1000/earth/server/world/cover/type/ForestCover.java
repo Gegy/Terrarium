@@ -1,5 +1,6 @@
 package net.gegy1000.earth.server.world.cover.type;
 
+import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverDecorationGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverGenerationContext;
 import net.gegy1000.terrarium.server.world.cover.CoverSurfaceGenerator;
@@ -71,7 +72,7 @@ public abstract class ForestCover implements CoverType {
         }
     }
 
-    protected static class Surface extends CoverSurfaceGenerator {
+    protected static class Surface extends EarthSurfaceGenerator {
         protected final GenLayer coverSelector;
 
         protected Surface(CoverGenerationContext context, CoverType coverType) {

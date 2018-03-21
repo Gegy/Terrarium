@@ -1,5 +1,6 @@
 package net.gegy1000.earth.server.world.cover.type;
 
+import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverDecorationGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverGenerationContext;
 import net.gegy1000.terrarium.server.world.cover.CoverSurfaceGenerator;
@@ -38,7 +39,7 @@ public class BareCover implements CoverType {
         return Biomes.DESERT;
     }
 
-    private static class Surface extends CoverSurfaceGenerator {
+    private static class Surface extends EarthSurfaceGenerator {
         private static final BlockProvider BLOCK_PROVIDER = (sampledValue, slope) -> {
             switch (sampledValue) {
                 case LAYER_GRAVEL:

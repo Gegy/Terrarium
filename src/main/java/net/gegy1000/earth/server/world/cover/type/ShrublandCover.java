@@ -1,5 +1,6 @@
 package net.gegy1000.earth.server.world.cover.type;
 
+import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
 import net.gegy1000.earth.server.world.cover.LatitudinalZone;
 import net.gegy1000.terrarium.server.world.cover.CoverBiomeSelectors;
 import net.gegy1000.terrarium.server.world.cover.CoverDecorationGenerator;
@@ -38,7 +39,7 @@ public class ShrublandCover implements CoverType {
         return CoverBiomeSelectors.SHRUBLAND_SELECTOR.apply(LatitudinalZone.TROPICS);
     }
 
-    private static class Surface extends CoverSurfaceGenerator {
+    private static class Surface extends EarthSurfaceGenerator {
         private final GenLayer coverSelector;
         private final GenLayer grassSelector;
 

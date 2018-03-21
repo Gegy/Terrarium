@@ -1,5 +1,6 @@
 package net.gegy1000.earth.server.world.cover.type;
 
+import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverDecorationGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverGenerationContext;
 import net.gegy1000.terrarium.server.world.cover.CoverSurfaceGenerator;
@@ -31,7 +32,7 @@ public class SnowCover implements CoverType {
         return Biomes.ICE_PLAINS;
     }
 
-    private static class Surface extends CoverSurfaceGenerator {
+    private static class Surface extends EarthSurfaceGenerator {
         private Surface(CoverGenerationContext context, CoverType coverType) {
             super(context, coverType);
         }

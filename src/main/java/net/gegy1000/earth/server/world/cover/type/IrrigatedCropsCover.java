@@ -1,5 +1,6 @@
 package net.gegy1000.earth.server.world.cover.type;
 
+import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
 import net.gegy1000.earth.server.world.cover.LatitudinalZone;
 import net.gegy1000.terrarium.server.world.cover.CoverBiomeSelectors;
 import net.gegy1000.terrarium.server.world.cover.CoverDecorationGenerator;
@@ -55,7 +56,7 @@ public class IrrigatedCropsCover implements CoverType {
         return CoverBiomeSelectors.BROADLEAF_FOREST_SELECTOR.apply(LatitudinalZone.TROPICS);
     }
 
-    private static class Surface extends CoverSurfaceGenerator {
+    private static class Surface extends EarthSurfaceGenerator {
         private final GenLayer cropSelector;
 
         private Surface(CoverGenerationContext context, CoverType coverType) {

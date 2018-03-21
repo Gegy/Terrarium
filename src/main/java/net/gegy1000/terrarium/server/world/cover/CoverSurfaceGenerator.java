@@ -36,19 +36,7 @@ public abstract class CoverSurfaceGenerator extends CoverGenerator {
             int sampledValue = sampledLayer[bufferIndex];
             int slope = slopeRaster.getUnsigned(localX, localZ);
 
-            // TODO: This should be Earth-specific implementation
-            IBlockState state = blockProvider.provideBlock(sampledValue, slope);
-            if (slope >= CLIFF_SLOPE) {
-                if (state == GRASS || state == PODZOL) {
-                    state = COARSE_DIRT;
-                } else if (state == COARSE_DIRT) {
-                    state = COBBLESTONE;
-                } else if (state == SAND) {
-                    state = SANDSTONE;
-                }
-            }
-
-            blockBuffer[bufferIndex] = state;
+            blockBuffer[bufferIndex] = blockProvider.provideBlock(sampledValue, slope);
         });
     }
 
