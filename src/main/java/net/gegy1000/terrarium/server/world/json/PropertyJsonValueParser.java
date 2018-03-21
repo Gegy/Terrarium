@@ -4,6 +4,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
+import net.gegy1000.terrarium.server.world.generator.customization.PropertyContainer;
+import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyValue;
 import net.minecraft.block.state.IBlockState;
 
@@ -130,4 +132,21 @@ public abstract class PropertyJsonValueParser implements JsonValueParser {
     }
 
     protected abstract <T> PropertyValue<T> getProperty(String keyIdentifier, Class<T> type);
+
+    public static class Container extends PropertyJsonValueParser {
+        private final PropertyContainer container;
+
+        public Container(PropertyContainer container) {
+            this.container = container;
+        }
+
+        @Override
+        protected <T> PropertyValue<T> getProperty(String keyIdentifier, Class<T> type) {
+            if (this.container.hasKey(keyIdentifier)) {
+                PropertyKey<T> key = this.container.getKey(keyIdentifier, type);
+                return this.container.getValue(key);
+            }
+            return null;
+        }
+    }
 }

@@ -8,8 +8,8 @@ import net.gegy1000.terrarium.client.preview.PreviewRenderer;
 import net.gegy1000.terrarium.client.preview.WorldPreview;
 import net.gegy1000.terrarium.server.world.coordinate.SpawnpointDefinition;
 import net.gegy1000.terrarium.server.world.generator.TerrariumGenerator;
-import net.gegy1000.terrarium.server.world.generator.customization.CustomizationCategory;
-import net.gegy1000.terrarium.server.world.generator.customization.CustomizationWidget;
+import net.gegy1000.terrarium.server.world.generator.customization.widget.CustomizationCategory;
+import net.gegy1000.terrarium.server.world.generator.customization.widget.CustomizationWidget;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.generator.customization.PropertyContainer;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPreset;
@@ -97,6 +97,8 @@ public class TerrariumCustomizationGui extends GuiScreen {
             }
         };
 
+        Runnable onPropertyChange = this::rebuildState;
+
         List<GuiButton> categoryListWidgets = new ArrayList<>();
 
         List<CustomizationCategory> categories = this.settings.getGenerator().getCategories();
@@ -104,7 +106,7 @@ public class TerrariumCustomizationGui extends GuiScreen {
             List<GuiButton> currentWidgets = new ArrayList<>();
             currentWidgets.add(upLevelButton);
             for (CustomizationWidget widget : category.getWidgets()) {
-                currentWidgets.add(widget.createWidget(this.settings, 0, 0, 0));
+                currentWidgets.add(widget.createWidget(this.settings, 0, 0, 0, onPropertyChange));
             }
 
             CustomizationList currentList = new CustomizationList(this.mc, this, PADDING_X, TOP_OFFSET, previewWidth, previewHeight, currentWidgets);

@@ -1,4 +1,4 @@
-package net.gegy1000.terrarium.server.world.generator.customization;
+package net.gegy1000.terrarium.server.world.generator.customization.widget;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;

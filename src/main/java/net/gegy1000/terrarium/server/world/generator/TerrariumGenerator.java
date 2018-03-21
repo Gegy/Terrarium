@@ -5,7 +5,7 @@ import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.bundle.IdBundle;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.coordinate.SpawnpointDefinition;
-import net.gegy1000.terrarium.server.world.generator.customization.CustomizationCategory;
+import net.gegy1000.terrarium.server.world.generator.customization.widget.CustomizationCategory;
 import net.gegy1000.terrarium.server.world.pipeline.RegionDataSystem;
 import net.gegy1000.terrarium.server.world.pipeline.composer.biome.BiomeComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;

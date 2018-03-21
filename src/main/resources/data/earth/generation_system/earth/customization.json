@@ -18,7 +18,13 @@
   "categories": {
     "world": {
       "widgets": [
-        {"type": "terrarium:slider", "property": "world_scale", "range": [1.0, 200.0], "step": [5.0, 1.0]},
+        {
+          "type": "terrarium:slider",
+          "property": "world_scale",
+          "range": [1.0, 200.0],
+          "step": [5.0, 1.0],
+          "value_converter": {"type": "terrarium:inverse_converter"}
+        },
         {"type": "terrarium:slider", "property": "height_scale", "range": [0.0, 10.0], "step": [0.5, 0.1]},
         {"type": "terrarium:slider", "property": "noise_scale", "range": [0.0, 3.0], "step": [0.5, 0.1]},
         {"type": "terrarium:slider", "property": "scatter_range", "range": [0, 32], "step": [1, 1]},

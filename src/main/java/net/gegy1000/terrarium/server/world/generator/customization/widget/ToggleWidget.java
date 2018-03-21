@@ -1,6 +1,7 @@
-package net.gegy1000.terrarium.server.world.generator.customization;
+package net.gegy1000.terrarium.server.world.generator.customization.widget;
 
 import net.gegy1000.terrarium.client.gui.widget.ToggleGuiWidget;
+import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraftforge.fml.relauncher.Side;
@@ -15,7 +16,9 @@ public class ToggleWidget implements CustomizationWidget {
 
     @Override
     @SideOnly(Side.CLIENT)
-    public GuiButton createWidget(GenerationSettings settings, int id, int x, int y) {
-        return new ToggleGuiWidget(id, x, y, this.propertyKey, settings.getProperties().getValue(this.propertyKey));
+    public GuiButton createWidget(GenerationSettings settings, int id, int x, int y, Runnable onPropertyChange) {
+        ToggleGuiWidget widget = new ToggleGuiWidget(id, x, y, this.propertyKey, settings.getProperties().getValue(this.propertyKey));
+        widget.addListener(onPropertyChange);
+        return widget;
     }
 }

@@ -13,13 +13,14 @@ import net.gegy1000.terrarium.server.world.bundle.JsonBundle;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateStateRegistry;
 import net.gegy1000.terrarium.server.world.coordinate.SpawnpointDefinition;
-import net.gegy1000.terrarium.server.world.generator.customization.CustomizationCategory;
 import net.gegy1000.terrarium.server.world.generator.customization.PropertyContainer;
-import net.gegy1000.terrarium.server.world.generator.customization.WidgetParseHandler;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
+import net.gegy1000.terrarium.server.world.generator.customization.widget.CustomizationCategory;
+import net.gegy1000.terrarium.server.world.generator.customization.widget.WidgetParseHandler;
 import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
 import net.gegy1000.terrarium.server.world.json.ParsableInstanceObject;
+import net.gegy1000.terrarium.server.world.json.PropertyJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.TerrariumJsonUtils;
 import net.gegy1000.terrarium.server.world.pipeline.DataPipelineRegistries;
 import net.gegy1000.terrarium.server.world.pipeline.RegionDataSystem;
@@ -98,11 +99,6 @@ public class JsonTerrariumGenerator implements TerrariumGenerator {
             JsonObject propertiesRoot = TerrariumJsonUtils.parseRemoteObject(customizationRoot, "properties");
             Map<String, PropertyKey<?>> properties = PropertyKey.parseProperties(propertiesRoot);
 
-            WidgetParseHandler widgetParseHandler = new WidgetParseHandler(properties);
-
-            JsonObject categoryRoot = TerrariumJsonUtils.parseRemoteObject(customizationRoot, "categories");
-            List<CustomizationCategory> categories = CustomizationCategory.parseCategories(widgetParseHandler, categoryRoot);
-
             JsonObject coordinateSystemRoot = TerrariumJsonUtils.parseRemoteObject(root, "coordinate_system");
             Map<String, ParsableInstanceObject<CoordinateState>> coordinateStateParsers = JsonTerrariumGenerator.parseCoordinateStates(coordinateSystemRoot);
 
@@ -155,6 +151,11 @@ public class JsonTerrariumGenerator implements TerrariumGenerator {
 
             JsonObject constantsRoot = TerrariumJsonUtils.parseRemoteObject(root, "constants");
             PropertyContainer constants = PropertyContainer.deserialize(constantsRoot);
+
+            WidgetParseHandler widgetParseHandler = new WidgetParseHandler(properties, new PropertyJsonValueParser.Container(constants));
+
+            JsonObject categoryRoot = TerrariumJsonUtils.parseRemoteObject(customizationRoot, "categories");
+            List<CustomizationCategory> categories = CustomizationCategory.parseCategories(widgetParseHandler, categoryRoot);
 
             return new JsonTerrariumGenerator(
                     identifier, categories,

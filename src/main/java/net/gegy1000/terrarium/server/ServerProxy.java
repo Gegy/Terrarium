@@ -5,7 +5,8 @@ import net.gegy1000.terrarium.server.world.coordinate.CoordinateStateRegistry;
 import net.gegy1000.terrarium.server.world.cover.CoverTypeRegistry;
 import net.gegy1000.terrarium.server.world.generator.TerrariumGeneratorRegistry;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPresetRegistry;
-import net.gegy1000.terrarium.server.world.generator.customization.WidgetParseHandler;
+import net.gegy1000.terrarium.server.world.generator.customization.widget.WidgetParseHandler;
+import net.gegy1000.terrarium.server.world.generator.customization.widget.WidgetConverterRegistry;
 import net.gegy1000.terrarium.server.world.json.ValueProviderRegistry;
 import net.gegy1000.terrarium.server.world.pipeline.DataPipelineRegistries;
 import net.gegy1000.terrarium.server.world.pipeline.composer.ComposerRegistries;
@@ -29,6 +30,7 @@ public class ServerProxy {
         CoverTypeRegistry.onInit();
         ValueProviderRegistry.onInit();
         CoordinateStateRegistry.onInit();
+        WidgetConverterRegistry.onInit();
         WidgetParseHandler.onInit();
         GeocoderRegistry.onInit();
         ComposerRegistries.onInit();

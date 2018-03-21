@@ -1,6 +1,7 @@
-package net.gegy1000.terrarium.server.world.generator.customization;
+package net.gegy1000.terrarium.server.world.generator.customization.widget;
 
 import net.gegy1000.terrarium.client.gui.widget.SliderGuiWidget;
+import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyValue;
 import net.minecraft.client.gui.GuiButton;
@@ -15,18 +16,25 @@ public class SliderWidget implements CustomizationWidget {
     private final double step;
     private final double fineStep;
 
-    public SliderWidget(PropertyKey<Number> propertyKey, double minimum, double maximum, double step, double fineStep) {
+    private final WidgetPropertyConverter converter;
+
+    public SliderWidget(PropertyKey<Number> propertyKey, double minimum, double maximum, double step, double fineStep, WidgetPropertyConverter converter) {
         this.propertyKey = propertyKey;
+
         this.minimum = Math.min(minimum, maximum);
         this.maximum = Math.max(maximum, minimum);
         this.step = step;
         this.fineStep = fineStep;
+
+        this.converter = converter;
     }
 
     @Override
     @SideOnly(Side.CLIENT)
-    public GuiButton createWidget(GenerationSettings settings, int id, int x, int y) {
+    public GuiButton createWidget(GenerationSettings settings, int id, int x, int y, Runnable onPropertyChange) {
         PropertyValue<Number> value = settings.getProperties().getValue(this.propertyKey);
-        return new SliderGuiWidget(id, x, y, this.propertyKey, value, this.minimum, this.maximum, this.step, this.fineStep);
+        SliderGuiWidget widget = new SliderGuiWidget(id, x, y, this.propertyKey, value, this.minimum, this.maximum, this.step, this.fineStep, this.converter);
+        widget.addListener(onPropertyChange);
+        return widget;
     }
 }

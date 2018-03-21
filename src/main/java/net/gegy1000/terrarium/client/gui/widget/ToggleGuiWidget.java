@@ -11,12 +11,15 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @SideOnly(Side.CLIENT)
 public class ToggleGuiWidget extends GuiButton implements TooltipRenderer {
     private final PropertyKey<Boolean> propertyKey;
     private final PropertyValue<Boolean> property;
+
+    private final List<Runnable> listeners = new ArrayList<>();
 
     private boolean state;
     private float hoverTime;
@@ -27,6 +30,10 @@ public class ToggleGuiWidget extends GuiButton implements TooltipRenderer {
         this.property = property;
 
         this.setState(property.get());
+    }
+
+    public void addListener(Runnable listener) {
+        this.listeners.add(listener);
     }
 
     @Override
@@ -53,8 +60,14 @@ public class ToggleGuiWidget extends GuiButton implements TooltipRenderer {
     }
 
     public void setState(boolean state) {
+        if (state != this.state) {
+            this.property.set(state);
+            for (Runnable listener : this.listeners) {
+                listener.run();
+            }
+        }
+
         this.state = state;
-        this.property.set(state);
 
         String stateKey = I18n.format(this.state ? "gui.yes" : "gui.no");
         if (this.state) {

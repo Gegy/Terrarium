@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import net.gegy1000.terrarium.client.gui.GuiRenderUtils;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyValue;
+import net.gegy1000.terrarium.server.world.generator.customization.widget.WidgetPropertyConverter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -14,12 +15,17 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @SideOnly(Side.CLIENT)
 public class SliderGuiWidget extends GuiButton implements TooltipRenderer {
     private final PropertyKey<Number> propertyKey;
     private final PropertyValue<Number> property;
+
+    private final WidgetPropertyConverter converter;
+
+    private final List<Runnable> listeners = new ArrayList<>();
 
     private final double min;
     private final double max;
@@ -33,10 +39,12 @@ public class SliderGuiWidget extends GuiButton implements TooltipRenderer {
 
     private float hoverTime;
 
-    public SliderGuiWidget(int widgetId, int x, int y, PropertyKey<Number> propertyKey, PropertyValue<Number> property, double min, double max, double step, double fineStep) {
+    public SliderGuiWidget(int widgetId, int x, int y, PropertyKey<Number> propertyKey, PropertyValue<Number> property, double min, double max, double step, double fineStep, WidgetPropertyConverter converter) {
         super(widgetId, x, y, 150, 20, "");
         this.propertyKey = propertyKey;
         this.property = property;
+        this.converter = converter;
+
         this.min = min;
         this.max = max;
         this.step = step;
@@ -46,11 +54,19 @@ public class SliderGuiWidget extends GuiButton implements TooltipRenderer {
     }
 
     public SliderGuiWidget(int widgetId, int x, int y, PropertyKey<Number> propertyKey, PropertyValue<Number> property, double min, double max) {
-        this(widgetId, x, y, propertyKey, property, min, max, 1.0, 0.1);
+        this(widgetId, x, y, propertyKey, property, min, max, 1.0, 0.1, null);
+    }
+
+    public void addListener(Runnable listener) {
+        this.listeners.add(listener);
     }
 
     public void setSliderPosition(double position) {
         double value = this.toValue(position);
+        if (this.converter != null) {
+            value = this.converter.toUser(value);
+        }
+
         this.position = position;
         this.displayString = String.format("%s: %.2f", this.propertyKey.getLocalizedName(), value);
     }
@@ -119,7 +135,13 @@ public class SliderGuiWidget extends GuiButton implements TooltipRenderer {
     public void mouseReleased(int mouseX, int mouseY) {
         if (this.mouseDown) {
             this.mouseDown = false;
-            this.property.set(this.toValue(this.position));
+            double value = this.toValue(this.position);
+            if (Math.abs(this.property.get().doubleValue() - value) > 1e-06) {
+                this.property.set(value);
+                for (Runnable listener : this.listeners) {
+                    listener.run();
+                }
+            }
         }
     }
 
@@ -128,17 +150,29 @@ public class SliderGuiWidget extends GuiButton implements TooltipRenderer {
     }
 
     private double step(double position, double step) {
-        double value = this.toValue(position);
-        return this.toPosition(value - (value % step));
+        double value = this.min + (this.max - this.min) * position;
+        double clamped = MathHelper.clamp(value, this.min, this.max);
+        double stepped = clamped - (clamped % step);
+        if (this.converter != null) {
+            stepped = this.converter.fromUser(stepped);
+        }
+        return this.toPosition(stepped);
     }
 
     private double toPosition(double value) {
+        if (this.converter != null) {
+            value = this.converter.toUser(value);
+        }
         double clampedValue = MathHelper.clamp(value, this.min, this.max);
         return (clampedValue - this.min) / (this.max - this.min);
     }
 
     private double toValue(double position) {
         double value = this.min + (this.max - this.min) * position;
-        return MathHelper.clamp(value, this.min, this.max);
+        double clamped = MathHelper.clamp(value, this.min, this.max);
+        if (this.converter != null) {
+            return this.converter.fromUser(clamped);
+        }
+        return clamped;
     }
 }
