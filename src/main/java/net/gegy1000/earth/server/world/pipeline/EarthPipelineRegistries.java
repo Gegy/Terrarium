@@ -2,6 +2,7 @@ package net.gegy1000.earth.server.world.pipeline;
 
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.world.pipeline.adapter.OsmCoastlineAdapter;
+import net.gegy1000.earth.server.world.pipeline.adapter.WaterFlattenAdapter;
 import net.gegy1000.earth.server.world.pipeline.populator.OverpassRegionPopulator;
 import net.gegy1000.earth.server.world.pipeline.sampler.OsmSampler;
 import net.gegy1000.earth.server.world.pipeline.source.GlobSource;
@@ -46,5 +47,6 @@ public class EarthPipelineRegistries {
     @SubscribeEvent
     public static void onRegisterAdapters(DataPipelineRegistries.AdapterEvent event) {
         event.register(new ResourceLocation(TerrariumEarth.MODID, "osm_coastlines"), new OsmCoastlineAdapter.Parser());
+        event.register(new ResourceLocation(TerrariumEarth.MODID, "water_edge_flatten"), new WaterFlattenAdapter.Parser());
     }
 }

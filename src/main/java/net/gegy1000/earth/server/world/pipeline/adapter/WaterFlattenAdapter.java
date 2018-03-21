@@ -1,4 +1,4 @@
-package net.gegy1000.terrarium.server.world.pipeline.adapter;
+package net.gegy1000.earth.server.world.pipeline.adapter;
 
 import com.google.gson.JsonObject;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
@@ -8,6 +8,7 @@ import net.gegy1000.terrarium.server.world.cover.CoverTypeRegistry;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
+import net.gegy1000.terrarium.server.world.pipeline.adapter.RegionAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTileAccess;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTileAccess;
@@ -93,10 +94,10 @@ public class WaterFlattenAdapter implements RegionAdapter {
 
     private boolean isAlreadyFlattened(int x, int z, short targetHeight, short[] heightBuffer, int width, int height) {
         int index = x + z * width;
-        return (x <= 0 || heightBuffer[index - 1] != targetHeight)
-                && (x >= width - 1 || heightBuffer[index + 1] != targetHeight)
-                && (z <= 0 || heightBuffer[index - width] != targetHeight)
-                && (z >= height - 1 || heightBuffer[index + width] != targetHeight);
+        return (x <= 0 || Math.abs(heightBuffer[index - 1] - targetHeight) > 1)
+                && (x >= width - 1 || Math.abs(heightBuffer[index + 1] - targetHeight) > 1)
+                && (z <= 0 || Math.abs(heightBuffer[index - width] - targetHeight) > 1)
+                && (z >= height - 1 || Math.abs(heightBuffer[index + width] - targetHeight) > 1);
     }
 
     private boolean hasNeighbouringLand(int x, int z, CoverType[] coverBuffer, int width, int height) {
@@ -168,7 +169,7 @@ public class WaterFlattenAdapter implements RegionAdapter {
 
         @Override
         public boolean canVisit(FloodFill.Point point, short sampled) {
-            if (sampled != this.target) {
+            if (Math.abs(sampled - this.target) > 1) {
                 return false;
             }
             int deltaX = Math.abs(point.getX() - this.origin.getX());

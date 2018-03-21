@@ -10,7 +10,7 @@ import net.gegy1000.terrarium.server.world.pipeline.adapter.BeachAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.HeightNoiseAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.HeightTransformAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.RegionAdapter;
-import net.gegy1000.terrarium.server.world.pipeline.adapter.WaterFlattenAdapter;
+import net.gegy1000.earth.server.world.pipeline.adapter.WaterFlattenAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.debug.DebugRegionBorderAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.populator.RegionPopulator;

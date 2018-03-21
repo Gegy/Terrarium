@@ -32,7 +32,7 @@
     "beach_cover": "earth:beach"
   },
   {
-    "type": "terrarium:water_edge_flatten",
+    "type": "earth:water_edge_flatten",
     "height_component": "terrarium:height",
     "cover_component": "terrarium:cover",
     "flatten_range": 16,
