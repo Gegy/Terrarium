@@ -3,6 +3,7 @@ package net.gegy1000.earth.server.world.pipeline;
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.world.pipeline.adapter.OsmCoastlineAdapter;
 import net.gegy1000.earth.server.world.pipeline.adapter.WaterFlattenAdapter;
+import net.gegy1000.earth.server.world.pipeline.composer.BoulderDecorationComposer;
 import net.gegy1000.earth.server.world.pipeline.populator.OverpassRegionPopulator;
 import net.gegy1000.earth.server.world.pipeline.sampler.OsmSampler;
 import net.gegy1000.earth.server.world.pipeline.source.GlobSource;
@@ -11,6 +12,7 @@ import net.gegy1000.earth.server.world.pipeline.source.osm.OverpassSource;
 import net.gegy1000.earth.server.world.pipeline.source.tile.OsmTileAccess;
 import net.gegy1000.terrarium.server.world.pipeline.DataPipelineRegistries;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
+import net.gegy1000.terrarium.server.world.pipeline.composer.ComposerRegistries;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -48,5 +50,10 @@ public class EarthPipelineRegistries {
     public static void onRegisterAdapters(DataPipelineRegistries.AdapterEvent event) {
         event.register(new ResourceLocation(TerrariumEarth.MODID, "osm_coastlines"), new OsmCoastlineAdapter.Parser());
         event.register(new ResourceLocation(TerrariumEarth.MODID, "water_edge_flatten"), new WaterFlattenAdapter.Parser());
+    }
+
+    @SubscribeEvent
+    public static void onRegisterComposers(ComposerRegistries.DecorationEvent event) {
+        event.register(new ResourceLocation(TerrariumEarth.MODID, "boulder_decorator"), new BoulderDecorationComposer.Parser());
     }
 }

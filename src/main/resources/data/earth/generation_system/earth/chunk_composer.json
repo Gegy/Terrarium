@@ -34,6 +34,11 @@
       "slope_component": "terrarium:slope",
       "cover_component": "terrarium:cover",
       "cover_bundle": "cover_types"
+    },
+    {
+      "type": "earth:boulder_decorator",
+      "apply_if": "@enable_decoration",
+      "slope_component": "terrarium:slope"
     }
   ],
   "biome_composer": {
