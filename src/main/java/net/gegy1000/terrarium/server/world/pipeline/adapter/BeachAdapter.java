@@ -9,8 +9,12 @@ import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTileAccess;
+import net.gegy1000.terrarium.server.world.region.GenerationRegion;
 import net.gegy1000.terrarium.server.world.region.RegionData;
 import net.minecraft.world.World;
+import net.minecraft.world.gen.NoiseGeneratorImproved;
+
+import java.util.Random;
 
 public class BeachAdapter implements RegionAdapter {
     private final RegionComponentType<CoverRasterTileAccess> coverComponent;
@@ -19,11 +23,17 @@ public class BeachAdapter implements RegionAdapter {
     private final CoverType waterCover;
     private final CoverType beachCover;
 
-    public BeachAdapter(RegionComponentType<CoverRasterTileAccess> coverComponent, int beachSize, CoverType waterCover, CoverType beachCover) {
+    private final NoiseGeneratorImproved beachNoise;
+    private final double[] sampledBeachNoise = new double[GenerationRegion.BUFFERED_SIZE * GenerationRegion.BUFFERED_SIZE];
+
+    public BeachAdapter(World world, RegionComponentType<CoverRasterTileAccess> coverComponent, int beachSize, CoverType waterCover, CoverType beachCover) {
         this.coverComponent = coverComponent;
         this.beachSize = beachSize;
         this.waterCover = waterCover;
         this.beachCover = beachCover;
+
+        Random random = new Random(world.getSeed());
+        this.beachNoise = new NoiseGeneratorImproved(random);
     }
 
     @Override
@@ -32,6 +42,9 @@ public class BeachAdapter implements RegionAdapter {
         if (this.beachSize <= 0) {
             return;
         }
+
+        double frequency = 0.2;
+        this.beachNoise.populateNoiseArray(this.sampledBeachNoise, x * frequency, 0.0, z * frequency, width, 1, height, frequency, 1.0, frequency, 1.0);
 
         CoverType[] coverBuffer = coverTile.getData();
 
@@ -48,6 +61,7 @@ public class BeachAdapter implements RegionAdapter {
     }
 
     private void spreadBeach(int beachSize, int width, int height, int localX, int localY, CoverType[] coverBuffer) {
+        double maxWeight = (beachSize * beachSize) * 2;
         for (int beachY = -beachSize; beachY <= beachSize; beachY++) {
             int globalY = localY + beachY;
             if (globalY >= 0 && globalY < height) {
@@ -56,7 +70,11 @@ public class BeachAdapter implements RegionAdapter {
                     if (globalX >= 0 && globalX < width) {
                         int beachIndex = globalX + globalY * width;
                         if (coverBuffer[beachIndex] != this.waterCover) {
-                            coverBuffer[beachIndex] = this.beachCover;
+                            double weight = maxWeight - (beachX * beachX + beachY * beachY);
+                            double noise = this.sampledBeachNoise[globalY + globalX * GenerationRegion.BUFFERED_SIZE];
+                            if (weight > noise * noise * 3.0) {
+                                coverBuffer[beachIndex] = this.beachCover;
+                            }
                         }
                     }
                 }
@@ -71,7 +89,7 @@ public class BeachAdapter implements RegionAdapter {
             int beachSize = valueParser.parseInteger(objectRoot, "beach_size");
             CoverType waterCover = valueParser.parseRegistryEntry(objectRoot, "water_cover", CoverTypeRegistry.getRegistry());
             CoverType beachCover = valueParser.parseRegistryEntry(objectRoot, "beach_cover", CoverTypeRegistry.getRegistry());
-            return new BeachAdapter(coverComponent, beachSize, waterCover, beachCover);
+            return new BeachAdapter(world, coverComponent, beachSize, waterCover, beachCover);
         }
     }
 }

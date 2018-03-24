@@ -94,10 +94,10 @@ public class WaterFlattenAdapter implements RegionAdapter {
 
     private boolean isAlreadyFlattened(int x, int z, short targetHeight, short[] heightBuffer, int width, int height) {
         int index = x + z * width;
-        return (x <= 0 || Math.abs(heightBuffer[index - 1] - targetHeight) > 1)
-                && (x >= width - 1 || Math.abs(heightBuffer[index + 1] - targetHeight) > 1)
-                && (z <= 0 || Math.abs(heightBuffer[index - width] - targetHeight) > 1)
-                && (z >= height - 1 || Math.abs(heightBuffer[index + width] - targetHeight) > 1);
+        return (x <= 0 || Math.abs(heightBuffer[index - 1] - targetHeight) > 0)
+                && (x >= width - 1 || Math.abs(heightBuffer[index + 1] - targetHeight) > 0)
+                && (z <= 0 || Math.abs(heightBuffer[index - width] - targetHeight) > 0)
+                && (z >= height - 1 || Math.abs(heightBuffer[index + width] - targetHeight) > 0);
     }
 
     private boolean hasNeighbouringLand(int x, int z, CoverType[] coverBuffer, int width, int height) {
@@ -169,7 +169,7 @@ public class WaterFlattenAdapter implements RegionAdapter {
 
         @Override
         public boolean canVisit(FloodFill.Point point, short sampled) {
-            if (Math.abs(sampled - this.target) > 1) {
+            if (Math.abs(sampled - this.target) > 0) {
                 return false;
             }
             int deltaX = Math.abs(point.getX() - this.origin.getX());
