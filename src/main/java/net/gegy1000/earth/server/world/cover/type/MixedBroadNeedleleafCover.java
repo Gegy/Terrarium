@@ -18,20 +18,19 @@ public class MixedBroadNeedleleafCover extends ForestCover {
     }
 
     @Override
-    public Biome getBiome(int x, int z) {
+    public Biome getBiome(EarthCoverContext context, int x, int z) {
         return Biomes.FOREST;
     }
 
     private static class Decoration extends ForestCover.Decoration {
-        private Decoration(EarthCoverContext context, CoverType coverType) {
+        private Decoration(EarthCoverContext context, CoverType<EarthCoverContext> coverType) {
             super(context, coverType);
         }
 
         @Override
         public void decorate(int originX, int originZ, Random random) {
             World world = this.context.getWorld();
-            // TODO
-            LatitudinalZone zone = LatitudinalZone.TROPICS;
+            LatitudinalZone zone = this.context.getZone(originX, originZ);
 
             this.preventIntersection(1);
 

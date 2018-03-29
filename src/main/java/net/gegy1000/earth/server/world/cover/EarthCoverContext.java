@@ -2,6 +2,7 @@ package net.gegy1000.earth.server.world.cover;
 
 import com.google.gson.JsonObject;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
+import net.gegy1000.terrarium.server.world.chunk.PseudoRandomMap;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.cover.CoverGenerationContext;
 import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
@@ -13,11 +14,15 @@ import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTileA
 import net.minecraft.world.World;
 
 public class EarthCoverContext implements CoverGenerationContext {
+    private static final long ZONE_SCATTER_SEED = 2016944452769570983L;
+
     private final World world;
     private final ShortRasterTileAccess heightRaster;
     private final CoverRasterTileAccess coverRaster;
     private final ByteRasterTileAccess slopeRaster;
     private final CoordinateState latLngCoordinate;
+
+    private final PseudoRandomMap zoneScatterMap;
 
     public EarthCoverContext(
             World world, TerrariumWorldData worldData,
@@ -30,6 +35,8 @@ public class EarthCoverContext implements CoverGenerationContext {
         this.coverRaster = this.getRaster(worldData, coverComponent);
         this.slopeRaster = this.getRaster(worldData, slopeComponent);
         this.latLngCoordinate = latLngCoordinate;
+
+        this.zoneScatterMap = new PseudoRandomMap(world, ZONE_SCATTER_SEED);
     }
 
     @Override
@@ -54,6 +61,15 @@ public class EarthCoverContext implements CoverGenerationContext {
 
     public ByteRasterTileAccess getSlopeRaster() {
         return this.slopeRaster;
+    }
+
+    public LatitudinalZone getZone(int globalX, int globalZ) {
+        this.zoneScatterMap.initPosSeed(globalX, globalZ);
+        int offsetX = this.zoneScatterMap.nextInt(128) - this.zoneScatterMap.nextInt(128);
+        int offsetZ = this.zoneScatterMap.nextInt(128) - this.zoneScatterMap.nextInt(128);
+
+        double latitude = this.latLngCoordinate.getX(globalX + offsetX, globalZ + offsetZ);
+        return LatitudinalZone.get(latitude);
     }
 
     public CoordinateState getLatLngCoordinate() {

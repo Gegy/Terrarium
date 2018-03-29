@@ -3,7 +3,6 @@ package net.gegy1000.earth.server.world.cover.type;
 import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthCoverType;
 import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
-import net.gegy1000.earth.server.world.cover.LatitudinalZone;
 import net.gegy1000.terrarium.server.world.cover.CoverBiomeSelectors;
 import net.gegy1000.terrarium.server.world.cover.CoverDecorationGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
@@ -37,16 +36,15 @@ public class RainfedCropsCover extends EarthCoverType {
     }
 
     @Override
-    public Biome getBiome(int x, int z) {
-        // TODO
-        return CoverBiomeSelectors.BROADLEAF_FOREST_SELECTOR.apply(LatitudinalZone.TROPICS);
+    public Biome getBiome(EarthCoverContext context, int x, int z) {
+        return CoverBiomeSelectors.BROADLEAF_FOREST_SELECTOR.apply(context.getZone(x, z));
     }
 
     private static class Surface extends EarthSurfaceGenerator {
         private final GenLayer coverSelector;
         private final GenLayer grassSelector;
 
-        private Surface(EarthCoverContext context, CoverType coverType) {
+        private Surface(EarthCoverContext context, CoverType<EarthCoverContext> coverType) {
             super(context, coverType);
 
             GenLayer cover = new SelectWeightedLayer(10,

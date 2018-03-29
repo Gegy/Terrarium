@@ -19,7 +19,7 @@ public class UrbanCover extends EarthCoverType {
     }
 
     @Override
-    public Biome getBiome(int x, int z) {
+    public Biome getBiome(EarthCoverContext context, int x, int z) {
         return Biomes.PLAINS;
     }
 }

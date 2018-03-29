@@ -29,14 +29,14 @@ public class WaterCover extends EarthCoverType {
     }
 
     @Override
-    public Biome getBiome(int x, int z) {
+    public Biome getBiome(EarthCoverContext context, int x, int z) {
         return Biomes.OCEAN;
     }
 
     private static class Surface extends EarthSurfaceGenerator {
         private final GenLayer coverSelector;
 
-        private Surface(EarthCoverContext context, CoverType coverType) {
+        private Surface(EarthCoverContext context, CoverType<EarthCoverContext> coverType) {
             super(context, coverType);
 
             GenLayer layer = new SelectionSeedLayer(2, 1);

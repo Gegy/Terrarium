@@ -4,7 +4,6 @@ import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthCoverType;
 import net.gegy1000.earth.server.world.cover.EarthDecorationGenerator;
 import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
-import net.gegy1000.earth.server.world.cover.LatitudinalZone;
 import net.gegy1000.terrarium.server.world.cover.CoverBiomeSelectors;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.ReplaceRandomLayer;
@@ -36,16 +35,15 @@ public class GrasslandCover extends EarthCoverType {
     }
 
     @Override
-    public Biome getBiome(int x, int z) {
-        // TODO
-        return CoverBiomeSelectors.GRASSLAND_SELECTOR.apply(LatitudinalZone.TROPICS);
+    public Biome getBiome(EarthCoverContext context, int x, int z) {
+        return CoverBiomeSelectors.GRASSLAND_SELECTOR.apply(context.getZone(x, z));
     }
 
     private static class Surface extends EarthSurfaceGenerator {
         private final GenLayer coverSelector;
         private final GenLayer grassSelector;
 
-        private Surface(EarthCoverContext context, CoverType coverType) {
+        private Surface(EarthCoverContext context, CoverType<EarthCoverContext> coverType) {
             super(context, coverType);
 
             GenLayer cover = new SelectionSeedLayer(2, 1);
@@ -101,7 +99,7 @@ public class GrasslandCover extends EarthCoverType {
     }
 
     private static class Decoration extends EarthDecorationGenerator {
-        private Decoration(EarthCoverContext context, CoverType coverType) {
+        private Decoration(EarthCoverContext context, CoverType<EarthCoverContext> coverType) {
             super(context, coverType);
         }
 

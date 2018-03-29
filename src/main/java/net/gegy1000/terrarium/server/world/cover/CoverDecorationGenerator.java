@@ -12,7 +12,7 @@ public abstract class CoverDecorationGenerator<T extends CoverGenerationContext>
     private final Set<BlockPos> intersectionPoints = new HashSet<>();
     private int intersectionRange;
 
-    protected CoverDecorationGenerator(T context, CoverType coverType) {
+    protected CoverDecorationGenerator(T context, CoverType<T> coverType) {
         super(context, coverType);
     }
 
@@ -76,7 +76,7 @@ public abstract class CoverDecorationGenerator<T extends CoverGenerationContext>
     }
 
     public static class Empty<T extends CoverGenerationContext> extends CoverDecorationGenerator<T> {
-        public Empty(T context, CoverType coverType) {
+        public Empty(T context, CoverType<T> coverType) {
             super(context, coverType);
         }
 

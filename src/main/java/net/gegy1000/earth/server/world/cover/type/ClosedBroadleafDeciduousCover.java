@@ -18,20 +18,19 @@ public class ClosedBroadleafDeciduousCover extends ClosedForestCover {
     }
 
     @Override
-    public Biome getBiome(int x, int z) {
-        // TODO
-        return CoverBiomeSelectors.BROADLEAF_FOREST_SELECTOR.apply(LatitudinalZone.TROPICS);
+    public Biome getBiome(EarthCoverContext context, int x, int z) {
+        return CoverBiomeSelectors.BROADLEAF_FOREST_SELECTOR.apply(context.getZone(x, z));
     }
 
     private static class Decoration extends ClosedForestCover.Decoration {
-        private Decoration(EarthCoverContext context, CoverType coverType) {
+        private Decoration(EarthCoverContext context, CoverType<EarthCoverContext> coverType) {
             super(context, coverType);
         }
 
         @Override
         public void decorate(int originX, int originZ, Random random) {
             World world = this.context.getWorld();
-            LatitudinalZone zone = LatitudinalZone.TROPICS;
+            LatitudinalZone zone = this.context.getZone(originX, originZ);
 
             this.preventIntersection(zone == LatitudinalZone.TROPICS ? 1 : 2);
 

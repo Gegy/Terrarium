@@ -7,7 +7,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.gen.layer.GenLayer;
 
 public abstract class EarthSurfaceGenerator extends CoverSurfaceGenerator<EarthCoverContext> {
-    protected EarthSurfaceGenerator(EarthCoverContext context, CoverType coverType) {
+    protected EarthSurfaceGenerator(EarthCoverContext context, CoverType<EarthCoverContext> coverType) {
         super(context, coverType);
     }
 

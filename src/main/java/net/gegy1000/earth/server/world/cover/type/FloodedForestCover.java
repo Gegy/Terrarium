@@ -23,7 +23,7 @@ public abstract class FloodedForestCover extends ForestCover {
 
         protected final GenLayer waterSelector;
 
-        protected Surface(EarthCoverContext context, CoverType coverType, IBlockState primaryCover, boolean addPodzol) {
+        protected Surface(EarthCoverContext context, CoverType<EarthCoverContext> coverType, IBlockState primaryCover, boolean addPodzol) {
             super(context, coverType);
 
             this.primaryCover = primaryCover;

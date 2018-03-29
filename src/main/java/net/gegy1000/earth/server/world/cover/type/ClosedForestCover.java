@@ -16,7 +16,7 @@ public abstract class ClosedForestCover extends ForestCover {
     }
 
     private static class Surface extends ForestCover.Surface {
-        private Surface(EarthCoverContext context, CoverType coverType) {
+        private Surface(EarthCoverContext context, CoverType<EarthCoverContext> coverType) {
             super(context, coverType);
         }
 

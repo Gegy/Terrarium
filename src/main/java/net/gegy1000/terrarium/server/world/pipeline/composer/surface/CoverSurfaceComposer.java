@@ -1,28 +1,21 @@
 package net.gegy1000.terrarium.server.world.pipeline.composer.surface;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
-import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.util.ArrayUtils;
 import net.gegy1000.terrarium.server.world.chunk.PseudoRandomMap;
 import net.gegy1000.terrarium.server.world.cover.CoverGenerationContext;
-import net.gegy1000.terrarium.server.world.cover.CoverRegistry;
 import net.gegy1000.terrarium.server.world.cover.CoverSurfaceGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
+import net.gegy1000.terrarium.server.world.cover.DeclaredCoverTypeParser;
 import net.gegy1000.terrarium.server.world.cover.generator.primer.CoverChunkPrimer;
 import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
-import net.gegy1000.terrarium.server.world.json.TerrariumJsonUtils;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTileAccess;
 import net.gegy1000.terrarium.server.world.region.GenerationRegionHandler;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.JsonUtils;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
@@ -170,49 +163,14 @@ public class CoverSurfaceComposer implements SurfaceComposer {
             IBlockState replaceBlock = valueParser.parseBlockState(objectRoot, "replace_block");
 
             Map<CoverType<?>, CoverSurfaceGenerator<?>> generators = new HashMap<>();
-            JsonObject coverTypeRoot = TerrariumJsonUtils.parseRemoteObject(objectRoot, "cover_types");
-
-            CoverGenerationContext defaultContext = null;
-            if (coverTypeRoot.has("default_context")) {
-                defaultContext = valueParser.parseContext(coverTypeRoot, "default_context");
-            }
-
-            JsonArray coverTypeArray = TerrariumJsonUtils.parseRemoteArray(coverTypeRoot, "types");
-            for (JsonElement element : coverTypeArray) {
-                if (element.isJsonObject()) {
-                    JsonObject coverObject = element.getAsJsonObject();
-                    ResourceLocation coverKey = new ResourceLocation(JsonUtils.getString(coverObject, "type"));
-                    CoverGenerationContext context = valueParser.parseContext(coverObject, "context");
-                    this.putGenerator(generators, coverKey, context);
-                } else if (TerrariumJsonUtils.isString(element)) {
-                    if (defaultContext == null) {
-                        throw new JsonSyntaxException("Cannot declare defaulted cover type with no default context!");
-                    }
-                    ResourceLocation coverKey = new ResourceLocation(element.getAsString());
-                    this.putGenerator(generators, coverKey, defaultContext);
-                } else {
-                    Terrarium.LOGGER.warn("Ignored invalid cover type entry {}", element);
+            DeclaredCoverTypeParser.parseCoverTypes(objectRoot, valueParser, new DeclaredCoverTypeParser.Handler() {
+                @Override
+                public <T extends CoverGenerationContext> void handle(CoverType<T> coverType, T context) {
+                    generators.put(coverType, coverType.createSurfaceGenerator(context));
                 }
-            }
+            });
 
             return new CoverSurfaceComposer(world, coverComponent, generators, decorate, replaceBlock);
-        }
-
-        private void putGenerator(Map<CoverType<?>, CoverSurfaceGenerator<?>> generators, ResourceLocation coverKey, CoverGenerationContext context) {
-            CoverType<?> coverType = CoverRegistry.getCoverType(coverKey);
-            if (coverType == null) {
-                throw new JsonSyntaxException("Found unregistered cover type " + coverKey);
-            }
-            generators.put(coverType, this.createGenerator(coverType, context));
-        }
-
-        @SuppressWarnings("unchecked")
-        private <T extends CoverGenerationContext> CoverSurfaceGenerator<T> createGenerator(CoverType<T> coverType, CoverGenerationContext context) {
-            if (coverType.getRequiredContext().isAssignableFrom(context.getClass())) {
-                return coverType.createSurfaceGenerator((T) context);
-            } else {
-                throw new JsonSyntaxException("Tried to apply context of wrong type to " + coverType);
-            }
         }
     }
 }

@@ -25,7 +25,7 @@ public class BareCover extends EarthCoverType {
     private static final int LAYER_SAND = 2;
 
     @Override
-    public Biome getBiome(int x, int z) {
+    public Biome getBiome(EarthCoverContext context, int x, int z) {
         return Biomes.DESERT;
     }
 
@@ -42,7 +42,7 @@ public class BareCover extends EarthCoverType {
     private static class Surface extends EarthSurfaceGenerator {
         private final GenLayer coverSelector;
 
-        private Surface(EarthCoverContext context, CoverType coverType) {
+        private Surface(EarthCoverContext context, CoverType<EarthCoverContext> coverType) {
             super(context, coverType);
 
             GenLayer layer = new SelectWeightedLayer(1,
@@ -104,7 +104,7 @@ public class BareCover extends EarthCoverType {
     }
 
     private static class Decoration extends EarthDecorationGenerator {
-        private Decoration(EarthCoverContext context, CoverType coverType) {
+        private Decoration(EarthCoverContext context, CoverType<EarthCoverContext> coverType) {
             super(context, coverType);
         }
 

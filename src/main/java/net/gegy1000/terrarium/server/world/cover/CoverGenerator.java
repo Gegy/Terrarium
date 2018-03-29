@@ -83,9 +83,9 @@ public abstract class CoverGenerator<T extends CoverGenerationContext> {
 
     protected final T context;
 
-    protected final CoverType coverType;
+    protected final CoverType<T> coverType;
 
-    protected CoverGenerator(T context, CoverType coverType) {
+    protected CoverGenerator(T context, CoverType<T> coverType) {
         this.context = context;
         this.coverType = coverType;
     }

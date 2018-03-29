@@ -24,13 +24,12 @@ public class FreshFloodedForestCover extends FloodedForestCover {
     }
 
     @Override
-    public Biome getBiome(int x, int z) {
-        // TODO
-        return CoverBiomeSelectors.FLOODED_SELECTOR.apply(LatitudinalZone.TROPICS);
+    public Biome getBiome(EarthCoverContext context, int x, int z) {
+        return CoverBiomeSelectors.FLOODED_SELECTOR.apply(context.getZone(x, z));
     }
 
     private static class Decoration extends ForestCover.Decoration {
-        private Decoration(EarthCoverContext context, CoverType coverType) {
+        private Decoration(EarthCoverContext context, CoverType<EarthCoverContext> coverType) {
             super(context, coverType);
         }
 
@@ -38,8 +37,7 @@ public class FreshFloodedForestCover extends FloodedForestCover {
         public void decorate(int originX, int originZ, Random random) {
             World world = this.context.getWorld();
 
-            // TODO
-            LatitudinalZone zone = LatitudinalZone.TROPICS;
+            LatitudinalZone zone = this.context.getZone(originX, originZ);
 
             this.preventIntersection(1);
 

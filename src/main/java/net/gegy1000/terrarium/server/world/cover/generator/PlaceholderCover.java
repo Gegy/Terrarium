@@ -23,7 +23,7 @@ public class PlaceholderCover implements CoverType<CoverGenerationContext> {
     }
 
     @Override
-    public Biome getBiome(int x, int z) {
+    public Biome getBiome(CoverGenerationContext context, int x, int z) {
         return Biomes.DEFAULT;
     }
 
@@ -33,7 +33,7 @@ public class PlaceholderCover implements CoverType<CoverGenerationContext> {
     }
 
     private static class Surface extends CoverSurfaceGenerator<CoverGenerationContext> {
-        private Surface(CoverGenerationContext context, CoverType coverType) {
+        private Surface(CoverGenerationContext context, CoverType<CoverGenerationContext> coverType) {
             super(context, coverType);
         }
 

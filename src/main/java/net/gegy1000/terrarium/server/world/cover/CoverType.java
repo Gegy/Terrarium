@@ -7,7 +7,7 @@ public interface CoverType<T extends CoverGenerationContext> {
 
     CoverDecorationGenerator<T> createDecorationGenerator(T context);
 
-    Biome getBiome(int x, int z);
+    Biome getBiome(T context, int x, int z);
 
     Class<T> getRequiredContext();
 }

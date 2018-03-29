@@ -34,16 +34,15 @@ public class ShrublandCover extends EarthCoverType {
     }
 
     @Override
-    public Biome getBiome(int x, int z) {
-        // TODO
-        return CoverBiomeSelectors.SHRUBLAND_SELECTOR.apply(LatitudinalZone.TROPICS);
+    public Biome getBiome(EarthCoverContext context, int x, int z) {
+        return CoverBiomeSelectors.SHRUBLAND_SELECTOR.apply(context.getZone(x, z));
     }
 
     private static class Surface extends EarthSurfaceGenerator {
         private final GenLayer coverSelector;
         private final GenLayer grassSelector;
 
-        private Surface(EarthCoverContext context, CoverType coverType) {
+        private Surface(EarthCoverContext context, CoverType<EarthCoverContext> coverType) {
             super(context, coverType);
 
             GenLayer cover = new SelectionSeedLayer(2, 1);
@@ -93,14 +92,14 @@ public class ShrublandCover extends EarthCoverType {
     }
 
     private static class Decoration extends EarthDecorationGenerator {
-        private Decoration(EarthCoverContext context, CoverType coverType) {
+        private Decoration(EarthCoverContext context, CoverType<EarthCoverContext> coverType) {
             super(context, coverType);
         }
 
         @Override
         public void decorate(int originX, int originZ, Random random) {
             World world = this.context.getWorld();
-            LatitudinalZone zone = LatitudinalZone.TROPICS; // TODO
+            LatitudinalZone zone = this.context.getZone(originX, originZ);
 
             this.preventIntersection(2);
 

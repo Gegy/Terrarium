@@ -34,7 +34,7 @@ public abstract class ForestCover extends EarthCoverType {
         protected final GenLayer clearingSelector;
         protected final GenLayer heightOffsetSelector;
 
-        protected Decoration(EarthCoverContext context, CoverType coverType) {
+        protected Decoration(EarthCoverContext context, CoverType<EarthCoverContext> coverType) {
             super(context, coverType);
 
             GenLayer clearing = new SelectWeightedLayer(2,
@@ -75,7 +75,7 @@ public abstract class ForestCover extends EarthCoverType {
     protected static class Surface extends EarthSurfaceGenerator {
         protected final GenLayer coverSelector;
 
-        protected Surface(EarthCoverContext context, CoverType coverType) {
+        protected Surface(EarthCoverContext context, CoverType<EarthCoverContext> coverType) {
             super(context, coverType);
 
             this.coverSelector = this.createCoverSelector();

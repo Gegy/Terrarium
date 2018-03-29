@@ -2,7 +2,6 @@ package net.gegy1000.earth.server.world.cover.type;
 
 import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthDecorationGenerator;
-import net.gegy1000.earth.server.world.cover.LatitudinalZone;
 import net.gegy1000.terrarium.server.world.cover.CoverBiomeSelectors;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.primer.CoverPrimer;
@@ -28,13 +27,12 @@ public class SalineFloodedForestCover extends FloodedForestCover {
     }
 
     @Override
-    public Biome getBiome(int x, int z) {
-        // TODO
-        return CoverBiomeSelectors.SALINE_FLOODED_SELECTOR.apply(LatitudinalZone.TROPICS);
+    public Biome getBiome(EarthCoverContext context, int x, int z) {
+        return CoverBiomeSelectors.SALINE_FLOODED_SELECTOR.apply(context.getZone(x, z));
     }
 
     private static class Surface extends FloodedForestCover.Surface {
-        private Surface(EarthCoverContext context, CoverType coverType) {
+        private Surface(EarthCoverContext context, CoverType<EarthCoverContext> coverType) {
             super(context, coverType, SAND, false);
         }
 
@@ -55,7 +53,7 @@ public class SalineFloodedForestCover extends FloodedForestCover {
     }
 
     private static class Decoration extends ForestCover.Decoration {
-        private Decoration(EarthCoverContext context, CoverType coverType) {
+        private Decoration(EarthCoverContext context, CoverType<EarthCoverContext> coverType) {
             super(context, coverType);
         }
 

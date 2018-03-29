@@ -28,12 +28,12 @@ public class SnowCover extends EarthCoverType {
     }
 
     @Override
-    public Biome getBiome(int x, int z) {
+    public Biome getBiome(EarthCoverContext context, int x, int z) {
         return Biomes.ICE_PLAINS;
     }
 
     private static class Surface extends EarthSurfaceGenerator {
-        private Surface(EarthCoverContext context, CoverType coverType) {
+        private Surface(EarthCoverContext context, CoverType<EarthCoverContext> coverType) {
             super(context, coverType);
         }
 

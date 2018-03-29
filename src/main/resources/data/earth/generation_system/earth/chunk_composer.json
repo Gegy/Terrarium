@@ -39,6 +39,7 @@
   ],
   "biome_composer": {
     "type": "terrarium:biome_cover",
-    "cover_component": "terrarium:cover"
+    "cover_component": "terrarium:cover",
+    "cover_types": "earth:generation_system/earth/cover_types.json"
   }
 }

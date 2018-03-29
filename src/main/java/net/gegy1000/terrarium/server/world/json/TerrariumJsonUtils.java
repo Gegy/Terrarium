@@ -22,13 +22,13 @@ public class TerrariumJsonUtils {
 
     public static JsonObject parseRemoteObject(JsonObject root, String key) {
         JsonElement element = root.get(key);
-        if (!element.isJsonObject()) {
+        if (element != null && !element.isJsonObject()) {
             JsonElement remoteElement = TerrariumJsonUtils.parseRemoteElement(element);
             if (remoteElement != null) {
                 element = remoteElement;
             }
         }
-        if (element.isJsonObject()) {
+        if (element != null && element.isJsonObject()) {
             return element.getAsJsonObject();
         }
         throw new JsonSyntaxException("Could not find local or remote JsonObject for " + key + " on " + root);

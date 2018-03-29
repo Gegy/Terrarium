@@ -7,7 +7,7 @@ import net.minecraft.util.math.BlockPos;
 import java.util.Random;
 
 public abstract class EarthDecorationGenerator extends CoverDecorationGenerator<EarthCoverContext> {
-    protected EarthDecorationGenerator(EarthCoverContext context, CoverType coverType) {
+    protected EarthDecorationGenerator(EarthCoverContext context, CoverType<EarthCoverContext> coverType) {
         super(context, coverType);
     }
 
