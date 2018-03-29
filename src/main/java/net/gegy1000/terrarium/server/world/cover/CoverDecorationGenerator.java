@@ -8,11 +8,11 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
-public abstract class CoverDecorationGenerator extends CoverGenerator {
+public abstract class CoverDecorationGenerator<T extends CoverGenerationContext> extends CoverGenerator<T> {
     private final Set<BlockPos> intersectionPoints = new HashSet<>();
     private int intersectionRange;
 
-    protected CoverDecorationGenerator(CoverGenerationContext context, CoverType coverType) {
+    protected CoverDecorationGenerator(T context, CoverType coverType) {
         super(context, coverType);
     }
 
@@ -40,15 +40,14 @@ public abstract class CoverDecorationGenerator extends CoverGenerator {
         }
     }
 
-    private boolean tryPlace(Random random, BlockPos pos, int localX, int localZ) {
+    protected boolean tryPlace(Random random, BlockPos pos, int localX, int localZ) {
         if (this.intersectionRange > 0) {
             if (this.checkHorizontalIntersection(pos)) {
                 return false;
             }
             this.intersectionPoints.add(pos.toImmutable());
         }
-        int slope = this.context.getSlopeRaster().getUnsigned(localX, localZ);
-        return slope < MOUNTAINOUS_SLOPE || random.nextInt(2) == 0;
+        return true;
     }
 
     private boolean checkHorizontalIntersection(BlockPos pos) {
@@ -76,8 +75,8 @@ public abstract class CoverDecorationGenerator extends CoverGenerator {
         void handlePoint(BlockPos pos, int localX, int localZ);
     }
 
-    public static class Empty extends CoverDecorationGenerator {
-        public Empty(CoverGenerationContext context, CoverType coverType) {
+    public static class Empty<T extends CoverGenerationContext> extends CoverDecorationGenerator<T> {
+        public Empty(T context, CoverType coverType) {
             super(context, coverType);
         }
 

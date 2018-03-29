@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.util.ArrayUtils;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.cover.CoverTypeRegistry;
+import net.gegy1000.terrarium.server.world.cover.CoverRegistry;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
@@ -41,7 +41,7 @@ public class CoverTileSampler extends TiledDataSampler<CoverType[]> {
         private final int width;
 
         private Handler(int width, int height) {
-            this.data = ArrayUtils.defaulted(new CoverType[width * height], CoverTypeRegistry.PLACEHOLDER);
+            this.data = ArrayUtils.defaulted(new CoverType[width * height], CoverRegistry.PLACEHOLDER);
             this.width = width;
         }
 

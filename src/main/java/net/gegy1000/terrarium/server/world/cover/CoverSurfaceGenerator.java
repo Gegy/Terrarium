@@ -1,60 +1,51 @@
 package net.gegy1000.terrarium.server.world.cover;
 
 import net.gegy1000.terrarium.server.world.cover.generator.primer.CoverPrimer;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ByteRasterTileAccess;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.gen.layer.GenLayer;
 
 import java.util.Random;
 
-public abstract class CoverSurfaceGenerator extends CoverGenerator {
-    protected CoverSurfaceGenerator(CoverGenerationContext context, CoverType coverType) {
+public abstract class CoverSurfaceGenerator<T extends CoverGenerationContext> extends CoverGenerator<T> {
+    protected CoverSurfaceGenerator(T context, CoverType coverType) {
         super(context, coverType);
     }
 
     public void populateBlockCover(Random random, int originX, int originZ, IBlockState[] coverBlockBuffer) {
-        this.iterateChunk((localX, localZ) -> {
-            coverBlockBuffer[localX + localZ * 16] = this.coverType.getBiome(originX + localX, originZ + localZ).topBlock;
-        });
+        this.iterateChunk((localX, localZ) -> coverBlockBuffer[localX + localZ * 16] = this.coverType.getBiome(originX + localX, originZ + localZ).topBlock);
     }
 
     public void populateBlockFiller(Random random, int originX, int originZ, IBlockState[] fillerBlockBuffer) {
-        this.iterateChunk((localX, localZ) -> {
-            fillerBlockBuffer[localX + localZ * 16] = this.coverType.getBiome(originX + localX, originZ + localZ).fillerBlock;
-        });
+        this.iterateChunk((localX, localZ) -> fillerBlockBuffer[localX + localZ * 16] = this.coverType.getBiome(originX + localX, originZ + localZ).fillerBlock);
     }
 
     public void decorate(int originX, int originZ, CoverPrimer primer, Random random) {
     }
 
     protected void coverFromLayer(IBlockState[] blockBuffer, int originX, int originZ, GenLayer layer, BlockProvider blockProvider) {
-        ByteRasterTileAccess slopeRaster = this.context.getSlopeRaster();
         int[] sampledLayer = this.sampleChunk(layer, originX, originZ);
 
         this.iterateChunk((localX, localZ) -> {
             int bufferIndex = localX + localZ * 16;
             int sampledValue = sampledLayer[bufferIndex];
-            int slope = slopeRaster.getUnsigned(localX, localZ);
 
-            blockBuffer[bufferIndex] = blockProvider.provideBlock(sampledValue, slope);
+            blockBuffer[bufferIndex] = blockProvider.provideBlock(sampledValue, localX, localZ);
         });
     }
 
     protected void coverBlock(IBlockState[] blockBuffer, IBlockState state) {
-        this.iterateChunk((localX, localZ) -> {
-            blockBuffer[localX + localZ * 16] = state;
-        });
+        this.iterateChunk((localX, localZ) -> blockBuffer[localX + localZ * 16] = state);
     }
 
     protected interface BlockProvider {
-        IBlockState provideBlock(int sampledValue, int slope);
+        IBlockState provideBlock(int sampledValue, int localX, int localZ);
     }
 
-    public static class Static extends CoverSurfaceGenerator {
+    public static class Static<T extends CoverGenerationContext> extends CoverSurfaceGenerator<T> {
         private final IBlockState coverState;
         private final IBlockState fillerState;
 
-        public Static(CoverGenerationContext context, CoverType coverType, IBlockState coverState, IBlockState fillerState) {
+        public Static(T context, CoverType coverType, IBlockState coverState, IBlockState fillerState) {
             super(context, coverType);
             this.coverState = coverState;
             this.fillerState = fillerState;
@@ -69,14 +60,10 @@ public abstract class CoverSurfaceGenerator extends CoverGenerator {
         public void populateBlockFiller(Random random, int originX, int originZ, IBlockState[] fillerBlockBuffer) {
             this.iterateChunk((localX, localZ) -> fillerBlockBuffer[localX + localZ * 16] = this.fillerState);
         }
-
-        @Override
-        public void decorate(int originX, int originZ, CoverPrimer primer, Random random) {
-        }
     }
 
-    public static class Inherit extends CoverSurfaceGenerator {
-        public Inherit(CoverGenerationContext context, CoverType coverType) {
+    public static class Inherit<T extends CoverGenerationContext> extends CoverSurfaceGenerator<T> {
+        public Inherit(T context, CoverType coverType) {
             super(context, coverType);
         }
     }

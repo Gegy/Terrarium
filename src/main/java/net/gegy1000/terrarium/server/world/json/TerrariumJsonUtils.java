@@ -110,4 +110,8 @@ public class TerrariumJsonUtils {
         }
         return state.withProperty(property, parsed.get());
     }
+
+    public static boolean isString(JsonElement element) {
+        return element.isJsonPrimitive() && element.getAsJsonPrimitive().isString();
+    }
 }

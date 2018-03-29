@@ -3,7 +3,7 @@ package net.gegy1000.terrarium.server.world.pipeline.adapter;
 import com.google.gson.JsonObject;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.cover.CoverTypeRegistry;
+import net.gegy1000.terrarium.server.world.cover.CoverRegistry;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
@@ -87,8 +87,8 @@ public class BeachAdapter implements RegionAdapter {
         public RegionAdapter parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) {
             RegionComponentType<CoverRasterTileAccess> coverComponent = valueParser.parseComponentType(objectRoot, "cover_component", CoverRasterTileAccess.class);
             int beachSize = valueParser.parseInteger(objectRoot, "beach_size");
-            CoverType waterCover = valueParser.parseRegistryEntry(objectRoot, "water_cover", CoverTypeRegistry.getRegistry());
-            CoverType beachCover = valueParser.parseRegistryEntry(objectRoot, "beach_cover", CoverTypeRegistry.getRegistry());
+            CoverType waterCover = valueParser.parseRegistryEntry(objectRoot, "water_cover", CoverRegistry.getRegistry());
+            CoverType beachCover = valueParser.parseRegistryEntry(objectRoot, "beach_cover", CoverRegistry.getRegistry());
             return new BeachAdapter(world, coverComponent, beachSize, waterCover, beachCover);
         }
     }

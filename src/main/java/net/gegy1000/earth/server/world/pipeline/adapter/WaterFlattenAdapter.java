@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.util.FloodFill;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.cover.CoverTypeRegistry;
+import net.gegy1000.terrarium.server.world.cover.CoverRegistry;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
@@ -59,7 +59,7 @@ public class WaterFlattenAdapter implements RegionAdapter {
         }
 
         for (int i = 0; i < coverBuffer.length; i++) {
-            if (coverBuffer[i] == CoverTypeRegistry.PLACEHOLDER) {
+            if (coverBuffer[i] == CoverRegistry.PLACEHOLDER) {
                 coverBuffer[i] = this.waterCoverType;
             }
         }
@@ -102,10 +102,10 @@ public class WaterFlattenAdapter implements RegionAdapter {
 
     private boolean hasNeighbouringLand(int x, int z, CoverType[] coverBuffer, int width, int height) {
         int index = x + z * width;
-        return (x > 0 && coverBuffer[index - 1] != CoverTypeRegistry.PLACEHOLDER)
-                || (x < width - 1 && coverBuffer[index + 1] != CoverTypeRegistry.PLACEHOLDER)
-                || (z > 0 && coverBuffer[index - width] != CoverTypeRegistry.PLACEHOLDER)
-                || (z < height - 1 && coverBuffer[index + width] != CoverTypeRegistry.PLACEHOLDER);
+        return (x > 0 && coverBuffer[index - 1] != CoverRegistry.PLACEHOLDER)
+                || (x < width - 1 && coverBuffer[index + 1] != CoverRegistry.PLACEHOLDER)
+                || (z > 0 && coverBuffer[index - width] != CoverRegistry.PLACEHOLDER)
+                || (z < height - 1 && coverBuffer[index + width] != CoverRegistry.PLACEHOLDER);
     }
 
     private class AverageCoverHeightVisitor implements FloodFill.Visitor<CoverType> {
@@ -125,7 +125,7 @@ public class WaterFlattenAdapter implements RegionAdapter {
         public CoverType visit(FloodFill.Point point, CoverType sampled) {
             this.totalHeight += this.heightBuffer[point.getX() + point.getY() * this.width];
             this.visitedPoints.add(point);
-            return CoverTypeRegistry.PLACEHOLDER;
+            return CoverRegistry.PLACEHOLDER;
         }
 
         @Override
@@ -184,7 +184,7 @@ public class WaterFlattenAdapter implements RegionAdapter {
             RegionComponentType<ShortRasterTileAccess> heightComponent = valueParser.parseComponentType(objectRoot, "height_component", ShortRasterTileAccess.class);
             RegionComponentType<CoverRasterTileAccess> coverComponent = valueParser.parseComponentType(objectRoot, "cover_component", CoverRasterTileAccess.class);
             int flattenRange = valueParser.parseInteger(objectRoot, "flatten_range");
-            CoverType waterCoverType = valueParser.parseRegistryEntry(objectRoot, "water_cover", CoverTypeRegistry.getRegistry());
+            CoverType waterCoverType = valueParser.parseRegistryEntry(objectRoot, "water_cover", CoverRegistry.getRegistry());
             return new WaterFlattenAdapter(heightComponent, coverComponent, flattenRange, waterCoverType);
         }
     }

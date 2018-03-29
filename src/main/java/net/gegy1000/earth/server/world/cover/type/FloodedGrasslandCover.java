@@ -1,11 +1,11 @@
 package net.gegy1000.earth.server.world.cover.type;
 
+import net.gegy1000.earth.server.world.cover.EarthCoverContext;
+import net.gegy1000.earth.server.world.cover.EarthCoverType;
 import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
 import net.gegy1000.earth.server.world.cover.LatitudinalZone;
 import net.gegy1000.terrarium.server.world.cover.CoverBiomeSelectors;
 import net.gegy1000.terrarium.server.world.cover.CoverDecorationGenerator;
-import net.gegy1000.terrarium.server.world.cover.CoverGenerationContext;
-import net.gegy1000.terrarium.server.world.cover.CoverSurfaceGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.OutlineEdgeLayer;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.ReplaceRandomLayer;
@@ -23,19 +23,19 @@ import net.minecraft.world.gen.layer.GenLayerZoom;
 
 import java.util.Random;
 
-public class FloodedGrasslandCover implements CoverType {
+public class FloodedGrasslandCover extends EarthCoverType {
     private static final int LAYER_GRASS = 0;
     private static final int LAYER_DIRT = 1;
     private static final int LAYER_PODZOL = 2;
 
     @Override
-    public CoverSurfaceGenerator createSurfaceGenerator(CoverGenerationContext context) {
+    public EarthSurfaceGenerator createSurfaceGenerator(EarthCoverContext context) {
         return new Surface(context, this);
     }
 
     @Override
-    public CoverDecorationGenerator createDecorationGenerator(CoverGenerationContext context) {
-        return new CoverDecorationGenerator.Empty(context, this);
+    public CoverDecorationGenerator<EarthCoverContext> createDecorationGenerator(EarthCoverContext context) {
+        return new CoverDecorationGenerator.Empty<>(context, this);
     }
 
     @Override
@@ -45,11 +45,11 @@ public class FloodedGrasslandCover implements CoverType {
     }
 
     private static class Surface extends EarthSurfaceGenerator {
-        private GenLayer coverSelector;
-        private GenLayer waterSelector;
-        private GenLayer grassSelector;
+        private final GenLayer coverSelector;
+        private final GenLayer waterSelector;
+        private final GenLayer grassSelector;
 
-        private Surface(CoverGenerationContext context, CoverType coverType) {
+        private Surface(EarthCoverContext context, CoverType coverType) {
             super(context, coverType);
 
             GenLayer cover = new SelectionSeedLayer(2, 1);

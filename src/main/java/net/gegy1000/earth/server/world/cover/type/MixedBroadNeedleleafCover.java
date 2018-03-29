@@ -1,8 +1,8 @@
 package net.gegy1000.earth.server.world.cover.type;
 
+import net.gegy1000.earth.server.world.cover.EarthCoverContext;
+import net.gegy1000.earth.server.world.cover.EarthDecorationGenerator;
 import net.gegy1000.earth.server.world.cover.LatitudinalZone;
-import net.gegy1000.terrarium.server.world.cover.CoverDecorationGenerator;
-import net.gegy1000.terrarium.server.world.cover.CoverGenerationContext;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.feature.tree.GenerousTreeGenerator;
 import net.minecraft.init.Biomes;
@@ -13,7 +13,7 @@ import java.util.Random;
 
 public class MixedBroadNeedleleafCover extends ForestCover {
     @Override
-    public CoverDecorationGenerator createDecorationGenerator(CoverGenerationContext context) {
+    public EarthDecorationGenerator createDecorationGenerator(EarthCoverContext context) {
         return new Decoration(context, this);
     }
 
@@ -23,7 +23,7 @@ public class MixedBroadNeedleleafCover extends ForestCover {
     }
 
     private static class Decoration extends ForestCover.Decoration {
-        private Decoration(CoverGenerationContext context, CoverType coverType) {
+        private Decoration(EarthCoverContext context, CoverType coverType) {
             super(context, coverType);
         }
 

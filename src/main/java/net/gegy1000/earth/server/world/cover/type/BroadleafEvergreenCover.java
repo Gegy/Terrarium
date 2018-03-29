@@ -1,9 +1,9 @@
 package net.gegy1000.earth.server.world.cover.type;
 
+import net.gegy1000.earth.server.world.cover.EarthCoverContext;
+import net.gegy1000.earth.server.world.cover.EarthDecorationGenerator;
 import net.gegy1000.earth.server.world.cover.LatitudinalZone;
 import net.gegy1000.terrarium.server.world.cover.CoverBiomeSelectors;
-import net.gegy1000.terrarium.server.world.cover.CoverDecorationGenerator;
-import net.gegy1000.terrarium.server.world.cover.CoverGenerationContext;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.feature.tree.GenerousTreeGenerator;
 import net.minecraft.world.World;
@@ -13,7 +13,7 @@ import java.util.Random;
 
 public class BroadleafEvergreenCover extends ForestCover {
     @Override
-    public CoverDecorationGenerator createDecorationGenerator(CoverGenerationContext context) {
+    public EarthDecorationGenerator createDecorationGenerator(EarthCoverContext context) {
         return new Decoration(context, this);
     }
 
@@ -24,7 +24,7 @@ public class BroadleafEvergreenCover extends ForestCover {
     }
 
     private static class Decoration extends ForestCover.Decoration {
-        private Decoration(CoverGenerationContext context, CoverType coverType) {
+        private Decoration(EarthCoverContext context, CoverType coverType) {
             super(context, coverType);
         }
 
@@ -63,13 +63,9 @@ public class BroadleafEvergreenCover extends ForestCover {
 
             this.stopIntersectionPrevention();
 
-            this.decorateScatter(random, originX, originZ, oakCount + 2, (pos, localX, localZ) -> {
-                OAK_DENSE_SHRUB.generate(world, random, pos);
-            });
+            this.decorateScatter(random, originX, originZ, oakCount + 2, (pos, localX, localZ) -> OAK_DENSE_SHRUB.generate(world, random, pos));
 
-            this.decorateScatter(random, originX, originZ, jungleCount + 2, (pos, localX, localZ) -> {
-                JUNGLE_DENSE_SHRUB.generate(world, random, pos);
-            });
+            this.decorateScatter(random, originX, originZ, jungleCount + 2, (pos, localX, localZ) -> JUNGLE_DENSE_SHRUB.generate(world, random, pos));
         }
 
         @Override

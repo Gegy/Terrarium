@@ -3,7 +3,7 @@ package net.gegy1000.terrarium.server.world.chunk;
 import net.gegy1000.earth.server.world.cover.EarthCoverRegistry;
 import net.gegy1000.earth.server.world.cover.LatitudinalZone;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.cover.CoverTypeRegistry;
+import net.gegy1000.terrarium.server.world.cover.CoverRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +33,7 @@ public class DebugMap {
             }
         }
 
-        return new DebugCover(CoverTypeRegistry.DEBUG, LatitudinalZone.TEMPERATE);
+        return new DebugCover(CoverRegistry.DEBUG, LatitudinalZone.TEMPERATE);
     }
 
     public static String[] getSign(int x, int z) {

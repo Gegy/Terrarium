@@ -2,10 +2,12 @@ package net.gegy1000.terrarium.server.world.cover;
 
 import net.minecraft.world.biome.Biome;
 
-public interface CoverType {
-    CoverSurfaceGenerator createSurfaceGenerator(CoverGenerationContext context);
+public interface CoverType<T extends CoverGenerationContext> {
+    CoverSurfaceGenerator<T> createSurfaceGenerator(T context);
 
-    CoverDecorationGenerator createDecorationGenerator(CoverGenerationContext context);
+    CoverDecorationGenerator<T> createDecorationGenerator(T context);
 
     Biome getBiome(int x, int z);
+
+    Class<T> getRequiredContext();
 }

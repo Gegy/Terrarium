@@ -1,11 +1,11 @@
 package net.gegy1000.earth.server.world.cover.type;
 
+import net.gegy1000.earth.server.world.cover.EarthCoverContext;
+import net.gegy1000.earth.server.world.cover.EarthCoverType;
+import net.gegy1000.earth.server.world.cover.EarthDecorationGenerator;
 import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
 import net.gegy1000.earth.server.world.cover.LatitudinalZone;
 import net.gegy1000.terrarium.server.world.cover.CoverBiomeSelectors;
-import net.gegy1000.terrarium.server.world.cover.CoverDecorationGenerator;
-import net.gegy1000.terrarium.server.world.cover.CoverGenerationContext;
-import net.gegy1000.terrarium.server.world.cover.CoverSurfaceGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.ReplaceRandomLayer;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectWeightedLayer;
@@ -21,18 +21,18 @@ import net.minecraft.world.gen.layer.GenLayerVoronoiZoom;
 
 import java.util.Random;
 
-public class GrassWithForestShrublandCover implements CoverType {
+public class GrassWithForestShrublandCover extends EarthCoverType {
     private static final int LAYER_GRASS = 0;
     private static final int LAYER_DIRT = 1;
     private static final int LAYER_PODZOL = 2;
 
     @Override
-    public CoverSurfaceGenerator createSurfaceGenerator(CoverGenerationContext context) {
+    public EarthSurfaceGenerator createSurfaceGenerator(EarthCoverContext context) {
         return new Surface(context, this);
     }
 
     @Override
-    public CoverDecorationGenerator createDecorationGenerator(CoverGenerationContext context) {
+    public EarthDecorationGenerator createDecorationGenerator(EarthCoverContext context) {
         return new Decoration(context, this);
     }
 
@@ -46,7 +46,7 @@ public class GrassWithForestShrublandCover implements CoverType {
         private final GenLayer coverSelector;
         private final GenLayer grassSelector;
 
-        private Surface(CoverGenerationContext context, CoverType coverType) {
+        private Surface(EarthCoverContext context, CoverType coverType) {
             super(context, coverType);
 
             GenLayer cover = new SelectWeightedLayer(1,
@@ -84,7 +84,7 @@ public class GrassWithForestShrublandCover implements CoverType {
 
         @Override
         public void populateBlockCover(Random random, int originX, int originZ, IBlockState[] coverBlockBuffer) {
-            this.coverFromLayer(coverBlockBuffer, originX, originZ, this.coverSelector, (sampledValue, slope) -> {
+            this.coverFromLayer(coverBlockBuffer, originX, originZ, this.coverSelector, (sampledValue, localX, localZ) -> {
                 switch (sampledValue) {
                     case LAYER_GRASS:
                         return GRASS;
@@ -97,8 +97,8 @@ public class GrassWithForestShrublandCover implements CoverType {
         }
     }
 
-    private static class Decoration extends CoverDecorationGenerator {
-        private Decoration(CoverGenerationContext context, CoverType coverType) {
+    private static class Decoration extends EarthDecorationGenerator {
+        private Decoration(EarthCoverContext context, CoverType coverType) {
             super(context, coverType);
         }
 
@@ -110,13 +110,9 @@ public class GrassWithForestShrublandCover implements CoverType {
 
             this.preventIntersection(2);
 
-            this.decorateScatter(random, originX, originZ, this.getOakShrubCount(random, zone), (pos, localX, localZ) -> {
-                OAK_TALL_SHRUB.generate(world, random, pos);
-            });
+            this.decorateScatter(random, originX, originZ, this.getOakShrubCount(random, zone), (pos, localX, localZ) -> OAK_TALL_SHRUB.generate(world, random, pos));
 
-            this.decorateScatter(random, originX, originZ, this.getJungleShrubCount(random, zone), (pos, localX, localZ) -> {
-                JUNGLE_TALL_SHRUB.generate(world, random, pos);
-            });
+            this.decorateScatter(random, originX, originZ, this.getJungleShrubCount(random, zone), (pos, localX, localZ) -> JUNGLE_TALL_SHRUB.generate(world, random, pos));
 
             this.stopIntersectionPrevention();
         }

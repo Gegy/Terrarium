@@ -11,15 +11,15 @@ import net.minecraft.world.biome.Biome;
 
 import java.util.Random;
 
-public class PlaceholderCover implements CoverType {
+public class PlaceholderCover implements CoverType<CoverGenerationContext> {
     @Override
-    public CoverSurfaceGenerator createSurfaceGenerator(CoverGenerationContext context) {
+    public CoverSurfaceGenerator<CoverGenerationContext> createSurfaceGenerator(CoverGenerationContext context) {
         return new Surface(context, this);
     }
 
     @Override
-    public CoverDecorationGenerator createDecorationGenerator(CoverGenerationContext context) {
-        return new CoverDecorationGenerator.Empty(context, this);
+    public CoverDecorationGenerator<CoverGenerationContext> createDecorationGenerator(CoverGenerationContext context) {
+        return new CoverDecorationGenerator.Empty<>(context, this);
     }
 
     @Override
@@ -27,7 +27,12 @@ public class PlaceholderCover implements CoverType {
         return Biomes.DEFAULT;
     }
 
-    private static class Surface extends CoverSurfaceGenerator {
+    @Override
+    public Class<CoverGenerationContext> getRequiredContext() {
+        return CoverGenerationContext.class;
+    }
+
+    private static class Surface extends CoverSurfaceGenerator<CoverGenerationContext> {
         private Surface(CoverGenerationContext context, CoverType coverType) {
             super(context, coverType);
         }

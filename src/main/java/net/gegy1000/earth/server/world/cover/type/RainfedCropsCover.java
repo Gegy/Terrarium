@@ -1,11 +1,11 @@
 package net.gegy1000.earth.server.world.cover.type;
 
+import net.gegy1000.earth.server.world.cover.EarthCoverContext;
+import net.gegy1000.earth.server.world.cover.EarthCoverType;
 import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
 import net.gegy1000.earth.server.world.cover.LatitudinalZone;
 import net.gegy1000.terrarium.server.world.cover.CoverBiomeSelectors;
 import net.gegy1000.terrarium.server.world.cover.CoverDecorationGenerator;
-import net.gegy1000.terrarium.server.world.cover.CoverGenerationContext;
-import net.gegy1000.terrarium.server.world.cover.CoverSurfaceGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectWeightedLayer;
 import net.gegy1000.terrarium.server.world.cover.generator.primer.CoverPrimer;
@@ -19,7 +19,7 @@ import net.minecraft.world.gen.layer.GenLayerVoronoiZoom;
 
 import java.util.Random;
 
-public class RainfedCropsCover implements CoverType {
+public class RainfedCropsCover extends EarthCoverType {
     protected static final int LAYER_GRASS = 0;
     protected static final int LAYER_PODZOL = 1;
 
@@ -27,13 +27,13 @@ public class RainfedCropsCover implements CoverType {
     private static final int LAYER_TALL_GRASS = 1;
 
     @Override
-    public CoverSurfaceGenerator createSurfaceGenerator(CoverGenerationContext context) {
+    public EarthSurfaceGenerator createSurfaceGenerator(EarthCoverContext context) {
         return new Surface(context, this);
     }
 
     @Override
-    public CoverDecorationGenerator createDecorationGenerator(CoverGenerationContext context) {
-        return new CoverDecorationGenerator.Empty(context, this);
+    public CoverDecorationGenerator<EarthCoverContext> createDecorationGenerator(EarthCoverContext context) {
+        return new CoverDecorationGenerator.Empty<>(context, this);
     }
 
     @Override
@@ -46,7 +46,7 @@ public class RainfedCropsCover implements CoverType {
         private final GenLayer coverSelector;
         private final GenLayer grassSelector;
 
-        private Surface(CoverGenerationContext context, CoverType coverType) {
+        private Surface(EarthCoverContext context, CoverType coverType) {
             super(context, coverType);
 
             GenLayer cover = new SelectWeightedLayer(10,
@@ -70,7 +70,7 @@ public class RainfedCropsCover implements CoverType {
 
         @Override
         public void populateBlockCover(Random random, int originX, int originZ, IBlockState[] coverBlockBuffer) {
-            this.coverFromLayer(coverBlockBuffer, originX, originZ, this.coverSelector, (sampledValue, slope) -> {
+            this.coverFromLayer(coverBlockBuffer, originX, originZ, this.coverSelector, (sampledValue, localX, localZ) -> {
                 switch (sampledValue) {
                     case LAYER_GRASS:
                         return GRASS;

@@ -2,7 +2,7 @@ package net.gegy1000.terrarium.server.world.pipeline.source.tile;
 
 import net.gegy1000.terrarium.server.util.ArrayUtils;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.cover.CoverTypeRegistry;
+import net.gegy1000.terrarium.server.world.cover.CoverRegistry;
 
 public class CoverRasterTileAccess implements RasterDataAccess<CoverType>, TiledDataAccess {
     private final CoverType[] cover;
@@ -27,7 +27,7 @@ public class CoverRasterTileAccess implements RasterDataAccess<CoverType>, Tiled
     }
 
     public CoverRasterTileAccess(int width, int height) {
-        this(ArrayUtils.defaulted(new CoverType[width * height], CoverTypeRegistry.PLACEHOLDER), width, height);
+        this(ArrayUtils.defaulted(new CoverType[width * height], CoverRegistry.PLACEHOLDER), width, height);
     }
 
     @Override

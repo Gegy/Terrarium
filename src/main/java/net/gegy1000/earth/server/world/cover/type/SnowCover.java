@@ -1,9 +1,9 @@
 package net.gegy1000.earth.server.world.cover.type;
 
+import net.gegy1000.earth.server.world.cover.EarthCoverContext;
+import net.gegy1000.earth.server.world.cover.EarthCoverType;
 import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverDecorationGenerator;
-import net.gegy1000.terrarium.server.world.cover.CoverGenerationContext;
-import net.gegy1000.terrarium.server.world.cover.CoverSurfaceGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ByteRasterTileAccess;
 import net.minecraft.block.state.IBlockState;
@@ -13,18 +13,18 @@ import net.minecraft.world.biome.Biome;
 
 import java.util.Random;
 
-public class SnowCover implements CoverType {
+public class SnowCover extends EarthCoverType {
     private static final IBlockState SNOW = Blocks.SNOW.getDefaultState();
     private static final IBlockState ICE = Blocks.PACKED_ICE.getDefaultState();
 
     @Override
-    public CoverSurfaceGenerator createSurfaceGenerator(CoverGenerationContext context) {
+    public EarthSurfaceGenerator createSurfaceGenerator(EarthCoverContext context) {
         return new Surface(context, this);
     }
 
     @Override
-    public CoverDecorationGenerator createDecorationGenerator(CoverGenerationContext context) {
-        return new CoverDecorationGenerator.Empty(context, this);
+    public CoverDecorationGenerator<EarthCoverContext> createDecorationGenerator(EarthCoverContext context) {
+        return new CoverDecorationGenerator.Empty<>(context, this);
     }
 
     @Override
@@ -33,7 +33,7 @@ public class SnowCover implements CoverType {
     }
 
     private static class Surface extends EarthSurfaceGenerator {
-        private Surface(CoverGenerationContext context, CoverType coverType) {
+        private Surface(EarthCoverContext context, CoverType coverType) {
             super(context, coverType);
         }
 

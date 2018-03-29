@@ -27,7 +27,7 @@ import net.gegy1000.earth.server.world.cover.type.UrbanCover;
 import net.gegy1000.earth.server.world.cover.type.VegetationWithCroplandCover;
 import net.gegy1000.earth.server.world.cover.type.WaterCover;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.cover.CoverTypeRegistry;
+import net.gegy1000.terrarium.server.world.cover.CoverRegistry;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -60,7 +60,7 @@ public class EarthCoverRegistry {
     public static final CoverType WATER = new WaterCover();
 
     @SubscribeEvent
-    public static void onRegisterCover(CoverTypeRegistry.Event event) {
+    public static void onRegisterCover(CoverRegistry.TypeEvent event) {
         event.register(new ResourceLocation(TerrariumEarth.MODID, "bare"), BARE);
         event.register(new ResourceLocation(TerrariumEarth.MODID, "beach"), BEACH);
         event.register(new ResourceLocation(TerrariumEarth.MODID, "broadleaf_evergreen"), BROADLEAF_EVERGREEN);
@@ -85,6 +85,11 @@ public class EarthCoverRegistry {
         event.register(new ResourceLocation(TerrariumEarth.MODID, "urban"), URBAN);
         event.register(new ResourceLocation(TerrariumEarth.MODID, "vegetation_with_cropland"), VEGETATION_WITH_CROPLAND);
         event.register(new ResourceLocation(TerrariumEarth.MODID, "water"), WATER);
+    }
+
+    @SubscribeEvent
+    public static void onRegisterContexts(CoverRegistry.ContextEvent event) {
+        event.register(new ResourceLocation(TerrariumEarth.MODID, "earth_context"), new EarthCoverContext.Parser());
     }
 
     public enum Glob {

@@ -15,11 +15,11 @@ public abstract class ActionButtonWidget extends GuiButton {
     @Override
     public boolean mousePressed(Minecraft mc, int mouseX, int mouseY) {
         if (super.mousePressed(mc, mouseX, mouseY)) {
-            this.handlePress(mc);
+            this.handlePress();
             return true;
         }
         return false;
     }
 
-    protected abstract void handlePress(Minecraft mc);
+    protected abstract void handlePress();
 }

@@ -1,28 +1,32 @@
 package net.gegy1000.terrarium.server.world.pipeline.composer.surface;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
+import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.util.ArrayUtils;
 import net.gegy1000.terrarium.server.world.chunk.PseudoRandomMap;
 import net.gegy1000.terrarium.server.world.cover.CoverGenerationContext;
+import net.gegy1000.terrarium.server.world.cover.CoverRegistry;
 import net.gegy1000.terrarium.server.world.cover.CoverSurfaceGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.cover.CoverTypeRegistry;
 import net.gegy1000.terrarium.server.world.cover.generator.primer.CoverChunkPrimer;
 import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
+import net.gegy1000.terrarium.server.world.json.TerrariumJsonUtils;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ByteRasterTileAccess;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTileAccess;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTileAccess;
 import net.gegy1000.terrarium.server.world.region.GenerationRegionHandler;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.JsonUtils;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -42,21 +46,20 @@ public class CoverSurfaceComposer implements SurfaceComposer {
 
     private final RegionComponentType<CoverRasterTileAccess> coverComponent;
 
+    private final boolean decorate;
     private final IBlockState replaceBlock;
 
     private final IBlockState[] coverBlockBuffer = ArrayUtils.defaulted(new IBlockState[16 * 16], AIR);
     private final IBlockState[] fillerBlockBuffer = ArrayUtils.defaulted(new IBlockState[16 * 16], AIR);
 
-    private final Set<CoverType> coverTypes = new HashSet<>();
-    private final Map<CoverType, CoverSurfaceGenerator> generators = new HashMap<>();
+    private final Map<CoverType<?>, CoverSurfaceGenerator<?>> generators;
+    private final Set<CoverType<?>> localCoverTypes = new HashSet<>();
 
     public CoverSurfaceComposer(
             World world,
-            TerrariumWorldData worldData,
             RegionComponentType<CoverRasterTileAccess> coverComponent,
-            RegionComponentType<ShortRasterTileAccess> heightComponent,
-            RegionComponentType<ByteRasterTileAccess> slopeComponent,
-            Collection<CoverType> bundledCover,
+            Map<CoverType<?>, CoverSurfaceGenerator<?>> generators,
+            boolean decorate,
             IBlockState replaceBlock
     ) {
         this.random = new Random(world.getSeed() ^ DEPTH_SEED);
@@ -65,17 +68,10 @@ public class CoverSurfaceComposer implements SurfaceComposer {
 
         this.coverComponent = coverComponent;
 
+        this.decorate = decorate;
         this.replaceBlock = replaceBlock;
 
-        GenerationRegionHandler regionHandler = worldData.getRegionHandler();
-        CoverRasterTileAccess coverRaster = regionHandler.getCachedChunkRaster(coverComponent);
-        ShortRasterTileAccess heightRaster = regionHandler.getCachedChunkRaster(heightComponent);
-        ByteRasterTileAccess slopeRaster = regionHandler.getCachedChunkRaster(slopeComponent);
-
-        CoverGenerationContext context = new CoverGenerationContext(world, heightRaster, coverRaster, slopeRaster);
-        for (CoverType coverType : bundledCover) {
-            this.generators.put(coverType, coverType.createSurfaceGenerator(context));
-        }
+        this.generators = generators;
     }
 
     @Override
@@ -96,31 +92,33 @@ public class CoverSurfaceComposer implements SurfaceComposer {
             }
         }
 
-        this.coverMap.initPosSeed(globalX, globalZ);
-        long randomSeed = this.coverMap.next();
+        if (this.decorate) {
+            this.coverMap.initPosSeed(globalX, globalZ);
+            long randomSeed = this.coverMap.next();
 
-        for (CoverType type : this.coverTypes) {
-            CoverSurfaceGenerator generator = this.generators.get(type);
-            if (generator != null) {
-                this.random.setSeed(randomSeed);
-                this.random.setSeed(this.random.nextLong());
-                generator.decorate(globalX, globalZ, new CoverChunkPrimer(primer), this.random);
+            for (CoverType type : this.localCoverTypes) {
+                CoverSurfaceGenerator<?> generator = this.generators.get(type);
+                if (generator != null) {
+                    this.random.setSeed(randomSeed);
+                    this.random.setSeed(this.random.nextLong());
+                    generator.decorate(globalX, globalZ, new CoverChunkPrimer(primer), this.random);
+                }
             }
         }
     }
 
     private void populateBlockCover(CoverRasterTileAccess coverBuffer, int globalX, int globalZ) {
-        this.coverTypes.clear();
+        this.localCoverTypes.clear();
         for (int localZ = 0; localZ < 16; localZ++) {
             for (int localX = 0; localX < 16; localX++) {
-                this.coverTypes.add(coverBuffer.get(localX, localZ));
+                this.localCoverTypes.add(coverBuffer.get(localX, localZ));
             }
         }
 
         this.coverMap.initPosSeed(globalX, globalZ);
         long randomSeed = this.coverMap.next();
-        for (CoverType type : this.coverTypes) {
-            CoverSurfaceGenerator generator = this.generators.get(type);
+        for (CoverType type : this.localCoverTypes) {
+            CoverSurfaceGenerator<?> generator = this.generators.get(type);
             if (generator != null) {
                 this.random.setSeed(randomSeed);
 
@@ -167,11 +165,54 @@ public class CoverSurfaceComposer implements SurfaceComposer {
         @Override
         public SurfaceComposer parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) {
             RegionComponentType<CoverRasterTileAccess> coverComponent = valueParser.parseComponentType(objectRoot, "cover_component", CoverRasterTileAccess.class);
-            RegionComponentType<ShortRasterTileAccess> heightComponent = valueParser.parseComponentType(objectRoot, "height_component", ShortRasterTileAccess.class);
-            RegionComponentType<ByteRasterTileAccess> slopeComponent = valueParser.parseComponentType(objectRoot, "slope_component", ByteRasterTileAccess.class);
-            Collection<CoverType> coverBundle = valueParser.parseIdBundle(objectRoot, "cover_bundle", CoverTypeRegistry.getRegistry());
+
+            boolean decorate = valueParser.parseBoolean(objectRoot, "decorate");
             IBlockState replaceBlock = valueParser.parseBlockState(objectRoot, "replace_block");
-            return new CoverSurfaceComposer(world, worldData, coverComponent, heightComponent, slopeComponent, coverBundle, replaceBlock);
+
+            Map<CoverType<?>, CoverSurfaceGenerator<?>> generators = new HashMap<>();
+            JsonObject coverTypeRoot = TerrariumJsonUtils.parseRemoteObject(objectRoot, "cover_types");
+
+            CoverGenerationContext defaultContext = null;
+            if (coverTypeRoot.has("default_context")) {
+                defaultContext = valueParser.parseContext(coverTypeRoot, "default_context");
+            }
+
+            JsonArray coverTypeArray = TerrariumJsonUtils.parseRemoteArray(coverTypeRoot, "types");
+            for (JsonElement element : coverTypeArray) {
+                if (element.isJsonObject()) {
+                    JsonObject coverObject = element.getAsJsonObject();
+                    ResourceLocation coverKey = new ResourceLocation(JsonUtils.getString(coverObject, "type"));
+                    CoverGenerationContext context = valueParser.parseContext(coverObject, "context");
+                    this.putGenerator(generators, coverKey, context);
+                } else if (TerrariumJsonUtils.isString(element)) {
+                    if (defaultContext == null) {
+                        throw new JsonSyntaxException("Cannot declare defaulted cover type with no default context!");
+                    }
+                    ResourceLocation coverKey = new ResourceLocation(element.getAsString());
+                    this.putGenerator(generators, coverKey, defaultContext);
+                } else {
+                    Terrarium.LOGGER.warn("Ignored invalid cover type entry {}", element);
+                }
+            }
+
+            return new CoverSurfaceComposer(world, coverComponent, generators, decorate, replaceBlock);
+        }
+
+        private void putGenerator(Map<CoverType<?>, CoverSurfaceGenerator<?>> generators, ResourceLocation coverKey, CoverGenerationContext context) {
+            CoverType<?> coverType = CoverRegistry.getCoverType(coverKey);
+            if (coverType == null) {
+                throw new JsonSyntaxException("Found unregistered cover type " + coverKey);
+            }
+            generators.put(coverType, this.createGenerator(coverType, context));
+        }
+
+        @SuppressWarnings("unchecked")
+        private <T extends CoverGenerationContext> CoverSurfaceGenerator<T> createGenerator(CoverType<T> coverType, CoverGenerationContext context) {
+            if (coverType.getRequiredContext().isAssignableFrom(context.getClass())) {
+                return coverType.createSurfaceGenerator((T) context);
+            } else {
+                throw new JsonSyntaxException("Tried to apply context of wrong type to " + coverType);
+            }
         }
     }
 }

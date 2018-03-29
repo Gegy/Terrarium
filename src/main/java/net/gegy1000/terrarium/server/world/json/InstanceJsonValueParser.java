@@ -6,8 +6,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
-import net.gegy1000.terrarium.server.world.bundle.IdBundle;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
+import net.gegy1000.terrarium.server.world.cover.CoverGenerationContext;
+import net.gegy1000.terrarium.server.world.cover.CoverRegistry;
 import net.gegy1000.terrarium.server.world.generator.customization.PropertyContainer;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyValue;
@@ -21,7 +22,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -119,16 +119,6 @@ public class InstanceJsonValueParser extends PropertyJsonValueParser {
         return state;
     }
 
-    public <T> Collection<T> parseIdBundle(JsonObject root, String key, Map<ResourceLocation, T> registry) {
-        String bundleKey = JsonUtils.getString(root, key);
-        IdBundle bundle = this.worldData.getSettings().getGenerator().getBundle(bundleKey);
-        if (bundle == null)  {
-            throw new JsonSyntaxException("Bundle with key " + bundleKey + " did not exist on generator");
-        }
-        return bundle.getRegistryEntries(registry);
-    }
-
-
     public <T> T parseRegistryEntry(JsonObject root, String key, Map<ResourceLocation, T> registry) {
         String entryKey = JsonUtils.getString(root, key);
         T entry = registry.get(new ResourceLocation(entryKey));
@@ -136,5 +126,13 @@ public class InstanceJsonValueParser extends PropertyJsonValueParser {
             throw new JsonSyntaxException("Entry " + entryKey + " does not exist in registry!");
         }
         return entry;
+    }
+
+    public CoverGenerationContext parseContext(JsonObject root, String key) {
+        JsonObject contextRoot = JsonUtils.getJsonObject(root, key);
+        ResourceLocation contextType = new ResourceLocation(JsonUtils.getString(contextRoot, "type"));
+        InstanceObjectParser<CoverGenerationContext> parser = CoverRegistry.getContext(contextType);
+
+        return parser.parse(this.worldData, this.world, this, contextRoot);
     }
 }

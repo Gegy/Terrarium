@@ -1,7 +1,7 @@
 package net.gegy1000.earth.server.world.cover.type;
 
-import net.gegy1000.terrarium.server.world.cover.CoverGenerationContext;
-import net.gegy1000.terrarium.server.world.cover.CoverSurfaceGenerator;
+import net.gegy1000.earth.server.world.cover.EarthCoverContext;
+import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.ReplaceRandomLayer;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectionSeedLayer;
@@ -11,12 +11,12 @@ import net.minecraft.world.gen.layer.GenLayerVoronoiZoom;
 
 public abstract class ClosedForestCover extends ForestCover {
     @Override
-    public CoverSurfaceGenerator createSurfaceGenerator(CoverGenerationContext context) {
+    public EarthSurfaceGenerator createSurfaceGenerator(EarthCoverContext context) {
         return new Surface(context, this);
     }
 
     private static class Surface extends ForestCover.Surface {
-        private Surface(CoverGenerationContext context, CoverType coverType) {
+        private Surface(EarthCoverContext context, CoverType coverType) {
             super(context, coverType);
         }
 

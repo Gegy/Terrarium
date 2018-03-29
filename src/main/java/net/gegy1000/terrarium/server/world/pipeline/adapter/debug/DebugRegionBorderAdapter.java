@@ -3,7 +3,7 @@ package net.gegy1000.terrarium.server.world.pipeline.adapter.debug;
 import com.google.gson.JsonObject;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.cover.CoverTypeRegistry;
+import net.gegy1000.terrarium.server.world.cover.CoverRegistry;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
@@ -34,7 +34,7 @@ public class DebugRegionBorderAdapter implements RegionAdapter {
         for (int localZ = minZ; localZ < maxZ; localZ++) {
             for (int localX = minX; localX < maxX; localX++) {
                 if (localX == minX || localX == maxX - 1 || localZ == minZ || localZ == maxZ - 1) {
-                    cover[localX + localZ * width] = CoverTypeRegistry.DEBUG;
+                    cover[localX + localZ * width] = CoverRegistry.DEBUG;
                 }
             }
         }

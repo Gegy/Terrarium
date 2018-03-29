@@ -1,6 +1,6 @@
 package net.gegy1000.earth.server.world.cover.type;
 
-import net.gegy1000.terrarium.server.world.cover.CoverGenerationContext;
+import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.OutlineEdgeLayer;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.ReplaceRandomLayer;
@@ -15,7 +15,7 @@ import java.util.Random;
 
 public abstract class FloodedForestCover extends ForestCover {
     @Override
-    public abstract Surface createSurfaceGenerator(CoverGenerationContext context);
+    public abstract Surface createSurfaceGenerator(EarthCoverContext context);
 
     protected static class Surface extends ForestCover.Surface {
         private final IBlockState primaryCover;
@@ -23,7 +23,7 @@ public abstract class FloodedForestCover extends ForestCover {
 
         protected final GenLayer waterSelector;
 
-        protected Surface(CoverGenerationContext context, CoverType coverType, IBlockState primaryCover, boolean addPodzol) {
+        protected Surface(EarthCoverContext context, CoverType coverType, IBlockState primaryCover, boolean addPodzol) {
             super(context, coverType);
 
             this.primaryCover = primaryCover;

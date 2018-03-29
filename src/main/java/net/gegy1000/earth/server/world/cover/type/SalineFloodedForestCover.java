@@ -1,9 +1,9 @@
 package net.gegy1000.earth.server.world.cover.type;
 
+import net.gegy1000.earth.server.world.cover.EarthCoverContext;
+import net.gegy1000.earth.server.world.cover.EarthDecorationGenerator;
 import net.gegy1000.earth.server.world.cover.LatitudinalZone;
 import net.gegy1000.terrarium.server.world.cover.CoverBiomeSelectors;
-import net.gegy1000.terrarium.server.world.cover.CoverDecorationGenerator;
-import net.gegy1000.terrarium.server.world.cover.CoverGenerationContext;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.primer.CoverPrimer;
 import net.gegy1000.terrarium.server.world.feature.tree.GenerousTreeGenerator;
@@ -18,12 +18,12 @@ import java.util.Random;
 
 public class SalineFloodedForestCover extends FloodedForestCover {
     @Override
-    public Surface createSurfaceGenerator(CoverGenerationContext context) {
+    public Surface createSurfaceGenerator(EarthCoverContext context) {
         return new Surface(context, this);
     }
 
     @Override
-    public CoverDecorationGenerator createDecorationGenerator(CoverGenerationContext context) {
+    public EarthDecorationGenerator createDecorationGenerator(EarthCoverContext context) {
         return new Decoration(context, this);
     }
 
@@ -34,7 +34,7 @@ public class SalineFloodedForestCover extends FloodedForestCover {
     }
 
     private static class Surface extends FloodedForestCover.Surface {
-        private Surface(CoverGenerationContext context, CoverType coverType) {
+        private Surface(EarthCoverContext context, CoverType coverType) {
             super(context, coverType, SAND, false);
         }
 
@@ -55,7 +55,7 @@ public class SalineFloodedForestCover extends FloodedForestCover {
     }
 
     private static class Decoration extends ForestCover.Decoration {
-        private Decoration(CoverGenerationContext context, CoverType coverType) {
+        private Decoration(EarthCoverContext context, CoverType coverType) {
             super(context, coverType);
         }
 

@@ -8,7 +8,7 @@ import net.gegy1000.terrarium.server.util.ArrayUtils;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.cover.CoverTypeRegistry;
+import net.gegy1000.terrarium.server.world.cover.CoverRegistry;
 import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
 import net.gegy1000.terrarium.server.world.pipeline.source.CachedRemoteSource;
@@ -83,7 +83,7 @@ public class GlobSource extends TiledDataSource<CoverRasterTileAccess> implement
 
     @Override
     protected CoverRasterTileAccess getDefaultTile() {
-        CoverType[] backingData = ArrayUtils.defaulted(new CoverType[TILE_SIZE * TILE_SIZE], CoverTypeRegistry.PLACEHOLDER);
+        CoverType[] backingData = ArrayUtils.defaulted(new CoverType[TILE_SIZE * TILE_SIZE], CoverRegistry.PLACEHOLDER);
         return new CoverRasterTileAccess(backingData, 0, 0, TILE_SIZE, TILE_SIZE);
     }
 

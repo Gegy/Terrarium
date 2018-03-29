@@ -1,11 +1,11 @@
 package net.gegy1000.earth.server.world.cover.type;
 
+import net.gegy1000.earth.server.world.cover.EarthCoverContext;
+import net.gegy1000.earth.server.world.cover.EarthCoverType;
+import net.gegy1000.earth.server.world.cover.EarthDecorationGenerator;
 import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
 import net.gegy1000.earth.server.world.cover.LatitudinalZone;
 import net.gegy1000.terrarium.server.world.cover.CoverBiomeSelectors;
-import net.gegy1000.terrarium.server.world.cover.CoverDecorationGenerator;
-import net.gegy1000.terrarium.server.world.cover.CoverGenerationContext;
-import net.gegy1000.terrarium.server.world.cover.CoverSurfaceGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectionSeedLayer;
 import net.gegy1000.terrarium.server.world.cover.generator.primer.CoverPrimer;
@@ -19,17 +19,17 @@ import net.minecraft.world.gen.layer.GenLayerVoronoiZoom;
 
 import java.util.Random;
 
-public class ShrublandCover implements CoverType {
+public class ShrublandCover extends EarthCoverType {
     private static final int LAYER_GRASS = 0;
     private static final int LAYER_DIRT = 1;
 
     @Override
-    public CoverSurfaceGenerator createSurfaceGenerator(CoverGenerationContext context) {
+    public EarthSurfaceGenerator createSurfaceGenerator(EarthCoverContext context) {
         return new Surface(context, this);
     }
 
     @Override
-    public CoverDecorationGenerator createDecorationGenerator(CoverGenerationContext context) {
+    public EarthDecorationGenerator createDecorationGenerator(EarthCoverContext context) {
         return new Decoration(context, this);
     }
 
@@ -43,7 +43,7 @@ public class ShrublandCover implements CoverType {
         private final GenLayer coverSelector;
         private final GenLayer grassSelector;
 
-        private Surface(CoverGenerationContext context, CoverType coverType) {
+        private Surface(EarthCoverContext context, CoverType coverType) {
             super(context, coverType);
 
             GenLayer cover = new SelectionSeedLayer(2, 1);
@@ -63,7 +63,7 @@ public class ShrublandCover implements CoverType {
 
         @Override
         public void populateBlockCover(Random random, int originX, int originZ, IBlockState[] coverBlockBuffer) {
-            this.coverFromLayer(coverBlockBuffer, originX, originZ, this.coverSelector, (sampledValue, slope) -> {
+            this.coverFromLayer(coverBlockBuffer, originX, originZ, this.coverSelector, (sampledValue, localX, localZ) -> {
                 switch (sampledValue) {
                     case LAYER_GRASS:
                         return GRASS;
@@ -92,8 +92,8 @@ public class ShrublandCover implements CoverType {
         }
     }
 
-    private static class Decoration extends CoverDecorationGenerator {
-        private Decoration(CoverGenerationContext context, CoverType coverType) {
+    private static class Decoration extends EarthDecorationGenerator {
+        private Decoration(EarthCoverContext context, CoverType coverType) {
             super(context, coverType);
         }
 
@@ -105,20 +105,12 @@ public class ShrublandCover implements CoverType {
             this.preventIntersection(2);
 
             int oakShrubCount = this.getOakShrubCount(random, zone);
-            this.decorateScatter(random, originX, originZ, oakShrubCount, (pos, localX, localZ) -> {
-                OAK_TALL_SHRUB.generate(world, random, pos);
-            });
-            this.decorateScatter(random, originX, originZ, oakShrubCount, (pos, localX, localZ) -> {
-                OAK_SMALL_SHRUB.generate(world, random, pos);
-            });
+            this.decorateScatter(random, originX, originZ, oakShrubCount, (pos, localX, localZ) -> OAK_TALL_SHRUB.generate(world, random, pos));
+            this.decorateScatter(random, originX, originZ, oakShrubCount, (pos, localX, localZ) -> OAK_SMALL_SHRUB.generate(world, random, pos));
 
             int acaciaShrubCount = this.getAcaciaShrubCount(random, zone);
-            this.decorateScatter(random, originX, originZ, acaciaShrubCount, (pos, localX, localZ) -> {
-                ACACIA_TALL_SHRUB.generate(world, random, pos);
-            });
-            this.decorateScatter(random, originX, originZ, acaciaShrubCount, (pos, localX, localZ) -> {
-                ACACIA_SMALL_SHRUB.generate(world, random, pos);
-            });
+            this.decorateScatter(random, originX, originZ, acaciaShrubCount, (pos, localX, localZ) -> ACACIA_TALL_SHRUB.generate(world, random, pos));
+            this.decorateScatter(random, originX, originZ, acaciaShrubCount, (pos, localX, localZ) -> ACACIA_SMALL_SHRUB.generate(world, random, pos));
 
             this.stopIntersectionPrevention();
         }

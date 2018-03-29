@@ -1,11 +1,11 @@
 package net.gegy1000.earth.server.world.cover.type;
 
+import net.gegy1000.earth.server.world.cover.EarthCoverContext;
+import net.gegy1000.earth.server.world.cover.EarthCoverType;
 import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
 import net.gegy1000.earth.server.world.cover.LatitudinalZone;
 import net.gegy1000.terrarium.server.world.cover.CoverBiomeSelectors;
 import net.gegy1000.terrarium.server.world.cover.CoverDecorationGenerator;
-import net.gegy1000.terrarium.server.world.cover.CoverGenerationContext;
-import net.gegy1000.terrarium.server.world.cover.CoverSurfaceGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.ConnectHorizontalLayer;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.OutlineEdgeLayer;
@@ -23,7 +23,7 @@ import net.minecraft.world.gen.layer.GenLayerVoronoiZoom;
 
 import java.util.Random;
 
-public class IrrigatedCropsCover implements CoverType {
+public class IrrigatedCropsCover extends EarthCoverType {
     private static final int CROP_COUNT = 3;
 
     private static final int LAYER_WHEAT = 0;
@@ -41,13 +41,13 @@ public class IrrigatedCropsCover implements CoverType {
     private static final IBlockState FENCE = Blocks.OAK_FENCE.getDefaultState();
 
     @Override
-    public CoverSurfaceGenerator createSurfaceGenerator(CoverGenerationContext context) {
+    public EarthSurfaceGenerator createSurfaceGenerator(EarthCoverContext context) {
         return new Surface(context, this);
     }
 
     @Override
-    public CoverDecorationGenerator createDecorationGenerator(CoverGenerationContext context) {
-        return new CoverDecorationGenerator.Empty(context, this);
+    public CoverDecorationGenerator<EarthCoverContext> createDecorationGenerator(EarthCoverContext context) {
+        return new CoverDecorationGenerator.Empty<>(context, this);
     }
 
     @Override
@@ -59,7 +59,7 @@ public class IrrigatedCropsCover implements CoverType {
     private static class Surface extends EarthSurfaceGenerator {
         private final GenLayer cropSelector;
 
-        private Surface(CoverGenerationContext context, CoverType coverType) {
+        private Surface(EarthCoverContext context, CoverType coverType) {
             super(context, coverType);
 
             GenLayer layer = new SelectionSeedLayer(CROP_COUNT, 1);

@@ -1,9 +1,9 @@
 package net.gegy1000.earth.server.world.cover.type;
 
+import net.gegy1000.earth.server.world.cover.EarthCoverContext;
+import net.gegy1000.earth.server.world.cover.EarthCoverType;
 import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverDecorationGenerator;
-import net.gegy1000.terrarium.server.world.cover.CoverGenerationContext;
-import net.gegy1000.terrarium.server.world.cover.CoverSurfaceGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectionSeedLayer;
 import net.minecraft.block.state.IBlockState;
@@ -17,15 +17,15 @@ import net.minecraft.world.gen.layer.IntCache;
 
 import java.util.Random;
 
-public class WaterCover implements CoverType {
+public class WaterCover extends EarthCoverType {
     @Override
-    public CoverSurfaceGenerator createSurfaceGenerator(CoverGenerationContext context) {
+    public EarthSurfaceGenerator createSurfaceGenerator(EarthCoverContext context) {
         return new Surface(context, this);
     }
 
     @Override
-    public CoverDecorationGenerator createDecorationGenerator(CoverGenerationContext context) {
-        return new CoverDecorationGenerator.Empty(context, this);
+    public CoverDecorationGenerator<EarthCoverContext> createDecorationGenerator(EarthCoverContext context) {
+        return new CoverDecorationGenerator.Empty<>(context, this);
     }
 
     @Override
@@ -34,9 +34,9 @@ public class WaterCover implements CoverType {
     }
 
     private static class Surface extends EarthSurfaceGenerator {
-        private GenLayer coverSelector;
+        private final GenLayer coverSelector;
 
-        private Surface(CoverGenerationContext context, CoverType coverType) {
+        private Surface(EarthCoverContext context, CoverType coverType) {
             super(context, coverType);
 
             GenLayer layer = new SelectionSeedLayer(2, 1);
@@ -56,7 +56,7 @@ public class WaterCover implements CoverType {
 
         @Override
         public void populateBlockFiller(Random random, int originX, int originZ, IBlockState[] fillerBlockBuffer) {
-            this.coverFromLayer(fillerBlockBuffer, originX, originZ, this.coverSelector, (sampledValue, slope) -> {
+            this.coverFromLayer(fillerBlockBuffer, originX, originZ, this.coverSelector, (sampledValue, localX, localZ) -> {
                 switch (sampledValue) {
                     case 0:
                         return SAND;

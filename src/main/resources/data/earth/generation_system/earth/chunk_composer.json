@@ -13,10 +13,8 @@
     },
     {
       "type": "terrarium:cover_surface",
-      "height_component": "terrarium:height",
-      "slope_component": "terrarium:slope",
       "cover_component": "terrarium:cover",
-      "cover_bundle": "cover_types",
+      "cover_types": "earth:generation_system/earth/cover_types.json",
       "decorate": "@enable_decoration",
       "replace_block": "minecraft:stone"
     },
@@ -30,10 +28,8 @@
     {
       "type": "terrarium:cover_decorator",
       "apply_if": "@enable_decoration",
-      "height_component": "terrarium:height",
-      "slope_component": "terrarium:slope",
       "cover_component": "terrarium:cover",
-      "cover_bundle": "cover_types"
+      "cover_types": "earth:generation_system/earth/cover_types.json"
     },
     {
       "type": "earth:boulder_decorator",

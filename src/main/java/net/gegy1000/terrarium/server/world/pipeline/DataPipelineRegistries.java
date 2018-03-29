@@ -4,7 +4,7 @@ import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.event.TerrariumRegistryEvent;
 import net.gegy1000.terrarium.server.util.ArrayUtils;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.cover.CoverTypeRegistry;
+import net.gegy1000.terrarium.server.world.cover.CoverRegistry;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.BeachAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.HeightNoiseAdapter;
@@ -72,7 +72,7 @@ public class DataPipelineRegistries {
         event.register(new ResourceLocation(Terrarium.MODID, "cover"), new RegionComponentType<CoverRasterTileAccess>(CoverRasterTileAccess.class) {
             @Override
             public CoverRasterTileAccess createDefaultData(int width, int height) {
-                CoverType[] data = ArrayUtils.defaulted(new CoverType[width * height], CoverTypeRegistry.PLACEHOLDER);
+                CoverType[] data = ArrayUtils.defaulted(new CoverType[width * height], CoverRegistry.PLACEHOLDER);
                 return new CoverRasterTileAccess(data, width, height);
             }
         });

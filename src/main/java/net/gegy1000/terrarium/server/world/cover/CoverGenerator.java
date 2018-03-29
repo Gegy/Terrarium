@@ -24,7 +24,7 @@ import net.minecraft.world.gen.layer.IntCache;
 
 import java.util.Random;
 
-public abstract class CoverGenerator {
+public abstract class CoverGenerator<T extends CoverGenerationContext> {
     public static final int MOUNTAINOUS_SLOPE = 20;
     public static final int CLIFF_SLOPE = 70;
     public static final int EXTREME_CLIFF_SLOPE = 150;
@@ -81,11 +81,11 @@ public abstract class CoverGenerator {
 
     protected final BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
 
-    protected final CoverGenerationContext context;
+    protected final T context;
 
     protected final CoverType coverType;
 
-    protected CoverGenerator(CoverGenerationContext context, CoverType coverType) {
+    protected CoverGenerator(T context, CoverType coverType) {
         this.context = context;
         this.coverType = coverType;
     }

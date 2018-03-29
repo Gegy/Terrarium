@@ -19,8 +19,7 @@
   "coordinate_system": "earth:generation_system/earth/coordinate_system.json",
   "data_system": {
     "components": "earth:generation_system/earth/data_components.json",
-    "adapters": "earth:generation_system/earth/data_adapters.json",
-    "bundles": "earth:generation_system/earth/bundles.json"
+    "adapters": "earth:generation_system/earth/data_adapters.json"
   },
   "chunk_composer": "earth:generation_system/earth/chunk_composer.json"
 }

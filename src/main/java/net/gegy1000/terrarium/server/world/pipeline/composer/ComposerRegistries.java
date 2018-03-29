@@ -54,8 +54,8 @@ public class ComposerRegistries {
         return SURFACE_COMPOSERS.get(identifier);
     }
 
-    public static InstanceObjectParser<DecorationComposer> getDecorationComposer(ResourceLocation identifer) {
-        return DECORATION_COMPOSERS.get(identifer);
+    public static InstanceObjectParser<DecorationComposer> getDecorationComposer(ResourceLocation identifier) {
+        return DECORATION_COMPOSERS.get(identifier);
     }
 
     public static InstanceObjectParser<BiomeComposer> getBiomeComposer(ResourceLocation identifier) {

@@ -13,7 +13,7 @@ import net.gegy1000.terrarium.server.util.Interpolation;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.cover.CoverTypeRegistry;
+import net.gegy1000.terrarium.server.world.cover.CoverRegistry;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
@@ -278,7 +278,7 @@ public class OsmCoastlineAdapter implements RegionAdapter {
                         heightBuffer[index] = 1;
                     }
                 } else if ((landType == LAND || landType == COAST && coastType != FREE_FLOOD) && cover == EarthCoverRegistry.WATER) {
-                    coverBuffer[index] = CoverTypeRegistry.PLACEHOLDER;
+                    coverBuffer[index] = CoverRegistry.PLACEHOLDER;
                     unselectedPoints.add(new FloodFill.Point(localX, localY));
                 }
             }
@@ -334,7 +334,7 @@ public class OsmCoastlineAdapter implements RegionAdapter {
 
         @Override
         public CoverType visit(FloodFill.Point point, CoverType sampled) {
-            if (sampled != CoverTypeRegistry.PLACEHOLDER) {
+            if (sampled != CoverRegistry.PLACEHOLDER) {
                 this.result = sampled;
                 return null;
             }

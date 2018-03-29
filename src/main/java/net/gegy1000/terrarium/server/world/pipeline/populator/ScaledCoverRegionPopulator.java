@@ -10,7 +10,6 @@ import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
 import net.gegy1000.terrarium.server.world.pipeline.sampler.DataSampler;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTileAccess;
-import net.gegy1000.terrarium.server.world.region.RegionTilePos;
 import net.minecraft.world.World;
 
 public class ScaledCoverRegionPopulator extends BufferedScalingPopulator<CoverRasterTileAccess> {
@@ -25,7 +24,7 @@ public class ScaledCoverRegionPopulator extends BufferedScalingPopulator<CoverRa
     }
 
     @Override
-    protected CoverRasterTileAccess populate(GenerationSettings settings, CoordinateState originState, RegionTilePos pos, int minSampleX, int minSampleZ, int sampleWidth, int sampleHeight, int width, int height, double scaleFactorX, double scaleFactorZ, double originOffsetX, double originOffsetZ) {
+    protected CoverRasterTileAccess populate(GenerationSettings settings, int minSampleX, int minSampleZ, int sampleWidth, int sampleHeight, int width, int height, double scaleFactorX, double scaleFactorZ, double originOffsetX, double originOffsetZ) {
         CoverType[] sampledCover = this.sampler.sample(settings, minSampleX, minSampleZ, sampleWidth + 1, sampleHeight + 1);
 
         CoverType[] scaledCover = new CoverType[width * height];

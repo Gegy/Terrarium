@@ -13,7 +13,6 @@ import net.gegy1000.terrarium.server.world.generator.customization.widget.Custom
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.generator.customization.PropertyContainer;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPreset;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiCreateWorld;
 import net.minecraft.client.gui.GuiScreen;
@@ -92,7 +91,7 @@ public class TerrariumCustomizationGui extends GuiScreen {
 
         ActionButtonWidget upLevelButton = new ActionButtonWidget(0, 0, 0, "<<") {
             @Override
-            protected void handlePress(Minecraft mc) {
+            protected void handlePress() {
                 TerrariumCustomizationGui.this.activeList = TerrariumCustomizationGui.this.categoryList;
             }
         };
@@ -113,7 +112,7 @@ public class TerrariumCustomizationGui extends GuiScreen {
 
             categoryListWidgets.add(new ActionButtonWidget(0, 0, 0, category.getLocalizedName()) {
                 @Override
-                protected void handlePress(Minecraft mc) {
+                protected void handlePress() {
                     TerrariumCustomizationGui.this.activeList = currentList;
                 }
             });

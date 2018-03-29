@@ -9,7 +9,6 @@ import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
 import net.gegy1000.terrarium.server.world.pipeline.sampler.DataSampler;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTileAccess;
-import net.gegy1000.terrarium.server.world.region.RegionTilePos;
 import net.minecraft.world.World;
 
 public class ScaledShortRegionPopulator extends InterpolatingRegionPopulator<ShortRasterTileAccess> {
@@ -21,7 +20,7 @@ public class ScaledShortRegionPopulator extends InterpolatingRegionPopulator<Sho
     }
 
     @Override
-    protected ShortRasterTileAccess populate(GenerationSettings settings, CoordinateState originState, RegionTilePos pos, int minSampleX, int minSampleZ,
+    protected ShortRasterTileAccess populate(GenerationSettings settings, int minSampleX, int minSampleZ,
                                              int sampleWidth, int sampleHeight, int width, int height,
                                              double scaleFactorX, double scaleFactorZ, double originOffsetX, double originOffsetZ
     ) {

@@ -1,7 +1,8 @@
 package net.gegy1000.earth.server.world.cover.type;
 
-import net.gegy1000.terrarium.server.world.cover.CoverDecorationGenerator;
-import net.gegy1000.terrarium.server.world.cover.CoverGenerationContext;
+import net.gegy1000.earth.server.world.cover.EarthCoverContext;
+import net.gegy1000.earth.server.world.cover.EarthCoverType;
+import net.gegy1000.earth.server.world.cover.EarthDecorationGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverSurfaceGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.feature.tree.GenerousTreeGenerator;
@@ -13,15 +14,15 @@ import net.minecraft.world.biome.Biome;
 
 import java.util.Random;
 
-public class BeachCover implements CoverType {
+public class BeachCover extends EarthCoverType {
     @Override
-    public CoverSurfaceGenerator createSurfaceGenerator(CoverGenerationContext context) {
+    public CoverSurfaceGenerator<EarthCoverContext> createSurfaceGenerator(EarthCoverContext context) {
         IBlockState state = Blocks.SAND.getDefaultState();
-        return new CoverSurfaceGenerator.Static(context, this, state, state);
+        return new CoverSurfaceGenerator.Static<>(context, this, state, state);
     }
 
     @Override
-    public CoverDecorationGenerator createDecorationGenerator(CoverGenerationContext context) {
+    public EarthDecorationGenerator createDecorationGenerator(EarthCoverContext context) {
         return new Decoration(context, this);
     }
 
@@ -30,8 +31,8 @@ public class BeachCover implements CoverType {
         return Biomes.BEACH;
     }
 
-    private static class Decoration extends CoverDecorationGenerator {
-        private Decoration(CoverGenerationContext context, CoverType coverType) {
+    private static class Decoration extends EarthDecorationGenerator {
+        private Decoration(EarthCoverContext context, CoverType coverType) {
             super(context, coverType);
         }
 

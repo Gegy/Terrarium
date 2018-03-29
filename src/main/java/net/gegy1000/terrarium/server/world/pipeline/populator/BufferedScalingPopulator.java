@@ -45,10 +45,10 @@ public abstract class BufferedScalingPopulator<T> implements RegionPopulator<T> 
         double originOffsetX = minRegionCoordinate.getX() - minSampleX;
         double originOffsetZ = minRegionCoordinate.getZ() - minSampleZ;
 
-        return this.populate(settings, this.coordinateState, pos, minSampleX, minSampleZ, sampleWidth, sampleHeight, width, height, scaleFactorX, scaleFactorZ, originOffsetX, originOffsetZ);
+        return this.populate(settings, minSampleX, minSampleZ, sampleWidth, sampleHeight, width, height, scaleFactorX, scaleFactorZ, originOffsetX, originOffsetZ);
     }
 
-    protected abstract T populate(GenerationSettings settings, CoordinateState originState, RegionTilePos pos,
+    protected abstract T populate(GenerationSettings settings,
                                   int minSampleX, int minSampleZ, int sampleWidth, int sampleHeight, int width, int height,
                                   double scaleFactorX, double scaleFactorZ, double originOffsetX, double originOffsetZ
     );
