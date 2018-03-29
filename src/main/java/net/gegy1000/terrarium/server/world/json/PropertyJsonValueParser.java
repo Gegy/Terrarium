@@ -3,7 +3,6 @@ package net.gegy1000.terrarium.server.world.json;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSyntaxException;
 import net.gegy1000.terrarium.server.world.generator.customization.PropertyContainer;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyValue;
@@ -11,10 +10,10 @@ import net.minecraft.block.state.IBlockState;
 
 public abstract class PropertyJsonValueParser implements JsonValueParser {
     @Override
-    public boolean parseBoolean(JsonObject objectRoot, String key) {
+    public boolean parseBoolean(JsonObject objectRoot, String key) throws InvalidJsonException {
         JsonElement element = objectRoot.get(key);
         if (element == null) {
-            throw new JsonSyntaxException("Boolean element with key " + key + " did not exist");
+            throw new InvalidJsonException("Boolean element with key " + key + " did not exist");
         }
 
         Boolean providedValue = this.parseFromProvider(element);
@@ -33,14 +32,14 @@ public abstract class PropertyJsonValueParser implements JsonValueParser {
             }
         }
 
-        throw new JsonSyntaxException("Could not parse boolean from non-boolean element: " + element);
+        throw new InvalidJsonException("Could not parse boolean from non-boolean element: " + element);
     }
 
     @Override
-    public double parseDouble(JsonObject objectRoot, String key) {
+    public double parseDouble(JsonObject objectRoot, String key) throws InvalidJsonException {
         JsonElement element = objectRoot.get(key);
         if (element == null) {
-            throw new JsonSyntaxException("Double element with key " + key + " did not exist");
+            throw new InvalidJsonException("Double element with key " + key + " did not exist");
         }
 
         Double providedValue = this.parseFromProvider(element);
@@ -59,14 +58,14 @@ public abstract class PropertyJsonValueParser implements JsonValueParser {
             }
         }
 
-        throw new JsonSyntaxException("Could not parse double from non-double element: " + element);
+        throw new InvalidJsonException("Could not parse double from non-double element: " + element);
     }
 
     @Override
-    public int parseInteger(JsonObject objectRoot, String key) {
+    public int parseInteger(JsonObject objectRoot, String key) throws InvalidJsonException {
         JsonElement element = objectRoot.get(key);
         if (element == null) {
-            throw new JsonSyntaxException("Integer element with key " + key + " did not exist");
+            throw new InvalidJsonException("Integer element with key " + key + " did not exist");
         }
 
         Integer providedValue = this.parseFromProvider(element);
@@ -85,14 +84,14 @@ public abstract class PropertyJsonValueParser implements JsonValueParser {
             }
         }
 
-        throw new JsonSyntaxException("Could not parse integer from non-integer element: " + element);
+        throw new InvalidJsonException("Could not parse integer from non-integer element: " + element);
     }
 
     @Override
-    public String parseString(JsonObject objectRoot, String key) {
+    public String parseString(JsonObject objectRoot, String key) throws InvalidJsonException {
         JsonElement element = objectRoot.get(key);
         if (element == null) {
-            throw new JsonSyntaxException("String element with key " + key + " did not exist");
+            throw new InvalidJsonException("String element with key " + key + " did not exist");
         }
 
         String providedValue = this.parseFromProvider(element);
@@ -111,16 +110,16 @@ public abstract class PropertyJsonValueParser implements JsonValueParser {
             }
         }
 
-        throw new JsonSyntaxException("Could not parse string from non-string: " + element);
+        throw new InvalidJsonException("Could not parse string from non-string: " + element);
     }
 
     @Override
-    public IBlockState parseBlockState(JsonObject objectRoot, String key) {
+    public IBlockState parseBlockState(JsonObject objectRoot, String key) throws InvalidJsonException {
         String blockstateKey = this.parseString(objectRoot, key);
-        return TerrariumJsonUtils.parseBlockState(blockstateKey);
+        return ParseUtils.parseBlockState(blockstateKey);
     }
 
-    protected <T> PropertyValue<T> parseProperty(JsonPrimitive primitive, Class<T> type) {
+    protected <T> PropertyValue<T> parseProperty(JsonPrimitive primitive, Class<T> type) throws InvalidJsonException {
         if (primitive.isString()) {
             String identifier = primitive.getAsString();
             if (identifier.startsWith("@")) {
@@ -131,7 +130,7 @@ public abstract class PropertyJsonValueParser implements JsonValueParser {
         return null;
     }
 
-    protected abstract <T> PropertyValue<T> getProperty(String keyIdentifier, Class<T> type);
+    protected abstract <T> PropertyValue<T> getProperty(String keyIdentifier, Class<T> type) throws InvalidJsonException;
 
     public static class Container extends PropertyJsonValueParser {
         private final PropertyContainer container;

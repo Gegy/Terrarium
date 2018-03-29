@@ -1,6 +1,7 @@
 package net.gegy1000.terrarium.client.gui.customization;
 
 import com.google.common.base.Strings;
+import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.client.gui.widget.ActionButtonWidget;
 import net.gegy1000.terrarium.client.gui.widget.CustomizationList;
 import net.gegy1000.terrarium.client.preview.PreviewController;
@@ -8,11 +9,12 @@ import net.gegy1000.terrarium.client.preview.PreviewRenderer;
 import net.gegy1000.terrarium.client.preview.WorldPreview;
 import net.gegy1000.terrarium.server.world.coordinate.SpawnpointDefinition;
 import net.gegy1000.terrarium.server.world.generator.TerrariumGenerator;
-import net.gegy1000.terrarium.server.world.generator.customization.widget.CustomizationCategory;
-import net.gegy1000.terrarium.server.world.generator.customization.widget.CustomizationWidget;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.generator.customization.PropertyContainer;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPreset;
+import net.gegy1000.terrarium.server.world.generator.customization.widget.CustomizationCategory;
+import net.gegy1000.terrarium.server.world.generator.customization.widget.CustomizationWidget;
+import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiCreateWorld;
 import net.minecraft.client.gui.GuiScreen;
@@ -64,10 +66,15 @@ public class TerrariumCustomizationGui extends GuiScreen {
         if (defaultPreset.getGenerator() != generator) {
             throw new IllegalArgumentException("Cannot customize world with preset of wrong generator type");
         }
-        if (Strings.isNullOrEmpty(parent.chunkProviderSettingsJson)) {
+        String settingsString = parent.chunkProviderSettingsJson;
+        if (Strings.isNullOrEmpty(settingsString)) {
             this.setSettings(defaultPreset.createSettings());
         } else {
-            this.setSettings(GenerationSettings.deserialize(parent.chunkProviderSettingsJson));
+            try {
+                this.setSettings(GenerationSettings.deserialize(settingsString));
+            } catch (InvalidJsonException e) {
+                Terrarium.LOGGER.error("Failed to deserialize settings: {}", settingsString, e);
+            }
         }
     }
 

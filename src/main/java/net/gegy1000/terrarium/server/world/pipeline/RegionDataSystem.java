@@ -8,6 +8,8 @@ import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
+import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
+import net.gegy1000.terrarium.server.world.json.ParseStateHandler;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.RegionAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.component.AttachedComponent;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponent;
@@ -71,9 +73,13 @@ public class RegionDataSystem {
         }
 
         public <T> Builder withParsableComponent(TerrariumWorldData worldData, World world, InstanceJsonValueParser parser, AttachedComponent.Parsable<T> parsableComponent) {
-            RegionComponentType<T> type = parsableComponent.getType();
-            AttachedComponent<T> populator = parsableComponent.parse(worldData, world, parser);
-            this.attachedComponents.put(type, populator);
+            try {
+                RegionComponentType<T> type = parsableComponent.getType();
+                AttachedComponent<T> populator = parsableComponent.parse(worldData, world, parser);
+                this.attachedComponents.put(type, populator);
+            } catch (InvalidJsonException e) {
+                ParseStateHandler.error(e);
+            }
             return this;
         }
 

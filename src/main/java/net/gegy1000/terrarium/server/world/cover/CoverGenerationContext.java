@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
+import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTileAccess;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.RasterDataAccess;
@@ -60,7 +61,7 @@ public interface CoverGenerationContext {
 
         public static class Parser implements InstanceObjectParser<CoverGenerationContext> {
             @Override
-            public CoverGenerationContext parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) {
+            public CoverGenerationContext parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) throws InvalidJsonException {
                 RegionComponentType<ShortRasterTileAccess> heightComponent = valueParser.parseComponentType(objectRoot, "height_component", ShortRasterTileAccess.class);
                 RegionComponentType<CoverRasterTileAccess> coverComponent = valueParser.parseComponentType(objectRoot, "cover_component", CoverRasterTileAccess.class);
 

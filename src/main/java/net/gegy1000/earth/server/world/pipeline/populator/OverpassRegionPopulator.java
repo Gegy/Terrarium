@@ -7,6 +7,7 @@ import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
+import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
 import net.gegy1000.terrarium.server.world.pipeline.populator.RegionPopulator;
 import net.gegy1000.terrarium.server.world.pipeline.sampler.DataSampler;
 import net.gegy1000.earth.server.world.pipeline.source.tile.OsmTileAccess;
@@ -59,7 +60,7 @@ public class OverpassRegionPopulator implements RegionPopulator<OsmTileAccess> {
 
     public static class Parser implements InstanceObjectParser<RegionPopulator<?>> {
         @Override
-        public RegionPopulator<?> parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) {
+        public RegionPopulator<?> parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) throws InvalidJsonException {
             List<DataSampler<OsmTileAccess>> samplers = valueParser.parseSamplers(objectRoot, "samplers", OsmTileAccess.class);
             return new OverpassRegionPopulator(samplers);
         }

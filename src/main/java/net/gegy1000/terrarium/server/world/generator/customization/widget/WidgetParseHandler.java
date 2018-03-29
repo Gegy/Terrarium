@@ -3,13 +3,14 @@ package net.gegy1000.terrarium.server.world.generator.customization.widget;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.event.TerrariumRegistryEvent;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
 import net.gegy1000.terrarium.server.world.json.InitObjectParser;
+import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
 import net.gegy1000.terrarium.server.world.json.JsonValueParser;
-import net.minecraft.util.JsonUtils;
+import net.gegy1000.terrarium.server.world.json.ParseStateHandler;
+import net.gegy1000.terrarium.server.world.json.ParseUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
@@ -41,8 +42,8 @@ public class WidgetParseHandler {
         event.register(new ResourceLocation(Terrarium.MODID, "toggle"), (WidgetParser<Boolean>) (widgetRoot, propertyKey, valueParser) -> new ToggleWidget(propertyKey));
 
         event.register(new ResourceLocation(Terrarium.MODID, "slider"), (WidgetParser<Number>) (widgetRoot, propertyKey, valueParser) -> {
-            JsonArray rangeArray = JsonUtils.getJsonArray(widgetRoot, "range");
-            JsonArray stepArray = JsonUtils.getJsonArray(widgetRoot, "step");
+            JsonArray rangeArray = ParseUtils.getJsonArray(widgetRoot, "range");
+            JsonArray stepArray = ParseUtils.getJsonArray(widgetRoot, "step");
 
             double minimum = rangeArray.get(0).getAsDouble();
             double maximum = rangeArray.get(1).getAsDouble();
@@ -51,10 +52,11 @@ public class WidgetParseHandler {
 
             WidgetPropertyConverter converter = null;
             if (widgetRoot.has("value_converter")) {
-                JsonObject converterRoot = JsonUtils.getJsonObject(widgetRoot, "value_converter");
-                ResourceLocation converterType = new ResourceLocation(JsonUtils.getString(converterRoot, "type"));
-                InitObjectParser<WidgetPropertyConverter> parser = WidgetConverterRegistry.get(converterType);
-                converter = parser.parse(valueParser, converterRoot);
+                converter = ParseUtils.parseObject(widgetRoot, "value_converter", converterRoot -> {
+                    ResourceLocation converterType = new ResourceLocation(ParseUtils.getString(converterRoot, "type"));
+                    InitObjectParser<WidgetPropertyConverter> parser = WidgetConverterRegistry.get(converterType);
+                    return parser.parse(valueParser, converterRoot);
+                });
             }
 
             return new SliderWidget(propertyKey, minimum, maximum, step, fineStep, converter);
@@ -62,20 +64,31 @@ public class WidgetParseHandler {
     }
 
     @SuppressWarnings("unchecked")
-    public CustomizationWidget parseWidget(JsonObject root) {
-        ResourceLocation type = new ResourceLocation(JsonUtils.getString(root, "type"));
-        String propertyKey = JsonUtils.getString(root, "property").toLowerCase(Locale.ROOT);
-
-        PropertyKey property = this.properties.get(propertyKey);
-        if (property == null) {
-            throw new JsonSyntaxException("Could not find property " + propertyKey);
-        }
+    public CustomizationWidget parseWidget(JsonObject root) throws InvalidJsonException {
+        String propertyKey = ParseUtils.getString(root, "property").toLowerCase(Locale.ROOT);
 
         try {
-            WidgetParser<?> parser = WIDGET_PARSERS.get(type);
-            return parser.parse(root, property, this.constantParser);
-        } catch (ClassCastException e) {
-            throw new JsonSyntaxException("Property " + propertyKey + " of wrong type " + property.getType());
+            ParseStateHandler.pushContext("parsing widget with property \"" + propertyKey + "\"");
+
+            ResourceLocation type = new ResourceLocation(ParseUtils.getString(root, "type"));
+
+            PropertyKey property = this.properties.get(propertyKey);
+            if (property == null) {
+                throw new InvalidJsonException("Could not find property " + propertyKey);
+            }
+
+            try {
+                WidgetParser<?> parser = WIDGET_PARSERS.get(type);
+                if (parser == null) {
+                    throw new InvalidJsonException("Widget parser with key \"" + type + "\" did not exist");
+                }
+
+                return parser.parse(root, property, this.constantParser);
+            } catch (ClassCastException e) {
+                throw new InvalidJsonException("Property " + propertyKey + " of wrong type " + property.getType());
+            }
+        } finally {
+            ParseStateHandler.popContext();
         }
     }
 

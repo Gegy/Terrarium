@@ -2,6 +2,7 @@ package net.gegy1000.terrarium.server.world.generator.customization.widget;
 
 import com.google.gson.JsonObject;
 import net.gegy1000.terrarium.server.world.json.InitObjectParser;
+import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
 import net.gegy1000.terrarium.server.world.json.JsonValueParser;
 
 public class ScaledPropertyConverter implements WidgetPropertyConverter {
@@ -23,7 +24,7 @@ public class ScaledPropertyConverter implements WidgetPropertyConverter {
 
     public static class Parser implements InitObjectParser<WidgetPropertyConverter> {
         @Override
-        public WidgetPropertyConverter parse(JsonValueParser valueParser, JsonObject objectRoot) {
+        public WidgetPropertyConverter parse(JsonValueParser valueParser, JsonObject objectRoot) throws InvalidJsonException {
             return new ScaledPropertyConverter(valueParser.parseDouble(objectRoot, "scale"));
         }
     }

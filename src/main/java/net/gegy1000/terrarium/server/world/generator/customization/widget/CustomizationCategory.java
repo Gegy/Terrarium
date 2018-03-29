@@ -1,12 +1,12 @@
 package net.gegy1000.terrarium.server.world.generator.customization.widget;
 
 import com.google.common.collect.ImmutableList;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.gegy1000.terrarium.Terrarium;
+import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
+import net.gegy1000.terrarium.server.world.json.ParseStateHandler;
+import net.gegy1000.terrarium.server.world.json.ParseUtils;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.util.JsonUtils;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -37,30 +37,44 @@ public class CustomizationCategory {
     }
 
     public static List<CustomizationCategory> parseCategories(WidgetParseHandler widgetParseHandler, JsonObject root) {
+        ParseStateHandler.pushContext("Parsing categories");
+
         List<CustomizationCategory> categories = new ArrayList<>();
         for (Map.Entry<String, JsonElement> child : root.entrySet()) {
             if (child.getValue().isJsonObject()) {
-                String identifier = child.getKey();
-                JsonObject categoryRoot = child.getValue().getAsJsonObject();
-                categories.add(CustomizationCategory.parseCategory(widgetParseHandler, identifier, categoryRoot));
+                try {
+                    String identifier = child.getKey();
+                    JsonObject categoryRoot = child.getValue().getAsJsonObject();
+                    categories.add(CustomizationCategory.parseCategory(widgetParseHandler, identifier, categoryRoot));
+                } catch (InvalidJsonException e) {
+                    ParseStateHandler.error(e);
+                }
             } else {
-                Terrarium.LOGGER.warn("Ignored invalid category element {}: {}, expected object", child.getKey(), child.getValue());
+                ParseStateHandler.error("Ignored invalid category element: \"" + child.getKey() + "\"");
             }
         }
+
+        ParseStateHandler.popContext();
+
         return categories;
     }
 
-    public static CustomizationCategory parseCategory(WidgetParseHandler widgetParseHandler, String identifier, JsonObject root) {
-        List<CustomizationWidget> widgets = new ArrayList<>();
-        JsonArray widgetsArray = JsonUtils.getJsonArray(root, "widgets");
-        for (JsonElement widgetElement : widgetsArray) {
-            if (widgetElement.isJsonObject()) {
-                widgets.add(widgetParseHandler.parseWidget(widgetElement.getAsJsonObject()));
-            } else {
-                Terrarium.LOGGER.warn("Ignored invalid widget element {}, expected object", widgetElement);
+    public static CustomizationCategory parseCategory(WidgetParseHandler widgetParseHandler, String identifier, JsonObject root) throws InvalidJsonException {
+        return new CustomizationCategory(identifier, ParseUtils.parseArray(root, "widgets", widgetsArray -> {
+            List<CustomizationWidget> widgets = new ArrayList<>();
+            for (JsonElement widgetElement : widgetsArray) {
+                try {
+                    if (widgetElement.isJsonObject()) {
+                        widgets.add(widgetParseHandler.parseWidget(widgetElement.getAsJsonObject()));
+                    } else {
+                        ParseStateHandler.error("Ignored invalid widget element");
+                    }
+                } catch (InvalidJsonException e) {
+                    ParseStateHandler.error(e);
+                }
             }
-        }
-        return new CustomizationCategory(identifier, widgets);
+            return widgets;
+        }));
     }
 
     @Override

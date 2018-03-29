@@ -5,6 +5,7 @@ import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.coordinate.SpawnpointDefinition;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.CustomizationCategory;
+import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
 import net.gegy1000.terrarium.server.world.pipeline.RegionDataSystem;
 import net.gegy1000.terrarium.server.world.pipeline.composer.biome.BiomeComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
@@ -19,21 +20,21 @@ import java.util.Map;
 public interface TerrariumGenerator {
     ImmutableList<CustomizationCategory> getCategories();
 
-    RegionDataSystem buildDataSystem(TerrariumWorldData worldData, World world);
+    RegionDataSystem buildDataSystem(TerrariumWorldData worldData, World world) throws InvalidJsonException;
 
-    Map<String, CoordinateState> buildCoordinateStates(TerrariumWorldData worldData, World world);
+    Map<String, CoordinateState> buildCoordinateStates(TerrariumWorldData worldData, World world) throws InvalidJsonException;
 
     String getNavigationalStateKey();
 
     SpawnpointDefinition getSpawnpointDefinition();
 
-    Geocoder createGeocoder(TerrariumWorldData worldData, World world);
+    Geocoder createGeocoder(TerrariumWorldData worldData, World world) throws InvalidJsonException;
 
-    List<SurfaceComposer> createSurfaceComposers(TerrariumWorldData worldData, World world);
+    List<SurfaceComposer> createSurfaceComposers(TerrariumWorldData worldData, World world) throws InvalidJsonException;
 
-    List<DecorationComposer> createDecorationComposers(TerrariumWorldData worldData, World world);
+    List<DecorationComposer> createDecorationComposers(TerrariumWorldData worldData, World world) throws InvalidJsonException;
 
-    BiomeComposer createBiomeComposer(TerrariumWorldData worldData, World world);
+    BiomeComposer createBiomeComposer(TerrariumWorldData worldData, World world) throws InvalidJsonException;
 
     class Default implements TerrariumGenerator {
         @Override

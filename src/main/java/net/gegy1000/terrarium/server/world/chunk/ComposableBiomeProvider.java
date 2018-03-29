@@ -3,6 +3,8 @@ package net.gegy1000.terrarium.server.world.chunk;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.util.Lazy;
+import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
+import net.gegy1000.terrarium.server.world.json.ParseStateHandler;
 import net.gegy1000.terrarium.server.world.pipeline.composer.biome.BiomeComposer;
 import net.gegy1000.terrarium.server.world.region.GenerationRegionHandler;
 import net.minecraft.init.Biomes;
@@ -38,7 +40,15 @@ public class ComposableBiomeProvider extends BiomeProvider {
         this.biomeComposer = new Lazy<>(() -> {
             TerrariumWorldData capability = this.world.getCapability(TerrariumCapabilities.worldDataCapability, null);
             if (capability != null) {
-                return capability.getSettings().getGenerator().createBiomeComposer(capability, world);
+                ParseStateHandler.begin();
+
+                try {
+                    return capability.getSettings().getGenerator().createBiomeComposer(capability, world);
+                } catch (InvalidJsonException e) {
+                    throw new IllegalStateException("Failed to create biome composer", e);
+                } finally {
+                    ParseStateHandler.finish("create biome composer");
+                }
             }
             throw new IllegalStateException("Tried to load BiomeComposer before it was present");
         });

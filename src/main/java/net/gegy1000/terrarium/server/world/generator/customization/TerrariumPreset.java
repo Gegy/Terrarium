@@ -2,8 +2,9 @@ package net.gegy1000.terrarium.server.world.generator.customization;
 
 import com.google.gson.JsonObject;
 import net.gegy1000.terrarium.server.world.generator.TerrariumGenerator;
+import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
+import net.gegy1000.terrarium.server.world.json.ParseUtils;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.util.JsonUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -19,9 +20,9 @@ public class TerrariumPreset {
         this.settings = settings;
     }
 
-    public static TerrariumPreset parse(JsonObject root) {
-        String name = JsonUtils.getString(root, "name");
-        ResourceLocation icon = new ResourceLocation(JsonUtils.getString(root, "icon"));
+    public static TerrariumPreset parse(JsonObject root) throws InvalidJsonException {
+        String name = ParseUtils.getString(root, "name");
+        ResourceLocation icon = new ResourceLocation(ParseUtils.getString(root, "icon"));
 
         return new TerrariumPreset(name, icon, GenerationSettings.deserialize(root));
     }

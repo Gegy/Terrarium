@@ -7,6 +7,7 @@ import net.gegy1000.terrarium.server.world.cover.CoverRegistry;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
+import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTileAccess;
 import net.gegy1000.terrarium.server.world.region.GenerationRegion;
@@ -84,7 +85,7 @@ public class BeachAdapter implements RegionAdapter {
 
     public static class Parser implements InstanceObjectParser<RegionAdapter> {
         @Override
-        public RegionAdapter parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) {
+        public RegionAdapter parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) throws InvalidJsonException {
             RegionComponentType<CoverRasterTileAccess> coverComponent = valueParser.parseComponentType(objectRoot, "cover_component", CoverRasterTileAccess.class);
             int beachSize = valueParser.parseInteger(objectRoot, "beach_size");
             CoverType waterCover = valueParser.parseRegistryEntry(objectRoot, "water_cover", CoverRegistry.getRegistry());

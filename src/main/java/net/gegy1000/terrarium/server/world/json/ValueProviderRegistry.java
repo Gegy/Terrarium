@@ -44,7 +44,7 @@ public class ValueProviderRegistry {
 
     private interface DoubleOp extends ValueProvider<Double> {
         @Override
-        default Double provide(JsonValueParser valueParser, JsonObject root) {
+        default Double provide(JsonValueParser valueParser, JsonObject root) throws InvalidJsonException {
             double left = valueParser.parseDouble(root, "left");
             double right = valueParser.parseDouble(root, "right");
             return this.perform(left, right);

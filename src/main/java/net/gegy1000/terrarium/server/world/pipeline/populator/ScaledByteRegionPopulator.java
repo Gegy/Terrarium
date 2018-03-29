@@ -7,6 +7,7 @@ import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
+import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
 import net.gegy1000.terrarium.server.world.pipeline.sampler.DataSampler;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ByteRasterTileAccess;
 import net.minecraft.world.World;
@@ -39,7 +40,7 @@ public class ScaledByteRegionPopulator extends InterpolatingRegionPopulator<Byte
 
     public static class Parser implements InstanceObjectParser<RegionPopulator<?>> {
         @Override
-        public RegionPopulator<?> parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) {
+        public RegionPopulator<?> parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) throws InvalidJsonException {
             DataSampler<byte[]> sampler = valueParser.parseSampler(objectRoot, "sampler", byte[].class);
             CoordinateState coordinateState = valueParser.parseCoordinateState(objectRoot, "coordinate");
             Interpolation.Method interpolationMethod = Interpolation.Method.parse(valueParser.parseString(objectRoot, "interpolation_method"));

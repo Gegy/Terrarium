@@ -3,6 +3,8 @@ package net.gegy1000.terrarium.server.world.chunk;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.util.Lazy;
+import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
+import net.gegy1000.terrarium.server.world.json.ParseStateHandler;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.SurfaceComposer;
 import net.gegy1000.terrarium.server.world.region.GenerationRegionHandler;
@@ -39,8 +41,29 @@ public class ComposableChunkGenerator implements IChunkGenerator {
         this.world = world;
         this.random = new Random(world.getSeed());
 
-        this.surfaceComposers = new Lazy.WorldCap<>(world, worldData -> worldData.getSettings().getGenerator().createSurfaceComposers(worldData, world));
-        this.decorationComposers = new Lazy.WorldCap<>(world, worldData -> worldData.getSettings().getGenerator().createDecorationComposers(worldData, world));
+        this.surfaceComposers = new Lazy.WorldCap<>(world, worldData -> {
+            ParseStateHandler.begin();
+
+            try {
+                return worldData.getSettings().getGenerator().createSurfaceComposers(worldData, world);
+            } catch (InvalidJsonException e) {
+                throw new IllegalStateException("Failed to create surface composers", e);
+            } finally {
+                ParseStateHandler.finish("create surface composers");
+            }
+        });
+
+        this.decorationComposers = new Lazy.WorldCap<>(world, worldData -> {
+            ParseStateHandler.begin();
+
+            try {
+                return worldData.getSettings().getGenerator().createDecorationComposers(worldData, world);
+            } catch (InvalidJsonException e) {
+                throw new IllegalStateException("Failed to create decoration composers", e);
+            } finally {
+                ParseStateHandler.finish("create decoration composers");
+            }
+        });
 
         this.regionHandler = new Lazy<>(() -> {
             TerrariumWorldData capability = this.world.getCapability(TerrariumCapabilities.worldDataCapability, null);

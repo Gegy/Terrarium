@@ -1,6 +1,6 @@
 package net.gegy1000.terrarium.server.util;
 
-import com.google.gson.JsonSyntaxException;
+import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.Point;
@@ -170,11 +170,11 @@ public class Interpolation {
             return this.lerp(verticalSampleBuffer, intermediateX);
         }
 
-        public static Method parse(String key) {
+        public static Method parse(String key) throws InvalidJsonException {
             if (METHOD_MAPPINGS.containsKey(key)) {
                 return METHOD_MAPPINGS.get(key);
             }
-            throw new JsonSyntaxException("Tried to parse invalid interpolation method type " + key);
+            throw new InvalidJsonException("Tried to parse invalid interpolation method type " + key);
         }
     }
 }

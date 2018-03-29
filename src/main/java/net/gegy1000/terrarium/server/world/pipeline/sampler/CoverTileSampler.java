@@ -8,6 +8,7 @@ import net.gegy1000.terrarium.server.world.cover.CoverRegistry;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
+import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTileAccess;
@@ -58,7 +59,7 @@ public class CoverTileSampler extends TiledDataSampler<CoverType[]> {
 
     public static class Parser implements InstanceObjectParser<DataSampler<?>> {
         @Override
-        public DataSampler<?> parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) {
+        public DataSampler<?> parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) throws InvalidJsonException {
             TiledDataSource<CoverRasterTileAccess> source = valueParser.parseTiledSource(objectRoot, "source", CoverRasterTileAccess.class);
             return new CoverTileSampler(source);
         }

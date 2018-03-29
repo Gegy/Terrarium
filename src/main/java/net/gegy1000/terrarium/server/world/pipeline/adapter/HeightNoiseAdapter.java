@@ -5,6 +5,7 @@ import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
+import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTileAccess;
 import net.gegy1000.terrarium.server.world.region.RegionData;
@@ -54,7 +55,7 @@ public class HeightNoiseAdapter implements RegionAdapter {
 
     public static class Parser implements InstanceObjectParser<RegionAdapter> {
         @Override
-        public RegionAdapter parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) {
+        public RegionAdapter parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) throws InvalidJsonException {
             RegionComponentType<ShortRasterTileAccess> heightComponent = valueParser.parseComponentType(objectRoot, "height_component", ShortRasterTileAccess.class);
             int octaveCount = valueParser.parseInteger(objectRoot, "octaves");
             double noiseScaleXZ = valueParser.parseDouble(objectRoot, "noise_xz_scale");

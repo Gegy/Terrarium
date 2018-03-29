@@ -3,10 +3,11 @@ package net.gegy1000.terrarium.server.world.generator.customization;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
 import net.gegy1000.terrarium.server.world.generator.TerrariumGenerator;
 import net.gegy1000.terrarium.server.world.generator.TerrariumGeneratorRegistry;
-import net.minecraft.util.JsonUtils;
+import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
+import net.gegy1000.terrarium.server.world.json.ParseStateHandler;
+import net.gegy1000.terrarium.server.world.json.ParseUtils;
 import net.minecraft.util.ResourceLocation;
 
 import java.util.HashMap;
@@ -20,20 +21,30 @@ public class GenerationSettings {
         this.propertyContainer = propertyContainer;
     }
 
-    public static GenerationSettings deserialize(String json) {
+    public static GenerationSettings deserialize(String json) throws InvalidJsonException {
         return GenerationSettings.deserialize(new JsonParser().parse(json).getAsJsonObject());
     }
 
-    public static GenerationSettings deserialize(JsonObject root) {
-        ResourceLocation generatorIdentifier = new ResourceLocation(JsonUtils.getString(root, "generator"));
-        TerrariumGenerator generator = TerrariumGeneratorRegistry.get(generatorIdentifier);
-        if (generator == null) {
-            throw new JsonSyntaxException("Failed to parse generation settings, generator with id " + generatorIdentifier + " does not exist!");
+    public static GenerationSettings deserialize(JsonObject root) throws InvalidJsonException {
+        ParseStateHandler.begin();
+
+        try {
+            ParseStateHandler.pushContext("parsing generation settings");
+
+            ResourceLocation generatorIdentifier = new ResourceLocation(ParseUtils.getString(root, "generator"));
+            TerrariumGenerator generator = TerrariumGeneratorRegistry.get(generatorIdentifier);
+            if (generator == null) {
+                throw new InvalidJsonException("Failed to parse generation settings, generator with id \"" + generatorIdentifier + "\" does not exist!");
+            }
+
+            PropertyContainer properties = ParseUtils.parseObject(root, "properties", PropertyContainer::deserialize);
+
+            ParseStateHandler.popContext();
+
+            return new GenerationSettings(generator, properties);
+        } finally {
+            ParseStateHandler.finish("parse settings");
         }
-
-        JsonObject propertiesRoot = JsonUtils.getJsonObject(root, "properties");
-
-        return new GenerationSettings(generator, PropertyContainer.deserialize(propertiesRoot));
     }
 
     public JsonObject serialize() {
@@ -64,7 +75,11 @@ public class GenerationSettings {
     }
 
     public GenerationSettings copy() {
-        return GenerationSettings.deserialize(this.serialize());
+        try {
+            return GenerationSettings.deserialize(this.serialize());
+        } catch (InvalidJsonException e) {
+            throw new IllegalStateException("Failed to parsed copied settings", e);
+        }
     }
 
     public static class Default extends GenerationSettings {

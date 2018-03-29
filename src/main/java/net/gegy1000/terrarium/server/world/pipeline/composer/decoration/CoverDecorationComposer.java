@@ -9,6 +9,7 @@ import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.DeclaredCoverTypeParser;
 import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
+import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTileAccess;
 import net.gegy1000.terrarium.server.world.region.GenerationRegionHandler;
@@ -71,7 +72,7 @@ public class CoverDecorationComposer implements DecorationComposer {
 
     public static class Parser implements InstanceObjectParser<DecorationComposer> {
         @Override
-        public DecorationComposer parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) {
+        public DecorationComposer parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) throws InvalidJsonException {
             RegionComponentType<CoverRasterTileAccess> coverComponent = valueParser.parseComponentType(objectRoot, "cover_component", CoverRasterTileAccess.class);
 
             Map<CoverType<?>, CoverDecorationGenerator<?>> generators = new HashMap<>();

@@ -5,6 +5,7 @@ import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.chunk.PseudoRandomMap;
 import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
+import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
 import net.gegy1000.terrarium.server.world.region.GenerationRegionHandler;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.World;
@@ -43,7 +44,7 @@ public class BedrockComposer implements SurfaceComposer {
 
     public static class Parser implements InstanceObjectParser<SurfaceComposer> {
         @Override
-        public SurfaceComposer parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) {
+        public SurfaceComposer parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) throws InvalidJsonException {
             IBlockState block = valueParser.parseBlockState(objectRoot, "block");
             int scatterRange = valueParser.parseInteger(objectRoot, "scatter_range");
             return new BedrockComposer(world, block, scatterRange);

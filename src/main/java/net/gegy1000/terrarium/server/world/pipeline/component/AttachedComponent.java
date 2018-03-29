@@ -1,11 +1,11 @@
 package net.gegy1000.terrarium.server.world.pipeline.component;
 
-import com.google.gson.JsonSyntaxException;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
-import net.gegy1000.terrarium.server.world.json.ParsableInstanceObject;
 import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
+import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
+import net.gegy1000.terrarium.server.world.json.ParsableInstanceObject;
 import net.gegy1000.terrarium.server.world.pipeline.populator.RegionPopulator;
 import net.gegy1000.terrarium.server.world.region.RegionTilePos;
 import net.minecraft.world.World;
@@ -42,10 +42,10 @@ public final class AttachedComponent<T> {
         }
 
         @SuppressWarnings("unchecked")
-        public AttachedComponent<T> parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser) {
+        public AttachedComponent<T> parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser) throws InvalidJsonException {
             RegionPopulator<?> populator = this.populatorParser.parse(worldData, world, valueParser);
             if (populator.getType() != this.type.getType()) {
-                throw new JsonSyntaxException("Found populator of wrong data type " + populator.getType());
+                throw new InvalidJsonException("Found populator of wrong data type " + populator.getType());
             }
 
             return new AttachedComponent<>(this.type, (RegionPopulator<T>) populator);

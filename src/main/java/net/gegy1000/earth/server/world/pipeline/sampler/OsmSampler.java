@@ -11,6 +11,7 @@ import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
+import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
 import net.gegy1000.terrarium.server.world.pipeline.sampler.DataSampler;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
@@ -72,7 +73,7 @@ public class OsmSampler implements DataSampler<OsmTileAccess> {
 
     public static class Parser implements InstanceObjectParser<DataSampler<?>> {
         @Override
-        public DataSampler<?> parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) {
+        public DataSampler<?> parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) throws InvalidJsonException {
             TiledDataSource<OsmTileAccess> source = valueParser.parseTiledSource(objectRoot, "source", OsmTileAccess.class);
             CoordinateState coordinateState = valueParser.parseCoordinateState(objectRoot, "lat_lng_coordinate");
             return new OsmSampler(source, coordinateState);

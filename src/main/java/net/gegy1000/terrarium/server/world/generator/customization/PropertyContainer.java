@@ -9,6 +9,7 @@ import net.gegy1000.terrarium.server.world.generator.customization.property.Bool
 import net.gegy1000.terrarium.server.world.generator.customization.property.NumberValue;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyValue;
+import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
 import net.gegy1000.terrarium.server.world.json.JsonValueParser;
 import net.gegy1000.terrarium.server.world.json.MutableJsonValueParser;
 import net.minecraft.util.Tuple;
@@ -25,7 +26,7 @@ public class PropertyContainer {
         this.values = ImmutableMap.copyOf(values);
     }
 
-    public static PropertyContainer deserialize(JsonObject root) {
+    public static PropertyContainer deserialize(JsonObject root) throws InvalidJsonException {
         Map<String, PropertyKey<?>> keys = new HashMap<>();
         Map<PropertyKey<?>, PropertyValue<?>> values = new HashMap<>();
 
@@ -49,7 +50,7 @@ public class PropertyContainer {
         return new PropertyContainer(keys, values);
     }
 
-    private static Tuple<PropertyKey<?>, PropertyValue<?>> parseKeyValuePair(String identifier, JsonElement element, JsonValueParser valueParser) {
+    private static Tuple<PropertyKey<?>, PropertyValue<?>> parseKeyValuePair(String identifier, JsonElement element, JsonValueParser valueParser) throws InvalidJsonException {
         if (element.isJsonPrimitive()) {
             JsonPrimitive primitive = element.getAsJsonPrimitive();
             if (primitive.isNumber()) {

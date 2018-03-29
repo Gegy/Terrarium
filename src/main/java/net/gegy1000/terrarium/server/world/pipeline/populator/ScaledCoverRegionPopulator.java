@@ -8,6 +8,7 @@ import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
+import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
 import net.gegy1000.terrarium.server.world.pipeline.sampler.DataSampler;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTileAccess;
 import net.minecraft.world.World;
@@ -40,7 +41,7 @@ public class ScaledCoverRegionPopulator extends BufferedScalingPopulator<CoverRa
 
     public static class Parser implements InstanceObjectParser<RegionPopulator<?>> {
         @Override
-        public RegionPopulator<?> parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) {
+        public RegionPopulator<?> parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) throws InvalidJsonException {
             DataSampler<CoverType[]> sampler = valueParser.parseSampler(objectRoot, "sampler", CoverType[].class);
             CoordinateState coordinate = valueParser.parseCoordinateState(objectRoot, "coordinate");
 

@@ -5,6 +5,7 @@ import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
+import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTileAccess;
@@ -54,7 +55,7 @@ public class ShortTileSampler extends TiledDataSampler<short[]> {
 
     public static class Parser implements InstanceObjectParser<DataSampler<?>> {
         @Override
-        public DataSampler<?> parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) {
+        public DataSampler<?> parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) throws InvalidJsonException {
             TiledDataSource<ShortRasterTileAccess> source = valueParser.parseTiledSource(objectRoot, "source", ShortRasterTileAccess.class);
             return new ShortTileSampler(source);
         }

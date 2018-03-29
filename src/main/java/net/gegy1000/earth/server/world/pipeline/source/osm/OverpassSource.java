@@ -8,6 +8,8 @@ import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
+import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
+import net.gegy1000.terrarium.server.world.json.ParseUtils;
 import net.gegy1000.terrarium.server.world.pipeline.source.CachedRemoteSource;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
 import net.gegy1000.terrarium.server.world.pipeline.source.SourceException;
@@ -215,12 +217,12 @@ public class OverpassSource extends TiledDataSource<OsmTileAccess> implements Ca
 
     public static class Parser implements InstanceObjectParser<TiledDataSource<?>> {
         @Override
-        public TiledDataSource<?> parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) {
-            String cache = JsonUtils.getString(objectRoot, "cache");
-            ResourceLocation queryLocation = new ResourceLocation(JsonUtils.getString(objectRoot, "query"));
+        public TiledDataSource<?> parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) throws InvalidJsonException {
+            String cache = ParseUtils.getString(objectRoot, "cache");
+            ResourceLocation queryLocation = new ResourceLocation(ParseUtils.getString(objectRoot, "query"));
             int queryVersion = JsonUtils.getInt(objectRoot, "query_version", 0);
             CoordinateState latLngCoordinate = valueParser.parseCoordinateState(objectRoot, "lat_lng_coordinate");
-            double tileSize = JsonUtils.getFloat(objectRoot, "tile_size_latlng");
+            double tileSize = ParseUtils.getFloat(objectRoot, "tile_size_latlng");
 
             return new OverpassSource(latLngCoordinate, tileSize, cache, queryLocation, queryVersion);
         }

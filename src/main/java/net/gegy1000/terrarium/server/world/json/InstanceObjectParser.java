@@ -5,5 +5,5 @@ import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.minecraft.world.World;
 
 public interface InstanceObjectParser<T> {
-    T parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot);
+    T parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) throws InvalidJsonException;
 }

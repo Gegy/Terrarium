@@ -7,6 +7,7 @@ import net.gegy1000.terrarium.server.world.cover.CoverRegistry;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
+import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.RegionAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTileAccess;
@@ -42,7 +43,7 @@ public class DebugRegionBorderAdapter implements RegionAdapter {
 
     public static class Parser implements InstanceObjectParser<RegionAdapter> {
         @Override
-        public RegionAdapter parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) {
+        public RegionAdapter parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) throws InvalidJsonException {
             return new DebugRegionBorderAdapter(valueParser.parseComponentType(objectRoot, "component", CoverRasterTileAccess.class));
         }
     }

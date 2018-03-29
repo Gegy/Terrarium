@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
+import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTileAccess;
 import net.gegy1000.terrarium.server.world.region.GenerationRegionHandler;
@@ -40,7 +41,7 @@ public class OceanFillComposer implements SurfaceComposer {
 
     public static class Parser implements InstanceObjectParser<SurfaceComposer> {
         @Override
-        public SurfaceComposer parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) {
+        public SurfaceComposer parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) throws InvalidJsonException {
             RegionComponentType<ShortRasterTileAccess> heightComponent = valueParser.parseComponentType(objectRoot, "height_component", ShortRasterTileAccess.class);
             IBlockState block = valueParser.parseBlockState(objectRoot, "block");
             int level = valueParser.parseInteger(objectRoot, "level");

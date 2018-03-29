@@ -7,6 +7,7 @@ import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
+import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
 import net.gegy1000.terrarium.server.world.pipeline.sampler.DataSampler;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTileAccess;
 import net.minecraft.world.World;
@@ -39,7 +40,7 @@ public class ScaledShortRegionPopulator extends InterpolatingRegionPopulator<Sho
 
     public static class Parser implements InstanceObjectParser<RegionPopulator<?>> {
         @Override
-        public RegionPopulator<?> parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) {
+        public RegionPopulator<?> parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) throws InvalidJsonException {
             DataSampler<short[]> sampler = valueParser.parseSampler(objectRoot, "sampler", short[].class);
             CoordinateState coordinate = valueParser.parseCoordinateState(objectRoot, "coordinate");
             Interpolation.Method interpolationMethod = Interpolation.Method.parse(valueParser.parseString(objectRoot, "interpolation_method"));

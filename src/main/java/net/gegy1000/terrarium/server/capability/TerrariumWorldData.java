@@ -6,6 +6,7 @@ import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.generator.TerrariumGenerator;
 import net.gegy1000.terrarium.server.world.generator.TerrariumGeneratorRegistry;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
+import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
 import net.gegy1000.terrarium.server.world.pipeline.RegionDataSystem;
 import net.gegy1000.terrarium.server.world.pipeline.source.Geocoder;
 import net.gegy1000.terrarium.server.world.region.GenerationRegionHandler;
@@ -39,7 +40,7 @@ public interface TerrariumWorldData extends ICapabilityProvider {
         private final Coordinate spawnpoint;
         private final CoordinateState navigationalState;
 
-        public Implementation(World world) {
+        public Implementation(World world) throws InvalidJsonException {
             this.settings = GenerationSettings.deserialize(world.getWorldInfo().getGeneratorOptions());
             this.generator = this.settings.getGenerator();
 
@@ -49,7 +50,7 @@ public interface TerrariumWorldData extends ICapabilityProvider {
             this.navigationalState = this.coordinateStates.get(navigationalStateKey);
             if (this.navigationalState == null) {
                 ResourceLocation generatorIdentifier = TerrariumGeneratorRegistry.getIdentifier(this.generator);
-                throw new IllegalStateException("Navigational state " + navigationalStateKey + " did not exist on " + generatorIdentifier);
+                throw new InvalidJsonException("Navigational state " + navigationalStateKey + " did not exist on " + generatorIdentifier);
             }
 
             this.spawnpoint = this.generator.getSpawnpointDefinition().createSpawnpoint(this.settings, this.navigationalState);

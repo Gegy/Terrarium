@@ -17,6 +17,7 @@ import net.gegy1000.terrarium.server.world.cover.CoverRegistry;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
+import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.RegionAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.debug.DebugImageWriter;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
@@ -356,7 +357,7 @@ public class OsmCoastlineAdapter implements RegionAdapter {
 
     public static class Parser implements InstanceObjectParser<RegionAdapter> {
         @Override
-        public RegionAdapter parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) {
+        public RegionAdapter parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) throws InvalidJsonException {
             RegionComponentType<ShortRasterTileAccess> heightComponent = valueParser.parseComponentType(objectRoot, "height_component", ShortRasterTileAccess.class);
             RegionComponentType<CoverRasterTileAccess> coverComponent = valueParser.parseComponentType(objectRoot, "cover_component", CoverRasterTileAccess.class);
             RegionComponentType<OsmTileAccess> osmComponent = valueParser.parseComponentType(objectRoot, "osm_component", OsmTileAccess.class);

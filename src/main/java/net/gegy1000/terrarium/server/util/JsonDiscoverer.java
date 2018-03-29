@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import net.gegy1000.terrarium.Terrarium;
+import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.fml.common.Loader;
@@ -18,12 +19,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 
 public class JsonDiscoverer<T> {
-    private final Function<JsonObject, T> parser;
+    private final Parser<T> parser;
 
-    public JsonDiscoverer(Function<JsonObject, T> parser) {
+    public JsonDiscoverer(Parser<T> parser) {
         this.parser = parser;
     }
 
@@ -52,8 +52,8 @@ public class JsonDiscoverer<T> {
 
                 try (BufferedReader reader = Files.newBufferedReader(path)) {
                     JsonObject rootObject = new JsonParser().parse(reader).getAsJsonObject();
-                    discoveries.add(new Result<>(key, this.parser.apply(rootObject)));
-                } catch (JsonParseException e) {
+                    discoveries.add(new Result<>(key, this.parser.parse(rootObject)));
+                } catch (JsonParseException | InvalidJsonException e) {
                     Terrarium.LOGGER.error("Couldn't parse JSON for {}", key, e);
                 } catch (IOException e) {
                     Terrarium.LOGGER.error("Couldn't read JSON {} from {}", key, path, e);
@@ -84,5 +84,9 @@ public class JsonDiscoverer<T> {
         public T getParsed() {
             return this.parsed;
         }
+    }
+
+    public interface Parser<T> {
+        T parse(JsonObject root) throws InvalidJsonException;
     }
 }

@@ -2,25 +2,24 @@ package net.gegy1000.terrarium.server.world.json;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.ResourceLocation;
 
 import java.util.Map;
 
 public interface JsonValueParser {
-    boolean parseBoolean(JsonObject objectRoot, String key);
+    boolean parseBoolean(JsonObject objectRoot, String key) throws InvalidJsonException;
 
-    double parseDouble(JsonObject objectRoot, String key);
+    double parseDouble(JsonObject objectRoot, String key) throws InvalidJsonException;
 
-    int parseInteger(JsonObject objectRoot, String key);
+    int parseInteger(JsonObject objectRoot, String key) throws InvalidJsonException;
 
-    String parseString(JsonObject objectRoot, String key);
+    String parseString(JsonObject objectRoot, String key) throws InvalidJsonException;
 
-    IBlockState parseBlockState(JsonObject objectRoot, String key);
+    IBlockState parseBlockState(JsonObject objectRoot, String key) throws InvalidJsonException;
 
     @SuppressWarnings("unchecked")
-    default <T> T parseFromProvider(JsonElement element) {
+    default <T> T parseFromProvider(JsonElement element) throws InvalidJsonException {
         if (element != null && element.isJsonObject()) {
             JsonObject root = element.getAsJsonObject();
 
@@ -33,7 +32,7 @@ public interface JsonValueParser {
                         try {
                             return (T) provider.provide(this, entry.getValue().getAsJsonObject());
                         } catch (ClassCastException e) {
-                            throw new JsonSyntaxException("Got value provider " + providerKey + " of wrong type");
+                            throw new InvalidJsonException("Got value provider " + providerKey + " of wrong type");
                         }
                     }
                 }

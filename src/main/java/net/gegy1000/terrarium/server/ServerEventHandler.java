@@ -4,6 +4,8 @@ import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
+import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
+import net.gegy1000.terrarium.server.world.json.ParseStateHandler;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
@@ -28,7 +30,15 @@ public class ServerEventHandler {
     public static void onAttachWorldCapabilities(AttachCapabilitiesEvent<World> event) {
         World world = event.getObject();
         if (ServerEventHandler.shouldHandle(world)) {
-            event.addCapability(TerrariumCapabilities.WORLD_DATA_ID, new TerrariumWorldData.Implementation(world));
+            ParseStateHandler.begin();
+
+            try {
+                event.addCapability(TerrariumCapabilities.WORLD_DATA_ID, new TerrariumWorldData.Implementation(world));
+            } catch (InvalidJsonException e) {
+                Terrarium.LOGGER.error("Failed to construct generator", e);
+            } finally {
+                ParseStateHandler.finish("construct generator");
+            }
         }
     }
 

@@ -7,16 +7,17 @@ import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.util.ArrayUtils;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
-import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.CoverRegistry;
+import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
+import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
+import net.gegy1000.terrarium.server.world.json.ParseUtils;
 import net.gegy1000.terrarium.server.world.pipeline.source.CachedRemoteSource;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
 import net.gegy1000.terrarium.server.world.pipeline.source.SourceException;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTileAccess;
-import net.minecraft.util.JsonUtils;
 import net.minecraft.world.World;
 
 import java.io.DataInputStream;
@@ -89,9 +90,9 @@ public class GlobSource extends TiledDataSource<CoverRasterTileAccess> implement
 
     public static class Parser implements InstanceObjectParser<TiledDataSource<?>> {
         @Override
-        public TiledDataSource<?> parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) {
+        public TiledDataSource<?> parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) throws InvalidJsonException {
             CoordinateState coordinateState = valueParser.parseCoordinateState(objectRoot, "tile_coordinate");
-            String cache = JsonUtils.getString(objectRoot, "cache");
+            String cache = ParseUtils.getString(objectRoot, "cache");
             return new GlobSource(coordinateState, cache);
         }
     }

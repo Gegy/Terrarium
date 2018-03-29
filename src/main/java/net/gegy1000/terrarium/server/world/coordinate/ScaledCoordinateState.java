@@ -4,12 +4,12 @@ public class ScaledCoordinateState implements CoordinateState {
     private final double scaleX;
     private final double scaleZ;
 
-    protected ScaledCoordinateState(double scaleX, double scaleZ) {
+    public ScaledCoordinateState(double scaleX, double scaleZ) {
         this.scaleX = scaleX;
         this.scaleZ = scaleZ;
     }
 
-    protected ScaledCoordinateState(double scale) {
+    public ScaledCoordinateState(double scale) {
         this(scale, scale);
     }
 
