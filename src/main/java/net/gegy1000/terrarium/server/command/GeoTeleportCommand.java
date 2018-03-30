@@ -67,7 +67,7 @@ public class GeoTeleportCommand extends CommandBase {
                 String argument = String.join(" ", args);
 
                 try {
-                    return getListOfStringsMatchingLastWord(args, worldData.getGeocoder().suggest(argument, true));
+                    return getListOfStringsMatchingLastWord(args, worldData.getGeocoder().suggestCommand(argument));
                 } catch (IOException e) {
                     Terrarium.LOGGER.warn("Failed to get geotp suggestions", e);
                 }

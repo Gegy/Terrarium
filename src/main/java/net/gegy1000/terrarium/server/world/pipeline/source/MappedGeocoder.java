@@ -12,6 +12,7 @@ import net.gegy1000.terrarium.server.world.json.ParseStateHandler;
 import net.gegy1000.terrarium.server.world.json.ParseUtils;
 import net.minecraft.world.World;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -31,11 +32,12 @@ public class MappedGeocoder implements Geocoder {
     }
 
     @Override
-    public String[] suggest(String place, boolean command) {
-        if (command) {
-            return this.coordinateMap.keySet().toArray(new String[0]);
-        }
+    public List<String> suggestCommand(String place) {
+        return new ArrayList<>(this.coordinateMap.keySet());
+    }
 
+    @Override
+    public String[] suggest(String place) {
         place = place.toLowerCase(Locale.ROOT).trim();
 
         List<String> suggestions = new LinkedList<>();

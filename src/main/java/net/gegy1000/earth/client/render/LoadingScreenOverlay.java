@@ -33,13 +33,14 @@ public class LoadingScreenOverlay {
             ScaledResolution resolution = new ScaledResolution(MC);
 
             int x = resolution.getScaledWidth() / 2;
-            int y = resolution.getScaledHeight() - 40;
+            int y = resolution.getScaledHeight() - 38 - 11;
 
             String header = TextFormatting.YELLOW.toString() + TextFormatting.BOLD + I18n.format("gui.earth.credits");
             GuiRenderUtils.drawCenteredString(header, x, y, 0xFFFFFF);
             GuiRenderUtils.drawCenteredString(TextFormatting.GRAY + "NASA SRTM,", x, y + 11, 0xFFFFFF);
             GuiRenderUtils.drawCenteredString(TextFormatting.GRAY + "ESA GlobCover,", x, y + 20, 0xFFFFFF);
-            GuiRenderUtils.drawCenteredString(TextFormatting.GRAY + "© OpenStreetMap Contributors", x, y + 29, 0xFFFFFF);
+            GuiRenderUtils.drawCenteredString(TextFormatting.GRAY + "Google APIs,", x, y + 29, 0xFFFFFF);
+            GuiRenderUtils.drawCenteredString(TextFormatting.GRAY + "© OpenStreetMap Contributors", x, y + 38, 0xFFFFFF);
         }
     }
 

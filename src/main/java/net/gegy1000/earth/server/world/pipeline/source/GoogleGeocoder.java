@@ -8,19 +8,41 @@ import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.pipeline.source.Geocoder;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpRequestInterceptor;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.entity.GzipDecompressingEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 
-import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URL;
 import java.net.URLEncoder;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.zip.GZIPInputStream;
 
 public class GoogleGeocoder implements Geocoder {
+    private static final String GEOCODER_ADDRESS = "https://maps.googleapis.com/maps/api/geocode/json?address=%s&key=%s";
+    private static final String SUGGESTION_ADDRESS = "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=%s&types=geocode&key=%s";
+
     private static final JsonParser JSON_PARSER = new JsonParser();
+
+    private final CloseableHttpClient client = HttpClientBuilder.create()
+            .addInterceptorFirst((HttpRequestInterceptor) (request, context) -> {
+                request.setHeader("Accent-Encoding", "gzip");
+                request.setHeader("User-Agent", "terrarium-earth");
+                request.setHeader("Referer", "https://github.com/gegy1000/Terrarium");
+            })
+            .setDefaultRequestConfig(RequestConfig.custom()
+                    .setConnectTimeout(2000)
+                    .setConnectionRequestTimeout(2000)
+                    .setSocketTimeout(30000)
+                    .build())
+            .build();
 
     private final CoordinateState latLngCoordinateState;
 
@@ -31,27 +53,15 @@ public class GoogleGeocoder implements Geocoder {
     @Override
     public Coordinate get(String place) throws IOException {
         String key = EarthRemoteData.info.getGeocoderKey();
-        String request = "https://maps.googleapis.com/maps/api/geocode/json?address=" + URLEncoder.encode(place, "UTF-8") + "&key=" + key;
+        HttpGet request = new HttpGet(String.format(GEOCODER_ADDRESS, URLEncoder.encode(place, "UTF-8"), key));
 
-        URL url = new URL(request);
-        HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-        connection.setConnectTimeout(8000);
-        connection.setReadTimeout(8000);
-        connection.setRequestMethod("GET");
-        connection.setRequestProperty("User-Agent", "terrarium-earth");
-        connection.setRequestProperty("Accept-Encoding", "gzip");
+        CloseableHttpResponse response = this.client.execute(request);
 
-        try (InputStreamReader input = new InputStreamReader(new BufferedInputStream(new GZIPInputStream(connection.getInputStream())))) {
+        HttpEntity entity = new GzipDecompressingEntity(response.getEntity());
+        try (InputStreamReader input = new InputStreamReader(new BufferedInputStream(entity.getContent()))) {
             JsonObject root = (JsonObject) JSON_PARSER.parse(input);
 
-            if (root.has("status")) {
-                String status = root.get("status").getAsString();
-                if (status.equalsIgnoreCase("OVER_QUERY_LIMIT")) {
-                    throw new IOException("Reached query limit for Google Geocoder API! Try again in a few minutes");
-                } else if (status.equalsIgnoreCase("REQUEST_DENIED")) {
-                    throw new IOException(root.get("error_message").getAsString());
-                }
-            }
+            this.handleResponseStatus(root);
 
             if (root.has("results")) {
                 JsonArray results = root.getAsJsonArray("results");
@@ -73,45 +83,47 @@ public class GoogleGeocoder implements Geocoder {
     }
 
     @Override
-    public String[] suggest(String place, boolean command) throws IOException {
-        if (!command) {
-            String key = EarthRemoteData.info.getAutocompleteKey();
-            String request = "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=" + URLEncoder.encode(place, "UTF-8") + "&types=geocode&key=" + key;
+    public List<String> suggestCommand(String place) {
+        return Collections.emptyList();
+    }
 
-            URL url = new URL(request);
-            HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-            connection.setConnectTimeout(8000);
-            connection.setReadTimeout(8000);
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("User-Agent", "terrarium-earth");
-            connection.setRequestProperty("Accept-Encoding", "gzip");
+    @Override
+    public String[] suggest(String place) throws IOException {
+        String key = EarthRemoteData.info.getAutocompleteKey();
+        HttpGet request = new HttpGet(String.format(SUGGESTION_ADDRESS, URLEncoder.encode(place, "UTF-8"), key));
 
-            try (InputStreamReader input = new InputStreamReader(new BufferedInputStream(new GZIPInputStream(connection.getInputStream())))) {
-                JsonObject root = (JsonObject) JSON_PARSER.parse(input);
+        CloseableHttpResponse response = this.client.execute(request);
 
-                if (root.has("status")) {
-                    String status = root.get("status").getAsString();
-                    if (status.equalsIgnoreCase("OVER_QUERY_LIMIT")) {
-                        throw new IOException("Reached query limit for Google Autocomplete API! Try again in a few minutes");
-                    } else if (status.equalsIgnoreCase("REQUEST_DENIED")) {
-                        throw new IOException(root.get("error_message").getAsString());
-                    }
+        HttpEntity entity = new GzipDecompressingEntity(response.getEntity());
+        try (InputStreamReader input = new InputStreamReader(new BufferedInputStream(entity.getContent()))) {
+            JsonObject root = (JsonObject) JSON_PARSER.parse(input);
+
+            this.handleResponseStatus(root);
+
+            if (root.has("predictions")) {
+                List<String> predictions = new LinkedList<>();
+
+                JsonArray predictionsArray = root.getAsJsonArray("predictions");
+                for (JsonElement element : predictionsArray) {
+                    JsonObject prediction = element.getAsJsonObject();
+                    predictions.add(prediction.get("description").getAsString());
                 }
 
-                if (root.has("predictions")) {
-                    List<String> predictions = new LinkedList<>();
-
-                    JsonArray predictionsArray = root.getAsJsonArray("predictions");
-                    for (JsonElement element : predictionsArray) {
-                        JsonObject prediction = element.getAsJsonObject();
-                        predictions.add(prediction.get("description").getAsString());
-                    }
-
-                    return predictions.toArray(new String[0]);
-                }
+                return predictions.toArray(new String[0]);
             }
         }
 
         return new String[0];
+    }
+
+    private void handleResponseStatus(JsonObject root) throws IOException {
+        if (root.has("status")) {
+            String status = root.get("status").getAsString();
+            if (status.equalsIgnoreCase("OVER_QUERY_LIMIT")) {
+                throw new IOException("Reached query limit for Google API! Try again in a few minutes");
+            } else if (status.equalsIgnoreCase("REQUEST_DENIED")) {
+                throw new IOException(root.get("error_message").getAsString());
+            }
+        }
     }
 }
