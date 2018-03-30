@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 public class GoogleGeocoder implements Geocoder {
@@ -68,5 +70,48 @@ public class GoogleGeocoder implements Geocoder {
         }
 
         return null;
+    }
+
+    @Override
+    public String[] suggest(String place, boolean command) throws IOException {
+        if (!command) {
+            String key = EarthRemoteData.info.getAutocompleteKey();
+            String request = "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=" + URLEncoder.encode(place, "UTF-8") + "&types=geocode&key=" + key;
+
+            URL url = new URL(request);
+            HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+            connection.setConnectTimeout(8000);
+            connection.setReadTimeout(8000);
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("User-Agent", "terrarium-earth");
+            connection.setRequestProperty("Accept-Encoding", "gzip");
+
+            try (InputStreamReader input = new InputStreamReader(new BufferedInputStream(new GZIPInputStream(connection.getInputStream())))) {
+                JsonObject root = (JsonObject) JSON_PARSER.parse(input);
+
+                if (root.has("status")) {
+                    String status = root.get("status").getAsString();
+                    if (status.equalsIgnoreCase("OVER_QUERY_LIMIT")) {
+                        throw new IOException("Reached query limit for Google Autocomplete API! Try again in a few minutes");
+                    } else if (status.equalsIgnoreCase("REQUEST_DENIED")) {
+                        throw new IOException(root.get("error_message").getAsString());
+                    }
+                }
+
+                if (root.has("predictions")) {
+                    List<String> predictions = new LinkedList<>();
+
+                    JsonArray predictionsArray = root.getAsJsonArray("predictions");
+                    for (JsonElement element : predictionsArray) {
+                        JsonObject prediction = element.getAsJsonObject();
+                        predictions.add(prediction.get("description").getAsString());
+                    }
+
+                    return predictions.toArray(new String[0]);
+                }
+            }
+        }
+
+        return new String[0];
     }
 }

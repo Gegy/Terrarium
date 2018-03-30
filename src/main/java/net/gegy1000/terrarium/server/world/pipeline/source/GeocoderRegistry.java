@@ -22,6 +22,7 @@ public class GeocoderRegistry {
 
     @SubscribeEvent
     public static void onRegisterGeocoders(Event event) {
+        event.register(new ResourceLocation(Terrarium.MODID, "mapped_geocoder"), new MappedGeocoder.Parser());
     }
 
     public static InstanceObjectParser<Geocoder> getGeocoder(ResourceLocation identifier) {

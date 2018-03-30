@@ -12,9 +12,15 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.chunk.Chunk;
+
+import javax.annotation.Nullable;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
 public class GeoTeleportCommand extends CommandBase {
     @Override
@@ -49,6 +55,26 @@ public class GeoTeleportCommand extends CommandBase {
         } else {
             throw new WrongUsageException("commands.terrarium.geotp.wrong_world");
         }
+    }
+
+    @Override
+    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
+        if (sender instanceof EntityPlayerMP) {
+            EntityPlayerMP player = (EntityPlayerMP) sender;
+
+            TerrariumWorldData worldData = player.world.getCapability(TerrariumCapabilities.worldDataCapability, null);
+            if (worldData != null) {
+                String argument = String.join(" ", args);
+
+                try {
+                    return getListOfStringsMatchingLastWord(args, worldData.getGeocoder().suggest(argument, true));
+                } catch (IOException e) {
+                    Terrarium.LOGGER.warn("Failed to get geotp suggestions", e);
+                }
+            }
+        }
+
+        return Collections.emptyList();
     }
 
     private CommandLocation parseLocation(ICommandSender sender, String[] input) throws WrongUsageException {

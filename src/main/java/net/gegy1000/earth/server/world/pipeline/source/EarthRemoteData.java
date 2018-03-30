@@ -26,7 +26,7 @@ public class EarthRemoteData {
 
     private static final File INFO_CACHE = new File(CachedRemoteSource.GLOBAL_CACHE_ROOT, "terrarium_info.json.gz");
 
-    public static EarthRemoteData.Info info = new EarthRemoteData.Info("", "", "%s_%s.mat", "", "%s%s.hgt", "", "http://tile.openstreetmap.org", "%s/%s/%s.png", "");
+    public static EarthRemoteData.Info info = new EarthRemoteData.Info("", "", "%s_%s.mat", "", "%s%s.hgt", "", "http://tile.openstreetmap.org", "%s/%s/%s.png", "", "");
 
     public static void loadInfo() {
         try {
@@ -81,8 +81,10 @@ public class EarthRemoteData {
         private String rasterMapQuery;
         @SerializedName("geocoder_key")
         private String geocoderKey;
+        @SerializedName("autocomplete_key")
+        private String autocompleteKey;
 
-        public Info(String baseURL, String globEndpoint, String globQuery, String heightsEndpoint, String heightsQuery, String heightTiles, String rasterMapEndpoint, String rasterMapQuery, String geocoderKey) {
+        public Info(String baseURL, String globEndpoint, String globQuery, String heightsEndpoint, String heightsQuery, String heightTiles, String rasterMapEndpoint, String rasterMapQuery, String geocoderKey, String autocompleteKey) {
             this.baseURL = baseURL;
             this.globEndpoint = globEndpoint;
             this.globQuery = globQuery;
@@ -92,6 +94,7 @@ public class EarthRemoteData {
             this.rasterMapEndpoint = rasterMapEndpoint;
             this.rasterMapQuery = rasterMapQuery;
             this.geocoderKey = geocoderKey;
+            this.autocompleteKey = autocompleteKey;
         }
 
         public String getBaseURL() {
@@ -135,6 +138,15 @@ public class EarthRemoteData {
             return new String(decodedBytes);
         }
 
+        public String getAutocompleteKey() {
+            byte[] encodedKeyBytes = Base64.getDecoder().decode(this.autocompleteKey);
+            byte[] decodedBytes = new byte[encodedKeyBytes.length];
+            for (int i = 0; i < encodedKeyBytes.length; i++) {
+                decodedBytes[i] = (byte) (encodedKeyBytes[i] - (i << i) - 961);
+            }
+            return new String(decodedBytes);
+        }
+
         public Info merge(Info info) {
             if (this.baseURL == null) {
                 this.baseURL = info.baseURL;
@@ -162,6 +174,9 @@ public class EarthRemoteData {
             }
             if (this.geocoderKey == null) {
                 this.geocoderKey = info.geocoderKey;
+            }
+            if (this.autocompleteKey == null) {
+                this.autocompleteKey = info.autocompleteKey;
             }
             return this;
         }

@@ -6,4 +6,6 @@ import java.io.IOException;
 
 public interface Geocoder {
     Coordinate get(String place) throws IOException;
+
+    String[] suggest(String place, boolean command) throws IOException;
 }
