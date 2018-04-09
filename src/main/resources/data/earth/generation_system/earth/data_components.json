@@ -5,7 +5,17 @@
       "type": "terrarium:scaled_short_populator",
       "sampler": {
         "type": "terrarium:short_raster_sampler",
-        "source": {"type": "earth:srtm_raster_source", "tile_coordinate": "srtm_raster", "cache": "srtm_heights"}
+        "source": {
+          "type": "earth:srtm_raster_source",
+          "tile_coordinate": "srtm_raster",
+          "cache": "srtm_heights",
+          "ocean_depth": {
+            "terrarium:div": {
+              "left": "@ocean_depth",
+              "right": {"terrarium:mul": {"left": "@height_scale", "right": "@world_scale"}}
+            }
+          }
+        }
       },
       "interpolation_method": {
         "earth:earth_interpolation_method": {"world_scale": "@world_scale"}
@@ -19,7 +29,17 @@
       "type": "terrarium:scaled_byte_populator",
       "sampler": {
         "type": "terrarium:slope_raster_sampler",
-        "height_source": {"type": "earth:srtm_raster_source", "tile_coordinate": "srtm_raster", "cache": "srtm_heights"}
+        "height_source": {
+          "type": "earth:srtm_raster_source",
+          "tile_coordinate": "srtm_raster",
+          "cache": "srtm_heights",
+          "ocean_depth": {
+            "terrarium:div": {
+              "left": "@ocean_depth",
+              "right": {"terrarium:mul": {"left": "@height_scale", "right": "@world_scale"}}
+            }
+          }
+        }
       },
       "interpolation_method": "linear",
       "coordinate": "srtm_raster"

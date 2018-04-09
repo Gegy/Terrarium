@@ -42,9 +42,9 @@ public abstract class PropertyJsonValueParser implements JsonValueParser {
             throw new InvalidJsonException("Double element with key " + key + " did not exist");
         }
 
-        Double providedValue = this.parseFromProvider(element);
+        Number providedValue = this.parseFromProvider(element);
         if (providedValue != null) {
-            return providedValue;
+            return providedValue.doubleValue();
         }
 
         if (element.isJsonPrimitive()) {
@@ -68,9 +68,9 @@ public abstract class PropertyJsonValueParser implements JsonValueParser {
             throw new InvalidJsonException("Integer element with key " + key + " did not exist");
         }
 
-        Integer providedValue = this.parseFromProvider(element);
+        Number providedValue = this.parseFromProvider(element);
         if (providedValue != null) {
-            return providedValue;
+            return providedValue.intValue();
         }
 
         if (element.isJsonPrimitive()) {

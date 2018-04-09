@@ -1,6 +1,7 @@
 package net.gegy1000.terrarium.server.world.pipeline.composer.decoration;
 
 import com.google.gson.JsonObject;
+import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.chunk.PseudoRandomMap;
 import net.gegy1000.terrarium.server.world.cover.CoverDecorationGenerator;
@@ -66,6 +67,8 @@ public class CoverDecorationComposer implements DecorationComposer {
             if (generator != null) {
                 this.random.setSeed(randomSeed);
                 generator.decorate(globalX + 8, globalZ + 8, this.random);
+            } else {
+                Terrarium.LOGGER.warn("Tried to generate with non-registered cover: {}", type);
             }
         }
     }

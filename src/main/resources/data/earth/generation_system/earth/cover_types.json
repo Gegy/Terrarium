@@ -15,6 +15,14 @@
         "cover_component": "terrarium:cover"
       }
     },
+    {
+      "type": "terrarium:placeholder",
+      "context": {
+        "type": "terrarium:default_context",
+        "height_component": "terrarium:height",
+        "cover_component": "terrarium:cover"
+      }
+    },
     "earth:bare",
     "earth:beach",
     "earth:broadleaf_evergreen",

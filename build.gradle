@@ -42,11 +42,13 @@ configurations {
 dependencies {
   embed 'de.topobyte:osm4j-core:0.0.15'
   embed 'de.topobyte:osm4j-utils:0.0.20'
-  embed 'de.topobyte:osm4j-geometry:0.0.10'
+  embed files('libs/osm4j-geometry-0.1.0.jar')
 }
 
 jar {
-  from configurations.embed.collect {
+  from configurations.embed.filter {
+    !(it.name.startsWith("osm4j-geometry-0.0.9") || it.name.contains("guava") || it.name.contains("trove") || it.name.contains("log4j") || it.name.contains("slf4j") || it.name.contains("commons"))
+  }.collect {
     exclude 'META-INF/LICENSE.txt'
     exclude 'META-INF/NOTICE.txt'
     it.isDirectory() ? it : zipTree(it)

@@ -10,6 +10,7 @@ import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.pipeline.source.Geocoder;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpRequestInterceptor;
+import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.GzipDecompressingEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -21,6 +22,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URLEncoder;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,6 +38,13 @@ public class GoogleGeocoder implements Geocoder {
                 request.setHeader("Accent-Encoding", "gzip");
                 request.setHeader("User-Agent", "terrarium-earth");
                 request.setHeader("Referer", "https://github.com/gegy1000/Terrarium");
+            })
+            .addInterceptorFirst((HttpResponseInterceptor) (response, context) -> {
+                HttpEntity entity = response.getEntity();
+                Arrays.stream(entity.getContentEncoding().getElements())
+                        .filter(element -> element.getName().equalsIgnoreCase("gzip"))
+                        .findFirst()
+                        .ifPresent(element -> response.setEntity(new GzipDecompressingEntity(entity)));
             })
             .setDefaultRequestConfig(RequestConfig.custom()
                     .setConnectTimeout(2000)
@@ -57,7 +66,7 @@ public class GoogleGeocoder implements Geocoder {
 
         CloseableHttpResponse response = this.client.execute(request);
 
-        HttpEntity entity = new GzipDecompressingEntity(response.getEntity());
+        HttpEntity entity = response.getEntity();
         try (InputStreamReader input = new InputStreamReader(new BufferedInputStream(entity.getContent()))) {
             JsonObject root = (JsonObject) JSON_PARSER.parse(input);
 
@@ -94,7 +103,7 @@ public class GoogleGeocoder implements Geocoder {
 
         CloseableHttpResponse response = this.client.execute(request);
 
-        HttpEntity entity = new GzipDecompressingEntity(response.getEntity());
+        HttpEntity entity = response.getEntity();
         try (InputStreamReader input = new InputStreamReader(new BufferedInputStream(entity.getContent()))) {
             JsonObject root = (JsonObject) JSON_PARSER.parse(input);
 

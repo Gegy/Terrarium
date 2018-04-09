@@ -33,10 +33,12 @@ public class SRTMHeightSource extends TiledDataSource<ShortRasterTileAccess> imp
     private static final Set<DataTilePos> VALID_TILES = new HashSet<>();
 
     private final File cacheRoot;
+    private final int oceanDepth;
 
-    public SRTMHeightSource(CoordinateState coordinateState, String cacheRoot) {
+    public SRTMHeightSource(CoordinateState coordinateState, String cacheRoot, int oceanDepth) {
         super(new Coordinate(coordinateState, TILE_SIZE, TILE_SIZE), 9);
         this.cacheRoot = new File(CachedRemoteSource.GLOBAL_CACHE_ROOT, cacheRoot);
+        this.oceanDepth = oceanDepth;
     }
 
     public static void loadValidTiles() {
@@ -63,7 +65,11 @@ public class SRTMHeightSource extends TiledDataSource<ShortRasterTileAccess> imp
             try (DataInputStream input = new DataInputStream(this.getStream(key))) {
                 short[] heightmap = new short[TILE_DATA_SIZE * TILE_DATA_SIZE];
                 for (int i = 0; i < heightmap.length; i++) {
-                    heightmap[i] = input.readShort();
+                    short heightValue = input.readShort();
+                    if (heightValue <= 0) {
+                        heightValue = (short) -this.oceanDepth;
+                    }
+                    heightmap[i] = heightValue;
                 }
                 return new ShortRasterTileAccess(heightmap, TILE_DATA_SIZE, TILE_DATA_SIZE);
             } catch (IOException e) {
@@ -120,7 +126,8 @@ public class SRTMHeightSource extends TiledDataSource<ShortRasterTileAccess> imp
         public TiledDataSource<?> parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) throws InvalidJsonException {
             CoordinateState coordinateState = valueParser.parseCoordinateState(objectRoot, "tile_coordinate");
             String cache = ParseUtils.getString(objectRoot, "cache");
-            return new SRTMHeightSource(coordinateState, cache);
+            int oceanDepth = valueParser.parseInteger(objectRoot, "ocean_depth");
+            return new SRTMHeightSource(coordinateState, cache, oceanDepth);
         }
     }
 }

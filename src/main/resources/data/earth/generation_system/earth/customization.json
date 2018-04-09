@@ -7,7 +7,7 @@
     "height_scale": "number",
     "noise_scale": "number",
     "height_origin": "number",
-    "scatter_range": "number",
+    "ocean_depth": "number",
     "beach_size": "number",
     "enable_buildings": "boolean",
     "enable_streets": "boolean",
@@ -27,7 +27,7 @@
         },
         {"type": "terrarium:slider", "property": "height_scale", "range": [0.0, 10.0], "step": [0.5, 0.1]},
         {"type": "terrarium:slider", "property": "noise_scale", "range": [0.0, 3.0], "step": [0.5, 0.1]},
-        {"type": "terrarium:slider", "property": "scatter_range", "range": [0, 32], "step": [1, 1]},
+        {"type": "terrarium:slider", "property": "ocean_depth", "range": [0, 32], "step": [1, 1]},
         {"type": "terrarium:slider", "property": "height_origin", "range": [0, 256], "step": [1, 1]},
         {"type": "terrarium:slider", "property": "beach_size", "range": [0, 8], "step": [1, 1]}
       ]

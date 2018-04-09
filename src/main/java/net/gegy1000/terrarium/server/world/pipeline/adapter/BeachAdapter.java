@@ -33,7 +33,7 @@ public class BeachAdapter implements RegionAdapter {
         this.waterCover = waterCover;
         this.beachCover = beachCover;
 
-        Random random = new Random(world.getSeed());
+        Random random = new Random(world.getWorldInfo().getSeed());
         this.beachNoise = new NoiseGeneratorImproved(random);
     }
 

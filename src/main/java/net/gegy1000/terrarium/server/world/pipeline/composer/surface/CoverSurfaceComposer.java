@@ -1,6 +1,7 @@
 package net.gegy1000.terrarium.server.world.pipeline.composer.surface;
 
 import com.google.gson.JsonObject;
+import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.util.ArrayUtils;
 import net.gegy1000.terrarium.server.world.chunk.PseudoRandomMap;
@@ -96,6 +97,8 @@ public class CoverSurfaceComposer implements SurfaceComposer {
                     this.random.setSeed(randomSeed);
                     this.random.setSeed(this.random.nextLong());
                     generator.decorate(globalX, globalZ, new CoverChunkPrimer(primer), this.random);
+                } else {
+                    Terrarium.LOGGER.warn("Tried to generate with non-registered cover: {}", type);
                 }
             }
         }

@@ -17,14 +17,14 @@ category.terrarium.features.name=Feature Properties
 property.terrarium.world_scale.name=World Scale
 property.terrarium.height_scale.name=Height Scale
 property.terrarium.noise_scale.name=Noise Scale
-property.terrarium.scatter_range.name=Scatter Range
+property.terrarium.ocean_depth.name=Ocean Depth
 property.terrarium.height_origin.name=Height Origin
 property.terrarium.beach_size.name=Beach Size
 
 property.terrarium.world_scale.tooltip=The amount of meters in real life representing one block in-game
 property.terrarium.height_scale.tooltip=Elevation multiplier from meters to blocks
 property.terrarium.noise_scale.tooltip=Multiplier for the effect of random noise generation in height to be applied to the world. 0 = no noise, 1 = default noise
-property.terrarium.scatter_range.tooltip=Range in blocks that biomes should be scattered
+property.terrarium.ocean_depth.tooltip=Depth to generate the bottom of the ocean at
 property.terrarium.height_origin.tooltip=The height in-game that corresponds to sea-level
 property.terrarium.beach_size.tooltip=Radius in blocks for beaches to be generated around coastlines
 

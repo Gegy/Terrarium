@@ -1,6 +1,7 @@
 package net.gegy1000.terrarium.server.world.pipeline.composer.biome;
 
 import com.google.gson.JsonObject;
+import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.cover.CoverGenerationContext;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
@@ -51,8 +52,12 @@ public class CoverBiomeComposer implements BiomeComposer {
     @SuppressWarnings("unchecked")
     private <T extends CoverGenerationContext> Biome getBiome(CoverType<T> coverType, int globalX, int globalZ) {
         CoverGenerationContext context = this.context.get(coverType);
-        if (coverType.getRequiredContext().isAssignableFrom(context.getClass())) {
-            return coverType.getBiome((T) context, globalX, globalZ);
+        if (context != null) {
+            if (coverType.getRequiredContext().isAssignableFrom(context.getClass())) {
+                return coverType.getBiome((T) context, globalX, globalZ);
+            }
+        } else {
+            Terrarium.LOGGER.warn("Tried to get biome for non-registered cover type: {}", coverType);
         }
         return Biomes.DEFAULT;
     }

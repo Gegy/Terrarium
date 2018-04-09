@@ -10,7 +10,7 @@
     "height_scale": 1.0,
     "noise_scale": 1.0,
     "height_origin": 5,
-    "scatter_range": 10,
+    "ocean_depth": 1,
     "beach_size": 4,
     "enable_buildings": false,
     "enable_streets": false,
