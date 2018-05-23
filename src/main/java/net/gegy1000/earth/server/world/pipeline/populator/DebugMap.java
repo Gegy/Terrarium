@@ -1,9 +1,10 @@
-package net.gegy1000.terrarium.server.world.chunk;
+package net.gegy1000.earth.server.world.pipeline.populator;
 
+import com.google.common.base.CaseFormat;
 import net.gegy1000.earth.server.world.cover.EarthCoverRegistry;
 import net.gegy1000.earth.server.world.cover.LatitudinalZone;
-import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.CoverRegistry;
+import net.gegy1000.terrarium.server.world.cover.CoverType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,8 +61,8 @@ public class DebugMap {
         List<String> lines = new ArrayList<>();
 
         String zoneName = cover.getZone().name().toLowerCase(Locale.ENGLISH);
-        String coverType = cover.getCoverType().getClass().getName().toLowerCase(Locale.ENGLISH);
-        String[] coverWords = coverType.split("_");
+        String coverType = cover.getCoverType().getClass().getSimpleName();
+        String[] coverWords = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, coverType).split("_");
 
         lines.add(zoneName);
 

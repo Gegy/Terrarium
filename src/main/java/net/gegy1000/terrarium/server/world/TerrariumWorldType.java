@@ -19,17 +19,51 @@ import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.biome.BiomeProviderSingle;
 import net.minecraft.world.gen.IChunkGenerator;
+import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+
+// TODO: Custom generators should not require the world type to be implemented
 public class TerrariumWorldType extends WorldType {
+    private static Field nameField;
+
     private final ResourceLocation generatorIdentifier;
     private final ResourceLocation presetIdentifier;
 
+    static {
+        try {
+            nameField = ReflectionHelper.findField(WorldType.class, "name", "field_77133_f");
+            if (nameField != null) {
+                nameField.setAccessible(true);
+                Field modifiersField = Field.class.getDeclaredField("modifiers");
+                modifiersField.setAccessible(true);
+                modifiersField.setInt(nameField, nameField.getModifiers() & ~Modifier.FINAL);
+            } else {
+                Terrarium.LOGGER.error("Failed to find world type name field");
+            }
+        } catch (ReflectiveOperationException e) {
+            Terrarium.LOGGER.error("Failed to get world type name field", e);
+        }
+    }
+
     public TerrariumWorldType(String name, ResourceLocation generatorIdentifier, ResourceLocation presetIdentifier) {
-        super(Terrarium.MODID + "." + name);
+        super("length_bypass");
+        setName(this, Terrarium.MODID + "." + name);
         this.generatorIdentifier = generatorIdentifier;
         this.presetIdentifier = presetIdentifier;
+    }
+
+    private static void setName(WorldType worldType, String name) {
+        if (nameField != null) {
+            try {
+                nameField.set(worldType, name);
+            } catch (IllegalAccessException e) {
+                Terrarium.LOGGER.error("Failed to set world type name", e);
+            }
+        }
     }
 
     @Override
@@ -48,13 +82,12 @@ public class TerrariumWorldType extends WorldType {
     @Override
     @SideOnly(Side.CLIENT)
     public final void onCustomizeButton(Minecraft mc, GuiCreateWorld parent) {
-        TerrariumGenerator generator = TerrariumGeneratorRegistry.get(this.generatorIdentifier);
+        TerrariumGenerator generator = this.getGenerator();
         if (generator == null) {
-            Terrarium.LOGGER.warn("Found no generator with id {} for world type {}", this.generatorIdentifier, this.getName());
             return;
         }
 
-        TerrariumPreset preset = TerrariumPresetRegistry.get(this.presetIdentifier);
+        TerrariumPreset preset = this.getPreset();
         if (preset == null) {
             Terrarium.LOGGER.warn("Found no preset with id {} for world type {}", this.presetIdentifier, this.getName());
             return;
@@ -65,7 +98,15 @@ public class TerrariumWorldType extends WorldType {
 
     @Override
     public final boolean isCustomizable() {
-        return true;
+        TerrariumGenerator generator = this.getGenerator();
+        if (generator == null) {
+            return false;
+        }
+        return !generator.getCategories().isEmpty();
+    }
+
+    public boolean isHidden() {
+        return this.getGenerator() == null;
     }
 
     public TerrariumWorldData getWorldData(World world) {
@@ -76,7 +117,16 @@ public class TerrariumWorldType extends WorldType {
         return worldData;
     }
 
-    public boolean isHidden() {
-        return false;
+    private TerrariumGenerator getGenerator() {
+        TerrariumGenerator generator = TerrariumGeneratorRegistry.get(this.generatorIdentifier);
+        if (generator == null) {
+            Terrarium.LOGGER.warn("Found no generator with id {} for world type {}", this.generatorIdentifier, this.getName());
+            return null;
+        }
+        return generator;
+    }
+
+    public TerrariumPreset getPreset() {
+        return TerrariumPresetRegistry.get(this.presetIdentifier);
     }
 }

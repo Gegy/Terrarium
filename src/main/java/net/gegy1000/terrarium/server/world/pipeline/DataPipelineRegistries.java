@@ -1,22 +1,25 @@
 package net.gegy1000.terrarium.server.world.pipeline;
 
+import net.gegy1000.earth.server.world.pipeline.adapter.WaterFlattenAdapter;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.event.TerrariumRegistryEvent;
 import net.gegy1000.terrarium.server.util.ArrayUtils;
-import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.CoverRegistry;
+import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.BeachAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.HeightNoiseAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.HeightTransformAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.RegionAdapter;
-import net.gegy1000.earth.server.world.pipeline.adapter.WaterFlattenAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.debug.DebugRegionBorderAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.populator.RegionPopulator;
 import net.gegy1000.terrarium.server.world.pipeline.populator.ScaledByteRegionPopulator;
 import net.gegy1000.terrarium.server.world.pipeline.populator.ScaledCoverRegionPopulator;
 import net.gegy1000.terrarium.server.world.pipeline.populator.ScaledShortRegionPopulator;
+import net.gegy1000.terrarium.server.world.pipeline.populator.StaticByteRegionPopulator;
+import net.gegy1000.terrarium.server.world.pipeline.populator.StaticCoverRegionPopulator;
+import net.gegy1000.terrarium.server.world.pipeline.populator.StaticShortRegionPopulator;
 import net.gegy1000.terrarium.server.world.pipeline.sampler.ByteTileSampler;
 import net.gegy1000.terrarium.server.world.pipeline.sampler.CoverTileSampler;
 import net.gegy1000.terrarium.server.world.pipeline.sampler.DataSampler;
@@ -98,6 +101,10 @@ public class DataPipelineRegistries {
 
         event.register(new ResourceLocation(Terrarium.MODID, "scaled_short_populator"), new ScaledShortRegionPopulator.Parser());
         event.register(new ResourceLocation(Terrarium.MODID, "scaled_byte_populator"), new ScaledByteRegionPopulator.Parser());
+
+        event.register(new ResourceLocation(Terrarium.MODID, "static_byte_populator"), new StaticByteRegionPopulator.Parser());
+        event.register(new ResourceLocation(Terrarium.MODID, "static_short_populator"), new StaticShortRegionPopulator.Parser());
+        event.register(new ResourceLocation(Terrarium.MODID, "static_cover_populator"), new StaticCoverRegionPopulator.Parser());
     }
 
     @SubscribeEvent

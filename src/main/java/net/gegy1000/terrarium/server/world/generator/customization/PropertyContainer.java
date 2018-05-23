@@ -14,6 +14,7 @@ import net.gegy1000.terrarium.server.world.json.JsonValueParser;
 import net.gegy1000.terrarium.server.world.json.MutableJsonValueParser;
 import net.minecraft.util.Tuple;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -147,5 +148,9 @@ public class PropertyContainer {
 
     public boolean hasKey(PropertyKey<?> key) {
         return this.values.containsKey(key);
+    }
+
+    public Collection<PropertyKey<?>> getKeys() {
+        return this.keys.values();
     }
 }

@@ -1,6 +1,8 @@
 package net.gegy1000.terrarium.server.capability;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.generator.TerrariumGenerator;
@@ -13,6 +15,7 @@ import net.gegy1000.terrarium.server.world.region.GenerationRegionHandler;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldType;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 
@@ -41,7 +44,18 @@ public interface TerrariumWorldData extends ICapabilityProvider {
         private final CoordinateState navigationalState;
 
         public Implementation(World world) throws InvalidJsonException {
-            this.settings = GenerationSettings.deserialize(world.getWorldInfo().getGeneratorOptions());
+            String generatorOptions = world.getWorldInfo().getGeneratorOptions();
+            if (Strings.isNullOrEmpty(generatorOptions)) {
+                WorldType worldType = world.getWorldType();
+                if (worldType instanceof TerrariumWorldType) {
+                    this.settings = ((TerrariumWorldType) worldType).getPreset().createSettings();
+                } else {
+                    throw new IllegalStateException("Cannot attach Terrarium capability to non-terrarium world type!");
+                }
+            } else {
+                this.settings = GenerationSettings.deserialize(generatorOptions);
+            }
+
             this.generator = this.settings.getGenerator();
 
             this.coordinateStates = ImmutableMap.copyOf(this.generator.buildCoordinateStates(this, world));

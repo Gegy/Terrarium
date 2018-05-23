@@ -25,12 +25,15 @@ public class EarthCoverContext implements CoverGenerationContext {
 
     private final PseudoRandomMap zoneScatterMap;
 
+    private final boolean scatterZone;
+
     public EarthCoverContext(
             World world, TerrariumWorldData worldData,
             RegionComponentType<ShortRasterTileAccess> heightComponent,
             RegionComponentType<CoverRasterTileAccess> coverComponent,
             RegionComponentType<ByteRasterTileAccess> slopeComponent,
-            CoordinateState latLngCoordinate) {
+            CoordinateState latLngCoordinate,
+            boolean scatterZone) {
         this.world = world;
         this.heightRaster = this.getRaster(worldData, heightComponent);
         this.coverRaster = this.getRaster(worldData, coverComponent);
@@ -38,6 +41,7 @@ public class EarthCoverContext implements CoverGenerationContext {
         this.latLngCoordinate = latLngCoordinate;
 
         this.zoneScatterMap = new PseudoRandomMap(world, ZONE_SCATTER_SEED);
+        this.scatterZone = scatterZone;
     }
 
     @Override
@@ -66,8 +70,9 @@ public class EarthCoverContext implements CoverGenerationContext {
 
     public LatitudinalZone getZone(int globalX, int globalZ) {
         this.zoneScatterMap.initPosSeed(globalX, globalZ);
-        int offsetX = this.zoneScatterMap.nextInt(128) - this.zoneScatterMap.nextInt(128);
-        int offsetZ = this.zoneScatterMap.nextInt(128) - this.zoneScatterMap.nextInt(128);
+
+        int offsetX = this.scatterZone ? this.zoneScatterMap.nextInt(128) - this.zoneScatterMap.nextInt(128) : 0;
+        int offsetZ = this.scatterZone ? this.zoneScatterMap.nextInt(128) - this.zoneScatterMap.nextInt(128) : 0;
 
         double latitude = this.latLngCoordinate.getX(globalX + offsetX, globalZ + offsetZ);
         return LatitudinalZone.get(latitude);
@@ -84,8 +89,9 @@ public class EarthCoverContext implements CoverGenerationContext {
             RegionComponentType<CoverRasterTileAccess> coverComponent = valueParser.parseComponentType(objectRoot, "cover_component", CoverRasterTileAccess.class);
             RegionComponentType<ByteRasterTileAccess> slopeComponent = valueParser.parseComponentType(objectRoot, "slope_component", ByteRasterTileAccess.class);
             CoordinateState latLngCoordinate = valueParser.parseCoordinateState(objectRoot, "lat_lng_coordinate");
+            boolean scatterZone = !objectRoot.has("scatter_zone") || valueParser.parseBoolean(objectRoot, "scatter_zone");
 
-            return new EarthCoverContext(world, worldData, heightComponent, coverComponent, slopeComponent, latLngCoordinate);
+            return new EarthCoverContext(world, worldData, heightComponent, coverComponent, slopeComponent, latLngCoordinate, scatterZone);
         }
     }
 }

@@ -4,6 +4,8 @@ import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.world.pipeline.adapter.OsmCoastlineAdapter;
 import net.gegy1000.earth.server.world.pipeline.adapter.WaterFlattenAdapter;
 import net.gegy1000.earth.server.world.pipeline.composer.BoulderDecorationComposer;
+import net.gegy1000.earth.server.world.pipeline.composer.DebugSignComposer;
+import net.gegy1000.earth.server.world.pipeline.populator.DebugCoverRegionPopulator;
 import net.gegy1000.earth.server.world.pipeline.populator.OverpassRegionPopulator;
 import net.gegy1000.earth.server.world.pipeline.sampler.OsmSampler;
 import net.gegy1000.earth.server.world.pipeline.source.GlobSource;
@@ -44,6 +46,7 @@ public class EarthPipelineRegistries {
     @SubscribeEvent
     public static void onRegisterPopulators(DataPipelineRegistries.PopulatorEvent event) {
         event.register(new ResourceLocation(TerrariumEarth.MODID, "overpass_populator"), new OverpassRegionPopulator.Parser());
+        event.register(new ResourceLocation(TerrariumEarth.MODID, "debug_cover_populator"), new DebugCoverRegionPopulator.Parser());
     }
 
     @SubscribeEvent
@@ -55,5 +58,6 @@ public class EarthPipelineRegistries {
     @SubscribeEvent
     public static void onRegisterComposers(ComposerRegistries.DecorationEvent event) {
         event.register(new ResourceLocation(TerrariumEarth.MODID, "boulder_decorator"), new BoulderDecorationComposer.Parser());
+        event.register(new ResourceLocation(TerrariumEarth.MODID, "debug_sign_decorator"), new DebugSignComposer.Parser());
     }
 }

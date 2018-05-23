@@ -85,7 +85,6 @@ public class JsonTerrariumGenerator implements TerrariumGenerator {
         this.constants = constants;
     }
 
-    // TODO: Clean this mess up. Ideally we want some sort of system to handle and log errors.
     public static JsonTerrariumGenerator parseGenerator(JsonObject root) throws InvalidJsonException {
         ResourceLocation identifier = new ResourceLocation(JsonUtils.getString(root, "identifier"));
 
@@ -103,6 +102,10 @@ public class JsonTerrariumGenerator implements TerrariumGenerator {
                     WidgetParseHandler widgetParseHandler = new WidgetParseHandler(properties, new PropertyJsonValueParser.Container(constants));
                     return CustomizationCategory.parseCategories(widgetParseHandler, categoryRoot);
                 });
+
+                for (PropertyKey<?> key : constants.getKeys()) {
+                    properties.put(key.getIdentifier(), key);
+                }
 
                 return new Customization(properties, categories);
             });

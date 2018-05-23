@@ -82,6 +82,9 @@ public class ParseUtils {
                 T result;
                 // TODO: Will this work across mods? I suspect it'll only load if the JSON is within the Terrarium jar
                 try (InputStream input = Terrarium.class.getResourceAsStream(path)) {
+                    if (input == null) {
+                        throw new InvalidJsonException("Remote element at " + path + " does not exist!");
+                    }
                     result = handler.parse(PARSER.parse(new InputStreamReader(input)));
                 } catch (IOException e) {
                     throw new InvalidJsonException("Failed to load remote element: " + e.getMessage());

@@ -1,29 +1,23 @@
 package net.gegy1000.earth.server.world;
 
-import net.gegy1000.terrarium.Terrarium;
+import net.gegy1000.earth.TerrariumEarth;
+import net.gegy1000.terrarium.server.world.TerrariumWorldType;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldType;
-import net.minecraft.world.biome.BiomeProvider;
-import net.minecraft.world.gen.IChunkGenerator;
 
 import java.util.Random;
 
-// TODO: Implement generators for the debug world type
-public class CoverDebugWorldType extends WorldType {
+public class CoverDebugWorldType extends TerrariumWorldType {
+    private static final ResourceLocation GENERATOR = new ResourceLocation(TerrariumEarth.MODID, "debug_generator");
+    private static final ResourceLocation PRESET = new ResourceLocation(TerrariumEarth.MODID, "debug_default");
+
     public CoverDebugWorldType() {
-        super(Terrarium.MODID + ".debug");
+        super("earth_debug", GENERATOR, PRESET);
     }
 
     @Override
-    public IChunkGenerator getChunkGenerator(World world, String settings) {
-//        return new ComposableChunkGenerator(world);
-        return null;
-    }
-
-    @Override
-    public BiomeProvider getBiomeProvider(World world) {
-//        return new ComposableBiomeProvider(world);
-        return null;
+    public boolean isHidden() {
+        return true;
     }
 
     @Override

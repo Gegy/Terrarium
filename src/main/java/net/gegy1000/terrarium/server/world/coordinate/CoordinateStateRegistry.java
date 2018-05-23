@@ -42,6 +42,8 @@ public class CoordinateStateRegistry {
             }
             return new ScaledCoordinateState(scaleMultiplierX, scaleMultiplierZ);
         });
+
+        event.register(new ResourceLocation(Terrarium.MODID, "none"), (worldData, world, valueParser, objectRoot) -> new ScaledCoordinateState(1.0));
     }
 
     public static InstanceObjectParser<CoordinateState> get(ResourceLocation key) {

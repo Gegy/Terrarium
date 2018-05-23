@@ -4,6 +4,7 @@ import net.gegy1000.terrarium.server.world.generator.customization.GenerationSet
 import net.gegy1000.terrarium.server.world.generator.customization.PropertyContainer;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
 
+// TODO: Constant based spawnpoints (for debug generator)
 public class SpawnpointDefinition {
     private final PropertyKey<Number> propertyX;
     private final PropertyKey<Number> propertyZ;

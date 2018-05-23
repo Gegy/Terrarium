@@ -8,6 +8,9 @@ import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
 import net.gegy1000.terrarium.server.world.json.ParseUtils;
 import net.minecraft.util.ResourceLocation;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class DeclaredCoverTypeParser {
     public static void parseCoverTypes(JsonObject objectRoot, InstanceJsonValueParser valueParser, Handler handler) throws InvalidJsonException {
         ParseUtils.handleObject(objectRoot, "cover_types", coverTypeRoot -> {
@@ -37,6 +40,17 @@ public class DeclaredCoverTypeParser {
                 }
             });
         });
+    }
+
+    public static CoverType[] parseCoverTypes(JsonObject objectRoot, InstanceJsonValueParser valueParser) throws InvalidJsonException {
+        List<CoverType> coverTypes = new ArrayList<>();
+        DeclaredCoverTypeParser.parseCoverTypes(objectRoot, valueParser, new Handler() {
+            @Override
+            public <T extends CoverGenerationContext> void handle(CoverType<T> coverType, T context) {
+                coverTypes.add(coverType);
+            }
+        });
+        return coverTypes.toArray(new CoverType[0]);
     }
 
     private static void handle(ResourceLocation coverKey, CoverGenerationContext context, Handler handler) throws InvalidJsonException {

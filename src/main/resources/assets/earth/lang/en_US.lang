@@ -1,7 +1,7 @@
 # Generators
 
 generator.terrarium.earth=Earth
-generator.terrarium.debug=Earth Debug
+generator.terrarium.earth_debug=Earth Debug
 
 # GUI
 
