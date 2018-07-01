@@ -8,21 +8,13 @@ import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.pipeline.source.Geocoder;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.HttpResponseInterceptor;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.entity.GzipDecompressingEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLEncoder;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,26 +25,6 @@ public class GoogleGeocoder implements Geocoder {
 
     private static final JsonParser JSON_PARSER = new JsonParser();
 
-    private final CloseableHttpClient client = HttpClientBuilder.create()
-            .addInterceptorFirst((HttpRequestInterceptor) (request, context) -> {
-                request.setHeader("Accent-Encoding", "gzip");
-                request.setHeader("User-Agent", "terrarium-earth");
-                request.setHeader("Referer", "https://github.com/gegy1000/Terrarium");
-            })
-            .addInterceptorFirst((HttpResponseInterceptor) (response, context) -> {
-                HttpEntity entity = response.getEntity();
-                Arrays.stream(entity.getContentEncoding().getElements())
-                        .filter(element -> element.getName().equalsIgnoreCase("gzip"))
-                        .findFirst()
-                        .ifPresent(element -> response.setEntity(new GzipDecompressingEntity(entity)));
-            })
-            .setDefaultRequestConfig(RequestConfig.custom()
-                    .setConnectTimeout(2000)
-                    .setConnectionRequestTimeout(2000)
-                    .setSocketTimeout(30000)
-                    .build())
-            .build();
-
     private final CoordinateState latLngCoordinateState;
 
     public GoogleGeocoder(CoordinateState coordinateState) {
@@ -62,12 +34,17 @@ public class GoogleGeocoder implements Geocoder {
     @Override
     public Coordinate get(String place) throws IOException {
         String key = EarthRemoteData.info.getGeocoderKey();
-        HttpGet request = new HttpGet(String.format(GEOCODER_ADDRESS, URLEncoder.encode(place, "UTF-8"), key));
 
-        CloseableHttpResponse response = this.client.execute(request);
+        HttpURLConnection connection = (HttpURLConnection) new URL(String.format(GEOCODER_ADDRESS, URLEncoder.encode(place, "UTF-8"), key)).openConnection();
+        connection.setRequestMethod("GET");
 
-        HttpEntity entity = response.getEntity();
-        try (InputStreamReader input = new InputStreamReader(new BufferedInputStream(entity.getContent()))) {
+        connection.setRequestProperty("User-Agent", "terrarium-earth");
+        connection.setRequestProperty("Referer", "https://github.com/gegy1000/Terrarium");
+
+        connection.setConnectTimeout(2000);
+        connection.setReadTimeout(30000);
+
+        try (InputStreamReader input = new InputStreamReader(new BufferedInputStream(connection.getInputStream()))) {
             JsonObject root = (JsonObject) JSON_PARSER.parse(input);
 
             this.handleResponseStatus(root);
@@ -99,12 +76,17 @@ public class GoogleGeocoder implements Geocoder {
     @Override
     public String[] suggest(String place) throws IOException {
         String key = EarthRemoteData.info.getAutocompleteKey();
-        HttpGet request = new HttpGet(String.format(SUGGESTION_ADDRESS, URLEncoder.encode(place, "UTF-8"), key));
 
-        CloseableHttpResponse response = this.client.execute(request);
+        HttpURLConnection connection = (HttpURLConnection) new URL(String.format(SUGGESTION_ADDRESS, URLEncoder.encode(place, "UTF-8"), key)).openConnection();
+        connection.setRequestMethod("GET");
 
-        HttpEntity entity = response.getEntity();
-        try (InputStreamReader input = new InputStreamReader(new BufferedInputStream(entity.getContent()))) {
+        connection.setRequestProperty("User-Agent", "terrarium-earth");
+        connection.setRequestProperty("Referer", "https://github.com/gegy1000/Terrarium");
+
+        connection.setConnectTimeout(2000);
+        connection.setReadTimeout(30000);
+
+        try (InputStreamReader input = new InputStreamReader(new BufferedInputStream(connection.getInputStream()))) {
             JsonObject root = (JsonObject) JSON_PARSER.parse(input);
 
             this.handleResponseStatus(root);

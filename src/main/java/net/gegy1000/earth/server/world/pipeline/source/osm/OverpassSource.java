@@ -18,19 +18,10 @@ import net.minecraft.util.JsonUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.HttpResponseInterceptor;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.entity.GzipDecompressingEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -39,32 +30,16 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Arrays;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
 
 public class OverpassSource extends TiledDataSource<OsmTileAccess> implements CachedRemoteSource {
     private static final double SAMPLE_BUFFER = 5e-4;
     private static final String OVERPASS_ENDPOINT = "http://www.overpass-api.de/api/interpreter";
-
-    private final CloseableHttpClient client = HttpClientBuilder.create()
-            .addInterceptorFirst((HttpRequestInterceptor) (request, context) -> {
-                request.setHeader("Accent-Encoding", "gzip");
-                request.setHeader("User-Agent", Terrarium.MODID);
-                request.setHeader("Referer", "https://github.com/gegy1000/Terrarium");
-            }).addInterceptorFirst((HttpResponseInterceptor) (response, context) -> {
-                HttpEntity entity = response.getEntity();
-                Arrays.stream(entity.getContentEncoding().getElements())
-                        .filter(element -> element.getName().equalsIgnoreCase("gzip"))
-                        .findFirst()
-                        .ifPresent(element -> response.setEntity(new GzipDecompressingEntity(entity)));
-            })
-            .setDefaultRequestConfig(RequestConfig.custom()
-                    .setConnectTimeout(1000)
-                    .setConnectionRequestTimeout(1000)
-                    .setSocketTimeout(30000)
-                    .build())
-            .build();
 
     private final File cacheRoot;
 
@@ -109,21 +84,30 @@ public class OverpassSource extends TiledDataSource<OsmTileAccess> implements Ca
 
     @Override
     public InputStream getRemoteStream(DataTilePos key) throws IOException {
-        HttpPost post = new HttpPost(OVERPASS_ENDPOINT);
         double minLatitude = this.getLatitude(key) - SAMPLE_BUFFER;
         double minLongitude = this.getLongitude(key) - SAMPLE_BUFFER;
         double maxLatitude = this.getMaxLatitude(key) + SAMPLE_BUFFER;
         double maxLongitude = this.getMaxLongitude(key) + SAMPLE_BUFFER;
 
-        String bbox = String.format("%.6f,%.6f,%.6f,%.6f", minLatitude, minLongitude, maxLatitude, maxLongitude);
-        String formattedQuery = this.query.replaceAll(Pattern.quote("{{bbox}}"), bbox);
-        post.setEntity(new StringEntity(formattedQuery));
+        HttpURLConnection connection = (HttpURLConnection) new URL(OVERPASS_ENDPOINT).openConnection();
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty("Accept-Encoding", "gzip");
+        connection.setRequestProperty("User-Agent", Terrarium.MODID);
+        connection.setRequestProperty("Referer", "https://github.com/gegy1000/Terrarium");
+        connection.setConnectTimeout(1000);
+        connection.setReadTimeout(30000);
+        connection.setDoOutput(true);
 
-        CloseableHttpResponse response = this.client.execute(post);
-        if (response.getStatusLine().getStatusCode() == 429) {
+        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()))) {
+            String bbox = String.format("%.6f,%.6f,%.6f,%.6f", minLatitude, minLongitude, maxLatitude, maxLongitude);
+            String formattedQuery = this.query.replaceAll(Pattern.quote("{{bbox}}"), bbox);
+            writer.write(formattedQuery);
+        }
+
+        int responseCode = connection.getResponseCode();
+        if (responseCode == 429) {
             try {
                 // TODO: Handle rate limit better
-                response.close();
                 Thread.sleep(150);
                 return this.getRemoteStream(key);
             } catch (InterruptedException e) {
@@ -131,7 +115,7 @@ public class OverpassSource extends TiledDataSource<OsmTileAccess> implements Ca
             }
         }
 
-        return response.getEntity().getContent();
+        return new GZIPInputStream(connection.getInputStream());
     }
 
     @Override
