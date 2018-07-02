@@ -9,7 +9,7 @@ import net.gegy1000.terrarium.server.world.cover.generator.layer.ReplaceRandomLa
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectWeightedLayer;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectionSeedLayer;
 import net.gegy1000.terrarium.server.world.cover.generator.primer.CoverPrimer;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTileAccess;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.gen.layer.GenLayer;
@@ -106,7 +106,7 @@ public abstract class ForestCover extends EarthCoverType {
 
         @Override
         public void decorate(int originX, int originZ, CoverPrimer primer, Random random) {
-            ShortRasterTileAccess heightRaster = this.context.getHeightRaster();
+            ShortRasterTile heightRaster = this.context.getHeightRaster();
 
             this.iterateChunk((localX, localZ) -> {
                 if (random.nextInt(4) == 0) {

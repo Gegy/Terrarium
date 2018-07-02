@@ -1,70 +1,65 @@
 package net.gegy1000.terrarium.client.gui.customization;
 
 import com.google.common.base.Strings;
+import com.google.gson.JsonSyntaxException;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.client.gui.widget.ActionButtonWidget;
 import net.gegy1000.terrarium.client.gui.widget.CustomizationList;
 import net.gegy1000.terrarium.client.preview.PreviewController;
 import net.gegy1000.terrarium.client.preview.PreviewRenderer;
 import net.gegy1000.terrarium.client.preview.WorldPreview;
-import net.gegy1000.terrarium.server.world.coordinate.SpawnpointDefinition;
-import net.gegy1000.terrarium.server.world.generator.TerrariumGenerator;
+import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
-import net.gegy1000.terrarium.server.world.generator.customization.PropertyContainer;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPreset;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.CustomizationCategory;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.CustomizationWidget;
-import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiCreateWorld;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.world.WorldType;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.input.Keyboard;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @SideOnly(Side.CLIENT)
 public class TerrariumCustomizationGui extends GuiScreen {
-    private static final int DONE_BUTTON = 0;
-    private static final int CANCEL_BUTTON = 1;
-    private static final int PREVIEW_BUTTON = 2;
+    protected static final int DONE_BUTTON = 0;
+    protected static final int CANCEL_BUTTON = 1;
+    protected static final int PREVIEW_BUTTON = 2;
 
-    private static final int PRESET_BUTTON = 3;
-    private static final int SPAWNPOINT_BUTTON = 4;
+    protected static final int PRESET_BUTTON = 3;
 
-    private static final int TOP_OFFSET = 32;
-    private static final int BOTTOM_OFFSET = 64;
-    private static final int PADDING_X = 5;
+    protected static final int TOP_OFFSET = 32;
+    protected static final int BOTTOM_OFFSET = 64;
+    protected static final int PADDING_X = 5;
 
-    private final GuiCreateWorld parent;
+    protected final GuiCreateWorld parent;
 
-    private final WorldType worldType;
-    private final TerrariumGenerator generator;
+    protected final TerrariumWorldType worldType;
 
-    private GenerationSettings settings;
+    protected GenerationSettings settings;
 
-    private CustomizationList activeList;
-    private CustomizationList categoryList;
+    protected CustomizationList activeList;
+    protected CustomizationList categoryList;
 
-    private PreviewRenderer renderer;
-    private PreviewController controller;
+    protected PreviewRenderer renderer;
+    protected PreviewController controller;
 
-    private WorldPreview preview = null;
+    protected WorldPreview preview = null;
 
-    private boolean freeze;
+    protected boolean freeze;
 
-    public TerrariumCustomizationGui(GuiCreateWorld parent, WorldType worldType, TerrariumGenerator generator, TerrariumPreset defaultPreset) {
+    public TerrariumCustomizationGui(GuiCreateWorld parent, TerrariumWorldType worldType, TerrariumPreset defaultPreset) {
         this.parent = parent;
         this.worldType = worldType;
-        this.generator = generator;
-        if (defaultPreset.getGenerator() != generator) {
-            throw new IllegalArgumentException("Cannot customize world with preset of wrong generator type");
+        if (!defaultPreset.getWorldType().equals(worldType.getIdentifier())) {
+            throw new IllegalArgumentException("Cannot customize world with preset of wrong world type");
         }
         String settingsString = parent.chunkProviderSettingsJson;
         if (Strings.isNullOrEmpty(settingsString)) {
@@ -72,7 +67,7 @@ public class TerrariumCustomizationGui extends GuiScreen {
         } else {
             try {
                 this.setSettings(GenerationSettings.deserialize(settingsString));
-            } catch (InvalidJsonException e) {
+            } catch (JsonSyntaxException e) {
                 Terrarium.LOGGER.error("Failed to deserialize settings: {}", settingsString, e);
             }
         }
@@ -94,7 +89,6 @@ public class TerrariumCustomizationGui extends GuiScreen {
         this.addButton(new GuiButton(PREVIEW_BUTTON, previewX + previewWidth - 20, previewY, 20, 20, "..."));
 
         this.addButton(new GuiButton(PRESET_BUTTON, this.width / 2 - 154, this.height - 52, 150, 20, I18n.format("gui.terrarium.preset")));
-        this.addButton(new GuiButton(SPAWNPOINT_BUTTON, this.width / 2 + 4, this.height - 52, 150, 20, I18n.format("gui.terrarium.spawnpoint")));
 
         ActionButtonWidget upLevelButton = new ActionButtonWidget(0, 0, 0, "<<") {
             @Override
@@ -107,7 +101,7 @@ public class TerrariumCustomizationGui extends GuiScreen {
 
         List<GuiButton> categoryListWidgets = new ArrayList<>();
 
-        List<CustomizationCategory> categories = this.settings.getGenerator().getCategories();
+        Collection<CustomizationCategory> categories = this.worldType.getCustomization().getCategories();
         for (CustomizationCategory category : categories) {
             List<GuiButton> currentWidgets = new ArrayList<>();
             currentWidgets.add(upLevelButton);
@@ -152,11 +146,7 @@ public class TerrariumCustomizationGui extends GuiScreen {
                     break;
                 case PRESET_BUTTON:
                     this.freeze = true;
-                    this.mc.displayGuiScreen(new SelectPresetGui(this));
-                    break;
-                case SPAWNPOINT_BUTTON:
-                    this.freeze = true;
-                    this.mc.displayGuiScreen(new SelectSpawnpointGui(this));
+                    this.mc.displayGuiScreen(new SelectPresetGui(this, this.worldType));
                     break;
             }
         }
@@ -238,15 +228,7 @@ public class TerrariumCustomizationGui extends GuiScreen {
         this.rebuildState();
     }
 
-    public void applySpawnpoint(double spawnpointX, double spawnpointZ) {
-        PropertyContainer properties = this.settings.getProperties();
-        SpawnpointDefinition spawnpointDefinition = this.generator.getSpawnpointDefinition();
-        properties.setDouble(spawnpointDefinition.getPropertyX(), spawnpointX);
-        properties.setDouble(spawnpointDefinition.getPropertyZ(), spawnpointZ);
-        this.rebuildState();
-    }
-
-    private void rebuildState() {
+    protected void rebuildState() {
         this.deletePreview();
 
         BufferBuilder[] builders = new BufferBuilder[8];
@@ -270,8 +252,8 @@ public class TerrariumCustomizationGui extends GuiScreen {
         }
     }
 
-    private void setSettings(GenerationSettings settings) {
-        if (settings.getGenerator() != this.generator) {
+    protected void setSettings(GenerationSettings settings) {
+        if (!settings.getWorldType().equals(this.worldType.getIdentifier())) {
             throw new IllegalArgumentException("Cannot use settings from another generator!");
         }
         this.settings = settings;

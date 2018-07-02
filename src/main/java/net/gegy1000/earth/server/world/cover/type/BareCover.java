@@ -7,8 +7,8 @@ import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectWeightedLayer;
 import net.gegy1000.terrarium.server.world.cover.generator.primer.CoverPrimer;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ByteRasterTileAccess;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTileAccess;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.ByteRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Biomes;
 import net.minecraft.world.World;
@@ -70,8 +70,8 @@ public class BareCover extends EarthCoverType {
 
         @Override
         public void decorate(int originX, int originZ, CoverPrimer primer, Random random) {
-            ShortRasterTileAccess heightRaster = this.context.getHeightRaster();
-            ByteRasterTileAccess slopeRaster = this.context.getSlopeRaster();
+            ShortRasterTile heightRaster = this.context.getHeightRaster();
+            ByteRasterTile slopeRaster = this.context.getSlopeRaster();
             this.iterateChunk((localX, localZ) -> {
                 int slope = slopeRaster.getUnsigned(localX, localZ);
                 if (slope < MOUNTAINOUS_SLOPE && random.nextInt(250) == 0) {
@@ -82,9 +82,9 @@ public class BareCover extends EarthCoverType {
         }
 
         private class Provider implements BlockProvider {
-            private final ByteRasterTileAccess slopeRaster;
+            private final ByteRasterTile slopeRaster;
 
-            private Provider(ByteRasterTileAccess slopeRaster) {
+            private Provider(ByteRasterTile slopeRaster) {
                 this.slopeRaster = slopeRaster;
             }
 
@@ -111,7 +111,7 @@ public class BareCover extends EarthCoverType {
         @Override
         public void decorate(int originX, int originZ, Random random) {
             World world = this.context.getWorld();
-            ByteRasterTileAccess slopeRaster = this.context.getSlopeRaster();
+            ByteRasterTile slopeRaster = this.context.getSlopeRaster();
 
             this.preventIntersection(5);
 

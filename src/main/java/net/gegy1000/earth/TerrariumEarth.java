@@ -1,8 +1,13 @@
 package net.gegy1000.earth;
 
 import net.gegy1000.earth.server.ServerProxy;
+import net.gegy1000.earth.server.capability.EarthCapability;
 import net.gegy1000.earth.server.world.CoverDebugWorldType;
 import net.gegy1000.earth.server.world.EarthWorldType;
+import net.gegy1000.terrarium.server.capability.BlankStorage;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.CapabilityInject;
+import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -31,8 +36,12 @@ public class TerrariumEarth {
     public static final EarthWorldType EARTH_TYPE = new EarthWorldType();
     public static final CoverDebugWorldType COVER_DEBUG_TYPE = new CoverDebugWorldType();
 
+    @CapabilityInject(EarthCapability.class)
+    public static Capability<EarthCapability> earthCap;
+
     @Mod.EventHandler
     public static void onPreInit(FMLPreInitializationEvent event) {
+        CapabilityManager.INSTANCE.register(EarthCapability.class, new BlankStorage<>(), EarthCapability.Impl.class);
         PROXY.onPreInit();
     }
 

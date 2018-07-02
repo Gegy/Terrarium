@@ -9,7 +9,7 @@ import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.ReplaceRandomLayer;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectionSeedLayer;
 import net.gegy1000.terrarium.server.world.cover.generator.primer.CoverPrimer;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTileAccess;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.minecraft.block.BlockDoublePlant;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.World;
@@ -79,7 +79,7 @@ public class VegetationWithCroplandCover extends EarthCoverType {
 
         @Override
         public void decorate(int originX, int originZ, CoverPrimer primer, Random random) {
-            ShortRasterTileAccess heightRaster = this.context.getHeightRaster();
+            ShortRasterTile heightRaster = this.context.getHeightRaster();
             int[] grassLayer = this.sampleChunk(this.grassSelector, originX, originZ);
 
             this.iterateChunk((localX, localZ) -> {
@@ -108,7 +108,6 @@ public class VegetationWithCroplandCover extends EarthCoverType {
             this.preventIntersection(2);
 
             this.decorateScatter(random, originX, originZ, this.range(random, 1, 3), (pos, localX, localZ) -> OAK_TALL_SHRUB.generate(world, random, pos));
-
             this.decorateScatter(random, originX, originZ, this.range(random, 5, 8), (pos, localX, localZ) -> OAK_SMALL_SHRUB.generate(world, random, pos));
 
             this.stopIntersectionPrevention();

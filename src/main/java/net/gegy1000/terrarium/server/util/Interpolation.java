@@ -1,11 +1,8 @@
 package net.gegy1000.terrarium.server.util;
 
-import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
 import net.minecraft.util.math.MathHelper;
 
 import java.awt.Point;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Consumer;
 
 public class Interpolation {
@@ -61,7 +58,7 @@ public class Interpolation {
     }
 
     public enum Method {
-        LINEAR("linear", 2, 1, 0) {
+        LINEAR(2, 1, 0) {
             @Override
             protected double[] getBuffer() {
                 return BUFFER_2.get();
@@ -72,7 +69,7 @@ public class Interpolation {
                 return b[0] + (b[1] - b[0]) * i;
             }
         },
-        COSINE("cosine", 2, 1, 0) {
+        COSINE(2, 1, 0) {
             @Override
             protected double[] getBuffer() {
                 return BUFFER_2.get();
@@ -84,7 +81,7 @@ public class Interpolation {
                 return b[0] * (1.0 - easedIntermediate) + b[1] * easedIntermediate;
             }
         },
-        CUBIC("cubic", 4, 2, 1) {
+        CUBIC(4, 2, 1) {
             @Override
             protected double[] getBuffer() {
                 return BUFFER_4.get();
@@ -96,31 +93,17 @@ public class Interpolation {
             }
         };
 
-        private static final Map<String, Method> METHOD_MAPPINGS = new HashMap<>();
-
         private static final ThreadLocal<double[]> BUFFER_2 = ThreadLocal.withInitial(() -> new double[2]);
         private static final ThreadLocal<double[]> BUFFER_4 = ThreadLocal.withInitial(() -> new double[4]);
 
-        static {
-            for (Method method : Method.values()) {
-                METHOD_MAPPINGS.put(method.getKey(), method);
-            }
-        }
-
-        private final String key;
         private final int pointCount;
         private final int forward;
         private final int backward;
 
-        Method(String key, int pointCount, int forward, int backward) {
-            this.key = key;
+        Method(int pointCount, int forward, int backward) {
             this.pointCount = pointCount;
             this.forward = forward;
             this.backward = backward;
-        }
-
-        public String getKey() {
-            return this.key;
         }
 
         public int getPointCount() {
@@ -168,13 +151,6 @@ public class Interpolation {
                 verticalSampleBuffer[sampleX] = this.lerp(buffer[sampleX], intermediateY);
             }
             return this.lerp(verticalSampleBuffer, intermediateX);
-        }
-
-        public static Method parse(String key) throws InvalidJsonException {
-            if (METHOD_MAPPINGS.containsKey(key)) {
-                return METHOD_MAPPINGS.get(key);
-            }
-            throw new InvalidJsonException("Tried to parse invalid interpolation method type " + key);
         }
     }
 }

@@ -1,16 +1,11 @@
 package net.gegy1000.earth.server.world.pipeline.composer;
 
-import com.google.gson.JsonObject;
-import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.chunk.PseudoRandomMap;
 import net.gegy1000.terrarium.server.world.cover.CoverGenerator;
 import net.gegy1000.terrarium.server.world.feature.BoulderGenerator;
-import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
-import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
-import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ByteRasterTileAccess;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.ByteRasterTile;
 import net.gegy1000.terrarium.server.world.region.GenerationRegionHandler;
 import net.minecraft.block.BlockStone;
 import net.minecraft.init.Blocks;
@@ -24,12 +19,12 @@ public class BoulderDecorationComposer implements DecorationComposer {
 
     private static final BoulderGenerator BOULDER_GENERATOR = new BoulderGenerator(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.ANDESITE), 0);
 
-    private final RegionComponentType<ByteRasterTileAccess> slopeComponent;
+    private final RegionComponentType<ByteRasterTile> slopeComponent;
 
     private final PseudoRandomMap decorationMap;
     private final Random random;
 
-    public BoulderDecorationComposer(World world, RegionComponentType<ByteRasterTileAccess> slopeComponent) {
+    public BoulderDecorationComposer(World world, RegionComponentType<ByteRasterTile> slopeComponent) {
         this.slopeComponent = slopeComponent;
 
         this.decorationMap = new PseudoRandomMap(world, DECORATION_SEED);
@@ -37,14 +32,14 @@ public class BoulderDecorationComposer implements DecorationComposer {
     }
 
     @Override
-    public void decorateChunk(World world, GenerationRegionHandler regionHandler, int chunkX, int chunkZ) {
+    public void composeDecoration(World world, GenerationRegionHandler regionHandler, int chunkX, int chunkZ) {
         int globalX = chunkX << 4;
         int globalZ = chunkZ << 4;
 
         this.decorationMap.initPosSeed(globalX, globalZ);
         this.random.setSeed(this.decorationMap.next());
 
-        ByteRasterTileAccess slopeRaster = regionHandler.getCachedChunkRaster(this.slopeComponent);
+        ByteRasterTile slopeRaster = regionHandler.getCachedChunkRaster(this.slopeComponent);
 
         for (int i = 0; i < 2; i++) {
             int localX = this.random.nextInt(16);
@@ -58,14 +53,6 @@ public class BoulderDecorationComposer implements DecorationComposer {
                     BOULDER_GENERATOR.generate(world, this.random, world.getTopSolidOrLiquidBlock(new BlockPos(spawnX, 0, spawnZ)));
                 }
             }
-        }
-    }
-
-    public static class Parser implements InstanceObjectParser<DecorationComposer> {
-        @Override
-        public DecorationComposer parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) throws InvalidJsonException {
-            RegionComponentType<ByteRasterTileAccess> slopeComponent = valueParser.parseComponentType(objectRoot, "slope_component", ByteRasterTileAccess.class);
-            return new BoulderDecorationComposer(world, slopeComponent);
         }
     }
 }

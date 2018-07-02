@@ -7,7 +7,7 @@ import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.pipeline.ChunkRasterHandler;
-import net.gegy1000.terrarium.server.world.pipeline.RegionDataSystem;
+import net.gegy1000.terrarium.server.world.pipeline.TerrariumDataProvider;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.RasterDataAccess;
 
@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 public class GenerationRegionHandler {
     private final GenerationSettings settings;
-    private final RegionDataSystem dataSystem;
+    private final TerrariumDataProvider dataSystem;
     private final ChunkRasterHandler chunkRasterHandler;
 
     private final Coordinate bufferedRegionSize;
@@ -37,7 +37,7 @@ public class GenerationRegionHandler {
                 }
             });
 
-    public GenerationRegionHandler(GenerationSettings settings, RegionDataSystem dataSystem) {
+    public GenerationRegionHandler(GenerationSettings settings, TerrariumDataProvider dataSystem) {
         this.settings = settings;
         this.dataSystem = dataSystem;
         this.chunkRasterHandler = new ChunkRasterHandler(this, dataSystem);

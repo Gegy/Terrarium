@@ -63,7 +63,6 @@ public class BroadleafEvergreenCover extends ForestCover {
             this.stopIntersectionPrevention();
 
             this.decorateScatter(random, originX, originZ, oakCount + 2, (pos, localX, localZ) -> OAK_DENSE_SHRUB.generate(world, random, pos));
-
             this.decorateScatter(random, originX, originZ, jungleCount + 2, (pos, localX, localZ) -> JUNGLE_DENSE_SHRUB.generate(world, random, pos));
         }
 

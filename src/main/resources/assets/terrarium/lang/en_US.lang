@@ -2,7 +2,6 @@
 
 gui.terrarium.accept=Accept
 gui.terrarium.preset=Set Preset
-gui.terrarium.spawnpoint=Set Spawn
 
 gui.terrarium.remote_data_warning.1=Warning: Terrarium may download data from the Internet!
 gui.terrarium.remote_data_warning.2=Various data may be required for chunk generation.
@@ -31,11 +30,3 @@ config.terrarium.enable_data_status_icon=Enable Data Status Icon
 config.terrarium.enable_data_status_icon.tooltip=If true, the current status for data streaming will be displayed in the top left corner of the screen
 config.terrarium.accept_remote_data=Accepted Remote Data Warning
 config.terrarium.accept_remote_data.tooltip=If true, you will no longer be warned about remote data usage. (Automatically set through GUI)
-
-# Commands
-
-commands.terrarium.geotp.usage=geotp <latitude> <longitude> OR geotp <place>
-commands.terrarium.geotp.wrong_world=Cannot use command in this world
-commands.terrarium.geotp.not_found=Could not find "%s"
-commands.terrarium.geotp.success=Successfully teleported to %s, %s
-commands.terrarium.geotp.error=An error occurred while finding "%s": %s: %s

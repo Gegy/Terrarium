@@ -40,6 +40,7 @@ configurations {
 }
 
 dependencies {
+  // TODO: Use jar-in-jar embedding
   embed 'de.topobyte:osm4j-core:0.0.15'
   embed 'de.topobyte:osm4j-utils:0.0.20'
   embed files('libs/osm4j-geometry-0.1.0.jar')

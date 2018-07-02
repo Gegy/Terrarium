@@ -12,7 +12,7 @@ public class ChunkRasterHandler {
     private final GenerationRegionHandler regionHandler;
     private final ImmutableMap<RegionComponentType<?>, Data<?, ?>> chunkRasters;
 
-    public ChunkRasterHandler(GenerationRegionHandler regionHandler, RegionDataSystem dataSystem) {
+    public ChunkRasterHandler(GenerationRegionHandler regionHandler, TerrariumDataProvider dataSystem) {
         this.regionHandler = regionHandler;
 
         ImmutableMap.Builder<RegionComponentType<?>, Data<?, ?>> chunkRastersBuilder = ImmutableMap.builder();

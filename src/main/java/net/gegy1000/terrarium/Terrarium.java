@@ -1,7 +1,7 @@
 package net.gegy1000.terrarium;
 
 import net.gegy1000.terrarium.server.ServerProxy;
-import net.gegy1000.terrarium.server.command.GeoTeleportCommand;
+import net.gegy1000.earth.server.command.GeoTeleportCommand;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;

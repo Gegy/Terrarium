@@ -5,7 +5,7 @@ import net.gegy1000.terrarium.server.world.feature.tree.GenerousPineGenerator;
 import net.gegy1000.terrarium.server.world.feature.tree.GenerousTaigaGenerator;
 import net.gegy1000.terrarium.server.world.feature.tree.SmallShrubGenerator;
 import net.gegy1000.terrarium.server.world.feature.tree.TallShrubGenerator;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTileAccess;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
 import net.minecraft.block.BlockDirt;
 import net.minecraft.block.BlockDoublePlant;
 import net.minecraft.block.BlockLeaves;
@@ -91,7 +91,7 @@ public abstract class CoverGenerator<T extends CoverGenerationContext> {
     }
 
     protected final void iterateChunk(PointConsumer handler) {
-        CoverRasterTileAccess coverRaster = this.context.getCoverRaster();
+        CoverRasterTile coverRaster = this.context.getCoverRaster();
         for (int localZ = 0; localZ < 16; localZ++) {
             for (int localX = 0; localX < 16; localX++) {
                 if (coverRaster.get(localX, localZ) == this.coverType) {

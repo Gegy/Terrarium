@@ -1,33 +1,27 @@
 package net.gegy1000.earth.server.world.pipeline.adapter;
 
-import com.google.gson.JsonObject;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
 import de.topobyte.osm4j.core.model.iface.OsmWay;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import net.gegy1000.earth.server.world.cover.EarthCoverRegistry;
-import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
+import net.gegy1000.earth.server.world.cover.EarthCoverTypes;
+import net.gegy1000.earth.server.world.pipeline.source.osm.OsmDataParser;
+import net.gegy1000.earth.server.world.pipeline.source.tile.OsmTile;
 import net.gegy1000.terrarium.server.util.FloodFill;
 import net.gegy1000.terrarium.server.util.Interpolation;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
+import net.gegy1000.terrarium.server.world.cover.TerrariumCoverTypes;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.cover.CoverRegistry;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
-import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
-import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
-import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.RegionAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.debug.DebugImageWriter;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.earth.server.world.pipeline.source.osm.OsmDataParser;
-import net.gegy1000.earth.server.world.pipeline.source.tile.OsmTileAccess;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTileAccess;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTileAccess;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.gegy1000.terrarium.server.world.region.RegionData;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -73,12 +67,12 @@ public class OsmCoastlineAdapter implements RegionAdapter {
     public static final int LAND_TYPE_MASK = 3;
     public static final int COAST_TYPE_MASK = 252;
 
-    private final RegionComponentType<ShortRasterTileAccess> heightComponent;
-    private final RegionComponentType<CoverRasterTileAccess> coverComponent;
-    private final RegionComponentType<OsmTileAccess> osmComponent;
+    private final RegionComponentType<ShortRasterTile> heightComponent;
+    private final RegionComponentType<CoverRasterTile> coverComponent;
+    private final RegionComponentType<OsmTile> osmComponent;
     private final CoordinateState latLngCoordinateState;
 
-    public OsmCoastlineAdapter(RegionComponentType<ShortRasterTileAccess> heightComponent, RegionComponentType<CoverRasterTileAccess> coverComponent, RegionComponentType<OsmTileAccess> osmComponent, CoordinateState latLngCoordinateState) {
+    public OsmCoastlineAdapter(RegionComponentType<ShortRasterTile> heightComponent, RegionComponentType<CoverRasterTile> coverComponent, RegionComponentType<OsmTile> osmComponent, CoordinateState latLngCoordinateState) {
         this.heightComponent = heightComponent;
         this.coverComponent = coverComponent;
         this.osmComponent = osmComponent;
@@ -87,9 +81,9 @@ public class OsmCoastlineAdapter implements RegionAdapter {
 
     @Override
     public void adapt(GenerationSettings settings, RegionData data, int x, int z, int width, int height) {
-        ShortRasterTileAccess heightTile = data.getOrExcept(this.heightComponent);
-        CoverRasterTileAccess coverTile = data.getOrExcept(this.coverComponent);
-        OsmTileAccess osmTile = data.getOrExcept(this.osmComponent);
+        ShortRasterTile heightTile = data.getOrExcept(this.heightComponent);
+        CoverRasterTile coverTile = data.getOrExcept(this.coverComponent);
+        OsmTile osmTile = data.getOrExcept(this.osmComponent);
 
         short[] heightBuffer = heightTile.getShortData();
         CoverType[] coverBuffer = coverTile.getData();
@@ -101,7 +95,7 @@ public class OsmCoastlineAdapter implements RegionAdapter {
         if (!coastlines.isEmpty()) {
             int[] landmap = new int[width * height];
             for (int i = 0; i < landmap.length; i++) {
-                landmap[i] = coverBuffer[i] == EarthCoverRegistry.WATER ? OCEAN : LAND;
+                landmap[i] = coverBuffer[i] == EarthCoverTypes.WATER ? OCEAN : LAND;
             }
 
             for (OsmWay coastline : coastlines) {
@@ -274,12 +268,12 @@ public class OsmCoastlineAdapter implements RegionAdapter {
                 int landType = sample & LAND_TYPE_MASK;
                 int coastType = sample & COAST_TYPE_MASK;
                 if (landType == OCEAN) {
-                    if (cover != EarthCoverRegistry.WATER) {
-                        coverBuffer[index] = EarthCoverRegistry.WATER;
-                        heightBuffer[index] = 1;
+                    if (cover != EarthCoverTypes.WATER) {
+                        coverBuffer[index] = EarthCoverTypes.WATER;
+                        heightBuffer[index] = 0;
                     }
-                } else if ((landType == LAND || landType == COAST && coastType != FREE_FLOOD) && cover == EarthCoverRegistry.WATER) {
-                    coverBuffer[index] = CoverRegistry.PLACEHOLDER;
+                } else if ((landType == LAND || landType == COAST && coastType != FREE_FLOOD) && cover == EarthCoverTypes.WATER) {
+                    coverBuffer[index] = TerrariumCoverTypes.PLACEHOLDER;
                     unselectedPoints.add(new FloodFill.Point(localX, localY));
                 }
             }
@@ -335,7 +329,7 @@ public class OsmCoastlineAdapter implements RegionAdapter {
 
         @Override
         public CoverType visit(FloodFill.Point point, CoverType sampled) {
-            if (sampled != CoverRegistry.PLACEHOLDER) {
+            if (sampled != TerrariumCoverTypes.PLACEHOLDER) {
                 this.result = sampled;
                 return null;
             }
@@ -344,25 +338,14 @@ public class OsmCoastlineAdapter implements RegionAdapter {
 
         @Override
         public boolean canVisit(FloodFill.Point point, CoverType sampled) {
-            return sampled != EarthCoverRegistry.WATER;
+            return sampled != EarthCoverTypes.WATER;
         }
 
         public CoverType getResult() {
             if (this.result == null) {
-                return EarthCoverRegistry.RAINFED_CROPS;
+                return EarthCoverTypes.RAINFED_CROPS;
             }
             return this.result;
-        }
-    }
-
-    public static class Parser implements InstanceObjectParser<RegionAdapter> {
-        @Override
-        public RegionAdapter parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) throws InvalidJsonException {
-            RegionComponentType<ShortRasterTileAccess> heightComponent = valueParser.parseComponentType(objectRoot, "height_component", ShortRasterTileAccess.class);
-            RegionComponentType<CoverRasterTileAccess> coverComponent = valueParser.parseComponentType(objectRoot, "cover_component", CoverRasterTileAccess.class);
-            RegionComponentType<OsmTileAccess> osmComponent = valueParser.parseComponentType(objectRoot, "osm_component", OsmTileAccess.class);
-            CoordinateState latLngCoordinateState = valueParser.parseCoordinateState(objectRoot, "lat_lng_coordinate");
-            return new OsmCoastlineAdapter(heightComponent, coverComponent, osmComponent, latLngCoordinateState);
         }
     }
 }

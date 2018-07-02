@@ -3,10 +3,7 @@ package net.gegy1000.terrarium.server.world.chunk;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.util.Lazy;
-import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
-import net.gegy1000.terrarium.server.world.json.ParseStateHandler;
-import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
-import net.gegy1000.terrarium.server.world.pipeline.composer.surface.SurfaceComposer;
+import net.gegy1000.terrarium.server.world.generator.ChunkCompositionProcedure;
 import net.gegy1000.terrarium.server.world.region.GenerationRegionHandler;
 import net.minecraft.block.BlockFalling;
 import net.minecraft.entity.EnumCreatureType;
@@ -30,8 +27,7 @@ public class ComposableChunkGenerator implements IChunkGenerator {
     private final World world;
     private final Random random;
 
-    private final Lazy<List<SurfaceComposer>> surfaceComposers;
-    private final Lazy<List<DecorationComposer>> decorationComposers;
+    private final Lazy<ChunkCompositionProcedure> compositionProcedure;
 
     private final Lazy<GenerationRegionHandler> regionHandler;
 
@@ -39,31 +35,9 @@ public class ComposableChunkGenerator implements IChunkGenerator {
 
     public ComposableChunkGenerator(World world) {
         this.world = world;
-        this.random = new Random(world.getSeed());
+        this.random = new Random(world.getWorldInfo().getSeed());
 
-        this.surfaceComposers = new Lazy.WorldCap<>(world, worldData -> {
-            ParseStateHandler.begin();
-
-            try {
-                return worldData.getSettings().getGenerator().createSurfaceComposers(worldData, world);
-            } catch (InvalidJsonException e) {
-                throw new IllegalStateException("Failed to create surface composers", e);
-            } finally {
-                ParseStateHandler.finish("create surface composers");
-            }
-        });
-
-        this.decorationComposers = new Lazy.WorldCap<>(world, worldData -> {
-            ParseStateHandler.begin();
-
-            try {
-                return worldData.getSettings().getGenerator().createDecorationComposers(worldData, world);
-            } catch (InvalidJsonException e) {
-                throw new IllegalStateException("Failed to create decoration composers", e);
-            } finally {
-                ParseStateHandler.finish("create decoration composers");
-            }
-        });
+        this.compositionProcedure = new Lazy.WorldCap<>(world, TerrariumWorldData::getCompositionProcedure);
 
         this.regionHandler = new Lazy<>(() -> {
             TerrariumWorldData capability = this.world.getCapability(TerrariumCapabilities.worldDataCapability, null);
@@ -97,10 +71,9 @@ public class ComposableChunkGenerator implements IChunkGenerator {
         regionHandler.prepareChunk(chunkX << 4, chunkZ << 4);
 
         ChunkPrimer primer = new ChunkPrimer();
-        List<SurfaceComposer> surfaceComposers = this.surfaceComposers.get();
-        for (SurfaceComposer surfaceComposer : surfaceComposers) {
-            surfaceComposer.provideSurface(primer, regionHandler, chunkX, chunkZ);
-        }
+
+        ChunkCompositionProcedure compositionProcedure = this.compositionProcedure.get();
+        compositionProcedure.composeSurface(primer, regionHandler, chunkX, chunkZ);
 
         return primer;
     }
@@ -123,10 +96,8 @@ public class ComposableChunkGenerator implements IChunkGenerator {
 
         ForgeEventFactory.onChunkPopulate(true, this, this.world, this.random, chunkX, chunkZ, false);
 
-        List<DecorationComposer> decorationComposers = this.decorationComposers.get();
-        for (DecorationComposer decorationComposer : decorationComposers) {
-            decorationComposer.decorateChunk(this.world, regionHandler, chunkX, chunkZ);
-        }
+        ChunkCompositionProcedure compositionProcedure = this.compositionProcedure.get();
+        compositionProcedure.composeDecoration(this.world, regionHandler, chunkX, chunkZ);
 
         if (TerrainGen.populate(this, this.world, this.random, chunkX, chunkZ, false, PopulateChunkEvent.Populate.EventType.ANIMALS)) {
             Biome biome = this.world.getChunkFromChunkCoords(chunkX, chunkZ).getBiome(DECORATION_CENTER, this.world.getBiomeProvider());

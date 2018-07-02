@@ -7,6 +7,7 @@ import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.chunk.ComposableChunkGenerator;
+import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -67,7 +68,13 @@ public class WorldPreview implements IBlockAccess {
         }
 
         this.chunkGenerator = new ComposableChunkGenerator(world);
-        this.centerPos = new ChunkPos(worldData.getSpawnpoint().toBlockPos());
+        Coordinate spawnPosition = worldData.getSpawnPosition();
+        if (spawnPosition != null) {
+            this.centerPos = new ChunkPos(spawnPosition.toBlockPos());
+        } else {
+            this.centerPos = new ChunkPos(0, 0);
+        }
+
         this.centerBlockPos = new BlockPos(this.centerPos.x << 4, 0, this.centerPos.z << 4);
 
         this.executor.submit(() -> {

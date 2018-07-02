@@ -4,5 +4,5 @@ import net.gegy1000.terrarium.server.world.region.GenerationRegionHandler;
 import net.minecraft.world.World;
 
 public interface DecorationComposer {
-    void decorateChunk(World world, GenerationRegionHandler regionHandler, int chunkX, int chunkZ);
+    void composeDecoration(World world, GenerationRegionHandler regionHandler, int chunkX, int chunkZ);
 }

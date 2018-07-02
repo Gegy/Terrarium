@@ -1,22 +1,14 @@
 package net.gegy1000.earth.server.world.pipeline.source.osm;
 
-import com.google.gson.JsonObject;
-import net.gegy1000.earth.server.world.pipeline.source.tile.OsmTileAccess;
+import net.gegy1000.earth.server.world.pipeline.source.tile.OsmTile;
 import net.gegy1000.terrarium.Terrarium;
-import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
-import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
-import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
-import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
-import net.gegy1000.terrarium.server.world.json.ParseUtils;
 import net.gegy1000.terrarium.server.world.pipeline.source.CachedRemoteSource;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
 import net.gegy1000.terrarium.server.world.pipeline.source.SourceException;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
-import net.minecraft.util.JsonUtils;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
 import org.apache.commons.io.IOUtils;
 
 import java.io.BufferedInputStream;
@@ -37,7 +29,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
-public class OverpassSource extends TiledDataSource<OsmTileAccess> implements CachedRemoteSource {
+public class OverpassSource extends TiledDataSource<OsmTile> implements CachedRemoteSource {
     private static final double SAMPLE_BUFFER = 5e-4;
     private static final String OVERPASS_ENDPOINT = "http://www.overpass-api.de/api/interpreter";
 
@@ -124,16 +116,16 @@ public class OverpassSource extends TiledDataSource<OsmTileAccess> implements Ca
     }
 
     @Override
-    public OsmTileAccess loadTile(DataTilePos key) throws SourceException {
+    public OsmTile loadTile(DataTilePos key) throws SourceException {
         return this.loadTile(key, 0);
     }
 
     @Override
-    public Class<OsmTileAccess> getTileType() {
-        return OsmTileAccess.class;
+    public Class<OsmTile> getTileType() {
+        return OsmTile.class;
     }
 
-    private OsmTileAccess loadTile(DataTilePos key, int retries) throws SourceException {
+    private OsmTile loadTile(DataTilePos key, int retries) throws SourceException {
         try {
             return OsmDataParser.parse(this.getStream(key));
         } catch (IOException e) {
@@ -149,8 +141,8 @@ public class OverpassSource extends TiledDataSource<OsmTileAccess> implements Ca
     }
 
     @Override
-    protected OsmTileAccess getDefaultTile() {
-        return new OsmTileAccess();
+    protected OsmTile getDefaultTile() {
+        return new OsmTile();
     }
 
     @Override
@@ -197,18 +189,5 @@ public class OverpassSource extends TiledDataSource<OsmTileAccess> implements Ca
 
     private double getMaxLongitude(DataTilePos pos) {
         return this.getLongitude(pos) + this.tileSize.getZ();
-    }
-
-    public static class Parser implements InstanceObjectParser<TiledDataSource<?>> {
-        @Override
-        public TiledDataSource<?> parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) throws InvalidJsonException {
-            String cache = ParseUtils.getString(objectRoot, "cache");
-            ResourceLocation queryLocation = new ResourceLocation(ParseUtils.getString(objectRoot, "query"));
-            int queryVersion = JsonUtils.getInt(objectRoot, "query_version", 0);
-            CoordinateState latLngCoordinate = valueParser.parseCoordinateState(objectRoot, "lat_lng_coordinate");
-            double tileSize = ParseUtils.getFloat(objectRoot, "tile_size_latlng");
-
-            return new OverpassSource(latLngCoordinate, tileSize, cache, queryLocation, queryVersion);
-        }
     }
 }

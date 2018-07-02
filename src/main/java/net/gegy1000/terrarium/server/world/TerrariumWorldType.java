@@ -7,11 +7,14 @@ import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.chunk.ComposableBiomeProvider;
 import net.gegy1000.terrarium.server.world.chunk.ComposableChunkGenerator;
 import net.gegy1000.terrarium.server.world.generator.TerrariumGenerator;
-import net.gegy1000.terrarium.server.world.generator.TerrariumGeneratorRegistry;
+import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
+import net.gegy1000.terrarium.server.world.generator.customization.TerrariumCustomization;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPreset;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPresetRegistry;
+import net.gegy1000.terrarium.server.world.pipeline.TerrariumDataProvider;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiCreateWorld;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.init.Biomes;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
@@ -26,12 +29,12 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
-// TODO: Custom generators should not require the world type to be implemented
-public class TerrariumWorldType extends WorldType {
+public abstract class TerrariumWorldType extends WorldType {
     private static Field nameField;
 
-    private final ResourceLocation generatorIdentifier;
+    private final ResourceLocation identifier;
     private final ResourceLocation presetIdentifier;
+    private final TerrariumCustomization customization;
 
     static {
         try {
@@ -49,11 +52,12 @@ public class TerrariumWorldType extends WorldType {
         }
     }
 
-    public TerrariumWorldType(String name, ResourceLocation generatorIdentifier, ResourceLocation presetIdentifier) {
+    public TerrariumWorldType(String name, ResourceLocation identifier, ResourceLocation presetIdentifier) {
         super("length_bypass");
         setName(this, Terrarium.MODID + "." + name);
-        this.generatorIdentifier = generatorIdentifier;
+        this.identifier = identifier;
         this.presetIdentifier = presetIdentifier;
+        this.customization = this.buildCustomization();
     }
 
     private static void setName(WorldType worldType, String name) {
@@ -64,6 +68,15 @@ public class TerrariumWorldType extends WorldType {
                 Terrarium.LOGGER.error("Failed to set world type name", e);
             }
         }
+    }
+
+    public abstract TerrariumGenerator buildGenerator(World world, GenerationSettings settings);
+
+    public abstract TerrariumDataProvider buildDataProvider(World world, GenerationSettings settings);
+
+    protected abstract TerrariumCustomization buildCustomization();
+
+    protected void collectCapabilities(TerrariumWorldData worldData) {
     }
 
     @Override
@@ -82,51 +95,45 @@ public class TerrariumWorldType extends WorldType {
     @Override
     @SideOnly(Side.CLIENT)
     public final void onCustomizeButton(Minecraft mc, GuiCreateWorld parent) {
-        TerrariumGenerator generator = this.getGenerator();
-        if (generator == null) {
-            return;
-        }
-
         TerrariumPreset preset = this.getPreset();
         if (preset == null) {
             Terrarium.LOGGER.warn("Found no preset with id {} for world type {}", this.presetIdentifier, this.getName());
             return;
         }
 
-        mc.displayGuiScreen(new TerrariumCustomizationGui(parent, this, generator, preset));
+        mc.displayGuiScreen(this.createCustomizationGui(parent, preset));
+    }
+
+    protected GuiScreen createCustomizationGui(GuiCreateWorld parent, TerrariumPreset preset) {
+        return new TerrariumCustomizationGui(parent, this, preset);
     }
 
     @Override
     public final boolean isCustomizable() {
-        TerrariumGenerator generator = this.getGenerator();
-        if (generator == null) {
-            return false;
-        }
-        return !generator.getCategories().isEmpty();
+        return !this.customization.getCategories().isEmpty() && this.getPreset() != null;
     }
 
     public boolean isHidden() {
-        return this.getGenerator() == null;
+        return false;
     }
 
-    public TerrariumWorldData getWorldData(World world) {
+    public final TerrariumWorldData getWorldData(World world) {
         TerrariumWorldData worldData = world.getCapability(TerrariumCapabilities.worldDataCapability, null);
         if (worldData == null) {
-            throw new IllegalStateException("Terrarium world capability not present");
+            throw new IllegalStateException("Terrarium world capability not yet present");
         }
         return worldData;
     }
 
-    private TerrariumGenerator getGenerator() {
-        TerrariumGenerator generator = TerrariumGeneratorRegistry.get(this.generatorIdentifier);
-        if (generator == null) {
-            Terrarium.LOGGER.warn("Found no generator with id {} for world type {}", this.generatorIdentifier, this.getName());
-            return null;
-        }
-        return generator;
+    public ResourceLocation getIdentifier() {
+        return this.identifier;
     }
 
     public TerrariumPreset getPreset() {
         return TerrariumPresetRegistry.get(this.presetIdentifier);
+    }
+
+    public TerrariumCustomization getCustomization() {
+        return this.customization;
     }
 }

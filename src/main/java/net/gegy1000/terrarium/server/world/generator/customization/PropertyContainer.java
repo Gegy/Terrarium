@@ -9,9 +9,6 @@ import net.gegy1000.terrarium.server.world.generator.customization.property.Bool
 import net.gegy1000.terrarium.server.world.generator.customization.property.NumberValue;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyValue;
-import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
-import net.gegy1000.terrarium.server.world.json.JsonValueParser;
-import net.gegy1000.terrarium.server.world.json.MutableJsonValueParser;
 import net.minecraft.util.Tuple;
 
 import java.util.Collection;
@@ -27,17 +24,15 @@ public class PropertyContainer {
         this.values = ImmutableMap.copyOf(values);
     }
 
-    public static PropertyContainer deserialize(JsonObject root) throws InvalidJsonException {
+    public static PropertyContainer deserialize(JsonObject root) {
         Map<String, PropertyKey<?>> keys = new HashMap<>();
         Map<PropertyKey<?>, PropertyValue<?>> values = new HashMap<>();
-
-        JsonValueParser valueParser = new MutableJsonValueParser(keys, values);
 
         for (Map.Entry<String, JsonElement> propertyEntry : root.entrySet()) {
             String identifier = propertyEntry.getKey();
             JsonElement propertyElement = propertyEntry.getValue();
 
-            Tuple<PropertyKey<?>, PropertyValue<?>> pair = PropertyContainer.parseKeyValuePair(identifier, propertyElement, valueParser);
+            Tuple<PropertyKey<?>, PropertyValue<?>> pair = PropertyContainer.parseKeyValuePair(identifier, propertyElement);
             if (pair != null) {
                 PropertyKey<?> key = pair.getFirst();
                 PropertyValue<?> value = pair.getSecond();
@@ -51,17 +46,14 @@ public class PropertyContainer {
         return new PropertyContainer(keys, values);
     }
 
-    private static Tuple<PropertyKey<?>, PropertyValue<?>> parseKeyValuePair(String identifier, JsonElement element, JsonValueParser valueParser) throws InvalidJsonException {
+    private static Tuple<PropertyKey<?>, PropertyValue<?>> parseKeyValuePair(String identifier, JsonElement element) {
         if (element.isJsonPrimitive()) {
             JsonPrimitive primitive = element.getAsJsonPrimitive();
             if (primitive.isNumber()) {
-                return new Tuple<>(new PropertyKey<>(identifier, Number.class), new NumberValue(primitive.getAsDouble()));
+                return new Tuple<>(PropertyKey.createNumber(identifier), new NumberValue(primitive.getAsDouble()));
             } else if (primitive.isBoolean()) {
-                return new Tuple<>(new PropertyKey<>(identifier, Boolean.class), new BooleanValue(primitive.getAsBoolean()));
+                return new Tuple<>(PropertyKey.createBoolean(identifier), new BooleanValue(primitive.getAsBoolean()));
             }
-        }
-        if (valueParser != null) {
-            return new Tuple<>(new PropertyKey<>(identifier, Number.class), new NumberValue(valueParser.parseFromProvider(element)));
         }
         return null;
     }
@@ -114,10 +106,6 @@ public class PropertyContainer {
         return property.get().doubleValue();
     }
 
-    public double getDouble(String key) {
-        return this.getDouble(this.getKey(key, Number.class));
-    }
-
     public void setInteger(PropertyKey<Number> key, int value) {
         PropertyValue<Number> property = this.getValue(key);
         property.set(value);
@@ -128,10 +116,6 @@ public class PropertyContainer {
         return property.get().intValue();
     }
 
-    public int getInteger(String key) {
-        return this.getInteger(this.getKey(key, Number.class));
-    }
-
     public void setBoolean(PropertyKey<Boolean> key, boolean value) {
         PropertyValue<Boolean> property = this.getValue(key);
         property.set(value);
@@ -140,10 +124,6 @@ public class PropertyContainer {
     public boolean getBoolean(PropertyKey<Boolean> key) {
         PropertyValue<Boolean> property = this.getValue(key);
         return property.get();
-    }
-
-    public boolean getBoolean(String key) {
-        return this.getBoolean(this.getKey(key, Boolean.class));
     }
 
     public boolean hasKey(PropertyKey<?> key) {

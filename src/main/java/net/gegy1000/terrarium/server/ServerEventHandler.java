@@ -1,11 +1,11 @@
 package net.gegy1000.terrarium.server;
 
+import com.google.gson.JsonSyntaxException;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
-import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
-import net.gegy1000.terrarium.server.world.json.ParseStateHandler;
+import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
@@ -21,7 +21,10 @@ public class ServerEventHandler {
         if (ServerEventHandler.shouldHandle(world)) {
             TerrariumWorldData worldData = ((TerrariumWorldType) world.getWorldType()).getWorldData(world);
             if (worldData != null) {
-                world.setSpawnPoint(worldData.getSpawnpoint().toBlockPos());
+                Coordinate spawnPosition = worldData.getSpawnPosition();
+                if (spawnPosition != null) {
+                    world.setSpawnPoint(spawnPosition.toBlockPos());
+                }
             }
         }
     }
@@ -30,14 +33,11 @@ public class ServerEventHandler {
     public static void onAttachWorldCapabilities(AttachCapabilitiesEvent<World> event) {
         World world = event.getObject();
         if (ServerEventHandler.shouldHandle(world)) {
-            ParseStateHandler.begin();
-
             try {
-                event.addCapability(TerrariumCapabilities.WORLD_DATA_ID, new TerrariumWorldData.Implementation(world));
-            } catch (InvalidJsonException e) {
+                TerrariumWorldType worldType = (TerrariumWorldType) world.getWorldType();
+                event.addCapability(TerrariumCapabilities.WORLD_DATA_ID, new TerrariumWorldData.Implementation(world, worldType));
+            } catch (JsonSyntaxException e) {
                 Terrarium.LOGGER.error("Failed to construct generator", e);
-            } finally {
-                ParseStateHandler.finish("construct generator");
             }
         }
     }

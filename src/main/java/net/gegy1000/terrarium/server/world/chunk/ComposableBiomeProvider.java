@@ -3,9 +3,7 @@ package net.gegy1000.terrarium.server.world.chunk;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.util.Lazy;
-import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
-import net.gegy1000.terrarium.server.world.json.ParseStateHandler;
-import net.gegy1000.terrarium.server.world.pipeline.composer.biome.BiomeComposer;
+import net.gegy1000.terrarium.server.world.generator.ChunkCompositionProcedure;
 import net.gegy1000.terrarium.server.world.region.GenerationRegionHandler;
 import net.minecraft.init.Biomes;
 import net.minecraft.util.math.BlockPos;
@@ -22,7 +20,7 @@ public class ComposableBiomeProvider extends BiomeProvider {
     private final World world;
 
     private final Lazy<GenerationRegionHandler> regionHandler;
-    private final Lazy<BiomeComposer> biomeComposer;
+    private final Lazy<ChunkCompositionProcedure> compositionProcedure;
 
     private final BiomeCache biomeCache = new BiomeCache(this);
 
@@ -37,21 +35,7 @@ public class ComposableBiomeProvider extends BiomeProvider {
             throw new IllegalStateException("Tried to load GenerationRegionHandler before it was present");
         });
 
-        this.biomeComposer = new Lazy<>(() -> {
-            TerrariumWorldData capability = this.world.getCapability(TerrariumCapabilities.worldDataCapability, null);
-            if (capability != null) {
-                ParseStateHandler.begin();
-
-                try {
-                    return capability.getSettings().getGenerator().createBiomeComposer(capability, world);
-                } catch (InvalidJsonException e) {
-                    throw new IllegalStateException("Failed to create biome composer", e);
-                } finally {
-                    ParseStateHandler.finish("create biome composer");
-                }
-            }
-            throw new IllegalStateException("Tried to load BiomeComposer before it was present");
-        });
+        this.compositionProcedure = new Lazy.WorldCap<>(world, TerrariumWorldData::getCompositionProcedure);
     }
 
     @Override
@@ -107,10 +91,10 @@ public class ComposableBiomeProvider extends BiomeProvider {
 
     private void populateArea(Biome[] biomes, int x, int z, int width, int height) {
         GenerationRegionHandler regionHandler = this.regionHandler.get();
-        BiomeComposer biomeComposer = this.biomeComposer.get();
+        ChunkCompositionProcedure compositionProcedure = this.compositionProcedure.get();
 
         if (this.isChunkGeneration(x, z, width, height)) {
-            Biome[] biomeBuffer = biomeComposer.getBiomes(regionHandler, x >> 4, z >> 4);
+            Biome[] biomeBuffer = compositionProcedure.composeBiomes(regionHandler, x >> 4, z >> 4);
             System.arraycopy(biomeBuffer, 0, biomes, 0, biomeBuffer.length);
             return;
         }
@@ -130,7 +114,7 @@ public class ComposableBiomeProvider extends BiomeProvider {
                 int minZ = Math.max(minChunkZ, z);
                 int maxZ = Math.min((chunkZ + 1) << 4, z + height);
 
-                Biome[] biomeBuffer = biomeComposer.getBiomes(regionHandler, chunkX, chunkZ);
+                Biome[] biomeBuffer = compositionProcedure.composeBiomes(regionHandler, chunkX, chunkZ);
 
                 for (int localZ = minZ; localZ < maxZ; localZ++) {
                     int srcPos = (localZ - z) * 16;

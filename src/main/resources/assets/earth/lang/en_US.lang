@@ -6,6 +6,7 @@ generator.terrarium.earth_debug=Earth Debug
 # GUI
 
 gui.earth.credits=Terrarium data provided by:
+gui.earth.spawnpoint=Set Spawn
 
 # Customization Categories
 
@@ -48,3 +49,11 @@ property.terrarium.enable_resource_generation.tooltip=If enabled, resources will
 
 preset.earth_default.name=Earth: Default
 preset.earth_default.desc=Default Earth generator
+
+# Commands
+
+commands.terrarium.geotp.usage=geotp <latitude> <longitude> OR geotp <place>
+commands.terrarium.geotp.wrong_world=Cannot use command in this world
+commands.terrarium.geotp.not_found=Could not find "%s"
+commands.terrarium.geotp.success=Successfully teleported to %s, %s
+commands.terrarium.geotp.error=An error occurred while finding "%s": %s: %s

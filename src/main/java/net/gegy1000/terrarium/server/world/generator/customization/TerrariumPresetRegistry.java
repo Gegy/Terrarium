@@ -20,15 +20,13 @@ public class TerrariumPresetRegistry {
 
     private static final JsonDiscoverer<TerrariumPreset> DISCOVERER = new JsonDiscoverer<>(TerrariumPreset::parse);
 
-    public static final TerrariumPreset DEFAULT = new TerrariumPreset("default", new ResourceLocation(Terrarium.MODID, "default"), new GenerationSettings.Default());
-
     public static void onInit() {
         MinecraftForge.EVENT_BUS.post(new Event(PRESETS));
     }
 
     @SubscribeEvent
     public static void onRegisterPresets(Event event) {
-        List<JsonDiscoverer.Result<TerrariumPreset>> discoveredPresets = DISCOVERER.discoverFiles("data", "generation_presets");
+        List<JsonDiscoverer.Result<TerrariumPreset>> discoveredPresets = DISCOVERER.discoverFiles("data", "terrarium/presets");
 
         for (JsonDiscoverer.Result<TerrariumPreset> result : discoveredPresets) {
             event.register(result.getKey(), result.getParsed());

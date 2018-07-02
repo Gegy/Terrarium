@@ -1,29 +1,29 @@
 package net.gegy1000.terrarium.server.world.coordinate;
 
 public class LatLngCoordinateState implements CoordinateState {
-    private final double finalScale;
+    private final double scale;
 
-    protected LatLngCoordinateState(double worldScale, double scaleMultiplier) {
-        this.finalScale = worldScale * scaleMultiplier;
+    public LatLngCoordinateState(double scale) {
+        this.scale = scale;
     }
 
     @Override
     public final double getBlockX(double latitude, double longitude) {
-        return longitude * this.finalScale;
+        return longitude * this.scale;
     }
 
     @Override
     public final double getBlockZ(double latitude, double longitude) {
-        return -latitude * this.finalScale;
+        return -latitude * this.scale;
     }
 
     @Override
     public final double getX(double blockX, double blockZ) {
-        return -blockZ / this.finalScale;
+        return -blockZ / this.scale;
     }
 
     @Override
     public final double getZ(double blockX, double blockZ) {
-        return blockX / this.finalScale;
+        return blockX / this.scale;
     }
 }

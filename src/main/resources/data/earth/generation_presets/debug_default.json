@@ -1,9 +1,0 @@
-{
-  "generator": "earth:debug_generator",
-  "name": "debug_default",
-  "icon": "earth:debug_default",
-  "properties": {
-    "spawn_x": 0,
-    "spawn_z": 0
-  }
-}

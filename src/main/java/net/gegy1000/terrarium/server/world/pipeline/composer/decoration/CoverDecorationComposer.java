@@ -1,26 +1,22 @@
 package net.gegy1000.terrarium.server.world.pipeline.composer.decoration;
 
-import com.google.gson.JsonObject;
 import net.gegy1000.terrarium.Terrarium;
-import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.chunk.PseudoRandomMap;
+import net.gegy1000.terrarium.server.world.cover.ConstructedCover;
 import net.gegy1000.terrarium.server.world.cover.CoverDecorationGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverGenerationContext;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.cover.DeclaredCoverTypeParser;
-import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
-import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
-import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTileAccess;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
 import net.gegy1000.terrarium.server.world.region.GenerationRegionHandler;
 import net.minecraft.world.World;
 
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class CoverDecorationComposer implements DecorationComposer {
     private static final long DECORATION_SEED = 2492037454623254033L;
@@ -28,29 +24,32 @@ public class CoverDecorationComposer implements DecorationComposer {
     private final Random random;
     private final PseudoRandomMap coverMap;
 
-    private final RegionComponentType<CoverRasterTileAccess> coverComponent;
+    private final RegionComponentType<CoverRasterTile> coverComponent;
 
+    private final List<CoverGenerationContext> context;
     private final Map<CoverType<?>, CoverDecorationGenerator<?>> generators;
     private final Set<CoverType<?>> coverTypes = new HashSet<>();
 
     public CoverDecorationComposer(
             World world,
-            RegionComponentType<CoverRasterTileAccess> coverComponent,
-            Map<CoverType<?>, CoverDecorationGenerator<?>> generators
+            RegionComponentType<CoverRasterTile> coverComponent,
+            List<ConstructedCover<?>> coverTypes
     ) {
-        this.random = new Random(world.getSeed() ^ DECORATION_SEED);
-        this.coverMap = new PseudoRandomMap(world.getSeed(), this.random.nextLong());
+        this.random = new Random(world.getWorldInfo().getSeed() ^ DECORATION_SEED);
+        this.coverMap = new PseudoRandomMap(world.getWorldInfo().getSeed(), this.random.nextLong());
 
         this.coverComponent = coverComponent;
-        this.generators = generators;
+
+        this.context = coverTypes.stream().map(ConstructedCover::getContext).collect(Collectors.toList());
+        this.generators = coverTypes.stream().collect(Collectors.toMap(ConstructedCover::getType, ConstructedCover::createDecorationGenerator));
     }
 
     @Override
-    public void decorateChunk(World world, GenerationRegionHandler regionHandler, int chunkX, int chunkZ) {
+    public void composeDecoration(World world, GenerationRegionHandler regionHandler, int chunkX, int chunkZ) {
         int globalX = chunkX << 4;
         int globalZ = chunkZ << 4;
 
-        CoverRasterTileAccess coverRaster = regionHandler.getCachedChunkRaster(this.coverComponent);
+        CoverRasterTile coverRaster = regionHandler.getCachedChunkRaster(this.coverComponent);
 
         this.coverTypes.clear();
         for (int localZ = 0; localZ < 16; localZ++) {
@@ -62,6 +61,10 @@ public class CoverDecorationComposer implements DecorationComposer {
         this.coverMap.initPosSeed(globalX, globalZ);
         long randomSeed = this.coverMap.next();
 
+        for (CoverGenerationContext context : this.context) {
+            context.prepareChunk(regionHandler);
+        }
+
         for (CoverType<?> type : this.coverTypes) {
             CoverDecorationGenerator<?> generator = this.generators.get(type);
             if (generator != null) {
@@ -70,23 +73,6 @@ public class CoverDecorationComposer implements DecorationComposer {
             } else {
                 Terrarium.LOGGER.warn("Tried to generate with non-registered cover: {}", type);
             }
-        }
-    }
-
-    public static class Parser implements InstanceObjectParser<DecorationComposer> {
-        @Override
-        public DecorationComposer parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) throws InvalidJsonException {
-            RegionComponentType<CoverRasterTileAccess> coverComponent = valueParser.parseComponentType(objectRoot, "cover_component", CoverRasterTileAccess.class);
-
-            Map<CoverType<?>, CoverDecorationGenerator<?>> generators = new HashMap<>();
-            DeclaredCoverTypeParser.parseCoverTypes(objectRoot, valueParser, new DeclaredCoverTypeParser.Handler() {
-                @Override
-                public <T extends CoverGenerationContext> void handle(CoverType<T> coverType, T context) {
-                    generators.put(coverType, coverType.createDecorationGenerator(context));
-                }
-            });
-
-            return new CoverDecorationComposer(world, coverComponent, generators);
         }
     }
 }

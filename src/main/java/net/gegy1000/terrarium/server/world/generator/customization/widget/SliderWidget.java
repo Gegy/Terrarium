@@ -29,6 +29,17 @@ public class SliderWidget implements CustomizationWidget {
         this.converter = converter;
     }
 
+    public SliderWidget(PropertyKey<Number> propertyKey, double minimum, double maximum, double step, double fineStep) {
+        this.propertyKey = propertyKey;
+
+        this.minimum = Math.min(minimum, maximum);
+        this.maximum = Math.max(maximum, minimum);
+        this.step = step;
+        this.fineStep = fineStep;
+
+        this.converter = null;
+    }
+
     @Override
     @SideOnly(Side.CLIENT)
     public GuiButton createWidget(GenerationSettings settings, int id, int x, int y, Runnable onPropertyChange) {

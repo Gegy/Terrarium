@@ -1,21 +1,14 @@
 package net.gegy1000.terrarium.server.capability;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableMap;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
-import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
+import net.gegy1000.terrarium.server.world.generator.ChunkCompositionProcedure;
 import net.gegy1000.terrarium.server.world.generator.TerrariumGenerator;
-import net.gegy1000.terrarium.server.world.generator.TerrariumGeneratorRegistry;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
-import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
-import net.gegy1000.terrarium.server.world.pipeline.RegionDataSystem;
-import net.gegy1000.terrarium.server.world.pipeline.source.Geocoder;
 import net.gegy1000.terrarium.server.world.region.GenerationRegionHandler;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldType;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 
@@ -24,54 +17,25 @@ public interface TerrariumWorldData extends ICapabilityProvider {
 
     GenerationRegionHandler getRegionHandler();
 
-    Geocoder getGeocoder();
+    ChunkCompositionProcedure getCompositionProcedure();
 
-    Coordinate getSpawnpoint();
-
-    CoordinateState getNavigationalState();
-
-    CoordinateState getCoordinateState(String coordinateKey);
+    Coordinate getSpawnPosition();
 
     class Implementation implements TerrariumWorldData {
         private final GenerationSettings settings;
         private final TerrariumGenerator generator;
-        private final RegionDataSystem dataSystem;
         private final GenerationRegionHandler regionHandler;
-        private final Geocoder geocoder;
 
-        private final ImmutableMap<String, CoordinateState> coordinateStates;
-        private final Coordinate spawnpoint;
-        private final CoordinateState navigationalState;
-
-        public Implementation(World world) throws InvalidJsonException {
+        public Implementation(World world, TerrariumWorldType worldType) {
             String generatorOptions = world.getWorldInfo().getGeneratorOptions();
             if (Strings.isNullOrEmpty(generatorOptions)) {
-                WorldType worldType = world.getWorldType();
-                if (worldType instanceof TerrariumWorldType) {
-                    this.settings = ((TerrariumWorldType) worldType).getPreset().createSettings();
-                } else {
-                    throw new IllegalStateException("Cannot attach Terrarium capability to non-terrarium world type!");
-                }
+                this.settings = worldType.getPreset().createSettings();
             } else {
                 this.settings = GenerationSettings.deserialize(generatorOptions);
             }
 
-            this.generator = this.settings.getGenerator();
-
-            this.coordinateStates = ImmutableMap.copyOf(this.generator.buildCoordinateStates(this, world));
-
-            String navigationalStateKey = this.generator.getNavigationalStateKey();
-            this.navigationalState = this.coordinateStates.get(navigationalStateKey);
-            if (this.navigationalState == null) {
-                ResourceLocation generatorIdentifier = TerrariumGeneratorRegistry.getIdentifier(this.generator);
-                throw new InvalidJsonException("Navigational state " + navigationalStateKey + " did not exist on " + generatorIdentifier);
-            }
-
-            this.spawnpoint = this.generator.getSpawnpointDefinition().createSpawnpoint(this.settings, this.navigationalState);
-
-            this.dataSystem = this.generator.buildDataSystem(this, world);
-            this.geocoder = this.generator.createGeocoder(this, world);
-            this.regionHandler = new GenerationRegionHandler(this.settings, this.dataSystem);
+            this.generator = worldType.buildGenerator(world, this.settings);
+            this.regionHandler = new GenerationRegionHandler(this.settings, worldType.buildDataProvider(world, this.settings));
         }
 
         @Override
@@ -85,36 +49,29 @@ public interface TerrariumWorldData extends ICapabilityProvider {
         }
 
         @Override
-        public Geocoder getGeocoder() {
-            return this.geocoder;
+        public ChunkCompositionProcedure getCompositionProcedure() {
+            return this.generator.getCompositionProcedure();
         }
 
         @Override
-        public Coordinate getSpawnpoint() {
-            return this.spawnpoint;
-        }
-
-        @Override
-        public CoordinateState getNavigationalState() {
-            return this.navigationalState;
-        }
-
-        @Override
-        public CoordinateState getCoordinateState(String coordinateKey) {
-            return this.coordinateStates.get(coordinateKey);
+        public Coordinate getSpawnPosition() {
+            return this.generator.getSpawnPosition();
         }
 
         @Override
         public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
-            return capability == TerrariumCapabilities.worldDataCapability;
+            if (capability == TerrariumCapabilities.worldDataCapability) {
+                return true;
+            }
+            return this.generator.hasCapability(capability, facing);
         }
 
         @Override
         public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
-            if (this.hasCapability(capability, facing)) {
+            if (capability == TerrariumCapabilities.worldDataCapability) {
                 return TerrariumCapabilities.worldDataCapability.cast(this);
             }
-            return null;
+            return this.generator.getCapability(capability, facing);
         }
     }
 }

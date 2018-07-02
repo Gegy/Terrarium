@@ -56,7 +56,6 @@ public class ClosedBroadleafDeciduousCover extends ClosedForestCover {
             this.stopIntersectionPrevention();
 
             this.decorateScatter(random, originX, originZ, oakCount + 4, (pos, localX, localZ) -> OAK_DENSE_SHRUB.generate(world, random, pos));
-
             this.decorateScatter(random, originX, originZ, jungleCount + 4, (pos, localX, localZ) -> JUNGLE_DENSE_SHRUB.generate(world, random, pos));
         }
 

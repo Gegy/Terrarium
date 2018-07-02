@@ -5,7 +5,7 @@ import net.gegy1000.earth.server.world.cover.EarthCoverType;
 import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverDecorationGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ByteRasterTileAccess;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.ByteRasterTile;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Biomes;
 import net.minecraft.init.Blocks;
@@ -39,7 +39,7 @@ public class SnowCover extends EarthCoverType {
 
         @Override
         public void populateBlockCover(Random random, int originX, int originZ, IBlockState[] coverBlockBuffer) {
-            ByteRasterTileAccess slopeRaster = this.context.getSlopeRaster();
+            ByteRasterTile slopeRaster = this.context.getSlopeRaster();
             this.iterateChunk((localX, localZ) -> {
                 int slope = slopeRaster.getUnsigned(localX, localZ);
                 coverBlockBuffer[localX + localZ * 16] = slope >= EXTREME_CLIFF_SLOPE ? ICE : SNOW;

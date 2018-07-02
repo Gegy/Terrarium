@@ -1,20 +1,14 @@
 package net.gegy1000.terrarium.server.world.pipeline.sampler;
 
-import com.google.gson.JsonObject;
-import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
-import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
-import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
-import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTileAccess;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
 
 public class SlopeTileSampler implements DataSampler<byte[]> {
     private final ShortTileSampler heightSampler;
 
-    public SlopeTileSampler(TiledDataSource<ShortRasterTileAccess> heightSource) {
+    public SlopeTileSampler(TiledDataSource<ShortRasterTile> heightSource) {
         this.heightSampler = new ShortTileSampler(heightSource);
     }
 
@@ -48,13 +42,5 @@ public class SlopeTileSampler implements DataSampler<byte[]> {
     @Override
     public Class<byte[]> getSamplerType() {
         return byte[].class;
-    }
-
-    public static class Parser implements InstanceObjectParser<DataSampler<?>> {
-        @Override
-        public DataSampler<?> parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) throws InvalidJsonException {
-            TiledDataSource<ShortRasterTileAccess> source = valueParser.parseTiledSource(objectRoot, "height_source", ShortRasterTileAccess.class);
-            return new SlopeTileSampler(source);
-        }
     }
 }

@@ -1,85 +1,26 @@
 package net.gegy1000.terrarium.server.world.generator;
 
-import com.google.common.collect.ImmutableList;
-import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
-import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
-import net.gegy1000.terrarium.server.world.coordinate.SpawnpointDefinition;
-import net.gegy1000.terrarium.server.world.generator.customization.widget.CustomizationCategory;
-import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
-import net.gegy1000.terrarium.server.world.pipeline.RegionDataSystem;
-import net.gegy1000.terrarium.server.world.pipeline.composer.biome.BiomeComposer;
-import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
-import net.gegy1000.terrarium.server.world.pipeline.composer.surface.SurfaceComposer;
-import net.gegy1000.terrarium.server.world.pipeline.source.Geocoder;
-import net.minecraft.world.World;
+import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
+import net.minecraft.util.EnumFacing;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
 
-import java.util.List;
-import java.util.Map;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
-// TODO: Review how a non-json generator would implement this
-public interface TerrariumGenerator {
-    ImmutableList<CustomizationCategory> getCategories();
+public interface TerrariumGenerator extends ICapabilityProvider {
+    ChunkCompositionProcedure getCompositionProcedure();
 
-    RegionDataSystem buildDataSystem(TerrariumWorldData worldData, World world) throws InvalidJsonException;
+    Coordinate getSpawnPosition();
 
-    Map<String, CoordinateState> buildCoordinateStates(TerrariumWorldData worldData, World world) throws InvalidJsonException;
+    @Override
+    default boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing facing) {
+        return false;
+    }
 
-    String getNavigationalStateKey();
-
-    SpawnpointDefinition getSpawnpointDefinition();
-
-    Geocoder createGeocoder(TerrariumWorldData worldData, World world) throws InvalidJsonException;
-
-    List<SurfaceComposer> createSurfaceComposers(TerrariumWorldData worldData, World world) throws InvalidJsonException;
-
-    List<DecorationComposer> createDecorationComposers(TerrariumWorldData worldData, World world) throws InvalidJsonException;
-
-    BiomeComposer createBiomeComposer(TerrariumWorldData worldData, World world) throws InvalidJsonException;
-
-    class Default implements TerrariumGenerator {
-        @Override
-        public ImmutableList<CustomizationCategory> getCategories() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public RegionDataSystem buildDataSystem(TerrariumWorldData worldData, World world) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Map<String, CoordinateState> buildCoordinateStates(TerrariumWorldData worldData, World world) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public String getNavigationalStateKey() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public SpawnpointDefinition getSpawnpointDefinition() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Geocoder createGeocoder(TerrariumWorldData worldData, World world) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public List<SurfaceComposer> createSurfaceComposers(TerrariumWorldData worldData, World world) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public List<DecorationComposer> createDecorationComposers(TerrariumWorldData worldData, World world) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public BiomeComposer createBiomeComposer(TerrariumWorldData worldData, World world) {
-            throw new UnsupportedOperationException();
-        }
+    @Nullable
+    @Override
+    default <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing) {
+        return null;
     }
 }

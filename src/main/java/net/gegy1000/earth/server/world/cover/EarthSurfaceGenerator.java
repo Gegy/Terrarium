@@ -2,7 +2,7 @@ package net.gegy1000.earth.server.world.cover;
 
 import net.gegy1000.terrarium.server.world.cover.CoverSurfaceGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ByteRasterTileAccess;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.ByteRasterTile;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.gen.layer.GenLayer;
 
@@ -13,7 +13,7 @@ public abstract class EarthSurfaceGenerator extends CoverSurfaceGenerator<EarthC
 
     @Override
     protected void coverFromLayer(IBlockState[] blockBuffer, int originX, int originZ, GenLayer layer, BlockProvider blockProvider) {
-        ByteRasterTileAccess slopeRaster = this.context.getSlopeRaster();
+        ByteRasterTile slopeRaster = this.context.getSlopeRaster();
         super.coverFromLayer(blockBuffer, originX, originZ, layer, (sampledValue, localX, localZ) -> {
             IBlockState state = blockProvider.provideBlock(sampledValue, localX, localZ);
             if (slopeRaster.getUnsigned(localX, localZ) >= CLIFF_SLOPE) {

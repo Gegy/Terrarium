@@ -3,6 +3,7 @@ package net.gegy1000.terrarium.client.gui.widget;
 import com.google.common.collect.ImmutableList;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.client.gui.customization.SelectPresetGui;
+import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPreset;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPresetRegistry;
 import net.minecraft.client.Minecraft;
@@ -28,7 +29,7 @@ public class PresetList extends GuiListExtended {
 
     private int selectedIndex = -1;
 
-    public PresetList(Minecraft mc, SelectPresetGui parent) {
+    public PresetList(Minecraft mc, SelectPresetGui parent, TerrariumWorldType worldType) {
         super(mc, parent.width, parent.height, 32, parent.height - 64, 36);
         this.parent = parent;
 
@@ -36,7 +37,9 @@ public class PresetList extends GuiListExtended {
 
         ImmutableList.Builder<PresetEntry> entryBuilder = ImmutableList.builder();
         for (TerrariumPreset preset : this.presets) {
-            entryBuilder.add(new PresetEntry(mc, preset));
+            if (preset.getWorldType().equals(worldType.getIdentifier())) {
+                entryBuilder.add(new PresetEntry(mc, preset));
+            }
         }
         this.entries = entryBuilder.build();
     }

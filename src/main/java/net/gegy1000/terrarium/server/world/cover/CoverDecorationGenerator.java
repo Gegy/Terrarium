@@ -1,6 +1,6 @@
 package net.gegy1000.terrarium.server.world.cover;
 
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTileAccess;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -20,7 +20,7 @@ public abstract class CoverDecorationGenerator<T extends CoverGenerationContext>
 
     protected void decorateScatter(Random random, int originX, int originZ, int count, ScatterDecorateConsumer decorator) {
         World world = this.context.getWorld();
-        CoverRasterTileAccess coverRaster = this.context.getCoverRaster();
+        CoverRasterTile coverRaster = this.context.getCoverRaster();
 
         for (int i = 0; i < count; i++) {
             int scatterX = random.nextInt(16);

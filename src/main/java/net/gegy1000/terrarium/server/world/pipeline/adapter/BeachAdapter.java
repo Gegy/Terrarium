@@ -1,15 +1,9 @@
 package net.gegy1000.terrarium.server.world.pipeline.adapter;
 
-import com.google.gson.JsonObject;
-import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.cover.CoverRegistry;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
-import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
-import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
-import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTileAccess;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
 import net.gegy1000.terrarium.server.world.region.GenerationRegion;
 import net.gegy1000.terrarium.server.world.region.RegionData;
 import net.minecraft.world.World;
@@ -18,7 +12,7 @@ import net.minecraft.world.gen.NoiseGeneratorImproved;
 import java.util.Random;
 
 public class BeachAdapter implements RegionAdapter {
-    private final RegionComponentType<CoverRasterTileAccess> coverComponent;
+    private final RegionComponentType<CoverRasterTile> coverComponent;
     private final int beachSize;
 
     private final CoverType waterCover;
@@ -27,7 +21,7 @@ public class BeachAdapter implements RegionAdapter {
     private final NoiseGeneratorImproved beachNoise;
     private final double[] sampledBeachNoise = new double[GenerationRegion.BUFFERED_SIZE * GenerationRegion.BUFFERED_SIZE];
 
-    public BeachAdapter(World world, RegionComponentType<CoverRasterTileAccess> coverComponent, int beachSize, CoverType waterCover, CoverType beachCover) {
+    public BeachAdapter(World world, RegionComponentType<CoverRasterTile> coverComponent, int beachSize, CoverType waterCover, CoverType beachCover) {
         this.coverComponent = coverComponent;
         this.beachSize = beachSize;
         this.waterCover = waterCover;
@@ -39,7 +33,7 @@ public class BeachAdapter implements RegionAdapter {
 
     @Override
     public void adapt(GenerationSettings settings, RegionData data, int x, int z, int width, int height) {
-        CoverRasterTileAccess coverTile = data.getOrExcept(this.coverComponent);
+        CoverRasterTile coverTile = data.getOrExcept(this.coverComponent);
         if (this.beachSize <= 0) {
             return;
         }
@@ -80,17 +74,6 @@ public class BeachAdapter implements RegionAdapter {
                     }
                 }
             }
-        }
-    }
-
-    public static class Parser implements InstanceObjectParser<RegionAdapter> {
-        @Override
-        public RegionAdapter parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) throws InvalidJsonException {
-            RegionComponentType<CoverRasterTileAccess> coverComponent = valueParser.parseComponentType(objectRoot, "cover_component", CoverRasterTileAccess.class);
-            int beachSize = valueParser.parseInteger(objectRoot, "beach_size");
-            CoverType waterCover = valueParser.parseRegistryEntry(objectRoot, "water_cover", CoverRegistry.getRegistry());
-            CoverType beachCover = valueParser.parseRegistryEntry(objectRoot, "beach_cover", CoverRegistry.getRegistry());
-            return new BeachAdapter(world, coverComponent, beachSize, waterCover, beachCover);
         }
     }
 }

@@ -8,7 +8,7 @@ import net.gegy1000.terrarium.server.world.cover.CoverDecorationGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectWeightedLayer;
 import net.gegy1000.terrarium.server.world.cover.generator.primer.CoverPrimer;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTileAccess;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.minecraft.block.BlockDoublePlant;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.biome.Biome;
@@ -80,7 +80,7 @@ public class RainfedCropsCover extends EarthCoverType {
 
         @Override
         public void decorate(int originX, int originZ, CoverPrimer primer, Random random) {
-            ShortRasterTileAccess heightRaster = this.context.getHeightRaster();
+            ShortRasterTile heightRaster = this.context.getHeightRaster();
             int[] grassLayer = this.sampleChunk(this.grassSelector, originX, originZ);
 
             this.iterateChunk((localX, localZ) -> {

@@ -1,21 +1,15 @@
 package net.gegy1000.terrarium.server.world.pipeline.sampler;
 
-import com.google.gson.JsonObject;
-import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
-import net.gegy1000.terrarium.server.world.json.InstanceJsonValueParser;
-import net.gegy1000.terrarium.server.world.json.InstanceObjectParser;
-import net.gegy1000.terrarium.server.world.json.InvalidJsonException;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTileAccess;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
 
 public class ShortTileSampler extends TiledDataSampler<short[]> {
-    private final TiledDataSource<? extends ShortRasterTileAccess> source;
+    private final TiledDataSource<? extends ShortRasterTile> source;
 
-    public ShortTileSampler(TiledDataSource<? extends ShortRasterTileAccess> source) {
+    public ShortTileSampler(TiledDataSource<? extends ShortRasterTile> source) {
         super(MathHelper.floor(source.getTileSize().getX()), MathHelper.floor(source.getTileSize().getZ()));
         this.source = source;
     }
@@ -33,7 +27,7 @@ public class ShortTileSampler extends TiledDataSampler<short[]> {
         return short[].class;
     }
 
-    private class Handler implements DataHandler<ShortRasterTileAccess> {
+    private class Handler implements DataHandler<ShortRasterTile> {
         private final short[] data;
         private final int width;
 
@@ -43,21 +37,13 @@ public class ShortTileSampler extends TiledDataSampler<short[]> {
         }
 
         @Override
-        public void put(ShortRasterTileAccess tile, int localX, int localZ, int resultX, int resultZ) {
+        public void put(ShortRasterTile tile, int localX, int localZ, int resultX, int resultZ) {
             this.data[resultX + resultZ * this.width] = tile.getShort(localX, localZ);
         }
 
         @Override
-        public ShortRasterTileAccess getTile(DataTilePos pos) {
+        public ShortRasterTile getTile(DataTilePos pos) {
             return ShortTileSampler.this.source.getTile(pos);
-        }
-    }
-
-    public static class Parser implements InstanceObjectParser<DataSampler<?>> {
-        @Override
-        public DataSampler<?> parse(TerrariumWorldData worldData, World world, InstanceJsonValueParser valueParser, JsonObject objectRoot) throws InvalidJsonException {
-            TiledDataSource<ShortRasterTileAccess> source = valueParser.parseTiledSource(objectRoot, "source", ShortRasterTileAccess.class);
-            return new ShortTileSampler(source);
         }
     }
 }

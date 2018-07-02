@@ -6,7 +6,7 @@ import net.gegy1000.terrarium.server.world.cover.CoverBiomeSelectors;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.primer.CoverPrimer;
 import net.gegy1000.terrarium.server.world.feature.tree.GenerousTreeGenerator;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTileAccess;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
@@ -38,7 +38,7 @@ public class SalineFloodedForestCover extends FloodedForestCover {
 
         @Override
         public void decorate(int originX, int originZ, CoverPrimer primer, Random random) {
-            ShortRasterTileAccess heightRaster = this.context.getHeightRaster();
+            ShortRasterTile heightRaster = this.context.getHeightRaster();
 
             this.iterateChunk((localX, localZ) -> {
                 if (random.nextInt(3) == 0) {

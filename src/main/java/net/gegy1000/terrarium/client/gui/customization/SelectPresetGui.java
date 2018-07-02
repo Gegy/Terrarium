@@ -1,6 +1,7 @@
 package net.gegy1000.terrarium.client.gui.customization;
 
 import net.gegy1000.terrarium.client.gui.widget.PresetList;
+import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPreset;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -13,19 +14,21 @@ public class SelectPresetGui extends GuiScreen {
     private static final int CANCEL_BUTTON = 1;
 
     private final TerrariumCustomizationGui parent;
+    private final TerrariumWorldType worldType;
 
     private GuiButton selectButton;
 
     private PresetList presetList;
     private TerrariumPreset selectedPreset;
 
-    public SelectPresetGui(TerrariumCustomizationGui parent) {
+    public SelectPresetGui(TerrariumCustomizationGui parent, TerrariumWorldType worldType) {
         this.parent = parent;
+        this.worldType = worldType;
     }
 
     @Override
     public void initGui() {
-        this.presetList = new PresetList(this.mc, this);
+        this.presetList = new PresetList(this.mc, this, this.worldType);
 
         this.selectButton = this.addButton(new GuiButton(SELECT_BUTTON, this.width / 2 - 154, this.height - 28, 150, 20, I18n.format("gui.done")));
         this.addButton(new GuiButton(CANCEL_BUTTON, this.width / 2 + 4, this.height - 28, 150, 20, I18n.format("gui.cancel")));

@@ -10,7 +10,7 @@ import net.gegy1000.terrarium.server.world.cover.generator.layer.ConnectHorizont
 import net.gegy1000.terrarium.server.world.cover.generator.layer.OutlineEdgeLayer;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectionSeedLayer;
 import net.gegy1000.terrarium.server.world.cover.generator.primer.CoverPrimer;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTileAccess;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.minecraft.block.BlockCrops;
 import net.minecraft.block.BlockFarmland;
 import net.minecraft.block.state.IBlockState;
@@ -90,7 +90,7 @@ public class IrrigatedCropsCover extends EarthCoverType {
 
         @Override
         public void decorate(int originX, int originZ, CoverPrimer primer, Random random) {
-            ShortRasterTileAccess heightRaster = this.context.getHeightRaster();
+            ShortRasterTile heightRaster = this.context.getHeightRaster();
             int[] cropLayer = this.sampleChunk(this.cropSelector, originX, originZ);
 
             this.iterateChunk((localX, localZ) -> {
