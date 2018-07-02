@@ -6,6 +6,7 @@ import net.gegy1000.earth.server.capability.EarthCapability;
 import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthCoverTypes;
 import net.gegy1000.earth.server.world.pipeline.EarthComponentTypes;
+import net.gegy1000.earth.server.world.pipeline.adapter.OceanDepthCorrectionAdapter;
 import net.gegy1000.earth.server.world.pipeline.adapter.OsmCoastlineAdapter;
 import net.gegy1000.earth.server.world.pipeline.adapter.WaterFlattenAdapter;
 import net.gegy1000.earth.server.world.pipeline.composer.BoulderDecorationComposer;
@@ -90,6 +91,7 @@ public class EarthWorldType extends TerrariumWorldType {
         super("earth", IDENTIFIER, PRESET);
     }
 
+    // TODO: These builders are absolutely horrible
     @Override
     public TerrariumGenerator buildGenerator(World world, GenerationSettings settings) {
         PropertyContainer properties = settings.getProperties();
@@ -102,10 +104,9 @@ public class EarthWorldType extends TerrariumWorldType {
         coverTypes.add(new ConstructedCover<>(TerrariumCoverTypes.DEBUG, context));
         coverTypes.add(new ConstructedCover<>(TerrariumCoverTypes.PLACEHOLDER, context));
         coverTypes.addAll(EarthCoverTypes.COVER_TYPES.stream().map(type -> new ConstructedCover<>(type, earthContext)).collect(Collectors.toList()));
-        // TODO: This is absolutely horrible
         return BasicTerrariumGenerator.builder()
                 .withSurfaceComposer(new HeightmapSurfaceComposer(RegionComponentType.HEIGHT, Blocks.STONE.getDefaultState()))
-                .withSurfaceComposer(new OceanFillSurfaceComposer(RegionComponentType.HEIGHT, Blocks.WATER.getDefaultState(), heightOrigin))
+                .withSurfaceComposer(new OceanFillSurfaceComposer(RegionComponentType.HEIGHT, Blocks.WATER.getDefaultState(), heightOrigin + 1))
                 .withSurfaceComposer(new CoverSurfaceComposer(world, RegionComponentType.COVER, coverTypes, properties.getBoolean(ENABLE_DECORATION), Blocks.STONE.getDefaultState()))
                 .withSurfaceComposer(new BedrockSurfaceComposer(world, Blocks.BEDROCK.getDefaultState(), Math.min(heightOrigin - 1, 5)))
                 .withDecorationComposer(new CoverDecorationComposer(world, RegionComponentType.COVER, coverTypes)) // TODO: Decoration composers only if decoration enabled!
@@ -126,9 +127,8 @@ public class EarthWorldType extends TerrariumWorldType {
         CoordinateState srtmRaster = new ScaledCoordinateState(worldScale * SRTM_SCALE);
         CoordinateState globcoverRaster = new ScaledCoordinateState(worldScale * SRTM_SCALE * GLOB_RATIO);
         Interpolation.Method interpolationMethod = this.selectInterpolationMethod(settings);
-        SrtmHeightSource heightSource = new SrtmHeightSource(srtmRaster, "srtm_heights", properties.getInteger(OCEAN_DEPTH));
+        SrtmHeightSource heightSource = new SrtmHeightSource(srtmRaster, "srtm_heights");
         return TerrariumDataProvider.builder()
-                // TODO: Ocean Depth handling in height transform adapter
                 .withComponent(RegionComponentType.HEIGHT, new ScaledShortRegionPopulator(new ShortTileSampler(heightSource), srtmRaster, interpolationMethod))
                 .withComponent(RegionComponentType.SLOPE, new ScaledByteRegionPopulator(new SlopeTileSampler(heightSource), srtmRaster, Interpolation.Method.LINEAR))
                 .withComponent(RegionComponentType.COVER, new ScaledCoverRegionPopulator(new CoverTileSampler(new GlobcoverSource(globcoverRaster, "globcover")), globcoverRaster))
@@ -156,9 +156,10 @@ public class EarthWorldType extends TerrariumWorldType {
                                 ), earthCoordinates)
                         )
                 )
-                .withAdapter(new HeightNoiseAdapter(world, RegionComponentType.HEIGHT, 2, 0.08, properties.getDouble(NOISE_SCALE)))
                 .withAdapter(new OsmCoastlineAdapter(RegionComponentType.HEIGHT, RegionComponentType.COVER, EarthComponentTypes.OSM, earthCoordinates))
+                .withAdapter(new HeightNoiseAdapter(world, RegionComponentType.HEIGHT, 2, 0.08, properties.getDouble(NOISE_SCALE)))
                 .withAdapter(new HeightTransformAdapter(RegionComponentType.HEIGHT, properties.getDouble(HEIGHT_SCALE) * worldScale, heightOrigin))
+                .withAdapter(new OceanDepthCorrectionAdapter(RegionComponentType.HEIGHT, properties.getInteger(OCEAN_DEPTH)))
                 .withAdapter(new BeachAdapter(world, RegionComponentType.COVER, properties.getInteger(BEACH_SIZE), EarthCoverTypes.WATER, EarthCoverTypes.BEACH))
                 .withAdapter(new WaterFlattenAdapter(RegionComponentType.HEIGHT, RegionComponentType.COVER, 15, EarthCoverTypes.WATER))
                 .build();

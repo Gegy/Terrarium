@@ -26,12 +26,10 @@ public class SrtmHeightSource extends TiledDataSource<ShortRasterTile> implement
     private static final Set<DataTilePos> VALID_TILES = new HashSet<>();
 
     private final File cacheRoot;
-    private final int oceanDepth;
 
-    public SrtmHeightSource(CoordinateState coordinateState, String cacheRoot, int oceanDepth) {
+    public SrtmHeightSource(CoordinateState coordinateState, String cacheRoot) {
         super(new Coordinate(coordinateState, TILE_SIZE, TILE_SIZE), 9);
         this.cacheRoot = new File(CachedRemoteSource.GLOBAL_CACHE_ROOT, cacheRoot);
-        this.oceanDepth = oceanDepth;
     }
 
     public static void loadValidTiles() {
@@ -58,11 +56,7 @@ public class SrtmHeightSource extends TiledDataSource<ShortRasterTile> implement
             try (DataInputStream input = new DataInputStream(this.getStream(key))) {
                 short[] heightmap = new short[TILE_DATA_SIZE * TILE_DATA_SIZE];
                 for (int i = 0; i < heightmap.length; i++) {
-                    short heightValue = input.readShort();
-                    if (heightValue <= 0) {
-                        heightValue = (short) -this.oceanDepth;
-                    }
-                    heightmap[i] = heightValue;
+                    heightmap[i] = input.readShort();
                 }
                 return new ShortRasterTile(heightmap, TILE_DATA_SIZE, TILE_DATA_SIZE);
             } catch (IOException e) {

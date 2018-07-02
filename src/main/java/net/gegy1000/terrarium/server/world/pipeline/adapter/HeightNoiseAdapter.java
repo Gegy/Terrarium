@@ -43,7 +43,9 @@ public class HeightNoiseAdapter implements RegionAdapter {
         this.heightNoise.generateNoiseOctaves(noise, z, x, width, height, this.noiseScaleXZ, this.noiseScaleXZ, 0.0);
 
         for (int i = 0; i < noise.length; i++) {
-            heightBuffer[i] += (noise[i] + this.noiseMax) / (this.noiseMax * 2.0) * this.noiseScaleY * 35.0;
+            if (heightBuffer[i] > 0) {
+                heightBuffer[i] += (noise[i] + this.noiseMax) / (this.noiseMax * 2.0) * this.noiseScaleY * 35.0;
+            }
         }
     }
 }
