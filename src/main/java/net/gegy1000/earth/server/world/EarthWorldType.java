@@ -17,6 +17,7 @@ import net.gegy1000.earth.server.world.pipeline.source.SrtmHeightSource;
 import net.gegy1000.earth.server.world.pipeline.source.osm.OverpassSource;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.util.Interpolation;
+import net.gegy1000.terrarium.server.world.TerrariumGeneratorInitializer;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
@@ -91,78 +92,9 @@ public class EarthWorldType extends TerrariumWorldType {
         super("earth", IDENTIFIER, PRESET);
     }
 
-    // TODO: These builders are absolutely horrible
     @Override
-    public TerrariumGenerator buildGenerator(World world, GenerationSettings settings) {
-        PropertyContainer properties = settings.getProperties();
-        double worldScale = properties.getDouble(WORLD_SCALE);
-        int heightOrigin = properties.getInteger(HEIGHT_ORIGIN);
-        CoordinateState earthCoordinates = new LatLngCoordinateState(worldScale * SRTM_SCALE * 1200.0);
-        List<ConstructedCover<?>> coverTypes = new ArrayList<>();
-        CoverGenerationContext.Default context = new CoverGenerationContext.Default(world, RegionComponentType.HEIGHT, RegionComponentType.COVER);
-        EarthCoverContext earthContext = new EarthCoverContext(world, RegionComponentType.HEIGHT, RegionComponentType.COVER, RegionComponentType.SLOPE, earthCoordinates, true);
-        coverTypes.add(new ConstructedCover<>(TerrariumCoverTypes.DEBUG, context));
-        coverTypes.add(new ConstructedCover<>(TerrariumCoverTypes.PLACEHOLDER, context));
-        coverTypes.addAll(EarthCoverTypes.COVER_TYPES.stream().map(type -> new ConstructedCover<>(type, earthContext)).collect(Collectors.toList()));
-        return BasicTerrariumGenerator.builder()
-                .withSurfaceComposer(new HeightmapSurfaceComposer(RegionComponentType.HEIGHT, Blocks.STONE.getDefaultState()))
-                .withSurfaceComposer(new OceanFillSurfaceComposer(RegionComponentType.HEIGHT, Blocks.WATER.getDefaultState(), heightOrigin + 1))
-                .withSurfaceComposer(new CoverSurfaceComposer(world, RegionComponentType.COVER, coverTypes, properties.getBoolean(ENABLE_DECORATION), Blocks.STONE.getDefaultState()))
-                .withSurfaceComposer(new BedrockSurfaceComposer(world, Blocks.BEDROCK.getDefaultState(), Math.min(heightOrigin - 1, 5)))
-                .withDecorationComposer(new CoverDecorationComposer(world, RegionComponentType.COVER, coverTypes)) // TODO: Decoration composers only if decoration enabled!
-                .withDecorationComposer(new BoulderDecorationComposer(world, RegionComponentType.SLOPE))
-                .withBiomeComposer(new CoverBiomeComposer(RegionComponentType.COVER, coverTypes))
-                .withSpawnPosition(new Coordinate(earthCoordinates, properties.getDouble(SPAWN_LATITUDE), properties.getDouble(SPAWN_LONGITUDE)))
-                .withCapability(new EarthCapability.Impl(earthCoordinates))
-                .build();
-    }
-
-    @Override
-    public TerrariumDataProvider buildDataProvider(World world, GenerationSettings settings) {
-        PropertyContainer properties = settings.getProperties();
-        double worldScale = properties.getDouble(WORLD_SCALE);
-        int heightOrigin = properties.getInteger(HEIGHT_ORIGIN);
-        // TODO: Avoid the duplication of this in both buildGenerator and buildDataProvider
-        CoordinateState earthCoordinates = new LatLngCoordinateState(worldScale * SRTM_SCALE * 1200.0);
-        CoordinateState srtmRaster = new ScaledCoordinateState(worldScale * SRTM_SCALE);
-        CoordinateState globcoverRaster = new ScaledCoordinateState(worldScale * SRTM_SCALE * GLOB_RATIO);
-        Interpolation.Method interpolationMethod = this.selectInterpolationMethod(settings);
-        SrtmHeightSource heightSource = new SrtmHeightSource(srtmRaster, "srtm_heights");
-        return TerrariumDataProvider.builder()
-                .withComponent(RegionComponentType.HEIGHT, new ScaledShortRegionPopulator(new ShortTileSampler(heightSource), srtmRaster, interpolationMethod))
-                .withComponent(RegionComponentType.SLOPE, new ScaledByteRegionPopulator(new SlopeTileSampler(heightSource), srtmRaster, Interpolation.Method.LINEAR))
-                .withComponent(RegionComponentType.COVER, new ScaledCoverRegionPopulator(new CoverTileSampler(new GlobcoverSource(globcoverRaster, "globcover")), globcoverRaster))
-                .withComponent(EarthComponentTypes.OSM, new OsmRegionPopulator(
-                                new OsmSampler(new OverpassSource(
-                                        earthCoordinates,
-                                        0.3,
-                                        "osm/outline",
-                                        new ResourceLocation(TerrariumEarth.MODID, "query/outline_overpass_query.oql"),
-                                        1
-                                ), earthCoordinates),
-                                new OsmSampler(new OverpassSource(
-                                        earthCoordinates,
-                                        0.1,
-                                        "osm/general",
-                                        new ResourceLocation(TerrariumEarth.MODID, "query/general_overpass_query.oql"),
-                                        2
-                                ), earthCoordinates),
-                                new OsmSampler(new OverpassSource(
-                                        earthCoordinates,
-                                        0.05,
-                                        "osm/detailed",
-                                        new ResourceLocation(TerrariumEarth.MODID, "query/detail_overpass_query.oql"),
-                                        2
-                                ), earthCoordinates)
-                        )
-                )
-                .withAdapter(new OsmCoastlineAdapter(RegionComponentType.HEIGHT, RegionComponentType.COVER, EarthComponentTypes.OSM, earthCoordinates))
-                .withAdapter(new HeightNoiseAdapter(world, RegionComponentType.HEIGHT, 2, 0.08, properties.getDouble(NOISE_SCALE)))
-                .withAdapter(new HeightTransformAdapter(RegionComponentType.HEIGHT, properties.getDouble(HEIGHT_SCALE) * worldScale, heightOrigin))
-                .withAdapter(new OceanDepthCorrectionAdapter(RegionComponentType.HEIGHT, properties.getInteger(OCEAN_DEPTH)))
-                .withAdapter(new BeachAdapter(world, RegionComponentType.COVER, properties.getInteger(BEACH_SIZE), EarthCoverTypes.WATER, EarthCoverTypes.BEACH))
-                .withAdapter(new WaterFlattenAdapter(RegionComponentType.HEIGHT, RegionComponentType.COVER, 15, EarthCoverTypes.WATER))
-                .build();
+    public TerrariumGeneratorInitializer createInitializer(World world, GenerationSettings settings) {
+        return new Initializer(world, settings.getProperties());
     }
 
     @Override
@@ -198,16 +130,130 @@ public class EarthWorldType extends TerrariumWorldType {
         return worldData.getSettings().getProperties().getInteger(HEIGHT_ORIGIN) < 40;
     }
 
-    private Interpolation.Method selectInterpolationMethod(GenerationSettings settings) {
-        double scale = 1.0 / settings.getProperties().getDouble(WORLD_SCALE);
+    private static class Initializer implements TerrariumGeneratorInitializer {
+        private final World world;
+        private final PropertyContainer properties;
 
-        Interpolation.Method interpolationMethod = Interpolation.Method.CUBIC;
-        if (scale >= 45.0) {
-            interpolationMethod = Interpolation.Method.LINEAR;
-        } else if (scale >= 20.0) {
-            interpolationMethod = Interpolation.Method.COSINE;
+        private final double worldScale;
+
+        private final CoordinateState earthCoordinates;
+        private final CoordinateState srtmRaster;
+        private final CoordinateState globcoverRaster;
+
+        private Initializer(World world, PropertyContainer properties) {
+            this.world = world;
+            this.properties = properties;
+
+            this.worldScale = properties.getDouble(WORLD_SCALE);
+            this.earthCoordinates = new LatLngCoordinateState(this.worldScale * SRTM_SCALE * 1200.0);
+            this.srtmRaster = new ScaledCoordinateState(this.worldScale * SRTM_SCALE);
+            this.globcoverRaster = new ScaledCoordinateState(this.worldScale * SRTM_SCALE * GLOB_RATIO);
         }
 
-        return interpolationMethod;
+        @Override
+        public TerrariumGenerator buildGenerator() {
+            int heightOrigin = this.properties.getInteger(HEIGHT_ORIGIN);
+            List<ConstructedCover<?>> coverTypes = this.constructCoverTypes();
+            BasicTerrariumGenerator.Builder builder = BasicTerrariumGenerator.builder()
+                    .withSurfaceComposer(new HeightmapSurfaceComposer(RegionComponentType.HEIGHT, Blocks.STONE.getDefaultState()))
+                    .withSurfaceComposer(new OceanFillSurfaceComposer(RegionComponentType.HEIGHT, Blocks.WATER.getDefaultState(), heightOrigin + 1))
+                    .withSurfaceComposer(new CoverSurfaceComposer(this.world, RegionComponentType.COVER, coverTypes, this.properties.getBoolean(ENABLE_DECORATION), Blocks.STONE.getDefaultState()))
+                    .withSurfaceComposer(new BedrockSurfaceComposer(this.world, Blocks.BEDROCK.getDefaultState(), Math.min(heightOrigin - 1, 5)))
+                    .withBiomeComposer(new CoverBiomeComposer(RegionComponentType.COVER, coverTypes))
+                    .withSpawnPosition(new Coordinate(this.earthCoordinates, this.properties.getDouble(SPAWN_LATITUDE), this.properties.getDouble(SPAWN_LONGITUDE)))
+                    .withCapability(new EarthCapability.Impl(this.earthCoordinates));
+            if (this.properties.getBoolean(ENABLE_DECORATION)) {
+                builder.withDecorationComposer(new CoverDecorationComposer(this.world, RegionComponentType.COVER, coverTypes));
+                builder.withDecorationComposer(new BoulderDecorationComposer(this.world, RegionComponentType.SLOPE));
+            }
+            return builder.build();
+        }
+
+        private List<ConstructedCover<?>> constructCoverTypes() {
+            List<ConstructedCover<?>> coverTypes = new ArrayList<>();
+            CoverGenerationContext.Default context = new CoverGenerationContext.Default(this.world, RegionComponentType.HEIGHT, RegionComponentType.COVER);
+            EarthCoverContext earthContext = new EarthCoverContext(this.world, RegionComponentType.HEIGHT, RegionComponentType.COVER, RegionComponentType.SLOPE, this.earthCoordinates, true);
+            coverTypes.add(new ConstructedCover<>(TerrariumCoverTypes.DEBUG, context));
+            coverTypes.add(new ConstructedCover<>(TerrariumCoverTypes.PLACEHOLDER, context));
+            coverTypes.addAll(EarthCoverTypes.COVER_TYPES.stream().map(type -> new ConstructedCover<>(type, earthContext)).collect(Collectors.toList()));
+            return coverTypes;
+        }
+
+        @Override
+        public TerrariumDataProvider buildDataProvider() {
+            int heightOrigin = this.properties.getInteger(HEIGHT_ORIGIN);
+            SrtmHeightSource heightSource = new SrtmHeightSource(this.srtmRaster, "srtm_heights");
+            return TerrariumDataProvider.builder()
+                    .withComponent(RegionComponentType.HEIGHT, this.createHeightPopulator(heightSource))
+                    .withComponent(RegionComponentType.SLOPE, this.createSlopePopulator(heightSource))
+                    .withComponent(RegionComponentType.COVER, this.createCoverPopulator())
+                    .withComponent(EarthComponentTypes.OSM, this.createOsmPopulator())
+                    .withAdapter(new OsmCoastlineAdapter(RegionComponentType.HEIGHT, RegionComponentType.COVER, EarthComponentTypes.OSM, this.earthCoordinates))
+                    .withAdapter(new HeightNoiseAdapter(this.world, RegionComponentType.HEIGHT, 2, 0.08, this.properties.getDouble(NOISE_SCALE)))
+                    .withAdapter(new HeightTransformAdapter(RegionComponentType.HEIGHT, this.properties.getDouble(HEIGHT_SCALE) * this.worldScale, heightOrigin))
+                    .withAdapter(new OceanDepthCorrectionAdapter(RegionComponentType.HEIGHT, this.properties.getInteger(OCEAN_DEPTH)))
+                    .withAdapter(new BeachAdapter(this.world, RegionComponentType.COVER, this.properties.getInteger(BEACH_SIZE), EarthCoverTypes.WATER, EarthCoverTypes.BEACH))
+                    .withAdapter(new WaterFlattenAdapter(RegionComponentType.HEIGHT, RegionComponentType.COVER, 15, EarthCoverTypes.WATER))
+                    .build();
+        }
+
+        private ScaledShortRegionPopulator createHeightPopulator(SrtmHeightSource heightSource) {
+            Interpolation.Method interpolationMethod = this.selectInterpolationMethod(this.properties);
+            ShortTileSampler heightSampler = new ShortTileSampler(heightSource);
+            return new ScaledShortRegionPopulator(heightSampler, this.srtmRaster, interpolationMethod);
+        }
+
+        private ScaledByteRegionPopulator createSlopePopulator(SrtmHeightSource heightSource) {
+            SlopeTileSampler slopeSampler = new SlopeTileSampler(heightSource);
+            return new ScaledByteRegionPopulator(slopeSampler, this.srtmRaster, Interpolation.Method.LINEAR);
+        }
+
+        private ScaledCoverRegionPopulator createCoverPopulator() {
+            GlobcoverSource globcoverSource = new GlobcoverSource(this.globcoverRaster, "globcover");
+            CoverTileSampler coverSampler = new CoverTileSampler(globcoverSource);
+            return new ScaledCoverRegionPopulator(coverSampler, this.globcoverRaster);
+        }
+
+        private OsmRegionPopulator createOsmPopulator() {
+            OverpassSource outlineSource = new OverpassSource(
+                    this.earthCoordinates,
+                    0.3,
+                    "osm/outline",
+                    new ResourceLocation(TerrariumEarth.MODID, "query/outline_overpass_query.oql"),
+                    1
+            );
+            OverpassSource generalSource = new OverpassSource(
+                    this.earthCoordinates,
+                    0.1,
+                    "osm/general",
+                    new ResourceLocation(TerrariumEarth.MODID, "query/general_overpass_query.oql"),
+                    2
+            );
+            OverpassSource detailSource = new OverpassSource(
+                    this.earthCoordinates,
+                    0.05,
+                    "osm/detailed",
+                    new ResourceLocation(TerrariumEarth.MODID, "query/detail_overpass_query.oql"),
+                    2
+            );
+            return new OsmRegionPopulator(
+                    new OsmSampler(outlineSource, this.earthCoordinates),
+                    new OsmSampler(generalSource, this.earthCoordinates),
+                    new OsmSampler(detailSource, this.earthCoordinates)
+            );
+        }
+
+        private Interpolation.Method selectInterpolationMethod(PropertyContainer properties) {
+            double scale = 1.0 / properties.getDouble(WORLD_SCALE);
+
+            Interpolation.Method interpolationMethod = Interpolation.Method.CUBIC;
+            if (scale >= 45.0) {
+                interpolationMethod = Interpolation.Method.LINEAR;
+            } else if (scale >= 20.0) {
+                interpolationMethod = Interpolation.Method.COSINE;
+            }
+
+            return interpolationMethod;
+        }
     }
 }

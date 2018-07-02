@@ -6,12 +6,10 @@ import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.chunk.ComposableBiomeProvider;
 import net.gegy1000.terrarium.server.world.chunk.ComposableChunkGenerator;
-import net.gegy1000.terrarium.server.world.generator.TerrariumGenerator;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumCustomization;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPreset;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPresetRegistry;
-import net.gegy1000.terrarium.server.world.pipeline.TerrariumDataProvider;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiCreateWorld;
 import net.minecraft.client.gui.GuiScreen;
@@ -70,14 +68,9 @@ public abstract class TerrariumWorldType extends WorldType {
         }
     }
 
-    public abstract TerrariumGenerator buildGenerator(World world, GenerationSettings settings);
-
-    public abstract TerrariumDataProvider buildDataProvider(World world, GenerationSettings settings);
+    public abstract TerrariumGeneratorInitializer createInitializer(World world, GenerationSettings settings);
 
     protected abstract TerrariumCustomization buildCustomization();
-
-    protected void collectCapabilities(TerrariumWorldData worldData) {
-    }
 
     @Override
     public final IChunkGenerator getChunkGenerator(World world, String settingsString) {

@@ -6,6 +6,7 @@ import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthCoverTypes;
 import net.gegy1000.earth.server.world.pipeline.composer.DebugSignDecorationComposer;
 import net.gegy1000.earth.server.world.pipeline.populator.DebugCoverRegionPopulator;
+import net.gegy1000.terrarium.server.world.TerrariumGeneratorInitializer;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
@@ -43,32 +44,8 @@ public class CoverDebugWorldType extends TerrariumWorldType {
     }
 
     @Override
-    public TerrariumGenerator buildGenerator(World world, GenerationSettings settings) {
-        CoordinateState zoneGeoCoordinates = new DebugLatLngCoordinateState();
-        List<ConstructedCover<?>> coverTypes = new ArrayList<>();
-        CoverGenerationContext.Default context = new CoverGenerationContext.Default(world, RegionComponentType.HEIGHT, RegionComponentType.COVER);
-        EarthCoverContext earthContext = new EarthCoverContext(world, RegionComponentType.HEIGHT, RegionComponentType.COVER, RegionComponentType.SLOPE, zoneGeoCoordinates, true);
-        coverTypes.add(new ConstructedCover<>(TerrariumCoverTypes.DEBUG, context));
-        coverTypes.add(new ConstructedCover<>(TerrariumCoverTypes.PLACEHOLDER, context));
-        coverTypes.addAll(EarthCoverTypes.COVER_TYPES.stream().map(type -> new ConstructedCover<>(type, earthContext)).collect(Collectors.toList()));
-        return BasicTerrariumGenerator.builder()
-                .withSurfaceComposer(new HeightmapSurfaceComposer(RegionComponentType.HEIGHT, Blocks.QUARTZ_BLOCK.getDefaultState()))
-                .withSurfaceComposer(new CoverSurfaceComposer(world, RegionComponentType.COVER, coverTypes, true,Blocks.QUARTZ_BLOCK.getDefaultState()))
-                .withSurfaceComposer(new BedrockSurfaceComposer(world, Blocks.BEDROCK.getDefaultState(), 0))
-                .withDecorationComposer(new CoverDecorationComposer(world, RegionComponentType.COVER, coverTypes))
-                .withDecorationComposer(new DebugSignDecorationComposer(RegionComponentType.HEIGHT))
-                .withBiomeComposer(new CoverBiomeComposer(RegionComponentType.COVER, coverTypes))
-                .withSpawnPosition(Coordinate.fromBlock(0.0, 0.0))
-                .build();
-    }
-
-    @Override
-    public TerrariumDataProvider buildDataProvider(World world, GenerationSettings settings) {
-        return TerrariumDataProvider.builder()
-                .withComponent(RegionComponentType.HEIGHT, new ConstantShortRegionPopulator((short) 62))
-                .withComponent(RegionComponentType.SLOPE, new ConstantByteRegionPopulator((byte) 0))
-                .withComponent(RegionComponentType.COVER, new DebugCoverRegionPopulator())
-                .build();
+    public TerrariumGeneratorInitializer createInitializer(World world, GenerationSettings settings) {
+        return new Initializer(world);
     }
 
     @Override
@@ -84,5 +61,47 @@ public class CoverDebugWorldType extends TerrariumWorldType {
     @Override
     public boolean handleSlimeSpawnReduction(Random random, World world) {
         return true;
+    }
+
+    private static class Initializer implements TerrariumGeneratorInitializer {
+        private final World world;
+
+        private Initializer(World world) {
+            this.world = world;
+        }
+
+        @Override
+        public TerrariumGenerator buildGenerator() {
+            CoordinateState zoneGeoCoordinates = new DebugLatLngCoordinateState();
+            List<ConstructedCover<?>> coverTypes = this.buildCoverTypes(zoneGeoCoordinates);
+            return BasicTerrariumGenerator.builder()
+                    .withSurfaceComposer(new HeightmapSurfaceComposer(RegionComponentType.HEIGHT, Blocks.QUARTZ_BLOCK.getDefaultState()))
+                    .withSurfaceComposer(new CoverSurfaceComposer(this.world, RegionComponentType.COVER, coverTypes, true,Blocks.QUARTZ_BLOCK.getDefaultState()))
+                    .withSurfaceComposer(new BedrockSurfaceComposer(this.world, Blocks.BEDROCK.getDefaultState(), 0))
+                    .withDecorationComposer(new CoverDecorationComposer(this.world, RegionComponentType.COVER, coverTypes))
+                    .withDecorationComposer(new DebugSignDecorationComposer(RegionComponentType.HEIGHT))
+                    .withBiomeComposer(new CoverBiomeComposer(RegionComponentType.COVER, coverTypes))
+                    .withSpawnPosition(Coordinate.fromBlock(0.0, 0.0))
+                    .build();
+        }
+
+        private List<ConstructedCover<?>> buildCoverTypes(CoordinateState zoneGeoCoordinates) {
+            List<ConstructedCover<?>> coverTypes = new ArrayList<>();
+            CoverGenerationContext.Default context = new CoverGenerationContext.Default(this.world, RegionComponentType.HEIGHT, RegionComponentType.COVER);
+            EarthCoverContext earthContext = new EarthCoverContext(this.world, RegionComponentType.HEIGHT, RegionComponentType.COVER, RegionComponentType.SLOPE, zoneGeoCoordinates, true);
+            coverTypes.add(new ConstructedCover<>(TerrariumCoverTypes.DEBUG, context));
+            coverTypes.add(new ConstructedCover<>(TerrariumCoverTypes.PLACEHOLDER, context));
+            coverTypes.addAll(EarthCoverTypes.COVER_TYPES.stream().map(type -> new ConstructedCover<>(type, earthContext)).collect(Collectors.toList()));
+            return coverTypes;
+        }
+
+        @Override
+        public TerrariumDataProvider buildDataProvider() {
+            return TerrariumDataProvider.builder()
+                    .withComponent(RegionComponentType.HEIGHT, new ConstantShortRegionPopulator((short) 62))
+                    .withComponent(RegionComponentType.SLOPE, new ConstantByteRegionPopulator((byte) 0))
+                    .withComponent(RegionComponentType.COVER, new DebugCoverRegionPopulator())
+                    .build();
+        }
     }
 }

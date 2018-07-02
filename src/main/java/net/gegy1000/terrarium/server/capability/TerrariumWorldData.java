@@ -1,6 +1,7 @@
 package net.gegy1000.terrarium.server.capability;
 
 import com.google.common.base.Strings;
+import net.gegy1000.terrarium.server.world.TerrariumGeneratorInitializer;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.generator.ChunkCompositionProcedure;
@@ -34,8 +35,9 @@ public interface TerrariumWorldData extends ICapabilityProvider {
                 this.settings = GenerationSettings.deserialize(generatorOptions);
             }
 
-            this.generator = worldType.buildGenerator(world, this.settings);
-            this.regionHandler = new GenerationRegionHandler(this.settings, worldType.buildDataProvider(world, this.settings));
+            TerrariumGeneratorInitializer initializer = worldType.createInitializer(world, this.settings);
+            this.generator = initializer.buildGenerator();
+            this.regionHandler = new GenerationRegionHandler(this.settings, initializer.buildDataProvider());
         }
 
         @Override
