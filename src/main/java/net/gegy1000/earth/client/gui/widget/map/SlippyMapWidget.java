@@ -3,6 +3,7 @@ package net.gegy1000.earth.client.gui.widget.map;
 import net.gegy1000.earth.client.gui.widget.map.component.MapComponent;
 import net.gegy1000.terrarium.client.gui.GuiRenderUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -22,6 +23,7 @@ import java.util.List;
 @SideOnly(Side.CLIENT)
 public class SlippyMapWidget extends Gui {
     private static final Minecraft MC = Minecraft.getMinecraft();
+    private static final String ATTRIBUTION = "© OpenStreetMap Contributors";
 
     private final int x;
     private final int y;
@@ -89,11 +91,21 @@ public class SlippyMapWidget extends Gui {
             component.onDrawMap(this.map, resolution, mouseX - this.x, mouseY - this.y);
         }
 
-        GlStateManager.disableBlend();
-        GlStateManager.disableAlpha();
-
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
         GlStateManager.popMatrix();
+
+        int maxX = this.x + this.width - 4;
+        int maxY = this.y + this.height - 4;
+
+        FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
+        int attributionWidth = fontRenderer.getStringWidth(ATTRIBUTION) + 20;
+        int attributionOriginX = maxX - attributionWidth;
+        int attributionOriginY = maxY - fontRenderer.FONT_HEIGHT - 4;
+        drawRect(attributionOriginX, attributionOriginY, maxX, maxY, 0xC0101010);
+        fontRenderer.drawString(ATTRIBUTION, attributionOriginX + 10, attributionOriginY + fontRenderer.FONT_HEIGHT / 2 - 1, 0xFFFFFFFF);
+
+        GlStateManager.disableBlend();
+        GlStateManager.disableAlpha();
 
         int scroll = Mouse.getDWheel();
         if (this.isSelected(mouseX, mouseY)) {
