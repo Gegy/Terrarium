@@ -1,0 +1,7 @@
+{
+  "world_type": "earth:debug_generator",
+  "name": "debug_default",
+  "icon": "earth:debug_default",
+  "properties": {
+  }
+}

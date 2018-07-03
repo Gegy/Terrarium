@@ -1,25 +1,17 @@
-# Generators
-
-generator.terrarium.earth=Terrarium
-generator.terrarium.debug=Terrarium Debug
-
 # GUI
 
 gui.terrarium.accept=Accept
 gui.terrarium.preset=Set Preset
-gui.terrarium.spawnpoint=Set Spawn
 
-gui.terrarium.remote_data_warning.1=Warning: Terrarium downloads data from the Internet!
-gui.terrarium.remote_data_warning.2=To generate chunks, GIS data is required for height and biomes.
-gui.terrarium.remote_data_warning.3=This may lead to large data usage, depending on the chunks generated.
-gui.terrarium.remote_data_warning.4=(Data is only requested for chunks that players view, and then is cached)
-
-gui.terrarium.credits=Terrarium data provided by:
+gui.terrarium.remote_data_warning.1=Warning: Terrarium may download data from the Internet!
+gui.terrarium.remote_data_warning.2=Various data may be required for chunk generation.
+gui.terrarium.remote_data_warning.3=This can lead to large data usage, depending on the chunks generated.
+gui.terrarium.remote_data_warning.4=(Data is only requested for chunks that players view, and is then cached)
 
 gui.terrarium.select_preset.name=Select World Preset
 
-options.terrarium.customize_earth_title.name=Customize Earth Generation
-options.terrarium.preview_earth_title.name=Preview Earth Generation
+options.terrarium.customize_world_title.name=Customize World Generation
+options.terrarium.preview_world_title.name=Preview World Generation
 
 state.terrarium.cached.name=Retrieving Cached Data
 state.terrarium.online.name=Retrieving Online Data
@@ -29,54 +21,8 @@ state.terrarium.cached.tooltip=Loading geographical data from local cache
 state.terrarium.online.tooltip=Loading geographical data from online source
 state.terrarium.no_connection.tooltip=Unable to load geographical data. Check your internet connection!
 
-# Customization Settings
-
-setting.terrarium.scale.name=World Scale
-setting.terrarium.height_scale.name=Height Scale
-setting.terrarium.scatter.name=Scatter Range
-setting.terrarium.height_offset.name=Sea Level
-setting.terrarium.decorate.name=Decorate
-setting.terrarium.map_features.name=Vanilla Map Features
-setting.terrarium.buildings.name=Buildings
-setting.terrarium.streets.name=Streets
-setting.terrarium.cave_gen.name=Cave Generation
-setting.terrarium.resource_generation.name=Resource Generation
-setting.terrarium.noise_scale.name=Noise Scale
-setting.terrarium.beach_size.name=Beach Size
-
-setting.terrarium.scale.tooltip=The amount of meters in real life representing one block in-game
-setting.terrarium.height_scale.tooltip=Elevation multiplier from meters to blocks
-setting.terrarium.scatter.tooltip=Range in blocks that biomes should be scattered
-setting.terrarium.height_offset.tooltip=The height in-game that corresponds to sea-level
-setting.terrarium.decorate.tooltip=If enabled, decorations such as plants and trees will be placed
-setting.terrarium.map_features.tooltip=If enabled, all vanilla map feature such as temples will be generated
-setting.terrarium.buildings.tooltip=If enabled, buildings from OpenStreetMap will be generated
-setting.terrarium.streets.tooltip=If enabled, streets from OpenStreetMap will be generated
-setting.terrarium.cave_gen.tooltip=If enabled, caves and ravines will be generated randomly
-setting.terrarium.resource_generation.tooltip=If enabled, resources will be randomly generated throughout in the world
-setting.terrarium.noise_scale.tooltip=Multiplier for the effect of random noise generation in height to be applied to the world. 0 = no noise, 1 = default noise
-setting.terrarium.beach.tooltip=Radius in blocks for beaches to be generated around coastlines
-
-setting.terrarium.slider_default.name=Default: %.2f, Range: [%.2f-%.2f]
-setting.terrarium.default.name=Default: %s
-setting.terrarium.slider_fine.name=Hold SHIFT to fine tune
-
-# Presets
-
-preset.terrarium.city.name=City
-preset.terrarium.city.desc=City
-
-preset.terrarium.default.name=Default
-preset.terrarium.default.desc=Default
-
-preset.terrarium.spikey.name=Spikey
-preset.terrarium.spikey.desc=Spikey
-
-preset.terrarium.survival_city.name=Survival City
-preset.terrarium.survival_city.desc=Survival City
-
-preset.terrarium.survival.name=Survival
-preset.terrarium.survival.desc=Survival
+property.terrarium.slider_range.name=Range: [%.2f-%.2f]
+property.terrarium.slider_fine.name=Hold SHIFT to fine tune
 
 # Config
 
@@ -84,11 +30,3 @@ config.terrarium.enable_data_status_icon=Enable Data Status Icon
 config.terrarium.enable_data_status_icon.tooltip=If true, the current status for data streaming will be displayed in the top left corner of the screen
 config.terrarium.accept_remote_data=Accepted Remote Data Warning
 config.terrarium.accept_remote_data.tooltip=If true, you will no longer be warned about remote data usage. (Automatically set through GUI)
-
-# Commands
-
-commands.terrarium.geotp.usage=geotp <latitude> <longitude> OR geotp <place>
-commands.terrarium.geotp.wrong_world=Cannot use command in this world
-commands.terrarium.geotp.not_found=Could not find "%s"
-commands.terrarium.geotp.success=Successfully teleported to %s, %s
-commands.terrarium.geotp.error=An error occurred while finding "%s": %s: %s

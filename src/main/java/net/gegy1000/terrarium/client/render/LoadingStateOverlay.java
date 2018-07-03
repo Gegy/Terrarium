@@ -5,14 +5,14 @@ import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.client.ClientEventHandler;
 import net.gegy1000.terrarium.client.gui.GuiRenderUtils;
 import net.gegy1000.terrarium.server.config.TerrariumConfig;
-import net.gegy1000.terrarium.server.map.source.LoadingState;
-import net.gegy1000.terrarium.server.map.source.LoadingStateHandler;
+import net.gegy1000.terrarium.server.world.pipeline.source.LoadingState;
+import net.gegy1000.terrarium.server.world.pipeline.source.LoadingStateHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -41,8 +41,8 @@ public class LoadingStateOverlay {
                 Gui.drawModalRectWithCustomSizedTexture(10, 10, frame * 10, state.getTextureY(), 10, 10, 256, 256);
 
                 if (mouseX >= 10 && mouseY >= 10 && mouseX <= 20 && mouseY <= 20) {
-                    String name = TextFormatting.WHITE + I18n.translateToLocal(state.getLanguageKey() + ".name");
-                    String tooltip = TextFormatting.GRAY + I18n.translateToLocal(state.getLanguageKey() + ".tooltip");
+                    String name = TextFormatting.WHITE + I18n.format(state.getLanguageKey() + ".name");
+                    String tooltip = TextFormatting.GRAY + I18n.format(state.getLanguageKey() + ".tooltip");
                     GuiRenderUtils.drawTooltip(Lists.newArrayList(name, tooltip), mouseX, mouseY);
                 }
             }
@@ -62,5 +62,4 @@ public class LoadingStateOverlay {
             GlStateManager.disableAlpha();
         }
     }
-
 }

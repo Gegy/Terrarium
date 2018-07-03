@@ -1,7 +1,6 @@
 package net.gegy1000.terrarium.client;
 
 import net.gegy1000.terrarium.Terrarium;
-import net.gegy1000.terrarium.client.render.LoadingScreenOverlay;
 import net.gegy1000.terrarium.server.ServerProxy;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiCreateWorld;
@@ -33,9 +32,6 @@ public class ClientProxy extends ServerProxy {
         } catch (ReflectiveOperationException e) {
             Terrarium.LOGGER.warn("Failed to reflect action performed", e);
         }
-
-        LoadingScreenOverlay.onPostInit();
-        LoadingWorldGetter.onPostInit();
     }
 
     private static Field reflectSelectedWorldType() throws ReflectiveOperationException {

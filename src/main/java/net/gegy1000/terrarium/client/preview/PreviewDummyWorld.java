@@ -1,7 +1,6 @@
 package net.gegy1000.terrarium.client.preview;
 
-import net.gegy1000.terrarium.Terrarium;
-import net.gegy1000.terrarium.server.world.EarthGenerationSettings;
+import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.world.GameType;
@@ -9,6 +8,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldProviderSurface;
 import net.minecraft.world.WorldSettings;
+import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.IChunkLoader;
@@ -23,20 +23,19 @@ import java.io.File;
 
 @SideOnly(Side.CLIENT)
 public class PreviewDummyWorld extends World {
-    public PreviewDummyWorld(EarthGenerationSettings settings) {
-        super(new SaveHandler(), new WorldInfo(createSettings(settings), "terrarium_preview"), new WorldProviderSurface(), new Profiler(), false);
+    public PreviewDummyWorld(WorldType worldType, GenerationSettings settings) {
+        super(new SaveHandler(), new WorldInfo(createSettings(worldType, settings), "terrarium_preview"), new WorldProviderSurface(), new Profiler(), false);
+        this.initCapabilities();
 
         int dimension = this.provider.getDimension();
         this.provider.setWorld(this);
         this.provider.setDimension(dimension);
         this.chunkProvider = this.createChunkProvider();
-
-        this.initCapabilities();
     }
 
-    private static WorldSettings createSettings(EarthGenerationSettings settings) {
-        WorldSettings worldSettings = new WorldSettings(0, GameType.ADVENTURE, false, false, Terrarium.EARTH_TYPE);
-        worldSettings.setGeneratorOptions(settings.serialize());
+    private static WorldSettings createSettings(WorldType worldType, GenerationSettings settings) {
+        WorldSettings worldSettings = new WorldSettings(0, GameType.ADVENTURE, false, false, worldType);
+        worldSettings.setGeneratorOptions(settings.serializeString());
         return worldSettings;
     }
 

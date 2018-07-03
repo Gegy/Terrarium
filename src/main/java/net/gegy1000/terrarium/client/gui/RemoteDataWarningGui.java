@@ -5,9 +5,9 @@ import net.gegy1000.terrarium.server.config.TerrariumConfig;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.realms.RealmsBridge;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.ConfigManager;
 
@@ -26,8 +26,8 @@ public class RemoteDataWarningGui extends GuiScreen {
     @Override
     public void initGui() {
         this.buttonList.clear();
-        this.addButton(new GuiButton(ACCEPT_ID, this.width / 2 - 155, this.height - 28, 150, 20, I18n.translateToLocal("gui.terrarium.accept")));
-        this.addButton(new GuiButton(CANCEL_ID, this.width / 2 + 5, this.height - 28, 150, 20, I18n.translateToLocal("gui.cancel")));
+        this.addButton(new GuiButton(ACCEPT_ID, this.width / 2 - 155, this.height - 28, 150, 20, I18n.format("gui.terrarium.accept")));
+        this.addButton(new GuiButton(CANCEL_ID, this.width / 2 + 5, this.height - 28, 150, 20, I18n.format("gui.cancel")));
     }
 
     public void setParent(GuiScreen parent) {
@@ -65,11 +65,11 @@ public class RemoteDataWarningGui extends GuiScreen {
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         this.drawDefaultBackground();
 
-        this.drawCenteredString(this.fontRenderer, TextFormatting.RED.toString() + TextFormatting.BOLD + I18n.translateToLocal("gui.terrarium.remote_data_warning.1"), this.width / 2, this.height / 2 - 24, 0xFFFFFF);
+        this.drawCenteredString(this.fontRenderer, TextFormatting.RED.toString() + TextFormatting.BOLD + I18n.format("gui.terrarium.remote_data_warning.1"), this.width / 2, this.height / 2 - 24, 0xFFFFFF);
 
-        this.drawCenteredString(this.fontRenderer, TextFormatting.ITALIC + I18n.translateToLocal("gui.terrarium.remote_data_warning.2"), this.width / 2, this.height / 2 - 9, 0xFFFFFF);
-        this.drawCenteredString(this.fontRenderer, TextFormatting.ITALIC + I18n.translateToLocal("gui.terrarium.remote_data_warning.3"), this.width / 2, this.height / 2, 0xFFFFFF);
-        this.drawCenteredString(this.fontRenderer, TextFormatting.ITALIC + I18n.translateToLocal("gui.terrarium.remote_data_warning.4"), this.width / 2, this.height / 2 + 9, 0xFFFFFF);
+        this.drawCenteredString(this.fontRenderer, TextFormatting.ITALIC + I18n.format("gui.terrarium.remote_data_warning.2"), this.width / 2, this.height / 2 - 9, 0xFFFFFF);
+        this.drawCenteredString(this.fontRenderer, TextFormatting.ITALIC + I18n.format("gui.terrarium.remote_data_warning.3"), this.width / 2, this.height / 2, 0xFFFFFF);
+        this.drawCenteredString(this.fontRenderer, TextFormatting.ITALIC + I18n.format("gui.terrarium.remote_data_warning.4"), this.width / 2, this.height / 2 + 9, 0xFFFFFF);
 
         super.drawScreen(mouseX, mouseY, partialTicks);
     }

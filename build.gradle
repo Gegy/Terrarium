@@ -20,7 +20,7 @@ archivesBaseName = "terrarium"
 sourceCompatibility = targetCompatibility = "1.8"
 
 minecraft {
-  version = "1.12.2-14.23.1.2555"
+  version = "1.12.2-14.23.4.2705"
   runDir = "minecraft"
   mappings = "snapshot_20180125"
 }
@@ -40,13 +40,16 @@ configurations {
 }
 
 dependencies {
+  // TODO: Use jar-in-jar embedding
   embed 'de.topobyte:osm4j-core:0.0.15'
   embed 'de.topobyte:osm4j-utils:0.0.20'
-  embed 'de.topobyte:osm4j-geometry:0.0.10'
+  embed files('libs/osm4j-geometry-0.1.0.jar')
 }
 
 jar {
-  from configurations.embed.collect {
+  from configurations.embed.filter {
+    !(it.name.startsWith("osm4j-geometry-0.0.9") || it.name.contains("guava") || it.name.contains("trove") || it.name.contains("log4j") || it.name.contains("slf4j") || it.name.contains("commons"))
+  }.collect {
     exclude 'META-INF/LICENSE.txt'
     exclude 'META-INF/NOTICE.txt'
     it.isDirectory() ? it : zipTree(it)
@@ -89,7 +92,7 @@ String getModField(String type, String mod_file) {
     return ""
   }
   String field = ""
-  String prefix = "public static final $type = \""
+  String prefix = "public static final String $type = \""
   File file = file(mod_file)
   file.eachLine { String s ->
     s = s.trim()

@@ -1,22 +1,20 @@
 package net.gegy1000.terrarium.server;
 
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
-import net.gegy1000.terrarium.server.map.source.TerrariumRemoteData;
-import net.gegy1000.terrarium.server.map.source.height.HeightSource;
+import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPresetRegistry;
+import net.gegy1000.terrarium.server.world.pipeline.source.CachedRemoteSource;
 
 public class ServerProxy {
     public void onPreInit() {
-        TerrariumCapabilities.onPreInit();
+        if (!CachedRemoteSource.GLOBAL_CACHE_ROOT.exists()) {
+            CachedRemoteSource.GLOBAL_CACHE_ROOT.mkdirs();
+        }
 
-        Thread thread = new Thread(() -> {
-            TerrariumRemoteData.loadInfo();
-            HeightSource.loadValidTiles();
-        }, "Terrarium Remote Load");
-        thread.setDaemon(true);
-        thread.start();
+        TerrariumCapabilities.onPreInit();
     }
 
     public void onInit() {
+        TerrariumPresetRegistry.onInit();
     }
 
     public void onPostInit() {

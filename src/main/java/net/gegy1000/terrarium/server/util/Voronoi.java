@@ -24,7 +24,7 @@ public class Voronoi {
         this.seed = this.random.nextLong() ^ this.random.nextLong();
     }
 
-    public <T> T[] scale(T[] input, T[] output, int seedOffsetX, int seedOffsetY,
+    public <T> void scale(T[] input, T[] output, int seedOffsetX, int seedOffsetY,
                          int width, int height, int scaledWidth, int scaledHeight,
                          double scaleFactorX, double scaleFactorY, double originOffsetX, double originOffsetY
     ) {
@@ -43,8 +43,6 @@ public class Voronoi {
                 output[scaledX + scaledY * scaledWidth] = cellValue;
             }
         }
-
-        return output;
     }
 
     private <T> T getCellValue(T[] input, int seedOffsetX, int seedOffsetY,
