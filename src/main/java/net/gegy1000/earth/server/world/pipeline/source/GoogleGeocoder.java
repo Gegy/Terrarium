@@ -5,10 +5,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.gegy1000.terrarium.Terrarium;
-import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
-import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.pipeline.source.Geocoder;
 
+import javax.vecmath.Vector2d;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -25,14 +24,8 @@ public class GoogleGeocoder implements Geocoder {
 
     private static final JsonParser JSON_PARSER = new JsonParser();
 
-    private final CoordinateState latLngCoordinateState;
-
-    public GoogleGeocoder(CoordinateState coordinateState) {
-        this.latLngCoordinateState = coordinateState;
-    }
-
     @Override
-    public Coordinate get(String place) throws IOException {
+    public Vector2d get(String place) throws IOException {
         String key = EarthRemoteData.info.getGeocoderKey();
 
         HttpURLConnection connection = (HttpURLConnection) new URL(String.format(GEOCODER_ADDRESS, URLEncoder.encode(place, "UTF-8"), key)).openConnection();
@@ -57,7 +50,7 @@ public class GoogleGeocoder implements Geocoder {
                         JsonObject geometry = result.getAsJsonObject("geometry");
                         JsonObject location = geometry.getAsJsonObject("location");
 
-                        return new Coordinate(this.latLngCoordinateState, location.get("lat").getAsDouble(), location.get("lng").getAsDouble());
+                        return new Vector2d(location.get("lat").getAsDouble(), location.get("lng").getAsDouble());
                     }
                 }
             }

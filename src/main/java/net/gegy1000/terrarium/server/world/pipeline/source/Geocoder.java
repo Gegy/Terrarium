@@ -1,12 +1,11 @@
 package net.gegy1000.terrarium.server.world.pipeline.source;
 
-import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
-
+import javax.vecmath.Vector2d;
 import java.io.IOException;
 import java.util.List;
 
 public interface Geocoder {
-    Coordinate get(String place) throws IOException;
+    Vector2d get(String place) throws IOException;
 
     List<String> suggestCommand(String place) throws IOException;
 

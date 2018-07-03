@@ -36,6 +36,12 @@ public class SlippyMap {
         return this.cache.getTile(pos);
     }
 
+    public void focus(double latitude, double longitude, int zoom) {
+        int scale = new ScaledResolution(MC).getScaleFactor();
+        SlippyMapPoint point = new SlippyMapPoint(latitude, longitude);
+        this.camera.focus(point.getX(zoom), point.getY(zoom), zoom, this.width * scale, this.height * scale);
+    }
+
     public void zoom(int step, int pivotX, int pivotY) {
         int scale = new ScaledResolution(MC).getScaleFactor();
         this.camera.zoom(step, pivotX * scale, pivotY * scale);
@@ -112,6 +118,11 @@ public class SlippyMap {
 
         private Camera(SlippyMapPoint origin, int width, int height) {
             this.origin = origin.translate(-width / 2, -height / 2, this.zoom);
+        }
+
+        public void focus(int x, int y, int zoom, int width, int height) {
+            this.origin = new SlippyMapPoint(x, y, zoom).translate(-width / 2, -height / 2, zoom);
+            this.zoom = zoom;
         }
 
         public void pan(int deltaX, int deltaY) {

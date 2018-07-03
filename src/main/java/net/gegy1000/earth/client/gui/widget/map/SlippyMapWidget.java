@@ -1,7 +1,7 @@
 package net.gegy1000.earth.client.gui.widget.map;
 
-import net.gegy1000.terrarium.client.gui.GuiRenderUtils;
 import net.gegy1000.earth.client.gui.widget.map.component.MapComponent;
+import net.gegy1000.terrarium.client.gui.GuiRenderUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
@@ -44,6 +44,10 @@ public class SlippyMapWidget extends Gui {
         this.height = height;
 
         this.map = new SlippyMap(width, height);
+    }
+
+    public SlippyMap getMap() {
+        return this.map;
     }
 
     public void addComponent(MapComponent component) {

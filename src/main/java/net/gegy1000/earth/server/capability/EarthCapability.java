@@ -30,7 +30,7 @@ public interface EarthCapability extends ICapabilityProvider {
 
         public Impl(CoordinateState geoCoordinate) {
             this.geoCoordinate = geoCoordinate;
-            this.geocoder = new GoogleGeocoder(geoCoordinate);
+            this.geocoder = new GoogleGeocoder();
         }
 
         @Override

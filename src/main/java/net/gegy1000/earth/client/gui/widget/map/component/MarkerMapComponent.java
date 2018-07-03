@@ -1,8 +1,8 @@
 package net.gegy1000.earth.client.gui.widget.map.component;
 
-import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.earth.client.gui.widget.map.SlippyMap;
 import net.gegy1000.earth.client.gui.widget.map.SlippyMapPoint;
+import net.gegy1000.terrarium.Terrarium;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
@@ -41,6 +41,10 @@ public class MarkerMapComponent implements MapComponent {
     public void onMapClicked(SlippyMap map, ScaledResolution resolution, int mouseX, int mouseY) {
         int scale = resolution.getScaleFactor();
         this.marker = new SlippyMapPoint(mouseX * scale + map.getCameraX(), mouseY * scale + map.getCameraY(), map.getCameraZoom());
+    }
+
+    public void moveMarker(double latitude, double longitude) {
+        this.marker = new SlippyMapPoint(latitude, longitude);
     }
 
     public SlippyMapPoint getMarker() {

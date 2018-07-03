@@ -17,6 +17,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.chunk.Chunk;
 
 import javax.annotation.Nullable;
+import javax.vecmath.Vector2d;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -141,18 +142,17 @@ public class GeoTeleportCommand extends CommandBase {
 
         @Override
         public Coordinate getCoordinate(ICommandSender sender, EarthCapability worldData) throws CommandException {
-            Coordinate geocode;
             try {
-                geocode = worldData.getGeocoder().get(this.place);
-            } catch (Exception e) {
+                Vector2d coordinate = worldData.getGeocoder().get(this.place);
+                if (coordinate == null) {
+                    throw OptionallyDeferredTranslator.createException(sender, "commands.earth.geotp.not_found", this.place);
+                }
+
+                return new Coordinate(worldData.getGeoCoordinate(), coordinate.getX(), coordinate.getY());
+            } catch (IOException e) {
                 Terrarium.LOGGER.error("Failed to get geocode for {}", this.place, e);
                 throw OptionallyDeferredTranslator.createException(sender, "commands.earth.geotp.error", this.place, e.getClass().getSimpleName(), e.getMessage());
             }
-
-            if (geocode == null) {
-                throw OptionallyDeferredTranslator.createException(sender, "commands.earth.geotp.not_found", this.place);
-            }
-            return geocode;
         }
     }
 }
