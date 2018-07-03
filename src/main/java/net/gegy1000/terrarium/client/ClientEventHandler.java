@@ -3,6 +3,7 @@ package net.gegy1000.terrarium.client;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.client.gui.RemoteDataWarningGui;
 import net.gegy1000.terrarium.server.config.TerrariumConfig;
+import net.gegy1000.terrarium.server.message.TerrariumHandshakeMessage;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
@@ -27,16 +28,23 @@ public class ClientEventHandler {
     private static int gameTicks = 0;
 
     private static boolean awaitingLoad;
+    private static boolean handshakeQueued;
 
     @SubscribeEvent
     public static void onTick(TickEvent.ClientTickEvent event) {
         if (event.phase == TickEvent.Phase.END) {
             gameTicks++;
 
-            if (awaitingLoad && MC.player != null && MC.player.ticksExisted > 10) {
-                awaitingLoad = false;
-                if (!TerrariumConfig.acceptedRemoteDataWarning) {
-                    MC.displayGuiScreen(new RemoteDataWarningGui(MC.currentScreen));
+            if (MC.player != null && MC.player.ticksExisted > 1) {
+                if (awaitingLoad) {
+                    awaitingLoad = false;
+                    if (!TerrariumConfig.acceptedRemoteDataWarning) {
+                        MC.displayGuiScreen(new RemoteDataWarningGui(MC.currentScreen));
+                    }
+                }
+                if (handshakeQueued) {
+                    handshakeQueued = false;
+                    Terrarium.network.sendToServer(new TerrariumHandshakeMessage());
                 }
             }
         }
@@ -45,8 +53,13 @@ public class ClientEventHandler {
     @SubscribeEvent
     public static void onJoinWorld(WorldEvent.Load event) {
         World world = event.getWorld();
-        if (world.isRemote && world.getWorldType() instanceof TerrariumWorldType && MC.isIntegratedServerRunning()) {
-            awaitingLoad = true;
+        if (world.isRemote) {
+            if (world.getWorldType() instanceof TerrariumWorldType && MC.isIntegratedServerRunning()){
+                awaitingLoad = true;
+            }
+            if (Terrarium.serverHasMod) {
+                handshakeQueued = true;
+            }
         }
     }
 

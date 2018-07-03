@@ -88,7 +88,7 @@ public class CoverDebugWorldType extends TerrariumWorldType {
         private List<ConstructedCover<?>> buildCoverTypes(CoordinateState zoneGeoCoordinates) {
             List<ConstructedCover<?>> coverTypes = new ArrayList<>();
             CoverGenerationContext.Default context = new CoverGenerationContext.Default(this.world, RegionComponentType.HEIGHT, RegionComponentType.COVER);
-            EarthCoverContext earthContext = new EarthCoverContext(this.world, RegionComponentType.HEIGHT, RegionComponentType.COVER, RegionComponentType.SLOPE, zoneGeoCoordinates, true);
+            EarthCoverContext earthContext = new EarthCoverContext(this.world, RegionComponentType.HEIGHT, RegionComponentType.COVER, RegionComponentType.SLOPE, zoneGeoCoordinates, false);
             coverTypes.add(new ConstructedCover<>(TerrariumCoverTypes.DEBUG, context));
             coverTypes.add(new ConstructedCover<>(TerrariumCoverTypes.PLACEHOLDER, context));
             coverTypes.addAll(EarthCoverTypes.COVER_TYPES.stream().map(type -> new ConstructedCover<>(type, earthContext)).collect(Collectors.toList()));

@@ -16,6 +16,14 @@ public interface EarthCapability extends ICapabilityProvider {
 
     CoordinateState getGeoCoordinate();
 
+    double getLatitude(double x, double z);
+
+    double getLongitude(double x, double z);
+
+    double getX(double latitude, double longitude);
+
+    double getZ(double latitude, double longitude);
+
     class Impl implements EarthCapability {
         private final CoordinateState geoCoordinate;
         private final Geocoder geocoder;
@@ -33,6 +41,26 @@ public interface EarthCapability extends ICapabilityProvider {
         @Override
         public CoordinateState getGeoCoordinate() {
             return this.geoCoordinate;
+        }
+
+        @Override
+        public double getLatitude(double x, double z) {
+            return this.geoCoordinate.getX(x, z);
+        }
+
+        @Override
+        public double getLongitude(double x, double z) {
+            return this.geoCoordinate.getZ(x, z);
+        }
+
+        @Override
+        public double getX(double latitude, double longitude) {
+            return this.geoCoordinate.getBlockX(latitude, longitude);
+        }
+
+        @Override
+        public double getZ(double latitude, double longitude) {
+            return this.geoCoordinate.getBlockZ(latitude, longitude);
         }
 
         @Override
