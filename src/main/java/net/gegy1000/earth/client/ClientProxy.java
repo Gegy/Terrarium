@@ -8,9 +8,15 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class ClientProxy extends ServerProxy {
     @Override
-    public void onPostInit() {
-        super.onPostInit();
+    public void onPreInit() {
+    }
 
+    @Override
+    public void onInit() {
+    }
+
+    @Override
+    public void onPostInit() {
         LoadingScreenOverlay.onPostInit();
         LoadingWorldGetter.onPostInit();
     }

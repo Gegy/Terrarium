@@ -34,7 +34,7 @@ public class GeoTeleportCommand extends CommandBase {
 
     @Override
     public String getUsage(ICommandSender sender) {
-        return "commands.earth.geotp.usage";
+        return OptionallyDeferredTranslator.translateString(sender, "commands.earth.geotp.usage");
     }
 
     @Override
@@ -48,9 +48,9 @@ public class GeoTeleportCommand extends CommandBase {
 
             // TODO: Don't block the server while loading generation region and geocode
             CommandLocation location = this.parseLocation(sender, locationInput);
-            this.teleport(player, location.getCoordinate(earthData));
+            this.teleport(player, location.getCoordinate(sender, earthData));
         } else {
-            throw new WrongUsageException("commands.earth.geotp.wrong_world");
+            throw OptionallyDeferredTranslator.createException(player, "commands.earth.geotp.wrong_world");
         }
     }
 
@@ -110,11 +110,11 @@ public class GeoTeleportCommand extends CommandBase {
         int height = chunk.getHeightValue(blockX & 15, blockZ & 15);
 
         player.connection.setPlayerLocation(coordinate.getBlockX(), height + 0.5, coordinate.getBlockZ(), 180.0F, 0.0F);
-        player.sendMessage(new TextComponentTranslation("commands.terrarium.geotp.success", coordinate.getX(), coordinate.getZ()));
+        player.sendMessage(OptionallyDeferredTranslator.translate(player, new TextComponentTranslation("commands.earth.geotp.success", coordinate.getX(), coordinate.getZ())));
     }
 
     private interface CommandLocation {
-        Coordinate getCoordinate(EarthCapability worldData) throws CommandException;
+        Coordinate getCoordinate(ICommandSender sender, EarthCapability worldData) throws CommandException;
     }
 
     private class CoordinateLocation implements CommandLocation {
@@ -127,7 +127,7 @@ public class GeoTeleportCommand extends CommandBase {
         }
 
         @Override
-        public Coordinate getCoordinate(EarthCapability worldData) {
+        public Coordinate getCoordinate(ICommandSender sender, EarthCapability worldData) {
             return new Coordinate(worldData.getGeoCoordinate(), this.latitude, this.longitude);
         }
     }
@@ -140,17 +140,17 @@ public class GeoTeleportCommand extends CommandBase {
         }
 
         @Override
-        public Coordinate getCoordinate(EarthCapability worldData) throws CommandException {
+        public Coordinate getCoordinate(ICommandSender sender, EarthCapability worldData) throws CommandException {
             Coordinate geocode;
             try {
                 geocode = worldData.getGeocoder().get(this.place);
             } catch (Exception e) {
                 Terrarium.LOGGER.error("Failed to get geocode for {}", this.place, e);
-                throw new WrongUsageException("commands.earth.geotp.error", this.place, e.getClass().getSimpleName(), e.getMessage());
+                throw OptionallyDeferredTranslator.createException(sender, "commands.earth.geotp.error", this.place, e.getClass().getSimpleName(), e.getMessage());
             }
 
             if (geocode == null) {
-                throw new WrongUsageException("commands.earth.geotp.not_found", this.place);
+                throw OptionallyDeferredTranslator.createException(sender, "commands.earth.geotp.not_found", this.place);
             }
             return geocode;
         }

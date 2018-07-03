@@ -2,7 +2,10 @@ package net.gegy1000.terrarium;
 
 import net.gegy1000.earth.server.command.GeoTeleportCommand;
 import net.gegy1000.terrarium.server.ServerProxy;
+import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.message.TerrariumHandshakeMessage;
+import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPresetRegistry;
+import net.gegy1000.terrarium.server.world.pipeline.source.CachedRemoteSource;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -39,6 +42,12 @@ public class Terrarium {
     public static void onPreInit(FMLPreInitializationEvent event) {
         PROXY.onPreInit();
 
+        if (!CachedRemoteSource.GLOBAL_CACHE_ROOT.exists()) {
+            CachedRemoteSource.GLOBAL_CACHE_ROOT.mkdirs();
+        }
+
+        TerrariumCapabilities.onPreInit();
+
         network = NetworkRegistry.INSTANCE.newSimpleChannel(Terrarium.MODID);
         network.registerMessage(TerrariumHandshakeMessage.Handler.class, TerrariumHandshakeMessage.class, 0, Side.SERVER);
         network.registerMessage(TerrariumHandshakeMessage.Handler.class, TerrariumHandshakeMessage.class, 1, Side.CLIENT);
@@ -47,6 +56,7 @@ public class Terrarium {
     @Mod.EventHandler
     public static void onInit(FMLInitializationEvent event) {
         PROXY.onInit();
+        TerrariumPresetRegistry.onInit();
     }
 
     @Mod.EventHandler

@@ -97,6 +97,7 @@ public abstract class TerrariumWorldType extends WorldType {
         mc.displayGuiScreen(this.createCustomizationGui(parent, preset));
     }
 
+    @SideOnly(Side.CLIENT)
     protected GuiScreen createCustomizationGui(GuiCreateWorld parent, TerrariumPreset preset) {
         return new TerrariumCustomizationGui(parent, this, preset);
     }

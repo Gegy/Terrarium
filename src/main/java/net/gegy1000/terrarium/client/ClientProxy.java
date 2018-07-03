@@ -18,9 +18,15 @@ public class ClientProxy extends ServerProxy {
     private static Field selectedWorldType;
 
     @Override
-    public void onPostInit() {
-        super.onPostInit();
+    public void onPreInit() {
+    }
 
+    @Override
+    public void onInit() {
+    }
+
+    @Override
+    public void onPostInit() {
         try {
             ClientProxy.selectedWorldType = reflectSelectedWorldType();
         } catch (ReflectiveOperationException e) {

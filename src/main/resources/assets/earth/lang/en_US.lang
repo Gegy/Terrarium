@@ -52,8 +52,8 @@ preset.earth_default.desc=Default Earth generator
 
 # Commands
 
-commands.terrarium.geotp.usage=geotp <latitude> <longitude> OR geotp <place>
-commands.terrarium.geotp.wrong_world=Cannot use command in this world
-commands.terrarium.geotp.not_found=Could not find "%s"
-commands.terrarium.geotp.success=Successfully teleported to %s, %s
-commands.terrarium.geotp.error=An error occurred while finding "%s": %s: %s
+commands.earth.geotp.usage=geotp <latitude> <longitude> OR geotp <place>
+commands.earth.geotp.wrong_world=Cannot use command in this world
+commands.earth.geotp.not_found=Could not find "%s"
+commands.earth.geotp.success=Successfully teleported to %s, %s
+commands.earth.geotp.error=An error occurred while finding "%s": %s: %s

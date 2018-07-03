@@ -58,6 +58,8 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -120,6 +122,7 @@ public class EarthWorldType extends TerrariumWorldType {
     }
 
     @Override
+    @SideOnly(Side.CLIENT)
     protected GuiScreen createCustomizationGui(GuiCreateWorld parent, TerrariumPreset preset) {
         return new EarthCustomizationGui(parent, this, preset);
     }

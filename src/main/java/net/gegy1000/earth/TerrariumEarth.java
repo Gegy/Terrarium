@@ -4,6 +4,8 @@ import net.gegy1000.earth.server.ServerProxy;
 import net.gegy1000.earth.server.capability.EarthCapability;
 import net.gegy1000.earth.server.world.CoverDebugWorldType;
 import net.gegy1000.earth.server.world.EarthWorldType;
+import net.gegy1000.earth.server.world.pipeline.source.EarthRemoteData;
+import net.gegy1000.earth.server.world.pipeline.source.SrtmHeightSource;
 import net.gegy1000.terrarium.server.capability.BlankStorage;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
@@ -43,6 +45,13 @@ public class TerrariumEarth {
     public static void onPreInit(FMLPreInitializationEvent event) {
         CapabilityManager.INSTANCE.register(EarthCapability.class, new BlankStorage<>(), EarthCapability.Impl.class);
         PROXY.onPreInit();
+
+        Thread thread = new Thread(() -> {
+            EarthRemoteData.loadInfo();
+            SrtmHeightSource.loadValidTiles();
+        }, "Terrarium Remote Load");
+        thread.setDaemon(true);
+        thread.start();
     }
 
     @Mod.EventHandler
