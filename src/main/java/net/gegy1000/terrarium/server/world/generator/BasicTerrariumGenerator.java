@@ -1,12 +1,8 @@
 package net.gegy1000.terrarium.server.world.generator;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import net.gegy1000.terrarium.server.util.ArrayUtils;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
-import net.gegy1000.terrarium.server.world.pipeline.adapter.RegionAdapter;
-import net.gegy1000.terrarium.server.world.pipeline.component.AttachedComponent;
-import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.composer.biome.BiomeComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.SurfaceComposer;
@@ -76,9 +72,6 @@ public class BasicTerrariumGenerator implements TerrariumGenerator {
         private final ImmutableList.Builder<DecorationComposer> decorationComposers = new ImmutableList.Builder<>();
         @Nullable
         private BiomeComposer biomeComposer;
-
-        private final ImmutableMap.Builder<RegionComponentType<?>, AttachedComponent<?>> attachedComponents = new ImmutableMap.Builder<>();
-        private final ImmutableList.Builder<RegionAdapter> adapters = new ImmutableList.Builder<>();
 
         private final List<ICapabilityProvider> capabilities = new ArrayList<>();
 

@@ -1,30 +1,25 @@
-package net.gegy1000.terrarium.server.world.pipeline.sampler;
+package net.gegy1000.terrarium.server.world.pipeline.layer;
 
-import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
+import net.gegy1000.terrarium.server.world.pipeline.DataView;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ByteRasterTile;
 import net.minecraft.util.math.MathHelper;
 
-public class ByteTileSampler extends TiledDataSampler<byte[]> {
+public class ByteTileSampleLayer extends TiledDataSampleLayer<ByteRasterTile> {
     private final TiledDataSource<? extends ByteRasterTile> source;
 
-    public ByteTileSampler(TiledDataSource<? extends ByteRasterTile> source) {
+    public ByteTileSampleLayer(TiledDataSource<? extends ByteRasterTile> source) {
         super(MathHelper.floor(source.getTileSize().getX()), MathHelper.floor(source.getTileSize().getZ()));
         this.source = source;
     }
 
     @Override
-    public byte[] sample(GenerationSettings settings, int x, int z, int width, int height) {
-        Handler handler = new Handler(width, height);
-        this.sampleTiles(handler, x, z, width, height);
+    public ByteRasterTile apply(DataView view) {
+        Handler handler = new Handler(view.getWidth(), view.getHeight());
+        this.sampleTiles(handler, view);
 
-        return handler.data;
-    }
-
-    @Override
-    public Class<byte[]> getSamplerType() {
-        return byte[].class;
+        return new ByteRasterTile(handler.data, view.getWidth(), view.getHeight());
     }
 
     private class Handler implements DataHandler<ByteRasterTile> {
@@ -37,13 +32,13 @@ public class ByteTileSampler extends TiledDataSampler<byte[]> {
         }
 
         @Override
-        public void put(ByteRasterTile tile, int localX, int localZ, int resultX, int resultZ) {
-            this.data[resultX + resultZ * this.width] = tile.getByte(localX, localZ);
+        public void put(ByteRasterTile tile, int localX, int localY, int resultX, int resultY) {
+            this.data[resultX + resultY * this.width] = tile.getByte(localX, localY);
         }
 
         @Override
         public ByteRasterTile getTile(DataTilePos pos) {
-            return ByteTileSampler.this.source.getTile(pos);
+            return ByteTileSampleLayer.this.source.getTile(pos);
         }
     }
 }

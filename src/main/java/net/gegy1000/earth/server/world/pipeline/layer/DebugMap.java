@@ -1,4 +1,4 @@
-package net.gegy1000.earth.server.world.pipeline.populator;
+package net.gegy1000.earth.server.world.pipeline.layer;
 
 import com.google.common.base.CaseFormat;
 import net.gegy1000.earth.server.world.cover.EarthCoverTypes;

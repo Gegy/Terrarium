@@ -55,8 +55,4 @@ public abstract class TiledDataSource<T extends TiledDataAccess> {
     public abstract Class<T> getTileType();
 
     protected abstract T getDefaultTile();
-
-    public boolean shouldSample() {
-        return true;
-    }
 }

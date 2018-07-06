@@ -1,6 +1,8 @@
 package net.gegy1000.terrarium.server.world.pipeline.source.tile;
 
-public class ByteRasterTile implements TiledDataAccess, RasterDataAccess<Byte> {
+import net.gegy1000.terrarium.server.world.pipeline.DataView;
+
+public class ByteRasterTile implements TiledDataAccess, NumberRasterTile<Byte> {
     private final byte[] data;
     private final int width;
     private final int height;
@@ -12,6 +14,12 @@ public class ByteRasterTile implements TiledDataAccess, RasterDataAccess<Byte> {
         this.data = data;
         this.width = width;
         this.height = height;
+    }
+
+    public ByteRasterTile(DataView view) {
+        this.data = new byte[view.getWidth() * view.getHeight()];
+        this.width = view.getWidth();
+        this.height = view.getHeight();
     }
 
     @Override
@@ -60,5 +68,15 @@ public class ByteRasterTile implements TiledDataAccess, RasterDataAccess<Byte> {
     @Override
     public int getHeight() {
         return this.height;
+    }
+
+    @Override
+    public void setDouble(int x, int y, double value) {
+        this.setByte(x, y, (byte) value);
+    }
+
+    @Override
+    public double getDouble(int x, int y) {
+        return this.getByte(x, y);
     }
 }

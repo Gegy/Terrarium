@@ -1,33 +1,29 @@
-package net.gegy1000.terrarium.server.world.pipeline.sampler;
+package net.gegy1000.terrarium.server.world.pipeline.layer;
 
 import net.gegy1000.terrarium.server.util.ArrayUtils;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.TerrariumCoverTypes;
-import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
+import net.gegy1000.terrarium.server.world.pipeline.DataView;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.RasterDataAccess;
 import net.minecraft.util.math.MathHelper;
 
-public class CoverTileSampler extends TiledDataSampler<CoverType[]> {
+public class CoverTileSampleLayer extends TiledDataSampleLayer<CoverRasterTile> {
     private final TiledDataSource<? extends RasterDataAccess<CoverType>> source;
 
-    public CoverTileSampler(TiledDataSource<? extends RasterDataAccess<CoverType>> source) {
+    public CoverTileSampleLayer(TiledDataSource<? extends RasterDataAccess<CoverType>> source) {
         super(MathHelper.floor(source.getTileSize().getX()), MathHelper.floor(source.getTileSize().getZ()));
         this.source = source;
     }
 
     @Override
-    public CoverType[] sample(GenerationSettings settings, int x, int z, int width, int height) {
-        Handler handler = new Handler(width, height);
-        this.sampleTiles(handler, x, z, width, height);
+    public CoverRasterTile apply(DataView view) {
+        Handler handler = new Handler(view.getWidth(), view.getHeight());
+        this.sampleTiles(handler, view);
 
-        return handler.data;
-    }
-
-    @Override
-    public Class<CoverType[]> getSamplerType() {
-        return CoverType[].class;
+        return new CoverRasterTile(handler.data, view.getWidth(), view.getHeight());
     }
 
     private class Handler implements DataHandler<RasterDataAccess<CoverType>> {
@@ -40,13 +36,13 @@ public class CoverTileSampler extends TiledDataSampler<CoverType[]> {
         }
 
         @Override
-        public void put(RasterDataAccess<CoverType> tile, int localX, int localZ, int resultX, int resultZ) {
-            this.data[resultX + resultZ * this.width] = tile.get(localX, localZ);
+        public void put(RasterDataAccess<CoverType> tile, int localX, int localY, int resultX, int resultY) {
+            this.data[resultX + resultY * this.width] = tile.get(localX, localY);
         }
 
         @Override
         public RasterDataAccess<CoverType> getTile(DataTilePos pos) {
-            return CoverTileSampler.this.source.getTile(pos);
+            return CoverTileSampleLayer.this.source.getTile(pos);
         }
     }
 }

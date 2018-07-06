@@ -170,7 +170,6 @@ public class OverpassSource extends TiledDataSource<OsmTile> implements CachedRe
         return false;
     }
 
-    @Override
     public boolean shouldSample() {
         return this.shouldSample;
     }

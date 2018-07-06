@@ -1,6 +1,6 @@
 package net.gegy1000.earth.server.world.coordinate;
 
-import net.gegy1000.earth.server.world.pipeline.populator.DebugMap;
+import net.gegy1000.earth.server.world.pipeline.layer.DebugMap;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.minecraft.util.math.MathHelper;
 

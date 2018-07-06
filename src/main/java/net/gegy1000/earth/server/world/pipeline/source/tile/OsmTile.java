@@ -8,9 +8,9 @@ import de.topobyte.osm4j.core.resolve.EntityNotFoundException;
 import de.topobyte.osm4j.core.resolve.OsmEntityProvider;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.TiledDataAccess;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.MergableTile;
 
-public class OsmTile implements OsmEntityProvider, TiledDataAccess {
+public class OsmTile implements OsmEntityProvider, MergableTile<OsmTile> {
     private final TLongObjectMap<OsmNode> nodes;
     private final TLongObjectMap<OsmWay> ways;
 
@@ -35,6 +35,7 @@ public class OsmTile implements OsmEntityProvider, TiledDataAccess {
         return this.ways;
     }
 
+    @Override
     public OsmTile merge(OsmTile tile) {
         TLongObjectMap<OsmNode> nodes = new TLongObjectHashMap<>(this.nodes.size() + tile.nodes.size());
         nodes.putAll(this.nodes);

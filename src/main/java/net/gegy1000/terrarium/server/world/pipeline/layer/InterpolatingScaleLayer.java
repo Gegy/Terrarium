@@ -1,14 +1,15 @@
-package net.gegy1000.terrarium.server.world.pipeline.populator;
+package net.gegy1000.terrarium.server.world.pipeline.layer;
 
 import net.gegy1000.terrarium.server.util.Interpolation;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.NumberRasterTile;
 import net.minecraft.util.math.MathHelper;
 
-public abstract class InterpolatingRegionPopulator<T> extends BufferedScalingPopulator<T> {
+public abstract class InterpolatingScaleLayer<T extends NumberRasterTile<?>> extends BufferedScalingLayer<T> {
     private final Interpolation.Method interpolationMethod;
     private final double[][] sampleBuffer;
 
-    public InterpolatingRegionPopulator(Interpolation.Method interpolationMethod, CoordinateState coordinateState) {
+    public InterpolatingScaleLayer(Interpolation.Method interpolationMethod, CoordinateState coordinateState) {
         super(interpolationMethod.getBackward(), interpolationMethod.getForward() + 1, coordinateState);
 
         this.interpolationMethod = interpolationMethod;
@@ -17,7 +18,7 @@ public abstract class InterpolatingRegionPopulator<T> extends BufferedScalingPop
         this.sampleBuffer = new double[pointCount][pointCount];
     }
 
-    protected final <R extends DataHandler> void scaleRegion(R sampled, R result, double scaleFactorX, double scaleFactorZ, double originOffsetX, double originOffsetZ) {
+    protected final void scaleRegion(T sampled, T result, double scaleFactorX, double scaleFactorZ, double originOffsetX, double originOffsetZ) {
         int startX = 0;
         int startZ = 0;
         int endX = result.getWidth();
@@ -25,14 +26,10 @@ public abstract class InterpolatingRegionPopulator<T> extends BufferedScalingPop
 
         if (scaleFactorX < 0.0) {
             scaleFactorX = -scaleFactorX;
-//            startX = endX - 1;
-//            endX = 0;
         }
 
         if (scaleFactorZ < 0.0) {
             scaleFactorZ = -scaleFactorZ;
-//            startZ = endZ - 1;
-//            endZ = 0;
         }
 
         int stepX = Integer.signum(endX - startX);
@@ -49,32 +46,22 @@ public abstract class InterpolatingRegionPopulator<T> extends BufferedScalingPop
                 double intermediateX = sampleX - originX;
 
                 double heightValue = this.interpolatePoint(sampled, originX, originZ, intermediateX, intermediateZ);
-                result.set(scaledX, scaledZ, heightValue);
+                result.setDouble(scaledX, scaledZ, heightValue);
             }
         }
     }
 
-    private <R extends DataHandler> double interpolatePoint(R sampled, int originX, int originZ, double intermediateX, double intermediateZ) {
+    private double interpolatePoint(T sampled, int originX, int originZ, double intermediateX, double intermediateZ) {
         int backward = this.interpolationMethod.getBackward();
         int pointCount = this.interpolationMethod.getPointCount();
         for (int sampleZ = 0; sampleZ < pointCount; sampleZ++) {
             int globalZ = originZ + sampleZ - backward;
             for (int sampleX = 0; sampleX < pointCount; sampleX++) {
                 int globalX = originX + sampleX - backward;
-                this.sampleBuffer[sampleX][sampleZ] = sampled.get(globalX, globalZ);
+                this.sampleBuffer[sampleX][sampleZ] = sampled.getDouble(globalX, globalZ);
             }
         }
 
         return (short) this.interpolationMethod.lerp2d(this.sampleBuffer, intermediateX, intermediateZ);
-    }
-
-    protected interface DataHandler {
-        void set(int x, int z, double value);
-
-        double get(int x, int z);
-
-        int getWidth();
-
-        int getHeight();
     }
 }

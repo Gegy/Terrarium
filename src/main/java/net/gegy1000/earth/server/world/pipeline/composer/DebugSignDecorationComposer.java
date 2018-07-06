@@ -1,6 +1,6 @@
 package net.gegy1000.earth.server.world.pipeline.composer;
 
-import net.gegy1000.earth.server.world.pipeline.populator.DebugMap;
+import net.gegy1000.earth.server.world.pipeline.layer.DebugMap;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;

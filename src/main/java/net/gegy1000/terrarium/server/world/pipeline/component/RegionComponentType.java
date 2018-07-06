@@ -6,8 +6,9 @@ import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ByteRasterTile;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.TiledDataAccess;
 
-public abstract class RegionComponentType<T> {
+public abstract class RegionComponentType<T extends TiledDataAccess> {
     public static final RegionComponentType<ShortRasterTile> HEIGHT = new RegionComponentType<ShortRasterTile>(ShortRasterTile.class) {
         @Override
         public ShortRasterTile createDefaultData(int width, int height) {

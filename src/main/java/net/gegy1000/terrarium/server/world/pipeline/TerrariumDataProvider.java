@@ -10,7 +10,7 @@ import net.gegy1000.terrarium.server.world.pipeline.adapter.RegionAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.component.AttachedComponent;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponent;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.populator.RegionPopulator;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.TiledDataAccess;
 import net.gegy1000.terrarium.server.world.region.RegionData;
 import net.gegy1000.terrarium.server.world.region.RegionTilePos;
 
@@ -38,7 +38,7 @@ public class TerrariumDataProvider {
     public RegionData populateData(GenerationSettings settings, RegionTilePos pos, Coordinate regionSize, int width, int height) {
         Map<RegionComponentType<?>, RegionComponent<?>> populatedComponents = new HashMap<>();
         for (AttachedComponent<?> attachedComponent : this.attachedComponents.values()) {
-            RegionComponent<?> component = attachedComponent.createAndPopulate(settings, pos, regionSize, width, height);
+            RegionComponent<?> component = attachedComponent.createAndPopulate(pos, width, height);
             populatedComponents.put(attachedComponent.getType(), component);
         }
         RegionData data = new RegionData(populatedComponents);
@@ -67,8 +67,8 @@ public class TerrariumDataProvider {
         private Builder() {
         }
 
-        public <T> Builder withComponent(RegionComponentType<T> type, RegionPopulator<T> populator) {
-            this.attachedComponents.put(type, new AttachedComponent<>(type, populator));
+        public <T extends TiledDataAccess> Builder withComponent(RegionComponentType<T> type, DataLayerProducer<T> producer) {
+            this.attachedComponents.put(type, new AttachedComponent<>(type, producer));
             return this;
         }
 

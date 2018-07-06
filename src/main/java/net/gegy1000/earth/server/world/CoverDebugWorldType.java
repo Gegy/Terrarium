@@ -5,7 +5,7 @@ import net.gegy1000.earth.server.world.coordinate.DebugLatLngCoordinateState;
 import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthCoverTypes;
 import net.gegy1000.earth.server.world.pipeline.composer.DebugSignDecorationComposer;
-import net.gegy1000.earth.server.world.pipeline.populator.DebugCoverRegionPopulator;
+import net.gegy1000.earth.server.world.pipeline.layer.DebugCoverPopulator;
 import net.gegy1000.terrarium.server.world.TerrariumGeneratorInitializer;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
@@ -24,8 +24,8 @@ import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.CoverDec
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.BedrockSurfaceComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.CoverSurfaceComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.HeightmapSurfaceComposer;
-import net.gegy1000.terrarium.server.world.pipeline.populator.ConstantByteRegionPopulator;
-import net.gegy1000.terrarium.server.world.pipeline.populator.ConstantShortRegionPopulator;
+import net.gegy1000.terrarium.server.world.pipeline.layer.ConstantByteProducer;
+import net.gegy1000.terrarium.server.world.pipeline.layer.ConstantShortProducer;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
@@ -98,9 +98,9 @@ public class CoverDebugWorldType extends TerrariumWorldType {
         @Override
         public TerrariumDataProvider buildDataProvider() {
             return TerrariumDataProvider.builder()
-                    .withComponent(RegionComponentType.HEIGHT, new ConstantShortRegionPopulator((short) 62))
-                    .withComponent(RegionComponentType.SLOPE, new ConstantByteRegionPopulator((byte) 0))
-                    .withComponent(RegionComponentType.COVER, new DebugCoverRegionPopulator())
+                    .withComponent(RegionComponentType.HEIGHT, new ConstantShortProducer((short) 62))
+                    .withComponent(RegionComponentType.SLOPE, new ConstantByteProducer((byte) 0))
+                    .withComponent(RegionComponentType.COVER, new DebugCoverPopulator())
                     .build();
         }
     }

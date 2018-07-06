@@ -6,15 +6,13 @@ import net.gegy1000.earth.server.capability.EarthCapability;
 import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthCoverTypes;
 import net.gegy1000.earth.server.world.pipeline.EarthComponentTypes;
-import net.gegy1000.earth.server.world.pipeline.adapter.OceanDepthCorrectionAdapter;
-import net.gegy1000.earth.server.world.pipeline.adapter.OsmCoastlineAdapter;
-import net.gegy1000.earth.server.world.pipeline.adapter.WaterFlattenAdapter;
 import net.gegy1000.earth.server.world.pipeline.composer.BoulderDecorationComposer;
-import net.gegy1000.earth.server.world.pipeline.populator.OsmRegionPopulator;
-import net.gegy1000.earth.server.world.pipeline.sampler.OsmSampler;
+import net.gegy1000.earth.server.world.pipeline.layer.OsmPopulatorLayer;
+import net.gegy1000.earth.server.world.pipeline.layer.OsmSampleLayer;
 import net.gegy1000.earth.server.world.pipeline.source.GlobcoverSource;
 import net.gegy1000.earth.server.world.pipeline.source.SrtmHeightSource;
 import net.gegy1000.earth.server.world.pipeline.source.osm.OverpassSource;
+import net.gegy1000.earth.server.world.pipeline.source.tile.OsmTile;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.util.Interpolation;
 import net.gegy1000.terrarium.server.world.TerrariumGeneratorInitializer;
@@ -36,9 +34,12 @@ import net.gegy1000.terrarium.server.world.generator.customization.property.Prop
 import net.gegy1000.terrarium.server.world.generator.customization.widget.InversePropertyConverter;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.SliderWidget;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.ToggleWidget;
+import net.gegy1000.terrarium.server.world.pipeline.DataLayer;
+import net.gegy1000.terrarium.server.world.pipeline.DataLayerProducer;
+import net.gegy1000.terrarium.server.world.pipeline.DataSource;
+import net.gegy1000.terrarium.server.world.pipeline.MergeDataLayer;
 import net.gegy1000.terrarium.server.world.pipeline.TerrariumDataProvider;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.BeachAdapter;
-import net.gegy1000.terrarium.server.world.pipeline.adapter.HeightNoiseAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.HeightTransformAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.composer.biome.CoverBiomeComposer;
@@ -47,12 +48,15 @@ import net.gegy1000.terrarium.server.world.pipeline.composer.surface.BedrockSurf
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.CoverSurfaceComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.HeightmapSurfaceComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.OceanFillSurfaceComposer;
-import net.gegy1000.terrarium.server.world.pipeline.populator.ScaledByteRegionPopulator;
-import net.gegy1000.terrarium.server.world.pipeline.populator.ScaledCoverRegionPopulator;
-import net.gegy1000.terrarium.server.world.pipeline.populator.ScaledShortRegionPopulator;
-import net.gegy1000.terrarium.server.world.pipeline.sampler.CoverTileSampler;
-import net.gegy1000.terrarium.server.world.pipeline.sampler.ShortTileSampler;
-import net.gegy1000.terrarium.server.world.pipeline.sampler.SlopeTileSampler;
+import net.gegy1000.terrarium.server.world.pipeline.layer.CoverTileSampleLayer;
+import net.gegy1000.terrarium.server.world.pipeline.layer.ScaledByteLayer;
+import net.gegy1000.terrarium.server.world.pipeline.layer.ScaledCoverLayer;
+import net.gegy1000.terrarium.server.world.pipeline.layer.ScaledShortLayer;
+import net.gegy1000.terrarium.server.world.pipeline.layer.ShortTileSampleLayer;
+import net.gegy1000.terrarium.server.world.pipeline.layer.SlopeProducerLayer;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.ByteRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.minecraft.client.gui.GuiCreateWorld;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.init.Blocks;
@@ -186,64 +190,75 @@ public class EarthWorldType extends TerrariumWorldType {
         public TerrariumDataProvider buildDataProvider() {
             int heightOrigin = this.properties.getInteger(HEIGHT_ORIGIN);
             SrtmHeightSource heightSource = new SrtmHeightSource(this.srtmRaster, "srtm_heights");
+            DataLayerProducer<ShortRasterTile> heightSampler = DataSource.from(new ShortTileSampleLayer(heightSource));
             return TerrariumDataProvider.builder()
-                    .withComponent(RegionComponentType.HEIGHT, this.createHeightPopulator(heightSource))
-                    .withComponent(RegionComponentType.SLOPE, this.createSlopePopulator(heightSource))
+                    .withComponent(RegionComponentType.HEIGHT, this.createHeightProducer(heightSampler))
+                    .withComponent(RegionComponentType.SLOPE, this.createSlopePopulator(heightSampler))
                     .withComponent(RegionComponentType.COVER, this.createCoverPopulator())
                     .withComponent(EarthComponentTypes.OSM, this.createOsmPopulator())
-                    .withAdapter(new OsmCoastlineAdapter(RegionComponentType.HEIGHT, RegionComponentType.COVER, EarthComponentTypes.OSM, this.earthCoordinates))
-                    .withAdapter(new HeightNoiseAdapter(this.world, RegionComponentType.HEIGHT, 2, 0.08, this.properties.getDouble(NOISE_SCALE)))
+//                    .withAdapter(new OsmCoastlineAdapter(RegionComponentType.HEIGHT, RegionComponentType.COVER, EarthComponentTypes.OSM, this.earthCoordinates))
+//                    .withAdapter(new HeightNoiseAdapter(this.world, RegionComponentType.HEIGHT, 2, 0.08, this.properties.getDouble(NOISE_SCALE)))
                     .withAdapter(new HeightTransformAdapter(RegionComponentType.HEIGHT, this.properties.getDouble(HEIGHT_SCALE) * this.worldScale, heightOrigin))
-                    .withAdapter(new OceanDepthCorrectionAdapter(RegionComponentType.HEIGHT, this.properties.getInteger(OCEAN_DEPTH)))
+//                    .withAdapter(new OceanDepthCorrectionAdapter(RegionComponentType.HEIGHT, this.properties.getInteger(OCEAN_DEPTH)))
                     .withAdapter(new BeachAdapter(this.world, RegionComponentType.COVER, this.properties.getInteger(BEACH_SIZE), EarthCoverTypes.WATER, EarthCoverTypes.BEACH))
-                    .withAdapter(new WaterFlattenAdapter(RegionComponentType.HEIGHT, RegionComponentType.COVER, 15, EarthCoverTypes.WATER))
+//                    .withAdapter(new WaterFlattenAdapter(RegionComponentType.HEIGHT, RegionComponentType.COVER, 15, EarthCoverTypes.WATER))
                     .build();
         }
 
-        private ScaledShortRegionPopulator createHeightPopulator(SrtmHeightSource heightSource) {
+        private DataLayerProducer<ShortRasterTile> createHeightProducer(DataLayerProducer<ShortRasterTile> heightSampler) {
             Interpolation.Method interpolationMethod = this.selectInterpolationMethod(this.properties);
-            ShortTileSampler heightSampler = new ShortTileSampler(heightSource);
-            return new ScaledShortRegionPopulator(heightSampler, this.srtmRaster, interpolationMethod);
+            return DataLayer.of(new ScaledShortLayer(this.srtmRaster, interpolationMethod), heightSampler);
         }
 
-        private ScaledByteRegionPopulator createSlopePopulator(SrtmHeightSource heightSource) {
-            SlopeTileSampler slopeSampler = new SlopeTileSampler(heightSource);
-            return new ScaledByteRegionPopulator(slopeSampler, this.srtmRaster, Interpolation.Method.LINEAR);
+        private DataLayerProducer<ByteRasterTile> createSlopePopulator(DataLayerProducer<ShortRasterTile> heightSampler) {
+            DataLayerProducer<ByteRasterTile> layer = DataLayer.of(new SlopeProducerLayer(), heightSampler);
+            layer = DataLayer.of(new ScaledByteLayer(this.srtmRaster, Interpolation.Method.LINEAR), layer);
+            return layer;
         }
 
-        private ScaledCoverRegionPopulator createCoverPopulator() {
+        private DataLayerProducer<CoverRasterTile> createCoverPopulator() {
             GlobcoverSource globcoverSource = new GlobcoverSource(this.globcoverRaster, "globcover");
-            CoverTileSampler coverSampler = new CoverTileSampler(globcoverSource);
-            return new ScaledCoverRegionPopulator(coverSampler, this.globcoverRaster);
+            DataLayerProducer<CoverRasterTile> layer = DataSource.from(new CoverTileSampleLayer(globcoverSource));
+            layer = DataLayer.of(new ScaledCoverLayer(this.globcoverRaster), layer);
+            return layer;
         }
 
-        private OsmRegionPopulator createOsmPopulator() {
-            OverpassSource outlineSource = new OverpassSource(
+        private DataLayerProducer<OsmTile> createOsmPopulator() {
+            List<OverpassSource> sources = new ArrayList<>();
+            sources.add(new OverpassSource(
                     this.earthCoordinates,
                     0.3,
                     "osm/outline",
                     new ResourceLocation(TerrariumEarth.MODID, "query/outline_overpass_query.oql"),
                     1
-            );
-            OverpassSource generalSource = new OverpassSource(
+            ));
+            sources.add(new OverpassSource(
                     this.earthCoordinates,
                     0.1,
                     "osm/general",
                     new ResourceLocation(TerrariumEarth.MODID, "query/general_overpass_query.oql"),
                     2
-            );
-            OverpassSource detailSource = new OverpassSource(
+            ));
+            sources.add(new OverpassSource(
                     this.earthCoordinates,
                     0.05,
                     "osm/detailed",
                     new ResourceLocation(TerrariumEarth.MODID, "query/detail_overpass_query.oql"),
                     2
-            );
-            return new OsmRegionPopulator(
-                    new OsmSampler(outlineSource, this.earthCoordinates),
-                    new OsmSampler(generalSource, this.earthCoordinates),
-                    new OsmSampler(detailSource, this.earthCoordinates)
-            );
+            ));
+
+            List<DataLayerProducer<OsmTile>> samplers = sources.stream()
+                    .filter(OverpassSource::shouldSample)
+                    .map(overpassSource -> new OsmSampleLayer(overpassSource, this.earthCoordinates))
+                    .collect(Collectors.toList());
+
+            if (!samplers.isEmpty()) {
+                DataLayerProducer<OsmTile> layer = MergeDataLayer.from(samplers);
+                layer = DataLayer.of(new OsmPopulatorLayer(), layer);
+                return layer;
+            }
+
+            return DataSource.from(view -> new OsmTile());
         }
 
         private Interpolation.Method selectInterpolationMethod(PropertyContainer properties) {

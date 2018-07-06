@@ -3,6 +3,7 @@ package net.gegy1000.terrarium.server.world.pipeline.source.tile;
 import net.gegy1000.terrarium.server.util.ArrayUtils;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.TerrariumCoverTypes;
+import net.gegy1000.terrarium.server.world.pipeline.DataView;
 
 public class CoverRasterTile implements RasterDataAccess<CoverType>, TiledDataAccess {
     private final CoverType[] cover;
@@ -20,6 +21,14 @@ public class CoverRasterTile implements RasterDataAccess<CoverType>, TiledDataAc
         this.offsetZ = offsetZ;
         this.width = width;
         this.height = height;
+    }
+
+    public CoverRasterTile(DataView view) {
+        this.cover = new CoverType[view.getWidth() * view.getHeight()];
+        this.offsetX = 0;
+        this.offsetZ = 0;
+        this.width = view.getWidth();
+        this.height = view.getHeight();
     }
 
     public CoverRasterTile(CoverType[] cover, int width, int height) {

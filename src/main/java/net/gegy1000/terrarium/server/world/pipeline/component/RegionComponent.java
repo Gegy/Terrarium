@@ -1,6 +1,8 @@
 package net.gegy1000.terrarium.server.world.pipeline.component;
 
-public class RegionComponent<T> {
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.TiledDataAccess;
+
+public class RegionComponent<T extends TiledDataAccess> {
     private final RegionComponentType<T> type;
     private final T data;
 
