@@ -111,9 +111,9 @@ public class EarthCoverTypes {
         private static final Byte2ObjectArrayMap<Glob> GLOB_IDS = new Byte2ObjectArrayMap<>();
 
         private final byte id;
-        private final CoverType coverType;
+        private final CoverType<?> coverType;
 
-        Glob(int id, CoverType coverType) {
+        Glob(int id, CoverType<?> coverType) {
             this.id = (byte) (id & 0xFf);
             this.coverType = coverType;
         }
@@ -122,7 +122,7 @@ public class EarthCoverTypes {
             return this.id;
         }
 
-        public CoverType getCoverType() {
+        public CoverType<?> getCoverType() {
             return this.coverType;
         }
 

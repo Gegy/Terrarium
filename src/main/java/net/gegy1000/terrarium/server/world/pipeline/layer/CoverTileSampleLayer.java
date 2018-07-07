@@ -11,9 +11,9 @@ import net.gegy1000.terrarium.server.world.pipeline.source.tile.RasterDataAccess
 import net.minecraft.util.math.MathHelper;
 
 public class CoverTileSampleLayer extends TiledDataSampleLayer<CoverRasterTile> {
-    private final TiledDataSource<? extends RasterDataAccess<CoverType>> source;
+    private final TiledDataSource<? extends RasterDataAccess<CoverType<?>>> source;
 
-    public CoverTileSampleLayer(TiledDataSource<? extends RasterDataAccess<CoverType>> source) {
+    public CoverTileSampleLayer(TiledDataSource<? extends RasterDataAccess<CoverType<?>>> source) {
         super(MathHelper.floor(source.getTileSize().getX()), MathHelper.floor(source.getTileSize().getZ()));
         this.source = source;
     }
@@ -26,22 +26,22 @@ public class CoverTileSampleLayer extends TiledDataSampleLayer<CoverRasterTile> 
         return new CoverRasterTile(handler.data, view.getWidth(), view.getHeight());
     }
 
-    private class Handler implements DataHandler<RasterDataAccess<CoverType>> {
-        private final CoverType[] data;
+    private class Handler implements DataHandler<RasterDataAccess<CoverType<?>>> {
+        private final CoverType<?>[] data;
         private final int width;
 
         private Handler(int width, int height) {
-            this.data = ArrayUtils.defaulted(new CoverType[width * height], TerrariumCoverTypes.PLACEHOLDER);
+            this.data = ArrayUtils.defaulted(new CoverType<?>[width * height], TerrariumCoverTypes.PLACEHOLDER);
             this.width = width;
         }
 
         @Override
-        public void put(RasterDataAccess<CoverType> tile, int localX, int localY, int resultX, int resultY) {
+        public void put(RasterDataAccess<CoverType<?>> tile, int localX, int localY, int resultX, int resultY) {
             this.data[resultX + resultY * this.width] = tile.get(localX, localY);
         }
 
         @Override
-        public RasterDataAccess<CoverType> getTile(DataTilePos pos) {
+        public RasterDataAccess<CoverType<?>> getTile(DataTilePos pos) {
             return CoverTileSampleLayer.this.source.getTile(pos);
         }
     }

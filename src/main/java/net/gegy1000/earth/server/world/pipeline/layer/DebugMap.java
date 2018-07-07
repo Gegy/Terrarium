@@ -87,7 +87,7 @@ public class DebugMap {
         int effectiveGridZ = gridZ + LatitudinalZone.ZONES.length / 2;
 
         if (effectiveGridX >= 0 && effectiveGridX < EarthCoverTypes.Glob.TYPES.length && effectiveGridZ >= 0 && effectiveGridZ < LatitudinalZone.ZONES.length) {
-            CoverType coverType = EarthCoverTypes.Glob.TYPES[effectiveGridX].getCoverType();
+            CoverType<?> coverType = EarthCoverTypes.Glob.TYPES[effectiveGridX].getCoverType();
             LatitudinalZone zone = LatitudinalZone.ZONES[effectiveGridZ];
             return new DebugCover(coverType, zone);
         }
@@ -96,15 +96,15 @@ public class DebugMap {
     }
 
     public static class DebugCover {
-        private final CoverType coverType;
+        private final CoverType<?> coverType;
         private final LatitudinalZone zone;
 
-        public DebugCover(CoverType coverType, LatitudinalZone zone) {
+        public DebugCover(CoverType<?> coverType, LatitudinalZone zone) {
             this.coverType = coverType;
             this.zone = zone;
         }
 
-        public CoverType getCoverType() {
+        public CoverType<?> getCoverType() {
             return this.coverType;
         }
 

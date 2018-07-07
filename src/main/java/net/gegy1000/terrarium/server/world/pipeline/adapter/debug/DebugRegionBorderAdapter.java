@@ -20,7 +20,7 @@ public class DebugRegionBorderAdapter implements RegionAdapter {
     public void adapt(GenerationSettings settings, RegionData data, int x, int z, int width, int height) {
         CoverRasterTile coverTile = data.getOrExcept(this.coverComponent);
 
-        CoverType[] cover = coverTile.getData();
+        CoverType<?>[] cover = coverTile.getData();
 
         int minX = GenerationRegion.BUFFER;
         int minZ = GenerationRegion.BUFFER;

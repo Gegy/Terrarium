@@ -28,7 +28,7 @@ public abstract class RegionComponentType<T extends TiledDataAccess> {
     public static final RegionComponentType<CoverRasterTile> COVER = new RegionComponentType<CoverRasterTile>(CoverRasterTile.class) {
         @Override
         public CoverRasterTile createDefaultData(int width, int height) {
-            CoverType[] data = ArrayUtils.defaulted(new CoverType[width * height], TerrariumCoverTypes.PLACEHOLDER);
+            CoverType<?>[] data = ArrayUtils.defaulted(new CoverType<?>[width * height], TerrariumCoverTypes.PLACEHOLDER);
             return new CoverRasterTile(data, width, height);
         }
     };
@@ -52,6 +52,6 @@ public abstract class RegionComponentType<T extends TiledDataAccess> {
 
     @Override
     public final boolean equals(Object obj) {
-        return obj instanceof RegionComponentType && ((RegionComponentType) obj).getType().equals(this.type);
+        return obj instanceof RegionComponentType && ((RegionComponentType<?>) obj).getType().equals(this.type);
     }
 }

@@ -58,7 +58,7 @@ public class GlobcoverSource extends TiledDataSource<CoverRasterTile> implements
             byte[] buffer = new byte[width * height];
             input.readFully(buffer);
 
-            CoverType[] cover = new CoverType[buffer.length];
+            CoverType<?>[] cover = new CoverType<?>[buffer.length];
             for (int i = 0; i < buffer.length; i++) {
                 cover[i] = EarthCoverTypes.Glob.get(buffer[i]).getCoverType();
             }
@@ -77,7 +77,7 @@ public class GlobcoverSource extends TiledDataSource<CoverRasterTile> implements
 
     @Override
     protected CoverRasterTile getDefaultTile() {
-        CoverType[] backingData = ArrayUtils.defaulted(new CoverType[TILE_SIZE * TILE_SIZE], TerrariumCoverTypes.PLACEHOLDER);
+        CoverType<?>[] backingData = ArrayUtils.defaulted(new CoverType<?>[TILE_SIZE * TILE_SIZE], TerrariumCoverTypes.PLACEHOLDER);
         return new CoverRasterTile(backingData, 0, 0, TILE_SIZE, TILE_SIZE);
     }
 }

@@ -93,7 +93,7 @@ public class CoverSurfaceComposer implements SurfaceComposer {
             this.coverMap.initPosSeed(globalX, globalZ);
             long randomSeed = this.coverMap.next();
 
-            for (CoverType type : this.localCoverTypes) {
+            for (CoverType<?> type : this.localCoverTypes) {
                 CoverSurfaceGenerator<?> generator = this.generators.get(type);
                 if (generator != null) {
                     this.random.setSeed(randomSeed);
@@ -116,7 +116,7 @@ public class CoverSurfaceComposer implements SurfaceComposer {
 
         this.coverMap.initPosSeed(globalX, globalZ);
         long randomSeed = this.coverMap.next();
-        for (CoverType type : this.localCoverTypes) {
+        for (CoverType<?> type : this.localCoverTypes) {
             CoverSurfaceGenerator<?> generator = this.generators.get(type);
             if (generator != null) {
                 this.random.setSeed(randomSeed);

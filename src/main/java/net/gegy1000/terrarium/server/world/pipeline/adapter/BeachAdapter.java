@@ -15,13 +15,13 @@ public class BeachAdapter implements RegionAdapter {
     private final RegionComponentType<CoverRasterTile> coverComponent;
     private final int beachSize;
 
-    private final CoverType waterCover;
-    private final CoverType beachCover;
+    private final CoverType<?> waterCover;
+    private final CoverType<?> beachCover;
 
     private final NoiseGeneratorImproved beachNoise;
     private final double[] sampledBeachNoise = new double[GenerationRegion.BUFFERED_SIZE * GenerationRegion.BUFFERED_SIZE];
 
-    public BeachAdapter(World world, RegionComponentType<CoverRasterTile> coverComponent, int beachSize, CoverType waterCover, CoverType beachCover) {
+    public BeachAdapter(World world, RegionComponentType<CoverRasterTile> coverComponent, int beachSize, CoverType<?> waterCover, CoverType<?> beachCover) {
         this.coverComponent = coverComponent;
         this.beachSize = beachSize;
         this.waterCover = waterCover;
@@ -41,12 +41,12 @@ public class BeachAdapter implements RegionAdapter {
         double frequency = 0.2;
         this.beachNoise.populateNoiseArray(this.sampledBeachNoise, x * frequency, 0.0, z * frequency, width, 1, height, frequency, 1.0, frequency, 1.0);
 
-        CoverType[] coverBuffer = coverTile.getData();
+        CoverType<?>[] coverBuffer = coverTile.getData();
 
         for (int localY = 0; localY < height; localY++) {
-            CoverType last = coverBuffer[localY * width];
+            CoverType<?> last = coverBuffer[localY * width];
             for (int localX = 1; localX < width; localX++) {
-                CoverType cover = coverBuffer[localX + localY * width];
+                CoverType<?> cover = coverBuffer[localX + localY * width];
                 if (last != cover && cover == this.waterCover || last == this.waterCover) {
                     this.spreadBeach(this.beachSize - 1, width, height, localX, localY, coverBuffer);
                 }
@@ -55,7 +55,7 @@ public class BeachAdapter implements RegionAdapter {
         }
     }
 
-    private void spreadBeach(int beachSize, int width, int height, int localX, int localY, CoverType[] coverBuffer) {
+    private void spreadBeach(int beachSize, int width, int height, int localX, int localY, CoverType<?>[] coverBuffer) {
         double maxWeight = (beachSize * beachSize) * 2;
         for (int beachY = -beachSize; beachY <= beachSize; beachY++) {
             int globalY = localY + beachY;

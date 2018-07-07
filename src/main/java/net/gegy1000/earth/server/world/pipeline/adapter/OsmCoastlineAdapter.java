@@ -86,7 +86,7 @@ public class OsmCoastlineAdapter implements RegionAdapter {
         OsmTile osmTile = data.getOrExcept(this.osmComponent);
 
         short[] heightBuffer = heightTile.getShortData();
-        CoverType[] coverBuffer = coverTile.getData();
+        CoverType<?>[] coverBuffer = coverTile.getData();
 
         List<OsmWay> coastlines = osmTile.getWays().valueCollection().stream()
                 .filter(way -> OsmDataParser.hasTag(way, "natural", "coastline"))
@@ -258,12 +258,12 @@ public class OsmCoastlineAdapter implements RegionAdapter {
         return floodSources;
     }
 
-    private void processFloodedMap(int width, int height, short[] heightBuffer, CoverType[] coverBuffer, int[] landmap) {
+    private void processFloodedMap(int width, int height, short[] heightBuffer, CoverType<?>[] coverBuffer, int[] landmap) {
         List<FloodFill.Point> unselectedPoints = new LinkedList<>();
         for (int localY = 0; localY < height; localY++) {
             for (int localX = 0; localX < width; localX++) {
                 int index = localX + localY * width;
-                CoverType cover = coverBuffer[index];
+                CoverType<?> cover = coverBuffer[index];
                 int sample = landmap[index];
                 int landType = sample & LAND_TYPE_MASK;
                 int coastType = sample & COAST_TYPE_MASK;
@@ -324,11 +324,11 @@ public class OsmCoastlineAdapter implements RegionAdapter {
         }
     }
 
-    private class CoverSelectVisitor implements FloodFill.Visitor<CoverType> {
-        private CoverType result = null;
+    private class CoverSelectVisitor implements FloodFill.Visitor<CoverType<?>> {
+        private CoverType<?> result = null;
 
         @Override
-        public CoverType visit(FloodFill.Point point, CoverType sampled) {
+        public CoverType<?> visit(FloodFill.Point point, CoverType<?> sampled) {
             if (sampled != TerrariumCoverTypes.PLACEHOLDER) {
                 this.result = sampled;
                 return null;
@@ -337,11 +337,11 @@ public class OsmCoastlineAdapter implements RegionAdapter {
         }
 
         @Override
-        public boolean canVisit(FloodFill.Point point, CoverType sampled) {
+        public boolean canVisit(FloodFill.Point point, CoverType<?> sampled) {
             return sampled != EarthCoverTypes.WATER;
         }
 
-        public CoverType getResult() {
+        public CoverType<?> getResult() {
             if (this.result == null) {
                 return EarthCoverTypes.RAINFED_CROPS;
             }

@@ -36,7 +36,7 @@ public class PropertyKey<T> {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof PropertyKey && obj.getClass() == this.getClass() && ((PropertyKey) obj).getIdentifier().equals(this.identifier);
+        return obj instanceof PropertyKey && obj.getClass() == this.getClass() && ((PropertyKey<?>) obj).getIdentifier().equals(this.identifier);
     }
 
     @SideOnly(Side.CLIENT)
