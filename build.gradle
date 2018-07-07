@@ -20,9 +20,9 @@ archivesBaseName = "terrarium"
 sourceCompatibility = targetCompatibility = "1.8"
 
 minecraft {
-  version = "1.12.2-14.23.4.2705"
+  version = "1.12.2-14.23.4.2729"
   runDir = "minecraft"
-  mappings = "snapshot_20180703"
+  mappings = "snapshot_20180706"
 }
 
 repositories {
@@ -41,8 +41,13 @@ configurations {
 
 dependencies {
   // TODO: Use jar-in-jar embedding
-  embed 'de.topobyte:osm4j-core:0.0.15'
-  embed 'de.topobyte:osm4j-utils:0.0.20'
+  embed('de.topobyte:osm4j-core:0.0.15') {
+    exclude group: 'com.google.gauva'
+  }
+  embed('de.topobyte:osm4j-utils:0.0.20') {
+    exclude group: 'com.google.guava'
+  }
+  embed('org.tukaani:xz:1.8')
   embed files('libs/osm4j-geometry-0.1.0.jar')
 }
 
