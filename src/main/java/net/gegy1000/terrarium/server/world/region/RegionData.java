@@ -28,7 +28,7 @@ public class RegionData {
     public <T extends TiledDataAccess> T getOrExcept(RegionComponentType<T> componentType) throws IllegalArgumentException {
         T value = this.get(componentType);
         if (value == null) {
-            throw new IllegalArgumentException("Component of type " + componentType.getType() + " not found!");
+            throw new IllegalArgumentException("Component of type " + componentType.getIdentifier() + " not found!");
         }
         return value;
     }

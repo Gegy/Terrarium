@@ -71,6 +71,7 @@ public interface CachedRemoteSource {
             if (!cacheRoot.exists()) {
                 cacheRoot.mkdirs();
             }
+            // TODO: If we're taking in an XZ input, we don't need to compress it again when we output
             try (OutputStream output = new XZCompressorOutputStream(new FileOutputStream(file))) {
                 output.write(remoteData);
                 this.cacheMetadata(key);

@@ -26,7 +26,7 @@ public class HeightTransformAdapter implements RegionAdapter {
             for (int localX = 0; localX < width; localX++) {
                 int index = localX + localZ * width;
                 int scaledHeight = MathHelper.ceil(heightBuffer[index] * this.heightScale);
-                heightBuffer[index] = (short) MathHelper.clamp(scaledHeight + this.heightOffset, 0, 255);
+                heightBuffer[index] = (short) MathHelper.clamp(scaledHeight + this.heightOffset, 1, 255);
             }
         }
     }

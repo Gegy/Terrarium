@@ -8,7 +8,6 @@ import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectionSeedLayer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Biomes;
-import net.minecraft.init.Blocks;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.layer.GenLayer;
 import net.minecraft.world.gen.layer.GenLayerFuzzyZoom;
@@ -51,7 +50,7 @@ public class WaterCover extends EarthCoverType {
 
         @Override
         public void populateBlockCover(Random random, int originX, int originZ, IBlockState[] coverBlockBuffer) {
-            this.coverBlock(coverBlockBuffer, Blocks.WATER.getDefaultState());
+            this.populateBlockFiller(random, originX, originZ, coverBlockBuffer);
         }
 
         @Override
