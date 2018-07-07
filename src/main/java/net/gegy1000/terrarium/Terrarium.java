@@ -4,6 +4,7 @@ import net.gegy1000.earth.server.command.GeoTeleportCommand;
 import net.gegy1000.terrarium.server.ServerProxy;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.message.TerrariumHandshakeMessage;
+import net.gegy1000.terrarium.server.message.TerrariumLoadingStateMessage;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPresetRegistry;
 import net.gegy1000.terrarium.server.world.pipeline.source.CachedRemoteSource;
 import net.minecraftforge.fml.common.Mod;
@@ -51,6 +52,7 @@ public class Terrarium {
         network = NetworkRegistry.INSTANCE.newSimpleChannel(Terrarium.MODID);
         network.registerMessage(TerrariumHandshakeMessage.Handler.class, TerrariumHandshakeMessage.class, 0, Side.SERVER);
         network.registerMessage(TerrariumHandshakeMessage.Handler.class, TerrariumHandshakeMessage.class, 1, Side.CLIENT);
+        network.registerMessage(TerrariumLoadingStateMessage.Handler.class, TerrariumLoadingStateMessage.class, 2, Side.CLIENT);
     }
 
     @Mod.EventHandler

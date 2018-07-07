@@ -4,9 +4,9 @@ import com.google.common.collect.Lists;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.client.ClientEventHandler;
 import net.gegy1000.terrarium.client.gui.GuiRenderUtils;
+import net.gegy1000.terrarium.client.ClientProxy;
 import net.gegy1000.terrarium.server.config.TerrariumConfig;
 import net.gegy1000.terrarium.server.world.pipeline.source.LoadingState;
-import net.gegy1000.terrarium.server.world.pipeline.source.LoadingStateHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
@@ -28,7 +28,7 @@ public class LoadingStateOverlay {
 
     public static void onRender(int mouseX, int mouseY) {
         if (TerrariumConfig.dataStatusIcon) {
-            LoadingState state = LoadingStateHandler.checkState();
+            LoadingState state = ClientProxy.loadingState;
 
             if (state != null) {
                 MC.getTextureManager().bindTexture(WIDGETS_TEXTURE);

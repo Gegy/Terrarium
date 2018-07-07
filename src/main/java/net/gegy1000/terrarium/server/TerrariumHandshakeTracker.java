@@ -28,6 +28,10 @@ public class TerrariumHandshakeTracker {
     public static boolean isFriendly(EntityPlayer player) {
         return FRIENDLY_PLAYERS.contains(player);
     }
+    
+    public static Set<EntityPlayer> getFriends() {
+    	return new HashSet<EntityPlayer>(FRIENDLY_PLAYERS);
+    }
 
     @Nullable
     public static GenerationSettings getProvidedSettings() {

@@ -2,6 +2,7 @@ package net.gegy1000.terrarium.client;
 
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.ServerProxy;
+import net.gegy1000.terrarium.server.world.pipeline.source.LoadingState;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiCreateWorld;
 import net.minecraft.client.gui.GuiScreen;
@@ -16,6 +17,7 @@ import java.lang.reflect.Method;
 public class ClientProxy extends ServerProxy {
     private static Method actionPerformed;
     private static Field selectedWorldType;
+	public static LoadingState loadingState = null;
 
     @Override
     public void onPreInit() {
