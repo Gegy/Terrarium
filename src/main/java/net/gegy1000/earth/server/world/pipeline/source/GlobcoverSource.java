@@ -12,13 +12,13 @@ import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
 import net.gegy1000.terrarium.server.world.pipeline.source.SourceException;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
+import org.apache.commons.compress.compressors.xz.XZCompressorInputStream;
 
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.zip.GZIPInputStream;
 
 public class GlobcoverSource extends TiledDataSource<CoverRasterTile> implements CachedRemoteSource {
     public static final int TILE_SIZE = 2560;
@@ -38,7 +38,7 @@ public class GlobcoverSource extends TiledDataSource<CoverRasterTile> implements
     @Override
     public InputStream getRemoteStream(DataTilePos key) throws IOException {
         URL url = new URL(String.format("%s/%s/%s", EarthRemoteData.info.getBaseURL(), EarthRemoteData.info.getGlobEndpoint(), this.getCachedName(key)));
-        return new GZIPInputStream(url.openStream());
+        return new XZCompressorInputStream(url.openStream());
     }
 
     @Override

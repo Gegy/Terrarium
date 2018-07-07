@@ -2,6 +2,8 @@ package net.gegy1000.terrarium.server.world.pipeline.source;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.gegy1000.terrarium.Terrarium;
+import org.apache.commons.compress.compressors.xz.XZCompressorInputStream;
+import org.apache.commons.compress.compressors.xz.XZCompressorOutputStream;
 import org.apache.commons.io.IOUtils;
 
 import java.io.BufferedInputStream;
@@ -14,8 +16,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 public interface CachedRemoteSource {
     File GLOBAL_CACHE_ROOT = new File(".", "mods/terrarium/cache/");
@@ -50,7 +50,7 @@ public interface CachedRemoteSource {
 
         LoadingStateHandler.putState(LoadingState.LOADING_CACHED);
         try {
-            return new BufferedInputStream(new GZIPInputStream(new FileInputStream(cachedFile)));
+            return new BufferedInputStream(new XZCompressorInputStream(new FileInputStream(cachedFile)));
         } catch (IOException e) {
             LoadingStateHandler.putState(LoadingState.LOADING_NO_CONNECTION);
             Terrarium.LOGGER.error("Failed to load local tile data stream at {}", key, e);
@@ -71,7 +71,7 @@ public interface CachedRemoteSource {
             if (!cacheRoot.exists()) {
                 cacheRoot.mkdirs();
             }
-            try (OutputStream output = new GZIPOutputStream(new FileOutputStream(file))) {
+            try (OutputStream output = new XZCompressorOutputStream(new FileOutputStream(file))) {
                 output.write(remoteData);
                 this.cacheMetadata(key);
             } catch (Exception e) {

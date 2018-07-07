@@ -8,6 +8,7 @@ import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
 import net.gegy1000.terrarium.server.world.pipeline.source.SourceException;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
+import org.apache.commons.compress.compressors.xz.XZCompressorInputStream;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
@@ -20,7 +21,6 @@ import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 public class SrtmHeightSource extends TiledDataSource<ShortRasterTile> implements CachedRemoteSource {
-    public static final int TILE_DATA_SIZE = 1201;
     public static final int TILE_SIZE = 1200;
 
     private static final Set<DataTilePos> VALID_TILES = new HashSet<>();
@@ -54,13 +54,20 @@ public class SrtmHeightSource extends TiledDataSource<ShortRasterTile> implement
         key = new DataTilePos(key.getTileX(), key.getTileZ() + 1);
         if (VALID_TILES.isEmpty() || VALID_TILES.contains(key)) {
             try (DataInputStream input = new DataInputStream(this.getStream(key))) {
-                short[] heightmap = new short[TILE_DATA_SIZE * TILE_DATA_SIZE];
-                for (int i = 0; i < heightmap.length; i++) {
-                    heightmap[i] = input.readShort();
+                short[] heightmap = new short[TILE_SIZE * TILE_SIZE];
+                short origin = input.readShort();
+                if (origin == -1) {
+                    for (int i = 0; i < heightmap.length; i++) {
+                        heightmap[i] = input.readShort();
+                    }
+                } else {
+                    for (int i = 0; i < heightmap.length; i++) {
+                        heightmap[i] = (short) ((input.readByte() & 0xFF) + origin);
+                    }
                 }
-                return new ShortRasterTile(heightmap, TILE_DATA_SIZE, TILE_DATA_SIZE);
+                return new ShortRasterTile(heightmap, TILE_SIZE, TILE_SIZE);
             } catch (IOException e) {
-                Terrarium.LOGGER.error("Failed to parse height tile at {}", key, e);
+                Terrarium.LOGGER.error("Failed to parse height tile at {} ({})", key, this.getCachedName(key), e);
             }
         }
         return null;
@@ -73,7 +80,7 @@ public class SrtmHeightSource extends TiledDataSource<ShortRasterTile> implement
 
     @Override
     protected ShortRasterTile getDefaultTile() {
-        return new ShortRasterTile(new short[TILE_DATA_SIZE * TILE_DATA_SIZE], TILE_DATA_SIZE, TILE_DATA_SIZE);
+        return new ShortRasterTile(new short[TILE_SIZE * TILE_SIZE], TILE_SIZE, TILE_SIZE);
     }
 
     @Override
@@ -85,7 +92,7 @@ public class SrtmHeightSource extends TiledDataSource<ShortRasterTile> implement
     public InputStream getRemoteStream(DataTilePos key) throws IOException {
         String cachedName = this.getCachedName(key);
         URL url = new URL(String.format("%s/%s/%s", EarthRemoteData.info.getBaseURL(), EarthRemoteData.info.getHeightsEndpoint(), cachedName));
-        return new GZIPInputStream(url.openStream());
+        return new XZCompressorInputStream(url.openStream());
     }
 
     @Override
