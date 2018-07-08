@@ -1,9 +1,5 @@
 package net.gegy1000.earth.server.world.pipeline.layer;
 
-import de.topobyte.osm4j.core.model.iface.OsmNode;
-import de.topobyte.osm4j.core.model.iface.OsmWay;
-import gnu.trove.map.TLongObjectMap;
-import gnu.trove.map.hash.TLongObjectHashMap;
 import net.gegy1000.earth.server.world.pipeline.source.tile.OsmTile;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
@@ -24,26 +20,26 @@ public class OsmSampleLayer implements DataLayerProducer<OsmTile> {
 
     @Override
     public OsmTile apply(DataView view) {
-        DataTilePos blockMinTilePos = this.getTilePos(view.getMinCoordinate());
-        DataTilePos blockMaxTilePos = this.getTilePos(view.getMaxCoordinate());
+        DataView bufferView = view.grow(16, 16, 16, 16);
+
+        DataTilePos blockMinTilePos = this.getTilePos(bufferView.getMinCoordinate());
+        DataTilePos blockMaxTilePos = this.getTilePos(bufferView.getMaxCoordinate());
 
         DataTilePos minTilePos = DataTilePos.min(blockMinTilePos, blockMaxTilePos);
         DataTilePos maxTilePos = DataTilePos.max(blockMinTilePos, blockMaxTilePos);
 
-        TLongObjectMap<OsmNode> nodes = new TLongObjectHashMap<>();
-        TLongObjectMap<OsmWay> ways = new TLongObjectHashMap<>();
+        OsmTile mergedTile = new OsmTile();
 
         for (int tileZ = minTilePos.getTileZ(); tileZ <= maxTilePos.getTileZ(); tileZ++) {
             for (int tileX = minTilePos.getTileX(); tileX <= maxTilePos.getTileX(); tileX++) {
                 OsmTile tile = this.overpassSource.getTile(new DataTilePos(tileX, tileZ));
                 if (tile != null) {
-                    nodes.putAll(tile.getNodes());
-                    ways.putAll(tile.getWays());
+                    mergedTile = mergedTile.merge(tile);
                 }
             }
         }
 
-        return new OsmTile(nodes, ways);
+        return mergedTile;
     }
 
     private DataTilePos getTilePos(Coordinate coordinate) {

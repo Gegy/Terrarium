@@ -35,4 +35,14 @@ public class WaterRasterTile extends ShortRasterTile {
     public int getWaterLevel(int localX, int localZ) {
         return (this.getShort(localX, localZ) & WATER_LEVEL_MASK) >> 2;
     }
+
+    public static boolean isLand(int value) {
+        int type = value & WATER_TYPE_MASK;
+        return type == LAND;
+    }
+
+    public static boolean isWater(int value) {
+        int type = value & WATER_TYPE_MASK;
+        return type == OCEAN || type == RIVER;
+    }
 }

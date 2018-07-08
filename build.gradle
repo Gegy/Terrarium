@@ -47,7 +47,7 @@ dependencies {
   embed('de.topobyte:osm4j-utils:0.0.20') {
     exclude group: 'com.google.guava'
   }
-  embed('org.tukaani:xz:1.8')
+  embed 'org.tukaani:xz:1.8'
   embed files('libs/osm4j-geometry-0.1.0.jar')
 }
 

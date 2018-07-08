@@ -39,7 +39,7 @@ public class OsmDataParser {
 
     public static OsmTile parse(InputStream input) throws IOException {
         InMemoryMapDataSet entities = OsmDataParser.parseEntities(input);
-        return new OsmTile(entities);
+        return OsmTile.fromDataSet(entities);
     }
 
     private static InMemoryMapDataSet parseEntities(InputStream input) throws IOException {
@@ -78,7 +78,11 @@ public class OsmDataParser {
     public static MultiPolygon createArea(OsmEntityProvider data, OsmWay way) {
         try {
             RegionBuilderResult region = REGION_BUILDER.build(way, data);
-            return region.getMultiPolygon();
+            MultiPolygon multiPolygon = region.getMultiPolygon();
+            if (multiPolygon.isEmpty()) {
+                return null;
+            }
+            return multiPolygon;
         } catch (EntityNotFoundException e) {
             Terrarium.LOGGER.warn("Unable to find relation member", e);
             return null;
@@ -88,7 +92,11 @@ public class OsmDataParser {
     public static MultiPolygon createArea(OsmEntityProvider data, OsmRelation relation) {
         try {
             RegionBuilderResult region = REGION_BUILDER.build(relation, data);
-            return region.getMultiPolygon();
+            MultiPolygon multiPolygon = region.getMultiPolygon();
+            if (multiPolygon.isEmpty()) {
+                return null;
+            }
+            return multiPolygon;
         } catch (EntityNotFoundException e) {
             Terrarium.LOGGER.warn("Unable to find relation member", e);
             return null;

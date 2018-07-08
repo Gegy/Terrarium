@@ -4,6 +4,12 @@
 (
     way({{bbox}})["highway"~"trunk|motorway"];
     way({{bbox}})["natural"="coastline"];
+    way({{bbox}})["waterway"~"riverbank|river"];
+  	way({{bbox}})["water"];
+  	way({{bbox}})["natural"="water"];
+  	relation({{bbox}})["waterway"];
+    relation({{bbox}})["water"="river"];
+  	relation({{bbox}})["natural"="water"];
 );
+(._;>;);
 out;
-node(w); out;

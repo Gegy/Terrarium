@@ -10,29 +10,37 @@ import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.MergableTile;
 
+import java.util.Collection;
+
 public class OsmTile implements OsmEntityProvider, MergableTile<OsmTile> {
     private final TLongObjectMap<OsmNode> nodes;
     private final TLongObjectMap<OsmWay> ways;
+    private final TLongObjectMap<OsmRelation> relations;
 
-    public OsmTile(TLongObjectMap<OsmNode> nodes, TLongObjectMap<OsmWay> ways) {
+    public OsmTile(TLongObjectMap<OsmNode> nodes, TLongObjectMap<OsmWay> ways, TLongObjectMap<OsmRelation> relations) {
         this.nodes = nodes;
         this.ways = ways;
-    }
-
-    public OsmTile(InMemoryMapDataSet data) {
-        this(data.getNodes(), data.getWays());
+        this.relations = relations;
     }
 
     public OsmTile() {
-        this(new TLongObjectHashMap<>(), new TLongObjectHashMap<>());
+        this(new TLongObjectHashMap<>(), new TLongObjectHashMap<>(), new TLongObjectHashMap<>());
     }
 
-    public TLongObjectMap<OsmNode> getNodes() {
-        return this.nodes;
+    public static OsmTile fromDataSet(InMemoryMapDataSet dataSet) {
+        return new OsmTile(dataSet.getNodes(), dataSet.getWays(), dataSet.getRelations());
     }
 
-    public TLongObjectMap<OsmWay> getWays() {
-        return this.ways;
+    public Collection<OsmNode> getNodes() {
+        return this.nodes.valueCollection();
+    }
+
+    public Collection<OsmWay> getWays() {
+        return this.ways.valueCollection();
+    }
+
+    public Collection<OsmRelation> getRelations() {
+        return this.relations.valueCollection();
     }
 
     @Override
@@ -45,7 +53,11 @@ public class OsmTile implements OsmEntityProvider, MergableTile<OsmTile> {
         ways.putAll(this.ways);
         ways.putAll(tile.ways);
 
-        return new OsmTile(nodes, ways);
+        TLongObjectMap<OsmRelation> relations = new TLongObjectHashMap<>(this.relations.size() + tile.relations.size());
+        relations.putAll(this.relations);
+        relations.putAll(tile.relations);
+
+        return new OsmTile(nodes, ways, relations);
     }
 
     @Override
@@ -68,6 +80,21 @@ public class OsmTile implements OsmEntityProvider, MergableTile<OsmTile> {
 
     @Override
     public OsmRelation getRelation(long id) throws EntityNotFoundException {
-        throw new EntityNotFoundException("Relation with id " + id + " not found");
+        OsmRelation relation = this.relations.get(id);
+        if (relation == null) {
+            throw new EntityNotFoundException("Relation with id " + id + " not found");
+        }
+        return relation;
+    }
+
+    @Override
+    public OsmTile copy() {
+        TLongObjectMap<OsmNode> nodes = new TLongObjectHashMap<>();
+        nodes.putAll(this.nodes);
+        TLongObjectMap<OsmWay> ways = new TLongObjectHashMap<>();
+        ways.putAll(this.ways);
+        TLongObjectMap<OsmRelation> relations = new TLongObjectHashMap<>();
+        relations.putAll(this.relations);
+        return new OsmTile(nodes, ways, relations);
     }
 }

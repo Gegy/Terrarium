@@ -5,6 +5,7 @@
     way({{bbox}})["landuse"];
     way({{bbox}})["railway"]["railway"!="no"];
     way({{bbox}})["highway"]["highway"!~"trunk|motorway"];
+    way({{bbox}})["waterway"="stream"];
 );
 out;
 node(w); out;

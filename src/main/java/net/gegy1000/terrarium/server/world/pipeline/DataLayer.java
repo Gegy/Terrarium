@@ -18,6 +18,7 @@ public class DataLayer<T extends TiledDataAccess, P extends TiledDataAccess> ext
     @Override
     public void reset() {
         super.reset();
+        this.processor.reset();
         this.parent.reset();
     }
 

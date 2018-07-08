@@ -8,11 +8,11 @@ import net.gegy1000.terrarium.server.world.pipeline.DataView;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 
-public class WaterPopulatorLayer implements DataLayerProducer<WaterRasterTile> {
+public class WaterBankPopulatorLayer implements DataLayerProducer<ShortRasterTile> {
     private final DataLayerProducer<CoverRasterTile> coverLayer;
     private final DataLayerProducer<ShortRasterTile> heightLayer;
 
-    public WaterPopulatorLayer(DataLayerProducer<CoverRasterTile> coverLayer, DataLayerProducer<ShortRasterTile> heightLayer) {
+    public WaterBankPopulatorLayer(DataLayerProducer<CoverRasterTile> coverLayer, DataLayerProducer<ShortRasterTile> heightLayer) {
         this.coverLayer = coverLayer;
         this.heightLayer = heightLayer;
     }
@@ -24,8 +24,8 @@ public class WaterPopulatorLayer implements DataLayerProducer<WaterRasterTile> {
     }
 
     @Override
-    public WaterRasterTile apply(DataView view) {
-        WaterRasterTile tile = new WaterRasterTile(view);
+    public ShortRasterTile apply(DataView view) {
+        ShortRasterTile tile = new ShortRasterTile(view);
         CoverRasterTile coverTile = this.coverLayer.apply(view);
         ShortRasterTile heightTile = this.heightLayer.apply(view);
 
@@ -34,7 +34,8 @@ public class WaterPopulatorLayer implements DataLayerProducer<WaterRasterTile> {
                 CoverType cover = coverTile.get(localX, localY);
                 if (cover == EarthCoverTypes.WATER) {
                     short height = heightTile.getShort(localX, localY);
-                    tile.setWaterType(localX, localY, height <= 1 ? WaterRasterTile.OCEAN : WaterRasterTile.RIVER);
+                    int bankType = height <= 1 ? OsmWaterLayer.OCEAN : OsmWaterLayer.RIVER;
+                    tile.setShort(localX, localY, (short) bankType);
                 }
             }
         }

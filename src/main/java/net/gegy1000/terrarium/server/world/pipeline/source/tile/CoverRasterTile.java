@@ -5,6 +5,8 @@ import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.TerrariumCoverTypes;
 import net.gegy1000.terrarium.server.world.pipeline.DataView;
 
+import java.util.Arrays;
+
 public class CoverRasterTile implements RasterDataAccess<CoverType>, TiledDataAccess {
     private final CoverType[] cover;
     private final int offsetX;
@@ -62,5 +64,10 @@ public class CoverRasterTile implements RasterDataAccess<CoverType>, TiledDataAc
     @Override
     public CoverType[] getData() {
         return this.cover;
+    }
+
+    @Override
+    public CoverRasterTile copy() {
+        return new CoverRasterTile(Arrays.copyOf(this.cover, this.cover.length), this.width, this.height);
     }
 }

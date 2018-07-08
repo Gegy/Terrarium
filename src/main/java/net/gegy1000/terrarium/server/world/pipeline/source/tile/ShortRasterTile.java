@@ -2,6 +2,8 @@ package net.gegy1000.terrarium.server.world.pipeline.source.tile;
 
 import net.gegy1000.terrarium.server.world.pipeline.DataView;
 
+import java.util.Arrays;
+
 public class ShortRasterTile implements TiledDataAccess, NumberRasterTile<Short> {
     private final short[] data;
     private final int width;
@@ -74,5 +76,10 @@ public class ShortRasterTile implements TiledDataAccess, NumberRasterTile<Short>
     @Override
     public double getDouble(int x, int y) {
         return this.getShort(x, y);
+    }
+
+    @Override
+    public ShortRasterTile copy() {
+        return new ShortRasterTile(Arrays.copyOf(this.data, this.data.length), this.width, this.height);
     }
 }
