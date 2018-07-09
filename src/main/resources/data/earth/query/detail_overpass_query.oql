@@ -1,12 +1,19 @@
 [out:json]
-[timeout:15][maxsize:16777216];
+[timeout:30][maxsize:16777216][bbox:{{bbox}}];
 
 (
-    way({{bbox}})["building"]["building"!="no"];
-    way({{bbox}})["building:part"];
-    way({{bbox}})["natural"]["natural"!="coastline"]["natural"!="water"];
+    way["building"]["building"!="no"];
+    rel["building"]["building"!="no"];
+    way["highway"]["highway"!~"motorway|trunk|primary|secondary|tertiary|unclassified|road"];
+    rel["highway"]["highway"!~"motorway|trunk|primary|secondary|tertiary|unclassified|road"];
+    way["waterway"="stream"];
+    rel["waterway"="stream"];
+    way["waterway"="canal"];
+    rel["waterway"="canal"];
+    way["waterway"="ditch"];
+    rel["waterway"="ditch"];
 );
+(._;>;);
 out;
-node(w); out;
 
-node({{bbox}})["amenity"]["amenity"!="no"]; out;
+node["amenity"]["amenity"!="no"]; out;

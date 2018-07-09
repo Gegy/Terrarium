@@ -1,15 +1,24 @@
 [out:json]
-[timeout:15][maxsize:5242880];
+[timeout:30][maxsize:5242880][bbox:{{bbox}}];
 
 (
-    way({{bbox}})["highway"~"trunk|motorway"];
-    way({{bbox}})["natural"="coastline"];
-    way({{bbox}})["waterway"~"riverbank|river"];
-  	way({{bbox}})["water"];
-  	way({{bbox}})["natural"="water"];
-  	relation({{bbox}})["waterway"];
-    relation({{bbox}})["water"="river"];
-  	relation({{bbox}})["natural"="water"];
+  way["highway"="motorway"];
+  way["landuse"="farmland"];
+  rel["landuse"="farmland"];
+  way["landuse"="basin"];
+  rel["landuse"="basin"];
+  way["waterway"="dam"];
+  rel["waterway"="dam"];
+  way["waterway"="dock"];
+  rel["waterway"="dock"];
+  way["waterway"="riverbank"];
+  rel["waterway"="riverbank"];
+  way["natural"="coastline"];
+  rel["natural"="coastline"];
+  way["landuse"="quarry"];
+  rel["landuse"="quarry"];
+  way["natural"="glacier"];
+  rel["natural"="glacier"];
 );
 (._;>;);
 out;

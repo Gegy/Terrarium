@@ -14,9 +14,7 @@ import net.gegy1000.terrarium.server.world.rasterization.RasterCanvas;
 
 import java.awt.Rectangle;
 import java.awt.geom.Area;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.Collection;
 
 public class OsmWaterBodyLayer extends OsmWaterLayer {
     private static final int RIVER_COLOR = 1;
@@ -31,7 +29,7 @@ public class OsmWaterBodyLayer extends OsmWaterLayer {
     @Override
     protected ShortRasterTile applyWater(DataView view, ShortRasterTile waterTile, OsmTile osmTile) {
         // TODO: Line-based rivers
-        List<MultiPolygon> waterPolygons = this.collectWaterPolygons(osmTile);
+        Collection<MultiPolygon> waterPolygons = osmTile.collectPolygons(this::isWaterArea);
 
         if (!waterPolygons.isEmpty()) {
             ShortRasterTile resultTile = waterTile.copy();
@@ -63,20 +61,6 @@ public class OsmWaterBodyLayer extends OsmWaterLayer {
         }
 
         return waterTile;
-    }
-
-    private List<MultiPolygon> collectWaterPolygons(OsmTile osmTile) {
-        List<MultiPolygon> waterPolygons = osmTile.getRelations().stream()
-                .filter(this::isWaterArea)
-                .map(relation -> OsmDataParser.createArea(osmTile, relation))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-        waterPolygons.addAll(osmTile.getWays().stream()
-                .filter(this::isWaterArea)
-                .map(way -> OsmDataParser.createArea(osmTile, way))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList()));
-        return waterPolygons;
     }
 
     private boolean isWaterArea(OsmEntity entity) {

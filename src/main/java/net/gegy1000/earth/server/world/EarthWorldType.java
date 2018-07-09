@@ -6,6 +6,7 @@ import net.gegy1000.earth.server.capability.EarthCapability;
 import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthCoverTypes;
 import net.gegy1000.earth.server.world.pipeline.EarthComponentTypes;
+import net.gegy1000.earth.server.world.pipeline.adapter.OsmAreaCoverAdapter;
 import net.gegy1000.earth.server.world.pipeline.adapter.WaterApplyAdapter;
 import net.gegy1000.earth.server.world.pipeline.adapter.WaterCarveAdapter;
 import net.gegy1000.earth.server.world.pipeline.adapter.WaterLevelingAdapter;
@@ -217,6 +218,7 @@ public class EarthWorldType extends TerrariumWorldType {
                     .withComponent(EarthComponentTypes.OSM, osmProducer)
                     .withComponent(EarthComponentTypes.WATER, waterProducer)
                     .withAdapter(new WaterApplyAdapter(this.earthCoordinates, EarthComponentTypes.WATER, RegionComponentType.HEIGHT, RegionComponentType.COVER))
+                    .withAdapter(new OsmAreaCoverAdapter(this.earthCoordinates, EarthComponentTypes.OSM, RegionComponentType.COVER))
 //                    .withAdapter(new HeightNoiseAdapter(this.world, RegionComponentType.HEIGHT, 2, 0.08, this.properties.getDouble(NOISE_SCALE)))
                     .withAdapter(new HeightTransformAdapter(RegionComponentType.HEIGHT, this.properties.getDouble(HEIGHT_SCALE) * this.worldScale, heightOrigin))
                     .withAdapter(new WaterLevelingAdapter(EarthComponentTypes.WATER, RegionComponentType.HEIGHT, heightOrigin + 1))
@@ -252,21 +254,21 @@ public class EarthWorldType extends TerrariumWorldType {
                     0.3,
                     "osm/outline",
                     new ResourceLocation(TerrariumEarth.MODID, "query/outline_overpass_query.oql"),
-                    5
+                    6
             ));
             sources.add(new OverpassSource(
                     this.earthCoordinates,
                     0.1,
                     "osm/general",
                     new ResourceLocation(TerrariumEarth.MODID, "query/general_overpass_query.oql"),
-                    3
+                    4
             ));
             sources.add(new OverpassSource(
                     this.earthCoordinates,
                     0.05,
                     "osm/detailed",
                     new ResourceLocation(TerrariumEarth.MODID, "query/detail_overpass_query.oql"),
-                    2
+                    3
             ));
 
             List<DataLayerProducer<OsmTile>> samplers = sources.stream()

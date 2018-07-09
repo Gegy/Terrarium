@@ -9,7 +9,7 @@
     "world_scale": 0.028571,
     "height_scale": 1.0,
     "noise_scale": 1.0,
-    "height_origin": 6,
+    "height_origin": 7,
     "ocean_depth": 3,
     "beach_size": 4,
     "enable_buildings": false,

@@ -17,8 +17,8 @@ import de.topobyte.osm4j.core.model.impl.Relation;
 import de.topobyte.osm4j.core.model.impl.RelationMember;
 import de.topobyte.osm4j.core.model.impl.Tag;
 import de.topobyte.osm4j.core.model.impl.Way;
-import gnu.trove.list.TLongList;
-import gnu.trove.list.array.TLongArrayList;
+import it.unimi.dsi.fastutil.longs.LongArrayList;
+import it.unimi.dsi.fastutil.longs.LongList;
 import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
@@ -98,7 +98,7 @@ public class OsmJsonReader implements OsmReader {
     }
 
     private void parseWay(long id, JsonObject elementObject) throws IOException {
-        TLongList nodes = new TLongArrayList();
+        LongList nodes = new LongArrayList();
 
         if (elementObject.has("nodes")) {
             JsonArray nodesArray = elementObject.get("nodes").getAsJsonArray();

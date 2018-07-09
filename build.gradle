@@ -29,8 +29,10 @@ repositories {
   mavenCentral()
   jcenter()
   maven {
-    name = "topobyte"
     url = "http://mvn.topobyte.de"
+  }
+  maven {
+    url = "https://maven.gegy1000.net"
   }
 }
 
@@ -41,19 +43,20 @@ configurations {
 
 dependencies {
   // TODO: Use jar-in-jar embedding
-  embed('de.topobyte:osm4j-core:0.0.15') {
-    exclude group: 'com.google.gauva'
+  embed('de.topobyte:osm4j-core-mc:0.1.0') {
+    exclude group: 'it.unimi.dsi', module: 'fastutil'
+    exclude group: 'org.apache.commons'
   }
-  embed('de.topobyte:osm4j-utils:0.0.20') {
-    exclude group: 'com.google.guava'
+  embed('de.topobyte:osm4j-utils-mc:0.1.2') {
+    exclude group: 'it.unimi.dsi', module: 'fastutil'
+    exclude group: 'org.apache.commons'
   }
-  embed 'org.tukaani:xz:1.8'
-  embed files('libs/osm4j-geometry-0.1.0.jar')
+  embed 'org.tukaani:xz:1.5'
 }
 
 jar {
   from configurations.embed.filter {
-    !(it.name.startsWith("osm4j-geometry-0.0.9") || it.name.contains("guava") || it.name.contains("trove") || it.name.contains("log4j") || it.name.contains("slf4j") || it.name.contains("commons"))
+    !(it.name.contains("guava") || it.name.contains("trove") || it.name.contains("log4j") || it.name.contains("slf4j") || it.name.contains("commons"))
   }.collect {
     exclude 'META-INF/LICENSE.txt'
     exclude 'META-INF/NOTICE.txt'
