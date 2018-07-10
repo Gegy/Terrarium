@@ -2,9 +2,10 @@ package net.gegy1000.terrarium.server.world.pipeline.source;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.gegy1000.terrarium.Terrarium;
-import org.apache.commons.compress.compressors.xz.XZCompressorInputStream;
-import org.apache.commons.compress.compressors.xz.XZCompressorOutputStream;
 import org.apache.commons.io.IOUtils;
+import org.tukaani.xz.LZMA2Options;
+import org.tukaani.xz.SingleXZInputStream;
+import org.tukaani.xz.XZOutputStream;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -50,7 +51,7 @@ public interface CachedRemoteSource {
 
         LoadingStateHandler.putState(LoadingState.LOADING_CACHED);
         try {
-            return new BufferedInputStream(new XZCompressorInputStream(new FileInputStream(cachedFile)));
+            return new BufferedInputStream(new SingleXZInputStream(new FileInputStream(cachedFile)));
         } catch (IOException e) {
             LoadingStateHandler.putState(LoadingState.LOADING_NO_CONNECTION);
             Terrarium.LOGGER.error("Failed to load local tile data stream at {}", key, e);
@@ -72,7 +73,7 @@ public interface CachedRemoteSource {
                 cacheRoot.mkdirs();
             }
             // TODO: If we're taking in an XZ input, we don't need to compress it again when we output
-            try (OutputStream output = new XZCompressorOutputStream(new FileOutputStream(file))) {
+            try (OutputStream output = new XZOutputStream(new FileOutputStream(file), new LZMA2Options())) {
                 output.write(remoteData);
                 this.cacheMetadata(key);
             } catch (Exception e) {

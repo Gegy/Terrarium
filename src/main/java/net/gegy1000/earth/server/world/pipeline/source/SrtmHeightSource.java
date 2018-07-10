@@ -8,7 +8,7 @@ import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
 import net.gegy1000.terrarium.server.world.pipeline.source.SourceException;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
-import org.apache.commons.compress.compressors.xz.XZCompressorInputStream;
+import org.tukaani.xz.SingleXZInputStream;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
@@ -92,7 +92,7 @@ public class SrtmHeightSource extends TiledDataSource<ShortRasterTile> implement
     public InputStream getRemoteStream(DataTilePos key) throws IOException {
         String cachedName = this.getCachedName(key);
         URL url = new URL(String.format("%s/%s/%s", EarthRemoteData.info.getBaseURL(), EarthRemoteData.info.getHeightsEndpoint(), cachedName));
-        return new XZCompressorInputStream(url.openStream());
+        return new SingleXZInputStream(url.openStream());
     }
 
     @Override

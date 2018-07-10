@@ -12,7 +12,7 @@ import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
 import net.gegy1000.terrarium.server.world.pipeline.source.SourceException;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
-import org.apache.commons.compress.compressors.xz.XZCompressorInputStream;
+import org.tukaani.xz.SingleXZInputStream;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -38,7 +38,7 @@ public class GlobcoverSource extends TiledDataSource<CoverRasterTile> implements
     @Override
     public InputStream getRemoteStream(DataTilePos key) throws IOException {
         URL url = new URL(String.format("%s/%s/%s", EarthRemoteData.info.getBaseURL(), EarthRemoteData.info.getGlobEndpoint(), this.getCachedName(key)));
-        return new XZCompressorInputStream(url.openStream());
+        return new SingleXZInputStream(url.openStream());
     }
 
     @Override

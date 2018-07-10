@@ -42,25 +42,32 @@ configurations {
 }
 
 dependencies {
-  // TODO: Use jar-in-jar embedding
   embed('de.topobyte:osm4j-core-mc:0.1.0') {
     exclude group: 'it.unimi.dsi', module: 'fastutil'
     exclude group: 'org.apache.commons'
+    exclude group: 'org.apache.logging.log4j'
   }
   embed('de.topobyte:osm4j-utils-mc:0.1.2') {
     exclude group: 'it.unimi.dsi', module: 'fastutil'
     exclude group: 'org.apache.commons'
+    exclude group: 'commons-cli'
+    exclude group: 'com.google.protobuf'
+    exclude group: 'com.google.guava'
+    exclude group: 'org.apache.logging.log4j'
+    exclude group: 'org.slf4j'
+    exclude group: 'net.sf.trove4j'
   }
   embed 'org.tukaani:xz:1.5'
 }
 
 jar {
-  from configurations.embed.filter {
-    !(it.name.contains("guava") || it.name.contains("trove") || it.name.contains("log4j") || it.name.contains("slf4j") || it.name.contains("commons"))
-  }.collect {
-    exclude 'META-INF/LICENSE.txt'
-    exclude 'META-INF/NOTICE.txt'
+  from configurations.embed.collect {
+    exclude 'META-INF/'
     it.isDirectory() ? it : zipTree(it)
+  }
+  manifest {
+    attributes "Maven-Artifact": "${project.group}:${project.archivesBaseName}:${project.version}"
+    attributes "Timestamp": System.currentTimeMillis()
   }
 }
 
