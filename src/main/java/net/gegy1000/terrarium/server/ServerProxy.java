@@ -9,4 +9,8 @@ public class ServerProxy {
 
     public void onPostInit() {
     }
+
+    public boolean hasServer() {
+        return true;
+    }
 }

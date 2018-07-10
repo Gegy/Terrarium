@@ -57,7 +57,7 @@ dependencies {
     exclude group: 'org.slf4j'
     exclude group: 'net.sf.trove4j'
   }
-  embed 'org.tukaani:xz:1.5'
+  embed 'org.tukaani:xz-fork:1.8'
 }
 
 jar {
