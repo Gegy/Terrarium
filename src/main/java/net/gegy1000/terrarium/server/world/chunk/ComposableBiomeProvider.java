@@ -4,7 +4,7 @@ import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.util.Lazy;
 import net.gegy1000.terrarium.server.world.generator.ChunkCompositionProcedure;
-import net.gegy1000.terrarium.server.world.region.GenerationRegionHandler;
+import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.init.Biomes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -19,7 +19,7 @@ import java.util.Random;
 public class ComposableBiomeProvider extends BiomeProvider {
     private final World world;
 
-    private final Lazy<GenerationRegionHandler> regionHandler;
+    private final Lazy<RegionGenerationHandler> regionHandler;
     private final Lazy<ChunkCompositionProcedure> compositionProcedure;
 
     private final BiomeCache biomeCache = new BiomeCache(this);
@@ -32,7 +32,7 @@ public class ComposableBiomeProvider extends BiomeProvider {
             if (capability != null) {
                 return capability.getRegionHandler();
             }
-            throw new IllegalStateException("Tried to load GenerationRegionHandler before it was present");
+            throw new IllegalStateException("Tried to load RegionGenerationHandler before it was present");
         });
 
         this.compositionProcedure = new Lazy.WorldCap<>(world, TerrariumWorldData::getCompositionProcedure);
@@ -90,7 +90,7 @@ public class ComposableBiomeProvider extends BiomeProvider {
     }
 
     private void populateArea(Biome[] biomes, int x, int z, int width, int height) {
-        GenerationRegionHandler regionHandler = this.regionHandler.get();
+        RegionGenerationHandler regionHandler = this.regionHandler.get();
         ChunkCompositionProcedure compositionProcedure = this.compositionProcedure.get();
 
         if (this.isChunkGeneration(x, z, width, height)) {

@@ -4,15 +4,15 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.RasterDataAccess;
-import net.gegy1000.terrarium.server.world.region.GenerationRegionHandler;
+import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 
 import java.util.Map;
 
 public class ChunkRasterHandler {
-    private final GenerationRegionHandler regionHandler;
+    private final RegionGenerationHandler regionHandler;
     private final ImmutableMap<RegionComponentType<?>, Data<?, ?>> chunkRasters;
 
-    public ChunkRasterHandler(GenerationRegionHandler regionHandler, TerrariumDataProvider dataSystem) {
+    public ChunkRasterHandler(RegionGenerationHandler regionHandler, TerrariumDataProvider dataSystem) {
         this.regionHandler = regionHandler;
 
         ImmutableMap.Builder<RegionComponentType<?>, Data<?, ?>> chunkRastersBuilder = ImmutableMap.builder();

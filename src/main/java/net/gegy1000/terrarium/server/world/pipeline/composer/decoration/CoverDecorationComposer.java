@@ -8,7 +8,7 @@ import net.gegy1000.terrarium.server.world.cover.CoverGenerationContext;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
-import net.gegy1000.terrarium.server.world.region.GenerationRegionHandler;
+import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.world.World;
 
 import java.util.HashSet;
@@ -45,7 +45,7 @@ public class CoverDecorationComposer implements DecorationComposer {
     }
 
     @Override
-    public void composeDecoration(World world, GenerationRegionHandler regionHandler, int chunkX, int chunkZ) {
+    public void composeDecoration(World world, RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
         int globalX = chunkX << 4;
         int globalZ = chunkZ << 4;
 

@@ -3,7 +3,7 @@ package net.gegy1000.terrarium.server.world.cover;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
-import net.gegy1000.terrarium.server.world.region.GenerationRegionHandler;
+import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.world.World;
 
 public interface CoverGenerationContext {
@@ -11,7 +11,7 @@ public interface CoverGenerationContext {
 
     long getSeed();
 
-    void prepareChunk(GenerationRegionHandler regionHandler);
+    void prepareChunk(RegionGenerationHandler regionHandler);
 
     ShortRasterTile getHeightRaster();
 
@@ -41,7 +41,7 @@ public interface CoverGenerationContext {
         }
 
         @Override
-        public void prepareChunk(GenerationRegionHandler regionHandler) {
+        public void prepareChunk(RegionGenerationHandler regionHandler) {
             this.heightTile = regionHandler.getCachedChunkRaster(this.heightComponent);
             this.coverTile = regionHandler.getCachedChunkRaster(this.coverComponent);
         }

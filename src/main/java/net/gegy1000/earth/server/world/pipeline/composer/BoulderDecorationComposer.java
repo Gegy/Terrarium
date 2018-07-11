@@ -6,7 +6,7 @@ import net.gegy1000.terrarium.server.world.feature.BoulderGenerator;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ByteRasterTile;
-import net.gegy1000.terrarium.server.world.region.GenerationRegionHandler;
+import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.block.BlockStone;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
@@ -32,7 +32,7 @@ public class BoulderDecorationComposer implements DecorationComposer {
     }
 
     @Override
-    public void composeDecoration(World world, GenerationRegionHandler regionHandler, int chunkX, int chunkZ) {
+    public void composeDecoration(World world, RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
         int globalX = chunkX << 4;
         int globalZ = chunkZ << 4;
 

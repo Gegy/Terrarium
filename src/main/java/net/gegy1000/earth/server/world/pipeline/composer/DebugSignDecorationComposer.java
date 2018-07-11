@@ -4,7 +4,7 @@ import net.gegy1000.earth.server.world.pipeline.layer.DebugMap;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
-import net.gegy1000.terrarium.server.world.region.GenerationRegionHandler;
+import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntitySign;
@@ -20,7 +20,7 @@ public class DebugSignDecorationComposer implements DecorationComposer {
     }
 
     @Override
-    public void composeDecoration(World world, GenerationRegionHandler regionHandler, int chunkX, int chunkZ) {
+    public void composeDecoration(World world, RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
         int globalX = chunkX << 4;
         int globalZ = chunkZ << 4;
 

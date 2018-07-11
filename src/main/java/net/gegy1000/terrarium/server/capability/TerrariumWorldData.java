@@ -7,7 +7,7 @@ import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.generator.ChunkCompositionProcedure;
 import net.gegy1000.terrarium.server.world.generator.TerrariumGenerator;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
-import net.gegy1000.terrarium.server.world.region.GenerationRegionHandler;
+import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
@@ -16,7 +16,7 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 public interface TerrariumWorldData extends ICapabilityProvider {
     GenerationSettings getSettings();
 
-    GenerationRegionHandler getRegionHandler();
+    RegionGenerationHandler getRegionHandler();
 
     ChunkCompositionProcedure getCompositionProcedure();
 
@@ -25,7 +25,7 @@ public interface TerrariumWorldData extends ICapabilityProvider {
     class Implementation implements TerrariumWorldData {
         private final GenerationSettings settings;
         private final TerrariumGenerator generator;
-        private final GenerationRegionHandler regionHandler;
+        private final RegionGenerationHandler regionHandler;
 
         public Implementation(World world, TerrariumWorldType worldType) {
             String generatorOptions = world.getWorldInfo().getGeneratorOptions();
@@ -37,7 +37,7 @@ public interface TerrariumWorldData extends ICapabilityProvider {
 
             TerrariumGeneratorInitializer initializer = worldType.createInitializer(world, this.settings);
             this.generator = initializer.buildGenerator();
-            this.regionHandler = new GenerationRegionHandler(this.settings, initializer.buildDataProvider());
+            this.regionHandler = new RegionGenerationHandler(this.settings, initializer.buildDataProvider());
         }
 
         @Override
@@ -46,7 +46,7 @@ public interface TerrariumWorldData extends ICapabilityProvider {
         }
 
         @Override
-        public GenerationRegionHandler getRegionHandler() {
+        public RegionGenerationHandler getRegionHandler() {
             return this.regionHandler;
         }
 

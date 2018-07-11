@@ -6,7 +6,7 @@ import net.gegy1000.terrarium.server.world.cover.CoverGenerationContext;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
-import net.gegy1000.terrarium.server.world.region.GenerationRegionHandler;
+import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.init.Biomes;
 import net.minecraft.world.biome.Biome;
 
@@ -29,7 +29,7 @@ public class CoverBiomeComposer implements BiomeComposer {
     }
 
     @Override
-    public Biome[] composeBiomes(GenerationRegionHandler regionHandler, int chunkX, int chunkZ) {
+    public Biome[] composeBiomes(RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
         int globalX = chunkX << 4;
         int globalZ = chunkZ << 4;
 

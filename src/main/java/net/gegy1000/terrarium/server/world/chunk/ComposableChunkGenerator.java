@@ -4,7 +4,7 @@ import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.util.Lazy;
 import net.gegy1000.terrarium.server.world.generator.ChunkCompositionProcedure;
-import net.gegy1000.terrarium.server.world.region.GenerationRegionHandler;
+import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.block.BlockFalling;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.util.math.BlockPos;
@@ -29,7 +29,7 @@ public class ComposableChunkGenerator implements IChunkGenerator {
 
     private final Lazy<ChunkCompositionProcedure> compositionProcedure;
 
-    private final Lazy<GenerationRegionHandler> regionHandler;
+    private final Lazy<RegionGenerationHandler> regionHandler;
 
     private final Biome[] biomeBuffer = new Biome[16 * 16];
 
@@ -44,7 +44,7 @@ public class ComposableChunkGenerator implements IChunkGenerator {
             if (capability != null) {
                 return capability.getRegionHandler();
             }
-            throw new IllegalStateException("Tried to load GenerationRegionHandler before it was present");
+            throw new IllegalStateException("Tried to load RegionGenerationHandler before it was present");
         });
     }
 
@@ -67,7 +67,7 @@ public class ComposableChunkGenerator implements IChunkGenerator {
     }
 
     public ChunkPrimer generatePrimer(int chunkX, int chunkZ) {
-        GenerationRegionHandler regionHandler = this.regionHandler.get();
+        RegionGenerationHandler regionHandler = this.regionHandler.get();
         regionHandler.prepareChunk(chunkX << 4, chunkZ << 4);
 
         ChunkPrimer primer = new ChunkPrimer();
@@ -91,7 +91,7 @@ public class ComposableChunkGenerator implements IChunkGenerator {
 
         BlockFalling.fallInstantly = true;
 
-        GenerationRegionHandler regionHandler = this.regionHandler.get();
+        RegionGenerationHandler regionHandler = this.regionHandler.get();
         regionHandler.prepareChunk(globalX + 8, globalZ + 8);
 
         ForgeEventFactory.onChunkPopulate(true, this, this.world, this.random, chunkX, chunkZ, false);

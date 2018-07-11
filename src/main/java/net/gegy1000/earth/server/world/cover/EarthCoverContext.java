@@ -7,7 +7,7 @@ import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentTyp
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ByteRasterTile;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
-import net.gegy1000.terrarium.server.world.region.GenerationRegionHandler;
+import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.world.World;
 
 public class EarthCoverContext implements CoverGenerationContext {
@@ -56,7 +56,7 @@ public class EarthCoverContext implements CoverGenerationContext {
     }
 
     @Override
-    public void prepareChunk(GenerationRegionHandler regionHandler) {
+    public void prepareChunk(RegionGenerationHandler regionHandler) {
         this.heightTile = regionHandler.getCachedChunkRaster(this.heightComponent);
         this.coverTile = regionHandler.getCachedChunkRaster(this.coverComponent);
         this.slopeTile = regionHandler.getCachedChunkRaster(this.slopeComponent);

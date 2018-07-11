@@ -6,7 +6,7 @@ import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.pipeline.composer.biome.BiomeComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.SurfaceComposer;
-import net.gegy1000.terrarium.server.world.region.GenerationRegionHandler;
+import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.init.Biomes;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
@@ -125,21 +125,21 @@ public class BasicTerrariumGenerator implements TerrariumGenerator {
         }
 
         @Override
-        public void composeSurface(ChunkPrimer primer, GenerationRegionHandler regionHandler, int chunkX, int chunkZ) {
+        public void composeSurface(ChunkPrimer primer, RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
             for (SurfaceComposer composer : this.surfaceComposers) {
                 composer.composeSurface(primer, regionHandler, chunkX, chunkZ);
             }
         }
 
         @Override
-        public void composeDecoration(World world, GenerationRegionHandler regionHandler, int chunkX, int chunkZ) {
+        public void composeDecoration(World world, RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
             for (DecorationComposer composer : this.decorationComposers) {
                 composer.composeDecoration(world, regionHandler, chunkX, chunkZ);
             }
         }
 
         @Override
-        public Biome[] composeBiomes(GenerationRegionHandler regionHandler, int chunkX, int chunkZ) {
+        public Biome[] composeBiomes(RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
             if (this.biomeComposer == null) {
                 return ArrayUtils.defaulted(new Biome[16 * 16], Biomes.DEFAULT);
             }

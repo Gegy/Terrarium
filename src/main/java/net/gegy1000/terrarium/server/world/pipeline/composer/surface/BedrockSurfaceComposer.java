@@ -1,7 +1,7 @@
 package net.gegy1000.terrarium.server.world.pipeline.composer.surface;
 
 import net.gegy1000.terrarium.server.world.chunk.PseudoRandomMap;
-import net.gegy1000.terrarium.server.world.region.GenerationRegionHandler;
+import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.ChunkPrimer;
@@ -22,7 +22,7 @@ public class BedrockSurfaceComposer implements SurfaceComposer {
     }
 
     @Override
-    public void composeSurface(ChunkPrimer primer, GenerationRegionHandler regionHandler, int chunkX, int chunkZ) {
+    public void composeSurface(ChunkPrimer primer, RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
         int globalX = chunkX << 4;
         int globalZ = chunkZ << 4;
         for (int localZ = 0; localZ < 16; localZ++) {

@@ -52,6 +52,8 @@ public class WorldPreview implements IBlockAccess {
 
     private final Long2ObjectMap<ChunkData> chunkMap = new Long2ObjectOpenHashMap<>(VIEW_RANGE * 2 * VIEW_RANGE * 2);
 
+    private final TerrariumWorldData worldData;
+
     private List<PreviewChunk> previewChunks = null;
     private int heightOffset = 64;
 
@@ -62,13 +64,13 @@ public class WorldPreview implements IBlockAccess {
         Collections.addAll(this.builderQueue, builders);
 
         PreviewDummyWorld world = new PreviewDummyWorld(this.worldType, settings);
-        TerrariumWorldData worldData = world.getCapability(TerrariumCapabilities.worldDataCapability, null);
-        if (worldData == null) {
+        this.worldData = world.getCapability(TerrariumCapabilities.worldDataCapability, null);
+        if (this.worldData == null) {
             throw new IllegalStateException("Failed to get world data capability from preview world");
         }
 
         this.chunkGenerator = new ComposableChunkGenerator(world);
-        Coordinate spawnPosition = worldData.getSpawnPosition();
+        Coordinate spawnPosition = this.worldData.getSpawnPosition();
         if (spawnPosition != null) {
             this.centerPos = new ChunkPos(spawnPosition.toBlockPos());
         } else {
@@ -125,6 +127,7 @@ public class WorldPreview implements IBlockAccess {
             }
         }
         this.executor.shutdown();
+        this.worldData.getRegionHandler().close();
     }
 
     public BufferBuilder takeBuilder() {
