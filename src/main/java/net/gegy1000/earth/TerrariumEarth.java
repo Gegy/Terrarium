@@ -2,6 +2,8 @@ package net.gegy1000.earth;
 
 import net.gegy1000.earth.server.ServerProxy;
 import net.gegy1000.earth.server.capability.EarthCapability;
+import net.gegy1000.earth.server.command.GeoToolCommand;
+import net.gegy1000.earth.server.command.GeoTeleportCommand;
 import net.gegy1000.earth.server.world.CoverDebugWorldType;
 import net.gegy1000.earth.server.world.EarthWorldType;
 import net.gegy1000.earth.server.world.pipeline.source.EarthRemoteData;
@@ -15,6 +17,7 @@ import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.network.NetworkCheckHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import org.apache.logging.log4j.LogManager;
@@ -67,5 +70,11 @@ public class TerrariumEarth {
     @NetworkCheckHandler
     public static boolean onCheckNetwork(Map<String, String> mods, Side side) {
         return !mods.containsKey(TerrariumEarth.MODID) || mods.get(TerrariumEarth.MODID).equals(VERSION);
+    }
+
+    @Mod.EventHandler
+    public static void onServerStarting(FMLServerStartingEvent event) {
+        event.registerServerCommand(new GeoTeleportCommand());
+        event.registerServerCommand(new GeoToolCommand());
     }
 }

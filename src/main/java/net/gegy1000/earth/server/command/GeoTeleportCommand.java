@@ -35,7 +35,7 @@ public class GeoTeleportCommand extends CommandBase {
 
     @Override
     public String getUsage(ICommandSender sender) {
-        return OptionallyDeferredTranslator.translateString(sender, "commands.earth.geotp.usage");
+        return DeferredTranslator.translateString(sender, "commands.earth.geotp.usage");
     }
 
     @Override
@@ -51,7 +51,7 @@ public class GeoTeleportCommand extends CommandBase {
             CommandLocation location = this.parseLocation(sender, locationInput);
             this.teleport(player, location.getCoordinate(sender, earthData));
         } else {
-            throw OptionallyDeferredTranslator.createException(player, "commands.earth.geotp.wrong_world");
+            throw DeferredTranslator.createException(player, "commands.earth.wrong_world");
         }
     }
 
@@ -111,7 +111,7 @@ public class GeoTeleportCommand extends CommandBase {
         int height = chunk.getHeightValue(blockX & 15, blockZ & 15);
 
         player.connection.setPlayerLocation(coordinate.getBlockX(), height + 0.5, coordinate.getBlockZ(), 180.0F, 0.0F);
-        player.sendMessage(OptionallyDeferredTranslator.translate(player, new TextComponentTranslation("commands.earth.geotp.success", coordinate.getX(), coordinate.getZ())));
+        player.sendMessage(DeferredTranslator.translate(player, new TextComponentTranslation("commands.earth.geotp.success", coordinate.getX(), coordinate.getZ())));
     }
 
     private interface CommandLocation {
@@ -145,13 +145,13 @@ public class GeoTeleportCommand extends CommandBase {
             try {
                 Vector2d coordinate = worldData.getGeocoder().get(this.place);
                 if (coordinate == null) {
-                    throw OptionallyDeferredTranslator.createException(sender, "commands.earth.geotp.not_found", this.place);
+                    throw DeferredTranslator.createException(sender, "commands.earth.geotp.not_found", this.place);
                 }
 
                 return new Coordinate(worldData.getGeoCoordinate(), coordinate.getX(), coordinate.getY());
             } catch (IOException e) {
                 Terrarium.LOGGER.error("Failed to get geocode for {}", this.place, e);
-                throw OptionallyDeferredTranslator.createException(sender, "commands.earth.geotp.error", this.place, e.getClass().getSimpleName(), e.getMessage());
+                throw DeferredTranslator.createException(sender, "commands.earth.geotp.error", this.place, e.getClass().getSimpleName(), e.getMessage());
             }
         }
     }

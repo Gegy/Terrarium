@@ -5,6 +5,9 @@ generator.terrarium.earth_debug=Earth Debug
 
 # GUI
 
+container.earth.geotool.name=Earth Toolbox
+geotool.earth.locate.success=You are at %s
+
 gui.earth.credits=Terrarium data provided by:
 gui.earth.spawnpoint=Set Spawn
 
@@ -52,8 +55,11 @@ preset.earth_default.desc=Default Earth generator
 
 # Commands
 
+commands.earth.wrong_world=Cannot use command in this world
+
 commands.earth.geotp.usage=geotp <latitude> <longitude> OR geotp <place>
-commands.earth.geotp.wrong_world=Cannot use command in this world
 commands.earth.geotp.not_found=Could not find "%s"
 commands.earth.geotp.success=Successfully teleported to %s, %s
 commands.earth.geotp.error=An error occurred while finding "%s": %s: %s
+
+commands.earth.geotool.usage=geotool

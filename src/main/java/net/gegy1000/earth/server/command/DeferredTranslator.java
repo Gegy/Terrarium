@@ -15,11 +15,11 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-public class OptionallyDeferredTranslator {
+public class DeferredTranslator {
     private static final Map<String, String> LANGUAGE_MAP = new HashMap<>();
 
     static {
-        try (InputStream input = OptionallyDeferredTranslator.class.getResourceAsStream("/assets/earth/lang/en_US.lang")) {
+        try (InputStream input = DeferredTranslator.class.getResourceAsStream("/assets/earth/lang/en_US.lang")) {
             LANGUAGE_MAP.putAll(LanguageMap.parseLangFile(input));
         } catch (IOException e) {
             TerrariumEarth.LOGGER.error("Failed to parse language file", e);

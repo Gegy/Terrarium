@@ -1,6 +1,5 @@
 package net.gegy1000.terrarium;
 
-import net.gegy1000.earth.server.command.GeoTeleportCommand;
 import net.gegy1000.terrarium.server.ServerProxy;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.message.TerrariumHandshakeMessage;
@@ -12,7 +11,6 @@ import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.network.NetworkCheckHandler;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
@@ -64,11 +62,6 @@ public class Terrarium {
     @Mod.EventHandler
     public static void onPostInit(FMLPostInitializationEvent event) {
         PROXY.onPostInit();
-    }
-
-    @Mod.EventHandler
-    public static void onServerStarting(FMLServerStartingEvent event) {
-        event.registerServerCommand(new GeoTeleportCommand());
     }
 
     @NetworkCheckHandler
