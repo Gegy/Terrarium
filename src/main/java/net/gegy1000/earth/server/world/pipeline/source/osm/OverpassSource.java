@@ -46,7 +46,7 @@ public class OverpassSource extends TiledDataSource<OsmTile> implements CachedRe
         this.cacheRoot = new File(CachedRemoteSource.GLOBAL_CACHE_ROOT, cacheRoot);
         this.queryVersion = queryVersion;
 
-        this.shouldSample = this.tileSize.getBlockX() > 512;
+        this.shouldSample = Math.abs(this.tileSize.getBlockX()) > 512 || Math.abs(this.tileSize.getBlockZ()) > 512;
 
         this.loadQuery("/data/" + queryLocation.getResourceDomain() + "/" + queryLocation.getResourcePath());
     }

@@ -19,6 +19,8 @@
   rel["landuse"="quarry"];
   way["natural"="glacier"];
   rel["natural"="glacier"];
+  way["natural"="volcano"];
+  rel["natural"="volcano"];
 );
 (._;>;);
 out;

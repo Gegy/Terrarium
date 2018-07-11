@@ -8,8 +8,6 @@
     rel["highway"]["highway"~"trunk|primary|secondary|tertiary|unclassified|road"];
     way["waterway"="river"];
     rel["waterway"="river"];
-    way["waterway"="river"];
-    rel["waterway"="river"];
     way["landuse"="reservoir"];
     rel["landuse"="reservoir"];
     way["landuse"="grass"];
@@ -18,14 +16,8 @@
     rel["leisure"="park"];
     way["waterway"="drain"];
     rel["waterway"="drain"];
-    way["natural"="water"];
-    rel["natural"="water"];
-    way["natural"="wood"];
-    rel["natural"="wood"];
-    way["landuse"="forest"];
-    rel["landuse"="forest"];
-    way["landuse"="meadow"];
-    rel["landuse"="meadow"];
+    way["natural"="sand"];
+    rel["natural"="sand"];
 );
 (._;>;);
 out;

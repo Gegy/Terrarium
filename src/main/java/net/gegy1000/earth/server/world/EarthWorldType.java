@@ -249,19 +249,27 @@ public class EarthWorldType extends TerrariumWorldType {
 
         private DataLayerProducer<OsmTile> createOsmProducer() {
             List<OverpassSource> sources = new ArrayList<>();
+
             sources.add(new OverpassSource(
                     this.earthCoordinates,
                     0.3,
                     "osm/outline",
                     new ResourceLocation(TerrariumEarth.MODID, "query/outline_overpass_query.oql"),
-                    6
+                    7
+            ));
+            sources.add(new OverpassSource(
+                    this.earthCoordinates,
+                    0.15,
+                    "osm/natural",
+                    new ResourceLocation(TerrariumEarth.MODID, "query/natural_overpass_query.oql"),
+                    0
             ));
             sources.add(new OverpassSource(
                     this.earthCoordinates,
                     0.1,
                     "osm/general",
                     new ResourceLocation(TerrariumEarth.MODID, "query/general_overpass_query.oql"),
-                    4
+                    5
             ));
             sources.add(new OverpassSource(
                     this.earthCoordinates,

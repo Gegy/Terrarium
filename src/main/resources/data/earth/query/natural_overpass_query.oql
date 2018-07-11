@@ -1,0 +1,25 @@
+[out:json]
+[timeout:30][maxsize:16777216][bbox:{{bbox}}];
+
+(
+    way["natural"="water"];
+    rel["natural"="water"];
+    way["natural"="wood"];
+    rel["natural"="wood"];
+    way["natural"="scree"];
+    rel["natural"="scree"];
+    way["natural"="shingle"];
+    rel["natural"="shingle"];
+    way["natural"="bare_rock"];
+    rel["natural"="bare_rock"];
+    way["natural"="wetland"];
+    rel["natural"="wetland"];
+    way["natural"="scrub"];
+    rel["natural"="scrub"];
+    way["landuse"="forest"];
+    rel["landuse"="forest"];
+    way["landuse"="meadow"];
+    rel["landuse"="meadow"];
+);
+(._;>;);
+out;
