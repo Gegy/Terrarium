@@ -49,7 +49,7 @@ import net.gegy1000.terrarium.server.world.pipeline.DataLayerProducer;
 import net.gegy1000.terrarium.server.world.pipeline.DataSource;
 import net.gegy1000.terrarium.server.world.pipeline.MergeDataLayer;
 import net.gegy1000.terrarium.server.world.pipeline.TerrariumDataProvider;
-import net.gegy1000.terrarium.server.world.pipeline.adapter.BeachAdapter;
+import net.gegy1000.earth.server.world.pipeline.adapter.BeachAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.HeightTransformAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.composer.biome.CoverBiomeComposer;
@@ -224,7 +224,7 @@ public class EarthWorldType extends TerrariumWorldType {
                     .withAdapter(new WaterLevelingAdapter(EarthComponentTypes.WATER, RegionComponentType.HEIGHT, heightOrigin + 1))
                     .withAdapter(new WaterCarveAdapter(EarthComponentTypes.WATER, RegionComponentType.HEIGHT, this.properties.getInteger(OCEAN_DEPTH)))
 //                    .withAdapter(new OceanDepthCorrectionAdapter(RegionComponentType.HEIGHT, this.properties.getInteger(OCEAN_DEPTH)))
-                    .withAdapter(new BeachAdapter(this.world, RegionComponentType.COVER, this.properties.getInteger(BEACH_SIZE), EarthCoverTypes.WATER, EarthCoverTypes.BEACH))
+                    .withAdapter(new BeachAdapter(this.world, RegionComponentType.COVER, EarthComponentTypes.WATER, this.properties.getInteger(BEACH_SIZE), EarthCoverTypes.BEACH))
 //                    .withAdapter(new WaterFlattenAdapter(RegionComponentType.HEIGHT, RegionComponentType.COVER, 15, EarthCoverTypes.WATER))
                     .build();
         }

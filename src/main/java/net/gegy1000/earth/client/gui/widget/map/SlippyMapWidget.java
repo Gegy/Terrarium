@@ -23,7 +23,7 @@ import java.util.List;
 @SideOnly(Side.CLIENT)
 public class SlippyMapWidget extends Gui {
     private static final Minecraft MC = Minecraft.getMinecraft();
-    private static final String ATTRIBUTION = "© OpenStreetMap Contributors";
+    private static final String ATTRIBUTION = "\u00a9 OpenStreetMap Contributors";
 
     private final int x;
     private final int y;
