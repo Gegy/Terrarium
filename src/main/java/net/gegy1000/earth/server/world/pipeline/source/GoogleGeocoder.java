@@ -34,7 +34,7 @@ public class GoogleGeocoder implements Geocoder {
         connection.setRequestProperty("User-Agent", "terrarium-earth");
         connection.setRequestProperty("Referer", "https://github.com/gegy1000/Terrarium");
 
-        connection.setConnectTimeout(2000);
+        connection.setConnectTimeout(4000);
         connection.setReadTimeout(30000);
 
         try (InputStreamReader input = new InputStreamReader(new BufferedInputStream(connection.getInputStream()))) {

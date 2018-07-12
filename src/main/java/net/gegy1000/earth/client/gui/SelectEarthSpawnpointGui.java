@@ -33,7 +33,7 @@ public class SelectEarthSpawnpointGui extends GuiScreen {
     @Override
     public void initGui() {
         if (this.mapWidget != null) {
-            this.mapWidget.onGuiClosed();
+            this.mapWidget.close();
         }
 
         Keyboard.enableRepeatEvents(true);
@@ -45,7 +45,7 @@ public class SelectEarthSpawnpointGui extends GuiScreen {
 
         double spawnpointX = properties.getDouble(EarthWorldType.SPAWN_LATITUDE);
         double spawnpointZ = properties.getDouble(EarthWorldType.SPAWN_LONGITUDE);
-        this.markerComponent = new MarkerMapComponent(new SlippyMapPoint(spawnpointX, spawnpointZ));
+        this.markerComponent = new MarkerMapComponent(new SlippyMapPoint(spawnpointX, spawnpointZ)).allowMovement();
         this.mapWidget.addComponent(this.markerComponent);
 
         this.searchWidget = new PlaceSearchWidget(SEARCH_FIELD, 25, 25, 200, 20, new GoogleGeocoder(), this::handleSearch);
@@ -120,7 +120,7 @@ public class SelectEarthSpawnpointGui extends GuiScreen {
     @Override
     public void onGuiClosed() {
         super.onGuiClosed();
-        this.mapWidget.onGuiClosed();
+        this.mapWidget.close();
         this.searchWidget.onGuiClosed();
         Keyboard.enableRepeatEvents(false);
     }

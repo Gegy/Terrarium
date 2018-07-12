@@ -63,8 +63,8 @@ public class ContainerUiInventory implements IInventory {
     private void handleElementClick(int index) {
         ContainerUi.Element element = this.elements.get(index);
         if (element != null) {
-            element.handleClick();
             this.player.closeScreen();
+            element.handleClick();
         }
     }
 

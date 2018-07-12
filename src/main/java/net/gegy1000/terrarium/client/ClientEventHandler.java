@@ -44,7 +44,7 @@ public class ClientEventHandler {
                 }
                 if (handshakeQueued) {
                     handshakeQueued = false;
-                    Terrarium.network.sendToServer(new TerrariumHandshakeMessage());
+                    Terrarium.NETWORK.sendToServer(new TerrariumHandshakeMessage());
                 }
             }
         }

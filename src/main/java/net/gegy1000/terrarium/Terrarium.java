@@ -30,7 +30,7 @@ public class Terrarium {
 
     public static final Logger LOGGER = LogManager.getLogger(MODID);
 
-    public static SimpleNetworkWrapper network;
+    public static final SimpleNetworkWrapper NETWORK = NetworkRegistry.INSTANCE.newSimpleChannel(Terrarium.MODID);
 
     public static boolean serverHasMod = false;
 
@@ -47,10 +47,9 @@ public class Terrarium {
 
         TerrariumCapabilities.onPreInit();
 
-        network = NetworkRegistry.INSTANCE.newSimpleChannel(Terrarium.MODID);
-        network.registerMessage(TerrariumHandshakeMessage.Handler.class, TerrariumHandshakeMessage.class, 0, Side.SERVER);
-        network.registerMessage(TerrariumHandshakeMessage.Handler.class, TerrariumHandshakeMessage.class, 1, Side.CLIENT);
-        network.registerMessage(TerrariumLoadingStateMessage.Handler.class, TerrariumLoadingStateMessage.class, 2, Side.CLIENT);
+        NETWORK.registerMessage(TerrariumHandshakeMessage.Handler.class, TerrariumHandshakeMessage.class, 0, Side.SERVER);
+        NETWORK.registerMessage(TerrariumHandshakeMessage.Handler.class, TerrariumHandshakeMessage.class, 1, Side.CLIENT);
+        NETWORK.registerMessage(TerrariumLoadingStateMessage.Handler.class, TerrariumLoadingStateMessage.class, 2, Side.CLIENT);
     }
 
     @Mod.EventHandler

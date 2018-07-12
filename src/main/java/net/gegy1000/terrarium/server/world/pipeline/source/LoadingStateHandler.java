@@ -55,7 +55,7 @@ public class LoadingStateHandler {
     private static void broadcastState(LoadingState state) {
         TerrariumLoadingStateMessage message = new TerrariumLoadingStateMessage(state);
         for (EntityPlayer player : TerrariumHandshakeTracker.getFriends()) {
-            Terrarium.network.sendTo(message, (EntityPlayerMP) player);
+            Terrarium.NETWORK.sendTo(message, (EntityPlayerMP) player);
         }
     }
 

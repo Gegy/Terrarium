@@ -15,6 +15,7 @@ public class MarkerMapComponent implements MapComponent {
     private static final ResourceLocation WIDGETS_TEXTURE = new ResourceLocation(Terrarium.MODID, "textures/gui/widgets.png");
 
     private SlippyMapPoint marker;
+    private boolean canMove;
 
     public MarkerMapComponent(SlippyMapPoint marker) {
         this.marker = marker;
@@ -22,6 +23,11 @@ public class MarkerMapComponent implements MapComponent {
 
     public MarkerMapComponent() {
         this(null);
+    }
+
+    public MarkerMapComponent allowMovement() {
+        this.canMove = true;
+        return this;
     }
 
     @Override
@@ -39,8 +45,10 @@ public class MarkerMapComponent implements MapComponent {
 
     @Override
     public void onMapClicked(SlippyMap map, ScaledResolution resolution, int mouseX, int mouseY) {
-        int scale = resolution.getScaleFactor();
-        this.marker = new SlippyMapPoint(mouseX * scale + map.getCameraX(), mouseY * scale + map.getCameraY(), map.getCameraZoom());
+        if (this.canMove) {
+            int scale = resolution.getScaleFactor();
+            this.marker = new SlippyMapPoint(mouseX * scale + map.getCameraX(), mouseY * scale + map.getCameraY(), map.getCameraZoom());
+        }
     }
 
     public void moveMarker(double latitude, double longitude) {

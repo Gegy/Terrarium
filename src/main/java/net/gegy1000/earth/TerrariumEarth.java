@@ -2,8 +2,9 @@ package net.gegy1000.earth;
 
 import net.gegy1000.earth.server.ServerProxy;
 import net.gegy1000.earth.server.capability.EarthCapability;
-import net.gegy1000.earth.server.command.GeoToolCommand;
 import net.gegy1000.earth.server.command.GeoTeleportCommand;
+import net.gegy1000.earth.server.command.GeoToolCommand;
+import net.gegy1000.earth.server.message.EarthLocateMessage;
 import net.gegy1000.earth.server.world.CoverDebugWorldType;
 import net.gegy1000.earth.server.world.EarthWorldType;
 import net.gegy1000.earth.server.world.pipeline.source.EarthRemoteData;
@@ -19,6 +20,8 @@ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.network.NetworkCheckHandler;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -41,6 +44,8 @@ public class TerrariumEarth {
     public static final EarthWorldType EARTH_TYPE = new EarthWorldType();
     public static final CoverDebugWorldType COVER_DEBUG_TYPE = new CoverDebugWorldType();
 
+    public static final SimpleNetworkWrapper NETWORK = NetworkRegistry.INSTANCE.newSimpleChannel(TerrariumEarth.MODID);
+
     @CapabilityInject(EarthCapability.class)
     public static Capability<EarthCapability> earthCap;
 
@@ -55,6 +60,8 @@ public class TerrariumEarth {
         }, "Terrarium Remote Load");
         thread.setDaemon(true);
         thread.start();
+
+        NETWORK.registerMessage(EarthLocateMessage.Handler.class, EarthLocateMessage.class, 0, Side.CLIENT);
     }
 
     @Mod.EventHandler

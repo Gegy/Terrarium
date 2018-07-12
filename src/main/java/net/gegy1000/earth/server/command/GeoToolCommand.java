@@ -2,6 +2,8 @@ package net.gegy1000.earth.server.command;
 
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.capability.EarthCapability;
+import net.gegy1000.earth.server.message.EarthLocateMessage;
+import net.gegy1000.terrarium.server.TerrariumHandshakeTracker;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -35,16 +37,22 @@ public class GeoToolCommand extends CommandBase {
         if (earthData != null) {
             ContainerUi ui = ContainerUi.builder(player)
                     .withTitle(DeferredTranslator.translate(player, new TextComponentTranslation("container.earth.geotool.name")))
-                    .withElement(Items.COMPASS, TextFormatting.BOLD + "Where am I?", () -> {
-                        double latitude = earthData.getLatitude(player.posX, player.posZ);
-                        double longitude = earthData.getLongitude(player.posX, player.posZ);
-                        String location = TextFormatting.BOLD.toString() + TextFormatting.UNDERLINE + String.format("%.5f, %.5f", latitude, longitude);
-                        player.sendMessage(DeferredTranslator.translate(player, new TextComponentTranslation("geotool.earth.locate.success", location)));
-                    })
+                    .withElement(Items.COMPASS, TextFormatting.BOLD + "Where am I?", () -> this.handleLocate(player, earthData))
                     .build();
             player.displayGUIChest(ui.createInventory());
         } else {
             throw DeferredTranslator.createException(player, "commands.earth.wrong_world");
+        }
+    }
+
+    private void handleLocate(EntityPlayerMP player, EarthCapability earthData) {
+        double latitude = earthData.getLatitude(player.posX, player.posZ);
+        double longitude = earthData.getLongitude(player.posX, player.posZ);
+        if (TerrariumHandshakeTracker.isFriendly(player)) {
+            TerrariumEarth.NETWORK.sendTo(new EarthLocateMessage(latitude, longitude), player);
+        } else {
+            String location = TextFormatting.BOLD.toString() + TextFormatting.UNDERLINE + String.format("%.5f, %.5f", latitude, longitude);
+            player.sendMessage(DeferredTranslator.translate(player, new TextComponentTranslation("geotool.earth.locate.success", location)));
         }
     }
 }

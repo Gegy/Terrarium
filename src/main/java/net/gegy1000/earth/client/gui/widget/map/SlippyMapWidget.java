@@ -180,7 +180,7 @@ public class SlippyMapWidget extends Gui {
         this.mouseDragged = false;
     }
 
-    public void onGuiClosed() {
+    public void close() {
         this.map.shutdown();
     }
 
