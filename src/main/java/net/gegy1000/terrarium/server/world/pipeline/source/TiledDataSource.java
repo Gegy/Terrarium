@@ -10,6 +10,7 @@ import net.gegy1000.terrarium.server.world.pipeline.source.tile.TiledDataAccess;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+// TODO: Interface
 public abstract class TiledDataSource<T extends TiledDataAccess> {
     private final LoadingCache<DataTilePos, T> tileCache;
 

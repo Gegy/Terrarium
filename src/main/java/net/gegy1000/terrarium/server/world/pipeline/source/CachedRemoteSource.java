@@ -19,7 +19,7 @@ import java.util.concurrent.Executors;
 public interface CachedRemoteSource {
     File GLOBAL_CACHE_ROOT = new File(".", "mods/terrarium/cache/");
 
-    // TODO: Shutdown the cache service after world exit + delete all in progress files
+    // TODO: Source accessor for multithreading purposes
     ExecutorService CACHE_SERVICE = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("terrarium-cache-service").setDaemon(true).build());
 
     File getCacheRoot();

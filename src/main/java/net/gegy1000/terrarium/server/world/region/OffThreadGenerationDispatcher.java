@@ -83,7 +83,8 @@ public class OffThreadGenerationDispatcher implements RegionGenerationDispatcher
 
     @Override
     public void close() {
-        this.regionLoadService.shutdownNow();
+        // TODO: We do want to stop region generation right now, but we want to let data source loading to finish up.
+        this.regionLoadService.shutdown();
     }
 
     private RegionFuture enqueueRegion(RegionTilePos pos) {
