@@ -1,21 +1,17 @@
 package net.gegy1000.terrarium.server.world.pipeline.source;
 
 public enum LoadingState {
-    LOADING_CACHED("state.terrarium.cached", 0, 1, 2000),
-    LOADING_ONLINE("state.terrarium.online", 10, 3, 2000),
-    LOADING_NO_CONNECTION("state.terrarium.no_connection", 20, 5, 5000);
+    LOADING_CACHED("state.terrarium.cached", 0, 1),
+    LOADING_REMOTE("state.terrarium.online", 10, 3);
 
     private final String languageKey;
     private final int textureY;
     private final int weight;
 
-    private final long lifetime;
-
-    LoadingState(String languageKey, int textureY, int weight, long lifetime) {
+    LoadingState(String languageKey, int textureY, int weight) {
         this.languageKey = languageKey;
         this.textureY = textureY;
         this.weight = weight;
-        this.lifetime = lifetime;
     }
 
     public String getLanguageKey() {
@@ -28,9 +24,5 @@ public enum LoadingState {
 
     public int getWeight() {
         return this.weight;
-    }
-
-    public long getLifetime() {
-        return this.lifetime;
     }
 }

@@ -3,7 +3,8 @@ package net.gegy1000.terrarium.server.world.pipeline.source;
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.TerrariumHandshakeTracker;
-import net.gegy1000.terrarium.server.message.TerrariumLoadingStateMessage;
+import net.gegy1000.terrarium.server.message.DataFailWarningMessage;
+import net.gegy1000.terrarium.server.message.LoadingStateMessage;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.event.world.WorldEvent;
@@ -12,48 +13,51 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import javax.annotation.Nullable;
-import java.util.EnumMap;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 @Mod.EventBusSubscriber(modid = TerrariumEarth.MODID)
 public class LoadingStateHandler {
-    private static final List<StateEntry> STATE_BUFFER = new LinkedList<>();
+    private static final LinkedList<LoadingState> CURRENT_STATE = new LinkedList<>();
 
     private static final Object LOCK = new Object();
 
-    private static final long STATE_TRACK_INTERVAL = 100;
+    private static final long FAIL_NOTIFICATION_INTERVAL = 8000;
+    private static final int FAIL_NOTIFICATION_THRESHOLD = 5;
 
-    private static LoadingState localState;
     private static LoadingState remoteState;
-    private static long lastCheckTime;
+
+    private static int failCount;
+    private static long lastFailNotificationTime;
 
     @SubscribeEvent
     public static void onWorldLoad(WorldEvent.Load event) {
-        localState = null;
+        CURRENT_STATE.clear();
         remoteState = null;
-        lastCheckTime = System.currentTimeMillis();
+
+        lastFailNotificationTime = System.currentTimeMillis();
+    }
+
+    @SubscribeEvent
+    public static void onWorldUnload(WorldEvent.Unload event) {
+        CURRENT_STATE.clear();
+        remoteState = null;
     }
 
     @SubscribeEvent
     public static void onTick(TickEvent event) {
         long time = System.currentTimeMillis();
-        if (time - lastCheckTime > STATE_TRACK_INTERVAL) {
-            LoadingState state = LoadingStateHandler.checkState();
-            if (!Objects.equals(state, localState)) {
-                if (Terrarium.PROXY.hasServer()) {
-                    broadcastState(state);
-                }
-                localState = state;
+
+        if (time - lastFailNotificationTime > FAIL_NOTIFICATION_INTERVAL) {
+            if (failCount > FAIL_NOTIFICATION_THRESHOLD) {
+                broadcastFailNotification(failCount);
+                failCount = 0;
             }
-            lastCheckTime = time;
+            lastFailNotificationTime = time;
         }
     }
 
-    private static void broadcastState(LoadingState state) {
-        TerrariumLoadingStateMessage message = new TerrariumLoadingStateMessage(state);
+    private static void broadcastFailNotification(int failCount) {
+        DataFailWarningMessage message = new DataFailWarningMessage(failCount);
         for (EntityPlayer player : TerrariumHandshakeTracker.getFriends()) {
             Terrarium.NETWORK.sendTo(message, (EntityPlayerMP) player);
         }
@@ -65,72 +69,38 @@ public class LoadingStateHandler {
 
     @Nullable
     public static LoadingState getDisplayState() {
-        if (localState != null) {
-            return localState;
+        if (!CURRENT_STATE.isEmpty()) {
+            return CURRENT_STATE.getLast();
         }
         return remoteState;
     }
 
-    public static void putState(LoadingState state) {
-        StateEntry entry = LoadingStateHandler.makeState(state);
-        LoadingStateHandler.breakState(entry);
-    }
-
-    public static StateEntry makeState(LoadingState state) {
-        StateEntry entry = new StateEntry(state);
+    public static void pushState(LoadingState state) {
         synchronized (LOCK) {
-            STATE_BUFFER.add(entry);
+            CURRENT_STATE.addLast(state);
+            broadcastCurrentState();
         }
-        return entry;
     }
 
-    public static void breakState(StateEntry entry) {
-        entry.completed = true;
-        entry.completedTime = System.currentTimeMillis();
-    }
-
-    public static LoadingState checkState() {
-        LoadingStateHandler.removeExpired();
+    public static void popState() {
         synchronized (LOCK) {
-            if (STATE_BUFFER.isEmpty()) {
-                return null;
-            }
-            Map<LoadingState, Integer> stateCounts = new EnumMap<>(LoadingState.class);
-            for (StateEntry entry : STATE_BUFFER) {
-                int weight = stateCounts.getOrDefault(entry.state, 0);
-                stateCounts.put(entry.state, weight + entry.state.getWeight());
-            }
-            LoadingState relevantState = null;
-            int relevantWeight = 0;
-            for (Map.Entry<LoadingState, Integer> entry : stateCounts.entrySet()) {
-                int weight = entry.getValue();
-                if (weight > relevantWeight) {
-                    relevantState = entry.getKey();
-                    relevantWeight = weight;
-                }
-            }
-            return relevantState;
+            CURRENT_STATE.pollLast();
+            broadcastCurrentState();
         }
     }
 
-    private static void removeExpired() {
+    public static void countFailure() {
         synchronized (LOCK) {
-            STATE_BUFFER.removeIf(StateEntry::hasExpired);
+            failCount++;
         }
     }
 
-    public static class StateEntry {
-        private final LoadingState state;
-
-        private boolean completed;
-        private long completedTime;
-
-        private StateEntry(LoadingState state) {
-            this.state = state;
-        }
-
-        public boolean hasExpired() {
-            return this.completed && System.currentTimeMillis() - this.completedTime > this.state.getLifetime();
+    private static void broadcastCurrentState() {
+        if (Terrarium.PROXY.hasServer()) {
+            LoadingStateMessage message = new LoadingStateMessage(getDisplayState());
+            for (EntityPlayer player : TerrariumHandshakeTracker.getFriends()) {
+                Terrarium.NETWORK.sendTo(message, (EntityPlayerMP) player);
+            }
         }
     }
 }

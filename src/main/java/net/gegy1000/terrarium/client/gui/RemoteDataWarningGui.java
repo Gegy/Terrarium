@@ -65,11 +65,13 @@ public class RemoteDataWarningGui extends GuiScreen {
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         this.drawDefaultBackground();
 
-        this.drawCenteredString(this.fontRenderer, TextFormatting.RED.toString() + TextFormatting.BOLD + I18n.format("gui.terrarium.remote_data_warning.1"), this.width / 2, this.height / 2 - 24, 0xFFFFFF);
+        int warningX = this.width / 2;
+        this.drawCenteredString(this.fontRenderer, TextFormatting.RED.toString() + TextFormatting.BOLD + I18n.format("gui.terrarium.remote_data_warning.1"), warningX, this.height / 2 - 24, 0xFFFFFF);
 
-        this.drawCenteredString(this.fontRenderer, TextFormatting.ITALIC + I18n.format("gui.terrarium.remote_data_warning.2"), this.width / 2, this.height / 2 - 9, 0xFFFFFF);
-        this.drawCenteredString(this.fontRenderer, TextFormatting.ITALIC + I18n.format("gui.terrarium.remote_data_warning.3"), this.width / 2, this.height / 2, 0xFFFFFF);
-        this.drawCenteredString(this.fontRenderer, TextFormatting.ITALIC + I18n.format("gui.terrarium.remote_data_warning.4"), this.width / 2, this.height / 2 + 9, 0xFFFFFF);
+        this.drawCenteredString(this.fontRenderer, TextFormatting.ITALIC + I18n.format("gui.terrarium.remote_data_warning.2"), warningX, this.height / 2 - 9, 0xFFFFFF);
+        this.drawCenteredString(this.fontRenderer, TextFormatting.ITALIC + I18n.format("gui.terrarium.remote_data_warning.3"), warningX, this.height / 2, 0xFFFFFF);
+        this.drawCenteredString(this.fontRenderer, TextFormatting.ITALIC + I18n.format("gui.terrarium.remote_data_warning.4"), warningX, this.height / 2 + 9, 0xFFFFFF);
+        this.drawCenteredString(this.fontRenderer, TextFormatting.BOLD + I18n.format("gui.terrarium.remote_data_warning.5"), warningX, this.height / 2 + 18, 0xFFFFFF);
 
         super.drawScreen(mouseX, mouseY, partialTicks);
     }

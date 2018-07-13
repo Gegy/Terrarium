@@ -19,6 +19,7 @@ import java.util.concurrent.Executors;
 public interface CachedRemoteSource {
     File GLOBAL_CACHE_ROOT = new File(".", "mods/terrarium/cache/");
 
+    // TODO: Shutdown the cache service after world exit + delete all in progress files
     ExecutorService CACHE_SERVICE = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("terrarium-cache-service").setDaemon(true).build());
 
     File getCacheRoot();
@@ -36,28 +37,26 @@ public interface CachedRemoteSource {
         }
         File cachedFile = new File(cacheRoot, this.getCachedName(key));
         if (!this.shouldLoadCache(key, cachedFile)) {
-            LoadingStateHandler.StateEntry onlineEntry = LoadingStateHandler.makeState(LoadingState.LOADING_ONLINE);
+            LoadingStateHandler.pushState(LoadingState.LOADING_REMOTE);
             try (InputStream remoteStream = this.getRemoteStream(key)) {
                 InputStream cachingStream = this.getCachingStream(remoteStream, cachedFile);
                 this.cacheMetadata(key);
                 return handler.parse(cachingStream);
             } catch (IOException e) {
-                LoadingStateHandler.putState(LoadingState.LOADING_NO_CONNECTION);
                 throw new NoDataException("Failed to load remote tile data stream at " + key, e);
             } finally {
-                LoadingStateHandler.breakState(onlineEntry);
+                LoadingStateHandler.popState();
             }
         }
 
-        LoadingStateHandler.StateEntry cachedEntry = LoadingStateHandler.makeState(LoadingState.LOADING_CACHED);
+        LoadingStateHandler.pushState(LoadingState.LOADING_CACHED);
         try {
             return handler.parse(this.getWrappedStream(new BufferedInputStream(new FileInputStream(cachedFile))));
         } catch (IOException e) {
-            LoadingStateHandler.putState(LoadingState.LOADING_NO_CONNECTION);
             Terrarium.LOGGER.error("Failed to load local tile data stream at {}", key, e);
             throw new NoDataException("Loading cache failed", e);
         } finally {
-            LoadingStateHandler.breakState(cachedEntry);
+            LoadingStateHandler.popState();
         }
     }
 
@@ -74,6 +73,9 @@ public interface CachedRemoteSource {
                 }
             } catch (IOException e) {
                 Terrarium.LOGGER.error("Failed to read or cache remote data", e);
+                if (cacheFile.exists()) {
+                    cacheFile.delete();
+                }
             } finally {
                 IOUtils.closeQuietly(sink);
             }

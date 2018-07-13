@@ -7,13 +7,13 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class TerrariumLoadingStateMessage implements IMessage {
+public class LoadingStateMessage implements IMessage {
 	private LoadingState state;
 
-    public TerrariumLoadingStateMessage() {
+    public LoadingStateMessage() {
     }
 
-    public TerrariumLoadingStateMessage(LoadingState state) {
+    public LoadingStateMessage(LoadingState state) {
         this.state = state;
     }
 
@@ -34,9 +34,9 @@ public class TerrariumLoadingStateMessage implements IMessage {
     	}
     }
 
-    public static class Handler implements IMessageHandler<TerrariumLoadingStateMessage, IMessage> {
+    public static class Handler implements IMessageHandler<LoadingStateMessage, IMessage> {
         @Override
-        public IMessage onMessage(TerrariumLoadingStateMessage message, MessageContext ctx) {
+        public IMessage onMessage(LoadingStateMessage message, MessageContext ctx) {
             LoadingStateHandler.updateRemoteState(message.state);
             return null;
         }

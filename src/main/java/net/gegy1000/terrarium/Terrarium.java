@@ -2,8 +2,9 @@ package net.gegy1000.terrarium;
 
 import net.gegy1000.terrarium.server.ServerProxy;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
+import net.gegy1000.terrarium.server.message.DataFailWarningMessage;
+import net.gegy1000.terrarium.server.message.LoadingStateMessage;
 import net.gegy1000.terrarium.server.message.TerrariumHandshakeMessage;
-import net.gegy1000.terrarium.server.message.TerrariumLoadingStateMessage;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPresetRegistry;
 import net.gegy1000.terrarium.server.world.pipeline.source.CachedRemoteSource;
 import net.minecraftforge.fml.common.Mod;
@@ -49,7 +50,8 @@ public class Terrarium {
 
         NETWORK.registerMessage(TerrariumHandshakeMessage.Handler.class, TerrariumHandshakeMessage.class, 0, Side.SERVER);
         NETWORK.registerMessage(TerrariumHandshakeMessage.Handler.class, TerrariumHandshakeMessage.class, 1, Side.CLIENT);
-        NETWORK.registerMessage(TerrariumLoadingStateMessage.Handler.class, TerrariumLoadingStateMessage.class, 2, Side.CLIENT);
+        NETWORK.registerMessage(LoadingStateMessage.Handler.class, LoadingStateMessage.class, 2, Side.CLIENT);
+        NETWORK.registerMessage(DataFailWarningMessage.Handler.class, DataFailWarningMessage.class, 3, Side.CLIENT);
     }
 
     @Mod.EventHandler

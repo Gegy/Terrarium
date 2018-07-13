@@ -29,6 +29,7 @@ public abstract class TiledDataSource<T extends TiledDataAccess> {
                                 return tile;
                             }
                         } catch (SourceException e) {
+                            LoadingStateHandler.countFailure();
                             Terrarium.LOGGER.error("Failed to load from data source", e);
                         }
                         return TiledDataSource.this.getDefaultTile();
@@ -44,7 +45,7 @@ public abstract class TiledDataSource<T extends TiledDataAccess> {
         try {
             return this.tileCache.get(key);
         } catch (ExecutionException e) {
-            LoadingStateHandler.putState(LoadingState.LOADING_NO_CONNECTION);
+            LoadingStateHandler.countFailure();
             Terrarium.LOGGER.error("Failed to load tile at {}", key, e);
             return this.getDefaultTile();
         }

@@ -3,10 +3,11 @@
 gui.terrarium.accept=Accept
 gui.terrarium.preset=Set Preset
 
-gui.terrarium.remote_data_warning.1=Warning: Terrarium may download data from the Internet!
+gui.terrarium.remote_data_warning.1=Warning: Terrarium downloads data from the Internet!
 gui.terrarium.remote_data_warning.2=Various data may be required for chunk generation.
 gui.terrarium.remote_data_warning.3=This can lead to large data usage, depending on the chunks generated.
-gui.terrarium.remote_data_warning.4=(Data is only requested for chunks that players view, and is then cached)
+gui.terrarium.remote_data_warning.4=Data is only requested for chunks that players view, and is then cached.
+gui.terrarium.remote_data_warning.5=Terrarium is not responsible for any damage caused.
 
 gui.terrarium.select_preset.name=Select World Preset
 
@@ -23,6 +24,11 @@ state.terrarium.no_connection.tooltip=Unable to load geographical data. Check yo
 
 property.terrarium.slider_range.name=Range: [%.2f-%.2f]
 property.terrarium.slider_fine.name=Hold SHIFT to fine tune
+
+# Toasts
+
+toast.terrarium.data_failure.title=Terrarium data failures
+toast.terrarium.data_failure.desc=Failed to load %s data tiles
 
 # Config
 
