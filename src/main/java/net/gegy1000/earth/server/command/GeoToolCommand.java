@@ -2,7 +2,7 @@ package net.gegy1000.earth.server.command;
 
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.capability.EarthCapability;
-import net.gegy1000.earth.server.message.EarthLocateMessage;
+import net.gegy1000.earth.server.message.EarthMapGuiMessage;
 import net.gegy1000.terrarium.server.TerrariumHandshakeTracker;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -35,10 +35,15 @@ public class GeoToolCommand extends CommandBase {
 
         EarthCapability earthData = player.world.getCapability(TerrariumEarth.earthCap, null);
         if (earthData != null) {
-            ContainerUi ui = ContainerUi.builder(player)
+            ContainerUi.Builder builder = ContainerUi.builder(player)
                     .withTitle(DeferredTranslator.translate(player, new TextComponentTranslation("container.earth.geotool.name")))
-                    .withElement(Items.COMPASS, TextFormatting.BOLD + "Where am I?", () -> this.handleLocate(player, earthData))
-                    .build();
+                    .withElement(Items.COMPASS, TextFormatting.BOLD + "Where am I?", () -> this.handleLocate(player, earthData));
+
+            if (TerrariumHandshakeTracker.isFriendly(player)) {
+                builder = builder.withElement(Items.ENDER_PEARL, TextFormatting.BOLD + "Go to place", () -> this.handleTeleport(player, earthData));
+            }
+
+            ContainerUi ui = builder.build();
             player.displayGUIChest(ui.createInventory());
         } else {
             throw DeferredTranslator.createException(player, "commands.earth.wrong_world");
@@ -49,10 +54,16 @@ public class GeoToolCommand extends CommandBase {
         double latitude = earthData.getLatitude(player.posX, player.posZ);
         double longitude = earthData.getLongitude(player.posX, player.posZ);
         if (TerrariumHandshakeTracker.isFriendly(player)) {
-            TerrariumEarth.NETWORK.sendTo(new EarthLocateMessage(latitude, longitude), player);
+            TerrariumEarth.NETWORK.sendTo(new EarthMapGuiMessage(latitude, longitude, EarthMapGuiMessage.Type.LOCATE), player);
         } else {
             String location = TextFormatting.BOLD.toString() + TextFormatting.UNDERLINE + String.format("%.5f, %.5f", latitude, longitude);
             player.sendMessage(DeferredTranslator.translate(player, new TextComponentTranslation("geotool.earth.locate.success", location)));
         }
+    }
+
+    private void handleTeleport(EntityPlayerMP player, EarthCapability earthData) {
+        double latitude = earthData.getLatitude(player.posX, player.posZ);
+        double longitude = earthData.getLongitude(player.posX, player.posZ);
+        TerrariumEarth.NETWORK.sendTo(new EarthMapGuiMessage(latitude, longitude, EarthMapGuiMessage.Type.TELEPORT), player);
     }
 }

@@ -4,7 +4,7 @@ import net.gegy1000.earth.server.ServerProxy;
 import net.gegy1000.earth.server.capability.EarthCapability;
 import net.gegy1000.earth.server.command.GeoTeleportCommand;
 import net.gegy1000.earth.server.command.GeoToolCommand;
-import net.gegy1000.earth.server.message.EarthLocateMessage;
+import net.gegy1000.earth.server.message.EarthMapGuiMessage;
 import net.gegy1000.earth.server.world.CoverDebugWorldType;
 import net.gegy1000.earth.server.world.EarthWorldType;
 import net.gegy1000.earth.server.world.pipeline.source.EarthRemoteData;
@@ -61,7 +61,7 @@ public class TerrariumEarth {
         thread.setDaemon(true);
         thread.start();
 
-        NETWORK.registerMessage(EarthLocateMessage.Handler.class, EarthLocateMessage.class, 0, Side.CLIENT);
+        NETWORK.registerMessage(EarthMapGuiMessage.Handler.class, EarthMapGuiMessage.class, 0, Side.CLIENT);
     }
 
     @Mod.EventHandler

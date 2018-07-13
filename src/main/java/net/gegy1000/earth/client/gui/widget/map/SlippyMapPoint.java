@@ -22,11 +22,11 @@ public class SlippyMapPoint {
         this.latitude = Math.toDegrees(Math.atan(Math.sinh(Math.PI - (2.0 * Math.PI * y) / maximumY)));
     }
 
-    public double getSpawnpointX() {
+    public double getLatitude() {
         return this.latitude;
     }
 
-    public double getSpawnpointZ() {
+    public double getLongitude() {
         return this.longitude;
     }
 
