@@ -12,6 +12,7 @@ import net.minecraft.util.ResourceLocation;
 import org.apache.commons.io.IOUtils;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
@@ -107,7 +108,12 @@ public class OverpassSource extends TiledDataSource<OsmTile> implements CachedRe
             }
         }
 
-        return new GZIPInputStream(connection.getInputStream());
+        return connection.getInputStream();
+    }
+
+    @Override
+    public InputStream getWrappedStream(InputStream stream) throws IOException {
+        return new GZIPInputStream(stream);
     }
 
     @Override
@@ -120,16 +126,9 @@ public class OverpassSource extends TiledDataSource<OsmTile> implements CachedRe
         return this.loadTile(key, 0);
     }
 
-    @Override
-    public Class<OsmTile> getTileType() {
-        return OsmTile.class;
-    }
-
     private OsmTile loadTile(DataTilePos key, int retries) throws SourceException {
         try {
-            return OsmDataParser.parse(this.getStream(key));
-        } catch (IOException e) {
-            Terrarium.LOGGER.error("Failed to load overpass map tile at {}", this.getCachedName(key), e);
+            return this.parseStream(key, OsmDataParser::parse);
         } catch (RuntimeException e) {
             Terrarium.LOGGER.error("Failed to parse overpass map tile at {}, reloading", this.getCachedName(key), e);
             this.removeCache(key);
@@ -148,7 +147,7 @@ public class OverpassSource extends TiledDataSource<OsmTile> implements CachedRe
     @Override
     public void cacheMetadata(DataTilePos key) {
         File metadataFile = new File(this.getCacheRoot(), String.format("%s_%s.meta", key.getTileX(), key.getTileZ()));
-        try (DataOutputStream output = new DataOutputStream(new FileOutputStream(metadataFile))) {
+        try (DataOutputStream output = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(metadataFile)))) {
             output.writeShort(this.queryVersion);
         } catch (IOException e) {
             Terrarium.LOGGER.error("Failed to cache OSM tile metadata at {}", key, e);

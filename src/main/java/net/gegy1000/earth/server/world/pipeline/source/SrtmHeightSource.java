@@ -53,29 +53,24 @@ public class SrtmHeightSource extends TiledDataSource<ShortRasterTile> implement
     public ShortRasterTile loadTile(DataTilePos key) throws SourceException {
         key = new DataTilePos(key.getTileX(), key.getTileZ() + 1);
         if (VALID_TILES.isEmpty() || VALID_TILES.contains(key)) {
-            try (DataInputStream input = new DataInputStream(this.getStream(key))) {
-                short[] heightmap = new short[TILE_SIZE * TILE_SIZE];
-                short origin = input.readShort();
-                if (origin == -1) {
-                    for (int i = 0; i < heightmap.length; i++) {
-                        heightmap[i] = input.readShort();
+            return this.parseStream(key, stream -> {
+                try (DataInputStream input = new DataInputStream(stream)) {
+                    short[] heightmap = new short[TILE_SIZE * TILE_SIZE];
+                    short origin = input.readShort();
+                    if (origin == -1) {
+                        for (int i = 0; i < heightmap.length; i++) {
+                            heightmap[i] = input.readShort();
+                        }
+                    } else {
+                        for (int i = 0; i < heightmap.length; i++) {
+                            heightmap[i] = (short) ((input.readByte() & 0xFF) + origin);
+                        }
                     }
-                } else {
-                    for (int i = 0; i < heightmap.length; i++) {
-                        heightmap[i] = (short) ((input.readByte() & 0xFF) + origin);
-                    }
+                    return new ShortRasterTile(heightmap, TILE_SIZE, TILE_SIZE);
                 }
-                return new ShortRasterTile(heightmap, TILE_SIZE, TILE_SIZE);
-            } catch (IOException e) {
-                Terrarium.LOGGER.error("Failed to parse height tile at {} ({})", key, this.getCachedName(key), e);
-            }
+            });
         }
         return null;
-    }
-
-    @Override
-    public Class<ShortRasterTile> getTileType() {
-        return ShortRasterTile.class;
     }
 
     @Override
@@ -92,7 +87,12 @@ public class SrtmHeightSource extends TiledDataSource<ShortRasterTile> implement
     public InputStream getRemoteStream(DataTilePos key) throws IOException {
         String cachedName = this.getCachedName(key);
         URL url = new URL(String.format("%s/%s/%s", EarthRemoteData.info.getBaseURL(), EarthRemoteData.info.getHeightsEndpoint(), cachedName));
-        return new SingleXZInputStream(url.openStream());
+        return url.openStream();
+    }
+
+    @Override
+    public InputStream getWrappedStream(InputStream stream) throws IOException {
+        return new SingleXZInputStream(stream);
     }
 
     @Override

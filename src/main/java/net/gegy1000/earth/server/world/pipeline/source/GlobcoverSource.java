@@ -1,7 +1,6 @@
 package net.gegy1000.earth.server.world.pipeline.source;
 
 import net.gegy1000.earth.server.world.cover.EarthCoverTypes;
-import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.util.ArrayUtils;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
@@ -38,7 +37,12 @@ public class GlobcoverSource extends TiledDataSource<CoverRasterTile> implements
     @Override
     public InputStream getRemoteStream(DataTilePos key) throws IOException {
         URL url = new URL(String.format("%s/%s/%s", EarthRemoteData.info.getBaseURL(), EarthRemoteData.info.getGlobEndpoint(), this.getCachedName(key)));
-        return new SingleXZInputStream(url.openStream());
+        return url.openStream();
+    }
+
+    @Override
+    public InputStream getWrappedStream(InputStream stream) throws IOException {
+        return new SingleXZInputStream(stream);
     }
 
     @Override
@@ -48,31 +52,24 @@ public class GlobcoverSource extends TiledDataSource<CoverRasterTile> implements
 
     @Override
     public CoverRasterTile loadTile(DataTilePos key) throws SourceException {
-        try (DataInputStream input = new DataInputStream(this.getStream(key))) {
-            int width = input.readUnsignedShort();
-            int height = input.readUnsignedShort();
+        return this.parseStream(key, stream -> {
+            try (DataInputStream input = new DataInputStream(stream)) {
+                int width = input.readUnsignedShort();
+                int height = input.readUnsignedShort();
 
-            int offsetX = key.getTileX() < 0 ? TILE_SIZE - width : 0;
-            int offsetZ = key.getTileZ() < 0 ? TILE_SIZE - height : 0;
+                int offsetX = key.getTileX() < 0 ? TILE_SIZE - width : 0;
+                int offsetZ = key.getTileZ() < 0 ? TILE_SIZE - height : 0;
 
-            byte[] buffer = new byte[width * height];
-            input.readFully(buffer);
+                byte[] buffer = new byte[width * height];
+                input.readFully(buffer);
 
-            CoverType[] cover = new CoverType[buffer.length];
-            for (int i = 0; i < buffer.length; i++) {
-                cover[i] = EarthCoverTypes.Glob.get(buffer[i]).getCoverType();
+                CoverType[] cover = new CoverType[buffer.length];
+                for (int i = 0; i < buffer.length; i++) {
+                    cover[i] = EarthCoverTypes.Glob.get(buffer[i]).getCoverType();
+                }
+                return new CoverRasterTile(cover, offsetX, offsetZ, width, height);
             }
-            return new CoverRasterTile(cover, offsetX, offsetZ, width, height);
-        } catch (IOException e) {
-            Terrarium.LOGGER.error("Failed to parse heights tile at {}", key, e);
-        }
-
-        return null;
-    }
-
-    @Override
-    public Class<CoverRasterTile> getTileType() {
-        return CoverRasterTile.class;
+        });
     }
 
     @Override

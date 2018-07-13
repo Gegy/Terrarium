@@ -52,7 +52,5 @@ public abstract class TiledDataSource<T extends TiledDataAccess> {
 
     public abstract T loadTile(DataTilePos key) throws SourceException;
 
-    public abstract Class<T> getTileType();
-
     protected abstract T getDefaultTile();
 }

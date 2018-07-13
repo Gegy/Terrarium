@@ -116,7 +116,7 @@ public class EarthWorldType extends TerrariumWorldType {
     protected TerrariumCustomization buildCustomization() {
         return TerrariumCustomization.builder()
                 .withCategory("world",
-                        new SliderWidget(WORLD_SCALE, 1.0, 200.0, 5.0, 1.0, new InversePropertyConverter()),
+                        new SliderWidget(WORLD_SCALE, 1.0, 1000.0, 5.0, 1.0, new InversePropertyConverter()),
                         new SliderWidget(HEIGHT_SCALE, 0.0, 10.0, 0.5, 0.1),
                         new SliderWidget(NOISE_SCALE, 0.0, 3.0, 0.5, 0.1),
                         new SliderWidget(OCEAN_DEPTH, 0, 32, 1, 1),
