@@ -62,11 +62,6 @@ public class GoogleGeocoder implements Geocoder {
     }
 
     @Override
-    public List<String> suggestCommand(String place) {
-        return Collections.emptyList();
-    }
-
-    @Override
     public String[] suggest(String place) throws IOException {
         String key = EarthRemoteData.info.getAutocompleteKey();
 

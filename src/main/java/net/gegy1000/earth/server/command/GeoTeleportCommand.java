@@ -11,16 +11,13 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.chunk.Chunk;
 
-import javax.annotation.Nullable;
 import javax.vecmath.Vector2d;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
 
 public class GeoTeleportCommand extends CommandBase {
     @Override
@@ -47,31 +44,21 @@ public class GeoTeleportCommand extends CommandBase {
             String argument = String.join(" ", args).replace(',', ' ');
             String[] locationInput = argument.split("\\s+");
 
-            // TODO: Don't block the server while loading generation region and geocode
-            CommandLocation location = this.parseLocation(sender, locationInput);
-            this.teleport(player, location.getCoordinate(sender, earthData));
+            Thread thread = new Thread(() -> {
+                try {
+                    CommandLocation location = this.parseLocation(sender, locationInput);
+                    this.teleport(player, location.getCoordinate(sender, earthData));
+                } catch (CommandException e) {
+                    TextComponentTranslation message = new TextComponentTranslation(e.getMessage(), e.getErrorObjects());
+                    message.getStyle().setColor(TextFormatting.RED);
+                    sender.sendMessage(message);
+                }
+            });
+            thread.setDaemon(true);
+            thread.start();
         } else {
             throw DeferredTranslator.createException(player, "commands.earth.wrong_world");
         }
-    }
-
-    @Override
-    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, @Nullable BlockPos targetPos) {
-        if (sender instanceof EntityPlayerMP) {
-            EntityPlayerMP player = (EntityPlayerMP) sender;
-
-            EarthCapability earthData = player.world.getCapability(TerrariumEarth.earthCap, null);
-            if (earthData != null) {
-                String argument = String.join(" ", args);
-                try {
-                    return getListOfStringsMatchingLastWord(args, earthData.getGeocoder().suggestCommand(argument));
-                } catch (IOException e) {
-                    Terrarium.LOGGER.warn("Failed to get geotp suggestions", e);
-                }
-            }
-        }
-
-        return Collections.emptyList();
     }
 
     private CommandLocation parseLocation(ICommandSender sender, String[] input) throws WrongUsageException {
