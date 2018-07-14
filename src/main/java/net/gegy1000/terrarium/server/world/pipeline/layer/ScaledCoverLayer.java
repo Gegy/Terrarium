@@ -2,14 +2,15 @@ package net.gegy1000.terrarium.server.world.pipeline.layer;
 
 import net.gegy1000.terrarium.server.util.Voronoi;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
+import net.gegy1000.terrarium.server.world.pipeline.DataLayer;
 import net.gegy1000.terrarium.server.world.pipeline.DataView;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
 
 public class ScaledCoverLayer extends BufferedScalingLayer<CoverRasterTile> {
     private final Voronoi voronoi;
 
-    public ScaledCoverLayer(CoordinateState coordinateState) {
-        super(1, 1, coordinateState);
+    public ScaledCoverLayer(DataLayer<CoverRasterTile> parent, CoordinateState coordinateState) {
+        super(parent, 1, 1, coordinateState);
         this.voronoi = new Voronoi(Voronoi.DistanceFunc.EUCLIDEAN, 0.9, 4, 1000);
     }
 

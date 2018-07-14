@@ -1,12 +1,14 @@
 package net.gegy1000.earth.server.world.pipeline.layer;
 
 import net.gegy1000.earth.server.world.pipeline.source.tile.WaterRasterTile;
-import net.gegy1000.terrarium.server.world.pipeline.DataLayerProcessor;
+import net.gegy1000.terrarium.server.world.pipeline.DataLayer;
 import net.gegy1000.terrarium.server.world.pipeline.DataView;
+import net.gegy1000.terrarium.server.world.pipeline.ParentedDataLayer;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.debug.DebugImageWriter;
+import net.gegy1000.terrarium.server.world.pipeline.layer.LayerContext;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 
-public class WaterProcessorLayer implements DataLayerProcessor<WaterRasterTile, ShortRasterTile> {
+public class WaterProcessorLayer extends ParentedDataLayer<WaterRasterTile, ShortRasterTile> {
     protected static final DebugImageWriter.ColorSelector<Short> BANK_DEBUG = value -> {
         int type = value & WaterRasterTile.WATER_TYPE_MASK;
         switch (type) {
@@ -20,8 +22,12 @@ public class WaterProcessorLayer implements DataLayerProcessor<WaterRasterTile, 
         return 0;
     };
 
+    public WaterProcessorLayer(DataLayer<ShortRasterTile> parent) {
+        super(parent);
+    }
+
     @Override
-    public WaterRasterTile apply(DataView view, ShortRasterTile parent, DataView parentView) {
+    protected WaterRasterTile apply(LayerContext context, DataView view, ShortRasterTile parent, DataView parentView) {
         WaterRasterTile waterTile = new WaterRasterTile(view);
         for (int localZ = 0; localZ < view.getHeight(); localZ++) {
             for (int localX = 0; localX < view.getWidth(); localX++) {

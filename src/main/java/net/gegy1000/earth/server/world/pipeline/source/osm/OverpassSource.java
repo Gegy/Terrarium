@@ -1,12 +1,12 @@
 package net.gegy1000.earth.server.world.pipeline.source.osm;
 
+import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.world.pipeline.source.tile.OsmTile;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
-import net.gegy1000.terrarium.server.world.pipeline.source.CachedRemoteSource;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
-import net.gegy1000.terrarium.server.world.pipeline.source.SourceException;
+import net.gegy1000.terrarium.server.world.pipeline.source.SourceResult;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
 import net.minecraft.util.ResourceLocation;
 import org.apache.commons.io.IOUtils;
@@ -30,11 +30,10 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
-public class OverpassSource extends TiledDataSource<OsmTile> implements CachedRemoteSource {
+public class OverpassSource extends TiledDataSource<OsmTile> {
     private static final double SAMPLE_BUFFER = 5e-4;
     private static final String OVERPASS_ENDPOINT = "http://www.overpass-api.de/api/interpreter";
-
-    private final File cacheRoot;
+    private static final OsmTile DEFAULT_TILE = new OsmTile();
 
     private final int queryVersion;
 
@@ -43,8 +42,7 @@ public class OverpassSource extends TiledDataSource<OsmTile> implements CachedRe
     private String query;
 
     public OverpassSource(CoordinateState latLngCoordinate, double tileSize, String cacheRoot, ResourceLocation queryLocation, int queryVersion) {
-        super(new Coordinate(latLngCoordinate, tileSize, tileSize), 4);
-        this.cacheRoot = new File(CachedRemoteSource.GLOBAL_CACHE_ROOT, cacheRoot);
+        super(new ResourceLocation(TerrariumEarth.MODID, "overpass"), new File(GLOBAL_CACHE_ROOT, cacheRoot), new Coordinate(latLngCoordinate, tileSize, tileSize));
         this.queryVersion = queryVersion;
 
         this.shouldSample = Math.abs(this.tileSize.getBlockX()) > 512 || Math.abs(this.tileSize.getBlockZ()) > 512;
@@ -122,26 +120,17 @@ public class OverpassSource extends TiledDataSource<OsmTile> implements CachedRe
     }
 
     @Override
-    public OsmTile loadTile(DataTilePos key) throws SourceException {
-        return this.loadTile(key, 0);
-    }
-
-    private OsmTile loadTile(DataTilePos key, int retries) throws SourceException {
-        try {
-            return this.parseStream(key, OsmDataParser::parse);
-        } catch (RuntimeException e) {
-            Terrarium.LOGGER.error("Failed to parse overpass map tile at {}, reloading", this.getCachedName(key), e);
-            this.removeCache(key);
-            if (retries < 2) {
-                return this.loadTile(key, retries + 1);
-            }
-        }
-        return null;
+    public OsmTile getDefaultTile() {
+        return DEFAULT_TILE;
     }
 
     @Override
-    protected OsmTile getDefaultTile() {
-        return new OsmTile();
+    public SourceResult<OsmTile> parseStream(DataTilePos pos, InputStream stream) throws IOException {
+        try {
+            return SourceResult.success(OsmDataParser.parse(stream));
+        } catch (RuntimeException e) {
+            return SourceResult.malformed(e.getMessage());
+        }
     }
 
     @Override

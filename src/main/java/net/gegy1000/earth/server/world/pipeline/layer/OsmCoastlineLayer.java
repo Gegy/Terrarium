@@ -11,7 +11,7 @@ import net.gegy1000.terrarium.server.util.FloodFill;
 import net.gegy1000.terrarium.server.util.Interpolation;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
-import net.gegy1000.terrarium.server.world.pipeline.DataLayerProducer;
+import net.gegy1000.terrarium.server.world.pipeline.DataLayer;
 import net.gegy1000.terrarium.server.world.pipeline.DataView;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.debug.DebugImageWriter;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
@@ -51,8 +51,8 @@ public class OsmCoastlineLayer extends OsmWaterLayer {
 
     private final CoordinateState geoCoordinateState;
 
-    public OsmCoastlineLayer(DataLayerProducer<OsmTile> osmLayer, CoordinateState geoCoordinateState) {
-        super(osmLayer);
+    public OsmCoastlineLayer(DataLayer<ShortRasterTile> parent, DataLayer<OsmTile> osmLayer, CoordinateState geoCoordinateState) {
+        super(parent, osmLayer);
         this.geoCoordinateState = geoCoordinateState;
     }
 
@@ -206,11 +206,11 @@ public class OsmCoastlineLayer extends OsmWaterLayer {
                 int sampled = resultTile.getShort(localX, localY);
                 if (this.isFillingBankType(sampled)) {
                     if (localX > 0) {
-                        short left = (short) ((sampled & BANK_UP_FLAG) != 0 ? LAND : OCEAN);
+                        short left = (sampled & BANK_UP_FLAG) != 0 ? LAND : OCEAN;
                         floodSources.put(new FloodFill.Point(localX - 1, localY), left);
                     }
                     if (localX < view.getWidth() - 1) {
-                        short right = (short) ((sampled & BANK_UP_FLAG) != 0 ? OCEAN : LAND);
+                        short right = (sampled & BANK_UP_FLAG) != 0 ? OCEAN : LAND;
                         floodSources.put(new FloodFill.Point(localX + 1, localY), right);
                     }
                 }

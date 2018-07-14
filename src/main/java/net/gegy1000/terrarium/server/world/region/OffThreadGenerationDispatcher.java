@@ -1,5 +1,6 @@
 package net.gegy1000.terrarium.server.world.region;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.gegy1000.terrarium.Terrarium;
 
 import javax.annotation.Nullable;
@@ -18,12 +19,7 @@ import java.util.stream.Collectors;
 public class OffThreadGenerationDispatcher implements RegionGenerationDispatcher {
     private final Function<RegionTilePos, GenerationRegion> generator;
 
-    private final ExecutorService regionLoadService = Executors.newSingleThreadExecutor(r -> {
-        Thread thread = new Thread(r);
-        thread.setName("terrarium-region-loader");
-        thread.setDaemon(true);
-        return thread;
-    });
+    private final ExecutorService regionLoadService = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("terrarium-region-loader").setDaemon(true).build());
 
     private final Map<RegionTilePos, RegionFuture> queuedRegions = new HashMap<>();
 
@@ -83,13 +79,11 @@ public class OffThreadGenerationDispatcher implements RegionGenerationDispatcher
 
     @Override
     public void close() {
-        // TODO: We do want to stop region generation right now, but we want to let data source loading to finish up.
-        this.regionLoadService.shutdown();
+        this.regionLoadService.shutdownNow();
     }
 
     private RegionFuture enqueueRegion(RegionTilePos pos) {
-        RegionFuture regionFuture;
-        regionFuture = new RegionFuture(pos);
+        RegionFuture regionFuture = new RegionFuture(pos);
         regionFuture.submitTo(this.regionLoadService);
         this.queuedRegions.put(pos, regionFuture);
         return regionFuture;

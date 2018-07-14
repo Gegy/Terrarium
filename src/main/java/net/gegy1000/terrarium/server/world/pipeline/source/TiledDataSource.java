@@ -1,58 +1,66 @@
 package net.gegy1000.terrarium.server.world.pipeline.source;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.TiledDataAccess;
+import net.minecraft.util.ResourceLocation;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
+import javax.annotation.Nullable;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 
-// TODO: Interface
 public abstract class TiledDataSource<T extends TiledDataAccess> {
-    private final LoadingCache<DataTilePos, T> tileCache;
+    public static final File GLOBAL_CACHE_ROOT = new File(".", "mods/terrarium/cache/");
 
+    protected final ResourceLocation identifier;
+    protected final File cacheRoot;
     protected final Coordinate tileSize;
 
-    protected TiledDataSource(Coordinate tileSize, int tileCacheSize) {
+    protected TiledDataSource(ResourceLocation identifier, File cacheRoot, Coordinate tileSize) {
+        this.identifier = identifier;
+        this.cacheRoot = cacheRoot;
         this.tileSize = tileSize;
-        this.tileCache = CacheBuilder.newBuilder()
-                .expireAfterAccess(30, TimeUnit.SECONDS)
-                .maximumSize(tileCacheSize)
-                .build(new CacheLoader<DataTilePos, T>() {
-                    @Override
-                    public T load(DataTilePos key) {
-                        try {
-                            T tile = TiledDataSource.this.loadTile(key);
-                            if (tile != null) {
-                                return tile;
-                            }
-                        } catch (SourceException e) {
-                            LoadingStateHandler.countFailure();
-                            Terrarium.LOGGER.error("Failed to load from data source", e);
-                        }
-                        return TiledDataSource.this.getDefaultTile();
-                    }
-                });
+        if (!cacheRoot.exists()) {
+            cacheRoot.mkdirs();
+        }
+    }
+
+    public ResourceLocation getIdentifier() {
+        return this.identifier;
+    }
+
+    public File getCacheRoot() {
+        return this.cacheRoot;
     }
 
     public Coordinate getTileSize() {
         return this.tileSize;
     }
 
-    public T getTile(DataTilePos key) {
-        try {
-            return this.tileCache.get(key);
-        } catch (ExecutionException e) {
-            LoadingStateHandler.countFailure();
-            Terrarium.LOGGER.error("Failed to load tile at {}", key, e);
-            return this.getDefaultTile();
-        }
+    public abstract InputStream getRemoteStream(DataTilePos key) throws IOException;
+
+    public abstract InputStream getWrappedStream(InputStream stream) throws IOException;
+
+    public abstract String getCachedName(DataTilePos key);
+
+    public abstract T getDefaultTile();
+
+    public abstract SourceResult<T> parseStream(DataTilePos pos, InputStream stream) throws IOException;
+
+    @Nullable
+    public DataTilePos getFinalTilePos(DataTilePos pos) {
+        return pos;
     }
 
-    public abstract T loadTile(DataTilePos key) throws SourceException;
+    public void cacheMetadata(DataTilePos key) {
+    }
 
-    protected abstract T getDefaultTile();
+    public boolean shouldLoadCache(DataTilePos key, File file) {
+        return file.exists();
+    }
+
+    @Override
+    public String toString() {
+        return "TiledDataSource{identifier=" + this.identifier + "}";
+    }
 }

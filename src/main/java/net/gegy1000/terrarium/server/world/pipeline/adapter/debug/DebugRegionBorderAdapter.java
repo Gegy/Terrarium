@@ -2,7 +2,6 @@ package net.gegy1000.terrarium.server.world.pipeline.adapter.debug;
 
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.TerrariumCoverTypes;
-import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.RegionAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
@@ -17,7 +16,7 @@ public class DebugRegionBorderAdapter implements RegionAdapter {
     }
 
     @Override
-    public void adapt(GenerationSettings settings, RegionData data, int x, int z, int width, int height) {
+    public void adapt(RegionData data, int x, int z, int width, int height) {
         CoverRasterTile coverTile = data.getOrExcept(this.coverComponent);
 
         CoverType[] cover = coverTile.getData();

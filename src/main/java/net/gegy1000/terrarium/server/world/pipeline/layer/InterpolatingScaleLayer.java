@@ -2,6 +2,7 @@ package net.gegy1000.terrarium.server.world.pipeline.layer;
 
 import net.gegy1000.terrarium.server.util.Interpolation;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
+import net.gegy1000.terrarium.server.world.pipeline.DataLayer;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.NumberRasterTile;
 import net.minecraft.util.math.MathHelper;
 
@@ -9,8 +10,8 @@ public abstract class InterpolatingScaleLayer<T extends NumberRasterTile<?>> ext
     private final Interpolation.Method interpolationMethod;
     private final double[][] sampleBuffer;
 
-    public InterpolatingScaleLayer(Interpolation.Method interpolationMethod, CoordinateState coordinateState) {
-        super(interpolationMethod.getBackward(), interpolationMethod.getForward() + 1, coordinateState);
+    public InterpolatingScaleLayer(DataLayer<T> parent, Interpolation.Method interpolationMethod, CoordinateState coordinateState) {
+        super(parent, interpolationMethod.getBackward(), interpolationMethod.getForward() + 1, coordinateState);
 
         this.interpolationMethod = interpolationMethod;
         int pointCount = interpolationMethod.getPointCount();

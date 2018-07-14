@@ -2,18 +2,20 @@ package net.gegy1000.terrarium.server.world.pipeline.layer;
 
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
-import net.gegy1000.terrarium.server.world.pipeline.DataLayerProcessor;
+import net.gegy1000.terrarium.server.world.pipeline.DataLayer;
 import net.gegy1000.terrarium.server.world.pipeline.DataView;
+import net.gegy1000.terrarium.server.world.pipeline.ParentedDataLayer;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.TiledDataAccess;
 import net.minecraft.util.math.MathHelper;
 
-public abstract class BufferedScalingLayer<T extends TiledDataAccess> implements DataLayerProcessor<T, T> {
+public abstract class BufferedScalingLayer<T extends TiledDataAccess> extends ParentedDataLayer<T, T> {
     protected final int lowerSampleBuffer;
     protected final int upperSampleBuffer;
 
     private final CoordinateState scaledState;
 
-    protected BufferedScalingLayer(int lowerSampleBuffer, int upperSampleBuffer, CoordinateState scaledState) {
+    protected BufferedScalingLayer(DataLayer<T> parent, int lowerSampleBuffer, int upperSampleBuffer, CoordinateState scaledState) {
+        super(parent);
         this.lowerSampleBuffer = lowerSampleBuffer;
         this.upperSampleBuffer = upperSampleBuffer;
 
@@ -23,7 +25,7 @@ public abstract class BufferedScalingLayer<T extends TiledDataAccess> implements
     protected abstract T apply(T parent, DataView view, DataView parentView, double scaleFactorX, double scaleFactorY, double originOffsetX, double originOffsetY);
 
     @Override
-    public final T apply(DataView view, T parent, DataView parentView) {
+    protected final T apply(LayerContext context, DataView view, T parent, DataView parentView) {
         double blockSizeX = view.getWidth();
         double blockSizeY = view.getHeight();
 

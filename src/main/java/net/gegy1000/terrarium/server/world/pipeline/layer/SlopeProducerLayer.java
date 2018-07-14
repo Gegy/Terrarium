@@ -1,14 +1,19 @@
 package net.gegy1000.terrarium.server.world.pipeline.layer;
 
-import net.gegy1000.terrarium.server.world.pipeline.DataLayerProcessor;
+import net.gegy1000.terrarium.server.world.pipeline.DataLayer;
 import net.gegy1000.terrarium.server.world.pipeline.DataView;
+import net.gegy1000.terrarium.server.world.pipeline.ParentedDataLayer;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ByteRasterTile;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.minecraft.util.math.MathHelper;
 
-public class SlopeProducerLayer implements DataLayerProcessor<ByteRasterTile, ShortRasterTile> {
+public class SlopeProducerLayer extends ParentedDataLayer<ByteRasterTile, ShortRasterTile> {
+    public SlopeProducerLayer(DataLayer<ShortRasterTile> parent) {
+        super(parent);
+    }
+
     @Override
-    public ByteRasterTile apply(DataView view, ShortRasterTile parent, DataView parentView) {
+    protected ByteRasterTile apply(LayerContext context, DataView view, ShortRasterTile parent, DataView parentView) {
         ByteRasterTile output = new ByteRasterTile(view);
 
         for (int localY = 0; localY < view.getHeight(); localY++) {

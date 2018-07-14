@@ -6,7 +6,7 @@ import net.gegy1000.earth.server.world.pipeline.source.osm.OsmDataParser;
 import net.gegy1000.earth.server.world.pipeline.source.tile.OsmTile;
 import net.gegy1000.terrarium.server.util.FloodFill;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
-import net.gegy1000.terrarium.server.world.pipeline.DataLayerProducer;
+import net.gegy1000.terrarium.server.world.pipeline.DataLayer;
 import net.gegy1000.terrarium.server.world.pipeline.DataView;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.gegy1000.terrarium.server.world.rasterization.OsmShapeProducer;
@@ -21,8 +21,8 @@ public class OsmWaterBodyLayer extends OsmWaterLayer {
 
     private final CoordinateState geoCoordinateState;
 
-    public OsmWaterBodyLayer(DataLayerProducer<OsmTile> osmLayer, CoordinateState geoCoordinateState) {
-        super(osmLayer);
+    public OsmWaterBodyLayer(DataLayer<ShortRasterTile> parent, DataLayer<OsmTile> osmLayer, CoordinateState geoCoordinateState) {
+        super(parent, osmLayer);
         this.geoCoordinateState = geoCoordinateState;
     }
 

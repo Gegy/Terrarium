@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
 import net.gegy1000.earth.TerrariumEarth;
-import net.gegy1000.terrarium.server.world.pipeline.source.CachedRemoteSource;
+import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -24,7 +24,7 @@ public class EarthRemoteData {
 
     private final static Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    private static final File INFO_CACHE = new File(CachedRemoteSource.GLOBAL_CACHE_ROOT, "terrarium_info.json.gz");
+    private static final File INFO_CACHE = new File(TiledDataSource.GLOBAL_CACHE_ROOT, "terrarium_info.json.gz");
 
     public static EarthRemoteData.Info info = new EarthRemoteData.Info("", "", "%s_%s.mat", "", "%s%s.hgt", "", "http://tile.openstreetmap.org", "%s/%s/%s.png", "", "");
 

@@ -6,7 +6,7 @@ import net.gegy1000.terrarium.server.message.DataFailWarningMessage;
 import net.gegy1000.terrarium.server.message.LoadingStateMessage;
 import net.gegy1000.terrarium.server.message.TerrariumHandshakeMessage;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPresetRegistry;
-import net.gegy1000.terrarium.server.world.pipeline.source.CachedRemoteSource;
+import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -42,8 +42,8 @@ public class Terrarium {
     public static void onPreInit(FMLPreInitializationEvent event) {
         PROXY.onPreInit();
 
-        if (!CachedRemoteSource.GLOBAL_CACHE_ROOT.exists()) {
-            CachedRemoteSource.GLOBAL_CACHE_ROOT.mkdirs();
+        if (!TiledDataSource.GLOBAL_CACHE_ROOT.exists()) {
+            TiledDataSource.GLOBAL_CACHE_ROOT.mkdirs();
         }
 
         TerrariumCapabilities.onPreInit();

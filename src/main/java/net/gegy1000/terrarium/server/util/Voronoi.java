@@ -1,28 +1,24 @@
 package net.gegy1000.terrarium.server.util;
 
+import net.gegy1000.terrarium.server.world.chunk.PseudoRandomMap;
 import net.gegy1000.terrarium.server.world.pipeline.DataView;
 import net.minecraft.util.math.MathHelper;
 
-import java.util.Random;
-
 public class Voronoi {
-    private static final long PRIME_1 = 22075533469133L;
-    private static final long PRIME_2 = 25293517046197L;
+    private static final long DISPLACEMENT_SEED = 2016969737595986194L;
 
-    private final Random random;
+    private final PseudoRandomMap random;
 
     private final DistanceFunc distanceFunc;
     private final double fuzzRange;
     private final int gridSize;
-    private final long seed;
 
     public Voronoi(DistanceFunc distanceFunc, double fuzzRange, int gridSize, long seed) {
         this.distanceFunc = distanceFunc;
         this.fuzzRange = fuzzRange;
         this.gridSize = gridSize;
 
-        this.random = new Random(seed);
-        this.seed = this.random.nextLong() ^ this.random.nextLong();
+        this.random = new PseudoRandomMap(seed, DISPLACEMENT_SEED);
     }
 
     public <T> void scale(T[] input, T[] output, DataView sourceView, DataView scaledView,
@@ -56,7 +52,7 @@ public class Voronoi {
         double selectionDistance = Double.MAX_VALUE;
         for (int neighbourY = originY - 1; neighbourY <= originY + 1; neighbourY++) {
             for (int neighbourX = originX - 1; neighbourX <= originX + 1; neighbourX++) {
-                this.random.setSeed(this.getCellSeed(neighbourX + sourceView.getX(), neighbourY + sourceView.getY(), this.seed));
+                this.random.initPosSeed(neighbourX + sourceView.getX(), neighbourY + sourceView.getY());
                 double fuzzedX = this.fuzzPoint(neighbourX) / scaleFactorX;
                 double fuzzedY = this.fuzzPoint(neighbourY) / scaleFactorY;
                 double distance = this.distanceFunc.get(scaledX, scaledY, fuzzedX, fuzzedY);
@@ -86,10 +82,6 @@ public class Voronoi {
     private double fuzzPoint(double point) {
         double offset = (double) this.random.nextInt(this.gridSize) / this.gridSize;
         return point + 0.5 + (offset - 0.5) * this.fuzzRange;
-    }
-
-    private long getCellSeed(int x, int y, long seed) {
-        return (x * PRIME_1 + y * PRIME_2) ^ seed;
     }
 
     public enum DistanceFunc {

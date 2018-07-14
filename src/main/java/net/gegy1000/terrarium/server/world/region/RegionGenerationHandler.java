@@ -6,6 +6,7 @@ import net.gegy1000.terrarium.server.world.generator.customization.GenerationSet
 import net.gegy1000.terrarium.server.world.pipeline.ChunkRasterHandler;
 import net.gegy1000.terrarium.server.world.pipeline.TerrariumDataProvider;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
+import net.gegy1000.terrarium.server.world.pipeline.source.DataSourceHandler;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.RasterDataAccess;
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerChunkMapEntry;
@@ -35,6 +36,7 @@ public class RegionGenerationHandler {
 
     private final Map<RegionTilePos, GenerationRegion> regionCache = new HashMap<>();
     private final RegionGenerationDispatcher dispatcher = new OffThreadGenerationDispatcher(this::generate);
+    private final DataSourceHandler sourceHandler = new DataSourceHandler();
 
     static {
         try {
@@ -137,7 +139,7 @@ public class RegionGenerationHandler {
     }
 
     private GenerationRegion generate(RegionTilePos pos) {
-        RegionData data = this.dataSystem.populateData(this.settings, pos, this.bufferedRegionSize, GenerationRegion.BUFFERED_SIZE, GenerationRegion.BUFFERED_SIZE);
+        RegionData data = this.dataSystem.populateData(this, pos, GenerationRegion.BUFFERED_SIZE, GenerationRegion.BUFFERED_SIZE);
         return new GenerationRegion(pos, data);
     }
 
@@ -153,7 +155,12 @@ public class RegionGenerationHandler {
         return this.chunkRasterHandler.getChunkRaster(componentType);
     }
 
+    public DataSourceHandler getSourceHandler() {
+        return this.sourceHandler;
+    }
+
     public void close() {
         this.dispatcher.close();
+        this.sourceHandler.close();
     }
 }

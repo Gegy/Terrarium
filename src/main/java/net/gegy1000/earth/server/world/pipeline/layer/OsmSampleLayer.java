@@ -3,13 +3,19 @@ package net.gegy1000.earth.server.world.pipeline.layer;
 import net.gegy1000.earth.server.world.pipeline.source.tile.OsmTile;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
-import net.gegy1000.terrarium.server.world.pipeline.DataLayerProducer;
+import net.gegy1000.terrarium.server.world.pipeline.DataLayer;
+import net.gegy1000.terrarium.server.world.pipeline.DataTileKey;
 import net.gegy1000.terrarium.server.world.pipeline.DataView;
+import net.gegy1000.terrarium.server.world.pipeline.layer.LayerContext;
+import net.gegy1000.terrarium.server.world.pipeline.source.DataSourceHandler;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
 import net.minecraft.util.math.MathHelper;
 
-public class OsmSampleLayer implements DataLayerProducer<OsmTile> {
+import java.util.Collection;
+import java.util.Collections;
+
+public class OsmSampleLayer implements DataLayer<OsmTile> {
     private final TiledDataSource<OsmTile> overpassSource;
     private final CoordinateState coordinateState;
 
@@ -19,7 +25,9 @@ public class OsmSampleLayer implements DataLayerProducer<OsmTile> {
     }
 
     @Override
-    public OsmTile apply(DataView view) {
+    public OsmTile apply(LayerContext context, DataView view) {
+        DataSourceHandler sourceHandler = context.getSourceHandler();
+
         DataView bufferView = view.grow(16, 16, 16, 16);
 
         DataTilePos blockMinTilePos = this.getTilePos(bufferView.getMinCoordinate());
@@ -32,7 +40,7 @@ public class OsmSampleLayer implements DataLayerProducer<OsmTile> {
 
         for (int tileZ = minTilePos.getTileZ(); tileZ <= maxTilePos.getTileZ(); tileZ++) {
             for (int tileX = minTilePos.getTileX(); tileX <= maxTilePos.getTileX(); tileX++) {
-                OsmTile tile = this.overpassSource.getTile(new DataTilePos(tileX, tileZ));
+                OsmTile tile = sourceHandler.getTile(this.overpassSource, new DataTilePos(tileX, tileZ));
                 if (tile != null) {
                     mergedTile = mergedTile.merge(tile);
                 }
@@ -40,6 +48,11 @@ public class OsmSampleLayer implements DataLayerProducer<OsmTile> {
         }
 
         return mergedTile;
+    }
+
+    @Override
+    public Collection<DataTileKey<?>> getRequiredData(LayerContext context, DataView view) {
+        return Collections.emptyList();
     }
 
     private DataTilePos getTilePos(Coordinate coordinate) {

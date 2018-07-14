@@ -110,7 +110,11 @@ public class GeoTeleportCommand extends CommandBase {
         Chunk chunk = player.world.getChunkFromChunkCoords(blockX >> 4, blockZ >> 4);
         int height = chunk.getHeightValue(blockX & 15, blockZ & 15);
 
+        player.dismountRidingEntity();
         player.connection.setPlayerLocation(coordinate.getBlockX(), height + 0.5, coordinate.getBlockZ(), 180.0F, 0.0F);
+        player.motionY = 0.0;
+        player.onGround = true;
+
         player.sendMessage(DeferredTranslator.translate(player, new TextComponentTranslation("commands.earth.geotp.success", coordinate.getX(), coordinate.getZ())));
     }
 

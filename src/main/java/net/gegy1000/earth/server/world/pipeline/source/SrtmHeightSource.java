@@ -1,15 +1,17 @@
 package net.gegy1000.earth.server.world.pipeline.source;
 
+import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
-import net.gegy1000.terrarium.server.world.pipeline.source.CachedRemoteSource;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
-import net.gegy1000.terrarium.server.world.pipeline.source.SourceException;
+import net.gegy1000.terrarium.server.world.pipeline.source.SourceResult;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
+import net.minecraft.util.ResourceLocation;
 import org.tukaani.xz.SingleXZInputStream;
 
+import javax.annotation.Nullable;
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.File;
@@ -20,16 +22,14 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
-public class SrtmHeightSource extends TiledDataSource<ShortRasterTile> implements CachedRemoteSource {
+public class SrtmHeightSource extends TiledDataSource<ShortRasterTile> {
     public static final int TILE_SIZE = 1200;
+    private static final ShortRasterTile DEFAULT_TILE = new ShortRasterTile(new short[TILE_SIZE * TILE_SIZE], TILE_SIZE, TILE_SIZE);
 
     private static final Set<DataTilePos> VALID_TILES = new HashSet<>();
 
-    private final File cacheRoot;
-
     public SrtmHeightSource(CoordinateState coordinateState, String cacheRoot) {
-        super(new Coordinate(coordinateState, TILE_SIZE, TILE_SIZE), 9);
-        this.cacheRoot = new File(CachedRemoteSource.GLOBAL_CACHE_ROOT, cacheRoot);
+        super(new ResourceLocation(TerrariumEarth.MODID, "srtm"), new File(GLOBAL_CACHE_ROOT, cacheRoot), new Coordinate(coordinateState, TILE_SIZE, TILE_SIZE));
     }
 
     public static void loadValidTiles() {
@@ -47,35 +47,6 @@ public class SrtmHeightSource extends TiledDataSource<ShortRasterTile> implement
 
     private static URL getTilesURL() throws IOException {
         return new URL(String.format("%s/%s/%s", EarthRemoteData.info.getBaseURL(), EarthRemoteData.info.getHeightsEndpoint(), EarthRemoteData.info.getHeightTiles()));
-    }
-
-    @Override
-    public ShortRasterTile loadTile(DataTilePos key) throws SourceException {
-        key = new DataTilePos(key.getTileX(), key.getTileZ() + 1);
-        if (VALID_TILES.isEmpty() || VALID_TILES.contains(key)) {
-            return this.parseStream(key, stream -> {
-                try (DataInputStream input = new DataInputStream(stream)) {
-                    short[] heightmap = new short[TILE_SIZE * TILE_SIZE];
-                    short origin = input.readShort();
-                    if (origin == -1) {
-                        for (int i = 0; i < heightmap.length; i++) {
-                            heightmap[i] = input.readShort();
-                        }
-                    } else {
-                        for (int i = 0; i < heightmap.length; i++) {
-                            heightmap[i] = (short) ((input.readByte() & 0xFF) + origin);
-                        }
-                    }
-                    return new ShortRasterTile(heightmap, TILE_SIZE, TILE_SIZE);
-                }
-            });
-        }
-        return null;
-    }
-
-    @Override
-    protected ShortRasterTile getDefaultTile() {
-        return new ShortRasterTile(new short[TILE_SIZE * TILE_SIZE], TILE_SIZE, TILE_SIZE);
     }
 
     @Override
@@ -113,5 +84,37 @@ public class SrtmHeightSource extends TiledDataSource<ShortRasterTile> implement
         longitudeString.insert(0, longitudePrefix);
 
         return String.format(EarthRemoteData.info.getHeightsQuery(), latitudeString.toString(), longitudeString.toString());
+    }
+
+    @Override
+    public ShortRasterTile getDefaultTile() {
+        return DEFAULT_TILE;
+    }
+
+    @Nullable
+    @Override
+    public DataTilePos getFinalTilePos(DataTilePos pos) {
+        if (!VALID_TILES.isEmpty() && !VALID_TILES.contains(pos)) {
+            return null;
+        }
+        return new DataTilePos(pos.getTileX(), pos.getTileZ() + 1);
+    }
+
+    @Override
+    public SourceResult<ShortRasterTile> parseStream(DataTilePos pos, InputStream stream) throws IOException {
+        try (DataInputStream input = new DataInputStream(stream)) {
+            short[] heightmap = new short[TILE_SIZE * TILE_SIZE];
+            short origin = input.readShort();
+            if (origin == -1) {
+                for (int i = 0; i < heightmap.length; i++) {
+                    heightmap[i] = input.readShort();
+                }
+            } else {
+                for (int i = 0; i < heightmap.length; i++) {
+                    heightmap[i] = (short) ((input.readByte() & 0xFF) + origin);
+                }
+            }
+            return SourceResult.success(new ShortRasterTile(heightmap, TILE_SIZE, TILE_SIZE));
+        }
     }
 }

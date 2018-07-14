@@ -1,26 +1,31 @@
 package net.gegy1000.terrarium.server.world.pipeline.component;
 
-import net.gegy1000.terrarium.server.world.pipeline.DataLayerProducer;
+import net.gegy1000.terrarium.server.world.pipeline.DataLayer;
+import net.gegy1000.terrarium.server.world.pipeline.DataTileKey;
 import net.gegy1000.terrarium.server.world.pipeline.DataView;
+import net.gegy1000.terrarium.server.world.pipeline.layer.LayerContext;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.TiledDataAccess;
-import net.gegy1000.terrarium.server.world.region.RegionTilePos;
+
+import java.util.Collection;
 
 public final class AttachedComponent<T extends TiledDataAccess> {
     private final RegionComponentType<T> type;
-    private final DataLayerProducer<T> producer;
+    private final DataLayer<T> layer;
 
-    public AttachedComponent(RegionComponentType<T> type, DataLayerProducer<T> producer) {
+    public AttachedComponent(RegionComponentType<T> type, DataLayer<T> layer) {
         this.type = type;
-        this.producer = producer;
+        this.layer = layer;
     }
 
     public RegionComponentType<T> getType() {
         return this.type;
     }
 
-    public RegionComponent<T> createAndPopulate(RegionTilePos pos, int width, int height) {
-        this.producer.reset();
-        DataView view = new DataView(pos.getMinBufferedX(), pos.getMinBufferedZ(), width, height);
-        return new RegionComponent<>(this.type, this.producer.apply(view));
+    public RegionComponent<T> createAndPopulate(LayerContext context, DataView view) {
+        return new RegionComponent<>(this.type, context.apply(this.layer, view));
+    }
+
+    public Collection<DataTileKey<?>> getRequiredData(LayerContext context, DataView view) {
+        return this.layer.getRequiredData(context, view);
     }
 }
