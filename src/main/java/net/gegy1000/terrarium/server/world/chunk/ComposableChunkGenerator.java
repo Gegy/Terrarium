@@ -9,21 +9,16 @@ import net.minecraft.block.BlockFalling;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldEntitySpawner;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.event.terraingen.PopulateChunkEvent;
-import net.minecraftforge.event.terraingen.TerrainGen;
 
 import java.util.List;
 import java.util.Random;
 
 public class ComposableChunkGenerator implements IChunkGenerator {
-    private static final BlockPos DECORATION_CENTER = new BlockPos(16, 0, 16);
-
     private final World world;
     private final Random random;
 
@@ -73,7 +68,7 @@ public class ComposableChunkGenerator implements IChunkGenerator {
         ChunkPrimer primer = new ChunkPrimer();
 
         ChunkCompositionProcedure compositionProcedure = this.compositionProcedure.get();
-        compositionProcedure.composeSurface(primer, regionHandler, chunkX, chunkZ);
+        compositionProcedure.composeSurface(this, primer, regionHandler, chunkX, chunkZ);
 
         return primer;
     }
@@ -97,12 +92,7 @@ public class ComposableChunkGenerator implements IChunkGenerator {
         ForgeEventFactory.onChunkPopulate(true, this, this.world, this.random, chunkX, chunkZ, false);
 
         ChunkCompositionProcedure compositionProcedure = this.compositionProcedure.get();
-        compositionProcedure.composeDecoration(this.world, regionHandler, chunkX, chunkZ);
-
-        if (TerrainGen.populate(this, this.world, this.random, chunkX, chunkZ, false, PopulateChunkEvent.Populate.EventType.ANIMALS)) {
-            Biome biome = this.world.getChunkFromChunkCoords(chunkX, chunkZ).getBiome(DECORATION_CENTER, this.world.getBiomeProvider());
-            WorldEntitySpawner.performWorldGenSpawning(this.world, biome, globalX + 8, globalZ + 8, 16, 16, this.random);
-        }
+        compositionProcedure.composeDecoration(this, this.world, regionHandler, chunkX, chunkZ);
 
         ForgeEventFactory.onChunkPopulate(false, this, this.world, this.random, chunkX, chunkZ, false);
 

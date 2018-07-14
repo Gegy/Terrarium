@@ -53,6 +53,10 @@ import net.gegy1000.terrarium.server.world.pipeline.adapter.HeightTransformAdapt
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.composer.biome.CoverBiomeComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.CoverDecorationComposer;
+import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.LakeDecorationComposer;
+import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.LavaLakeDecorationComposer;
+import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.VanillaBiomeDecorationComposer;
+import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.VanillaOreDecorationComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.BedrockSurfaceComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.CoverSurfaceComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.HeightmapSurfaceComposer;
@@ -90,6 +94,7 @@ public class EarthWorldType extends TerrariumWorldType {
     public static final PropertyKey<Number> SPAWN_LATITUDE = PropertyKey.createNumber("spawn_latitude");
     public static final PropertyKey<Number> SPAWN_LONGITUDE = PropertyKey.createNumber("spawn_longitude");
     public static final PropertyKey<Boolean> ENABLE_DECORATION = PropertyKey.createBoolean("enable_decoration");
+    public static final PropertyKey<Boolean> ENABLE_DEFAULT_DECORATION = PropertyKey.createBoolean("enable_default_decoration");
     public static final PropertyKey<Number> WORLD_SCALE = PropertyKey.createNumber("world_scale");
     public static final PropertyKey<Number> HEIGHT_SCALE = PropertyKey.createNumber("height_scale");
     public static final PropertyKey<Number> NOISE_SCALE = PropertyKey.createNumber("noise_scale");
@@ -98,9 +103,11 @@ public class EarthWorldType extends TerrariumWorldType {
     public static final PropertyKey<Number> BEACH_SIZE = PropertyKey.createNumber("beach_size");
     public static final PropertyKey<Boolean> ENABLE_BUILDINGS = PropertyKey.createBoolean("enable_buildings");
     public static final PropertyKey<Boolean> ENABLE_STREETS = PropertyKey.createBoolean("enable_streets");
-    public static final PropertyKey<Boolean> ENABLE_VANILLA_FEATURES = PropertyKey.createBoolean("enable_vanilla_features");
+    public static final PropertyKey<Boolean> ENABLE_DEFAULT_FEATURES = PropertyKey.createBoolean("enable_default_features");
     public static final PropertyKey<Boolean> ENABLE_CAVE_GENERATION = PropertyKey.createBoolean("enable_cave_generation");
     public static final PropertyKey<Boolean> ENABLE_RESOURCE_GENERATION = PropertyKey.createBoolean("enable_resource_generation");
+    public static final PropertyKey<Boolean> ENABLE_LAKE_GENERATION = PropertyKey.createBoolean("enable_lake_generation");
+    public static final PropertyKey<Boolean> ENABLE_LAVA_GENERATION = PropertyKey.createBoolean("enable_lava_generation");
 
     public EarthWorldType() {
         super("earth", IDENTIFIER, PRESET);
@@ -108,6 +115,7 @@ public class EarthWorldType extends TerrariumWorldType {
 
     @Override
     public TerrariumGeneratorInitializer createInitializer(World world, GenerationSettings settings) {
+        world.setSeaLevel(settings.getProperties().getInteger(HEIGHT_ORIGIN));
         return new Initializer(world, settings.getProperties());
     }
 
@@ -125,10 +133,15 @@ public class EarthWorldType extends TerrariumWorldType {
                 .withCategory("features",
                         new ToggleWidget(ENABLE_DECORATION),
                         new ToggleWidget(ENABLE_BUILDINGS),
-                        new ToggleWidget(ENABLE_STREETS),
-                        new ToggleWidget(ENABLE_VANILLA_FEATURES),
+                        new ToggleWidget(ENABLE_STREETS)
+                )
+                .withCategory("vanilla",
+                        new ToggleWidget(ENABLE_DEFAULT_DECORATION),
+                        new ToggleWidget(ENABLE_DEFAULT_FEATURES),
                         new ToggleWidget(ENABLE_CAVE_GENERATION),
-                        new ToggleWidget(ENABLE_RESOURCE_GENERATION)
+                        new ToggleWidget(ENABLE_RESOURCE_GENERATION),
+                        new ToggleWidget(ENABLE_LAKE_GENERATION),
+                        new ToggleWidget(ENABLE_LAVA_GENERATION)
                 )
                 .build();
     }
@@ -177,10 +190,24 @@ public class EarthWorldType extends TerrariumWorldType {
                     .withBiomeComposer(new CoverBiomeComposer(RegionComponentType.COVER, coverTypes))
                     .withSpawnPosition(new Coordinate(this.earthCoordinates, this.properties.getDouble(SPAWN_LATITUDE), this.properties.getDouble(SPAWN_LONGITUDE)))
                     .withCapability(new EarthCapability.Impl(this.earthCoordinates));
+
             if (this.properties.getBoolean(ENABLE_DECORATION)) {
                 builder.withDecorationComposer(new CoverDecorationComposer(this.world, RegionComponentType.COVER, coverTypes));
                 builder.withDecorationComposer(new BoulderDecorationComposer(this.world, RegionComponentType.SLOPE));
             }
+            if (this.properties.getBoolean(ENABLE_DEFAULT_DECORATION)) {
+                builder.withDecorationComposer(new VanillaBiomeDecorationComposer(this.world));
+            }
+            if (this.properties.getBoolean(ENABLE_LAKE_GENERATION)) {
+                builder.withDecorationComposer(new LakeDecorationComposer(this.world));
+            }
+            if (this.properties.getBoolean(ENABLE_LAVA_GENERATION)) {
+                builder.withDecorationComposer(new LavaLakeDecorationComposer(this.world));
+            }
+            if (this.properties.getBoolean(ENABLE_RESOURCE_GENERATION)) {
+                builder.withDecorationComposer(new VanillaOreDecorationComposer(this.world));
+            }
+
             return builder.build();
         }
 

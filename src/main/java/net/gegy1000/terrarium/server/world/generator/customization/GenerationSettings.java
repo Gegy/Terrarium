@@ -55,4 +55,9 @@ public class GenerationSettings {
             throw new IllegalStateException("Failed to parsed copied settings", e);
         }
     }
+
+    public GenerationSettings union(GenerationSettings other) {
+        PropertyContainer properties = this.propertyContainer.union(other.getProperties());
+        return new GenerationSettings(other.getWorldType(), properties);
+    }
 }

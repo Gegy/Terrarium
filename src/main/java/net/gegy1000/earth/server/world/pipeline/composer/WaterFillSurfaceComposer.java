@@ -7,6 +7,7 @@ import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.chunk.ChunkPrimer;
+import net.minecraft.world.gen.IChunkGenerator;
 
 public class WaterFillSurfaceComposer implements SurfaceComposer {
     private final RegionComponentType<ShortRasterTile> heightComponent;
@@ -20,7 +21,7 @@ public class WaterFillSurfaceComposer implements SurfaceComposer {
     }
 
     @Override
-    public void composeSurface(ChunkPrimer primer, RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
+    public void composeSurface(IChunkGenerator generator, ChunkPrimer primer, RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
         ShortRasterTile heightRaster = regionHandler.getCachedChunkRaster(this.heightComponent);
         WaterRasterTile waterRaster = regionHandler.getCachedChunkRaster(this.waterComponent);
 

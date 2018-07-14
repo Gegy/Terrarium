@@ -11,6 +11,7 @@ import net.minecraft.block.BlockStone;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.gen.IChunkGenerator;
 
 import java.util.Random;
 
@@ -32,7 +33,7 @@ public class BoulderDecorationComposer implements DecorationComposer {
     }
 
     @Override
-    public void composeDecoration(World world, RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
+    public void composeDecoration(IChunkGenerator generator, World world, RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
         int globalX = chunkX << 4;
         int globalZ = chunkZ << 4;
 

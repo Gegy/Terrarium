@@ -10,6 +10,7 @@ import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentTyp
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.world.World;
+import net.minecraft.world.gen.IChunkGenerator;
 
 import java.util.HashSet;
 import java.util.List;
@@ -45,7 +46,7 @@ public class CoverDecorationComposer implements DecorationComposer {
     }
 
     @Override
-    public void composeDecoration(World world, RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
+    public void composeDecoration(IChunkGenerator generator, World world, RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
         int globalX = chunkX << 4;
         int globalZ = chunkZ << 4;
 
@@ -66,10 +67,10 @@ public class CoverDecorationComposer implements DecorationComposer {
         }
 
         for (CoverType<?> type : this.coverTypes) {
-            CoverDecorationGenerator<?> generator = this.generators.get(type);
-            if (generator != null) {
+            CoverDecorationGenerator<?> coverGenerator = this.generators.get(type);
+            if (coverGenerator != null) {
                 this.random.setSeed(randomSeed);
-                generator.decorate(globalX + 8, globalZ + 8, this.random);
+                coverGenerator.decorate(globalX + 8, globalZ + 8, this.random);
             } else {
                 Terrarium.LOGGER.warn("Tried to generate with non-registered cover: {}", type);
             }

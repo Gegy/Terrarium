@@ -133,4 +133,13 @@ public class PropertyContainer {
     public Collection<PropertyKey<?>> getKeys() {
         return this.keys.values();
     }
+
+    public PropertyContainer union(PropertyContainer other) {
+        Map<String, PropertyKey<?>> keys = new HashMap<>(this.keys);
+        Map<PropertyKey<?>, PropertyValue<?>> values = new HashMap<>(this.values);
+        keys.putAll(other.keys);
+        values.putAll(other.values);
+
+        return new PropertyContainer(keys, values);
+    }
 }

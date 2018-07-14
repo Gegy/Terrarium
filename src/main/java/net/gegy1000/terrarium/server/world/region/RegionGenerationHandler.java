@@ -1,7 +1,6 @@
 package net.gegy1000.terrarium.server.world.region;
 
 import net.gegy1000.terrarium.Terrarium;
-import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.pipeline.ChunkRasterHandler;
 import net.gegy1000.terrarium.server.world.pipeline.TerrariumDataProvider;
@@ -28,11 +27,8 @@ import java.util.stream.Collectors;
 public class RegionGenerationHandler {
     private static Field chunkMapEntriesField;
 
-    private final GenerationSettings settings;
     private final TerrariumDataProvider dataSystem;
     private final ChunkRasterHandler chunkRasterHandler;
-
-    private final Coordinate bufferedRegionSize;
 
     private final Map<RegionTilePos, GenerationRegion> regionCache = new HashMap<>();
     private final RegionGenerationDispatcher dispatcher = new OffThreadGenerationDispatcher(this::generate);
@@ -46,12 +42,9 @@ public class RegionGenerationHandler {
         }
     }
 
-    public RegionGenerationHandler(GenerationSettings settings, TerrariumDataProvider dataSystem) {
-        this.settings = settings;
+    public RegionGenerationHandler(TerrariumDataProvider dataSystem) {
         this.dataSystem = dataSystem;
         this.chunkRasterHandler = new ChunkRasterHandler(this, dataSystem);
-
-        this.bufferedRegionSize = Coordinate.fromBlock(GenerationRegion.BUFFERED_SIZE, GenerationRegion.BUFFERED_SIZE);
     }
 
     public void trackRegions(PlayerChunkMap chunkTracker) {

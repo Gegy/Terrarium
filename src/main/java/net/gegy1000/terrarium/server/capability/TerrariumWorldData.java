@@ -29,15 +29,17 @@ public interface TerrariumWorldData extends ICapabilityProvider {
 
         public Implementation(World world, TerrariumWorldType worldType) {
             String generatorOptions = world.getWorldInfo().getGeneratorOptions();
+
+            GenerationSettings presetSettings = worldType.getPreset().createSettings();
             if (Strings.isNullOrEmpty(generatorOptions)) {
-                this.settings = worldType.getPreset().createSettings();
+                this.settings = presetSettings;
             } else {
-                this.settings = GenerationSettings.deserialize(generatorOptions);
+                this.settings = presetSettings.union(GenerationSettings.deserialize(generatorOptions));
             }
 
             TerrariumGeneratorInitializer initializer = worldType.createInitializer(world, this.settings);
             this.generator = initializer.buildGenerator();
-            this.regionHandler = new RegionGenerationHandler(this.settings, initializer.buildDataProvider());
+            this.regionHandler = new RegionGenerationHandler(initializer.buildDataProvider());
         }
 
         @Override

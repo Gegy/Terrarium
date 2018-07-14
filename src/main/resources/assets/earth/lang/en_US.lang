@@ -21,6 +21,7 @@ gui.copy_box.copied.name=Copied to clipboard!
 
 category.terrarium.world.name=World Properties
 category.terrarium.features.name=Feature Properties
+category.terrarium.vanilla.name=Vanilla Properties
 
 # World Properties
 
@@ -41,18 +42,25 @@ property.terrarium.beach_size.tooltip=Radius in blocks for beaches to be generat
 # Feature Properties
 
 property.terrarium.enable_decoration.name=Enable Decoration
+property.terrarium.enable_default_decoration.name=Enable Default Decoration
 property.terrarium.enable_buildings.name=Enable Buildings
 property.terrarium.enable_streets.name=Enable Streets
-property.terrarium.enable_vanilla_features.name=Enable Vanilla Features
+
+property.terrarium.enable_default_features.name=Enable Default Features
 property.terrarium.enable_cave_generation.name=Enable Cave Generation
 property.terrarium.enable_resource_generation.name=Enable Resource Generation
+property.terrarium.enable_lake_generation.name=Enable Lake Generation
+property.terrarium.enable_lava_generation.name=Enable Lava Generation
 
 property.terrarium.enable_decoration.tooltip=If enabled, decorations such as plants and trees will be placed
 property.terrarium.enable_buildings.tooltip=If enabled, buildings from OpenStreetMap will be generated
 property.terrarium.enable_streets.tooltip=If enabled, streets from OpenStreetMap will be generated
-property.terrarium.enable_vanilla_features.tooltip=If enabled, all vanilla map features such as temples will be generated
+
+property.terrarium.enable_default_features.tooltip=If enabled, all vanilla and modded map features and structures will be generated
 property.terrarium.enable_cave_generation.tooltip=If enabled, caves and ravines will be generated randomly
 property.terrarium.enable_resource_generation.tooltip=If enabled, resources will be randomly generated throughout in the world
+property.terrarium.enable_lake_generation.tooltip=If enabled, water lakes will be generated randomly
+property.terrarium.enable_lava_generation.tooltip=If enabled, lava lakes will be generated randomly above and below ground
 
 # Presets
 

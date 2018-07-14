@@ -23,7 +23,7 @@ public class ServerEventHandler {
     @SubscribeEvent
     public static void onWorldLoad(WorldEvent.Load event) {
         World world = event.getWorld();
-        if (ServerEventHandler.shouldHandle(world)) {
+        if (!world.isRemote && ServerEventHandler.shouldHandle(world)) {
             TerrariumWorldData worldData = ((TerrariumWorldType) world.getWorldType()).getWorldData(world);
             if (worldData != null) {
                 Coordinate spawnPosition = worldData.getSpawnPosition();
@@ -37,7 +37,7 @@ public class ServerEventHandler {
     @SubscribeEvent
     public static void onWorldUnload(WorldEvent.Unload event) {
         World world = event.getWorld();
-        if (ServerEventHandler.shouldHandle(world)) {
+        if (!world.isRemote && ServerEventHandler.shouldHandle(world)) {
             TerrariumWorldData worldData = ((TerrariumWorldType) world.getWorldType()).getWorldData(world);
             if (worldData != null) {
                 worldData.getRegionHandler().close();
@@ -48,7 +48,7 @@ public class ServerEventHandler {
     @SubscribeEvent
     public static void onAttachWorldCapabilities(AttachCapabilitiesEvent<World> event) {
         World world = event.getObject();
-        if (ServerEventHandler.shouldHandle(world)) {
+        if (!world.isRemote && ServerEventHandler.shouldHandle(world)) {
             try {
                 TerrariumWorldType worldType = (TerrariumWorldType) world.getWorldType();
                 event.addCapability(TerrariumCapabilities.WORLD_DATA_ID, new TerrariumWorldData.Implementation(world, worldType));
@@ -74,6 +74,6 @@ public class ServerEventHandler {
     }
 
     private static boolean shouldHandle(World world) {
-        return !world.isRemote && world.provider.getDimensionType() == DimensionType.OVERWORLD && world.getWorldType() instanceof TerrariumWorldType;
+        return world.provider.getDimensionType() == DimensionType.OVERWORLD && world.getWorldType() instanceof TerrariumWorldType;
     }
 }

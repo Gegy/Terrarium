@@ -12,6 +12,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.ChunkPrimer;
+import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 
@@ -125,16 +126,16 @@ public class BasicTerrariumGenerator implements TerrariumGenerator {
         }
 
         @Override
-        public void composeSurface(ChunkPrimer primer, RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
+        public void composeSurface(IChunkGenerator generator, ChunkPrimer primer, RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
             for (SurfaceComposer composer : this.surfaceComposers) {
-                composer.composeSurface(primer, regionHandler, chunkX, chunkZ);
+                composer.composeSurface(generator, primer, regionHandler, chunkX, chunkZ);
             }
         }
 
         @Override
-        public void composeDecoration(World world, RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
+        public void composeDecoration(IChunkGenerator generator, World world, RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
             for (DecorationComposer composer : this.decorationComposers) {
-                composer.composeDecoration(world, regionHandler, chunkX, chunkZ);
+                composer.composeDecoration(generator, world, regionHandler, chunkX, chunkZ);
             }
         }
 

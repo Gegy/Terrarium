@@ -11,6 +11,7 @@ import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
+import net.minecraft.world.gen.IChunkGenerator;
 
 public class DebugSignDecorationComposer implements DecorationComposer {
     private final RegionComponentType<ShortRasterTile> heightComponent;
@@ -20,7 +21,7 @@ public class DebugSignDecorationComposer implements DecorationComposer {
     }
 
     @Override
-    public void composeDecoration(World world, RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
+    public void composeDecoration(IChunkGenerator generator, World world, RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
         int globalX = chunkX << 4;
         int globalZ = chunkZ << 4;
 

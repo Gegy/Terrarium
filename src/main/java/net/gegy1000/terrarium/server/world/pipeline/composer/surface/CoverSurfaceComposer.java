@@ -15,6 +15,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.ChunkPrimer;
+import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
 
 import java.util.HashSet;
@@ -68,7 +69,7 @@ public class CoverSurfaceComposer implements SurfaceComposer {
     }
 
     @Override
-    public void composeSurface(ChunkPrimer primer, RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
+    public void composeSurface(IChunkGenerator generator, ChunkPrimer primer, RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
         int globalX = chunkX << 4;
         int globalZ = chunkZ << 4;
 
@@ -94,11 +95,11 @@ public class CoverSurfaceComposer implements SurfaceComposer {
             long randomSeed = this.coverMap.next();
 
             for (CoverType type : this.localCoverTypes) {
-                CoverSurfaceGenerator<?> generator = this.generators.get(type);
-                if (generator != null) {
+                CoverSurfaceGenerator<?> coverGenerator = this.generators.get(type);
+                if (coverGenerator != null) {
                     this.random.setSeed(randomSeed);
                     this.random.setSeed(this.random.nextLong());
-                    generator.decorate(globalX, globalZ, new CoverChunkPrimer(primer), this.random);
+                    coverGenerator.decorate(globalX, globalZ, new CoverChunkPrimer(primer), this.random);
                 } else {
                     Terrarium.LOGGER.warn("Tried to generate with non-registered cover: {}", type);
                 }

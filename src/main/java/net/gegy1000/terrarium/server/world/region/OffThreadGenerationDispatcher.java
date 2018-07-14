@@ -31,12 +31,14 @@ public class OffThreadGenerationDispatcher implements RegionGenerationDispatcher
     public void setRequiredRegions(Collection<RegionTilePos> regions) {
         for (RegionTilePos pos : regions) {
             if (!this.queuedRegions.containsKey(pos)) {
-                this.enqueueRegion(pos);
+                this.enqueueRegion(pos, true);
             }
         }
 
-        Set<RegionTilePos> untrackedLoadingRegions = this.queuedRegions.keySet().stream()
-                .filter(pos -> !regions.contains(pos))
+        Set<RegionTilePos> untrackedLoadingRegions = this.queuedRegions.entrySet().stream()
+                .filter(entry -> entry.getValue().tracked)
+                .filter(entry -> !regions.contains(entry.getKey()))
+                .map(Map.Entry::getKey)
                 .collect(Collectors.toSet());
 
         for (RegionTilePos pos : untrackedLoadingRegions) {
@@ -68,7 +70,7 @@ public class OffThreadGenerationDispatcher implements RegionGenerationDispatcher
     public GenerationRegion get(RegionTilePos pos) {
         RegionFuture regionFuture = this.queuedRegions.get(pos);
         if (regionFuture == null) {
-            regionFuture = this.enqueueRegion(pos);
+            regionFuture = this.enqueueRegion(pos, false);
         }
 
         GenerationRegion generatedRegion = regionFuture.getGeneratedRegion();
@@ -82,8 +84,8 @@ public class OffThreadGenerationDispatcher implements RegionGenerationDispatcher
         this.regionLoadService.shutdownNow();
     }
 
-    private RegionFuture enqueueRegion(RegionTilePos pos) {
-        RegionFuture regionFuture = new RegionFuture(pos);
+    private RegionFuture enqueueRegion(RegionTilePos pos, boolean tracked) {
+        RegionFuture regionFuture = new RegionFuture(pos, tracked);
         regionFuture.submitTo(this.regionLoadService);
         this.queuedRegions.put(pos, regionFuture);
         return regionFuture;
@@ -91,11 +93,13 @@ public class OffThreadGenerationDispatcher implements RegionGenerationDispatcher
 
     private class RegionFuture {
         private final RegionTilePos pos;
+        private boolean tracked;
 
         private Future<GenerationRegion> future;
 
-        private RegionFuture(RegionTilePos pos) {
+        private RegionFuture(RegionTilePos pos, boolean tracked) {
             this.pos = pos;
+            this.tracked = tracked;
         }
 
         public void cancel() {
