@@ -51,6 +51,7 @@ public class TerrariumCustomizationGui extends GuiScreen {
     protected PreviewRenderer renderer;
     protected PreviewController controller;
 
+    protected boolean previewDirty = true;
     protected WorldPreview preview = null;
 
     protected boolean freeze;
@@ -97,7 +98,7 @@ public class TerrariumCustomizationGui extends GuiScreen {
             }
         };
 
-        Runnable onPropertyChange = this::rebuildState;
+        Runnable onPropertyChange = () -> this.previewDirty = true;
 
         List<GuiButton> categoryListWidgets = new ArrayList<>();
 
@@ -124,7 +125,11 @@ public class TerrariumCustomizationGui extends GuiScreen {
         this.activeList = this.categoryList;
 
         if (!this.freeze) {
-            this.rebuildState();
+            if (this.preview != null) {
+                this.preview.delete();
+                this.preview = null;
+            }
+            this.previewDirty = true;
         }
 
         this.freeze = false;
@@ -155,6 +160,11 @@ public class TerrariumCustomizationGui extends GuiScreen {
     @Override
     public void updateScreen() {
         super.updateScreen();
+
+        if (this.previewDirty) {
+            this.rebuildState();
+            this.previewDirty = false;
+        }
 
         this.controller.update();
     }
@@ -225,7 +235,7 @@ public class TerrariumCustomizationGui extends GuiScreen {
 
     public void applyPreset(TerrariumPreset preset) {
         this.setSettings(preset.createSettings());
-        this.rebuildState();
+        this.previewDirty = true;
     }
 
     protected void rebuildState() {

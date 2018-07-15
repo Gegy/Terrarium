@@ -212,14 +212,21 @@ public class DataSourceHandler {
 
         public SourceResult<T> getResult() {
             try {
+                if (this.future == null) {
+                    return SourceResult.empty();
+                }
                 return this.future.get();
-            } catch (InterruptedException | ExecutionException e) {
+            } catch (ExecutionException e) {
                 return SourceResult.exception(e);
+            } catch (InterruptedException e) {
+                return SourceResult.empty();
             }
         }
 
         public void submitTo(ExecutorService service) {
-            this.future = service.submit(() -> DataSourceHandler.this.loadTileRobustly(this.key));
+            if (!service.isShutdown()) {
+                this.future = service.submit(() -> DataSourceHandler.this.loadTileRobustly(this.key));
+            }
         }
     }
 }

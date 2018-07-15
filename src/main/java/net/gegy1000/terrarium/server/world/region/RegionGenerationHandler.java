@@ -1,7 +1,6 @@
 package net.gegy1000.terrarium.server.world.region;
 
 import net.gegy1000.terrarium.Terrarium;
-import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.pipeline.ChunkRasterHandler;
 import net.gegy1000.terrarium.server.world.pipeline.TerrariumDataProvider;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
@@ -137,7 +136,7 @@ public class RegionGenerationHandler {
     }
 
     private GenerationRegion createDefaultRegion(RegionTilePos pos) {
-        return new GenerationRegion(pos, new RegionData(Collections.emptyMap()));
+        return new GenerationRegion(pos, this.dataSystem.createDefaultData(GenerationRegion.BUFFERED_SIZE, GenerationRegion.BUFFERED_SIZE));
     }
 
     public void prepareChunk(int originX, int originZ) {

@@ -115,15 +115,22 @@ public class OffThreadGenerationDispatcher implements RegionGenerationDispatcher
         @Nullable
         public GenerationRegion getGeneratedRegion() {
             try {
+                if (this.future == null) {
+                    return null;
+                }
                 return this.future.get();
-            } catch (InterruptedException | ExecutionException e) {
+            } catch (ExecutionException e) {
                 Terrarium.LOGGER.error("Failed to retrieve generated region", e);
+                return null;
+            } catch (InterruptedException e) {
                 return null;
             }
         }
 
         public void submitTo(ExecutorService service) {
-            this.future = service.submit(() -> OffThreadGenerationDispatcher.this.generator.apply(this.pos));
+            if (!service.isShutdown()) {
+                this.future = service.submit(() -> OffThreadGenerationDispatcher.this.generator.apply(this.pos));
+            }
         }
     }
 }

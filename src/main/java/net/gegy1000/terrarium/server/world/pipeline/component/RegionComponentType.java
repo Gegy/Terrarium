@@ -2,8 +2,8 @@ package net.gegy1000.terrarium.server.world.pipeline.component;
 
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.util.ArrayUtils;
-import net.gegy1000.terrarium.server.world.cover.TerrariumCoverTypes;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
+import net.gegy1000.terrarium.server.world.cover.TerrariumCoverTypes;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ByteRasterTile;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
@@ -51,6 +51,10 @@ public abstract class RegionComponentType<T extends TiledDataAccess> {
 
     public ResourceLocation getIdentifier() {
         return this.identifier;
+    }
+
+    public RegionComponent<T> createDefaultComponent(int width, int height) {
+        return new RegionComponent<>(this, this.createDefaultData(width, height));
     }
 
     @Override

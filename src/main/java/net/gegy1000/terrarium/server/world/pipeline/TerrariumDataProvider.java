@@ -60,6 +60,15 @@ public class TerrariumDataProvider {
         return data;
     }
 
+    public RegionData createDefaultData(int width, int height) {
+        Map<RegionComponentType<?>, RegionComponent<?>> defaultComponents = new HashMap<>();
+        for (RegionComponentType<?> componentType : this.attachedComponents.keySet()) {
+            defaultComponents.put(componentType, componentType.createDefaultComponent(width, height));
+        }
+
+        return new RegionData(defaultComponents);
+    }
+
     private void applyAdapters(RegionData data, RegionTilePos pos, int width, int height) {
         for (RegionAdapter adapter : this.adapters) {
             try {
