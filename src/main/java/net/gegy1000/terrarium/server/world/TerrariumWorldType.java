@@ -1,6 +1,8 @@
 package net.gegy1000.terrarium.server.world;
 
+import com.google.common.base.Strings;
 import net.gegy1000.terrarium.Terrarium;
+import net.gegy1000.terrarium.client.gui.customization.SelectPresetGui;
 import net.gegy1000.terrarium.client.gui.customization.TerrariumCustomizationGui;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
@@ -12,7 +14,6 @@ import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPres
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPresetRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiCreateWorld;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.init.Biomes;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
@@ -94,11 +95,16 @@ public abstract class TerrariumWorldType extends WorldType {
             return;
         }
 
-        mc.displayGuiScreen(this.createCustomizationGui(parent, preset));
+        TerrariumCustomizationGui customizationGui = this.createCustomizationGui(parent, preset);
+        if (Strings.isNullOrEmpty(parent.chunkProviderSettingsJson)) {
+            mc.displayGuiScreen(new SelectPresetGui(customizationGui, this));
+        } else {
+            mc.displayGuiScreen(customizationGui);
+        }
     }
 
     @SideOnly(Side.CLIENT)
-    protected GuiScreen createCustomizationGui(GuiCreateWorld parent, TerrariumPreset preset) {
+    protected TerrariumCustomizationGui createCustomizationGui(GuiCreateWorld parent, TerrariumPreset preset) {
         return new TerrariumCustomizationGui(parent, this, preset);
     }
 

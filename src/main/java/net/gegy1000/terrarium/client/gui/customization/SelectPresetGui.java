@@ -57,7 +57,7 @@ public class SelectPresetGui extends GuiScreen {
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         super.drawDefaultBackground();
         this.presetList.drawScreen(mouseX, mouseY, partialTicks);
-        this.drawCenteredString(this.fontRenderer, I18n.format("gui.terrarium.select_preset.name"), this.width / 2, 4, 0xFFFFFF);
+        this.drawCenteredString(this.fontRenderer, I18n.format("gui.terrarium.select_preset.name"), this.width / 2, 20, 0xFFFFFF);
         super.drawScreen(mouseX, mouseY, partialTicks);
     }
 

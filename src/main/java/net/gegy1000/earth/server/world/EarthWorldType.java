@@ -25,6 +25,7 @@ import net.gegy1000.earth.server.world.pipeline.source.SrtmHeightSource;
 import net.gegy1000.earth.server.world.pipeline.source.osm.OverpassSource;
 import net.gegy1000.earth.server.world.pipeline.source.tile.OsmTile;
 import net.gegy1000.earth.server.world.pipeline.source.tile.WaterRasterTile;
+import net.gegy1000.terrarium.client.gui.customization.TerrariumCustomizationGui;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.util.Interpolation;
 import net.gegy1000.terrarium.server.world.TerrariumGeneratorInitializer;
@@ -71,7 +72,6 @@ import net.gegy1000.terrarium.server.world.pipeline.source.tile.ByteRasterTile;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.minecraft.client.gui.GuiCreateWorld;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
@@ -151,7 +151,7 @@ public class EarthWorldType extends TerrariumWorldType {
 
     @Override
     @SideOnly(Side.CLIENT)
-    protected GuiScreen createCustomizationGui(GuiCreateWorld parent, TerrariumPreset preset) {
+    protected TerrariumCustomizationGui createCustomizationGui(GuiCreateWorld parent, TerrariumPreset preset) {
         return new EarthCustomizationGui(parent, this, preset);
     }
 
