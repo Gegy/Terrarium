@@ -1,0 +1,25 @@
+{
+  "world_type": "earth:earth_generator",
+  "name": "earth_survival",
+  "icon": "earth:earth_default",
+  "properties": {
+    "spawn_latitude": 27.988350,
+    "spawn_longitude": 86.923641,
+    "enable_decoration": true,
+    "enable_default_decoration": true,
+    "world_scale": 0.015384,
+    "height_scale": 1.5,
+    "noise_scale": 1.0,
+    "height_origin": 62,
+    "ocean_depth": 12,
+    "beach_size": 4,
+    "enable_buildings": false,
+    "enable_streets": false,
+    "enable_default_features": true,
+    "enable_cave_generation": true,
+    "enable_resource_generation": true,
+    "enable_lake_generation": true,
+    "enable_lava_generation": true,
+    "enable_mod_generation": true
+  }
+}

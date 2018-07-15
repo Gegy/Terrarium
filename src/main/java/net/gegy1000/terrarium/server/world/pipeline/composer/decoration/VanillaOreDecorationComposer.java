@@ -31,7 +31,6 @@ public class VanillaOreDecorationComposer extends VanillaDecorationComposer {
 
     @Override
     protected void composeDecoration(IChunkGenerator generator, World world, int chunkX, int chunkZ, Biome biome) {
-        // TODO: Hook GameRegistry#sortedGeneratorList to optionally disable
         if (generateOres != null) {
             try {
                 EarthDecorationEventHandler.allowOreGeneration = true;

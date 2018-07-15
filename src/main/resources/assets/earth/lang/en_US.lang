@@ -21,7 +21,7 @@ gui.copy_box.copied.name=Copied to clipboard!
 
 category.terrarium.world.name=World Properties
 category.terrarium.features.name=Feature Properties
-category.terrarium.vanilla.name=Vanilla Properties
+category.terrarium.survival.name=Survival Properties
 
 # World Properties
 
@@ -51,6 +51,7 @@ property.terrarium.enable_cave_generation.name=Enable Cave Generation
 property.terrarium.enable_resource_generation.name=Enable Resource Generation
 property.terrarium.enable_lake_generation.name=Enable Lake Generation
 property.terrarium.enable_lava_generation.name=Enable Lava Generation
+property.terrarium.enable_mod_generation.name=Enable Modded Generators
 
 property.terrarium.enable_decoration.tooltip=If enabled, decorations such as plants and trees will be placed
 property.terrarium.enable_buildings.tooltip=If enabled, buildings from OpenStreetMap will be generated
@@ -61,11 +62,14 @@ property.terrarium.enable_cave_generation.tooltip=If enabled, caves and ravines 
 property.terrarium.enable_resource_generation.tooltip=If enabled, resources will be randomly generated throughout in the world
 property.terrarium.enable_lake_generation.tooltip=If enabled, water lakes will be generated randomly
 property.terrarium.enable_lava_generation.tooltip=If enabled, lava lakes will be generated randomly above and below ground
+property.terrarium.enable_mod_generation.tooltip=If enabled, modded generators will run. This can include both ores and structures.
 
 # Presets
 
 preset.earth_default.name=Earth: Default
 preset.earth_default.desc=Default Earth generator
+preset.earth_survival.name=Earth: Survival
+preset.earth_survival.desc=Earth generator optimized for a survival experience
 
 # Commands
 

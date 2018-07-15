@@ -12,6 +12,7 @@ import net.gegy1000.earth.server.world.pipeline.adapter.WaterApplyAdapter;
 import net.gegy1000.earth.server.world.pipeline.adapter.WaterCarveAdapter;
 import net.gegy1000.earth.server.world.pipeline.adapter.WaterLevelingAdapter;
 import net.gegy1000.earth.server.world.pipeline.composer.BoulderDecorationComposer;
+import net.gegy1000.earth.server.world.pipeline.composer.ModdedDecorationComposer;
 import net.gegy1000.earth.server.world.pipeline.composer.WaterFillSurfaceComposer;
 import net.gegy1000.earth.server.world.pipeline.layer.OsmCoastlineLayer;
 import net.gegy1000.earth.server.world.pipeline.layer.OsmPopulatorLayer;
@@ -108,6 +109,7 @@ public class EarthWorldType extends TerrariumWorldType {
     public static final PropertyKey<Boolean> ENABLE_RESOURCE_GENERATION = PropertyKey.createBoolean("enable_resource_generation");
     public static final PropertyKey<Boolean> ENABLE_LAKE_GENERATION = PropertyKey.createBoolean("enable_lake_generation");
     public static final PropertyKey<Boolean> ENABLE_LAVA_GENERATION = PropertyKey.createBoolean("enable_lava_generation");
+    public static final PropertyKey<Boolean> ENABLE_MOD_GENERATION = PropertyKey.createBoolean("enable_mod_generation");
 
     public EarthWorldType() {
         super("earth", IDENTIFIER, PRESET);
@@ -135,9 +137,10 @@ public class EarthWorldType extends TerrariumWorldType {
                         new ToggleWidget(ENABLE_BUILDINGS),
                         new ToggleWidget(ENABLE_STREETS)
                 )
-                .withCategory("vanilla",
+                .withCategory("survival",
                         new ToggleWidget(ENABLE_DEFAULT_DECORATION),
                         new ToggleWidget(ENABLE_DEFAULT_FEATURES),
+                        new ToggleWidget(ENABLE_MOD_GENERATION),
                         new ToggleWidget(ENABLE_CAVE_GENERATION),
                         new ToggleWidget(ENABLE_RESOURCE_GENERATION),
                         new ToggleWidget(ENABLE_LAKE_GENERATION),
@@ -206,6 +209,9 @@ public class EarthWorldType extends TerrariumWorldType {
             }
             if (this.properties.getBoolean(ENABLE_RESOURCE_GENERATION)) {
                 builder.withDecorationComposer(new VanillaOreDecorationComposer(this.world));
+            }
+            if (this.properties.getBoolean(ENABLE_MOD_GENERATION)) {
+                builder.withDecorationComposer(new ModdedDecorationComposer(this.world));
             }
 
             return builder.build();
