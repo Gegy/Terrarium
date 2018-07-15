@@ -71,7 +71,7 @@ public class CoverDebugWorldType extends TerrariumWorldType {
         }
 
         @Override
-        public TerrariumGenerator buildGenerator() {
+        public TerrariumGenerator buildGenerator(boolean preview) {
             CoordinateState zoneGeoCoordinates = new DebugLatLngCoordinateState();
             List<ConstructedCover<?>> coverTypes = this.buildCoverTypes(zoneGeoCoordinates);
             return BasicTerrariumGenerator.builder()

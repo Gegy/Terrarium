@@ -14,6 +14,8 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 
 public interface TerrariumWorldData extends ICapabilityProvider {
+    ThreadLocal<Boolean> PREVIEW_WORLD = ThreadLocal.withInitial(() -> false);
+
     GenerationSettings getSettings();
 
     RegionGenerationHandler getRegionHandler();
@@ -38,7 +40,7 @@ public interface TerrariumWorldData extends ICapabilityProvider {
             }
 
             TerrariumGeneratorInitializer initializer = worldType.createInitializer(world, this.settings);
-            this.generator = initializer.buildGenerator();
+            this.generator = initializer.buildGenerator(PREVIEW_WORLD.get());
             this.regionHandler = new RegionGenerationHandler(initializer.buildDataProvider());
         }
 

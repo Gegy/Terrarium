@@ -63,10 +63,17 @@ public class WorldPreview implements IBlockAccess {
         this.builderQueue = new ArrayBlockingQueue<>(builders.length);
         Collections.addAll(this.builderQueue, builders);
 
-        PreviewDummyWorld world = new PreviewDummyWorld(this.worldType, settings);
-        this.worldData = world.getCapability(TerrariumCapabilities.worldDataCapability, null);
-        if (this.worldData == null) {
-            throw new IllegalStateException("Failed to get world data capability from preview world");
+        PreviewDummyWorld world;
+
+        TerrariumWorldData.PREVIEW_WORLD.set(true);
+        try {
+            world = new PreviewDummyWorld(this.worldType, settings);
+            this.worldData = world.getCapability(TerrariumCapabilities.worldDataCapability, null);
+            if (this.worldData == null) {
+                throw new IllegalStateException("Failed to get world data capability from preview world");
+            }
+        } finally {
+            TerrariumWorldData.PREVIEW_WORLD.set(false);
         }
 
         this.chunkGenerator = new ComposableChunkGenerator(world);

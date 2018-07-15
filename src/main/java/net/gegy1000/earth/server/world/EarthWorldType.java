@@ -60,6 +60,7 @@ import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.LavaLake
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.VanillaBiomeDecorationComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.VanillaOreDecorationComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.BedrockSurfaceComposer;
+import net.gegy1000.terrarium.server.world.pipeline.composer.surface.CaveSurfaceComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.CoverSurfaceComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.HeightmapSurfaceComposer;
 import net.gegy1000.terrarium.server.world.pipeline.layer.CoverTileSampleLayer;
@@ -182,17 +183,21 @@ public class EarthWorldType extends TerrariumWorldType {
         }
 
         @Override
-        public TerrariumGenerator buildGenerator() {
+        public TerrariumGenerator buildGenerator(boolean preview) {
             int heightOrigin = this.properties.getInteger(HEIGHT_ORIGIN);
             List<ConstructedCover<?>> coverTypes = this.constructCoverTypes();
             BasicTerrariumGenerator.Builder builder = BasicTerrariumGenerator.builder()
                     .withSurfaceComposer(new HeightmapSurfaceComposer(RegionComponentType.HEIGHT, Blocks.STONE.getDefaultState()))
                     .withSurfaceComposer(new WaterFillSurfaceComposer(RegionComponentType.HEIGHT, EarthComponentTypes.WATER, Blocks.WATER.getDefaultState()))
-                    .withSurfaceComposer(new CoverSurfaceComposer(this.world, RegionComponentType.COVER, coverTypes, this.properties.getBoolean(ENABLE_DECORATION), Blocks.STONE.getDefaultState()))
+                    .withSurfaceComposer(new CoverSurfaceComposer(this.world, RegionComponentType.COVER, coverTypes, !preview && this.properties.getBoolean(ENABLE_DECORATION), Blocks.STONE.getDefaultState()))
                     .withSurfaceComposer(new BedrockSurfaceComposer(this.world, Blocks.BEDROCK.getDefaultState(), Math.min(heightOrigin - 1, 5)))
                     .withBiomeComposer(new CoverBiomeComposer(RegionComponentType.COVER, coverTypes))
                     .withSpawnPosition(new Coordinate(this.earthCoordinates, this.properties.getDouble(SPAWN_LATITUDE), this.properties.getDouble(SPAWN_LONGITUDE)))
                     .withCapability(new EarthCapability.Impl(this.earthCoordinates));
+
+            if (!preview && this.properties.getBoolean(ENABLE_CAVE_GENERATION)) {
+                builder.withSurfaceComposer(new CaveSurfaceComposer(this.world));
+            }
 
             if (this.properties.getBoolean(ENABLE_DECORATION)) {
                 builder.withDecorationComposer(new CoverDecorationComposer(this.world, RegionComponentType.COVER, coverTypes));
@@ -252,7 +257,7 @@ public class EarthWorldType extends TerrariumWorldType {
                     .withAdapter(new WaterApplyAdapter(this.earthCoordinates, EarthComponentTypes.WATER, RegionComponentType.HEIGHT, RegionComponentType.COVER))
                     .withAdapter(new OsmAreaCoverAdapter(this.earthCoordinates, EarthComponentTypes.OSM, RegionComponentType.COVER))
 //                    .withAdapter(new HeightNoiseAdapter(this.world, RegionComponentType.HEIGHT, 2, 0.08, this.properties.getDouble(NOISE_SCALE)))
-                    .withAdapter(new HeightTransformAdapter(RegionComponentType.HEIGHT, this.properties.getDouble(HEIGHT_SCALE) * this.worldScale, heightOrigin))
+                    .withAdapter(new HeightTransformAdapter(this.world, RegionComponentType.HEIGHT, this.properties.getDouble(HEIGHT_SCALE) * this.worldScale, heightOrigin))
                     .withAdapter(new WaterLevelingAdapter(EarthComponentTypes.WATER, RegionComponentType.HEIGHT, heightOrigin + 1))
                     .withAdapter(new WaterCarveAdapter(EarthComponentTypes.WATER, RegionComponentType.HEIGHT, this.properties.getInteger(OCEAN_DEPTH)))
 //                    .withAdapter(new OceanDepthCorrectionAdapter(RegionComponentType.HEIGHT, this.properties.getInteger(OCEAN_DEPTH)))
