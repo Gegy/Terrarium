@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 public class RegionGenerationHandler {
     private static Field chunkMapEntriesField;
 
-    private final TerrariumDataProvider dataSystem;
+    private final TerrariumDataProvider dataProvider;
     private final ChunkRasterHandler chunkRasterHandler;
 
     private final Map<RegionTilePos, GenerationRegion> regionCache = new HashMap<>();
@@ -41,9 +41,9 @@ public class RegionGenerationHandler {
         }
     }
 
-    public RegionGenerationHandler(TerrariumDataProvider dataSystem) {
-        this.dataSystem = dataSystem;
-        this.chunkRasterHandler = new ChunkRasterHandler(this, dataSystem);
+    public RegionGenerationHandler(TerrariumDataProvider dataProvider) {
+        this.dataProvider = dataProvider;
+        this.chunkRasterHandler = new ChunkRasterHandler(this, dataProvider);
     }
 
     public void trackRegions(PlayerChunkMap chunkTracker) {
@@ -114,7 +114,11 @@ public class RegionGenerationHandler {
         return this.createDefaultRegion(pos);
     }
 
-    public <T extends RasterDataAccess<V>, V> void fillRaster(RegionComponentType<T> componentType, T result, int originX, int originZ, int width, int height) {
+    public <T extends RasterDataAccess<V>, V> T fillRaster(RegionComponentType<T> componentType, T result, int originX, int originZ, int width, int height, boolean allowPartial) {
+        if (allowPartial && !this.hasRegions(originX, originZ, width, height)) {
+            return this.dataProvider.populatePartialData(this, componentType, originX, originZ, width, height);
+        }
+
         for (int localZ = 0; localZ < height; localZ++) {
             int blockZ = originZ + localZ;
 
@@ -123,24 +127,47 @@ public class RegionGenerationHandler {
 
                 GenerationRegion region = this.get(blockX, blockZ);
                 T dataTile = region.getData().getOrExcept(componentType);
-
                 V value = dataTile.get(blockX - region.getMinX(), blockZ - region.getMinZ());
+
                 result.set(localX, localZ, value);
             }
         }
+
+        return result;
+    }
+
+    private boolean hasRegions(int originX, int originZ, int width, int height) {
+        int minRegionX = Math.floorDiv(originX, GenerationRegion.SIZE);
+        int maxRegionX = Math.floorDiv((originX + width), GenerationRegion.SIZE);
+        int minRegionY = Math.floorDiv(originZ, GenerationRegion.SIZE);
+        int maxRegionY = Math.floorDiv((originZ + height), GenerationRegion.SIZE);
+
+        for (int regionY = minRegionY; regionY <= maxRegionY; regionY++) {
+            for (int regionX = minRegionX; regionX <= maxRegionX; regionX++) {
+                if (!this.regionCache.containsKey(new RegionTilePos(regionX, regionY))) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     private GenerationRegion generate(RegionTilePos pos) {
-        RegionData data = this.dataSystem.populateData(this, pos, GenerationRegion.BUFFERED_SIZE, GenerationRegion.BUFFERED_SIZE);
+        RegionData data = this.dataProvider.populateData(this, pos, GenerationRegion.BUFFERED_SIZE, GenerationRegion.BUFFERED_SIZE);
         return new GenerationRegion(pos, data);
     }
 
     private GenerationRegion createDefaultRegion(RegionTilePos pos) {
-        return new GenerationRegion(pos, this.dataSystem.createDefaultData(GenerationRegion.BUFFERED_SIZE, GenerationRegion.BUFFERED_SIZE));
+        return new GenerationRegion(pos, this.dataProvider.createDefaultData(GenerationRegion.BUFFERED_SIZE, GenerationRegion.BUFFERED_SIZE));
     }
 
     public void prepareChunk(int originX, int originZ) {
         this.chunkRasterHandler.fillRasters(originX, originZ);
+    }
+
+    public void prepareChunk(int originX, int originZ, Collection<RegionComponentType<?>> components) {
+        this.chunkRasterHandler.fillRasters(originX, originZ, components);
     }
 
     public <T extends RasterDataAccess<V>, V> T getCachedChunkRaster(RegionComponentType<T> componentType) {

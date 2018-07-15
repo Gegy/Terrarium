@@ -160,4 +160,9 @@ public class CoverSurfaceComposer implements SurfaceComposer {
             }
         }
     }
+
+    @Override
+    public RegionComponentType<?>[] getDependencies() {
+        return new RegionComponentType[] { this.coverComponent };
+    }
 }

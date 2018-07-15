@@ -8,6 +8,7 @@ import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.chunk.ComposableBiomeProvider;
 import net.gegy1000.terrarium.server.world.chunk.ComposableChunkGenerator;
+import net.gegy1000.terrarium.server.world.chunk.TerrariumChunkGenerator;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumCustomization;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPreset;
@@ -69,7 +70,7 @@ public abstract class TerrariumWorldType extends WorldType {
         }
     }
 
-    public abstract TerrariumGeneratorInitializer createInitializer(World world, GenerationSettings settings);
+    public abstract TerrariumGeneratorInitializer createInitializer(World world, TerrariumChunkGenerator chunkGenerator, GenerationSettings settings);
 
     protected abstract TerrariumCustomization buildCustomization();
 

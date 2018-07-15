@@ -1,5 +1,6 @@
 package net.gegy1000.terrarium.server.world.pipeline.composer.decoration;
 
+import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;

@@ -1,6 +1,7 @@
 package net.gegy1000.terrarium.server.world.pipeline.composer.decoration;
 
 import net.gegy1000.terrarium.server.world.chunk.PseudoRandomMap;
+import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -30,6 +31,11 @@ public abstract class VanillaDecorationComposer implements DecorationComposer {
 
         Biome biome = world.getChunkFromChunkCoords(chunkX, chunkZ).getBiome(DECORATION_CENTER, world.getBiomeProvider());
         this.composeDecoration(generator, world, chunkX, chunkZ, biome);
+    }
+
+    @Override
+    public RegionComponentType<?>[] getDependencies() {
+        return new RegionComponentType[0];
     }
 
     protected abstract void composeDecoration(IChunkGenerator generator, World world, int chunkX, int chunkZ, Biome biome);

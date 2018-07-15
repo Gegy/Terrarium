@@ -3,6 +3,7 @@ package net.gegy1000.terrarium.server.capability;
 import com.google.common.base.Strings;
 import net.gegy1000.terrarium.server.world.TerrariumGeneratorInitializer;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
+import net.gegy1000.terrarium.server.world.chunk.TerrariumChunkGenerator;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.generator.ChunkCompositionProcedure;
 import net.gegy1000.terrarium.server.world.generator.TerrariumGenerator;
@@ -10,6 +11,9 @@ import net.gegy1000.terrarium.server.world.generator.customization.GenerationSet
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.IChunkProvider;
+import net.minecraft.world.gen.ChunkProviderServer;
+import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 
@@ -39,7 +43,17 @@ public interface TerrariumWorldData extends ICapabilityProvider {
                 this.settings = presetSettings.union(GenerationSettings.deserialize(generatorOptions));
             }
 
-            TerrariumGeneratorInitializer initializer = worldType.createInitializer(world, this.settings);
+            IChunkProvider chunkProvider = world.getChunkProvider();
+            if (!(chunkProvider instanceof ChunkProviderServer)) {
+                throw new IllegalStateException("Cannot create Terrarium generator with invalid chunk provider " + chunkProvider);
+            }
+
+            IChunkGenerator chunkGenerator = ((ChunkProviderServer) chunkProvider).chunkGenerator;
+            if (!(chunkGenerator instanceof TerrariumChunkGenerator)) {
+                throw new IllegalStateException("Terrarium chunk generator must implement TerrariumChunkGenerator");
+            }
+
+            TerrariumGeneratorInitializer initializer = worldType.createInitializer(world, (TerrariumChunkGenerator) chunkGenerator, this.settings);
             this.generator = initializer.buildGenerator(PREVIEW_WORLD.get());
             this.regionHandler = new RegionGenerationHandler(initializer.buildDataProvider());
         }

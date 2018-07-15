@@ -56,4 +56,9 @@ public class BoulderDecorationComposer implements DecorationComposer {
             }
         }
     }
+
+    @Override
+    public RegionComponentType<?>[] getDependencies() {
+        return new RegionComponentType[] { this.slopeComponent };
+    }
 }

@@ -1,6 +1,7 @@
 package net.gegy1000.earth.server.world.pipeline.composer;
 
 import net.gegy1000.earth.server.EarthDecorationEventHandler;
+import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.world.World;
@@ -38,5 +39,10 @@ public class ModdedDecorationComposer implements DecorationComposer {
                 worldGenerator.generate(this.random, chunkX, chunkZ, world, generator, chunkProvider);
             }
         }
+    }
+
+    @Override
+    public RegionComponentType<?>[] getDependencies() {
+        return new RegionComponentType[0];
     }
 }

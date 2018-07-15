@@ -1,5 +1,6 @@
 package net.gegy1000.terrarium.client.preview;
 
+import net.gegy1000.terrarium.server.world.chunk.ComposableChunkGenerator;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.profiler.Profiler;
@@ -12,6 +13,8 @@ import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.IChunkLoader;
+import net.minecraft.world.gen.ChunkProviderServer;
+import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.gen.structure.template.TemplateManager;
 import net.minecraft.world.storage.IPlayerFileData;
 import net.minecraft.world.storage.ISaveHandler;
@@ -23,14 +26,19 @@ import java.io.File;
 
 @SideOnly(Side.CLIENT)
 public class PreviewDummyWorld extends World {
+    private final ComposableChunkGenerator generator;
+
     public PreviewDummyWorld(WorldType worldType, GenerationSettings settings) {
         super(new SaveHandler(), new WorldInfo(createSettings(worldType, settings), "terrarium_preview"), new WorldProviderSurface(), new Profiler(), false);
-        this.initCapabilities();
 
         int dimension = this.provider.getDimension();
         this.provider.setWorld(this);
         this.provider.setDimension(dimension);
+
+        this.generator = new ComposableChunkGenerator(this);
         this.chunkProvider = this.createChunkProvider();
+
+        this.initCapabilities();
     }
 
     private static WorldSettings createSettings(WorldType worldType, GenerationSettings settings) {
@@ -39,9 +47,13 @@ public class PreviewDummyWorld extends World {
         return worldSettings;
     }
 
+    public ComposableChunkGenerator getGenerator() {
+        return this.generator;
+    }
+
     @Override
     protected IChunkProvider createChunkProvider() {
-        return new ChunkCache();
+        return new ChunkCache(this.generator);
     }
 
     @Override
@@ -49,7 +61,11 @@ public class PreviewDummyWorld extends World {
         return false;
     }
 
-    private static class ChunkCache implements IChunkProvider {
+    private static class ChunkCache extends ChunkProviderServer {
+        public ChunkCache(IChunkGenerator generator) {
+            super(null, null, generator);
+        }
+
         @Override
         public Chunk getLoadedChunk(int x, int z) {
             return null;

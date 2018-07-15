@@ -33,4 +33,9 @@ public class OceanFillSurfaceComposer implements SurfaceComposer {
             }
         }
     }
+
+    @Override
+    public RegionComponentType<?>[] getDependencies() {
+        return new RegionComponentType[] { this.heightComponent };
+    }
 }

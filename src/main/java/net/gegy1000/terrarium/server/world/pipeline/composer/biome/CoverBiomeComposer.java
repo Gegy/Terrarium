@@ -20,10 +20,7 @@ public class CoverBiomeComposer implements BiomeComposer {
 
     private final Biome[] biomeBuffer = new Biome[16 * 16];
 
-    public CoverBiomeComposer(
-            RegionComponentType<CoverRasterTile> coverComponent,
-            List<ConstructedCover<?>> coverTypes
-    ) {
+    public CoverBiomeComposer(RegionComponentType<CoverRasterTile> coverComponent, List<ConstructedCover<?>> coverTypes) {
         this.coverComponent = coverComponent;
         this.context = coverTypes.stream().collect(Collectors.toMap(ConstructedCover::getType, ConstructedCover::getContext));
     }
@@ -53,5 +50,10 @@ public class CoverBiomeComposer implements BiomeComposer {
             Terrarium.LOGGER.warn("Tried to get biome for non-registered cover type: {}", coverType);
         }
         return Biomes.DEFAULT;
+    }
+
+    @Override
+    public RegionComponentType<?>[] getDependencies() {
+        return new RegionComponentType[] { this.coverComponent };
     }
 }

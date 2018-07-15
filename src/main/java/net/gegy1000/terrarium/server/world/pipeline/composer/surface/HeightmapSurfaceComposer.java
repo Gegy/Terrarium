@@ -11,8 +11,6 @@ public class HeightmapSurfaceComposer implements SurfaceComposer {
     private final RegionComponentType<ShortRasterTile> heightComponent;
     private final IBlockState block;
 
-    private final ShortRasterTile chunkBuffer = new ShortRasterTile(new short[16 * 16], 16, 16);
-
     public HeightmapSurfaceComposer(RegionComponentType<ShortRasterTile> heightComponent, IBlockState block) {
         this.heightComponent = heightComponent;
         this.block = block;
@@ -20,18 +18,20 @@ public class HeightmapSurfaceComposer implements SurfaceComposer {
 
     @Override
     public void composeSurface(IChunkGenerator generator, ChunkPrimer primer, RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
-        int globalX = chunkX << 4;
-        int globalZ = chunkZ << 4;
-
-        regionHandler.fillRaster(this.heightComponent, this.chunkBuffer, globalX, globalZ, 16, 16);
+        ShortRasterTile chunkRaster = regionHandler.getCachedChunkRaster(this.heightComponent);
 
         for (int localZ = 0; localZ < 16; localZ++) {
             for (int localX = 0; localX < 16; localX++) {
-                int height = this.chunkBuffer.getShort(localX, localZ);
+                int height = chunkRaster.getShort(localX, localZ);
                 for (int localY = 1; localY <= height; localY++) {
                     primer.setBlockState(localX, localY, localZ, this.block);
                 }
             }
         }
+    }
+
+    @Override
+    public RegionComponentType<?>[] getDependencies() {
+        return new RegionComponentType[] { this.heightComponent };
     }
 }

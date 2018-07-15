@@ -1,14 +1,19 @@
 package net.gegy1000.terrarium.server.world.generator;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
 import net.gegy1000.terrarium.server.util.ArrayUtils;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
+import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
+import net.gegy1000.terrarium.server.world.pipeline.composer.ChunkComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.biome.BiomeComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
+import net.gegy1000.terrarium.server.world.pipeline.composer.structure.StructureComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.SurfaceComposer;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.init.Biomes;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.ChunkPrimer;
@@ -19,7 +24,11 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class BasicTerrariumGenerator implements TerrariumGenerator {
     private final ChunkCompositionProcedure compositionProcedure;
@@ -70,6 +79,7 @@ public class BasicTerrariumGenerator implements TerrariumGenerator {
 
     public static class Builder {
         private final ImmutableList.Builder<SurfaceComposer> surfaceComposers = new ImmutableList.Builder<>();
+        private final ImmutableList.Builder<StructureComposer> structureComposers = new ImmutableList.Builder<>();
         private final ImmutableList.Builder<DecorationComposer> decorationComposers = new ImmutableList.Builder<>();
         @Nullable
         private BiomeComposer biomeComposer;
@@ -83,6 +93,11 @@ public class BasicTerrariumGenerator implements TerrariumGenerator {
 
         public Builder withSurfaceComposer(SurfaceComposer composer) {
             this.surfaceComposers.add(composer);
+            return this;
+        }
+
+        public Builder withStructureComposer(StructureComposer composer) {
+            this.structureComposers.add(composer);
             return this;
         }
 
@@ -107,7 +122,7 @@ public class BasicTerrariumGenerator implements TerrariumGenerator {
         }
 
         public BasicTerrariumGenerator build() {
-            CompositionProcedure compositionProcedure = new CompositionProcedure(this.surfaceComposers.build(), this.decorationComposers.build(), this.biomeComposer);
+            CompositionProcedure compositionProcedure = new CompositionProcedure(this.surfaceComposers.build(), this.structureComposers.build(), this.decorationComposers.build(), this.biomeComposer);
             ICapabilityProvider[] capabilities = this.capabilities.toArray(new ICapabilityProvider[0]);
             return new BasicTerrariumGenerator(compositionProcedure, this.spawnPosition, capabilities);
         }
@@ -115,12 +130,14 @@ public class BasicTerrariumGenerator implements TerrariumGenerator {
 
     private static class CompositionProcedure implements ChunkCompositionProcedure {
         private final ImmutableList<SurfaceComposer> surfaceComposers;
+        private final ImmutableList<StructureComposer> structureComposers;
         private final ImmutableList<DecorationComposer> decorationComposers;
         @Nullable
         private final BiomeComposer biomeComposer;
 
-        private CompositionProcedure(ImmutableList<SurfaceComposer> surfaceComposers, ImmutableList<DecorationComposer> decorationComposers, BiomeComposer biomeComposer) {
+        private CompositionProcedure(ImmutableList<SurfaceComposer> surfaceComposers, ImmutableList<StructureComposer> structureComposers, ImmutableList<DecorationComposer> decorationComposers, BiomeComposer biomeComposer) {
             this.surfaceComposers = surfaceComposers;
+            this.structureComposers = structureComposers;
             this.decorationComposers = decorationComposers;
             this.biomeComposer = biomeComposer;
         }
@@ -145,6 +162,74 @@ public class BasicTerrariumGenerator implements TerrariumGenerator {
                 return ArrayUtils.defaulted(new Biome[16 * 16], Biomes.DEFAULT);
             }
             return this.biomeComposer.composeBiomes(regionHandler, chunkX, chunkZ);
+        }
+
+        @Override
+        public void composeStructures(IChunkGenerator generator, ChunkPrimer primer, RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
+            for (StructureComposer composer : this.structureComposers) {
+                composer.composeStructures(generator, primer, regionHandler, chunkX, chunkZ);
+            }
+        }
+
+        @Override
+        public void populateStructures(World world, RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
+            for (StructureComposer composer : this.structureComposers) {
+                composer.populateStructures(world, regionHandler, chunkX, chunkZ);
+            }
+        }
+
+        @Override
+        public boolean isInsideStructure(World world, String structureName, BlockPos pos) {
+            for (StructureComposer composer : this.structureComposers) {
+                boolean inside = composer.isInsideStructure(world, structureName, pos);
+                if (inside) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Nullable
+        @Override
+        public BlockPos getNearestStructure(World world, String structureName, BlockPos pos, boolean findUnexplored) {
+            for (StructureComposer composer : this.structureComposers) {
+                BlockPos nearestStructure = composer.getNearestStructure(world, structureName, pos, findUnexplored);
+                if (nearestStructure != null) {
+                    return nearestStructure;
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public Set<RegionComponentType<?>> getSurfaceDependencies() {
+            return this.getDependencies(this.surfaceComposers);
+        }
+
+        @Override
+        public Set<RegionComponentType<?>> getStructureDependencies() {
+            return this.getDependencies(this.structureComposers);
+        }
+
+        @Override
+        public Set<RegionComponentType<?>> getDecorationDependencies() {
+            return this.getDependencies(this.decorationComposers);
+        }
+
+        @Override
+        public Set<RegionComponentType<?>> getBiomeDependencies() {
+            if (this.biomeComposer == null) {
+                return Collections.emptySet();
+            }
+            return Sets.newHashSet(this.biomeComposer.getDependencies());
+        }
+
+        private Set<RegionComponentType<?>> getDependencies(Collection<? extends ChunkComposer> composers) {
+            Set<RegionComponentType<?>> dependencies = new HashSet<>();
+            for (ChunkComposer composer : composers) {
+                Collections.addAll(dependencies, composer.getDependencies());
+            }
+            return dependencies;
         }
     }
 }

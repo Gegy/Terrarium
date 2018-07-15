@@ -76,7 +76,7 @@ public class WorldPreview implements IBlockAccess {
             TerrariumWorldData.PREVIEW_WORLD.set(false);
         }
 
-        this.chunkGenerator = new ComposableChunkGenerator(world);
+        this.chunkGenerator = world.getGenerator();
         Coordinate spawnPosition = this.worldData.getSpawnPosition();
         if (spawnPosition != null) {
             this.centerPos = new ChunkPos(spawnPosition.toBlockPos());

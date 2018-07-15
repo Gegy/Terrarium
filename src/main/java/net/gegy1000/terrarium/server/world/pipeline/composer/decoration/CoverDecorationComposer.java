@@ -76,4 +76,9 @@ public class CoverDecorationComposer implements DecorationComposer {
             }
         }
     }
+
+    @Override
+    public RegionComponentType<?>[] getDependencies() {
+        return new RegionComponentType[] { this.coverComponent };
+    }
 }

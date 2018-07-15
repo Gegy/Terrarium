@@ -1,5 +1,6 @@
 package net.gegy1000.terrarium.server.world.pipeline.composer.decoration;
 
+import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldEntitySpawner;
@@ -25,5 +26,10 @@ public class VanillaBiomeDecorationComposer extends VanillaDecorationComposer {
         if (TerrainGen.populate(generator, world, this.random, chunkX, chunkZ, false, PopulateChunkEvent.Populate.EventType.ANIMALS)) {
             WorldEntitySpawner.performWorldGenSpawning(world, biome, globalX + 8, globalZ + 8, 16, 16, this.random);
         }
+    }
+
+    @Override
+    public RegionComponentType<?>[] getDependencies() {
+        return new RegionComponentType[0];
     }
 }

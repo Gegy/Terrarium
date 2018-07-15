@@ -60,6 +60,23 @@ public class TerrariumDataProvider {
         return data;
     }
 
+    @SuppressWarnings("unchecked")
+    public <T extends TiledDataAccess> T populatePartialData(RegionGenerationHandler generationHandler, RegionComponentType<T> componentType, int x, int z, int width, int height) {
+        AttachedComponent<T> attachedComponent = (AttachedComponent<T>) this.attachedComponents.get(componentType);
+        if (attachedComponent == null) {
+            throw new IllegalArgumentException("Cannot populate partial data tile for component that is not attached!");
+        }
+
+        CachedLayerContext context = new CachedLayerContext(generationHandler.getSourceHandler());
+        DataView view = new DataView(x, z, width, height);
+
+        Set<DataTileKey<?>> requiredData = new HashSet<>(attachedComponent.getRequiredData(context, view));
+        generationHandler.getSourceHandler().enqueueData(requiredData);
+
+        RegionComponent<T> component = attachedComponent.createAndPopulate(context, view);
+        return component.getData();
+    }
+
     public RegionData createDefaultData(int width, int height) {
         Map<RegionComponentType<?>, RegionComponent<?>> defaultComponents = new HashMap<>();
         for (RegionComponentType<?> componentType : this.attachedComponents.keySet()) {

@@ -79,21 +79,35 @@ public class ComposableBiomeProvider extends BiomeProvider {
     }
 
     @Override
-    public boolean areBiomesViable(int x, int z, int radius, List<Biome> allowed) {
+    public boolean areBiomesViable(int originX, int originZ, int radius, List<Biome> allowed) {
+        int minX = originX - radius;
+        int minZ = originZ - radius;
+        int size = (radius * 2) + 1;
+
+        Biome[] biomes = new Biome[size * size];
+        this.populateArea(biomes, minX, minZ, size, size);
+        for (Biome biome : biomes) {
+            if (!allowed.contains(biome)) {
+                return false;
+            }
+        }
+
         return true;
     }
 
     // TODO: Implement properly
     @Override
-    public BlockPos findBiomePosition(int x, int z, int range, List<Biome> biomes, Random random) {
-        return new BlockPos(x, 0, z);
+    public BlockPos findBiomePosition(int originX, int originZ, int radius, List<Biome> allowed, Random random) {
+        return new BlockPos(originX, 0, originZ);
     }
 
     private void populateArea(Biome[] biomes, int x, int z, int width, int height) {
         RegionGenerationHandler regionHandler = this.regionHandler.get();
+
         ChunkCompositionProcedure compositionProcedure = this.compositionProcedure.get();
 
         if (this.isChunkGeneration(x, z, width, height)) {
+            regionHandler.prepareChunk(x, z, compositionProcedure.getBiomeDependencies());
             Biome[] biomeBuffer = compositionProcedure.composeBiomes(regionHandler, x >> 4, z >> 4);
             System.arraycopy(biomeBuffer, 0, biomes, 0, biomeBuffer.length);
             return;
@@ -114,11 +128,12 @@ public class ComposableBiomeProvider extends BiomeProvider {
                 int minZ = Math.max(minChunkZ, z);
                 int maxZ = Math.min((chunkZ + 1) << 4, z + height);
 
+                regionHandler.prepareChunk(minChunkX, minChunkZ, compositionProcedure.getBiomeDependencies());
                 Biome[] biomeBuffer = compositionProcedure.composeBiomes(regionHandler, chunkX, chunkZ);
 
                 for (int localZ = minZ; localZ < maxZ; localZ++) {
-                    int srcPos = (localZ - z) * 16;
-                    int destPos = minX + localZ * width;
+                    int srcPos = (localZ - minChunkZ) * 16;
+                    int destPos = (localZ - z) * width;
                     System.arraycopy(biomeBuffer, srcPos, biomes, destPos, maxX - minX);
                 }
             }

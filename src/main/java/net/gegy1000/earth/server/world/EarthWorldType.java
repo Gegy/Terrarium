@@ -30,6 +30,7 @@ import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.util.Interpolation;
 import net.gegy1000.terrarium.server.world.TerrariumGeneratorInitializer;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
+import net.gegy1000.terrarium.server.world.chunk.TerrariumChunkGenerator;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.coordinate.LatLngCoordinateState;
@@ -63,6 +64,7 @@ import net.gegy1000.terrarium.server.world.pipeline.composer.surface.BedrockSurf
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.CaveSurfaceComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.CoverSurfaceComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.HeightmapSurfaceComposer;
+import net.gegy1000.terrarium.server.world.pipeline.composer.structure.VanillaStructureComposer;
 import net.gegy1000.terrarium.server.world.pipeline.layer.CoverTileSampleLayer;
 import net.gegy1000.terrarium.server.world.pipeline.layer.ScaledByteLayer;
 import net.gegy1000.terrarium.server.world.pipeline.layer.ScaledCoverLayer;
@@ -117,9 +119,9 @@ public class EarthWorldType extends TerrariumWorldType {
     }
 
     @Override
-    public TerrariumGeneratorInitializer createInitializer(World world, GenerationSettings settings) {
+    public TerrariumGeneratorInitializer createInitializer(World world, TerrariumChunkGenerator chunkGenerator, GenerationSettings settings) {
         world.setSeaLevel(settings.getProperties().getInteger(HEIGHT_ORIGIN));
-        return new Initializer(world, settings.getProperties());
+        return new Initializer(world, chunkGenerator, settings.getProperties());
     }
 
     @Override
@@ -164,6 +166,7 @@ public class EarthWorldType extends TerrariumWorldType {
 
     private static class Initializer implements TerrariumGeneratorInitializer {
         private final World world;
+        private final TerrariumChunkGenerator chunkGenerator;
         private final PropertyContainer properties;
 
         private final double worldScale;
@@ -172,8 +175,9 @@ public class EarthWorldType extends TerrariumWorldType {
         private final CoordinateState srtmRaster;
         private final CoordinateState globcoverRaster;
 
-        private Initializer(World world, PropertyContainer properties) {
+        private Initializer(World world, TerrariumChunkGenerator chunkGenerator, PropertyContainer properties) {
             this.world = world;
+            this.chunkGenerator = chunkGenerator;
             this.properties = properties;
 
             this.worldScale = properties.getDouble(WORLD_SCALE);
@@ -195,8 +199,13 @@ public class EarthWorldType extends TerrariumWorldType {
                     .withSpawnPosition(new Coordinate(this.earthCoordinates, this.properties.getDouble(SPAWN_LATITUDE), this.properties.getDouble(SPAWN_LONGITUDE)))
                     .withCapability(new EarthCapability.Impl(this.earthCoordinates));
 
-            if (!preview && this.properties.getBoolean(ENABLE_CAVE_GENERATION)) {
-                builder.withSurfaceComposer(new CaveSurfaceComposer(this.world));
+            if (!preview) {
+                if (this.properties.getBoolean(ENABLE_CAVE_GENERATION)) {
+                    builder.withSurfaceComposer(new CaveSurfaceComposer(this.world));
+                }
+                if (this.properties.getBoolean(ENABLE_DEFAULT_FEATURES)) {
+                    builder.withStructureComposer(new VanillaStructureComposer(this.world, this.chunkGenerator));
+                }
             }
 
             if (this.properties.getBoolean(ENABLE_DECORATION)) {

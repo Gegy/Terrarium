@@ -1,6 +1,7 @@
 package net.gegy1000.terrarium.server.world.pipeline.composer.surface;
 
 import net.gegy1000.terrarium.server.world.chunk.PseudoRandomMap;
+import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.World;
@@ -36,5 +37,10 @@ public class BedrockSurfaceComposer implements SurfaceComposer {
                 }
             }
         }
+    }
+
+    @Override
+    public RegionComponentType<?>[] getDependencies() {
+        return new RegionComponentType[0];
     }
 }

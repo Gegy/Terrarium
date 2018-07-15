@@ -8,6 +8,7 @@ import net.gegy1000.earth.server.world.pipeline.composer.DebugSignDecorationComp
 import net.gegy1000.earth.server.world.pipeline.layer.DebugCoverPopulator;
 import net.gegy1000.terrarium.server.world.TerrariumGeneratorInitializer;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
+import net.gegy1000.terrarium.server.world.chunk.TerrariumChunkGenerator;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.cover.ConstructedCover;
@@ -44,7 +45,7 @@ public class CoverDebugWorldType extends TerrariumWorldType {
     }
 
     @Override
-    public TerrariumGeneratorInitializer createInitializer(World world, GenerationSettings settings) {
+    public TerrariumGeneratorInitializer createInitializer(World world, TerrariumChunkGenerator chunkGenerator, GenerationSettings settings) {
         return new Initializer(world);
     }
 

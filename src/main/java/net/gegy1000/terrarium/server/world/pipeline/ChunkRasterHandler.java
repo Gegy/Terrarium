@@ -6,6 +6,7 @@ import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentTyp
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.RasterDataAccess;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 
+import java.util.Collection;
 import java.util.Map;
 
 public class ChunkRasterHandler {
@@ -32,10 +33,19 @@ public class ChunkRasterHandler {
         builder.put(componentType, new Data<>((RegionComponentType<? extends RasterDataAccess<V>>) componentType));
     }
 
+    public void fillRasters(int originX, int originZ, Collection<RegionComponentType<?>> components) {
+        for (RegionComponentType<?> componentType : components) {
+            Data<?, ?> data = this.chunkRasters.get(componentType);
+            if (data != null) {
+                data.fillRaster(originX, originZ, true);
+            }
+        }
+    }
+
     public void fillRasters(int originX, int originZ) {
         for (Map.Entry<RegionComponentType<?>, Data<?, ?>> entry : this.chunkRasters.entrySet()) {
             Data<?, ?> data = entry.getValue();
-            data.fillRaster(originX, originZ);
+            data.fillRaster(originX, originZ, false);
         }
     }
 
@@ -47,15 +57,22 @@ public class ChunkRasterHandler {
 
     private class Data<T extends RasterDataAccess<V>, V> {
         private final RegionComponentType<T> componentType;
-        private final T raster;
+        private T raster;
+
+        private int currentX = Integer.MIN_VALUE;
+        private int currentZ = Integer.MIN_VALUE;
 
         private Data(RegionComponentType<T> componentType) {
             this.componentType = componentType;
             this.raster = componentType.createDefaultData(16, 16);
         }
 
-        public void fillRaster(int originX, int originZ) {
-            ChunkRasterHandler.this.regionHandler.fillRaster(this.componentType, this.raster, originX, originZ, 16, 16);
+        public void fillRaster(int originX, int originZ, boolean allowPartial) {
+            if (this.currentX != originX || this.currentZ != originZ) {
+                this.raster = ChunkRasterHandler.this.regionHandler.fillRaster(this.componentType, this.raster, originX, originZ, 16, 16, allowPartial);
+                this.currentX = originX;
+                this.currentZ = originZ;
+            }
         }
 
         public T getRaster() {

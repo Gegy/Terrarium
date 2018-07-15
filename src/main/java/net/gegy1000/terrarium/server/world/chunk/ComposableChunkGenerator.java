@@ -12,13 +12,12 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkPrimer;
-import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraftforge.event.ForgeEventFactory;
 
 import java.util.List;
 import java.util.Random;
 
-public class ComposableChunkGenerator implements IChunkGenerator {
+public class ComposableChunkGenerator implements TerrariumChunkGenerator {
     private final World world;
     private final Random random;
 
@@ -62,15 +61,23 @@ public class ComposableChunkGenerator implements IChunkGenerator {
     }
 
     public ChunkPrimer generatePrimer(int chunkX, int chunkZ) {
+        ChunkPrimer primer = new ChunkPrimer();
+        this.populateTerrain(chunkX, chunkZ, primer);
+
+        RegionGenerationHandler regionHandler = this.regionHandler.get();
+        ChunkCompositionProcedure compositionProcedure = this.compositionProcedure.get();
+        compositionProcedure.composeStructures(this, primer, regionHandler, chunkX, chunkZ);
+
+        return primer;
+    }
+
+    @Override
+    public void populateTerrain(int chunkX, int chunkZ, ChunkPrimer primer) {
         RegionGenerationHandler regionHandler = this.regionHandler.get();
         regionHandler.prepareChunk(chunkX << 4, chunkZ << 4);
 
-        ChunkPrimer primer = new ChunkPrimer();
-
         ChunkCompositionProcedure compositionProcedure = this.compositionProcedure.get();
         compositionProcedure.composeSurface(this, primer, regionHandler, chunkX, chunkZ);
-
-        return primer;
     }
 
     public Biome[] provideBiomes(int chunkX, int chunkZ) {
@@ -93,6 +100,7 @@ public class ComposableChunkGenerator implements IChunkGenerator {
 
         ChunkCompositionProcedure compositionProcedure = this.compositionProcedure.get();
         compositionProcedure.composeDecoration(this, this.world, regionHandler, chunkX, chunkZ);
+        compositionProcedure.populateStructures(this.world, regionHandler, chunkX, chunkZ);
 
         ForgeEventFactory.onChunkPopulate(false, this, this.world, this.random, chunkX, chunkZ, false);
 
@@ -100,7 +108,7 @@ public class ComposableChunkGenerator implements IChunkGenerator {
     }
 
     @Override
-    public boolean generateStructures(Chunk chunk, int x, int z) {
+    public boolean generateStructures(Chunk chunk, int chunkX, int chunkZ) {
         return false;
     }
 
@@ -111,15 +119,20 @@ public class ComposableChunkGenerator implements IChunkGenerator {
 
     @Override
     public BlockPos getNearestStructurePos(World world, String structureName, BlockPos pos, boolean findUnexplored) {
-        return pos;
-    }
-
-    @Override
-    public void recreateStructures(Chunk chunk, int x, int z) {
+        ChunkCompositionProcedure compositionProcedure = this.compositionProcedure.get();
+        return compositionProcedure.getNearestStructure(world, structureName, pos, findUnexplored);
     }
 
     @Override
     public boolean isInsideStructure(World world, String structureName, BlockPos pos) {
-        return false;
+        ChunkCompositionProcedure compositionProcedure = this.compositionProcedure.get();
+        return compositionProcedure.isInsideStructure(world, structureName, pos);
+    }
+
+    @Override
+    public void recreateStructures(Chunk chunk, int chunkX, int chunkZ) {
+        RegionGenerationHandler regionHandler = this.regionHandler.get();
+        ChunkCompositionProcedure compositionProcedure = this.compositionProcedure.get();
+        compositionProcedure.composeStructures(this, null, regionHandler, chunkX, chunkZ);
     }
 }

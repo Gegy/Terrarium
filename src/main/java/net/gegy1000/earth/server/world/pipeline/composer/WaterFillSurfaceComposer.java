@@ -40,4 +40,9 @@ public class WaterFillSurfaceComposer implements SurfaceComposer {
             }
         }
     }
+
+    @Override
+    public RegionComponentType<?>[] getDependencies() {
+        return new RegionComponentType[] { this.heightComponent, this.waterComponent };
+    }
 }
