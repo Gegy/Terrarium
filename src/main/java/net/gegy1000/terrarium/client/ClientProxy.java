@@ -1,11 +1,13 @@
 package net.gegy1000.terrarium.client;
 
 import net.gegy1000.terrarium.Terrarium;
+import net.gegy1000.terrarium.client.toast.DataFailToast;
 import net.gegy1000.terrarium.server.ServerProxy;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiCreateWorld;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -44,6 +46,20 @@ public class ClientProxy extends ServerProxy {
     @Override
     public boolean hasServer() {
         return Minecraft.getMinecraft().isIntegratedServerRunning();
+    }
+
+    @Override
+    public void openWarnToast(int failCount) {
+        Minecraft.getMinecraft().getToastGui().add(new DataFailToast(failCount));
+    }
+
+    @Override
+    public void scheduleTask(MessageContext ctx, Runnable task) {
+        if (ctx.side.isClient()) {
+            Minecraft.getMinecraft().addScheduledTask(task);
+        } else {
+            super.scheduleTask(ctx, task);
+        }
     }
 
     private static Field reflectSelectedWorldType() throws ReflectiveOperationException {

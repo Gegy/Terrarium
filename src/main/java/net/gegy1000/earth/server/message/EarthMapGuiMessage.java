@@ -1,9 +1,8 @@
 package net.gegy1000.earth.server.message;
 
 import io.netty.buffer.ByteBuf;
-import net.gegy1000.earth.client.gui.EarthLocateGui;
-import net.gegy1000.earth.client.gui.EarthTeleportGui;
-import net.minecraft.client.Minecraft;
+import net.gegy1000.earth.TerrariumEarth;
+import net.gegy1000.terrarium.Terrarium;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -39,16 +38,9 @@ public class EarthMapGuiMessage implements IMessage {
     public static class Handler implements IMessageHandler<EarthMapGuiMessage, IMessage> {
         @Override
         public IMessage onMessage(EarthMapGuiMessage message, MessageContext ctx) {
-            Minecraft mc = Minecraft.getMinecraft();
-            mc.addScheduledTask(() -> {
-                switch (message.type) {
-                    case LOCATE:
-                        mc.displayGuiScreen(new EarthLocateGui(message.latitude, message.longitude));
-                        break;
-                    case TELEPORT:
-                        mc.displayGuiScreen(new EarthTeleportGui(message.latitude, message.longitude));
-                }
-            });
+            if (ctx.side.isClient()) {
+                Terrarium.PROXY.scheduleTask(ctx, () -> TerrariumEarth.PROXY.openMapGui(message.type, message.latitude, message.longitude));
+            }
             return null;
         }
     }

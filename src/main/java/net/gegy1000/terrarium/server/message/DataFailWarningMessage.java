@@ -1,8 +1,7 @@
 package net.gegy1000.terrarium.server.message;
 
 import io.netty.buffer.ByteBuf;
-import net.gegy1000.terrarium.client.toast.DataFailToast;
-import net.minecraft.client.Minecraft;
+import net.gegy1000.terrarium.Terrarium;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -30,8 +29,7 @@ public class DataFailWarningMessage implements IMessage {
     public static class Handler implements IMessageHandler<DataFailWarningMessage, IMessage> {
         @Override
         public IMessage onMessage(DataFailWarningMessage message, MessageContext ctx) {
-            Minecraft mc = Minecraft.getMinecraft();
-            mc.addScheduledTask(() -> mc.getToastGui().add(new DataFailToast(message.failCount)));
+            Terrarium.PROXY.scheduleTask(ctx, () -> Terrarium.PROXY.openWarnToast(message.failCount));
             return null;
         }
     }
