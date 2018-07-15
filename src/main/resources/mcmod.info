@@ -2,7 +2,19 @@
   {
     "modid": "terrarium",
     "name": "Terrarium",
-    "description": "Generation of the Earth in a new customizable world type\n\nMap data: OpenStreetMap Contributors (C)\nHeight & Globcover data: NASA & ESA",
+    "description": "Data-based world generation library",
+    "version": "${version}",
+    "url": "https://github.com/gegy1000/Terrarium/",
+    "authorList": [
+      "gegy1000"
+    ],
+    "dependencies": [],
+    "credits": "pau101"
+  },
+  {
+    "modid": "earth",
+    "name": "Terrarium: Earth",
+    "description": "Generation of the Earth in a new customizable world type",
     "version": "${version}",
     "url": "https://github.com/gegy1000/Terrarium/",
     "authorList": [

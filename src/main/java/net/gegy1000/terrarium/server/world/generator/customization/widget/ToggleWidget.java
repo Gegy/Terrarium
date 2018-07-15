@@ -9,6 +9,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ToggleWidget implements CustomizationWidget {
     private final PropertyKey<Boolean> propertyKey;
+    private boolean locked;
 
     public ToggleWidget(PropertyKey<Boolean> propertyKey) {
         this.propertyKey = propertyKey;
@@ -18,7 +19,13 @@ public class ToggleWidget implements CustomizationWidget {
     @SideOnly(Side.CLIENT)
     public GuiButton createWidget(GenerationSettings settings, int id, int x, int y, Runnable onPropertyChange) {
         ToggleGuiWidget widget = new ToggleGuiWidget(id, x, y, this.propertyKey, settings.getProperties().getValue(this.propertyKey));
+        widget.setLocked(locked);
         widget.addListener(onPropertyChange);
         return widget;
+    }
+
+    public CustomizationWidget locked() {
+        this.locked = true;
+        return this;
     }
 }

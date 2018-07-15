@@ -134,8 +134,8 @@ public class EarthWorldType extends TerrariumWorldType {
                 )
                 .withCategory("features",
                         new ToggleWidget(ENABLE_DECORATION),
-                        new ToggleWidget(ENABLE_BUILDINGS),
-                        new ToggleWidget(ENABLE_STREETS)
+                        new ToggleWidget(ENABLE_BUILDINGS).locked(),
+                        new ToggleWidget(ENABLE_STREETS).locked()
                 )
                 .withCategory("survival",
                         new ToggleWidget(ENABLE_DEFAULT_DECORATION),
