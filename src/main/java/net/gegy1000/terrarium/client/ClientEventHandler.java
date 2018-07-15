@@ -24,6 +24,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @Mod.EventBusSubscriber(modid = Terrarium.MODID, value = Side.CLIENT)
 public class ClientEventHandler {
     private static final Minecraft MC = Minecraft.getMinecraft();
+    private static final int STRUCTURES_BUTTON_ID = 4;
 
     private static int gameTicks = 0;
 
@@ -54,7 +55,7 @@ public class ClientEventHandler {
     public static void onJoinWorld(WorldEvent.Load event) {
         World world = event.getWorld();
         if (world.isRemote) {
-            if (world.getWorldType() instanceof TerrariumWorldType && MC.isIntegratedServerRunning()){
+            if (world.getWorldType() instanceof TerrariumWorldType && MC.isIntegratedServerRunning()) {
                 awaitingLoad = true;
             }
             if (Terrarium.serverHasMod) {
@@ -73,10 +74,23 @@ public class ClientEventHandler {
     }
 
     @SubscribeEvent
+    public static void onGuiPostInit(GuiScreenEvent.InitGuiEvent.Post event) {
+        GuiScreen currentScreen = event.getGui();
+        if (currentScreen instanceof GuiCreateWorld) {
+            GuiButton structuresButton = event.getButtonList().get(STRUCTURES_BUTTON_ID);
+            int selectedWorldIndex = ClientProxy.getSelectedWorldType((GuiCreateWorld) currentScreen);
+            WorldType worldType = WorldType.WORLD_TYPES[selectedWorldIndex];
+            if (worldType instanceof TerrariumWorldType) {
+                structuresButton.visible = false;
+            }
+        }
+    }
+
+    @SubscribeEvent
     public static void onGuiButton(GuiScreenEvent.ActionPerformedEvent.Post event) {
         GuiScreen currentScreen = event.getGui();
         if (currentScreen instanceof GuiCreateWorld && event.getButton().id == 5) {
-            GuiButton structuresButton = event.getButtonList().get(4);
+            GuiButton structuresButton = event.getButtonList().get(STRUCTURES_BUTTON_ID);
             int selectedWorldIndex = ClientProxy.getSelectedWorldType((GuiCreateWorld) currentScreen);
             WorldType worldType = WorldType.WORLD_TYPES[selectedWorldIndex];
             if (worldType instanceof TerrariumWorldType) {
