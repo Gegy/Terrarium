@@ -20,9 +20,11 @@ import de.topobyte.osm4j.core.model.impl.Way;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongList;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +51,7 @@ public class OsmJsonReader implements OsmReader {
             throw new OsmInputException("handler not set");
         }
 
-        try (InputStreamReader reader = new InputStreamReader(this.input)) {
+        try (Reader reader = new BufferedReader(new InputStreamReader(this.input))) {
             JsonObject root = JSON_PARSER.parse(reader).getAsJsonObject();
             JsonArray elementsArray = root.getAsJsonArray("elements");
 

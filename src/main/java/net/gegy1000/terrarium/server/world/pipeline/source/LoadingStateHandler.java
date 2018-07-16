@@ -24,23 +24,32 @@ public class LoadingStateHandler {
     private static final long FAIL_NOTIFICATION_INTERVAL = 8000;
     private static final int FAIL_NOTIFICATION_THRESHOLD = 5;
 
+    private static final long STATE_BROADCAST_INTERVAL = 500;
+
     private static LoadingState remoteState;
 
     private static int failCount;
     private static long lastFailNotificationTime;
 
+    private static LoadingState lastBroadcastState;
+    private static long lastStateBroadcastTime;
+
     @SubscribeEvent
     public static void onWorldLoad(WorldEvent.Load event) {
         CURRENT_STATE.clear();
         remoteState = null;
+        lastBroadcastState = null;
 
-        lastFailNotificationTime = System.currentTimeMillis();
+        long time = System.currentTimeMillis();
+        lastStateBroadcastTime = time;
+        lastFailNotificationTime = time;
     }
 
     @SubscribeEvent
     public static void onWorldUnload(WorldEvent.Unload event) {
         CURRENT_STATE.clear();
         remoteState = null;
+        lastBroadcastState = null;
     }
 
     @SubscribeEvent
@@ -54,6 +63,14 @@ public class LoadingStateHandler {
             }
             lastFailNotificationTime = time;
         }
+
+        if (time - lastStateBroadcastTime > STATE_BROADCAST_INTERVAL) {
+            LoadingState currentState = !CURRENT_STATE.isEmpty() ? CURRENT_STATE.getLast() : null;
+            if (lastBroadcastState != currentState) {
+                broadcastCurrentState(currentState);
+                lastStateBroadcastTime = time;
+            }
+        }
     }
 
     private static void broadcastFailNotification(int failCount) {
@@ -61,6 +78,16 @@ public class LoadingStateHandler {
         for (EntityPlayer player : TerrariumHandshakeTracker.getFriends()) {
             Terrarium.NETWORK.sendTo(message, (EntityPlayerMP) player);
         }
+    }
+
+    private static void broadcastCurrentState(LoadingState state) {
+        if (Terrarium.PROXY.hasServer()) {
+            LoadingStateMessage message = new LoadingStateMessage(state);
+            for (EntityPlayer player : TerrariumHandshakeTracker.getFriends()) {
+                Terrarium.NETWORK.sendTo(message, (EntityPlayerMP) player);
+            }
+        }
+        lastBroadcastState = state;
     }
 
     public static void updateRemoteState(LoadingState state) {
@@ -78,29 +105,18 @@ public class LoadingStateHandler {
     public static void pushState(LoadingState state) {
         synchronized (LOCK) {
             CURRENT_STATE.addLast(state);
-            broadcastCurrentState();
         }
     }
 
     public static void popState() {
         synchronized (LOCK) {
             CURRENT_STATE.pollLast();
-            broadcastCurrentState();
         }
     }
 
     public static void countFailure() {
         synchronized (LOCK) {
             failCount++;
-        }
-    }
-
-    private static void broadcastCurrentState() {
-        if (Terrarium.PROXY.hasServer()) {
-            LoadingStateMessage message = new LoadingStateMessage(getDisplayState());
-            for (EntityPlayer player : TerrariumHandshakeTracker.getFriends()) {
-                Terrarium.NETWORK.sendTo(message, (EntityPlayerMP) player);
-            }
         }
     }
 }

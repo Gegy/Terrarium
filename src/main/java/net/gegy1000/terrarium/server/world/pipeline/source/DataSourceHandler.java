@@ -99,6 +99,8 @@ public class DataSourceHandler {
         }
 
         completedTiles.forEach(this.queuedTiles::remove);
+
+        System.out.println(this.tileCache.size());
     }
 
     private <T extends TiledDataAccess> T parseResult(TileFuture<T> future) {
@@ -138,7 +140,7 @@ public class DataSourceHandler {
         if (!source.shouldLoadCache(finalPos, cachedFile)) {
             return this.loadRemoteTile(source, finalPos, cachedFile);
         } else {
-            return this.loadCachedTiled(source, finalPos, cachedFile);
+            return this.loadCachedTile(source, finalPos, cachedFile);
         }
     }
 
@@ -157,7 +159,7 @@ public class DataSourceHandler {
         }
     }
 
-    private <T extends TiledDataAccess> SourceResult<T> loadCachedTiled(TiledDataSource<T> source, DataTilePos pos, File cachedFile) {
+    private <T extends TiledDataAccess> SourceResult<T> loadCachedTile(TiledDataSource<T> source, DataTilePos pos, File cachedFile) {
         LoadingStateHandler.pushState(LoadingState.LOADING_CACHED);
         try {
             return source.parseStream(pos, source.getWrappedStream(new BufferedInputStream(new FileInputStream(cachedFile))));
