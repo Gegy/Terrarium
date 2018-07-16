@@ -75,9 +75,9 @@ public class CoverBiomeSelectors {
     public static final Function<LatitudinalZone, Biome> SHRUBLAND_SELECTOR = zone -> {
         switch (zone) {
             case FRIGID:
-            case SUBTROPICS:
             case TEMPERATE:
                 return Biomes.SAVANNA;
+            case SUBTROPICS:
             case TROPICS:
                 return Biomes.PLAINS;
         }

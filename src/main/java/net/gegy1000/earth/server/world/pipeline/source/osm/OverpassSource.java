@@ -174,10 +174,10 @@ public class OverpassSource extends TiledDataSource<OsmTile> {
     }
 
     private double getMaxLatitude(DataTilePos pos) {
-        return this.getLatitude(pos) + this.tileSize.getX();
+        return (pos.getTileX() + 1) * this.tileSize.getX();
     }
 
     private double getMaxLongitude(DataTilePos pos) {
-        return this.getLongitude(pos) + this.tileSize.getZ();
+        return (pos.getTileZ() + 1) * this.tileSize.getZ();
     }
 }

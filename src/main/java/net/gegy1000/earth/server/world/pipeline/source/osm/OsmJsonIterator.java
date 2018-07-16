@@ -46,7 +46,7 @@ public class OsmJsonIterator implements OsmIterator, OsmHandler {
         if (this.exception != null) {
             throw new RuntimeException("Error while processing input", this.exception);
         }
-        return this.cursor < this.entities.size() - 1;
+        return this.cursor < this.entities.size();
     }
 
     @Override

@@ -182,7 +182,6 @@ public class OsmTile implements OsmEntityProvider, MergableTile<OsmTile> {
             }
         }
 
-        return true;
-//        return minLatitude < wayMaxLatitude && maxLatitude > wayMinLatitude && minLongitude < wayMaxLongitude && maxLongitude > wayMinLongitude;
+        return minLatitude < wayMaxLatitude && maxLatitude > wayMinLatitude && minLongitude < wayMaxLongitude && maxLongitude > wayMinLongitude;
     }
 }
