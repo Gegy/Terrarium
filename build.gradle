@@ -22,7 +22,7 @@ sourceCompatibility = targetCompatibility = "1.8"
 minecraft {
   version = "1.12.2-14.23.4.2729"
   runDir = "minecraft"
-  mappings = "snapshot_20180706"
+  mappings = "snapshot_20180716"
 }
 
 repositories {

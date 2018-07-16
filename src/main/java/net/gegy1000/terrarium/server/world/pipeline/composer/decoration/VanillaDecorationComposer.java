@@ -29,7 +29,7 @@ public abstract class VanillaDecorationComposer implements DecorationComposer {
         this.randomMap.initPosSeed(globalX, globalZ);
         this.random.setSeed(this.randomMap.next());
 
-        Biome biome = world.getChunkFromChunkCoords(chunkX, chunkZ).getBiome(DECORATION_CENTER, world.getBiomeProvider());
+        Biome biome = world.getChunk(chunkX, chunkZ).getBiome(DECORATION_CENTER, world.getBiomeProvider());
         this.composeDecoration(generator, world, chunkX, chunkZ, biome);
     }
 

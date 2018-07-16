@@ -47,7 +47,7 @@ public class OverpassSource extends TiledDataSource<OsmTile> {
 
         this.shouldSample = Math.abs(this.tileSize.getBlockX()) > 512 || Math.abs(this.tileSize.getBlockZ()) > 512;
 
-        this.loadQuery("/data/" + queryLocation.getResourceDomain() + "/" + queryLocation.getResourcePath());
+        this.loadQuery("/data/" + queryLocation.getNamespace() + "/" + queryLocation.getPath());
     }
 
     private void loadQuery(String queryLocation) {

@@ -94,7 +94,7 @@ public class GeoTeleportCommand extends CommandBase {
         int blockX = MathHelper.floor(coordinate.getBlockX());
         int blockZ = MathHelper.floor(coordinate.getBlockZ());
 
-        Chunk chunk = player.world.getChunkFromChunkCoords(blockX >> 4, blockZ >> 4);
+        Chunk chunk = player.world.getChunk(blockX >> 4, blockZ >> 4);
         int height = chunk.getHeightValue(blockX & 15, blockZ & 15);
 
         player.dismountRidingEntity();

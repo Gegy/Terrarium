@@ -14,7 +14,7 @@ public class TerrariumPreset {
 
     public TerrariumPreset(String name, ResourceLocation icon, GenerationSettings settings) {
         this.name = name;
-        this.icon = new ResourceLocation(icon.getResourceDomain(), "textures/preset/" + icon.getResourcePath() + ".png");
+        this.icon = new ResourceLocation(icon.getNamespace(), "textures/preset/" + icon.getNamespace() + ".png");
         this.settings = settings;
     }
 
