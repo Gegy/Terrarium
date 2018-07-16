@@ -54,6 +54,7 @@ property.terrarium.enable_lava_generation.name=Enable Lava Generation
 property.terrarium.enable_mod_generation.name=Enable Modded Generators
 
 property.terrarium.enable_decoration.tooltip=If enabled, decorations such as plants and trees will be placed
+property.terrarium.enable_default_decoration.tooltip=If enabled, vanilla and modded decorations will be placed.
 property.terrarium.enable_buildings.tooltip=If enabled, buildings from OpenStreetMap will be generated
 property.terrarium.enable_streets.tooltip=If enabled, streets from OpenStreetMap will be generated
 

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+// TODO: If osm data is available, fill the area with land/water first
 public class OsmCoastlineLayer extends OsmWaterLayer {
     protected static final int BANK_UP_FLAG = 0b100;
     protected static final int BANK_DOWN_FLAG = 0b1000;

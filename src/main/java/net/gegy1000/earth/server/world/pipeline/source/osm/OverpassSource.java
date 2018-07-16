@@ -85,8 +85,9 @@ public class OverpassSource extends TiledDataSource<OsmTile> {
         connection.setRequestProperty("Accept-Encoding", "gzip");
         connection.setRequestProperty("User-Agent", Terrarium.MODID);
         connection.setRequestProperty("Referer", "https://github.com/gegy1000/Terrarium");
-        connection.setConnectTimeout(1000);
+        connection.setConnectTimeout(2000);
         connection.setReadTimeout(30000);
+        connection.setDoInput(true);
         connection.setDoOutput(true);
 
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()))) {
@@ -94,6 +95,8 @@ public class OverpassSource extends TiledDataSource<OsmTile> {
             String formattedQuery = this.query.replaceAll(Pattern.quote("{{bbox}}"), bbox);
             writer.write(formattedQuery);
         }
+
+        InputStream input = connection.getInputStream();
 
         int responseCode = connection.getResponseCode();
         if (responseCode == 429) {
@@ -106,7 +109,7 @@ public class OverpassSource extends TiledDataSource<OsmTile> {
             }
         }
 
-        return connection.getInputStream();
+        return input;
     }
 
     @Override

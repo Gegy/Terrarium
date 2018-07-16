@@ -1,6 +1,5 @@
 package net.gegy1000.earth.server.world.cover;
 
-import it.unimi.dsi.fastutil.bytes.Byte2ObjectArrayMap;
 import net.gegy1000.earth.server.world.cover.type.BareCover;
 import net.gegy1000.earth.server.world.cover.type.BeachCover;
 import net.gegy1000.earth.server.world.cover.type.BroadleafEvergreenCover;
@@ -108,13 +107,13 @@ public class EarthCoverTypes {
         NO_DATA(0, EarthCoverTypes.BARE);
 
         public static final Glob[] TYPES = Glob.values();
-        private static final Byte2ObjectArrayMap<Glob> GLOB_IDS = new Byte2ObjectArrayMap<>();
+        public static final Glob[] GLOB_IDS = new Glob[256];
 
         private final byte id;
         private final CoverType coverType;
 
         Glob(int id, CoverType coverType) {
-            this.id = (byte) (id & 0xFf);
+            this.id = (byte) (id & 0xFF);
             this.coverType = coverType;
         }
 
@@ -127,12 +126,16 @@ public class EarthCoverTypes {
         }
 
         public static Glob get(int id) {
-            return GLOB_IDS.getOrDefault((byte) (id & 0xFF), NO_DATA);
+            Glob glob = GLOB_IDS[id & 0xFF];
+            if (glob == null) {
+                return NO_DATA;
+            }
+            return glob;
         }
 
         static {
             for (Glob glob : TYPES) {
-                GLOB_IDS.put(glob.id, glob);
+                GLOB_IDS[glob.id & 0xFF] = glob;
             }
         }
     }

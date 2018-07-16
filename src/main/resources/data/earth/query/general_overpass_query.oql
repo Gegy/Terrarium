@@ -4,12 +4,14 @@
 (
     way["railway"];
     rel["railway"];
-    way["highway"]["highway"~"trunk|primary|secondary|tertiary|unclassified|road"];
-    rel["highway"]["highway"~"trunk|primary|secondary|tertiary|unclassified|road"];
+    way["highway"]["highway"~"motorway|trunk|primary|secondary|tertiary|unclassified|road"];
+    rel["highway"]["highway"~"motorway|trunk|primary|secondary|tertiary|unclassified|road"];
     way["waterway"="river"];
     rel["waterway"="river"];
     way["landuse"="reservoir"];
     rel["landuse"="reservoir"];
+    way["landuse"="basin"];
+    rel["landuse"="basin"];
     way["landuse"="grass"];
     rel["landuse"="grass"];
     way["leisure"="park"];
@@ -20,4 +22,4 @@
     rel["natural"="sand"];
 );
 (._;>;);
-out;
+out geom qt;

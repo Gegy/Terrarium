@@ -2,13 +2,12 @@
 [timeout:30][maxsize:5242880][bbox:{{bbox}}];
 
 (
-  way["highway"="motorway"];
   way["landuse"="farmland"];
   rel["landuse"="farmland"];
-  way["landuse"="basin"];
-  rel["landuse"="basin"];
   way["waterway"="dam"];
   rel["waterway"="dam"];
+  way["water"="river"];
+  rel["water"="river"];
   way["waterway"="dock"];
   rel["waterway"="dock"];
   way["waterway"="riverbank"];
@@ -21,6 +20,18 @@
   rel["natural"="glacier"];
   way["natural"="volcano"];
   rel["natural"="volcano"];
+  way["natural"="scrub"];
+  rel["natural"="scrub"];
+  way["landuse"="forest"];
+  rel["landuse"="forest"];
+  way["landuse"="meadow"];
+  rel["landuse"="meadow"];
+  way["natural"="scree"];
+  rel["natural"="scree"];
+  way["natural"="shingle"];
+  rel["natural"="shingle"];
+  way["natural"="bare_rock"];
+  rel["natural"="bare_rock"];
 );
 (._;>;);
-out;
+out geom qt;

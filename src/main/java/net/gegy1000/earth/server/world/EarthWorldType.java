@@ -301,29 +301,29 @@ public class EarthWorldType extends TerrariumWorldType {
                     0.3,
                     "osm/outline",
                     new ResourceLocation(TerrariumEarth.MODID, "query/outline_overpass_query.oql"),
-                    7
+                    9
             ));
             sources.add(new OverpassSource(
                     this.earthCoordinates,
                     0.15,
                     "osm/natural",
                     new ResourceLocation(TerrariumEarth.MODID, "query/natural_overpass_query.oql"),
-                    0
+                    1
             ));
-            sources.add(new OverpassSource(
+            /*sources.add(new OverpassSource(
                     this.earthCoordinates,
                     0.1,
                     "osm/general",
                     new ResourceLocation(TerrariumEarth.MODID, "query/general_overpass_query.oql"),
-                    5
+                    6
             ));
             sources.add(new OverpassSource(
                     this.earthCoordinates,
                     0.05,
                     "osm/detailed",
                     new ResourceLocation(TerrariumEarth.MODID, "query/detail_overpass_query.oql"),
-                    3
-            ));
+                    4
+            ));*/
 
             List<DataLayer<OsmTile>> samplers = sources.stream()
                     .filter(OverpassSource::shouldSample)

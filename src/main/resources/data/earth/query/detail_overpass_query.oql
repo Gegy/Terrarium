@@ -14,6 +14,6 @@
     rel["waterway"="ditch"];
 );
 (._;>;);
-out;
+out geom qt;
 
 node["amenity"]["amenity"!="no"]; out;
