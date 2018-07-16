@@ -1,5 +1,5 @@
 [out:json]
-[timeout:30][maxsize:5242880][bbox:{{bbox}}];
+[timeout:30][bbox:{{bbox}}];
 
 (
   way["landuse"="farmland"];

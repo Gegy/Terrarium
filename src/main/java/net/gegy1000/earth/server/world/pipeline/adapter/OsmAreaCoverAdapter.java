@@ -7,6 +7,7 @@ import net.gegy1000.earth.server.world.pipeline.source.osm.OsmDataParser;
 import net.gegy1000.earth.server.world.pipeline.source.tile.OsmTile;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
+import net.gegy1000.terrarium.server.world.pipeline.DataView;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.RegionAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
@@ -57,7 +58,7 @@ public class OsmAreaCoverAdapter implements RegionAdapter {
         OsmTile osmTile = data.getOrExcept(this.osmComponent);
         CoverRasterTile coverTile = data.getOrExcept(this.coverComponent);
 
-        Collection<Result> polygons = this.collectPolygons(osmTile);
+        Collection<Result> polygons = this.collectPolygons(new DataView(x, z, width, height), osmTile);
 
         if (!polygons.isEmpty()) {
             RasterCanvas canvas = new RasterCanvas(width, height);
@@ -86,10 +87,10 @@ public class OsmAreaCoverAdapter implements RegionAdapter {
         }
     }
 
-    private Collection<Result> collectPolygons(OsmTile osmTile) {
+    private Collection<Result> collectPolygons(DataView view, OsmTile osmTile) {
         List<Result> results = new ArrayList<>();
         for (Type type : this.polygonTypes) {
-            Collection<MultiPolygon> coverPolygons = osmTile.collectPolygons(type.filter);
+            Collection<MultiPolygon> coverPolygons = osmTile.collectPolygons(view, this.geoCoordinateState, type.filter);
             if (!coverPolygons.isEmpty()) {
                 results.add(new Result(type.id, coverPolygons));
             }

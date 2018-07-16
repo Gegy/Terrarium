@@ -74,7 +74,10 @@ public class OsmCoastlineLayer extends OsmWaterLayer {
 
             this.reduceProblematicPoints(view, bankMap);
 
+            DebugImageWriter.write("coast_" + view.getX() + "_" + view.getY(), bankMap, BANK_DEBUG, view.getWidth(), view.getHeight());
+
             this.floodCoastMap(view, resultTile);
+            DebugImageWriter.write("coast_" + view.getX() + "_" + view.getY() + "_b", bankMap, BANK_DEBUG, view.getWidth(), view.getHeight());
 
             return resultTile;
         }
@@ -133,7 +136,12 @@ public class OsmCoastlineLayer extends OsmWaterLayer {
             int localX = point.x - view.getX();
             int localY = point.y - view.getY();
             if (localX >= 0 && localY >= 0 && localX < view.getWidth() && localY < view.getHeight()) {
-                resultTile.setShort(localX, localY, (short) bankType);
+                short currentBankType = resultTile.getShort(localX, localY);
+                if ((currentBankType & TYPE_MASK) != BANK) {
+                    resultTile.setShort(localX, localY, (short) bankType);
+                } else {
+                    resultTile.setShort(localX, localY, (short) (currentBankType | (bankType & ~TYPE_MASK)));
+                }
                 this.freeNeighbors(view, resultTile, localX, localY);
             }
         });
@@ -166,13 +174,17 @@ public class OsmCoastlineLayer extends OsmWaterLayer {
                 int bankType = bankMap[index];
 
                 if (this.isFillingBankType(bankType)) {
-                    int upType = (localY > 0) ? bankMap[index - width] : bankType;
-                    int leftType = (localX > 0) ? bankMap[index - 1] : bankType;
-                    int downType = (localY < height - 1) ? bankMap[index + width] : bankType;
-                    int rightType = (localX < width - 1) ? bankMap[index + 1] : bankType;
-
-                    if ((upType != bankType && downType != bankType) ^ (leftType != bankType && rightType != bankType)) {
+                    if ((bankType & BANK_UP_FLAG) != 0 && (bankType & BANK_DOWN_FLAG) != 0) {
                         bankMap[index] = BANK;
+                    } else {
+                        int upType = (localY > 0) ? bankMap[index - width] : bankType;
+                        int leftType = (localX > 0) ? bankMap[index - 1] : bankType;
+                        int downType = (localY < height - 1) ? bankMap[index + width] : bankType;
+                        int rightType = (localX < width - 1) ? bankMap[index + 1] : bankType;
+
+                        if ((upType != bankType && downType != bankType) && (leftType != bankType && rightType != bankType)) {
+                            bankMap[index] = BANK;
+                        }
                     }
                 }
             }

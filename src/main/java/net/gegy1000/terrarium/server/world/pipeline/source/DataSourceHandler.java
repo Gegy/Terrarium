@@ -99,8 +99,6 @@ public class DataSourceHandler {
         }
 
         completedTiles.forEach(this.queuedTiles::remove);
-
-        System.out.println(this.tileCache.size());
     }
 
     private <T extends TiledDataAccess> T parseResult(TileFuture<T> future) {

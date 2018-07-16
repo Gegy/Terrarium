@@ -1,5 +1,5 @@
 [out:json]
-[timeout:30][maxsize:16777216][bbox:{{bbox}}];
+[timeout:30][bbox:{{bbox}}];
 
 (
     way["natural"="wood"];

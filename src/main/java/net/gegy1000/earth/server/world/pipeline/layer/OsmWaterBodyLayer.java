@@ -8,6 +8,7 @@ import net.gegy1000.terrarium.server.util.FloodFill;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.pipeline.DataLayer;
 import net.gegy1000.terrarium.server.world.pipeline.DataView;
+import net.gegy1000.terrarium.server.world.pipeline.adapter.debug.DebugImageWriter;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.gegy1000.terrarium.server.world.rasterization.OsmShapeProducer;
 import net.gegy1000.terrarium.server.world.rasterization.RasterCanvas;
@@ -29,7 +30,7 @@ public class OsmWaterBodyLayer extends OsmWaterLayer {
     @Override
     protected ShortRasterTile applyWater(DataView view, ShortRasterTile waterTile, OsmTile osmTile) {
         // TODO: Line-based rivers
-        Collection<MultiPolygon> waterPolygons = osmTile.collectPolygons(this::isWaterArea);
+        Collection<MultiPolygon> waterPolygons = osmTile.collectPolygons(view, this.geoCoordinateState, this::isWaterArea);
 
         if (!waterPolygons.isEmpty()) {
             ShortRasterTile resultTile = waterTile.copy();
@@ -47,6 +48,7 @@ public class OsmWaterBodyLayer extends OsmWaterLayer {
             }
 
             this.fillExistingWater(view, resultTile, canvas);
+            DebugImageWriter.write("water_" + view.getX() + "_" + view.getY(), resultTile.getData(), OsmCoastlineLayer.BANK_DEBUG, view.getWidth(), view.getHeight());
 
             for (int localZ = 0; localZ < view.getHeight(); localZ++) {
                 for (int localX = 0; localX < view.getWidth(); localX++) {
@@ -56,6 +58,8 @@ public class OsmWaterBodyLayer extends OsmWaterLayer {
                     }
                 }
             }
+
+            DebugImageWriter.write("water_" + view.getX() + "_" + view.getY() + "_b", resultTile.getData(), OsmCoastlineLayer.BANK_DEBUG, view.getWidth(), view.getHeight());
 
             return resultTile;
         }

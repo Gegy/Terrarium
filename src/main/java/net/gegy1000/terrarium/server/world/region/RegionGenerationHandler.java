@@ -70,6 +70,7 @@ public class RegionGenerationHandler {
             try {
                 Set<RegionTilePos> requiredRegions = new LinkedHashSet<>();
 
+                // TODO: This might include already generated (just not loaded) chunks. Make use of AnvilChunkLoader#isChunkGeneratedAt and cache!
                 List<PlayerChunkMapEntry> entries = (List<PlayerChunkMapEntry>) chunkMapEntriesField.get(chunkTracker);
 
                 List<PlayerChunkMapEntry> sortedEntries = new ArrayList<>(entries);

@@ -1,21 +1,30 @@
 package net.gegy1000.earth.server.world.pipeline.source.tile;
 
 import com.vividsolutions.jts.geom.MultiPolygon;
+import de.topobyte.adt.multicollections.HashMultiSet;
+import de.topobyte.adt.multicollections.MultiSet;
 import de.topobyte.osm4j.core.dataset.InMemoryMapDataSet;
 import de.topobyte.osm4j.core.model.iface.OsmEntity;
 import de.topobyte.osm4j.core.model.iface.OsmNode;
 import de.topobyte.osm4j.core.model.iface.OsmRelation;
 import de.topobyte.osm4j.core.model.iface.OsmWay;
+import de.topobyte.osm4j.core.resolve.EntityFinder;
+import de.topobyte.osm4j.core.resolve.EntityFinders;
 import de.topobyte.osm4j.core.resolve.EntityNotFoundException;
+import de.topobyte.osm4j.core.resolve.EntityNotFoundStrategy;
 import de.topobyte.osm4j.core.resolve.OsmEntityProvider;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.gegy1000.earth.server.world.pipeline.source.osm.OsmDataParser;
+import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
+import net.gegy1000.terrarium.server.world.pipeline.DataView;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.MergableTile;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -105,17 +114,75 @@ public class OsmTile implements OsmEntityProvider, MergableTile<OsmTile> {
         return new OsmTile(nodes, ways, relations);
     }
 
-    public Collection<MultiPolygon> collectPolygons(Predicate<OsmEntity> filter) {
+    public Collection<MultiPolygon> collectPolygons(DataView view, CoordinateState geoCoordinate, Predicate<OsmEntity> filter) {
+        double minLatitude = geoCoordinate.getZ(view.getX(), view.getY());
+        double minLongitude = geoCoordinate.getX(view.getMaxX(), view.getMaxY());
+        double maxLatitude = geoCoordinate.getZ(view.getMaxX(), view.getMaxY());
+        double maxLongitude = geoCoordinate.getX(view.getX(), view.getY());
         List<MultiPolygon> polygons = this.getRelations().stream()
                 .filter(filter)
+                .filter(relation -> this.isRelationInBounds(relation, minLatitude, minLongitude, maxLatitude, maxLongitude))
                 .map(relation -> OsmDataParser.createArea(this, relation))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
         polygons.addAll(this.getWays().stream()
                 .filter(filter)
+                .filter(way -> this.isWayInBounds(way, minLatitude, minLongitude, maxLatitude, maxLongitude))
                 .map(way -> OsmDataParser.createArea(this, way))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
         return polygons;
+    }
+
+    private boolean isRelationInBounds(OsmRelation relation, double minLatitude, double minLongitude, double maxLatitude, double maxLongitude) {
+        Set<OsmRelation> relations = new HashSet<>();
+        MultiSet<OsmWay> ways = new HashMultiSet<>();
+        EntityFinder finder = EntityFinders.create(this, EntityNotFoundStrategy.IGNORE);
+        relations.add(relation);
+
+        try {
+            finder.findMemberRelationsRecursively(relation, relations);
+            finder.findMemberWays(relations, ways);
+        } catch (EntityNotFoundException e) {
+        }
+
+        for (OsmWay way : ways) {
+            if (this.isWayInBounds(way, minLatitude, minLongitude, maxLatitude, maxLongitude)) {
+                return true;
+            }
+        }
+
+        return true;
+    }
+
+    private boolean isWayInBounds(OsmWay way, double minLatitude, double minLongitude, double maxLatitude, double maxLongitude) {
+        double wayMinLatitude = Double.MAX_VALUE;
+        double wayMinLongitude = Double.MAX_VALUE;
+        double wayMaxLatitude = -Double.MAX_VALUE;
+        double wayMaxLongitude = -Double.MAX_VALUE;
+
+        for (int i = 0; i < way.getNumberOfNodes(); i++) {
+            try {
+                OsmNode node = this.getNode(way.getNodeId(i));
+                double latitude = node.getLatitude();
+                if (latitude < wayMinLatitude) {
+                    wayMinLatitude = latitude;
+                }
+                if (latitude > wayMaxLatitude) {
+                    wayMaxLatitude = latitude;
+                }
+                double longitude = node.getLongitude();
+                if (longitude < wayMinLongitude) {
+                    wayMinLongitude = longitude;
+                }
+                if (longitude > wayMaxLongitude) {
+                    wayMaxLongitude = longitude;
+                }
+            } catch (EntityNotFoundException e) {
+            }
+        }
+
+        return true;
+//        return minLatitude < wayMaxLatitude && maxLatitude > wayMinLatitude && minLongitude < wayMaxLongitude && maxLongitude > wayMinLongitude;
     }
 }

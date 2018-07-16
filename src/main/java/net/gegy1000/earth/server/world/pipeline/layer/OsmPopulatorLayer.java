@@ -18,6 +18,6 @@ public class OsmPopulatorLayer extends ParentedDataLayer<OsmTile, OsmTile> {
 
     @Override
     public DataView getParentView(DataView view) {
-        return view.grow(8, 8, 8, 8);
+        return view;
     }
 }

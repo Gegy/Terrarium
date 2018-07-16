@@ -52,6 +52,7 @@ import net.gegy1000.terrarium.server.world.pipeline.DataLayer;
 import net.gegy1000.terrarium.server.world.pipeline.DataProducerLayer;
 import net.gegy1000.terrarium.server.world.pipeline.MergeDataLayer;
 import net.gegy1000.terrarium.server.world.pipeline.TerrariumDataProvider;
+import net.gegy1000.terrarium.server.world.pipeline.adapter.HeightNoiseAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.HeightTransformAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.composer.biome.CoverBiomeComposer;
@@ -60,11 +61,11 @@ import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.LakeDeco
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.LavaLakeDecorationComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.VanillaBiomeDecorationComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.VanillaOreDecorationComposer;
+import net.gegy1000.terrarium.server.world.pipeline.composer.structure.VanillaStructureComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.BedrockSurfaceComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.CaveSurfaceComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.CoverSurfaceComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.HeightmapSurfaceComposer;
-import net.gegy1000.terrarium.server.world.pipeline.composer.structure.VanillaStructureComposer;
 import net.gegy1000.terrarium.server.world.pipeline.layer.CoverTileSampleLayer;
 import net.gegy1000.terrarium.server.world.pipeline.layer.ScaledByteLayer;
 import net.gegy1000.terrarium.server.world.pipeline.layer.ScaledCoverLayer;
@@ -265,7 +266,7 @@ public class EarthWorldType extends TerrariumWorldType {
                     .withComponent(EarthComponentTypes.WATER, waterProducer)
                     .withAdapter(new WaterApplyAdapter(this.earthCoordinates, EarthComponentTypes.WATER, RegionComponentType.HEIGHT, RegionComponentType.COVER))
                     .withAdapter(new OsmAreaCoverAdapter(this.earthCoordinates, EarthComponentTypes.OSM, RegionComponentType.COVER))
-//                    .withAdapter(new HeightNoiseAdapter(this.world, RegionComponentType.HEIGHT, 2, 0.08, this.properties.getDouble(NOISE_SCALE)))
+                    .withAdapter(new HeightNoiseAdapter(this.world, RegionComponentType.HEIGHT, 2, 0.08, this.properties.getDouble(NOISE_SCALE)))
                     .withAdapter(new HeightTransformAdapter(this.world, RegionComponentType.HEIGHT, this.properties.getDouble(HEIGHT_SCALE) * this.worldScale, heightOrigin))
                     .withAdapter(new WaterLevelingAdapter(EarthComponentTypes.WATER, RegionComponentType.HEIGHT, heightOrigin + 1))
                     .withAdapter(new WaterCarveAdapter(EarthComponentTypes.WATER, RegionComponentType.HEIGHT, this.properties.getInteger(OCEAN_DEPTH)))
