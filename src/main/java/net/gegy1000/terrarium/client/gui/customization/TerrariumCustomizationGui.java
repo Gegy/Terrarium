@@ -251,7 +251,7 @@ public class TerrariumCustomizationGui extends GuiScreen {
     private void previewLarge() {
         if (this.preview != null) {
             this.freeze = true;
-            this.mc.displayGuiScreen(new PreviewWorldGui(this.preview, this));
+            this.mc.displayGuiScreen(new PreviewWorldGui(this.preview, this, this.settings.serializeString()));
         }
     }
 

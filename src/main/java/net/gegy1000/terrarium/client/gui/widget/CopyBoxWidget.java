@@ -1,4 +1,4 @@
-package net.gegy1000.earth.client.gui.widget.map;
+package net.gegy1000.terrarium.client.gui.widget;
 
 import com.google.common.collect.Lists;
 import net.gegy1000.terrarium.Terrarium;

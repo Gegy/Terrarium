@@ -1,6 +1,6 @@
 package net.gegy1000.earth.client.gui;
 
-import net.gegy1000.earth.client.gui.widget.map.CopyBoxWidget;
+import net.gegy1000.terrarium.client.gui.widget.CopyBoxWidget;
 import net.gegy1000.earth.client.gui.widget.map.SlippyMapPoint;
 import net.gegy1000.earth.client.gui.widget.map.SlippyMapWidget;
 import net.gegy1000.earth.client.gui.widget.map.component.MarkerMapComponent;

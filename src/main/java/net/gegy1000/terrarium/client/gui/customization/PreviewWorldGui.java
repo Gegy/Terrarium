@@ -1,5 +1,6 @@
 package net.gegy1000.terrarium.client.gui.customization;
 
+import net.gegy1000.terrarium.client.gui.widget.CopyBoxWidget;
 import net.gegy1000.terrarium.client.preview.PreviewController;
 import net.gegy1000.terrarium.client.preview.PreviewRenderer;
 import net.gegy1000.terrarium.client.preview.WorldPreview;
@@ -13,22 +14,28 @@ import java.io.IOException;
 public class PreviewWorldGui extends GuiScreen {
     private final WorldPreview preview;
     private final GuiScreen parent;
+    private final String generatorSettings;
 
     private PreviewRenderer renderer;
     private PreviewController controller;
 
-    public PreviewWorldGui(WorldPreview preview, GuiScreen parent) {
+    private CopyBoxWidget settingsBox;
+
+    public PreviewWorldGui(WorldPreview preview, GuiScreen parent, String generatorSettings) {
         this.preview = preview;
         this.parent = parent;
+        this.generatorSettings = generatorSettings;
     }
 
     @Override
     public void initGui() {
         this.buttonList.clear();
-        this.addButton(new GuiButton(0, this.width / 2 - 75, this.height - 28, 150, 20, I18n.format("gui.done")));
+        this.addButton(new GuiButton(0, 8, this.height - 30, 150, 20, I18n.format("gui.done")));
 
         this.renderer = new PreviewRenderer(this, 8.0, 21.0, this.width - 16.0, this.height - 57.0);
         this.controller = new PreviewController(this.renderer, 0.4F, 1.5F);
+
+        this.settingsBox = new CopyBoxWidget(8 + 150 + 8, this.height - 28, this.width - (8 * 2) - 150 - 8, 20, this.generatorSettings, this.fontRenderer);
     }
 
     @Override
@@ -48,6 +55,7 @@ public class PreviewWorldGui extends GuiScreen {
         super.mouseClicked(mouseX, mouseY, mouseButton);
 
         this.controller.mouseClicked(mouseX, mouseY, mouseButton);
+        this.settingsBox.mouseClicked(mouseX, mouseY);
     }
 
     @Override
@@ -77,6 +85,8 @@ public class PreviewWorldGui extends GuiScreen {
         float rotationX = this.controller.getRotationX(partialTicks);
         float rotationY = this.controller.getRotationY(partialTicks);
         this.renderer.render(this.preview, zoom, rotationX, rotationY);
+
+        this.settingsBox.draw(mouseX, mouseY);
 
         super.drawScreen(mouseX, mouseY, partialTicks);
     }
