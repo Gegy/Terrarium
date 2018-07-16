@@ -1,5 +1,7 @@
 package net.gegy1000.terrarium.server.world.region;
 
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.world.pipeline.ChunkRasterHandler;
 import net.gegy1000.terrarium.server.world.pipeline.TerrariumDataProvider;
@@ -9,6 +11,7 @@ import net.gegy1000.terrarium.server.world.pipeline.source.tile.RasterDataAccess
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 import java.lang.reflect.Field;
@@ -33,6 +36,8 @@ public class RegionGenerationHandler {
     private final RegionGenerationDispatcher dispatcher = new OffThreadGenerationDispatcher(this::generate);
     private final DataSourceHandler sourceHandler = new DataSourceHandler();
 
+    private final Object2BooleanMap<ChunkPos> chunkStateMap = new Object2BooleanOpenHashMap<>();
+
     static {
         try {
             chunkMapEntriesField = ReflectionHelper.findField(PlayerChunkMap.class, "entries", "field_111193_e");
@@ -46,8 +51,18 @@ public class RegionGenerationHandler {
         this.chunkRasterHandler = new ChunkRasterHandler(this, dataProvider);
     }
 
-    public void trackRegions(PlayerChunkMap chunkTracker) {
-        Collection<RegionTilePos> requiredRegions = this.collectRequiredRegions(chunkTracker);
+    public void trackRegions(WorldServer world, PlayerChunkMap chunkTracker) {
+        List<PlayerChunkMapEntry> chunkEntries = this.getChunkEntries(chunkTracker);
+
+        Set<ChunkPos> trackedChunks = chunkEntries.stream()
+                .map(PlayerChunkMapEntry::getPos)
+                .collect(Collectors.toSet());
+        Set<ChunkPos> untrackedChunks = this.chunkStateMap.keySet().stream()
+                .filter(pos -> !trackedChunks.contains(pos))
+                .collect(Collectors.toSet());
+        untrackedChunks.forEach(this.chunkStateMap::remove);
+
+        Collection<RegionTilePos> requiredRegions = this.collectRequiredRegions(world, chunkEntries);
         this.dispatcher.setRequiredRegions(requiredRegions);
 
         Set<RegionTilePos> untrackedRegions = this.regionCache.keySet().stream()
@@ -65,31 +80,46 @@ public class RegionGenerationHandler {
     }
 
     @SuppressWarnings("unchecked")
-    private Collection<RegionTilePos> collectRequiredRegions(PlayerChunkMap chunkTracker) {
+    private List<PlayerChunkMapEntry> getChunkEntries(PlayerChunkMap chunkTracker) {
         if (chunkMapEntriesField != null) {
             try {
-                Set<RegionTilePos> requiredRegions = new LinkedHashSet<>();
-
-                // TODO: This might include already generated (just not loaded) chunks. Make use of AnvilChunkLoader#isChunkGeneratedAt and cache!
                 List<PlayerChunkMapEntry> entries = (List<PlayerChunkMapEntry>) chunkMapEntriesField.get(chunkTracker);
 
                 List<PlayerChunkMapEntry> sortedEntries = new ArrayList<>(entries);
                 sortedEntries.sort(Comparator.comparingDouble(PlayerChunkMapEntry::getClosestPlayerDistance));
 
-                for (PlayerChunkMapEntry entry : entries) {
-                    if (entry.getChunk() == null) {
-                        ChunkPos chunkPos = entry.getPos();
-                        requiredRegions.add(this.getRegionPos(chunkPos.getXStart(), chunkPos.getZStart()));
-                    }
-                }
-
-                return requiredRegions;
+                return sortedEntries;
             } catch (Exception e) {
                 Terrarium.LOGGER.error("Failed to get player chunk entries", e);
             }
         }
 
-        return Collections.emptySet();
+        return Collections.emptyList();
+    }
+
+    private Collection<RegionTilePos> collectRequiredRegions(WorldServer world, List<PlayerChunkMapEntry> chunkEntries) {
+        Set<RegionTilePos> requiredRegions = new LinkedHashSet<>();
+
+        for (PlayerChunkMapEntry entry : chunkEntries) {
+            if (entry.getChunk() == null) {
+                ChunkPos chunkPos = entry.getPos();
+                if (this.isChunkSaved(world, chunkPos)) {
+                    continue;
+                }
+                requiredRegions.add(this.getRegionPos(chunkPos.getXStart(), chunkPos.getZStart()));
+            }
+        }
+
+        return requiredRegions;
+    }
+
+    private boolean isChunkSaved(WorldServer world, ChunkPos pos) {
+        if (this.chunkStateMap.containsKey(pos)) {
+            return this.chunkStateMap.get(pos);
+        }
+        boolean saved = world.getChunkProvider().chunkLoader.isChunkGeneratedAt(pos.x, pos.z);
+        this.chunkStateMap.put(pos, saved);
+        return saved;
     }
 
     public GenerationRegion get(int blockX, int blockZ) {

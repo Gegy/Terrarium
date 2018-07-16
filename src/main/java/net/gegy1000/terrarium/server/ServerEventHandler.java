@@ -17,7 +17,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 @Mod.EventBusSubscriber(modid = Terrarium.MODID)
 public class ServerEventHandler {
-    private static final long REGION_TRACK_INTERVAL = 500;
+    private static final long REGION_TRACK_INTERVAL = 1000;
     private static long lastRegionTrackTime;
 
     @SubscribeEvent
@@ -66,7 +66,8 @@ public class ServerEventHandler {
             if (time - lastRegionTrackTime > REGION_TRACK_INTERVAL) {
                 TerrariumWorldData worldData = ((TerrariumWorldType) world.getWorldType()).getWorldData(world);
                 if (worldData != null) {
-                    worldData.getRegionHandler().trackRegions(((WorldServer) world).getPlayerChunkMap());
+                    WorldServer worldServer = (WorldServer) world;
+                    worldData.getRegionHandler().trackRegions(worldServer, worldServer.getPlayerChunkMap());
                 }
                 lastRegionTrackTime = time;
             }
