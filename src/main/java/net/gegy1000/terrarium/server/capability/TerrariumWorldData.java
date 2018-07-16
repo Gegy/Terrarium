@@ -36,7 +36,7 @@ public interface TerrariumWorldData extends ICapabilityProvider {
         public Implementation(World world, TerrariumWorldType worldType) {
             String generatorOptions = world.getWorldInfo().getGeneratorOptions();
 
-            GenerationSettings presetSettings = worldType.getPreset().createSettings();
+            GenerationSettings presetSettings = worldType.getPreset().createProperties();
             if (Strings.isNullOrEmpty(generatorOptions)) {
                 this.settings = presetSettings;
             } else {

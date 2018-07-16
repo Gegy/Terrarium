@@ -64,7 +64,7 @@ public class TerrariumCustomizationGui extends GuiScreen {
         }
         String settingsString = parent.chunkProviderSettingsJson;
         if (Strings.isNullOrEmpty(settingsString)) {
-            this.setSettings(defaultPreset.createSettings());
+            this.setSettings(defaultPreset.createProperties());
         } else {
             try {
                 this.setSettings(GenerationSettings.deserialize(settingsString));
@@ -234,7 +234,7 @@ public class TerrariumCustomizationGui extends GuiScreen {
     }
 
     public void applyPreset(TerrariumPreset preset) {
-        this.setSettings(preset.createSettings());
+        this.setSettings(preset.createProperties());
         this.previewDirty = true;
     }
 
@@ -263,9 +263,6 @@ public class TerrariumCustomizationGui extends GuiScreen {
     }
 
     protected void setSettings(GenerationSettings settings) {
-        if (!settings.getWorldType().equals(this.worldType.getIdentifier())) {
-            throw new IllegalArgumentException("Cannot use settings from another generator!");
-        }
         this.settings = settings;
     }
 

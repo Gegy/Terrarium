@@ -41,7 +41,6 @@ import net.gegy1000.terrarium.server.world.cover.TerrariumCoverTypes;
 import net.gegy1000.terrarium.server.world.generator.BasicTerrariumGenerator;
 import net.gegy1000.terrarium.server.world.generator.TerrariumGenerator;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
-import net.gegy1000.terrarium.server.world.generator.customization.PropertyContainer;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumCustomization;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPreset;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
@@ -121,8 +120,8 @@ public class EarthWorldType extends TerrariumWorldType {
 
     @Override
     public TerrariumGeneratorInitializer createInitializer(World world, TerrariumChunkGenerator chunkGenerator, GenerationSettings settings) {
-        world.setSeaLevel(settings.getProperties().getInteger(HEIGHT_ORIGIN));
-        return new Initializer(world, chunkGenerator, settings.getProperties());
+        world.setSeaLevel(settings.getInteger(HEIGHT_ORIGIN));
+        return new Initializer(world, chunkGenerator, settings);
     }
 
     @Override
@@ -162,13 +161,13 @@ public class EarthWorldType extends TerrariumWorldType {
     @Override
     public boolean handleSlimeSpawnReduction(Random random, World world) {
         TerrariumWorldData worldData = this.getWorldData(world);
-        return worldData.getSettings().getProperties().getInteger(HEIGHT_ORIGIN) < 40;
+        return worldData.getSettings().getInteger(HEIGHT_ORIGIN) < 40;
     }
 
     private static class Initializer implements TerrariumGeneratorInitializer {
         private final World world;
         private final TerrariumChunkGenerator chunkGenerator;
-        private final PropertyContainer properties;
+        private final GenerationSettings settings;
 
         private final double worldScale;
 
@@ -176,12 +175,12 @@ public class EarthWorldType extends TerrariumWorldType {
         private final CoordinateState srtmRaster;
         private final CoordinateState globcoverRaster;
 
-        private Initializer(World world, TerrariumChunkGenerator chunkGenerator, PropertyContainer properties) {
+        private Initializer(World world, TerrariumChunkGenerator chunkGenerator, GenerationSettings settings) {
             this.world = world;
             this.chunkGenerator = chunkGenerator;
-            this.properties = properties;
+            this.settings = settings;
 
-            this.worldScale = properties.getDouble(WORLD_SCALE);
+            this.worldScale = settings.getDouble(WORLD_SCALE);
             this.earthCoordinates = new LatLngCoordinateState(this.worldScale * SRTM_SCALE * 1200.0);
             this.srtmRaster = new ScaledCoordinateState(this.worldScale * SRTM_SCALE);
             this.globcoverRaster = new ScaledCoordinateState(this.worldScale * SRTM_SCALE * GLOB_RATIO);
@@ -189,43 +188,43 @@ public class EarthWorldType extends TerrariumWorldType {
 
         @Override
         public TerrariumGenerator buildGenerator(boolean preview) {
-            int heightOrigin = this.properties.getInteger(HEIGHT_ORIGIN);
+            int heightOrigin = this.settings.getInteger(HEIGHT_ORIGIN);
             List<ConstructedCover<?>> coverTypes = this.constructCoverTypes();
             BasicTerrariumGenerator.Builder builder = BasicTerrariumGenerator.builder()
                     .withSurfaceComposer(new HeightmapSurfaceComposer(RegionComponentType.HEIGHT, Blocks.STONE.getDefaultState()))
                     .withSurfaceComposer(new WaterFillSurfaceComposer(RegionComponentType.HEIGHT, EarthComponentTypes.WATER, Blocks.WATER.getDefaultState()))
-                    .withSurfaceComposer(new CoverSurfaceComposer(this.world, RegionComponentType.COVER, coverTypes, !preview && this.properties.getBoolean(ENABLE_DECORATION), Blocks.STONE.getDefaultState()))
+                    .withSurfaceComposer(new CoverSurfaceComposer(this.world, RegionComponentType.COVER, coverTypes, !preview && this.settings.getBoolean(ENABLE_DECORATION), Blocks.STONE.getDefaultState()))
                     .withSurfaceComposer(new BedrockSurfaceComposer(this.world, Blocks.BEDROCK.getDefaultState(), Math.min(heightOrigin - 1, 5)))
                     .withBiomeComposer(new CoverBiomeComposer(RegionComponentType.COVER, coverTypes))
-                    .withSpawnPosition(new Coordinate(this.earthCoordinates, this.properties.getDouble(SPAWN_LATITUDE), this.properties.getDouble(SPAWN_LONGITUDE)))
+                    .withSpawnPosition(new Coordinate(this.earthCoordinates, this.settings.getDouble(SPAWN_LATITUDE), this.settings.getDouble(SPAWN_LONGITUDE)))
                     .withCapability(new EarthCapability.Impl(this.earthCoordinates));
 
             if (!preview) {
-                if (this.properties.getBoolean(ENABLE_CAVE_GENERATION)) {
+                if (this.settings.getBoolean(ENABLE_CAVE_GENERATION)) {
                     builder.withSurfaceComposer(new CaveSurfaceComposer(this.world));
                 }
-                if (this.properties.getBoolean(ENABLE_DEFAULT_FEATURES)) {
+                if (this.settings.getBoolean(ENABLE_DEFAULT_FEATURES)) {
                     builder.withStructureComposer(new VanillaStructureComposer(this.world, this.chunkGenerator));
                 }
             }
 
-            if (this.properties.getBoolean(ENABLE_DECORATION)) {
+            if (this.settings.getBoolean(ENABLE_DECORATION)) {
                 builder.withDecorationComposer(new CoverDecorationComposer(this.world, RegionComponentType.COVER, coverTypes));
                 builder.withDecorationComposer(new BoulderDecorationComposer(this.world, RegionComponentType.SLOPE));
             }
-            if (this.properties.getBoolean(ENABLE_DEFAULT_DECORATION)) {
+            if (this.settings.getBoolean(ENABLE_DEFAULT_DECORATION)) {
                 builder.withDecorationComposer(new VanillaBiomeDecorationComposer(this.world));
             }
-            if (this.properties.getBoolean(ENABLE_LAKE_GENERATION)) {
+            if (this.settings.getBoolean(ENABLE_LAKE_GENERATION)) {
                 builder.withDecorationComposer(new LakeDecorationComposer(this.world));
             }
-            if (this.properties.getBoolean(ENABLE_LAVA_GENERATION)) {
+            if (this.settings.getBoolean(ENABLE_LAVA_GENERATION)) {
                 builder.withDecorationComposer(new LavaLakeDecorationComposer(this.world));
             }
-            if (this.properties.getBoolean(ENABLE_RESOURCE_GENERATION)) {
+            if (this.settings.getBoolean(ENABLE_RESOURCE_GENERATION)) {
                 builder.withDecorationComposer(new VanillaOreDecorationComposer(this.world));
             }
-            if (this.properties.getBoolean(ENABLE_MOD_GENERATION)) {
+            if (this.settings.getBoolean(ENABLE_MOD_GENERATION)) {
                 builder.withDecorationComposer(new ModdedDecorationComposer(this.world));
             }
 
@@ -244,7 +243,7 @@ public class EarthWorldType extends TerrariumWorldType {
 
         @Override
         public TerrariumDataProvider buildDataProvider() {
-            int heightOrigin = this.properties.getInteger(HEIGHT_ORIGIN);
+            int heightOrigin = this.settings.getInteger(HEIGHT_ORIGIN);
             SrtmHeightSource heightSource = new SrtmHeightSource(this.srtmRaster, "srtm_heights");
             DataLayer<ShortRasterTile> heightSampler = new ShortTileSampleLayer(heightSource);
 
@@ -266,18 +265,18 @@ public class EarthWorldType extends TerrariumWorldType {
                     .withComponent(EarthComponentTypes.WATER, waterProducer)
                     .withAdapter(new WaterApplyAdapter(this.earthCoordinates, EarthComponentTypes.WATER, RegionComponentType.HEIGHT, RegionComponentType.COVER))
                     .withAdapter(new OsmAreaCoverAdapter(this.earthCoordinates, EarthComponentTypes.OSM, RegionComponentType.COVER))
-                    .withAdapter(new HeightNoiseAdapter(this.world, RegionComponentType.HEIGHT, 2, 0.08, this.properties.getDouble(NOISE_SCALE)))
-                    .withAdapter(new HeightTransformAdapter(this.world, RegionComponentType.HEIGHT, this.properties.getDouble(HEIGHT_SCALE) * this.worldScale, heightOrigin))
+                    .withAdapter(new HeightNoiseAdapter(this.world, RegionComponentType.HEIGHT, 2, 0.08, this.settings.getDouble(NOISE_SCALE)))
+                    .withAdapter(new HeightTransformAdapter(this.world, RegionComponentType.HEIGHT, this.settings.getDouble(HEIGHT_SCALE) * this.worldScale, heightOrigin))
                     .withAdapter(new WaterLevelingAdapter(EarthComponentTypes.WATER, RegionComponentType.HEIGHT, heightOrigin + 1))
-                    .withAdapter(new WaterCarveAdapter(EarthComponentTypes.WATER, RegionComponentType.HEIGHT, this.properties.getInteger(OCEAN_DEPTH)))
+                    .withAdapter(new WaterCarveAdapter(EarthComponentTypes.WATER, RegionComponentType.HEIGHT, this.settings.getInteger(OCEAN_DEPTH)))
 //                    .withAdapter(new OceanDepthCorrectionAdapter(RegionComponentType.HEIGHT, this.properties.getInteger(OCEAN_DEPTH)))
-                    .withAdapter(new BeachAdapter(this.world, RegionComponentType.COVER, EarthComponentTypes.WATER, this.properties.getInteger(BEACH_SIZE), EarthCoverTypes.BEACH))
+                    .withAdapter(new BeachAdapter(this.world, RegionComponentType.COVER, EarthComponentTypes.WATER, this.settings.getInteger(BEACH_SIZE), EarthCoverTypes.BEACH))
 //                    .withAdapter(new WaterFlattenAdapter(RegionComponentType.HEIGHT, RegionComponentType.COVER, 15, EarthCoverTypes.WATER))
                     .build();
         }
 
         private DataLayer<ShortRasterTile> createHeightProducer(DataLayer<ShortRasterTile> heightSampler) {
-            Interpolation.Method interpolationMethod = this.selectInterpolationMethod(this.properties);
+            Interpolation.Method interpolationMethod = this.selectInterpolationMethod(this.settings);
             return new ScaledShortLayer(heightSampler, this.srtmRaster, interpolationMethod);
         }
 
@@ -340,7 +339,7 @@ public class EarthWorldType extends TerrariumWorldType {
             return (DataProducerLayer<OsmTile>) (context, view) -> new OsmTile();
         }
 
-        private Interpolation.Method selectInterpolationMethod(PropertyContainer properties) {
+        private Interpolation.Method selectInterpolationMethod(GenerationSettings properties) {
             double scale = 1.0 / properties.getDouble(WORLD_SCALE);
 
             Interpolation.Method interpolationMethod = Interpolation.Method.CUBIC;

@@ -43,7 +43,7 @@ public class SliderWidget implements CustomizationWidget {
     @Override
     @SideOnly(Side.CLIENT)
     public GuiButton createWidget(GenerationSettings settings, int id, int x, int y, Runnable onPropertyChange) {
-        PropertyValue<Number> value = settings.getProperties().getValue(this.propertyKey);
+        PropertyValue<Number> value = settings.getValue(this.propertyKey);
         SliderGuiWidget widget = new SliderGuiWidget(id, x, y, this.propertyKey, value, this.minimum, this.maximum, this.step, this.fineStep, this.converter);
         widget.addListener(onPropertyChange);
         return widget;

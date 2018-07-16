@@ -30,7 +30,7 @@ public class TerrariumHandshakeTracker {
     }
     
     public static Set<EntityPlayer> getFriends() {
-    	return new HashSet<EntityPlayer>(FRIENDLY_PLAYERS);
+    	return new HashSet<>(FRIENDLY_PLAYERS);
     }
 
     @Nullable

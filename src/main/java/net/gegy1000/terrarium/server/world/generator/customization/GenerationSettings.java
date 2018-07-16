@@ -1,19 +1,28 @@
 package net.gegy1000.terrarium.server.world.generator.customization;
 
-import com.google.gson.Gson;
+import com.google.common.collect.ImmutableMap;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
-import net.minecraft.util.JsonUtils;
-import net.minecraft.util.ResourceLocation;
+import com.google.gson.JsonPrimitive;
+import net.gegy1000.terrarium.Terrarium;
+import net.gegy1000.terrarium.server.world.generator.customization.property.BooleanValue;
+import net.gegy1000.terrarium.server.world.generator.customization.property.NumberValue;
+import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
+import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyValue;
+import net.minecraft.util.Tuple;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class GenerationSettings {
-    private final ResourceLocation worldType;
-    private final PropertyContainer propertyContainer;
+    private final ImmutableMap<String, PropertyKey<?>> keys;
+    private final ImmutableMap<PropertyKey<?>, PropertyValue<?>> values;
 
-    private GenerationSettings(ResourceLocation worldType, PropertyContainer propertyContainer) {
-        this.worldType = worldType;
-        this.propertyContainer = propertyContainer;
+    protected GenerationSettings(Map<String, PropertyKey<?>> keys, Map<PropertyKey<?>, PropertyValue<?>> values) {
+        this.keys = ImmutableMap.copyOf(keys);
+        this.values = ImmutableMap.copyOf(values);
     }
 
     public static GenerationSettings deserialize(String json) {
@@ -21,43 +30,125 @@ public class GenerationSettings {
     }
 
     public static GenerationSettings deserialize(JsonObject root) {
-        ResourceLocation worldType = new ResourceLocation(JsonUtils.getString(root, "world_type"));
-        PropertyContainer properties = PropertyContainer.deserialize(root.getAsJsonObject("properties"));
+        Map<String, PropertyKey<?>> keys = new HashMap<>();
+        Map<PropertyKey<?>, PropertyValue<?>> values = new HashMap<>();
 
-        return new GenerationSettings(worldType, properties);
+        for (Map.Entry<String, JsonElement> propertyEntry : root.entrySet()) {
+            String identifier = propertyEntry.getKey();
+            JsonElement propertyElement = propertyEntry.getValue();
+
+            Tuple<PropertyKey<?>, PropertyValue<?>> pair = GenerationSettings.parseKeyValuePair(identifier, propertyElement);
+            if (pair != null) {
+                PropertyKey<?> key = pair.getFirst();
+                PropertyValue<?> value = pair.getSecond();
+                keys.put(key.getIdentifier(), key);
+                values.put(key, value);
+            } else {
+                Terrarium.LOGGER.warn("Ignored invalid property {}: {}", identifier, propertyElement);
+            }
+        }
+
+        return new GenerationSettings(keys, values);
+    }
+
+    private static Tuple<PropertyKey<?>, PropertyValue<?>> parseKeyValuePair(String identifier, JsonElement element) {
+        if (element.isJsonPrimitive()) {
+            JsonPrimitive primitive = element.getAsJsonPrimitive();
+            if (primitive.isNumber()) {
+                return new Tuple<>(PropertyKey.createNumber(identifier), new NumberValue(primitive.getAsDouble()));
+            } else if (primitive.isBoolean()) {
+                return new Tuple<>(PropertyKey.createBoolean(identifier), new BooleanValue(primitive.getAsBoolean()));
+            }
+        }
+        return null;
     }
 
     public JsonObject serialize() {
-        JsonObject root = new JsonObject();
+        JsonObject propertiesRoot = new JsonObject();
 
-        root.addProperty("world_type", this.worldType.toString());
-        root.add("properties", this.propertyContainer.serialize());
+        for (Map.Entry<PropertyKey<?>, PropertyValue<?>> entry : this.values.entrySet()) {
+            PropertyKey<?> key = entry.getKey();
+            PropertyValue<?> value = entry.getValue();
+            if (Number.class.isAssignableFrom(key.getType())) {
+                propertiesRoot.addProperty(key.getIdentifier(), (Number) value.get());
+            } else if (Boolean.class.isAssignableFrom(key.getType())) {
+                propertiesRoot.addProperty(key.getIdentifier(), (Boolean) value.get());
+            }
+        }
 
-        return root;
+        return propertiesRoot;
     }
 
     public String serializeString() {
-        return new Gson().toJson(this.serialize());
+        return this.serialize().toString();
     }
 
-    public ResourceLocation getWorldType() {
-        return this.worldType;
+    public boolean hasKey(String identifier) {
+        return this.keys.containsKey(identifier);
     }
 
-    public PropertyContainer getProperties() {
-        return this.propertyContainer;
-    }
-
-    public GenerationSettings copy() {
-        try {
-            return GenerationSettings.deserialize(this.serialize());
-        } catch (JsonSyntaxException e) {
-            throw new IllegalStateException("Failed to parsed copied settings", e);
+    @SuppressWarnings("unchecked")
+    public <T> PropertyKey<T> getKey(String identifier, Class<T> type) {
+        PropertyKey<?> key = this.keys.get(identifier);
+        if (key != null && key.getType().isAssignableFrom(type)) {
+            return (PropertyKey<T>) key;
         }
+        throw new IllegalArgumentException("Given property identifier does not exist: " + identifier);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> PropertyValue<T> getValue(PropertyKey<T> key) {
+        PropertyValue<?> value = this.values.get(key);
+        if (value != null && value.getType().equals(key.getType())) {
+            return (PropertyValue<T>) value;
+        }
+        throw new IllegalArgumentException("Given property key does not exist: " + key.getIdentifier());
+    }
+
+    public void setDouble(PropertyKey<Number> key, double value) {
+        PropertyValue<Number> property = this.getValue(key);
+        property.set(value);
+    }
+
+    public double getDouble(PropertyKey<Number> key) {
+        PropertyValue<Number> property = this.getValue(key);
+        return property.get().doubleValue();
+    }
+
+    public void setInteger(PropertyKey<Number> key, int value) {
+        PropertyValue<Number> property = this.getValue(key);
+        property.set(value);
+    }
+
+    public int getInteger(PropertyKey<Number> key) {
+        PropertyValue<Number> property = this.getValue(key);
+        return property.get().intValue();
+    }
+
+    public void setBoolean(PropertyKey<Boolean> key, boolean value) {
+        PropertyValue<Boolean> property = this.getValue(key);
+        property.set(value);
+    }
+
+    public boolean getBoolean(PropertyKey<Boolean> key) {
+        PropertyValue<Boolean> property = this.getValue(key);
+        return property.get();
+    }
+
+    public boolean hasKey(PropertyKey<?> key) {
+        return this.values.containsKey(key);
+    }
+
+    public Collection<PropertyKey<?>> getKeys() {
+        return this.keys.values();
     }
 
     public GenerationSettings union(GenerationSettings other) {
-        PropertyContainer properties = this.propertyContainer.union(other.getProperties());
-        return new GenerationSettings(other.getWorldType(), properties);
+        Map<String, PropertyKey<?>> keys = new HashMap<>(this.keys);
+        Map<PropertyKey<?>, PropertyValue<?>> values = new HashMap<>(this.values);
+        keys.putAll(other.keys);
+        values.putAll(other.values);
+
+        return new GenerationSettings(keys, values);
     }
 }
