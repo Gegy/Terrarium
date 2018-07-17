@@ -35,8 +35,13 @@ public class OsmAreaCoverAdapter implements RegionAdapter {
         this.osmComponent = osmComponent;
         this.coverComponent = coverComponent;
 
-        this.addCoverType(EarthCoverTypes.IRRIGATED_CROPS, this::isFarmlandArea);
-        this.addCoverType(EarthCoverTypes.OPEN_BROADLEAF_DECIDUOUS, this::isWoodedArea);
+//        this.addCoverType(EarthCoverTypes.IRRIGATED_CROPS, this::isFarmlandArea);
+//        this.addCoverType(EarthCoverTypes.OPEN_BROADLEAF_DECIDUOUS, this::isWoodedArea);
+//        this.addCoverType(EarthCoverTypes.FLOODED_GRASSLAND, this::isWetlandArea);
+//        this.addCoverType(EarthCoverTypes.SHRUBLAND, this::isScrubArea);
+//        this.addCoverType(EarthCoverTypes.SNOW, this::isGlacierArea);
+        this.addCoverType(EarthCoverTypes.FLOWER_FIELD, this::isFlowerField);
+        this.addCoverType(EarthCoverTypes.SCREE, this::isScree);
     }
 
     private void addCoverType(CoverType<?> coverType, Predicate<OsmEntity> filter) {
@@ -51,6 +56,31 @@ public class OsmAreaCoverAdapter implements RegionAdapter {
     private boolean isWoodedArea(OsmEntity entity) {
         return OsmDataParser.hasTag(entity, "natural", "wood")
                 || OsmDataParser.hasTag(entity, "landuse", "forest");
+    }
+
+    private boolean isWetlandArea(OsmEntity entity) {
+        return OsmDataParser.hasTag(entity, "natural", "wetland");
+    }
+
+    private boolean isScrubArea(OsmEntity entity) {
+        return OsmDataParser.hasTag(entity, "natural", "scrub");
+    }
+
+    private boolean isGlacierArea(OsmEntity entity) {
+        return OsmDataParser.hasTag(entity, "natural", "glacier");
+    }
+
+    private boolean isFlowerField(OsmEntity entity) {
+        return OsmDataParser.hasTag(entity, "leisure", "garden")
+                || OsmDataParser.hasTag(entity, "landuse", "meadow")
+                || OsmDataParser.hasTag(entity, "leisure", "park");
+    }
+
+    private boolean isScree(OsmEntity entity) {
+        return OsmDataParser.hasTag(entity, "natural", "scree")
+                || OsmDataParser.hasTag(entity, "natural", "bare_rock")
+                || OsmDataParser.hasTag(entity, "natural", "shingle")
+                || OsmDataParser.hasTag(entity, "landuse", "quarry");
     }
 
     @Override

@@ -3,23 +3,23 @@ package net.gegy1000.earth.server.world.cover.type;
 import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthCoverType;
 import net.gegy1000.earth.server.world.cover.EarthDecorationGenerator;
+import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
 import net.gegy1000.earth.server.world.cover.LatitudinalZone;
 import net.gegy1000.terrarium.server.world.cover.CoverSurfaceGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.feature.tree.GenerousTreeGenerator;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.ByteRasterTile;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Biomes;
-import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 
 import java.util.Random;
 
-public class BeachCover extends EarthCoverType {
+public class BeachCover extends EarthCoverType implements BeachyCover {
     @Override
     public CoverSurfaceGenerator<EarthCoverContext> createSurfaceGenerator(EarthCoverContext context) {
-        IBlockState state = Blocks.SAND.getDefaultState();
-        return new CoverSurfaceGenerator.Static<>(context, this, state, state);
+        return new Surface(context, this);
     }
 
     @Override
@@ -30,6 +30,26 @@ public class BeachCover extends EarthCoverType {
     @Override
     public Biome getBiome(EarthCoverContext context, int x, int z) {
         return Biomes.BEACH;
+    }
+
+    private static class Surface extends EarthSurfaceGenerator {
+        private Surface(EarthCoverContext context, CoverType<EarthCoverContext> coverType) {
+            super(context, coverType);
+        }
+
+        @Override
+        public void populateBlockCover(Random random, int originX, int originZ, IBlockState[] coverBlockBuffer) {
+            ByteRasterTile slopeRaster = this.context.getSlopeRaster();
+            this.iterateChunk((localX, localZ) -> {
+                int slope = slopeRaster.getUnsigned(localX, localZ);
+                coverBlockBuffer[localX + localZ * 16] = slope >= CLIFF_SLOPE ? COBBLESTONE : SAND;
+            });
+        }
+
+        @Override
+        public void populateBlockFiller(Random random, int originX, int originZ, IBlockState[] fillerBlockBuffer) {
+            this.populateBlockCover(random, originX, originZ, fillerBlockBuffer);
+        }
     }
 
     private static class Decoration extends EarthDecorationGenerator {

@@ -1,5 +1,6 @@
 package net.gegy1000.earth.server.world.pipeline.adapter;
 
+import net.gegy1000.earth.server.world.cover.type.BeachyCover;
 import net.gegy1000.earth.server.world.pipeline.source.tile.WaterRasterTile;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.RegionAdapter;
@@ -47,39 +48,42 @@ public class BeachAdapter implements RegionAdapter {
         Arrays.fill(this.beachWeight, 0.0);
         this.beachNoise.populateNoiseArray(this.beachWeight, x * FREQ, 0.0, z * FREQ, width, 1, height, FREQ, 1.0, FREQ, 1.0);
 
-        this.detectEdgesX(width, height, waterTile);
-        this.detectEdgesY(width, height, waterTile);
+        this.detectEdgesX(waterTile, coverTile, width, height);
+        this.detectEdgesY(waterTile, coverTile, width, height);
 
         this.applyBeaches(width, height, coverTile, waterTile);
     }
 
-    private void detectEdgesX(int width, int height, WaterRasterTile waterTile) {
+    private void detectEdgesX(WaterRasterTile waterTile, CoverRasterTile coverTile, int width, int height) {
         for (int localY = 0; localY < height; localY++) {
             int lastWaterType = waterTile.getWaterType(0, localY);
             for (int localX = 1; localX < width; localX++) {
                 int waterType = waterTile.getWaterType(localX, localY);
                 if (lastWaterType != waterType) {
-                    this.spreadBeach(this.beachSize - 1, width, height, localX, localY);
+                    this.spreadBeach(coverTile, this.beachSize - 1, localX, localY, width, height);
                     lastWaterType = waterType;
                 }
             }
         }
     }
 
-    private void detectEdgesY(int width, int height, WaterRasterTile waterTile) {
+    private void detectEdgesY(WaterRasterTile waterTile, CoverRasterTile coverTile, int width, int height) {
         for (int localX = 0; localX < width; localX++) {
             int lastWaterType = waterTile.getWaterType(localX, 0);
             for (int localY = 1; localY < height; localY++) {
                 int waterType = waterTile.getWaterType(localX, localY);
                 if (lastWaterType != waterType) {
-                    this.spreadBeach(this.beachSize - 1, width, height, localX, localY);
+                    this.spreadBeach(coverTile, this.beachSize - 1, localX, localY, width, height);
                     lastWaterType = waterType;
                 }
             }
         }
     }
 
-    private void spreadBeach(int beachSize, int width, int height, int localX, int localY) {
+    private void spreadBeach(CoverRasterTile coverTile, int beachSize, int localX, int localY, int width, int height) {
+        if (this.hasBeach(coverTile, localX, localY, width, height)) {
+            return;
+        }
         double maxWeight = (beachSize * beachSize) * 2;
         for (int beachY = -beachSize; beachY <= beachSize; beachY++) {
             int globalY = localY + beachY;
@@ -95,13 +99,30 @@ public class BeachAdapter implements RegionAdapter {
         }
     }
 
+    private boolean hasBeach(CoverRasterTile coverTile, int localX, int localY, int width, int height) {
+        for (int offsetY = -1; offsetY <= 1; offsetY++) {
+            int globalY = localY + offsetY;
+            for (int offsetX = -1; offsetX <= 1; offsetX++) {
+                int globalX = localX + offsetX;
+                if (globalX >= 0 && globalY >= 0 && globalX < width && globalY < height) {
+                    if (coverTile.get(globalX, globalY) instanceof BeachyCover) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     private void applyBeaches(int width, int height, CoverRasterTile coverTile, WaterRasterTile waterTile) {
         for (int localY = 0; localY < height; localY++) {
             for (int localX = 0; localX < width; localX++) {
                 double weight = this.beachWeight[localY + localX * width];
                 if (weight > 1.0) {
                     if (WaterRasterTile.isLand(waterTile.getShort(localX, localY))) {
-                        coverTile.set(localX, localY, this.beachCover);
+                        if (!(coverTile.get(localX, localY) instanceof BeachyCover)) {
+                            coverTile.set(localX, localY, this.beachCover);
+                        }
                     }
                 }
             }

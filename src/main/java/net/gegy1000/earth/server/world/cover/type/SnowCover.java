@@ -13,7 +13,7 @@ import net.minecraft.world.biome.Biome;
 
 import java.util.Random;
 
-public class SnowCover extends EarthCoverType {
+public class SnowCover extends EarthCoverType implements BeachyCover {
     private static final IBlockState SNOW = Blocks.SNOW.getDefaultState();
     private static final IBlockState ICE = Blocks.PACKED_ICE.getDefaultState();
 

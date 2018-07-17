@@ -6,8 +6,10 @@ import net.gegy1000.terrarium.server.world.feature.tree.GenerousTaigaGenerator;
 import net.gegy1000.terrarium.server.world.feature.tree.SmallShrubGenerator;
 import net.gegy1000.terrarium.server.world.feature.tree.TallShrubGenerator;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockDirt;
 import net.minecraft.block.BlockDoublePlant;
+import net.minecraft.block.BlockFlower;
 import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockNewLeaf;
 import net.minecraft.block.BlockNewLog;
@@ -44,6 +46,19 @@ public abstract class CoverGenerator<T extends CoverGenerationContext> {
     protected static final IBlockState DEAD_BUSH = Blocks.DEADBUSH.getDefaultState();
     protected static final IBlockState DOUBLE_TALL_GRASS = Blocks.DOUBLE_PLANT.getDefaultState().withProperty(BlockDoublePlant.VARIANT, BlockDoublePlant.EnumPlantType.GRASS);
     protected static final IBlockState BUSH = Blocks.LEAVES.getDefaultState().withProperty(BlockLeaves.CHECK_DECAY, false).withProperty(BlockLeaves.DECAYABLE, false);
+
+    protected static final IBlockState[] FLOWERS = new IBlockState[] {
+            createFlowerState(BlockFlower.EnumFlowerType.ALLIUM),
+            createFlowerState(BlockFlower.EnumFlowerType.BLUE_ORCHID),
+            createFlowerState(BlockFlower.EnumFlowerType.DANDELION),
+            createFlowerState(BlockFlower.EnumFlowerType.HOUSTONIA),
+            createFlowerState(BlockFlower.EnumFlowerType.ORANGE_TULIP),
+            createFlowerState(BlockFlower.EnumFlowerType.OXEYE_DAISY),
+            createFlowerState(BlockFlower.EnumFlowerType.PINK_TULIP),
+            createFlowerState(BlockFlower.EnumFlowerType.POPPY),
+            createFlowerState(BlockFlower.EnumFlowerType.RED_TULIP),
+            createFlowerState(BlockFlower.EnumFlowerType.WHITE_TULIP)
+    };
 
     protected static final IBlockState WATER = Blocks.WATER.getDefaultState();
     protected static final IBlockState LILYPAD = Blocks.WATERLILY.getDefaultState();
@@ -88,6 +103,11 @@ public abstract class CoverGenerator<T extends CoverGenerationContext> {
     protected CoverGenerator(T context, CoverType<T> coverType) {
         this.context = context;
         this.coverType = coverType;
+    }
+
+    private static IBlockState createFlowerState(BlockFlower.EnumFlowerType type) {
+        Block block = type.getBlockType() == BlockFlower.EnumFlowerColor.RED ? Blocks.RED_FLOWER : Blocks.YELLOW_FLOWER;
+        return block.getDefaultState().withProperty(((BlockFlower) block).getTypeProperty(), type);
     }
 
     protected final void iterateChunk(PointConsumer handler) {

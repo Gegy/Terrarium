@@ -33,6 +33,12 @@
   way["natural"="bare_rock"];
   rel["natural"="bare_rock"];
   way["waterway"="river"];
+  way["leisure"="garden"];
+  rel["leisure"="garden"];
+  way["leisure"="park"];
+  rel["leisure"="park"];
+  way["landuse"="vineyard"];
+  rel["landuse"="vineyard"];
 );
 (._;>;);
 out geom qt;

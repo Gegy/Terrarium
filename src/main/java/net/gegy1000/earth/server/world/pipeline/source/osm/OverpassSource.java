@@ -83,7 +83,7 @@ public class OverpassSource extends TiledDataSource<OsmTile> {
         HttpURLConnection connection = (HttpURLConnection) new URL(OVERPASS_ENDPOINT).openConnection();
         connection.setRequestMethod("POST");
         connection.setRequestProperty("Accept-Encoding", "gzip");
-        connection.setRequestProperty("User-Agent", Terrarium.MODID);
+        connection.setRequestProperty("User-Agent", "terrarium_earth");
         connection.setRequestProperty("Referer", "https://github.com/gegy1000/Terrarium");
         connection.setConnectTimeout(2000);
         connection.setReadTimeout(30000);

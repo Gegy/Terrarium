@@ -36,7 +36,7 @@ public class OsmWaterBodyLayer extends OsmWaterLayer {
         Collection<MultiPolygon> waterPolygons = osmTile.collectPolygons(view, this.geoCoordinateState, this::isWaterArea);
         Collection<LineString> waterLines = osmTile.collectLines(view, this.geoCoordinateState, this::isWaterLine);
 
-        if (!waterPolygons.isEmpty()) {
+        if (!waterPolygons.isEmpty() || !waterLines.isEmpty()) {
             ShortRasterTile resultTile = waterTile.copy();
 
             RasterCanvas canvas = new RasterCanvas(view.getWidth(), view.getHeight());

@@ -7,6 +7,7 @@ import net.gegy1000.earth.server.world.cover.type.ClosedBroadleafDeciduousCover;
 import net.gegy1000.earth.server.world.cover.type.ClosedNeedleleafEvergreenCover;
 import net.gegy1000.earth.server.world.cover.type.CroplandWithVegetationCover;
 import net.gegy1000.earth.server.world.cover.type.FloodedGrasslandCover;
+import net.gegy1000.earth.server.world.cover.type.FlowerFieldCover;
 import net.gegy1000.earth.server.world.cover.type.ForestShrublandWithGrassCover;
 import net.gegy1000.earth.server.world.cover.type.FreshFloodedForestCover;
 import net.gegy1000.earth.server.world.cover.type.GrassWithForestShrublandCover;
@@ -17,6 +18,7 @@ import net.gegy1000.earth.server.world.cover.type.OpenBroadleafDeciduousCover;
 import net.gegy1000.earth.server.world.cover.type.OpenNeedleleafCover;
 import net.gegy1000.earth.server.world.cover.type.RainfedCropsCover;
 import net.gegy1000.earth.server.world.cover.type.SalineFloodedForestCover;
+import net.gegy1000.earth.server.world.cover.type.ScreeCover;
 import net.gegy1000.earth.server.world.cover.type.ShrublandCover;
 import net.gegy1000.earth.server.world.cover.type.SnowCover;
 import net.gegy1000.earth.server.world.cover.type.SparseVegetationCover;
@@ -52,6 +54,8 @@ public class EarthCoverTypes {
     public static final EarthCoverType URBAN = new UrbanCover();
     public static final EarthCoverType VEGETATION_WITH_CROPLAND = new VegetationWithCroplandCover();
     public static final EarthCoverType WATER = new WaterCover();
+    public static final EarthCoverType FLOWER_FIELD = new FlowerFieldCover();
+    public static final EarthCoverType SCREE = new ScreeCover();
 
     public static final List<EarthCoverType> COVER_TYPES = new ArrayList<>();
 
@@ -79,6 +83,8 @@ public class EarthCoverTypes {
         COVER_TYPES.add(URBAN);
         COVER_TYPES.add(VEGETATION_WITH_CROPLAND);
         COVER_TYPES.add(WATER);
+        COVER_TYPES.add(FLOWER_FIELD);
+        COVER_TYPES.add(SCREE);
     }
 
     public enum Glob {
