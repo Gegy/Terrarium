@@ -7,6 +7,7 @@ import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthCoverTypes;
 import net.gegy1000.earth.server.world.pipeline.EarthComponentTypes;
 import net.gegy1000.earth.server.world.pipeline.adapter.BeachAdapter;
+import net.gegy1000.earth.server.world.pipeline.adapter.HeightNoiseAdapter;
 import net.gegy1000.earth.server.world.pipeline.adapter.OsmAreaCoverAdapter;
 import net.gegy1000.earth.server.world.pipeline.adapter.WaterApplyAdapter;
 import net.gegy1000.earth.server.world.pipeline.adapter.WaterCarveAdapter;
@@ -51,7 +52,6 @@ import net.gegy1000.terrarium.server.world.pipeline.DataLayer;
 import net.gegy1000.terrarium.server.world.pipeline.DataProducerLayer;
 import net.gegy1000.terrarium.server.world.pipeline.MergeDataLayer;
 import net.gegy1000.terrarium.server.world.pipeline.TerrariumDataProvider;
-import net.gegy1000.terrarium.server.world.pipeline.adapter.HeightNoiseAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.HeightTransformAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.composer.biome.CoverBiomeComposer;
@@ -265,7 +265,7 @@ public class EarthWorldType extends TerrariumWorldType {
                     .withComponent(EarthComponentTypes.WATER, waterProducer)
                     .withAdapter(new OsmAreaCoverAdapter(this.earthCoordinates, EarthComponentTypes.OSM, RegionComponentType.COVER))
                     .withAdapter(new WaterApplyAdapter(this.earthCoordinates, EarthComponentTypes.WATER, RegionComponentType.HEIGHT, RegionComponentType.COVER))
-                    .withAdapter(new HeightNoiseAdapter(this.world, RegionComponentType.HEIGHT, 2, 0.08, this.settings.getDouble(NOISE_SCALE))) // TODO: Ignore where water is
+                    .withAdapter(new HeightNoiseAdapter(this.world, RegionComponentType.HEIGHT, EarthComponentTypes.WATER, 2, 0.08, this.settings.getDouble(NOISE_SCALE)))
                     .withAdapter(new HeightTransformAdapter(this.world, RegionComponentType.HEIGHT, this.settings.getDouble(HEIGHT_SCALE) * this.worldScale, heightOrigin))
                     .withAdapter(new WaterLevelingAdapter(EarthComponentTypes.WATER, RegionComponentType.HEIGHT, heightOrigin + 1))
                     .withAdapter(new WaterCarveAdapter(EarthComponentTypes.WATER, RegionComponentType.HEIGHT, this.settings.getInteger(OCEAN_DEPTH)))
