@@ -5,6 +5,7 @@ import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
+import net.gegy1000.terrarium.server.world.chunk.PlayerChunkMapHooks;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
@@ -30,6 +31,9 @@ public class ServerEventHandler {
                 if (spawnPosition != null) {
                     world.setSpawnPoint(spawnPosition.toBlockPos());
                 }
+            }
+            if (world instanceof WorldServer) {
+                PlayerChunkMapHooks.hookWorldMap((WorldServer) world);
             }
         }
     }
