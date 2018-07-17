@@ -31,7 +31,7 @@ public class WaterFillSurfaceComposer implements SurfaceComposer {
                 if (waterType != WaterRasterTile.LAND) {
                     int height = heightRaster.getShort(localX, localZ);
                     int waterLevel = waterRaster.getWaterLevel(localX, localZ);
-                    if (height < waterLevel) {
+                    if (height >= 0 && height < waterLevel) {
                         for (int localY = height + 1; localY <= waterLevel; localY++) {
                             primer.setBlockState(localX, localY, localZ, this.block);
                         }

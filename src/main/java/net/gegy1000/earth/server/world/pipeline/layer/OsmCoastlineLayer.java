@@ -24,32 +24,6 @@ import java.util.stream.Collectors;
 
 // TODO: If osm data is available, fill the area with land/water first
 public class OsmCoastlineLayer extends OsmWaterLayer {
-    protected static final int BANK_UP_FLAG = 0b100;
-    protected static final int BANK_DOWN_FLAG = 0b1000;
-    protected static final int FREE_FLOOD_FLAG = 0b100000;
-
-    public static final DebugImageWriter.ColorSelector<Short> BANK_DEBUG = value -> {
-        if ((value & FREE_FLOOD_FLAG) != 0) {
-            return 0x404040;
-        } else if ((value & BANK_UP_FLAG) != 0) {
-            return 0xFF0000;
-        } else if ((value & BANK_DOWN_FLAG) != 0) {
-            return 0xFFFF00;
-        }
-        int type = value & TYPE_MASK;
-        switch (type) {
-            case OCEAN:
-                return 0x0000FF;
-            case RIVER:
-                return 0x00AAFF;
-            case LAND:
-                return 0x00FF00;
-            case BANK:
-                return 0xFFFFFF;
-        }
-        return 0;
-    };
-
     private final CoordinateState geoCoordinateState;
 
     public OsmCoastlineLayer(DataLayer<ShortRasterTile> parent, DataLayer<OsmTile> osmLayer, CoordinateState geoCoordinateState) {

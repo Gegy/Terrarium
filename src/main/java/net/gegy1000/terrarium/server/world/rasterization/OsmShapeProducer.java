@@ -48,7 +48,7 @@ public class OsmShapeProducer {
         return new Area(path);
     }
 
-    public static Path2D getPath(LineString string, CoordinateState state) {
+    public static Path2D toPath(LineString string, CoordinateState state) {
         Path2D.Double path = new Path2D.Double();
 
         Coordinate coordinate = string.getCoordinateN(0);

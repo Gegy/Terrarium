@@ -32,6 +32,7 @@
   rel["natural"="shingle"];
   way["natural"="bare_rock"];
   rel["natural"="bare_rock"];
+  way["waterway"="river"];
 );
 (._;>;);
 out geom qt;

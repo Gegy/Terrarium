@@ -1,9 +1,11 @@
 package net.gegy1000.terrarium.server.world.rasterization;
 
+import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.Shape;
+import java.awt.Stroke;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.awt.image.DirectColorModel;
@@ -20,6 +22,7 @@ public class RasterCanvas {
     private final BufferedImage rasterImage;
     private final Graphics2D graphics;
 
+    private static final Stroke DEFAULT_STROKE = new BasicStroke(1);
     private final ValueColor color = new ValueColor();
 
     private int originX;
@@ -45,6 +48,14 @@ public class RasterCanvas {
 
     public void setColor(int color) {
         this.color.set(color);
+    }
+
+    public void resetStroke() {
+        this.setStroke(DEFAULT_STROKE);
+    }
+
+    public void setStroke(Stroke stroke) {
+        this.graphics.setStroke(stroke);
     }
 
     public void fill(Shape shape) {

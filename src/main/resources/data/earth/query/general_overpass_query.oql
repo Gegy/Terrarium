@@ -6,8 +6,6 @@
     rel["railway"];
     way["highway"]["highway"~"motorway|trunk|primary|secondary|tertiary|unclassified|road"];
     rel["highway"]["highway"~"motorway|trunk|primary|secondary|tertiary|unclassified|road"];
-    way["waterway"="river"];
-    rel["waterway"="river"];
     way["landuse"="reservoir"];
     rel["landuse"="reservoir"];
     way["landuse"="basin"];

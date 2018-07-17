@@ -301,7 +301,7 @@ public class EarthWorldType extends TerrariumWorldType {
                     0.3,
                     "osm/outline",
                     new ResourceLocation(TerrariumEarth.MODID, "query/outline_overpass_query.oql"),
-                    9
+                    10
             ));
             sources.add(new OverpassSource(
                     this.earthCoordinates,

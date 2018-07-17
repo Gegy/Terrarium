@@ -1,5 +1,6 @@
 package net.gegy1000.earth.server.world.pipeline.source.tile;
 
+import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import de.topobyte.adt.multicollections.HashMultiSet;
 import de.topobyte.adt.multicollections.MultiSet;
@@ -132,6 +133,19 @@ public class OsmTile implements OsmEntityProvider, MergableTile<OsmTile> {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
         return polygons;
+    }
+
+    public Collection<LineString> collectLines(DataView view, CoordinateState geoCoordinate, Predicate<OsmEntity> filter) {
+        double minLatitude = geoCoordinate.getZ(view.getX(), view.getY());
+        double minLongitude = geoCoordinate.getX(view.getMaxX(), view.getMaxY());
+        double maxLatitude = geoCoordinate.getZ(view.getMaxX(), view.getMaxY());
+        double maxLongitude = geoCoordinate.getX(view.getX(), view.getY());
+        return this.getWays().stream()
+                .filter(filter)
+                .filter(way -> this.isWayInBounds(way, minLatitude, minLongitude, maxLatitude, maxLongitude))
+                .flatMap(way -> OsmDataParser.createLines(this, way).stream())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     private boolean isRelationInBounds(OsmRelation relation, double minLatitude, double minLongitude, double maxLatitude, double maxLongitude) {

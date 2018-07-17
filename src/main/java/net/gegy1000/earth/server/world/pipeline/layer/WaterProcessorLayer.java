@@ -31,14 +31,19 @@ public class WaterProcessorLayer extends ParentedDataLayer<WaterRasterTile, Shor
         WaterRasterTile waterTile = new WaterRasterTile(view);
         for (int localZ = 0; localZ < view.getHeight(); localZ++) {
             for (int localX = 0; localX < view.getWidth(); localX++) {
-                int waterType = parent.getShort(localX, localZ) & OsmWaterLayer.TYPE_MASK;
+                short waterValue = parent.getShort(localX, localZ);
+                int waterType = waterValue & OsmWaterLayer.TYPE_MASK;
                 switch (waterType) {
                     case OsmWaterLayer.LAND:
                     case OsmWaterLayer.BANK:
                         waterTile.setWaterType(localX, localZ, WaterRasterTile.LAND);
                         break;
                     case OsmWaterLayer.RIVER:
-                        waterTile.setWaterType(localX, localZ, WaterRasterTile.RIVER);
+                        if ((waterValue & OsmWaterLayer.CENTER_FLAG) != 0) {
+                            waterTile.setWaterType(localX, localZ, WaterRasterTile.RIVER_CENTER);
+                        } else {
+                            waterTile.setWaterType(localX, localZ, WaterRasterTile.RIVER);
+                        }
                         break;
                     case OsmWaterLayer.OCEAN:
                         waterTile.setWaterType(localX, localZ, WaterRasterTile.OCEAN);

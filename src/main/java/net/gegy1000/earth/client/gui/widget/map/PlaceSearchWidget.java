@@ -61,7 +61,11 @@ public class PlaceSearchWidget extends GuiTextField {
         if (!this.pause && !text.isEmpty()) {
             if (!text.equals(this.lastSearchText) && this.queriedSuggestions == null) {
                 this.suggestions.clear();
-                this.queriedSuggestions = this.executor.submit(() -> this.geocoder.suggest(text));
+                try {
+                    this.queriedSuggestions = this.executor.submit(() -> this.geocoder.suggest(text));
+                } catch (Exception e) {
+                    Terrarium.LOGGER.error("Failed to get geocoder suggestions", e);
+                }
                 this.lastSearchText = text;
             }
         } else {

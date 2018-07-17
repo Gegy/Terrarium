@@ -10,6 +10,7 @@ public class WaterRasterTile extends ShortRasterTile {
     public static final int LAND = 0;
     public static final int OCEAN = 1;
     public static final int RIVER = 2;
+    public static final int RIVER_CENTER = 3;
 
     public WaterRasterTile(short[] data, int width, int height) {
         super(data, width, height);
@@ -43,6 +44,6 @@ public class WaterRasterTile extends ShortRasterTile {
 
     public static boolean isWater(int value) {
         int type = value & WATER_TYPE_MASK;
-        return type == OCEAN || type == RIVER;
+        return type == OCEAN || type == RIVER || type == RIVER_CENTER;
     }
 }
