@@ -7,8 +7,8 @@ import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectWeightedLayer;
 import net.gegy1000.terrarium.server.world.cover.generator.primer.CoverPrimer;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ByteRasterTile;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.UnsignedByteRasterTile;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Biomes;
 import net.minecraft.world.World;
@@ -71,9 +71,9 @@ public class BareCover extends EarthCoverType {
         @Override
         public void decorate(int originX, int originZ, CoverPrimer primer, Random random) {
             ShortRasterTile heightRaster = this.context.getHeightRaster();
-            ByteRasterTile slopeRaster = this.context.getSlopeRaster();
+            UnsignedByteRasterTile slopeRaster = this.context.getSlopeRaster();
             this.iterateChunk((localX, localZ) -> {
-                int slope = slopeRaster.getUnsigned(localX, localZ);
+                int slope = slopeRaster.getByte(localX, localZ);
                 if (slope < MOUNTAINOUS_SLOPE && random.nextInt(250) == 0) {
                     int y = heightRaster.getShort(localX, localZ);
                     primer.setBlockState(localX, y + 1, localZ, DEAD_BUSH);
@@ -82,15 +82,15 @@ public class BareCover extends EarthCoverType {
         }
 
         private class Provider implements BlockProvider {
-            private final ByteRasterTile slopeRaster;
+            private final UnsignedByteRasterTile slopeRaster;
 
-            private Provider(ByteRasterTile slopeRaster) {
+            private Provider(UnsignedByteRasterTile slopeRaster) {
                 this.slopeRaster = slopeRaster;
             }
 
             @Override
             public IBlockState provideBlock(int sampledValue, int localX, int localZ) {
-                int slope = this.slopeRaster.getUnsigned(localX, localZ);
+                int slope = this.slopeRaster.getByte(localX, localZ);
                 switch (sampledValue) {
                     case LAYER_GRAVEL:
                         return slope >= MOUNTAINOUS_SLOPE ? COBBLESTONE : GRAVEL;
@@ -111,12 +111,12 @@ public class BareCover extends EarthCoverType {
         @Override
         public void decorate(int originX, int originZ, Random random) {
             World world = this.context.getWorld();
-            ByteRasterTile slopeRaster = this.context.getSlopeRaster();
+            UnsignedByteRasterTile slopeRaster = this.context.getSlopeRaster();
 
             this.preventIntersection(5);
 
             this.decorateScatter(random, originX, originZ, this.range(random, -16, 1), (pos, localX, localZ) -> {
-                if (slopeRaster.getUnsigned(localX, localZ) < MOUNTAINOUS_SLOPE) {
+                if (slopeRaster.getByte(localX, localZ) < MOUNTAINOUS_SLOPE) {
                     OAK_TALL_SHRUB.generate(world, random, pos);
                 }
             });

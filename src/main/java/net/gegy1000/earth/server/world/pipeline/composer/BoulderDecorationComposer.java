@@ -5,7 +5,7 @@ import net.gegy1000.terrarium.server.world.cover.CoverGenerator;
 import net.gegy1000.terrarium.server.world.feature.BoulderGenerator;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ByteRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.UnsignedByteRasterTile;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.block.BlockStone;
 import net.minecraft.init.Blocks;
@@ -20,12 +20,12 @@ public class BoulderDecorationComposer implements DecorationComposer {
 
     private static final BoulderGenerator BOULDER_GENERATOR = new BoulderGenerator(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.ANDESITE), 0);
 
-    private final RegionComponentType<ByteRasterTile> slopeComponent;
+    private final RegionComponentType<UnsignedByteRasterTile> slopeComponent;
 
     private final PseudoRandomMap decorationMap;
     private final Random random;
 
-    public BoulderDecorationComposer(World world, RegionComponentType<ByteRasterTile> slopeComponent) {
+    public BoulderDecorationComposer(World world, RegionComponentType<UnsignedByteRasterTile> slopeComponent) {
         this.slopeComponent = slopeComponent;
 
         this.decorationMap = new PseudoRandomMap(world, DECORATION_SEED);
@@ -40,14 +40,14 @@ public class BoulderDecorationComposer implements DecorationComposer {
         this.decorationMap.initPosSeed(globalX, globalZ);
         this.random.setSeed(this.decorationMap.next());
 
-        ByteRasterTile slopeRaster = regionHandler.getCachedChunkRaster(this.slopeComponent);
+        UnsignedByteRasterTile slopeRaster = regionHandler.getCachedChunkRaster(this.slopeComponent);
 
         for (int i = 0; i < 2; i++) {
             int localX = this.random.nextInt(16);
             int localZ = this.random.nextInt(16);
 
             if (this.random.nextInt(8) == 0) {
-                if ((slopeRaster.getUnsigned(localX, localZ) & 0xFF) >= CoverGenerator.MOUNTAINOUS_SLOPE || this.random.nextInt(60) == 0) {
+                if (slopeRaster.getByte(localX, localZ) >= CoverGenerator.MOUNTAINOUS_SLOPE || this.random.nextInt(60) == 0) {
                     int spawnX = localX + globalX + 8;
                     int spawnZ = localZ + globalZ + 8;
 

@@ -3,13 +3,13 @@ package net.gegy1000.earth.server.world.cover.type;
 import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthCoverType;
 import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
-import net.gegy1000.terrarium.server.world.cover.CoverBiomeSelectors;
 import net.gegy1000.terrarium.server.world.cover.CoverDecorationGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectionSeedLayer;
 import net.gegy1000.terrarium.server.world.cover.generator.primer.CoverPrimer;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Biomes;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.layer.GenLayer;
 import net.minecraft.world.gen.layer.GenLayerFuzzyZoom;
@@ -33,7 +33,7 @@ public class FlowerFieldCover extends EarthCoverType {
 
     @Override
     public Biome getBiome(EarthCoverContext context, int x, int z) {
-        return CoverBiomeSelectors.GRASSLAND_SELECTOR.apply(context.getZone(x, z));
+        return Biomes.BIRCH_FOREST;
     }
 
     private static class Surface extends EarthSurfaceGenerator {

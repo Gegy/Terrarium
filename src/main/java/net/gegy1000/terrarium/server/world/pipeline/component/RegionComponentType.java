@@ -4,10 +4,10 @@ import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.util.ArrayUtils;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.TerrariumCoverTypes;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ByteRasterTile;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.TiledDataAccess;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.UnsignedByteRasterTile;
 import net.minecraft.util.ResourceLocation;
 
 public abstract class RegionComponentType<T extends TiledDataAccess> {
@@ -19,11 +19,11 @@ public abstract class RegionComponentType<T extends TiledDataAccess> {
         }
     };
 
-    public static final RegionComponentType<ByteRasterTile> SLOPE = new RegionComponentType<ByteRasterTile>(new ResourceLocation(Terrarium.MODID, "slope"), ByteRasterTile.class) {
+    public static final RegionComponentType<UnsignedByteRasterTile> SLOPE = new RegionComponentType<UnsignedByteRasterTile>(new ResourceLocation(Terrarium.MODID, "slope"), UnsignedByteRasterTile.class) {
         @Override
-        public ByteRasterTile createDefaultData(int width, int height) {
+        public UnsignedByteRasterTile createDefaultData(int width, int height) {
             byte[] data = new byte[width * height];
-            return new ByteRasterTile(data, width, height);
+            return new UnsignedByteRasterTile(data, width, height);
         }
     };
 

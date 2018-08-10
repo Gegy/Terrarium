@@ -25,8 +25,8 @@ import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.CoverDec
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.BedrockSurfaceComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.CoverSurfaceComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.HeightmapSurfaceComposer;
-import net.gegy1000.terrarium.server.world.pipeline.layer.ConstantBytePopulator;
 import net.gegy1000.terrarium.server.world.pipeline.layer.ConstantShortProducer;
+import net.gegy1000.terrarium.server.world.pipeline.layer.ConstantUnsignedBytePopulator;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
@@ -100,7 +100,7 @@ public class CoverDebugWorldType extends TerrariumWorldType {
         public TerrariumDataProvider buildDataProvider() {
             return TerrariumDataProvider.builder()
                     .withComponent(RegionComponentType.HEIGHT, new ConstantShortProducer((short) 62))
-                    .withComponent(RegionComponentType.SLOPE, new ConstantBytePopulator((byte) 0))
+                    .withComponent(RegionComponentType.SLOPE, new ConstantUnsignedBytePopulator(0))
                     .withComponent(RegionComponentType.COVER, new DebugCoverPopulator())
                     .build();
         }

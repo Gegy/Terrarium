@@ -27,9 +27,9 @@ import net.minecraft.world.gen.layer.IntCache;
 import java.util.Random;
 
 public abstract class CoverGenerator<T extends CoverGenerationContext> {
-    public static final int MOUNTAINOUS_SLOPE = 20;
+    public static final int MOUNTAINOUS_SLOPE = 40;
     public static final int CLIFF_SLOPE = 70;
-    public static final int EXTREME_CLIFF_SLOPE = 150;
+    public static final int EXTREME_CLIFF_SLOPE = 180;
 
     protected static final IBlockState GRASS = Blocks.GRASS.getDefaultState();
     protected static final IBlockState COARSE_DIRT = Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT);

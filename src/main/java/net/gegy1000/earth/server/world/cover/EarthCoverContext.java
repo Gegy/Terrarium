@@ -4,9 +4,9 @@ import net.gegy1000.terrarium.server.world.chunk.PseudoRandomMap;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.cover.CoverGenerationContext;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ByteRasterTile;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.UnsignedByteRasterTile;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.world.World;
 
@@ -16,11 +16,11 @@ public class EarthCoverContext implements CoverGenerationContext {
     private final World world;
     private final RegionComponentType<ShortRasterTile> heightComponent;
     private final RegionComponentType<CoverRasterTile> coverComponent;
-    private final RegionComponentType<ByteRasterTile> slopeComponent;
+    private final RegionComponentType<UnsignedByteRasterTile> slopeComponent;
 
     private ShortRasterTile heightTile;
     private CoverRasterTile coverTile;
-    private ByteRasterTile slopeTile;
+    private UnsignedByteRasterTile slopeTile;
 
     private final CoordinateState latLngCoordinate;
 
@@ -32,7 +32,7 @@ public class EarthCoverContext implements CoverGenerationContext {
             World world,
             RegionComponentType<ShortRasterTile> heightComponent,
             RegionComponentType<CoverRasterTile> coverComponent,
-            RegionComponentType<ByteRasterTile> slopeComponent,
+            RegionComponentType<UnsignedByteRasterTile> slopeComponent,
             CoordinateState latLngCoordinate,
             boolean scatterZone) {
         this.world = world;
@@ -72,7 +72,7 @@ public class EarthCoverContext implements CoverGenerationContext {
         return this.coverTile;
     }
 
-    public ByteRasterTile getSlopeRaster() {
+    public UnsignedByteRasterTile getSlopeRaster() {
         return this.slopeTile;
     }
 

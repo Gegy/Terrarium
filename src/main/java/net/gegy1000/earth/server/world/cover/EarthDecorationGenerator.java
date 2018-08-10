@@ -15,7 +15,7 @@ public abstract class EarthDecorationGenerator extends CoverDecorationGenerator<
     protected boolean tryPlace(Random random, BlockPos pos, int localX, int localZ) {
         boolean place = super.tryPlace(random, pos, localX, localZ);
         if (place) {
-            int slope = this.context.getSlopeRaster().getUnsigned(localX, localZ);
+            int slope = this.context.getSlopeRaster().getByte(localX, localZ);
             return slope < MOUNTAINOUS_SLOPE || random.nextInt(2) == 0;
         }
         return false;

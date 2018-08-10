@@ -41,6 +41,24 @@ public class DebugImageWriter {
         }
     }
 
+    public static void write(String fileName, byte[] buffer, ColorSelector<Byte> selector, int width, int height) {
+        if (ENABLED) {
+            BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    byte sampledValue = buffer[x + y * width];
+                    image.setRGB(x, y, selector.getColor(sampledValue));
+                }
+            }
+
+            try {
+                ImageIO.write(image, "png", new File(DEBUG_OUTPUT, fileName + ".png"));
+            } catch (IOException e) {
+                Terrarium.LOGGER.error("Failed to write debug image {}", fileName, e);
+            }
+        }
+    }
+
     public static void write(String fileName, short[] buffer, ColorSelector<Short> selector, int width, int height) {
         if (ENABLED) {
             BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);

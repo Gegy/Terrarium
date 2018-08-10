@@ -66,14 +66,14 @@ import net.gegy1000.terrarium.server.world.pipeline.composer.surface.CaveSurface
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.CoverSurfaceComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.HeightmapSurfaceComposer;
 import net.gegy1000.terrarium.server.world.pipeline.layer.CoverTileSampleLayer;
-import net.gegy1000.terrarium.server.world.pipeline.layer.ScaledByteLayer;
 import net.gegy1000.terrarium.server.world.pipeline.layer.ScaledCoverLayer;
 import net.gegy1000.terrarium.server.world.pipeline.layer.ScaledShortLayer;
+import net.gegy1000.terrarium.server.world.pipeline.layer.ScaledUnsignedByteLater;
 import net.gegy1000.terrarium.server.world.pipeline.layer.ShortTileSampleLayer;
 import net.gegy1000.terrarium.server.world.pipeline.layer.SlopeProducerLayer;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ByteRasterTile;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.UnsignedByteRasterTile;
 import net.minecraft.client.gui.GuiCreateWorld;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ResourceLocation;
@@ -265,7 +265,7 @@ public class EarthWorldType extends TerrariumWorldType {
                     .withComponent(EarthComponentTypes.WATER, waterProducer)
                     .withAdapter(new OsmAreaCoverAdapter(this.earthCoordinates, EarthComponentTypes.OSM, RegionComponentType.COVER))
                     .withAdapter(new WaterApplyAdapter(this.earthCoordinates, EarthComponentTypes.WATER, RegionComponentType.HEIGHT, RegionComponentType.COVER))
-                    .withAdapter(new HeightNoiseAdapter(this.world, RegionComponentType.HEIGHT, EarthComponentTypes.WATER, 2, 0.08, this.settings.getDouble(NOISE_SCALE)))
+                    .withAdapter(new HeightNoiseAdapter(this.world, RegionComponentType.HEIGHT, EarthComponentTypes.WATER, 2, 0.04, this.settings.getDouble(NOISE_SCALE)))
                     .withAdapter(new HeightTransformAdapter(this.world, RegionComponentType.HEIGHT, this.settings.getDouble(HEIGHT_SCALE) * this.worldScale, heightOrigin))
                     .withAdapter(new WaterLevelingAdapter(EarthComponentTypes.WATER, RegionComponentType.HEIGHT, heightOrigin + 1))
                     .withAdapter(new WaterCarveAdapter(EarthComponentTypes.WATER, RegionComponentType.HEIGHT, this.settings.getInteger(OCEAN_DEPTH)))
@@ -280,9 +280,9 @@ public class EarthWorldType extends TerrariumWorldType {
             return new ScaledShortLayer(heightSampler, this.srtmRaster, interpolationMethod);
         }
 
-        private DataLayer<ByteRasterTile> createSlopeProducer(DataLayer<ShortRasterTile> heightSampler) {
-            DataLayer<ByteRasterTile> layer = new SlopeProducerLayer(heightSampler);
-            layer = new ScaledByteLayer(layer, this.srtmRaster, Interpolation.Method.LINEAR);
+        private DataLayer<UnsignedByteRasterTile> createSlopeProducer(DataLayer<ShortRasterTile> heightSampler) {
+            DataLayer<UnsignedByteRasterTile> layer = new SlopeProducerLayer(heightSampler);
+            layer = new ScaledUnsignedByteLater(layer, this.srtmRaster, Interpolation.Method.LINEAR);
             return layer;
         }
 

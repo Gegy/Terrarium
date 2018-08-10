@@ -5,21 +5,21 @@ import net.minecraft.util.math.MathHelper;
 
 import java.util.Arrays;
 
-public class ByteRasterTile implements TiledDataAccess, NumberRasterTile<Byte> {
+public class UnsignedByteRasterTile implements TiledDataAccess, NumberRasterTile<Integer> {
     private final byte[] data;
     private final int width;
     private final int height;
 
-    public ByteRasterTile(byte[] data, int width, int height) {
+    public UnsignedByteRasterTile(byte[] data, int width, int height) {
         if (data.length != width * height) {
-            throw new IllegalArgumentException("Given width and height do not match cover length!");
+            throw new IllegalArgumentException("Given width and height do not match data length!");
         }
         this.data = data;
         this.width = width;
         this.height = height;
     }
 
-    public ByteRasterTile(DataView view) {
+    public UnsignedByteRasterTile(DataView view) {
         this.data = new byte[view.getWidth() * view.getHeight()];
         this.width = view.getWidth();
         this.height = view.getHeight();
@@ -27,34 +27,30 @@ public class ByteRasterTile implements TiledDataAccess, NumberRasterTile<Byte> {
 
     @Override
     @Deprecated
-    public void set(int x, int z, Byte value) {
-        this.data[x + z * this.width] = value;
+    public void set(int x, int z, Integer value) {
+        this.setByte(x, z, value);
     }
 
-    public void setByte(int x, int z, byte value) {
-        this.data[x + z * this.width] = value;
+    public void setByte(int x, int z, int value) {
+        this.data[x + z * this.width] = (byte) (value & 0xFF);
     }
 
     @Override
     @Deprecated
-    public Byte get(int x, int z) {
+    public Integer get(int x, int z) {
         return this.getByte(x, z);
     }
 
-    public byte getByte(int x, int y) {
-        return this.data[x + y * this.width];
-    }
-
-    public int getUnsigned(int x, int y) {
-        return this.getByte(x, y) & 0xFF;
+    public int getByte(int x, int y) {
+        return this.data[x + y * this.width] & 0xFF;
     }
 
     @Override
-    public Byte[] getData() {
+    public Integer[] getData() {
         byte[] data = this.getByteData();
-        Byte[] result = new Byte[data.length];
+        Integer[] result = new Integer[data.length];
         for (int i = 0; i < data.length; i++) {
-            result[i] = data[i];
+            result[i] = data[i] & 0xFF;
         }
         return result;
     }
@@ -76,7 +72,7 @@ public class ByteRasterTile implements TiledDataAccess, NumberRasterTile<Byte> {
     @Override
     public void setDouble(int x, int y, double value) {
         int rounded = (int) value;
-        this.setByte(x, y, (byte) MathHelper.clamp(rounded, Byte.MIN_VALUE, Byte.MAX_VALUE));
+        this.setByte(x, y, (byte) MathHelper.clamp(rounded, 0, 255));
     }
 
     @Override
@@ -85,7 +81,7 @@ public class ByteRasterTile implements TiledDataAccess, NumberRasterTile<Byte> {
     }
 
     @Override
-    public ByteRasterTile copy() {
-        return new ByteRasterTile(Arrays.copyOf(this.data, this.data.length), this.width, this.height);
+    public UnsignedByteRasterTile copy() {
+        return new UnsignedByteRasterTile(Arrays.copyOf(this.data, this.data.length), this.width, this.height);
     }
 }
