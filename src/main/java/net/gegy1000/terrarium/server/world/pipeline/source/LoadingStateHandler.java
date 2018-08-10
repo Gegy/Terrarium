@@ -65,7 +65,10 @@ public class LoadingStateHandler {
         }
 
         if (time - lastStateBroadcastTime > STATE_BROADCAST_INTERVAL) {
-            LoadingState currentState = !CURRENT_STATE.isEmpty() ? CURRENT_STATE.getLast() : null;
+            LoadingState currentState;
+            synchronized (LOCK) {
+                currentState = !CURRENT_STATE.isEmpty() ? CURRENT_STATE.getLast() : null;
+            }
             if (lastBroadcastState != currentState) {
                 broadcastCurrentState(currentState);
                 lastStateBroadcastTime = time;
@@ -96,8 +99,10 @@ public class LoadingStateHandler {
 
     @Nullable
     public static LoadingState getDisplayState() {
-        if (!CURRENT_STATE.isEmpty()) {
-            return CURRENT_STATE.getLast();
+        synchronized (LOCK) {
+            if (!CURRENT_STATE.isEmpty()) {
+                return CURRENT_STATE.getLast();
+            }
         }
         return remoteState;
     }
