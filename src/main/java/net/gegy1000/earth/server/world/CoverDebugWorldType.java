@@ -30,8 +30,11 @@ import net.gegy1000.terrarium.server.world.pipeline.layer.ConstantUnsignedBytePo
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -47,6 +50,11 @@ public class CoverDebugWorldType extends TerrariumWorldType {
     @Override
     public TerrariumGeneratorInitializer createInitializer(World world, TerrariumChunkGenerator chunkGenerator, GenerationSettings settings) {
         return new Initializer(world);
+    }
+
+    @Override
+    public Collection<ICapabilityProvider> createCapabilities(World world, GenerationSettings settings) {
+        return Collections.emptyList();
     }
 
     @Override

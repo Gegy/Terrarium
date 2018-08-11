@@ -61,6 +61,7 @@ public class ContainerUiInventory implements IInventory {
     }
 
     private void handleElementClick(int index) {
+        this.player.inventory.setItemStack(ItemStack.EMPTY);
         ContainerUi.Element element = this.elements.get(index);
         if (element != null) {
             this.player.closeScreen();

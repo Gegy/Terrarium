@@ -12,33 +12,25 @@ import net.gegy1000.terrarium.server.world.pipeline.composer.structure.Structure
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.SurfaceComposer;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.init.Biomes;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.gen.IChunkGenerator;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class BasicTerrariumGenerator implements TerrariumGenerator {
     private final ChunkCompositionProcedure compositionProcedure;
     private final Coordinate spawnPosition;
-    private final ICapabilityProvider[] capabilities;
 
-    private BasicTerrariumGenerator(ChunkCompositionProcedure compositionProcedure, Coordinate spawnPosition, ICapabilityProvider[] capabilities) {
+    private BasicTerrariumGenerator(ChunkCompositionProcedure compositionProcedure, Coordinate spawnPosition) {
         this.compositionProcedure = compositionProcedure;
         this.spawnPosition = spawnPosition;
-        this.capabilities = capabilities;
     }
 
     public static Builder builder() {
@@ -55,36 +47,12 @@ public class BasicTerrariumGenerator implements TerrariumGenerator {
         return this.spawnPosition;
     }
 
-    @Override
-    public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing facing) {
-        for (ICapabilityProvider provider : this.capabilities) {
-            if (provider.hasCapability(capability, facing)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Nullable
-    @Override
-    public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing) {
-        for (ICapabilityProvider provider : this.capabilities) {
-            T provided = provider.getCapability(capability, facing);
-            if (provided != null) {
-                return provided;
-            }
-        }
-        return null;
-    }
-
     public static class Builder {
         private final ImmutableList.Builder<SurfaceComposer> surfaceComposers = new ImmutableList.Builder<>();
         private final ImmutableList.Builder<StructureComposer> structureComposers = new ImmutableList.Builder<>();
         private final ImmutableList.Builder<DecorationComposer> decorationComposers = new ImmutableList.Builder<>();
         @Nullable
         private BiomeComposer biomeComposer;
-
-        private final List<ICapabilityProvider> capabilities = new ArrayList<>();
 
         private Coordinate spawnPosition;
 
@@ -116,15 +84,9 @@ public class BasicTerrariumGenerator implements TerrariumGenerator {
             return this;
         }
 
-        public Builder withCapability(ICapabilityProvider provider) {
-            this.capabilities.add(provider);
-            return this;
-        }
-
         public BasicTerrariumGenerator build() {
             CompositionProcedure compositionProcedure = new CompositionProcedure(this.surfaceComposers.build(), this.structureComposers.build(), this.decorationComposers.build(), this.biomeComposer);
-            ICapabilityProvider[] capabilities = this.capabilities.toArray(new ICapabilityProvider[0]);
-            return new BasicTerrariumGenerator(compositionProcedure, this.spawnPosition, capabilities);
+            return new BasicTerrariumGenerator(compositionProcedure, this.spawnPosition);
         }
     }
 

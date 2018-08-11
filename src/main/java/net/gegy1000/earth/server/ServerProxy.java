@@ -14,4 +14,7 @@ public class ServerProxy {
 
     public void openMapGui(EarthMapGuiMessage.Type type, double latitude, double longitude) {
     }
+
+    public void displayPanorama() {
+    }
 }

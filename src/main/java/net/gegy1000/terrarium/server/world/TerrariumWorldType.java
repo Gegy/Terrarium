@@ -22,12 +22,14 @@ import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.biome.BiomeProviderSingle;
 import net.minecraft.world.gen.IChunkGenerator;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Collection;
 
 public abstract class TerrariumWorldType extends WorldType {
     private static Field nameField;
@@ -71,6 +73,8 @@ public abstract class TerrariumWorldType extends WorldType {
     }
 
     public abstract TerrariumGeneratorInitializer createInitializer(World world, TerrariumChunkGenerator chunkGenerator, GenerationSettings settings);
+
+    public abstract Collection<ICapabilityProvider> createCapabilities(World world, GenerationSettings settings);
 
     protected abstract TerrariumCustomization buildCustomization();
 

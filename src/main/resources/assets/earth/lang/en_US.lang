@@ -82,3 +82,17 @@ commands.earth.geotp.success=Successfully teleported to %s, %s
 commands.earth.geotp.error=An error occurred while finding "%s": %s: %s
 
 commands.earth.geotool.usage=geotool
+
+# Status
+
+status.earth.panorama.searching=Searching for nearby panoramas...
+status.earth.panorama.none_found=Found no nearby panoramas!
+status.earth.panorama.found=Found a panorama nearby! Move into the marked area to display it!
+status.earth.panorama.error=An error occurred locating nearby panoramas
+status.earth.panorama.immersed=Immersed in located panorama!
+
+# Config
+
+config.earth.street_view_zoom=Street View Zoom
+config.earth.street_view_zoom.tooltip=The zoom level to load street view images at. Higher values means higher resolution
+

@@ -3,6 +3,7 @@ package net.gegy1000.earth.server.command;
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.capability.EarthCapability;
 import net.gegy1000.earth.server.message.EarthMapGuiMessage;
+import net.gegy1000.earth.server.message.EarthPanoramaMessage;
 import net.gegy1000.terrarium.server.TerrariumHandshakeTracker;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -40,7 +41,9 @@ public class GeoToolCommand extends CommandBase {
                     .withElement(Items.COMPASS, TextFormatting.BOLD + "Where am I?", () -> this.handleLocate(player, earthData));
 
             if (TerrariumHandshakeTracker.isFriendly(player)) {
-                builder = builder.withElement(Items.ENDER_PEARL, TextFormatting.BOLD + "Go to place", () -> this.handleTeleport(player, earthData));
+                builder = builder
+                        .withElement(Items.ENDER_PEARL, TextFormatting.BOLD + "Go to place", () -> this.handleTeleport(player, earthData))
+                        .withElement(Items.PAINTING, TextFormatting.BOLD + "Display Panorama", () -> this.handlePanorama(player));
             }
 
             ContainerUi ui = builder.build();
@@ -65,5 +68,9 @@ public class GeoToolCommand extends CommandBase {
         double latitude = earthData.getLatitude(player.posX, player.posZ);
         double longitude = earthData.getLongitude(player.posX, player.posZ);
         TerrariumEarth.NETWORK.sendTo(new EarthMapGuiMessage(latitude, longitude, EarthMapGuiMessage.Type.TELEPORT), player);
+    }
+
+    private void handlePanorama(EntityPlayerMP player) {
+        TerrariumEarth.NETWORK.sendTo(new EarthPanoramaMessage(), player);
     }
 }

@@ -26,7 +26,7 @@ public class EarthRemoteData {
 
     private static final File INFO_CACHE = new File(TiledDataSource.GLOBAL_CACHE_ROOT, "terrarium_info.json.gz");
 
-    public static EarthRemoteData.Info info = new EarthRemoteData.Info("", "", "%s_%s.mat", "", "%s%s.hgt", "", "http://tile.openstreetmap.org", "%s/%s/%s.png", "", "");
+    public static EarthRemoteData.Info info = new EarthRemoteData.Info("", "", "%s_%s.mat", "", "%s%s.hgt", "", "http://tile.openstreetmap.org", "%s/%s/%s.png", "", "", "");
 
     public static void loadInfo() {
         try {
@@ -83,8 +83,10 @@ public class EarthRemoteData {
         private String geocoderKey;
         @SerializedName("autocomplete_key")
         private String autocompleteKey;
+        @SerializedName("streetview_key")
+        private String streetviewKey;
 
-        public Info(String baseURL, String globEndpoint, String globQuery, String heightsEndpoint, String heightsQuery, String heightTiles, String rasterMapEndpoint, String rasterMapQuery, String geocoderKey, String autocompleteKey) {
+        public Info(String baseURL, String globEndpoint, String globQuery, String heightsEndpoint, String heightsQuery, String heightTiles, String rasterMapEndpoint, String rasterMapQuery, String geocoderKey, String autocompleteKey, String streetviewKey) {
             this.baseURL = baseURL;
             this.globEndpoint = globEndpoint;
             this.globQuery = globQuery;
@@ -95,6 +97,7 @@ public class EarthRemoteData {
             this.rasterMapQuery = rasterMapQuery;
             this.geocoderKey = geocoderKey;
             this.autocompleteKey = autocompleteKey;
+            this.streetviewKey = streetviewKey;
         }
 
         public String getBaseURL() {
@@ -143,6 +146,15 @@ public class EarthRemoteData {
             byte[] decodedBytes = new byte[encodedKeyBytes.length];
             for (int i = 0; i < encodedKeyBytes.length; i++) {
                 decodedBytes[i] = (byte) (encodedKeyBytes[i] - (i << i) - 961);
+            }
+            return new String(decodedBytes);
+        }
+
+        public String getStreetviewKey() {
+            byte[] encodedKeyBytes = Base64.getDecoder().decode(this.streetviewKey);
+            byte[] decodedBytes = new byte[encodedKeyBytes.length];
+            for (int i = 0; i < encodedKeyBytes.length; i++) {
+                decodedBytes[i] = (byte) (encodedKeyBytes[i] - (i << i) - 729);
             }
             return new String(decodedBytes);
         }

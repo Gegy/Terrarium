@@ -80,10 +80,7 @@ public interface TerrariumWorldData extends ICapabilityProvider {
 
         @Override
         public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
-            if (capability == TerrariumCapabilities.worldDataCapability) {
-                return true;
-            }
-            return this.generator.hasCapability(capability, facing);
+            return capability == TerrariumCapabilities.worldDataCapability;
         }
 
         @Override
@@ -91,7 +88,7 @@ public interface TerrariumWorldData extends ICapabilityProvider {
             if (capability == TerrariumCapabilities.worldDataCapability) {
                 return TerrariumCapabilities.worldDataCapability.cast(this);
             }
-            return this.generator.getCapability(capability, facing);
+            return null;
         }
     }
 }

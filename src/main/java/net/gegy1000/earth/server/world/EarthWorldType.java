@@ -1,5 +1,6 @@
 package net.gegy1000.earth.server.world;
 
+import com.google.common.collect.Lists;
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.client.gui.EarthCustomizationGui;
 import net.gegy1000.earth.server.capability.EarthCapability;
@@ -78,10 +79,12 @@ import net.minecraft.client.gui.GuiCreateWorld;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -122,6 +125,12 @@ public class EarthWorldType extends TerrariumWorldType {
     public TerrariumGeneratorInitializer createInitializer(World world, TerrariumChunkGenerator chunkGenerator, GenerationSettings settings) {
         world.setSeaLevel(settings.getInteger(HEIGHT_ORIGIN));
         return new Initializer(world, chunkGenerator, settings);
+    }
+
+    @Override
+    public Collection<ICapabilityProvider> createCapabilities(World world, GenerationSettings settings) {
+        CoordinateState earthCoordinates = new LatLngCoordinateState(settings.getDouble(WORLD_SCALE) * SRTM_SCALE * 1200.0);
+        return Lists.newArrayList(new EarthCapability.Impl(earthCoordinates));
     }
 
     @Override
@@ -196,8 +205,7 @@ public class EarthWorldType extends TerrariumWorldType {
                     .withSurfaceComposer(new CoverSurfaceComposer(this.world, RegionComponentType.COVER, coverTypes, !preview && this.settings.getBoolean(ENABLE_DECORATION), Blocks.STONE.getDefaultState()))
                     .withSurfaceComposer(new BedrockSurfaceComposer(this.world, Blocks.BEDROCK.getDefaultState(), Math.min(heightOrigin - 1, 5)))
                     .withBiomeComposer(new CoverBiomeComposer(RegionComponentType.COVER, coverTypes))
-                    .withSpawnPosition(new Coordinate(this.earthCoordinates, this.settings.getDouble(SPAWN_LATITUDE), this.settings.getDouble(SPAWN_LONGITUDE)))
-                    .withCapability(new EarthCapability.Impl(this.earthCoordinates));
+                    .withSpawnPosition(new Coordinate(this.earthCoordinates, this.settings.getDouble(SPAWN_LATITUDE), this.settings.getDouble(SPAWN_LONGITUDE)));
 
             if (!preview) {
                 if (this.settings.getBoolean(ENABLE_CAVE_GENERATION)) {
