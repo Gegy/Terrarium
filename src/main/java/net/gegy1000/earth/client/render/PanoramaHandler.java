@@ -201,7 +201,7 @@ public class PanoramaHandler {
 
         @Override
         public void renderWorld(Minecraft mc, float partialTicks, float deltaTicks) {
-            GlStateManager.disableCull();
+            GlStateManager.cullFace(GlStateManager.CullFace.FRONT);
             GlStateManager.disableLighting();
             GlStateManager.disableDepth();
             GlStateManager.enableBlend();
@@ -215,6 +215,8 @@ public class PanoramaHandler {
             double renderZ = this.originZ - TileEntityRendererDispatcher.staticPlayerZ;
 
             GlStateManager.translate(renderX, renderY, renderZ);
+
+            GlStateManager.scale(1.0F, 1.0F, -1.0F);
             GlStateManager.rotate(-90.0F, 0.0F, 1.0F, 0.0F);
             GlStateManager.rotate(-90.0F, 1.0F, 0.0F, 0.0F);
 
@@ -243,10 +245,10 @@ public class PanoramaHandler {
 
             GlStateManager.popMatrix();
 
+            GlStateManager.cullFace(GlStateManager.CullFace.BACK);
             GlStateManager.disableBlend();
             GlStateManager.enableDepth();
             GlStateManager.enableLighting();
-            GlStateManager.enableCull();
         }
 
         @Override
