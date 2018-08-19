@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiCreateWorld;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -59,6 +60,15 @@ public class ClientProxy extends ServerProxy {
             Minecraft.getMinecraft().addScheduledTask(task);
         } else {
             super.scheduleTask(ctx, task);
+        }
+    }
+
+    @Override
+    public World getWorld(MessageContext ctx) {
+        if (ctx.side.isClient()) {
+            return Minecraft.getMinecraft().world;
+        } else {
+            return super.getWorld(ctx);
         }
     }
 

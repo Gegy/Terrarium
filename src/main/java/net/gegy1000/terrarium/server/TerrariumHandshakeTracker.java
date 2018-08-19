@@ -5,7 +5,6 @@ import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumExternalCapProvider;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -28,10 +27,9 @@ public class TerrariumHandshakeTracker {
         FRIENDLY_PLAYERS.add(player);
     }
 
-    public static void provideSettings(GenerationSettings settings) {
+    public static void provideSettings(World world, GenerationSettings settings) {
         providedSettings = settings;
 
-        World world = Minecraft.getMinecraft().world;
         if (world == null || !(world.getWorldType() instanceof TerrariumWorldType)) {
             return;
         }

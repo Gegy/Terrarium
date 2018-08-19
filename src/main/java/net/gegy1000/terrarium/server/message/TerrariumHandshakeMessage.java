@@ -53,7 +53,7 @@ public class TerrariumHandshakeMessage implements IMessage {
                     return new TerrariumHandshakeMessage(worldData.getSettings());
                 }
             } else {
-                Terrarium.PROXY.scheduleTask(ctx, () -> TerrariumHandshakeTracker.provideSettings(message.settings));
+                Terrarium.PROXY.scheduleTask(ctx, () -> TerrariumHandshakeTracker.provideSettings(Terrarium.PROXY.getWorld(ctx), message.settings));
             }
             return null;
         }
