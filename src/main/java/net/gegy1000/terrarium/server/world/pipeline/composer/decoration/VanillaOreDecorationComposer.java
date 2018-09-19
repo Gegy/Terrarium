@@ -1,14 +1,12 @@
 package net.gegy1000.terrarium.server.world.pipeline.composer.decoration;
 
-import net.gegy1000.earth.server.EarthDecorationEventHandler;
 import net.gegy1000.terrarium.Terrarium;
+import net.gegy1000.terrarium.server.world.chunk.populate.PopulateChunk;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeDecorator;
-import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Random;
 
@@ -30,15 +28,16 @@ public class VanillaOreDecorationComposer extends VanillaDecorationComposer {
     }
 
     @Override
-    protected void composeDecoration(IChunkGenerator generator, World world, int chunkX, int chunkZ, Biome biome) {
-        if (generateOres != null) {
-            try {
-                EarthDecorationEventHandler.allowOreGeneration = true;
-                generateOres.invoke(biome.decorator, world, this.random);
-                EarthDecorationEventHandler.allowOreGeneration = false;
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                Terrarium.LOGGER.error("Failed to invoke ore generator", e);
-            }
-        }
+    protected void composeDecoration(World world, PopulateChunk chunk, Biome biome) {
+        // TODO: This won't work
+//        if (generateOres != null) {
+//            try {
+//                EarthDecorationEventHandler.allowOreGeneration = true;
+//                generateOres.invoke(biome.decorator, world, this.horizontalRandom);
+//                EarthDecorationEventHandler.allowOreGeneration = false;
+//            } catch (IllegalAccessException | InvocationTargetException e) {
+//                Terrarium.LOGGER.error("Failed to invoke ore generator", e);
+//            }
+//        }
     }
 }

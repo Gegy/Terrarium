@@ -6,8 +6,11 @@ import io.github.opencubicchunks.cubicchunks.api.worldgen.CubePrimer;
 import io.github.opencubicchunks.cubicchunks.api.worldgen.ICubeGenerator;
 import io.github.opencubicchunks.cubicchunks.api.worldgen.populator.CubePopulatorEvent;
 import mcp.MethodsReturnNonnullByDefault;
+import net.gegy1000.terrarium.server.world.chunk.populate.ColumnPopulateChunk;
+import net.gegy1000.terrarium.server.world.chunk.prime.CubePrimeChunk;
 import net.gegy1000.terrarium.server.world.generator.ChunkCompositionProcedure;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
+import net.minecraft.block.BlockFalling;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -35,8 +38,8 @@ public class ComposableCubeGenerator extends ComposableChunkGenerator implements
 
         ChunkCompositionProcedure compositionProcedure = this.compositionProcedure.get();
 
-        CubeComposeChunk chunk = new CubeComposeChunk(cubeX, cubeY, cubeZ, primer);
-        compositionProcedure.composeSurface(chunk, regionHandler);
+        CubePrimeChunk chunk = new CubePrimeChunk(new CubicPos(cubeX, cubeY, cubeZ), primer);
+        compositionProcedure.composeSurface(regionHandler, chunk);
 
         // TODO
 //        RegionGenerationHandler regionHandler = this.regionHandler.get();
@@ -56,6 +59,7 @@ public class ComposableCubeGenerator extends ComposableChunkGenerator implements
         }
     }
 
+    @Override
     public Biome[] provideBiomes(int chunkX, int chunkZ) {
         return this.world.getBiomeProvider().getBiomes(this.biomeBuffer, chunkX << 4, chunkZ << 4, 16, 16);
     }
@@ -63,6 +67,24 @@ public class ComposableCubeGenerator extends ComposableChunkGenerator implements
     @Override
     public void populate(ICube cube) {
         if (!MinecraftForge.EVENT_BUS.post(new CubePopulatorEvent(this.world, cube))) {
+            int globalX = cube.getX() << 4;
+            int globalZ = cube.getZ() << 4;
+
+            this.random.setSeed(cube.getX() * 341873128712L + cube.getZ() * 132897987541L);
+
+            BlockFalling.fallInstantly = true;
+
+            RegionGenerationHandler regionHandler = this.regionHandler.get();
+            regionHandler.prepareChunk(globalX + 8, globalZ + 8);
+
+            ChunkCompositionProcedure compositionProcedure = this.compositionProcedure.get();
+            CubicPos pos = new CubicPos(cube.getX(), cube.getY(), cube.getZ());
+            compositionProcedure.composeDecoration(this.world, regionHandler, new ColumnPopulateChunk(pos, this.world));
+
+            // TODO
+//            compositionProcedure.populateStructures(this.world, regionHandler, cube.getX(), cube.getZ());
+
+            BlockFalling.fallInstantly = false;
         }
     }
 

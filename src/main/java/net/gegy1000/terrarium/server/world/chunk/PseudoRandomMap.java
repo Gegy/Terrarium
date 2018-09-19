@@ -28,6 +28,18 @@ public class PseudoRandomMap {
         }
     }
 
+    public void initPosSeed(int x, int y, int z) {
+        this.currentSeed = this.seed;
+        for (int i = 0; i < 2; i++) {
+            this.currentSeed *= this.currentSeed * PRIME_1 + PRIME_2;
+            this.currentSeed += x;
+            this.currentSeed *= this.currentSeed * PRIME_1 + PRIME_2;
+            this.currentSeed += z;
+            this.currentSeed *= this.currentSeed * PRIME_1 + PRIME_2;
+            this.currentSeed += y;
+        }
+    }
+
     public int nextInt(int bound) {
         long next = (this.next() >> 24) % bound;
         if (next < 0) {

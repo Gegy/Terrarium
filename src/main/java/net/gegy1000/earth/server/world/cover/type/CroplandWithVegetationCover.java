@@ -4,7 +4,8 @@ import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthCoverType;
 import net.gegy1000.earth.server.world.cover.EarthDecorationGenerator;
 import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
-import net.gegy1000.terrarium.server.world.chunk.ComposeChunk;
+import net.gegy1000.terrarium.server.world.chunk.populate.PopulateChunk;
+import net.gegy1000.terrarium.server.world.chunk.prime.PrimeChunk;
 import net.gegy1000.terrarium.server.world.cover.CoverBiomeSelectors;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.ReplaceRandomLayer;
@@ -12,6 +13,7 @@ import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectionSeedLa
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.minecraft.block.BlockDoublePlant;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.layer.GenLayer;
@@ -78,7 +80,7 @@ public class CroplandWithVegetationCover extends EarthCoverType {
         }
 
         @Override
-        public void decorate(int originX, int originZ, ComposeChunk chunk, Random random) {
+        public void decorate(int originX, int originY, int originZ, PrimeChunk chunk, Random random) {
             ShortRasterTile heightRaster = this.context.getHeightRaster();
             int[] grassLayer = this.sampleChunk(this.grassSelector, originX, originZ);
 
@@ -102,13 +104,13 @@ public class CroplandWithVegetationCover extends EarthCoverType {
         }
 
         @Override
-        public void decorate(int originX, int originZ, Random random) {
+        public void decorate(PopulateChunk chunk, BlockPos origin, Random random) {
             World world = this.context.getWorld();
 
             this.preventIntersection(3);
 
-            this.decorateScatter(random, originX, originZ, this.range(random, -1, 2), (pos, localX, localZ) -> OAK_TALL_SHRUB.generate(world, random, pos));
-            this.decorateScatter(random, originX, originZ, this.range(random, 5, 8), (pos, localX, localZ) -> OAK_SMALL_SHRUB.generate(world, random, pos));
+            this.decorateScatter(random, chunk, origin, this.range(random, -1, 2), (pos, localX, localZ) -> OAK_TALL_SHRUB.generate(world, random, pos));
+            this.decorateScatter(random, chunk, origin, this.range(random, 5, 8), (pos, localX, localZ) -> OAK_SMALL_SHRUB.generate(world, random, pos));
 
             this.stopIntersectionPrevention();
         }

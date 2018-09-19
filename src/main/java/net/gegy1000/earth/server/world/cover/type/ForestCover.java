@@ -4,7 +4,7 @@ import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthCoverType;
 import net.gegy1000.earth.server.world.cover.EarthDecorationGenerator;
 import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
-import net.gegy1000.terrarium.server.world.chunk.ComposeChunk;
+import net.gegy1000.terrarium.server.world.chunk.prime.PrimeChunk;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.ReplaceRandomLayer;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectWeightedLayer;
@@ -105,7 +105,7 @@ public abstract class ForestCover extends EarthCoverType {
         }
 
         @Override
-        public void decorate(int originX, int originZ, ComposeChunk chunk, Random random) {
+        public void decorate(int originX, int originY, int originZ, PrimeChunk chunk, Random random) {
             ShortRasterTile heightRaster = this.context.getHeightRaster();
 
             this.iterateChunk((localX, localZ) -> {

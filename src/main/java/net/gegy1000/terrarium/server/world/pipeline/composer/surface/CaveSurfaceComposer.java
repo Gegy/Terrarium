@@ -1,6 +1,6 @@
 package net.gegy1000.terrarium.server.world.pipeline.composer.surface;
 
-import net.gegy1000.terrarium.server.world.chunk.ComposeChunk;
+import net.gegy1000.terrarium.server.world.chunk.prime.PrimeChunk;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.world.World;
@@ -22,7 +22,7 @@ public class CaveSurfaceComposer implements SurfaceComposer {
     }
 
     @Override
-    public void composeSurface(ComposeChunk chunk, RegionGenerationHandler regionHandler) {
+    public void composeSurface(RegionGenerationHandler regionHandler, PrimeChunk chunk) {
         // TODO: Cubic Chunks
 //        this.caveGenerator.generate(this.world, chunk.getX(), chunk.getZ(), primer);
 //        this.ravineGenerator.generate(this.world, chunk.getX(), chunk.getZ(), primer);

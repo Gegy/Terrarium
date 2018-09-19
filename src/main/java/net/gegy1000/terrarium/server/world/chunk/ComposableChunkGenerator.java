@@ -4,6 +4,9 @@ import mcp.MethodsReturnNonnullByDefault;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.util.Lazy;
+import net.gegy1000.terrarium.server.world.chunk.populate.ColumnPopulateChunk;
+import net.gegy1000.terrarium.server.world.chunk.prime.ColumnPrimeChunk;
+import net.gegy1000.terrarium.server.world.chunk.prime.PrimeChunk;
 import net.gegy1000.terrarium.server.world.generator.ChunkCompositionProcedure;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.block.BlockFalling;
@@ -82,9 +85,10 @@ public class ComposableChunkGenerator implements IChunkGenerator, TerrariumChunk
         regionHandler.prepareChunk(chunkX << 4, chunkZ << 4);
 
         ChunkCompositionProcedure compositionProcedure = this.compositionProcedure.get();
-
-        ComposeChunk chunk = new ColumnComposeChunk(chunkX, chunkZ, primer);
-        compositionProcedure.composeSurface(chunk, regionHandler);
+        for (int chunkY = 0; chunkY < 16; chunkY++) {
+            PrimeChunk chunk = new ColumnPrimeChunk(new CubicPos(chunkX, chunkY, chunkZ), primer);
+            compositionProcedure.composeSurface(regionHandler, chunk);
+        }
     }
 
     public Biome[] provideBiomes(int chunkX, int chunkZ) {
@@ -106,7 +110,11 @@ public class ComposableChunkGenerator implements IChunkGenerator, TerrariumChunk
         ForgeEventFactory.onChunkPopulate(true, this, this.world, this.random, chunkX, chunkZ, false);
 
         ChunkCompositionProcedure compositionProcedure = this.compositionProcedure.get();
-        compositionProcedure.composeDecoration(this, this.world, regionHandler, chunkX, chunkZ);
+        for (int chunkY = 0; chunkY < 16; chunkY++) {
+            ColumnPopulateChunk chunk = new ColumnPopulateChunk(new CubicPos(chunkX, chunkY, chunkZ), this.world);
+            compositionProcedure.composeDecoration(this.world, regionHandler, chunk);
+        }
+
         compositionProcedure.populateStructures(this.world, regionHandler, chunkX, chunkZ);
 
         ForgeEventFactory.onChunkPopulate(false, this, this.world, this.random, chunkX, chunkZ, false);

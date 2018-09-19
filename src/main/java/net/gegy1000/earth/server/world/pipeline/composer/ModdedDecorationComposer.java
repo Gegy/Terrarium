@@ -1,12 +1,14 @@
 package net.gegy1000.earth.server.world.pipeline.composer;
 
 import net.gegy1000.earth.server.EarthDecorationEventHandler;
+import net.gegy1000.terrarium.server.world.chunk.CubicPos;
+import net.gegy1000.terrarium.server.world.chunk.PseudoRandomMap;
+import net.gegy1000.terrarium.server.world.chunk.populate.PopulateChunk;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunkProvider;
-import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraftforge.fml.common.IWorldGenerator;
 
 import java.util.List;
@@ -15,28 +17,30 @@ import java.util.Random;
 public class ModdedDecorationComposer implements DecorationComposer {
     private static final long DECORATION_SEED = 6926778772467445428L;
 
-    private final Random random;
-    private final long worldSeed;
+    private final PseudoRandomMap randomMap;
+    private final Random horizontalRandom;
 
     public ModdedDecorationComposer(World world) {
-        this.worldSeed = world.getWorldInfo().getSeed();
-        this.random = new Random(this.worldSeed);
+        this.randomMap = new PseudoRandomMap(world, DECORATION_SEED);
+        this.horizontalRandom = new Random(0);
     }
 
     @Override
-    public void composeDecoration(IChunkGenerator generator, World world, RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
+    public void composeDecoration(World world, RegionGenerationHandler regionHandler, PopulateChunk chunk) {
         List<IWorldGenerator> capturedGenerators = EarthDecorationEventHandler.capturedGenerators;
         if (capturedGenerators != null && !capturedGenerators.isEmpty()) {
             IChunkProvider chunkProvider = world.getChunkProvider();
 
-            this.random.setSeed(this.worldSeed);
-            long seedX = this.random.nextLong() >> 2 + 1L;
-            long seedZ = this.random.nextLong() >> 2 + 1L;
+            CubicPos pos = chunk.getPos();
+            this.randomMap.initPosSeed(pos.getMinX(), pos.getMinZ());
+            this.horizontalRandom.setSeed(this.randomMap.next());
 
-            long chunkSeed = (seedX * chunkX + seedZ * chunkZ) ^ DECORATION_SEED;
+            long chunkSeed = this.horizontalRandom.nextLong();
+
             for (IWorldGenerator worldGenerator : capturedGenerators) {
-                this.random.setSeed(chunkSeed);
-                worldGenerator.generate(this.random, chunkX, chunkZ, world, generator, chunkProvider);
+                this.horizontalRandom.setSeed(chunkSeed);
+                // TODO: Generator
+                worldGenerator.generate(this.horizontalRandom, pos.getX(), pos.getZ(), world, null, chunkProvider);
             }
         }
     }

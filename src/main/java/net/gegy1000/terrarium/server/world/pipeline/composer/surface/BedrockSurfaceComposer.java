@@ -1,7 +1,8 @@
 package net.gegy1000.terrarium.server.world.pipeline.composer.surface;
 
-import net.gegy1000.terrarium.server.world.chunk.ComposeChunk;
+import net.gegy1000.terrarium.server.world.chunk.CubicPos;
 import net.gegy1000.terrarium.server.world.chunk.PseudoRandomMap;
+import net.gegy1000.terrarium.server.world.chunk.prime.PrimeChunk;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.block.state.IBlockState;
@@ -23,15 +24,17 @@ public class BedrockSurfaceComposer implements SurfaceComposer {
     }
 
     @Override
-    public void composeSurface(ComposeChunk chunk, RegionGenerationHandler regionHandler) {
-        int minY = chunk.getMinY();
-        int maxY = chunk.getMaxY();
+    public void composeSurface(RegionGenerationHandler regionHandler, PrimeChunk chunk) {
+        CubicPos pos = chunk.getPos();
+
+        int minY = pos.getMinY();
+        int maxY = pos.getMaxY();
         if (minY >= this.scatterRange || maxY < 0) {
             return;
         }
 
-        int globalX = chunk.getX() << 4;
-        int globalZ = chunk.getZ() << 4;
+        int globalX = pos.getMinX();
+        int globalZ = pos.getMinZ();
 
         for (int localZ = 0; localZ < 16; localZ++) {
             for (int localX = 0; localX < 16; localX++) {

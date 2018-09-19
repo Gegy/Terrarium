@@ -4,13 +4,15 @@ import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthCoverType;
 import net.gegy1000.earth.server.world.cover.EarthDecorationGenerator;
 import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
-import net.gegy1000.terrarium.server.world.chunk.ComposeChunk;
+import net.gegy1000.terrarium.server.world.chunk.populate.PopulateChunk;
+import net.gegy1000.terrarium.server.world.chunk.prime.PrimeChunk;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectWeightedLayer;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.UnsignedByteRasterTile;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Biomes;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.layer.GenLayer;
@@ -69,7 +71,7 @@ public class BareCover extends EarthCoverType {
         }
 
         @Override
-        public void decorate(int originX, int originZ, ComposeChunk chunk, Random random) {
+        public void decorate(int originX, int originY, int originZ, PrimeChunk chunk, Random random) {
             ShortRasterTile heightRaster = this.context.getHeightRaster();
             UnsignedByteRasterTile slopeRaster = this.context.getSlopeRaster();
             this.iterateChunk((localX, localZ) -> {
@@ -109,13 +111,13 @@ public class BareCover extends EarthCoverType {
         }
 
         @Override
-        public void decorate(int originX, int originZ, Random random) {
+        public void decorate(PopulateChunk chunk, BlockPos origin, Random random) {
             World world = this.context.getWorld();
             UnsignedByteRasterTile slopeRaster = this.context.getSlopeRaster();
 
             this.preventIntersection(5);
 
-            this.decorateScatter(random, originX, originZ, this.range(random, -16, 1), (pos, localX, localZ) -> {
+            this.decorateScatter(random, chunk, origin, this.range(random, -16, 1), (pos, localX, localZ) -> {
                 if (slopeRaster.getByte(localX, localZ) < MOUNTAINOUS_SLOPE) {
                     OAK_TALL_SHRUB.generate(world, random, pos);
                 }

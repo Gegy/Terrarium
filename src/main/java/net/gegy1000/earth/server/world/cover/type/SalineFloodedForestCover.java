@@ -2,7 +2,8 @@ package net.gegy1000.earth.server.world.cover.type;
 
 import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthDecorationGenerator;
-import net.gegy1000.terrarium.server.world.chunk.ComposeChunk;
+import net.gegy1000.terrarium.server.world.chunk.populate.PopulateChunk;
+import net.gegy1000.terrarium.server.world.chunk.prime.PrimeChunk;
 import net.gegy1000.terrarium.server.world.cover.CoverBiomeSelectors;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.feature.tree.GenerousTreeGenerator;
@@ -37,7 +38,7 @@ public class SalineFloodedForestCover extends FloodedForestCover {
         }
 
         @Override
-        public void decorate(int originX, int originZ, ComposeChunk chunk, Random random) {
+        public void decorate(int originX, int originY, int originZ, PrimeChunk chunk, Random random) {
             ShortRasterTile heightRaster = this.context.getHeightRaster();
 
             this.iterateChunk((localX, localZ) -> {
@@ -58,15 +59,15 @@ public class SalineFloodedForestCover extends FloodedForestCover {
         }
 
         @Override
-        public void decorate(int originX, int originZ, Random random) {
+        public void decorate(PopulateChunk chunk, BlockPos origin, Random random) {
             World world = this.context.getWorld();
 
             this.preventIntersection(1);
 
-            int[] clearingLayer = this.sampleChunk(this.clearingSelector, originX, originZ);
-            int[] heightOffsetLayer = this.sampleChunk(this.heightOffsetSelector, originX, originZ);
+            int[] clearingLayer = this.sampleChunk(this.clearingSelector, origin.getX(), origin.getZ());
+            int[] heightOffsetLayer = this.sampleChunk(this.heightOffsetSelector, origin.getX(), origin.getZ());
 
-            this.decorateScatter(random, originX, originZ, this.range(random, 8, 10), (pos, localX, localZ) -> {
+            this.decorateScatter(random, chunk, origin, this.range(random, 8, 10), (pos, localX, localZ) -> {
                 if (clearingLayer[localX + localZ * 16] == 0) {
                     int height = this.range(random, 5, 8) + this.sampleHeightOffset(heightOffsetLayer, localX, localZ);
                     BlockPos ground = pos.down();

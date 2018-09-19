@@ -1,6 +1,6 @@
 package net.gegy1000.terrarium.server.world.cover;
 
-import net.gegy1000.terrarium.server.world.chunk.ComposeChunk;
+import net.gegy1000.terrarium.server.world.chunk.prime.PrimeChunk;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.layer.GenLayer;
@@ -26,7 +26,7 @@ public abstract class CoverSurfaceGenerator<T extends CoverGenerationContext> ex
         });
     }
 
-    public void decorate(int originX, int originZ, ComposeChunk chunk, Random random) {
+    public void decorate(int originX, int originY, int originZ, PrimeChunk chunk, Random random) {
     }
 
     protected void coverFromLayer(IBlockState[] blockBuffer, int originX, int originZ, GenLayer layer, BlockProvider blockProvider) {

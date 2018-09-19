@@ -1,6 +1,8 @@
 package net.gegy1000.earth.server.world.pipeline.composer;
 
 import net.gegy1000.earth.server.world.pipeline.layer.DebugMap;
+import net.gegy1000.terrarium.server.world.chunk.CubicPos;
+import net.gegy1000.terrarium.server.world.chunk.populate.PopulateChunk;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
@@ -11,7 +13,6 @@ import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.IChunkGenerator;
 
 public class DebugSignDecorationComposer implements DecorationComposer {
     private final RegionComponentType<ShortRasterTile> heightComponent;
@@ -21,25 +22,31 @@ public class DebugSignDecorationComposer implements DecorationComposer {
     }
 
     @Override
-    public void composeDecoration(IChunkGenerator generator, World world, RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
-        int globalX = chunkX << 4;
-        int globalZ = chunkZ << 4;
+    public void composeDecoration(World world, RegionGenerationHandler regionHandler, PopulateChunk chunk) {
+        CubicPos pos = chunk.getPos();
+        int globalX = pos.getMinX();
+        int globalZ = pos.getMinZ();
+
+        int minY = pos.getMinY();
+        int maxY = pos.getMaxY();
 
         ShortRasterTile heightRaster = regionHandler.getCachedChunkRaster(this.heightComponent);
 
-        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
 
         for (int localZ = 0; localZ < 16; localZ++) {
             for (int localX = 0; localX < 16; localX++) {
                 String[] signText = DebugMap.getSign(globalX + localX, globalZ + localZ);
                 if (signText != null) {
-                    pos.setPos(localX + globalX, heightRaster.getShort(localX, localZ) + 1, localZ + globalZ);
-                    world.setBlockState(pos, Blocks.STANDING_SIGN.getDefaultState());
-                    TileEntity entity = world.getTileEntity(pos);
-                    if (entity instanceof TileEntitySign) {
-                        TileEntitySign signEntity = (TileEntitySign) entity;
-                        for (int i = 0; i < signEntity.signText.length && i < signText.length; i++) {
-                            signEntity.signText[i] = new TextComponentString(signText[i]);
+                    mutablePos.setPos(localX + globalX, heightRaster.getShort(localX, localZ) + 1, localZ + globalZ);
+                    if (mutablePos.getY() >= minY && mutablePos.getY() < maxY) {
+                        world.setBlockState(mutablePos, Blocks.STANDING_SIGN.getDefaultState());
+                        TileEntity entity = world.getTileEntity(mutablePos);
+                        if (entity instanceof TileEntitySign) {
+                            TileEntitySign signEntity = (TileEntitySign) entity;
+                            for (int i = 0; i < signEntity.signText.length && i < signText.length; i++) {
+                                signEntity.signText[i] = new TextComponentString(signText[i]);
+                            }
                         }
                     }
                 }

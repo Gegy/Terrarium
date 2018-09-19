@@ -1,7 +1,8 @@
 package net.gegy1000.earth.server.world.pipeline.composer;
 
 import net.gegy1000.earth.server.world.pipeline.source.tile.WaterRasterTile;
-import net.gegy1000.terrarium.server.world.chunk.ComposeChunk;
+import net.gegy1000.terrarium.server.world.chunk.CubicPos;
+import net.gegy1000.terrarium.server.world.chunk.prime.PrimeChunk;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.SurfaceComposer;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
@@ -20,12 +21,13 @@ public class WaterFillSurfaceComposer implements SurfaceComposer {
     }
 
     @Override
-    public void composeSurface(ComposeChunk chunk, RegionGenerationHandler regionHandler) {
+    public void composeSurface(RegionGenerationHandler regionHandler, PrimeChunk chunk) {
         ShortRasterTile heightRaster = regionHandler.getCachedChunkRaster(this.heightComponent);
         WaterRasterTile waterRaster = regionHandler.getCachedChunkRaster(this.waterComponent);
 
-        int minY = chunk.getMinY();
-        int maxY = chunk.getMaxY();
+        CubicPos pos = chunk.getPos();
+        int minY = pos.getMinY();
+        int maxY = pos.getMaxY();
 
         for (int localZ = 0; localZ < 16; localZ++) {
             for (int localX = 0; localX < 16; localX++) {
