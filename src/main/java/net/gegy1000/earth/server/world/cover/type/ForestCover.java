@@ -4,11 +4,11 @@ import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthCoverType;
 import net.gegy1000.earth.server.world.cover.EarthDecorationGenerator;
 import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
+import net.gegy1000.terrarium.server.world.chunk.ComposeChunk;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.ReplaceRandomLayer;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectWeightedLayer;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectionSeedLayer;
-import net.gegy1000.terrarium.server.world.cover.generator.primer.CoverPrimer;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -105,19 +105,19 @@ public abstract class ForestCover extends EarthCoverType {
         }
 
         @Override
-        public void decorate(int originX, int originZ, CoverPrimer primer, Random random) {
+        public void decorate(int originX, int originZ, ComposeChunk chunk, Random random) {
             ShortRasterTile heightRaster = this.context.getHeightRaster();
 
             this.iterateChunk((localX, localZ) -> {
                 if (random.nextInt(4) == 0) {
                     int y = heightRaster.getShort(localX, localZ);
-                    IBlockState state = primer.getBlockState(localX, y, localZ);
+                    IBlockState state = chunk.get(localX, y, localZ);
                     if (state.getMaterial() == Material.WATER) {
                         if (random.nextInt(16) == 0) {
-                            primer.setBlockState(localX, y + 1, localZ, LILYPAD);
+                            chunk.set(localX, y + 1, localZ, LILYPAD);
                         }
                     } else {
-                        primer.setBlockState(localX, y + 1, localZ, TALL_GRASS);
+                        chunk.set(localX, y + 1, localZ, TALL_GRASS);
                     }
                 }
             });

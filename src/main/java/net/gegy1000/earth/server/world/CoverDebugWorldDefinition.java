@@ -7,8 +7,8 @@ import net.gegy1000.earth.server.world.cover.EarthCoverTypes;
 import net.gegy1000.earth.server.world.pipeline.composer.DebugSignDecorationComposer;
 import net.gegy1000.earth.server.world.pipeline.layer.DebugCoverPopulator;
 import net.gegy1000.terrarium.server.world.TerrariumGeneratorInitializer;
-import net.gegy1000.terrarium.server.world.TerrariumWorldType;
-import net.gegy1000.terrarium.server.world.chunk.TerrariumChunkGenerator;
+import net.gegy1000.terrarium.server.world.TerrariumWorldDefinition;
+import net.gegy1000.terrarium.server.world.chunk.TerrariumChunkDelegate;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.cover.ConstructedCover;
@@ -39,16 +39,16 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-public class CoverDebugWorldType extends TerrariumWorldType {
+public class CoverDebugWorldDefinition extends TerrariumWorldDefinition {
     private static final ResourceLocation IDENTIFIER = new ResourceLocation(TerrariumEarth.MODID, "debug_generator");
     private static final ResourceLocation PRESET = new ResourceLocation(TerrariumEarth.MODID, "debug_default");
 
-    public CoverDebugWorldType() {
+    public CoverDebugWorldDefinition() {
         super("earth_debug", IDENTIFIER, PRESET);
     }
 
     @Override
-    public TerrariumGeneratorInitializer createInitializer(World world, TerrariumChunkGenerator chunkGenerator, GenerationSettings settings) {
+    public TerrariumGeneratorInitializer createInitializer(World world, TerrariumChunkDelegate delegate, GenerationSettings settings) {
         return new Initializer(world);
     }
 
@@ -58,7 +58,7 @@ public class CoverDebugWorldType extends TerrariumWorldType {
     }
 
     @Override
-    protected TerrariumCustomization buildCustomization() {
+    public TerrariumCustomization buildCustomization() {
         return TerrariumCustomization.builder().build();
     }
 
@@ -68,7 +68,7 @@ public class CoverDebugWorldType extends TerrariumWorldType {
     }
 
     @Override
-    public boolean handleSlimeSpawnReduction(Random random, World world) {
+    public boolean shouldReduceSlimeSpawns(Random random, World world) {
         return true;
     }
 

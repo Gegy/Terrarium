@@ -4,11 +4,9 @@ import com.google.common.base.Strings;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.client.gui.customization.SelectPresetGui;
 import net.gegy1000.terrarium.client.gui.customization.TerrariumCustomizationGui;
-import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
-import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.chunk.ComposableBiomeProvider;
 import net.gegy1000.terrarium.server.world.chunk.ComposableChunkGenerator;
-import net.gegy1000.terrarium.server.world.chunk.TerrariumChunkGenerator;
+import net.gegy1000.terrarium.server.world.chunk.TerrariumChunkDelegate;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumCustomization;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPreset;
@@ -30,12 +28,12 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
+import java.util.Random;
 
-public abstract class TerrariumWorldType extends WorldType {
+public class TerrariumWorldType extends WorldType {
     private static Field nameField;
 
-    private final ResourceLocation identifier;
-    private final ResourceLocation presetIdentifier;
+    private final TerrariumWorldDefinition inner;
     private final TerrariumCustomization customization;
 
     static {
@@ -54,12 +52,11 @@ public abstract class TerrariumWorldType extends WorldType {
         }
     }
 
-    public TerrariumWorldType(String name, ResourceLocation identifier, ResourceLocation presetIdentifier) {
+    public TerrariumWorldType(TerrariumWorldDefinition worldType) {
         super("length_bypass");
-        setName(this, Terrarium.MODID + "." + name);
-        this.identifier = identifier;
-        this.presetIdentifier = presetIdentifier;
-        this.customization = this.buildCustomization();
+        setName(this, Terrarium.MODID + "." + worldType.getName());
+        this.inner = worldType;
+        this.customization = worldType.buildCustomization();
     }
 
     private static void setName(WorldType worldType, String name) {
@@ -72,11 +69,13 @@ public abstract class TerrariumWorldType extends WorldType {
         }
     }
 
-    public abstract TerrariumGeneratorInitializer createInitializer(World world, TerrariumChunkGenerator chunkGenerator, GenerationSettings settings);
+    public TerrariumGeneratorInitializer createInitializer(World world, TerrariumChunkDelegate delegate, GenerationSettings settings) {
+        return this.inner.createInitializer(world, delegate, settings);
+    }
 
-    public abstract Collection<ICapabilityProvider> createCapabilities(World world, GenerationSettings settings);
-
-    protected abstract TerrariumCustomization buildCustomization();
+    public Collection<ICapabilityProvider> createCapabilities(World world, GenerationSettings settings) {
+        return this.inner.createCapabilities(world, settings);
+    }
 
     @Override
     public final IChunkGenerator getChunkGenerator(World world, String settingsString) {
@@ -96,11 +95,11 @@ public abstract class TerrariumWorldType extends WorldType {
     public final void onCustomizeButton(Minecraft mc, GuiCreateWorld parent) {
         TerrariumPreset preset = this.getPreset();
         if (preset == null) {
-            Terrarium.LOGGER.warn("Found no preset with id {} for world type {}", this.presetIdentifier, this.getName());
+            Terrarium.LOGGER.warn("Found no preset with id {} for world type {}", this.inner.getPresetIdentifier(), this.getName());
             return;
         }
 
-        TerrariumCustomizationGui customizationGui = this.createCustomizationGui(parent, preset);
+        TerrariumCustomizationGui customizationGui = this.inner.createCustomizationGui(parent, this, preset);
         if (Strings.isNullOrEmpty(parent.chunkProviderSettingsJson)) {
             mc.displayGuiScreen(new SelectPresetGui(customizationGui, this));
         } else {
@@ -108,9 +107,9 @@ public abstract class TerrariumWorldType extends WorldType {
         }
     }
 
-    @SideOnly(Side.CLIENT)
-    protected TerrariumCustomizationGui createCustomizationGui(GuiCreateWorld parent, TerrariumPreset preset) {
-        return new TerrariumCustomizationGui(parent, this, preset);
+    @Override
+    public boolean handleSlimeSpawnReduction(Random random, World world) {
+        return this.inner.shouldReduceSlimeSpawns(random, world);
     }
 
     @Override
@@ -119,23 +118,15 @@ public abstract class TerrariumWorldType extends WorldType {
     }
 
     public boolean isHidden() {
-        return false;
-    }
-
-    public final TerrariumWorldData getWorldData(World world) {
-        TerrariumWorldData worldData = world.getCapability(TerrariumCapabilities.worldDataCapability, null);
-        if (worldData == null) {
-            throw new IllegalStateException("Terrarium world capability not yet present");
-        }
-        return worldData;
+        return this.inner.isHidden();
     }
 
     public ResourceLocation getIdentifier() {
-        return this.identifier;
+        return this.inner.getIdentifier();
     }
 
     public TerrariumPreset getPreset() {
-        return TerrariumPresetRegistry.get(this.presetIdentifier);
+        return TerrariumPresetRegistry.get(this.inner.getPresetIdentifier());
     }
 
     public TerrariumCustomization getCustomization() {

@@ -2,9 +2,9 @@ package net.gegy1000.earth.server.world.cover.type;
 
 import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthDecorationGenerator;
+import net.gegy1000.terrarium.server.world.chunk.ComposeChunk;
 import net.gegy1000.terrarium.server.world.cover.CoverBiomeSelectors;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.cover.generator.primer.CoverPrimer;
 import net.gegy1000.terrarium.server.world.feature.tree.GenerousTreeGenerator;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.minecraft.block.material.Material;
@@ -37,15 +37,15 @@ public class SalineFloodedForestCover extends FloodedForestCover {
         }
 
         @Override
-        public void decorate(int originX, int originZ, CoverPrimer primer, Random random) {
+        public void decorate(int originX, int originZ, ComposeChunk chunk, Random random) {
             ShortRasterTile heightRaster = this.context.getHeightRaster();
 
             this.iterateChunk((localX, localZ) -> {
                 if (random.nextInt(3) == 0) {
                     int y = heightRaster.getShort(localX, localZ);
-                    IBlockState state = primer.getBlockState(localX, y, localZ);
+                    IBlockState state = chunk.get(localX, y, localZ);
                     if (state.getMaterial() == Material.GROUND) {
-                        primer.setBlockState(localX, y + 1, localZ, TALL_GRASS);
+                        chunk.set(localX, y + 1, localZ, TALL_GRASS);
                     }
                 }
             });

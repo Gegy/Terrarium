@@ -1,6 +1,6 @@
 package net.gegy1000.earth.client.gui;
 
-import net.gegy1000.earth.server.world.EarthWorldType;
+import net.gegy1000.earth.server.world.EarthWorldDefinition;
 import net.gegy1000.terrarium.client.gui.customization.TerrariumCustomizationGui;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPreset;
@@ -35,8 +35,8 @@ public class EarthCustomizationGui extends TerrariumCustomizationGui {
     }
 
     public void applySpawnpoint(double latitude, double longitude) {
-        this.settings.setDouble(EarthWorldType.SPAWN_LATITUDE, latitude);
-        this.settings.setDouble(EarthWorldType.SPAWN_LONGITUDE, longitude);
+        this.settings.setDouble(EarthWorldDefinition.SPAWN_LATITUDE, latitude);
+        this.settings.setDouble(EarthWorldDefinition.SPAWN_LONGITUDE, longitude);
         this.rebuildState();
     }
 }

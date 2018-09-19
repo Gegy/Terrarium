@@ -1,9 +1,9 @@
 package net.gegy1000.earth.client.render;
 
-import net.gegy1000.terrarium.Terrarium;
+import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.client.LoadingWorldGetter;
+import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.client.gui.GuiRenderUtils;
-import net.gegy1000.earth.server.world.EarthWorldType;
 import net.minecraft.client.LoadingScreenRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiDownloadTerrain;
@@ -29,7 +29,7 @@ public class LoadingScreenOverlay {
     private static Field framebufferField;
 
     public static void onRender() {
-        if (LoadingWorldGetter.getLoadingWorldType() instanceof EarthWorldType) {
+        if (LoadingWorldGetter.getLoadingWorldType() == TerrariumEarth.EARTH_TYPE) {
             ScaledResolution resolution = new ScaledResolution(MC);
 
             int x = resolution.getScaledWidth() / 2;

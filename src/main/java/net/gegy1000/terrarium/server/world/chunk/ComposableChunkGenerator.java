@@ -1,5 +1,6 @@
 package net.gegy1000.terrarium.server.world.chunk;
 
+import mcp.MethodsReturnNonnullByDefault;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.util.Lazy;
@@ -12,20 +13,24 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkPrimer;
+import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraftforge.event.ForgeEventFactory;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
 import java.util.Random;
 
-public class ComposableChunkGenerator implements TerrariumChunkGenerator {
-    private final World world;
-    private final Random random;
+@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
+public class ComposableChunkGenerator implements IChunkGenerator, TerrariumChunkDelegate {
+    protected final World world;
+    protected final Random random;
 
-    private final Lazy<ChunkCompositionProcedure> compositionProcedure;
+    protected final Lazy<ChunkCompositionProcedure> compositionProcedure;
 
-    private final Lazy<RegionGenerationHandler> regionHandler;
+    protected final Lazy<RegionGenerationHandler> regionHandler;
 
-    private final Biome[] biomeBuffer = new Biome[16 * 16];
+    protected final Biome[] biomeBuffer = new Biome[16 * 16];
 
     public ComposableChunkGenerator(World world) {
         this.world = world;
@@ -77,7 +82,9 @@ public class ComposableChunkGenerator implements TerrariumChunkGenerator {
         regionHandler.prepareChunk(chunkX << 4, chunkZ << 4);
 
         ChunkCompositionProcedure compositionProcedure = this.compositionProcedure.get();
-        compositionProcedure.composeSurface(this, primer, regionHandler, chunkX, chunkZ);
+
+        ComposeChunk chunk = new ColumnComposeChunk(chunkX, chunkZ, primer);
+        compositionProcedure.composeSurface(chunk, regionHandler);
     }
 
     public Biome[] provideBiomes(int chunkX, int chunkZ) {

@@ -1,5 +1,6 @@
 package net.gegy1000.earth;
 
+import com.google.common.reflect.Reflection;
 import net.gegy1000.earth.server.EarthDecorationEventHandler;
 import net.gegy1000.earth.server.ServerProxy;
 import net.gegy1000.earth.server.capability.EarthCapability;
@@ -7,11 +8,13 @@ import net.gegy1000.earth.server.command.GeoTeleportCommand;
 import net.gegy1000.earth.server.command.GeoToolCommand;
 import net.gegy1000.earth.server.message.EarthMapGuiMessage;
 import net.gegy1000.earth.server.message.EarthPanoramaMessage;
-import net.gegy1000.earth.server.world.CoverDebugWorldType;
-import net.gegy1000.earth.server.world.EarthWorldType;
+import net.gegy1000.earth.server.world.CoverDebugWorldDefinition;
+import net.gegy1000.earth.server.world.EarthWorldDefinition;
 import net.gegy1000.earth.server.world.pipeline.source.EarthRemoteData;
 import net.gegy1000.earth.server.world.pipeline.source.SrtmHeightSource;
 import net.gegy1000.terrarium.server.capability.BlankStorage;
+import net.gegy1000.terrarium.server.world.TerrariumWorldDefinition;
+import net.minecraft.world.WorldType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
@@ -44,10 +47,16 @@ public class TerrariumEarth {
     @SidedProxy(clientSide = CLIENT_PROXY, serverSide = SERVER_PROXY)
     public static ServerProxy PROXY;
 
-    public static final EarthWorldType EARTH_TYPE = new EarthWorldType();
-    public static final CoverDebugWorldType COVER_DEBUG_TYPE = new CoverDebugWorldType();
+    public static final Object A = a();
+    public static final WorldType EARTH_TYPE = new EarthWorldDefinition().create();
+    public static final WorldType COVER_DEBUG_TYPE = new CoverDebugWorldDefinition().create();
 
     public static final SimpleNetworkWrapper NETWORK = NetworkRegistry.INSTANCE.newSimpleChannel(TerrariumEarth.MODID);
+
+    private static Object a() {
+        Reflection.initialize(TerrariumWorldDefinition.class);
+        return null;
+    }
 
     @CapabilityInject(EarthCapability.class)
     public static Capability<EarthCapability> earthCap;

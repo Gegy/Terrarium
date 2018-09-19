@@ -19,17 +19,14 @@ import net.minecraft.world.gen.structure.template.TemplateManager;
 import net.minecraft.world.storage.IPlayerFileData;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.io.File;
 
-@SideOnly(Side.CLIENT)
 public class PreviewDummyWorld extends World {
     private final ComposableChunkGenerator generator;
 
     public PreviewDummyWorld(WorldType worldType, GenerationSettings settings) {
-        super(new SaveHandler(), new WorldInfo(createSettings(worldType, settings), "terrarium_preview"), new WorldProviderSurface(), new Profiler(), false);
+        super(new SaveHandler(), new WorldInfo(createSettings(worldType, settings), "terrarium_preview"), new WorldProviderSurface(), new Profiler(), true);
 
         int dimension = this.provider.getDimension();
         this.provider.setWorld(this);

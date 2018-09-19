@@ -3,11 +3,11 @@ package net.gegy1000.earth.server.world.cover.type;
 import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthCoverType;
 import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
+import net.gegy1000.terrarium.server.world.chunk.ComposeChunk;
 import net.gegy1000.terrarium.server.world.cover.CoverBiomeSelectors;
 import net.gegy1000.terrarium.server.world.cover.CoverDecorationGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectWeightedLayer;
-import net.gegy1000.terrarium.server.world.cover.generator.primer.CoverPrimer;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.minecraft.block.BlockDoublePlant;
 import net.minecraft.block.state.IBlockState;
@@ -79,7 +79,7 @@ public class RainfedCropsCover extends EarthCoverType {
         }
 
         @Override
-        public void decorate(int originX, int originZ, CoverPrimer primer, Random random) {
+        public void decorate(int originX, int originZ, ComposeChunk chunk, Random random) {
             ShortRasterTile heightRaster = this.context.getHeightRaster();
             int[] grassLayer = this.sampleChunk(this.grassSelector, originX, originZ);
 
@@ -88,13 +88,13 @@ public class RainfedCropsCover extends EarthCoverType {
                 switch (grassLayer[localX + localZ * 16]) {
                     case LAYER_SHORT_GRASS:
                         if (random.nextInt(3) == 0) {
-                            primer.setBlockState(localX, y + 1, localZ, TALL_GRASS);
+                            chunk.set(localX, y + 1, localZ, TALL_GRASS);
                         }
                         break;
                     case LAYER_TALL_GRASS:
                         if (random.nextInt(2) == 0) {
-                            primer.setBlockState(localX, y + 1, localZ, DOUBLE_TALL_GRASS);
-                            primer.setBlockState(localX, y + 2, localZ, DOUBLE_TALL_GRASS.withProperty(BlockDoublePlant.HALF, BlockDoublePlant.EnumBlockHalf.UPPER));
+                            chunk.set(localX, y + 1, localZ, DOUBLE_TALL_GRASS);
+                            chunk.set(localX, y + 2, localZ, DOUBLE_TALL_GRASS.withProperty(BlockDoublePlant.HALF, BlockDoublePlant.EnumBlockHalf.UPPER));
                         }
                         break;
                 }

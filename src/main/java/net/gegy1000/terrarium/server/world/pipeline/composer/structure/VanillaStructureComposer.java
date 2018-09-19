@@ -2,7 +2,7 @@ package net.gegy1000.terrarium.server.world.pipeline.composer.structure;
 
 import net.gegy1000.terrarium.server.world.chunk.OverworldChunkGeneratorWrapper;
 import net.gegy1000.terrarium.server.world.chunk.PseudoRandomMap;
-import net.gegy1000.terrarium.server.world.chunk.TerrariumChunkGenerator;
+import net.gegy1000.terrarium.server.world.chunk.TerrariumChunkDelegate;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.util.math.BlockPos;
@@ -37,7 +37,7 @@ public class VanillaStructureComposer implements StructureComposer {
     private final MapGenStructure oceanMonumentGenerator;
     private final MapGenStructure woodlandMansionGenerator;
 
-    public VanillaStructureComposer(World world, TerrariumChunkGenerator generator) {
+    public VanillaStructureComposer(World world, TerrariumChunkDelegate generator) {
         this.world = world;
         this.randomMap = new PseudoRandomMap(world, STRUCTURE_SEED);
 

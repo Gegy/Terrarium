@@ -3,6 +3,7 @@ package net.gegy1000.terrarium.server.world.generator;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import net.gegy1000.terrarium.server.util.ArrayUtils;
+import net.gegy1000.terrarium.server.world.chunk.ComposeChunk;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.composer.ChunkComposer;
@@ -105,9 +106,9 @@ public class BasicTerrariumGenerator implements TerrariumGenerator {
         }
 
         @Override
-        public void composeSurface(IChunkGenerator generator, ChunkPrimer primer, RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
+        public void composeSurface(ComposeChunk chunk, RegionGenerationHandler regionHandler) {
             for (SurfaceComposer composer : this.surfaceComposers) {
-                composer.composeSurface(generator, primer, regionHandler, chunkX, chunkZ);
+                composer.composeSurface(chunk, regionHandler);
             }
         }
 

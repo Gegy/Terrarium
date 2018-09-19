@@ -6,6 +6,7 @@ import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 import java.lang.reflect.Field;
@@ -45,12 +46,16 @@ public class PlayerChunkMapHooks {
     }
 
     public static void hookWorldMap(WorldServer world) {
-        if (chunkMapField != null) {
-            try {
-                chunkMapField.set(world, new Wrapper(world));
-            } catch (Exception e) {
-                Terrarium.LOGGER.error("Failed to hook World chunk map", e);
+        if (!Loader.isModLoaded("cubicchunks")) {
+            if (chunkMapField != null) {
+                try {
+                    chunkMapField.set(world, new Wrapper(world));
+                } catch (Exception e) {
+                    Terrarium.LOGGER.error("Failed to hook World chunk map", e);
+                }
             }
+        } else {
+            // TODO
         }
     }
 

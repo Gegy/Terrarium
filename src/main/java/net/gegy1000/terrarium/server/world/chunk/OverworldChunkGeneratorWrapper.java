@@ -6,9 +6,9 @@ import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.gen.ChunkGeneratorOverworld;
 
 public class OverworldChunkGeneratorWrapper extends ChunkGeneratorOverworld {
-    private final TerrariumChunkGenerator delegate;
+    private final TerrariumChunkDelegate delegate;
 
-    public OverworldChunkGeneratorWrapper(World world, TerrariumChunkGenerator delegate) {
+    public OverworldChunkGeneratorWrapper(World world, TerrariumChunkDelegate delegate) {
         super(world, world.getWorldInfo().getSeed(), false, "");
         this.delegate = delegate;
     }

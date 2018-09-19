@@ -5,12 +5,12 @@ import net.gegy1000.earth.server.world.cover.EarthCoverType;
 import net.gegy1000.earth.server.world.cover.EarthDecorationGenerator;
 import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
 import net.gegy1000.earth.server.world.cover.LatitudinalZone;
+import net.gegy1000.terrarium.server.world.chunk.ComposeChunk;
 import net.gegy1000.terrarium.server.world.cover.CoverBiomeSelectors;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.ReplaceRandomLayer;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectWeightedLayer;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectionSeedLayer;
-import net.gegy1000.terrarium.server.world.cover.generator.primer.CoverPrimer;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.World;
@@ -67,16 +67,16 @@ public class GrassWithForestShrublandCover extends EarthCoverType {
         }
 
         @Override
-        public void decorate(int originX, int originZ, CoverPrimer primer, Random random) {
+        public void decorate(int originX, int originZ, ComposeChunk chunk, Random random) {
             ShortRasterTile heightRaster = this.context.getHeightRaster();
             int[] grassLayer = this.sampleChunk(this.grassSelector, originX, originZ);
 
             this.iterateChunk((localX, localZ) -> {
                 int y = heightRaster.getShort(localX, localZ);
                 if (grassLayer[localX + localZ * 16] == 1 && random.nextInt(4) != 0) {
-                    primer.setBlockState(localX, y + 1, localZ, TALL_GRASS);
+                    chunk.set(localX, y + 1, localZ, TALL_GRASS);
                 } else if (random.nextInt(10) == 0) {
-                    primer.setBlockState(localX, y + 1, localZ, BUSH);
+                    chunk.set(localX, y + 1, localZ, BUSH);
                 }
             });
         }

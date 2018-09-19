@@ -16,7 +16,7 @@ public class HeightTransformAdapter implements RegionAdapter {
         this.heightComponent = heightComponent;
         this.heightScale = heightScale;
         this.heightOffset = heightOffset;
-        this.maxHeight = world.getHeight() - 1;
+        this.maxHeight = world.provider.getHeight() - 1;
     }
 
     @Override

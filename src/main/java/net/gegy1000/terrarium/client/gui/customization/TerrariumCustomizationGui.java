@@ -245,7 +245,14 @@ public class TerrariumCustomizationGui extends GuiScreen {
         for (int i = 0; i < builders.length; i++) {
             builders[i] = new BufferBuilder(0x4000);
         }
-        this.preview = new WorldPreview(this.worldType, this.settings, builders);
+
+        try {
+            this.preview = new WorldPreview(this.worldType, this.settings, builders);
+        } catch (Throwable t) {
+            Terrarium.LOGGER.error("Failed to update world preview", t);
+            this.deletePreview();
+            this.mc.displayGuiScreen(this.parent);
+        }
     }
 
     private void previewLarge() {

@@ -4,7 +4,6 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.gegy1000.terrarium.Terrarium;
-import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.chunk.ComposableChunkGenerator;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
@@ -68,10 +67,7 @@ public class WorldPreview implements IBlockAccess {
         TerrariumWorldData.PREVIEW_WORLD.set(true);
         try {
             world = new PreviewDummyWorld(this.worldType, settings);
-            this.worldData = world.getCapability(TerrariumCapabilities.worldDataCapability, null);
-            if (this.worldData == null) {
-                throw new IllegalStateException("Failed to get world data capability from preview world");
-            }
+            this.worldData = TerrariumWorldData.get(world);
         } finally {
             TerrariumWorldData.PREVIEW_WORLD.set(false);
         }

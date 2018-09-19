@@ -1,5 +1,6 @@
 package net.gegy1000.terrarium.server.world.generator;
 
+import net.gegy1000.terrarium.server.world.chunk.ComposeChunk;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.util.math.BlockPos;
@@ -12,7 +13,7 @@ import javax.annotation.Nullable;
 import java.util.Set;
 
 public interface ChunkCompositionProcedure {
-    void composeSurface(IChunkGenerator generator, ChunkPrimer primer, RegionGenerationHandler regionHandler, int chunkX, int chunkZ);
+    void composeSurface(ComposeChunk chunk, RegionGenerationHandler regionHandler);
 
     void composeDecoration(IChunkGenerator generator, World world, RegionGenerationHandler regionHandler, int chunkX, int chunkZ);
 

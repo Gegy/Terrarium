@@ -3,10 +3,10 @@ package net.gegy1000.earth.server.world.cover.type;
 import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthCoverType;
 import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
+import net.gegy1000.terrarium.server.world.chunk.ComposeChunk;
 import net.gegy1000.terrarium.server.world.cover.CoverDecorationGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectionSeedLayer;
-import net.gegy1000.terrarium.server.world.cover.generator.primer.CoverPrimer;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Biomes;
@@ -72,7 +72,7 @@ public class FlowerFieldCover extends EarthCoverType {
         }
 
         @Override
-        public void decorate(int originX, int originZ, CoverPrimer primer, Random random) {
+        public void decorate(int originX, int originZ, ComposeChunk chunk, Random random) {
             ShortRasterTile heightRaster = this.context.getHeightRaster();
             int[] plantLayer = this.sampleChunk(this.plantSelector, originX, originZ);
 
@@ -82,9 +82,9 @@ public class FlowerFieldCover extends EarthCoverType {
                     int plant = plantLayer[index];
                     int y = heightRaster.getShort(localX, localZ);
                     if (plant == 0) {
-                        primer.setBlockState(localX, y + 1, localZ, FLOWERS[random.nextInt(FLOWERS.length)]);
+                        chunk.set(localX, y + 1, localZ, FLOWERS[random.nextInt(FLOWERS.length)]);
                     } else {
-                        primer.setBlockState(localX, y + 1, localZ, TALL_GRASS);
+                        chunk.set(localX, y + 1, localZ, TALL_GRASS);
                     }
                 }
             });
