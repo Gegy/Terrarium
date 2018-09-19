@@ -35,13 +35,13 @@ public class OsmAreaCoverAdapter implements RegionAdapter {
         this.osmComponent = osmComponent;
         this.coverComponent = coverComponent;
 
-        this.addCoverType(EarthCoverTypes.IRRIGATED_CROPS, this::isFarmlandArea);
         this.addCoverType(EarthCoverTypes.OPEN_BROADLEAF_DECIDUOUS, this::isWoodedArea);
-        this.addCoverType(EarthCoverTypes.FLOODED_GRASSLAND, this::isWetlandArea);
         this.addCoverType(EarthCoverTypes.SHRUBLAND, this::isScrubArea);
-        this.addCoverType(EarthCoverTypes.SNOW, this::isGlacierArea);
-        this.addCoverType(EarthCoverTypes.FLOWER_FIELD, this::isFlowerField);
         this.addCoverType(EarthCoverTypes.SCREE, this::isScree);
+        this.addCoverType(EarthCoverTypes.FLOODED_GRASSLAND, this::isWetlandArea);
+        this.addCoverType(EarthCoverTypes.IRRIGATED_CROPS, this::isFarmlandArea);
+        this.addCoverType(EarthCoverTypes.FLOWER_FIELD, this::isFlowerField);
+        this.addCoverType(EarthCoverTypes.SNOW, this::isGlacierArea);
     }
 
     private void addCoverType(CoverType<?> coverType, Predicate<OsmEntity> filter) {
@@ -53,6 +53,8 @@ public class OsmAreaCoverAdapter implements RegionAdapter {
         return OsmDataParser.hasTag(entity, "landuse", "farmland");
     }
 
+    // TODO: This causes issues in that it can replace areas that are already forest.
+    // All data should come in tiles with this pre-processed
     private boolean isWoodedArea(OsmEntity entity) {
         return OsmDataParser.hasTag(entity, "natural", "wood")
                 || OsmDataParser.hasTag(entity, "landuse", "forest");
