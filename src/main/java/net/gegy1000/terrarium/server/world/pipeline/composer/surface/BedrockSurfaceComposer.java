@@ -1,8 +1,8 @@
 package net.gegy1000.terrarium.server.world.pipeline.composer.surface;
 
-import net.gegy1000.terrarium.server.world.chunk.CubicPos;
-import net.gegy1000.terrarium.server.world.chunk.PseudoRandomMap;
-import net.gegy1000.terrarium.server.world.chunk.prime.PrimeChunk;
+import net.gegy1000.cubicglue.api.ChunkPrimeWriter;
+import net.gegy1000.cubicglue.util.CubicPos;
+import net.gegy1000.cubicglue.util.PseudoRandomMap;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.block.state.IBlockState;
@@ -24,9 +24,7 @@ public class BedrockSurfaceComposer implements SurfaceComposer {
     }
 
     @Override
-    public void composeSurface(RegionGenerationHandler regionHandler, PrimeChunk chunk) {
-        CubicPos pos = chunk.getPos();
-
+    public void composeSurface(RegionGenerationHandler regionHandler, CubicPos pos, ChunkPrimeWriter writer) {
         int minY = pos.getMinY();
         int maxY = pos.getMaxY();
         if (minY >= this.scatterRange || maxY < 0) {
@@ -41,7 +39,7 @@ public class BedrockSurfaceComposer implements SurfaceComposer {
                 this.scatterMap.initPosSeed(globalX + localX, globalZ + localZ);
                 for (int localY = minY; localY < this.scatterRange; localY++) {
                     if (localY == 0 || localY <= this.scatterMap.nextInt(this.scatterRange)) {
-                        chunk.set(localX, localY, localZ, this.block);
+                        writer.set(localX, localY, localZ, this.block);
                     }
                 }
             }

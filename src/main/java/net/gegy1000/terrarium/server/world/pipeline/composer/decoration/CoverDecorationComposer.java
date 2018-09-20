@@ -1,9 +1,9 @@
 package net.gegy1000.terrarium.server.world.pipeline.composer.decoration;
 
+import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
+import net.gegy1000.cubicglue.util.CubicPos;
+import net.gegy1000.cubicglue.util.PseudoRandomMap;
 import net.gegy1000.terrarium.Terrarium;
-import net.gegy1000.terrarium.server.world.chunk.CubicPos;
-import net.gegy1000.terrarium.server.world.chunk.PseudoRandomMap;
-import net.gegy1000.terrarium.server.world.chunk.populate.PopulateChunk;
 import net.gegy1000.terrarium.server.world.cover.ConstructedCover;
 import net.gegy1000.terrarium.server.world.cover.CoverDecorationGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverGenerationContext;
@@ -11,7 +11,6 @@ import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.util.HashSet;
@@ -24,7 +23,7 @@ import java.util.stream.Collectors;
 public class CoverDecorationComposer implements DecorationComposer {
     private static final long DECORATION_SEED = 2492037454623254033L;
 
-    private final Random horizontalRandom;
+    private final Random random;
     private final PseudoRandomMap coverMap;
 
     private final RegionComponentType<CoverRasterTile> coverComponent;
@@ -38,8 +37,8 @@ public class CoverDecorationComposer implements DecorationComposer {
             RegionComponentType<CoverRasterTile> coverComponent,
             List<ConstructedCover<?>> coverTypes
     ) {
-        this.horizontalRandom = new Random(world.getWorldInfo().getSeed() ^ DECORATION_SEED);
-        this.coverMap = new PseudoRandomMap(world.getWorldInfo().getSeed(), this.horizontalRandom.nextLong());
+        this.random = new Random(world.getWorldInfo().getSeed() ^ DECORATION_SEED);
+        this.coverMap = new PseudoRandomMap(world.getWorldInfo().getSeed(), this.random.nextLong());
 
         this.coverComponent = coverComponent;
 
@@ -48,8 +47,7 @@ public class CoverDecorationComposer implements DecorationComposer {
     }
 
     @Override
-    public void composeDecoration(World world, RegionGenerationHandler regionHandler, PopulateChunk chunk) {
-        CubicPos pos = chunk.getPos();
+    public void composeDecoration(RegionGenerationHandler regionHandler, CubicPos pos, ChunkPopulationWriter writer) {
         int globalX = pos.getMinX();
         int globalY = pos.getMinY();
         int globalZ = pos.getMinZ();
@@ -70,13 +68,11 @@ public class CoverDecorationComposer implements DecorationComposer {
             context.prepareChunk(regionHandler);
         }
 
-        BlockPos origin = chunk.getPos().getCenter();
-
         for (CoverType<?> type : this.coverTypes) {
             CoverDecorationGenerator<?> coverGenerator = this.generators.get(type);
             if (coverGenerator != null) {
-                this.horizontalRandom.setSeed(randomSeed);
-                coverGenerator.decorate(chunk, origin, this.horizontalRandom);
+                this.random.setSeed(randomSeed);
+                coverGenerator.decorate(pos, writer, this.random);
             } else {
                 Terrarium.LOGGER.warn("Tried to generate with non-registered cover: {}", type);
             }

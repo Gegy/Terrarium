@@ -1,5 +1,6 @@
 package net.gegy1000.terrarium.server.world.cover;
 
+import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.terrarium.server.world.feature.tree.GenerousDenseShrubGenerator;
 import net.gegy1000.terrarium.server.world.feature.tree.GenerousPineGenerator;
 import net.gegy1000.terrarium.server.world.feature.tree.GenerousTaigaGenerator;
@@ -123,6 +124,11 @@ public abstract class CoverGenerator<T extends CoverGenerationContext> {
 
     protected final int range(Random random, int minimum, int maximum) {
         return random.nextInt((maximum - minimum) + 1) + minimum;
+    }
+
+    protected final int[] sampleChunk(GenLayer layer, CubicPos pos) {
+        IntCache.resetIntCache();
+        return layer.getInts(pos.getMinX(), pos.getMinZ(), 16, 16);
     }
 
     protected final int[] sampleChunk(GenLayer layer, int x, int z) {

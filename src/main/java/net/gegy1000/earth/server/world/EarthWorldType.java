@@ -31,9 +31,7 @@ import net.gegy1000.terrarium.client.gui.customization.TerrariumCustomizationGui
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.util.Interpolation;
 import net.gegy1000.terrarium.server.world.TerrariumGeneratorInitializer;
-import net.gegy1000.terrarium.server.world.TerrariumWorldDefinition;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
-import net.gegy1000.terrarium.server.world.chunk.TerrariumChunkDelegate;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.coordinate.LatLngCoordinateState;
@@ -79,7 +77,10 @@ import net.gegy1000.terrarium.server.world.pipeline.source.tile.UnsignedByteRast
 import net.minecraft.client.gui.GuiCreateWorld;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
+import net.minecraft.world.WorldType;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -90,11 +91,13 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-public class EarthWorldDefinition extends TerrariumWorldDefinition {
+public class EarthWorldType extends TerrariumWorldType {
     private static final double EARTH_CIRCUMFERENCE = 40075000.0;
     private static final double SRTM_WIDTH = 1200.0 * 360.0;
     private static final double SRTM_SCALE = EARTH_CIRCUMFERENCE / SRTM_WIDTH;
     private static final double GLOB_RATIO = 10.0 / 3.0;
+
+    private static final int HIGHEST_POINT_METERS = 8900;
 
     private static final ResourceLocation IDENTIFIER = new ResourceLocation(TerrariumEarth.MODID, "earth_generator");
     private static final ResourceLocation PRESET = new ResourceLocation(TerrariumEarth.MODID, "earth_default");
@@ -118,14 +121,14 @@ public class EarthWorldDefinition extends TerrariumWorldDefinition {
     public static final PropertyKey<Boolean> ENABLE_LAVA_GENERATION = PropertyKey.createBoolean("enable_lava_generation");
     public static final PropertyKey<Boolean> ENABLE_MOD_GENERATION = PropertyKey.createBoolean("enable_mod_generation");
 
-    public EarthWorldDefinition() {
+    public EarthWorldType() {
         super("earth", IDENTIFIER, PRESET);
     }
 
     @Override
-    public TerrariumGeneratorInitializer createInitializer(World world, TerrariumChunkDelegate delegate, GenerationSettings settings) {
+    public TerrariumGeneratorInitializer createInitializer(World world, GenerationSettings settings) {
         world.setSeaLevel(settings.getInteger(HEIGHT_ORIGIN));
-        return new Initializer(world, delegate, settings);
+        return new Initializer(world, settings);
     }
 
     @Override
@@ -164,19 +167,25 @@ public class EarthWorldDefinition extends TerrariumWorldDefinition {
 
     @Override
     @SideOnly(Side.CLIENT)
-    protected TerrariumCustomizationGui createCustomizationGui(GuiCreateWorld parent, TerrariumWorldType worldType, TerrariumPreset preset) {
-        return new EarthCustomizationGui(parent, worldType, preset);
+    protected TerrariumCustomizationGui createCustomizationGui(GuiCreateWorld parent, WorldType worldType, TerrariumPreset preset) {
+        return new EarthCustomizationGui(parent, worldType, this, preset);
     }
 
     @Override
-    public boolean shouldReduceSlimeSpawns(Random random, World world) {
+    public boolean shouldReduceSlimes(World world, Random random) {
         TerrariumWorldData worldData = TerrariumWorldData.get(world);
         return worldData.getSettings().getInteger(HEIGHT_ORIGIN) < 40;
     }
 
+    @Override
+    protected int calculateMaxGenerationHeight(WorldServer world, GenerationSettings settings) {
+        double globalScale = settings.getDouble(HEIGHT_SCALE) * settings.getDouble(WORLD_SCALE);
+        double highestPointBlocks = HIGHEST_POINT_METERS * globalScale;
+        return MathHelper.ceil(highestPointBlocks + settings.getDouble(HEIGHT_ORIGIN) + 1);
+    }
+
     private static class Initializer implements TerrariumGeneratorInitializer {
         private final World world;
-        private final TerrariumChunkDelegate delegate;
         private final GenerationSettings settings;
 
         private final double worldScale;
@@ -185,9 +194,8 @@ public class EarthWorldDefinition extends TerrariumWorldDefinition {
         private final CoordinateState srtmRaster;
         private final CoordinateState globcoverRaster;
 
-        private Initializer(World world, TerrariumChunkDelegate delegate, GenerationSettings settings) {
+        private Initializer(World world, GenerationSettings settings) {
             this.world = world;
-            this.delegate = delegate;
             this.settings = settings;
 
             this.worldScale = settings.getDouble(WORLD_SCALE);
@@ -214,7 +222,7 @@ public class EarthWorldDefinition extends TerrariumWorldDefinition {
                     builder.withSurfaceComposer(new CaveSurfaceComposer(this.world));
                 }
                 if (this.settings.getBoolean(ENABLE_DEFAULT_FEATURES)) {
-                    builder.withStructureComposer(new VanillaStructureComposer(this.world, this.delegate));
+                    builder.withStructureComposer(new VanillaStructureComposer(this.world));
                 }
             }
 
@@ -223,7 +231,7 @@ public class EarthWorldDefinition extends TerrariumWorldDefinition {
                 builder.withDecorationComposer(new BoulderDecorationComposer(this.world, RegionComponentType.SLOPE));
             }
             if (this.settings.getBoolean(ENABLE_DEFAULT_DECORATION)) {
-                builder.withDecorationComposer(new VanillaBiomeDecorationComposer(this.world));
+                builder.withDecorationComposer(new VanillaBiomeDecorationComposer());
             }
             if (this.settings.getBoolean(ENABLE_LAKE_GENERATION)) {
                 builder.withDecorationComposer(new LakeDecorationComposer(this.world));
@@ -232,7 +240,7 @@ public class EarthWorldDefinition extends TerrariumWorldDefinition {
                 builder.withDecorationComposer(new LavaLakeDecorationComposer(this.world));
             }
             if (this.settings.getBoolean(ENABLE_RESOURCE_GENERATION)) {
-                builder.withDecorationComposer(new VanillaOreDecorationComposer(this.world));
+                builder.withDecorationComposer(new VanillaOreDecorationComposer());
             }
             if (this.settings.getBoolean(ENABLE_MOD_GENERATION)) {
                 builder.withDecorationComposer(new ModdedDecorationComposer(this.world));

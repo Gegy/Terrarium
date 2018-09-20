@@ -1,7 +1,7 @@
 package net.gegy1000.terrarium.server.world.pipeline.composer.surface;
 
-import net.gegy1000.terrarium.server.world.chunk.CubicPos;
-import net.gegy1000.terrarium.server.world.chunk.prime.PrimeChunk;
+import net.gegy1000.cubicglue.api.ChunkPrimeWriter;
+import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
@@ -19,10 +19,9 @@ public class OceanFillSurfaceComposer implements SurfaceComposer {
     }
 
     @Override
-    public void composeSurface(RegionGenerationHandler regionHandler, PrimeChunk chunk) {
+    public void composeSurface(RegionGenerationHandler regionHandler, CubicPos pos, ChunkPrimeWriter writer) {
         ShortRasterTile heightRaster = regionHandler.getCachedChunkRaster(this.heightComponent);
 
-        CubicPos pos = chunk.getPos();
         int minY = pos.getMinY();
         int maxY = pos.getMaxY();
 
@@ -33,7 +32,7 @@ public class OceanFillSurfaceComposer implements SurfaceComposer {
                     int minOceanY = Math.max(height + 1, minY);
                     int maxOceanY = Math.min(this.oceanLevel, maxY);
                     for (int localY = minOceanY; localY <= maxOceanY; localY++) {
-                        chunk.set(localX, localY, localZ, this.block);
+                        writer.set(localX, localY, localZ, this.block);
                     }
                 }
             }

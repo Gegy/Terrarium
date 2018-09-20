@@ -5,12 +5,15 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import net.gegy1000.cubicglue.api.CubicWorldType;
 import net.gegy1000.terrarium.Terrarium;
+import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.generator.customization.property.BooleanValue;
 import net.gegy1000.terrarium.server.world.generator.customization.property.NumberValue;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyValue;
 import net.minecraft.util.Tuple;
+import net.minecraft.world.World;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -25,8 +28,26 @@ public class GenerationSettings {
         this.values = ImmutableMap.copyOf(values);
     }
 
+    public static GenerationSettings parse(World world) {
+        String generatorOptions = world.getWorldInfo().getGeneratorOptions();
+        GenerationSettings parsedSettings = GenerationSettings.deserialize(generatorOptions);
+
+        CubicWorldType worldType = CubicWorldType.unwrap(world.getWorldType());
+        if (worldType instanceof TerrariumWorldType) {
+            GenerationSettings presetSettings = ((TerrariumWorldType) worldType).getPreset().createProperties();
+            return presetSettings.union(parsedSettings);
+        }
+
+        return parsedSettings;
+    }
+
     public static GenerationSettings deserialize(String json) {
-        return GenerationSettings.deserialize(new JsonParser().parse(json).getAsJsonObject());
+        JsonElement element = new JsonParser().parse(json);
+        if (element instanceof JsonObject) {
+            return GenerationSettings.deserialize(element.getAsJsonObject());
+        } else {
+            return new GenerationSettings(new HashMap<>(), new HashMap<>());
+        }
     }
 
     public static GenerationSettings deserialize(JsonObject root) {

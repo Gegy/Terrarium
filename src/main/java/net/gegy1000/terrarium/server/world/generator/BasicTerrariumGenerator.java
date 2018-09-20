@@ -2,9 +2,10 @@ package net.gegy1000.terrarium.server.world.generator;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
+import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
+import net.gegy1000.cubicglue.api.ChunkPrimeWriter;
+import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.terrarium.server.util.ArrayUtils;
-import net.gegy1000.terrarium.server.world.chunk.populate.PopulateChunk;
-import net.gegy1000.terrarium.server.world.chunk.prime.PrimeChunk;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.composer.ChunkComposer;
@@ -107,17 +108,16 @@ public class BasicTerrariumGenerator implements TerrariumGenerator {
         }
 
         @Override
-        public void composeSurface(RegionGenerationHandler regionHandler, PrimeChunk chunk) {
+        public void composeSurface(RegionGenerationHandler regionHandler, CubicPos pos, ChunkPrimeWriter writer) {
             for (SurfaceComposer composer : this.surfaceComposers) {
-                composer.composeSurface(regionHandler, chunk);
+                composer.composeSurface(regionHandler, pos, writer);
             }
         }
 
         @Override
-        public void composeDecoration(World world, RegionGenerationHandler regionHandler, PopulateChunk chunk) {
-            // TODO: Run decoration composers 16 times in column mode for each cube
+        public void composeDecoration(RegionGenerationHandler regionHandler, CubicPos pos, ChunkPopulationWriter writer) {
             for (DecorationComposer composer : this.decorationComposers) {
-                composer.composeDecoration(world, regionHandler, chunk);
+                composer.composeDecoration(regionHandler, pos, writer);
             }
         }
 

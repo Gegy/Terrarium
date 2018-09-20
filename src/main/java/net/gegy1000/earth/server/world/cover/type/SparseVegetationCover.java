@@ -1,17 +1,17 @@
 package net.gegy1000.earth.server.world.cover.type;
 
+import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
+import net.gegy1000.cubicglue.api.ChunkPrimeWriter;
+import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthCoverType;
 import net.gegy1000.earth.server.world.cover.EarthDecorationGenerator;
 import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
-import net.gegy1000.terrarium.server.world.chunk.populate.PopulateChunk;
-import net.gegy1000.terrarium.server.world.chunk.prime.PrimeChunk;
 import net.gegy1000.terrarium.server.world.cover.CoverBiomeSelectors;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectionSeedLayer;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.layer.GenLayer;
@@ -76,20 +76,20 @@ public class SparseVegetationCover extends EarthCoverType {
         }
 
         @Override
-        public void decorate(int originX, int originY, int originZ, PrimeChunk chunk, Random random) {
+        public void decorate(CubicPos chunkPos, ChunkPrimeWriter writer, Random random) {
             ShortRasterTile heightRaster = this.context.getHeightRaster();
-            int[] grassLayer = this.sampleChunk(this.grassSelector, originX, originZ);
+            int[] grassLayer = this.sampleChunk(this.grassSelector, chunkPos);
 
             this.iterateChunk((localX, localZ) -> {
                 int y = heightRaster.getShort(localX, localZ);
                 switch (grassLayer[localX + localZ * 16]) {
                     case 0:
                         if (random.nextInt(8) == 0) {
-                            IBlockState ground = chunk.get(localX, y, localZ);
+                            IBlockState ground = writer.get(localX, y, localZ);
                             if (ground == COARSE_DIRT) {
-                                chunk.set(localX, y + 1, localZ, TALL_GRASS);
+                                writer.set(localX, y + 1, localZ, TALL_GRASS);
                             } else if (random.nextInt(6) == 0) {
-                                chunk.set(localX, y + 1, localZ, DEAD_BUSH);
+                                writer.set(localX, y + 1, localZ, DEAD_BUSH);
                             }
                         }
                         break;
@@ -104,13 +104,13 @@ public class SparseVegetationCover extends EarthCoverType {
         }
 
         @Override
-        public void decorate(PopulateChunk chunk, BlockPos origin, Random random) {
+        public void decorate(CubicPos chunkPos, ChunkPopulationWriter writer, Random random) {
             World world = this.context.getWorld();
 
             this.preventIntersection(2);
 
-            this.decorateScatter(random, chunk, origin, this.range(random, -5, 2), (pos, localX, localZ) -> OAK_TALL_SHRUB.generate(world, random, pos));
-            this.decorateScatter(random, chunk, origin, this.range(random, -5, 2), (pos, localX, localZ) -> JUNGLE_TALL_SHRUB.generate(world, random, pos));
+            this.decorateScatter(random, chunkPos, writer, this.range(random, -5, 2), (pos, localX, localZ) -> OAK_TALL_SHRUB.generate(world, random, pos));
+            this.decorateScatter(random, chunkPos, writer, this.range(random, -5, 2), (pos, localX, localZ) -> JUNGLE_TALL_SHRUB.generate(world, random, pos));
 
             this.stopIntersectionPrevention();
         }

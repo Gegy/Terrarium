@@ -1,9 +1,10 @@
 package net.gegy1000.earth.server.world.cover.type;
 
+import net.gegy1000.cubicglue.api.ChunkPrimeWriter;
+import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthCoverType;
 import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
-import net.gegy1000.terrarium.server.world.chunk.prime.PrimeChunk;
 import net.gegy1000.terrarium.server.world.cover.CoverBiomeSelectors;
 import net.gegy1000.terrarium.server.world.cover.CoverDecorationGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
@@ -106,25 +107,25 @@ public class FloodedGrasslandCover extends EarthCoverType {
         }
 
         @Override
-        public void decorate(int originX, int originY, int originZ, PrimeChunk chunk, Random random) {
+        public void decorate(CubicPos chunkPos, ChunkPrimeWriter writer, Random random) {
             ShortRasterTile heightRaster = this.context.getHeightRaster();
 
-            int[] grassLayer = this.sampleChunk(this.grassSelector, originX, originZ);
+            int[] grassLayer = this.sampleChunk(this.grassSelector, chunkPos);
 
             this.iterateChunk((localX, localZ) -> {
                 int index = localX + localZ * 16;
                 if (grassLayer[index] == 1 && random.nextInt(6) != 0) {
                     int y = heightRaster.getShort(localX, localZ);
-                    IBlockState ground = chunk.get(localX, y, localZ);
+                    IBlockState ground = writer.get(localX, y, localZ);
                     if (ground.getBlock() instanceof BlockLiquid) {
                         if (random.nextInt(3) == 0) {
-                            chunk.set(localX, y + 1, localZ, LILYPAD);
+                            writer.set(localX, y + 1, localZ, LILYPAD);
                         }
                     } else if (random.nextInt(3) != 0) {
-                        chunk.set(localX, y + 1, localZ, TALL_GRASS);
+                        writer.set(localX, y + 1, localZ, TALL_GRASS);
                     } else {
-                        chunk.set(localX, y + 1, localZ, DOUBLE_TALL_GRASS);
-                        chunk.set(localX, y + 2, localZ, DOUBLE_TALL_GRASS.withProperty(BlockDoublePlant.HALF, BlockDoublePlant.EnumBlockHalf.UPPER));
+                        writer.set(localX, y + 1, localZ, DOUBLE_TALL_GRASS);
+                        writer.set(localX, y + 2, localZ, DOUBLE_TALL_GRASS.withProperty(BlockDoublePlant.HALF, BlockDoublePlant.EnumBlockHalf.UPPER));
                     }
                 }
             });

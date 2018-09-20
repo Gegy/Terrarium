@@ -1,6 +1,7 @@
 package net.gegy1000.terrarium.client.preview;
 
-import net.gegy1000.terrarium.server.world.chunk.ComposableChunkGenerator;
+import net.gegy1000.cubicglue.GluedColumnGenerator;
+import net.gegy1000.terrarium.server.world.chunk.ComposableCubeGenerator;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.profiler.Profiler;
@@ -23,7 +24,7 @@ import net.minecraft.world.storage.WorldInfo;
 import java.io.File;
 
 public class PreviewDummyWorld extends World {
-    private final ComposableChunkGenerator generator;
+    private final ComposableCubeGenerator generator;
 
     public PreviewDummyWorld(WorldType worldType, GenerationSettings settings) {
         super(new SaveHandler(), new WorldInfo(createSettings(worldType, settings), "terrarium_preview"), new WorldProviderSurface(), new Profiler(), true);
@@ -32,7 +33,7 @@ public class PreviewDummyWorld extends World {
         this.provider.setWorld(this);
         this.provider.setDimension(dimension);
 
-        this.generator = new ComposableChunkGenerator(this);
+        this.generator = new ComposableCubeGenerator(this);
         this.chunkProvider = this.createChunkProvider();
 
         this.initCapabilities();
@@ -44,13 +45,18 @@ public class PreviewDummyWorld extends World {
         return worldSettings;
     }
 
-    public ComposableChunkGenerator getGenerator() {
+    // TODO: Remove: Cubic Chunks for preview
+    public GluedColumnGenerator getColumnGenerator() {
+        return new GluedColumnGenerator(this, this.generator);
+    }
+
+    public ComposableCubeGenerator getCubeGenerator() {
         return this.generator;
     }
 
     @Override
     protected IChunkProvider createChunkProvider() {
-        return new ChunkCache(this.generator);
+        return new ChunkCache(this.getColumnGenerator());
     }
 
     @Override

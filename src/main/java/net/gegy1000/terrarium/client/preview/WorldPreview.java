@@ -3,9 +3,10 @@ package net.gegy1000.terrarium.client.preview;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import net.gegy1000.cubicglue.GluedColumnGenerator;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
-import net.gegy1000.terrarium.server.world.chunk.ComposableChunkGenerator;
+import net.gegy1000.terrarium.server.world.chunk.ComposableCubeGenerator;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.minecraft.block.state.IBlockState;
@@ -24,7 +25,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -44,7 +44,8 @@ public class WorldPreview implements IBlockAccess {
 
     private final BlockingQueue<BufferBuilder> builderQueue;
 
-    private final ComposableChunkGenerator chunkGenerator;
+    private final GluedColumnGenerator columnGenerator;
+    private final ComposableCubeGenerator cubeGenerator;
 
     private final ChunkPos centerPos;
     private final BlockPos centerBlockPos;
@@ -72,7 +73,9 @@ public class WorldPreview implements IBlockAccess {
             TerrariumWorldData.PREVIEW_WORLD.set(false);
         }
 
-        this.chunkGenerator = world.getGenerator();
+        this.columnGenerator = world.getColumnGenerator();
+        this.cubeGenerator = world.getCubeGenerator();
+
         Coordinate spawnPosition = this.worldData.getSpawnPosition();
         if (spawnPosition != null) {
             this.centerPos = new ChunkPos(spawnPosition.toBlockPos());
@@ -158,8 +161,13 @@ public class WorldPreview implements IBlockAccess {
             for (int x = -VIEW_RANGE; x <= VIEW_RANGE; x++) {
                 ChunkPos pos = new ChunkPos(this.centerPos.x + x, this.centerPos.z + z);
 
-                ChunkPrimer chunk = this.chunkGenerator.generatePrimer(pos.x, pos.z);
-                Biome[] biomes = Arrays.copyOf(this.chunkGenerator.provideBiomes(pos.x, pos.z), 256);
+                // TODO: Use cubic chunks
+                ChunkPrimer chunk = new ChunkPrimer();
+                this.columnGenerator.primeColumnTerrain(pos.x, pos.z, chunk);
+
+                Biome[] biomes = new Biome[256];
+                this.cubeGenerator.populateBiomes(pos, biomes);
+
                 this.chunkMap.put(ChunkPos.asLong(pos.x, pos.z), new ChunkData(chunk, biomes));
 
                 chunkPositions.add(pos);

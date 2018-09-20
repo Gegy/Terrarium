@@ -1,8 +1,8 @@
 package net.gegy1000.earth.server.world.pipeline.composer;
 
+import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
+import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.earth.server.world.pipeline.layer.DebugMap;
-import net.gegy1000.terrarium.server.world.chunk.CubicPos;
-import net.gegy1000.terrarium.server.world.chunk.populate.PopulateChunk;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
@@ -12,7 +12,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
-import net.minecraft.world.World;
 
 public class DebugSignDecorationComposer implements DecorationComposer {
     private final RegionComponentType<ShortRasterTile> heightComponent;
@@ -22,8 +21,7 @@ public class DebugSignDecorationComposer implements DecorationComposer {
     }
 
     @Override
-    public void composeDecoration(World world, RegionGenerationHandler regionHandler, PopulateChunk chunk) {
-        CubicPos pos = chunk.getPos();
+    public void composeDecoration(RegionGenerationHandler regionHandler, CubicPos pos, ChunkPopulationWriter writer) {
         int globalX = pos.getMinX();
         int globalZ = pos.getMinZ();
 
@@ -39,9 +37,9 @@ public class DebugSignDecorationComposer implements DecorationComposer {
                 String[] signText = DebugMap.getSign(globalX + localX, globalZ + localZ);
                 if (signText != null) {
                     mutablePos.setPos(localX + globalX, heightRaster.getShort(localX, localZ) + 1, localZ + globalZ);
-                    if (mutablePos.getY() >= minY && mutablePos.getY() < maxY) {
-                        world.setBlockState(mutablePos, Blocks.STANDING_SIGN.getDefaultState());
-                        TileEntity entity = world.getTileEntity(mutablePos);
+                    if (mutablePos.getY() >= minY && mutablePos.getY() <= maxY) {
+                        writer.set(mutablePos, Blocks.STANDING_SIGN.getDefaultState());
+                        TileEntity entity = writer.getGlobal().getTileEntity(mutablePos);
                         if (entity instanceof TileEntitySign) {
                             TileEntitySign signEntity = (TileEntitySign) entity;
                             for (int i = 0; i < signEntity.signText.length && i < signText.length; i++) {

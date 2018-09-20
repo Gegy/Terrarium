@@ -1,6 +1,7 @@
 package net.gegy1000.earth.server.world.cover;
 
-import net.gegy1000.terrarium.server.world.chunk.PseudoRandomMap;
+import net.gegy1000.cubicglue.util.CubicPos;
+import net.gegy1000.cubicglue.util.PseudoRandomMap;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.cover.CoverGenerationContext;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
@@ -84,6 +85,10 @@ public class EarthCoverContext implements CoverGenerationContext {
 
         double latitude = this.latLngCoordinate.getX(globalX + offsetX, globalZ + offsetZ);
         return LatitudinalZone.get(latitude);
+    }
+
+    public LatitudinalZone getZone(CubicPos pos) {
+        return this.getZone(pos.getMinX() + 16, pos.getMinZ() + 16);
     }
 
     public CoordinateState getLatLngCoordinate() {

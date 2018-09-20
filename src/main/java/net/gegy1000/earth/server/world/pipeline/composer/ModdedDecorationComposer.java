@@ -1,14 +1,16 @@
 package net.gegy1000.earth.server.world.pipeline.composer;
 
+import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
+import net.gegy1000.cubicglue.util.CubicPos;
+import net.gegy1000.cubicglue.util.PseudoRandomMap;
+import net.gegy1000.cubicglue.util.VanillaGeneratorCache;
 import net.gegy1000.earth.server.EarthDecorationEventHandler;
-import net.gegy1000.terrarium.server.world.chunk.CubicPos;
-import net.gegy1000.terrarium.server.world.chunk.PseudoRandomMap;
-import net.gegy1000.terrarium.server.world.chunk.populate.PopulateChunk;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunkProvider;
+import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraftforge.fml.common.IWorldGenerator;
 
 import java.util.List;
@@ -26,12 +28,18 @@ public class ModdedDecorationComposer implements DecorationComposer {
     }
 
     @Override
-    public void composeDecoration(World world, RegionGenerationHandler regionHandler, PopulateChunk chunk) {
+    public void composeDecoration(RegionGenerationHandler regionHandler, CubicPos pos, ChunkPopulationWriter writer) {
         List<IWorldGenerator> capturedGenerators = EarthDecorationEventHandler.capturedGenerators;
-        if (capturedGenerators != null && !capturedGenerators.isEmpty()) {
-            IChunkProvider chunkProvider = world.getChunkProvider();
 
-            CubicPos pos = chunk.getPos();
+        if (capturedGenerators != null && !capturedGenerators.isEmpty()) {
+            World world = writer.getGlobal();
+
+            IChunkProvider provider = world.getChunkProvider();
+            IChunkGenerator generator = VanillaGeneratorCache.getGenerator(world);
+            if (generator == null) {
+                return;
+            }
+
             this.randomMap.initPosSeed(pos.getMinX(), pos.getMinZ());
             this.horizontalRandom.setSeed(this.randomMap.next());
 
@@ -39,8 +47,7 @@ public class ModdedDecorationComposer implements DecorationComposer {
 
             for (IWorldGenerator worldGenerator : capturedGenerators) {
                 this.horizontalRandom.setSeed(chunkSeed);
-                // TODO: Generator
-                worldGenerator.generate(this.horizontalRandom, pos.getX(), pos.getZ(), world, null, chunkProvider);
+                worldGenerator.generate(this.horizontalRandom, pos.getX(), pos.getZ(), world, generator, provider);
             }
         }
     }

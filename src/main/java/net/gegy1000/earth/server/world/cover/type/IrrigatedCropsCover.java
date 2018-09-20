@@ -1,9 +1,10 @@
 package net.gegy1000.earth.server.world.cover.type;
 
+import net.gegy1000.cubicglue.api.ChunkPrimeWriter;
+import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthCoverType;
 import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
-import net.gegy1000.terrarium.server.world.chunk.prime.PrimeChunk;
 import net.gegy1000.terrarium.server.world.cover.CoverBiomeSelectors;
 import net.gegy1000.terrarium.server.world.cover.CoverDecorationGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
@@ -89,9 +90,9 @@ public class IrrigatedCropsCover extends EarthCoverType {
         }
 
         @Override
-        public void decorate(int originX, int originY, int originZ, PrimeChunk chunk, Random random) {
+        public void decorate(CubicPos chunkPos, ChunkPrimeWriter writer, Random random) {
             ShortRasterTile heightRaster = this.context.getHeightRaster();
-            int[] cropLayer = this.sampleChunk(this.cropSelector, originX, originZ);
+            int[] cropLayer = this.sampleChunk(this.cropSelector, chunkPos);
 
             this.iterateChunk((localX, localZ) -> {
                 int y = heightRaster.getShort(localX, localZ);
@@ -99,13 +100,13 @@ public class IrrigatedCropsCover extends EarthCoverType {
 
                 if (state.getBlock() instanceof BlockCrops) {
                     if (random.nextInt(20) != 0) {
-                        if (chunk.get(localX, y, localZ).getBlock() instanceof BlockFarmland) {
-                            chunk.set(localX, y + 1, localZ, state.withProperty(BlockCrops.AGE, random.nextInt(8)));
+                        if (writer.get(localX, y, localZ).getBlock() instanceof BlockFarmland) {
+                            writer.set(localX, y + 1, localZ, state.withProperty(BlockCrops.AGE, random.nextInt(8)));
                         }
                     }
                 } else {
-                    chunk.set(localX, y, localZ, COARSE_DIRT);
-                    chunk.set(localX, y + 1, localZ, state);
+                    writer.set(localX, y, localZ, COARSE_DIRT);
+                    writer.set(localX, y + 1, localZ, state);
                 }
             });
         }

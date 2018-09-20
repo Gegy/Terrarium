@@ -7,8 +7,7 @@ import net.gegy1000.earth.server.world.cover.EarthCoverTypes;
 import net.gegy1000.earth.server.world.pipeline.composer.DebugSignDecorationComposer;
 import net.gegy1000.earth.server.world.pipeline.layer.DebugCoverPopulator;
 import net.gegy1000.terrarium.server.world.TerrariumGeneratorInitializer;
-import net.gegy1000.terrarium.server.world.TerrariumWorldDefinition;
-import net.gegy1000.terrarium.server.world.chunk.TerrariumChunkDelegate;
+import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.cover.ConstructedCover;
@@ -39,7 +38,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-public class CoverDebugWorldDefinition extends TerrariumWorldDefinition {
+public class CoverDebugWorldDefinition extends TerrariumWorldType {
     private static final ResourceLocation IDENTIFIER = new ResourceLocation(TerrariumEarth.MODID, "debug_generator");
     private static final ResourceLocation PRESET = new ResourceLocation(TerrariumEarth.MODID, "debug_default");
 
@@ -48,7 +47,7 @@ public class CoverDebugWorldDefinition extends TerrariumWorldDefinition {
     }
 
     @Override
-    public TerrariumGeneratorInitializer createInitializer(World world, TerrariumChunkDelegate delegate, GenerationSettings settings) {
+    public TerrariumGeneratorInitializer createInitializer(World world, GenerationSettings settings) {
         return new Initializer(world);
     }
 
@@ -68,7 +67,7 @@ public class CoverDebugWorldDefinition extends TerrariumWorldDefinition {
     }
 
     @Override
-    public boolean shouldReduceSlimeSpawns(Random random, World world) {
+    public boolean shouldReduceSlimes(World world, Random random) {
         return true;
     }
 
@@ -85,7 +84,7 @@ public class CoverDebugWorldDefinition extends TerrariumWorldDefinition {
             List<ConstructedCover<?>> coverTypes = this.buildCoverTypes(zoneGeoCoordinates);
             return BasicTerrariumGenerator.builder()
                     .withSurfaceComposer(new HeightmapSurfaceComposer(RegionComponentType.HEIGHT, Blocks.QUARTZ_BLOCK.getDefaultState()))
-                    .withSurfaceComposer(new CoverSurfaceComposer(this.world, RegionComponentType.COVER, coverTypes, true,Blocks.QUARTZ_BLOCK.getDefaultState()))
+                    .withSurfaceComposer(new CoverSurfaceComposer(this.world, RegionComponentType.COVER, coverTypes, true, Blocks.QUARTZ_BLOCK.getDefaultState()))
                     .withSurfaceComposer(new BedrockSurfaceComposer(this.world, Blocks.BEDROCK.getDefaultState(), 0))
                     .withDecorationComposer(new CoverDecorationComposer(this.world, RegionComponentType.COVER, coverTypes))
                     .withDecorationComposer(new DebugSignDecorationComposer(RegionComponentType.HEIGHT))

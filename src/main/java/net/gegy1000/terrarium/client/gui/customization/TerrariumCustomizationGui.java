@@ -18,6 +18,7 @@ import net.minecraft.client.gui.GuiCreateWorld;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.world.WorldType;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.input.Keyboard;
@@ -41,7 +42,8 @@ public class TerrariumCustomizationGui extends GuiScreen {
 
     protected final GuiCreateWorld parent;
 
-    protected final TerrariumWorldType worldType;
+    protected final WorldType worldType;
+    protected final TerrariumWorldType terrariumType;
 
     protected GenerationSettings settings;
 
@@ -56,12 +58,15 @@ public class TerrariumCustomizationGui extends GuiScreen {
 
     protected boolean freeze;
 
-    public TerrariumCustomizationGui(GuiCreateWorld parent, TerrariumWorldType worldType, TerrariumPreset defaultPreset) {
+    public TerrariumCustomizationGui(GuiCreateWorld parent, WorldType worldType, TerrariumWorldType terrariumType, TerrariumPreset defaultPreset) {
         this.parent = parent;
         this.worldType = worldType;
-        if (!defaultPreset.getWorldType().equals(worldType.getIdentifier())) {
+        this.terrariumType = terrariumType;
+
+        if (!defaultPreset.getWorldType().equals(terrariumType.getIdentifier())) {
             throw new IllegalArgumentException("Cannot customize world with preset of wrong world type");
         }
+
         String settingsString = parent.chunkProviderSettingsJson;
         if (Strings.isNullOrEmpty(settingsString)) {
             this.setSettings(defaultPreset.createProperties());
@@ -102,7 +107,7 @@ public class TerrariumCustomizationGui extends GuiScreen {
 
         List<GuiButton> categoryListWidgets = new ArrayList<>();
 
-        Collection<CustomizationCategory> categories = this.worldType.getCustomization().getCategories();
+        Collection<CustomizationCategory> categories = this.terrariumType.getCustomization().getCategories();
         for (CustomizationCategory category : categories) {
             List<GuiButton> currentWidgets = new ArrayList<>();
             currentWidgets.add(upLevelButton);
@@ -151,7 +156,7 @@ public class TerrariumCustomizationGui extends GuiScreen {
                     break;
                 case PRESET_BUTTON:
                     this.freeze = true;
-                    this.mc.displayGuiScreen(new SelectPresetGui(this, this.worldType));
+                    this.mc.displayGuiScreen(new SelectPresetGui(this, this.terrariumType));
                     break;
             }
         }

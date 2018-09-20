@@ -1,6 +1,7 @@
 package net.gegy1000.terrarium.server.world.cover;
 
-import net.gegy1000.terrarium.server.world.chunk.populate.PopulateChunk;
+import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
+import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -17,9 +18,9 @@ public abstract class CoverDecorationGenerator<T extends CoverGenerationContext>
         super(context, coverType);
     }
 
-    public abstract void decorate(PopulateChunk chunk, BlockPos origin, Random random);
+    public abstract void decorate(CubicPos chunkPos, ChunkPopulationWriter writer, Random random);
 
-    protected void decorateScatter(Random random, PopulateChunk chunk, BlockPos origin, int count, ScatterDecorateConsumer decorator) {
+    protected void decorateScatter(Random random, CubicPos chunkPos, ChunkPopulationWriter writer, int count, ScatterDecorateConsumer decorator) {
         World world = this.context.getWorld();
         CoverRasterTile coverRaster = this.context.getCoverRaster();
 
@@ -30,10 +31,10 @@ public abstract class CoverDecorationGenerator<T extends CoverGenerationContext>
             int scatterZ = random.nextInt(16);
 
             if (coverRaster.get(scatterX, scatterZ) == this.coverType) {
-                pos.setPos(origin.getX() + scatterX, 0, origin.getZ() + scatterZ);
+                pos.setPos(chunkPos.getCenterX() + scatterX, 0, chunkPos.getCenterZ() + scatterZ);
 
                 if (this.tryPlace(random, pos, scatterX, scatterZ)) {
-                    BlockPos topBlock = chunk.getSurface(pos.getX(), pos.getZ());
+                    BlockPos topBlock = writer.getSurface(pos);
                     if (topBlock == null) {
                         continue;
                     }
@@ -89,7 +90,7 @@ public abstract class CoverDecorationGenerator<T extends CoverGenerationContext>
         }
 
         @Override
-        public void decorate(PopulateChunk chunk, BlockPos origin, Random random) {
+        public void decorate(CubicPos chunkPos, ChunkPopulationWriter writer, Random random) {
         }
     }
 }

@@ -1,10 +1,10 @@
 package net.gegy1000.terrarium.server.world.pipeline.composer.surface;
 
+import net.gegy1000.cubicglue.api.ChunkPrimeWriter;
+import net.gegy1000.cubicglue.util.CubicPos;
+import net.gegy1000.cubicglue.util.PseudoRandomMap;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.util.ArrayUtils;
-import net.gegy1000.terrarium.server.world.chunk.CubicPos;
-import net.gegy1000.terrarium.server.world.chunk.PseudoRandomMap;
-import net.gegy1000.terrarium.server.world.chunk.prime.PrimeChunk;
 import net.gegy1000.terrarium.server.world.cover.ConstructedCover;
 import net.gegy1000.terrarium.server.world.cover.CoverGenerationContext;
 import net.gegy1000.terrarium.server.world.cover.CoverSurfaceGenerator;
@@ -68,8 +68,7 @@ public class CoverSurfaceComposer implements SurfaceComposer {
     }
 
     @Override
-    public void composeSurface(RegionGenerationHandler regionHandler, PrimeChunk chunk) {
-        CubicPos pos = chunk.getPos();
+    public void composeSurface(RegionGenerationHandler regionHandler, CubicPos pos, ChunkPrimeWriter writer) {
         int globalX = pos.getMinX();
         int globalY = pos.getMinY();
         int globalZ = pos.getMinZ();
@@ -87,7 +86,7 @@ public class CoverSurfaceComposer implements SurfaceComposer {
         for (int localZ = 0; localZ < 16; localZ++) {
             for (int localX = 0; localX < 16; localX++) {
                 this.coverMap.initPosSeed(localX + globalX, globalY, localZ + globalZ);
-                this.coverColumn(chunk, localX, localZ, this.depthBuffer[localX + localZ * 16]);
+                this.coverColumn(pos, writer, localX, localZ, this.depthBuffer[localX + localZ * 16]);
             }
         }
 
@@ -100,7 +99,7 @@ public class CoverSurfaceComposer implements SurfaceComposer {
                 if (coverGenerator != null) {
                     this.random.setSeed(randomSeed);
                     this.random.setSeed(this.random.nextLong());
-                    coverGenerator.decorate(globalX, globalY, globalZ, chunk, this.random);
+                    coverGenerator.decorate(pos, writer, this.random);
                 } else {
                     Terrarium.LOGGER.warn("Tried to generate with non-registered cover: {}", type);
                 }
@@ -129,7 +128,7 @@ public class CoverSurfaceComposer implements SurfaceComposer {
         }
     }
 
-    private void coverColumn(PrimeChunk chunk, int localX, int localZ, double depthNoise) {
+    private void coverColumn(CubicPos pos, ChunkPrimeWriter writer, int localX, int localZ, double depthNoise) {
         int index = localX + localZ * 16;
 
         IBlockState currentTop = this.coverBlockBuffer[index];
@@ -138,14 +137,13 @@ public class CoverSurfaceComposer implements SurfaceComposer {
         int depth = -1;
         int soilDepth = Math.max((int) (depthNoise / 3.0 + 3.0 + this.coverMap.nextDouble() * 0.25), 1);
 
-        CubicPos pos = chunk.getPos();
         int minY = pos.getMinY();
         int maxY = pos.getMaxY();
 
         for (int localY = maxY; localY >= minY; localY--) {
-            IBlockState current = chunk.get(localX, localY, localZ);
+            IBlockState current = writer.get(localX, localY, localZ);
             while (current == AIR && --localY >= 0) {
-                current = chunk.get(localX, localY, localZ);
+                current = writer.get(localX, localY, localZ);
                 depth = -1;
             }
             if (current == this.replaceBlock) {
@@ -156,9 +154,9 @@ public class CoverSurfaceComposer implements SurfaceComposer {
                     }
                     depth = soilDepth;
 
-                    chunk.set(localX, localY, localZ, currentTop);
+                    writer.set(localX, localY, localZ, currentTop);
                 } else if (depth-- > 0) {
-                    chunk.set(localX, localY, localZ, currentFiller);
+                    writer.set(localX, localY, localZ, currentFiller);
                 } else {
                     break;
                 }

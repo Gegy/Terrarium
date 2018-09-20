@@ -1,5 +1,6 @@
 package net.gegy1000.terrarium.server;
 
+import net.gegy1000.cubicglue.api.CubicWorldType;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumExternalCapProvider;
@@ -30,7 +31,12 @@ public class TerrariumHandshakeTracker {
     public static void provideSettings(World world, GenerationSettings settings) {
         providedSettings = settings;
 
-        if (world == null || !(world.getWorldType() instanceof TerrariumWorldType)) {
+        if (world == null) {
+            return;
+        }
+
+        CubicWorldType worldType = CubicWorldType.unwrap(world.getWorldType());
+        if (!(worldType instanceof TerrariumWorldType)) {
             return;
         }
 
@@ -39,8 +45,7 @@ public class TerrariumHandshakeTracker {
             return;
         }
 
-        TerrariumWorldType worldType = (TerrariumWorldType) world.getWorldType();
-        Collection<ICapabilityProvider> capabilities = worldType.createCapabilities(world, providedSettings);
+        Collection<ICapabilityProvider> capabilities = ((TerrariumWorldType) worldType).createCapabilities(world, providedSettings);
         for (ICapabilityProvider provider : capabilities) {
             external.addExternal(provider);
         }

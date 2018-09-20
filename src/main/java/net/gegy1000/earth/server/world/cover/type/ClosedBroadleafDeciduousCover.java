@@ -1,13 +1,13 @@
 package net.gegy1000.earth.server.world.cover.type;
 
+import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
+import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthDecorationGenerator;
 import net.gegy1000.earth.server.world.cover.LatitudinalZone;
-import net.gegy1000.terrarium.server.world.chunk.populate.PopulateChunk;
 import net.gegy1000.terrarium.server.world.cover.CoverBiomeSelectors;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.feature.tree.GenerousTreeGenerator;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 
@@ -30,35 +30,35 @@ public class ClosedBroadleafDeciduousCover extends ClosedForestCover {
         }
 
         @Override
-        public void decorate(PopulateChunk chunk, BlockPos origin, Random random) {
+        public void decorate(CubicPos chunkPos, ChunkPopulationWriter writer, Random random) {
             World world = this.context.getWorld();
-            LatitudinalZone zone = this.context.getZone(origin.getX(), origin.getZ());
+            LatitudinalZone zone = this.context.getZone(chunkPos);
 
             this.preventIntersection(zone == LatitudinalZone.TROPICS ? 1 : 2);
 
-            int[] heightOffsetLayer = this.sampleChunk(this.heightOffsetSelector, origin.getX(), origin.getZ());
+            int[] heightOffsetLayer = this.sampleChunk(this.heightOffsetSelector, chunkPos);
 
             int oakCount = this.getOakCount(random, zone);
-            this.decorateScatter(random, chunk, origin, oakCount, (pos, localX, localZ) -> {
+            this.decorateScatter(random, chunkPos, writer, oakCount, (pos, localX, localZ) -> {
                 int height = this.range(random, 5, 7) + this.sampleHeightOffset(heightOffsetLayer, localX, localZ);
                 new GenerousTreeGenerator(false, height, OAK_LOG, OAK_LEAF, false, false).generate(world, random, pos);
             });
 
-            this.decorateScatter(random, chunk, origin, this.getBirchCount(random, zone), (pos, localX, localZ) -> {
+            this.decorateScatter(random, chunkPos, writer, this.getBirchCount(random, zone), (pos, localX, localZ) -> {
                 int height = this.range(random, 5, 7) + this.sampleHeightOffset(heightOffsetLayer, localX, localZ);
                 new GenerousTreeGenerator(false, height, BIRCH_LOG, BIRCH_LEAF, false, false).generate(world, random, pos);
             });
 
             int jungleCount = this.getJungleCount(random, zone);
-            this.decorateScatter(random, chunk, origin, jungleCount, (pos, localX, localZ) -> {
+            this.decorateScatter(random, chunkPos, writer, jungleCount, (pos, localX, localZ) -> {
                 int height = this.range(random, 5, 7) + this.sampleHeightOffset(heightOffsetLayer, localX, localZ);
                 new GenerousTreeGenerator(false, height, JUNGLE_LOG, JUNGLE_LEAF, false, false).generate(world, random, pos);
             });
 
             this.stopIntersectionPrevention();
 
-            this.decorateScatter(random, chunk, origin, oakCount + 4, (pos, localX, localZ) -> OAK_DENSE_SHRUB.generate(world, random, pos));
-            this.decorateScatter(random, chunk, origin, jungleCount + 4, (pos, localX, localZ) -> JUNGLE_DENSE_SHRUB.generate(world, random, pos));
+            this.decorateScatter(random, chunkPos, writer, oakCount + 4, (pos, localX, localZ) -> OAK_DENSE_SHRUB.generate(world, random, pos));
+            this.decorateScatter(random, chunkPos, writer, jungleCount + 4, (pos, localX, localZ) -> JUNGLE_DENSE_SHRUB.generate(world, random, pos));
         }
 
         private int getOakCount(Random random, LatitudinalZone zone) {

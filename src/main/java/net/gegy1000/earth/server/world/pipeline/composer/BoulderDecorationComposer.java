@@ -1,8 +1,8 @@
 package net.gegy1000.earth.server.world.pipeline.composer;
 
-import net.gegy1000.terrarium.server.world.chunk.CubicPos;
-import net.gegy1000.terrarium.server.world.chunk.PseudoRandomMap;
-import net.gegy1000.terrarium.server.world.chunk.populate.PopulateChunk;
+import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
+import net.gegy1000.cubicglue.util.CubicPos;
+import net.gegy1000.cubicglue.util.PseudoRandomMap;
 import net.gegy1000.terrarium.server.world.cover.CoverGenerator;
 import net.gegy1000.terrarium.server.world.feature.BoulderGenerator;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
@@ -34,8 +34,7 @@ public class BoulderDecorationComposer implements DecorationComposer {
     }
 
     @Override
-    public void composeDecoration(World world, RegionGenerationHandler regionHandler, PopulateChunk chunk) {
-        CubicPos pos = chunk.getPos();
+    public void composeDecoration(RegionGenerationHandler regionHandler, CubicPos pos, ChunkPopulationWriter writer) {
         int globalX = pos.getMinX();
         int globalY = pos.getMinY();
         int globalZ = pos.getMinZ();
@@ -45,6 +44,7 @@ public class BoulderDecorationComposer implements DecorationComposer {
 
         UnsignedByteRasterTile slopeRaster = regionHandler.getCachedChunkRaster(this.slopeComponent);
 
+        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
         for (int i = 0; i < 2; i++) {
             int localX = this.random.nextInt(16);
             int localZ = this.random.nextInt(16);
@@ -54,9 +54,10 @@ public class BoulderDecorationComposer implements DecorationComposer {
                     int spawnX = localX + globalX + 8;
                     int spawnZ = localZ + globalZ + 8;
 
-                    BlockPos surface = chunk.getSurface(spawnX, spawnZ);
+                    mutablePos.setPos(spawnX, 0, spawnZ);
+                    BlockPos surface = writer.getSurface(mutablePos);
                     if (surface != null) {
-                        BOULDER_GENERATOR.generate(world, this.random, surface);
+                        BOULDER_GENERATOR.generate(writer.getGlobal(), this.random, surface);
                     }
                 }
             }

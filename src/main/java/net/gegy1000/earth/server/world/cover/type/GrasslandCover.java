@@ -1,11 +1,12 @@
 package net.gegy1000.earth.server.world.cover.type;
 
+import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
+import net.gegy1000.cubicglue.api.ChunkPrimeWriter;
+import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthCoverType;
 import net.gegy1000.earth.server.world.cover.EarthDecorationGenerator;
 import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
-import net.gegy1000.terrarium.server.world.chunk.populate.PopulateChunk;
-import net.gegy1000.terrarium.server.world.chunk.prime.PrimeChunk;
 import net.gegy1000.terrarium.server.world.cover.CoverBiomeSelectors;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.ReplaceRandomLayer;
@@ -13,7 +14,6 @@ import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectionSeedLa
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.minecraft.block.BlockDoublePlant;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.layer.GenLayer;
 import net.minecraft.world.gen.layer.GenLayerFuzzyZoom;
@@ -79,21 +79,21 @@ public class GrasslandCover extends EarthCoverType {
         }
 
         @Override
-        public void decorate(int originX, int originY, int originZ, PrimeChunk chunk, Random random) {
+        public void decorate(CubicPos chunkPos, ChunkPrimeWriter writer, Random random) {
             ShortRasterTile heightRaster = this.context.getHeightRaster();
-            int[] grassLayer = this.sampleChunk(this.grassSelector, originX, originZ);
+            int[] grassLayer = this.sampleChunk(this.grassSelector, chunkPos);
 
             this.iterateChunk((localX, localZ) -> {
                 int index = localX + localZ * 16;
                 if (grassLayer[index] == 1 && random.nextInt(4) != 0) {
                     int y = heightRaster.getShort(localX, localZ);
                     if (random.nextInt(4) == 0) {
-                        chunk.set(localX, y + 1, localZ, DOUBLE_TALL_GRASS);
-                        chunk.set(localX, y + 2, localZ, DOUBLE_TALL_GRASS.withProperty(BlockDoublePlant.HALF, BlockDoublePlant.EnumBlockHalf.UPPER));
+                        writer.set(localX, y + 1, localZ, DOUBLE_TALL_GRASS);
+                        writer.set(localX, y + 2, localZ, DOUBLE_TALL_GRASS.withProperty(BlockDoublePlant.HALF, BlockDoublePlant.EnumBlockHalf.UPPER));
                     } else if (random.nextInt(16) == 0) {
-                        chunk.set(localX, y + 1, localZ, DEAD_BUSH);
+                        writer.set(localX, y + 1, localZ, DEAD_BUSH);
                     } else {
-                        chunk.set(localX, y + 1, localZ, TALL_GRASS);
+                        writer.set(localX, y + 1, localZ, TALL_GRASS);
                     }
                 }
             });
@@ -106,8 +106,8 @@ public class GrasslandCover extends EarthCoverType {
         }
 
         @Override
-        public void decorate(PopulateChunk chunk, BlockPos origin, Random random) {
-            this.decorateScatter(random, chunk, origin, this.range(random, -1, 2), (pos, localX, localZ) -> ACACIA_SMALL_SHRUB.generate(this.context.getWorld(), random, pos));
+        public void decorate(CubicPos chunkPos, ChunkPopulationWriter writer, Random random) {
+            this.decorateScatter(random, chunkPos, writer, this.range(random, -1, 2), (pos, localX, localZ) -> ACACIA_SMALL_SHRUB.generate(this.context.getWorld(), random, pos));
         }
     }
 }

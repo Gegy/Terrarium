@@ -1,18 +1,18 @@
 package net.gegy1000.earth.server.world.cover.type;
 
+import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
+import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthCoverType;
 import net.gegy1000.earth.server.world.cover.EarthDecorationGenerator;
 import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
 import net.gegy1000.earth.server.world.cover.LatitudinalZone;
-import net.gegy1000.terrarium.server.world.chunk.populate.PopulateChunk;
 import net.gegy1000.terrarium.server.world.cover.CoverSurfaceGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.feature.tree.GenerousTreeGenerator;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.UnsignedByteRasterTile;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Biomes;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 
@@ -60,11 +60,11 @@ public class BeachCover extends EarthCoverType implements BeachyCover {
         }
 
         @Override
-        public void decorate(PopulateChunk chunk, BlockPos origin, Random random) {
-            LatitudinalZone zone = this.context.getZone(origin.getX(), origin.getZ());
+        public void decorate(CubicPos chunkPos, ChunkPopulationWriter writer, Random random) {
+            LatitudinalZone zone = this.context.getZone(chunkPos);
             if (zone == LatitudinalZone.TROPICS) {
                 World world = this.context.getWorld();
-                this.decorateScatter(random, chunk, origin, this.range(random, 0, 2), (pos, localX, localZ) -> {
+                this.decorateScatter(random, chunkPos, writer, this.range(random, 0, 2), (pos, localX, localZ) -> {
                     int height = this.range(random, 6, 7);
                     new GenerousTreeGenerator(false, height, JUNGLE_LOG, JUNGLE_LEAF, true, true).generate(world, random, pos);
                 });

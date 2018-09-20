@@ -1,18 +1,18 @@
 package net.gegy1000.earth.server.world.cover.type;
 
+import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
+import net.gegy1000.cubicglue.api.ChunkPrimeWriter;
+import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthCoverType;
 import net.gegy1000.earth.server.world.cover.EarthDecorationGenerator;
 import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
-import net.gegy1000.terrarium.server.world.chunk.populate.PopulateChunk;
-import net.gegy1000.terrarium.server.world.chunk.prime.PrimeChunk;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectWeightedLayer;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.UnsignedByteRasterTile;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Biomes;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.layer.GenLayer;
@@ -71,14 +71,14 @@ public class BareCover extends EarthCoverType {
         }
 
         @Override
-        public void decorate(int originX, int originY, int originZ, PrimeChunk chunk, Random random) {
+        public void decorate(CubicPos chunkPos, ChunkPrimeWriter writer, Random random) {
             ShortRasterTile heightRaster = this.context.getHeightRaster();
             UnsignedByteRasterTile slopeRaster = this.context.getSlopeRaster();
             this.iterateChunk((localX, localZ) -> {
                 int slope = slopeRaster.getByte(localX, localZ);
                 if (slope < MOUNTAINOUS_SLOPE && random.nextInt(250) == 0) {
                     int y = heightRaster.getShort(localX, localZ);
-                    chunk.set(localX, y + 1, localZ, DEAD_BUSH);
+                    writer.set(localX, y + 1, localZ, DEAD_BUSH);
                 }
             });
         }
@@ -111,13 +111,13 @@ public class BareCover extends EarthCoverType {
         }
 
         @Override
-        public void decorate(PopulateChunk chunk, BlockPos origin, Random random) {
+        public void decorate(CubicPos chunkPos, ChunkPopulationWriter writer, Random random) {
             World world = this.context.getWorld();
             UnsignedByteRasterTile slopeRaster = this.context.getSlopeRaster();
 
             this.preventIntersection(5);
 
-            this.decorateScatter(random, chunk, origin, this.range(random, -16, 1), (pos, localX, localZ) -> {
+            this.decorateScatter(random, chunkPos, writer, this.range(random, -16, 1), (pos, localX, localZ) -> {
                 if (slopeRaster.getByte(localX, localZ) < MOUNTAINOUS_SLOPE) {
                     OAK_TALL_SHRUB.generate(world, random, pos);
                 }

@@ -1,5 +1,6 @@
 package net.gegy1000.terrarium.server;
 
+import net.gegy1000.cubicglue.api.CubicWorldType;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.client.preview.PreviewDummyWorld;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
@@ -59,7 +60,7 @@ public class ServerEventHandler {
         World world = event.getObject();
 
         if (ServerEventHandler.shouldHandle(world)) {
-            TerrariumWorldType worldType = (TerrariumWorldType) world.getWorldType();
+            TerrariumWorldType worldType = (TerrariumWorldType) CubicWorldType.unwrap(world.getWorldType());
             TerrariumExternalCapProvider external = new TerrariumExternalCapProvider.Implementation();
 
             if (!world.isRemote || world instanceof PreviewDummyWorld) {
@@ -94,6 +95,7 @@ public class ServerEventHandler {
     }
 
     private static boolean shouldHandle(World world) {
-        return world.provider.getDimensionType() == DimensionType.OVERWORLD && world.getWorldType() instanceof TerrariumWorldType;
+        CubicWorldType worldType = CubicWorldType.unwrap(world.getWorldType());
+        return world.provider.getDimensionType() == DimensionType.OVERWORLD && worldType instanceof TerrariumWorldType;
     }
 }
