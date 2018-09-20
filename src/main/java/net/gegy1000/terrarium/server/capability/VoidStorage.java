@@ -6,7 +6,7 @@ import net.minecraftforge.common.capabilities.Capability;
 
 import javax.annotation.Nullable;
 
-public class BlankStorage<T> implements Capability.IStorage<T> {
+public class VoidStorage<T> implements Capability.IStorage<T> {
     @Nullable
     @Override
     public NBTBase writeNBT(Capability<T> capability, T instance, EnumFacing side) {

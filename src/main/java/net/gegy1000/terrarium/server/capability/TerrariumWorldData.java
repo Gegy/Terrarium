@@ -9,6 +9,7 @@ import net.gegy1000.terrarium.server.world.generator.customization.GenerationSet
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 
@@ -41,7 +42,7 @@ public interface TerrariumWorldData extends ICapabilityProvider {
 
             TerrariumGeneratorInitializer initializer = worldType.createInitializer(world, this.settings);
             this.generator = initializer.buildGenerator(PREVIEW_WORLD.get());
-            this.regionHandler = new RegionGenerationHandler(initializer.buildDataProvider());
+            this.regionHandler = new RegionGenerationHandler(world, initializer.buildDataProvider());
         }
 
         @Override

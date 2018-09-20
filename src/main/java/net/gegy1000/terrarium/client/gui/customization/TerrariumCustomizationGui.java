@@ -145,10 +145,12 @@ public class TerrariumCustomizationGui extends GuiScreen {
         if (button.enabled && button.visible) {
             switch (button.id) {
                 case DONE_BUTTON:
+                    this.freeze = false;
                     this.parent.chunkProviderSettingsJson = this.settings.serializeString();
                     this.mc.displayGuiScreen(this.parent);
                     break;
                 case CANCEL_BUTTON:
+                    this.freeze = false;
                     this.mc.displayGuiScreen(this.parent);
                     break;
                 case PREVIEW_BUTTON:

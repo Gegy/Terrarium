@@ -61,6 +61,16 @@ public class OsmDataParser {
         return false;
     }
 
+    public static boolean hasKey(OsmEntity entity, String key) {
+        for (int i = 0; i < entity.getNumberOfTags(); i++) {
+            OsmTag tag = entity.getTag(i);
+            if (tag.getKey().equals(key)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static List<LineString> createLines(OsmEntityProvider data, OsmWay way) {
         List<LineString> results = new ArrayList<>();
         try {

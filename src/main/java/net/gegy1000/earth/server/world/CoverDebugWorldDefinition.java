@@ -84,7 +84,7 @@ public class CoverDebugWorldDefinition extends TerrariumWorldType {
             List<ConstructedCover<?>> coverTypes = this.buildCoverTypes(zoneGeoCoordinates);
             return BasicTerrariumGenerator.builder()
                     .withSurfaceComposer(new HeightmapSurfaceComposer(RegionComponentType.HEIGHT, Blocks.QUARTZ_BLOCK.getDefaultState()))
-                    .withSurfaceComposer(new CoverSurfaceComposer(this.world, RegionComponentType.COVER, coverTypes, true, Blocks.QUARTZ_BLOCK.getDefaultState()))
+                    .withSurfaceComposer(new CoverSurfaceComposer(this.world, RegionComponentType.HEIGHT, RegionComponentType.COVER, coverTypes, true, Blocks.QUARTZ_BLOCK.getDefaultState()))
                     .withSurfaceComposer(new BedrockSurfaceComposer(this.world, Blocks.BEDROCK.getDefaultState(), 0))
                     .withDecorationComposer(new CoverDecorationComposer(this.world, RegionComponentType.COVER, coverTypes))
                     .withDecorationComposer(new DebugSignDecorationComposer(RegionComponentType.HEIGHT))

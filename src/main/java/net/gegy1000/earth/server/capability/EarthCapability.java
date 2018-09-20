@@ -2,9 +2,17 @@ package net.gegy1000.earth.server.capability;
 
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.world.pipeline.source.GoogleGeocoder;
+import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
+import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
+import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.source.Geocoder;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
+import net.gegy1000.terrarium.server.world.region.GenerationRegion;
+import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 
@@ -23,6 +31,9 @@ public interface EarthCapability extends ICapabilityProvider {
     double getX(double latitude, double longitude);
 
     double getZ(double latitude, double longitude);
+
+    @Nullable
+    BlockPos estimateSurface(World world, int blockX, int blockZ);
 
     class Impl implements EarthCapability {
         private final CoordinateState geoCoordinate;
@@ -61,6 +72,25 @@ public interface EarthCapability extends ICapabilityProvider {
         @Override
         public double getZ(double latitude, double longitude) {
             return this.geoCoordinate.getBlockZ(latitude, longitude);
+        }
+
+        @Nullable
+        @Override
+        public BlockPos estimateSurface(World world, int blockX, int blockZ) {
+            TerrariumWorldData worldData = world.getCapability(TerrariumCapabilities.worldDataCapability, null);
+            if (worldData == null) {
+                return null;
+            }
+
+            RegionGenerationHandler regionHandler = worldData.getRegionHandler();
+            GenerationRegion region = regionHandler.get(blockX, blockZ);
+            ShortRasterTile heightRaster = region.getData().get(RegionComponentType.HEIGHT);
+            if (heightRaster == null) {
+                return null;
+            }
+
+            int height = heightRaster.getShort(blockX - region.getMinX(), blockZ - region.getMinZ()) + 1;
+            return new BlockPos(blockX, height, blockZ);
         }
 
         @Override

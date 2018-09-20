@@ -7,7 +7,7 @@ import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumExternalCapProvider;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
-import net.gegy1000.terrarium.server.world.chunk.PlayerChunkMapHooks;
+import net.gegy1000.terrarium.server.world.chunk.tracker.ChunkTrackerHooks;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
@@ -27,7 +27,7 @@ public class ServerEventHandler {
     private static final long REGION_TRACK_INTERVAL = 1000;
     private static long lastRegionTrackTime;
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onWorldLoad(WorldEvent.Load event) {
         World world = event.getWorld();
         if (!world.isRemote && ServerEventHandler.shouldHandle(world)) {
@@ -37,9 +37,6 @@ public class ServerEventHandler {
                 if (spawnPosition != null) {
                     world.setSpawnPoint(spawnPosition.toBlockPos());
                 }
-            }
-            if (world instanceof WorldServer) {
-                PlayerChunkMapHooks.hookWorldMap((WorldServer) world);
             }
         }
     }
@@ -75,19 +72,26 @@ public class ServerEventHandler {
             }
 
             event.addCapability(TerrariumCapabilities.EXTERNAL_DATA_ID, external);
+
+            if (world instanceof WorldServer) {
+                ChunkTrackerHooks trackerHooks = ChunkTrackerHooks.createHooks((WorldServer) world);
+                if (trackerHooks != null) {
+                    event.addCapability(TerrariumCapabilities.TRACKER_HOOKS_ID, trackerHooks);
+                }
+            }
         }
     }
 
     @SubscribeEvent
     public static void onWorldTick(TickEvent.WorldTickEvent event) {
         World world = event.world;
-        if (ServerEventHandler.shouldHandle(world) && world instanceof WorldServer) {
+        if (event.phase == TickEvent.Phase.START && ServerEventHandler.shouldHandle(world) && world instanceof WorldServer) {
             long time = System.currentTimeMillis();
             if (time - lastRegionTrackTime > REGION_TRACK_INTERVAL) {
                 TerrariumWorldData worldData = TerrariumWorldData.get(world);
                 if (worldData != null) {
                     WorldServer worldServer = (WorldServer) world;
-                    worldData.getRegionHandler().trackRegions(worldServer, worldServer.getPlayerChunkMap());
+                    worldData.getRegionHandler().trackRegions(worldServer);
                 }
                 lastRegionTrackTime = time;
             }

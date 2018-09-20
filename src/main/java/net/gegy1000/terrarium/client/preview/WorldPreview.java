@@ -132,7 +132,7 @@ public class WorldPreview implements IBlockAccess {
                 chunk.delete();
             }
         }
-        this.executor.shutdown();
+        this.executor.shutdownNow();
         this.worldData.getRegionHandler().close();
     }
 

@@ -11,6 +11,7 @@ import net.gegy1000.terrarium.server.world.cover.CoverSurfaceGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -35,6 +36,7 @@ public class CoverSurfaceComposer implements SurfaceComposer {
     private final Random random;
     private final PseudoRandomMap coverMap;
 
+    private final RegionComponentType<ShortRasterTile> heightComponent;
     private final RegionComponentType<CoverRasterTile> coverComponent;
 
     private final boolean decorate;
@@ -49,6 +51,7 @@ public class CoverSurfaceComposer implements SurfaceComposer {
 
     public CoverSurfaceComposer(
             World world,
+            RegionComponentType<ShortRasterTile> heightComponent,
             RegionComponentType<CoverRasterTile> coverComponent,
             List<ConstructedCover<?>> coverTypes,
             boolean decorate,
@@ -58,6 +61,7 @@ public class CoverSurfaceComposer implements SurfaceComposer {
         this.depthNoise = new NoiseGeneratorPerlin(this.random, 4);
         this.coverMap = new PseudoRandomMap(world.getWorldInfo().getSeed(), this.random.nextLong());
 
+        this.heightComponent = heightComponent;
         this.coverComponent = coverComponent;
 
         this.decorate = decorate;
@@ -73,6 +77,7 @@ public class CoverSurfaceComposer implements SurfaceComposer {
         int globalY = pos.getMinY();
         int globalZ = pos.getMinZ();
 
+        ShortRasterTile heightRaster = regionHandler.getCachedChunkRaster(this.heightComponent);
         CoverRasterTile coverRaster = regionHandler.getCachedChunkRaster(this.coverComponent);
 
         this.depthBuffer = this.depthNoise.getRegion(this.depthBuffer, globalX, globalZ, 16, 16, 0.0625, 0.0625, 1.0);
@@ -85,8 +90,11 @@ public class CoverSurfaceComposer implements SurfaceComposer {
 
         for (int localZ = 0; localZ < 16; localZ++) {
             for (int localX = 0; localX < 16; localX++) {
-                this.coverMap.initPosSeed(localX + globalX, globalY, localZ + globalZ);
-                this.coverColumn(pos, writer, localX, localZ, this.depthBuffer[localX + localZ * 16]);
+                int height = heightRaster.getShort(localX, localZ);
+                if (pos.getMinY() <= height) {
+                    this.coverMap.initPosSeed(localX + globalX, globalY, localZ + globalZ);
+                    this.coverColumn(pos, writer, localX, localZ, height, this.depthBuffer[localX + localZ * 16]);
+                }
             }
         }
 
@@ -128,17 +136,21 @@ public class CoverSurfaceComposer implements SurfaceComposer {
         }
     }
 
-    private void coverColumn(CubicPos pos, ChunkPrimeWriter writer, int localX, int localZ, double depthNoise) {
+    private void coverColumn(CubicPos pos, ChunkPrimeWriter writer, int localX, int localZ, int height, double depthNoise) {
         int index = localX + localZ * 16;
 
         IBlockState currentTop = this.coverBlockBuffer[index];
         IBlockState currentFiller = this.fillerBlockBuffer[index];
 
+        int minY = pos.getMinY();
+        int maxY = Math.min(pos.getMaxY(), height);
+
         int depth = -1;
         int soilDepth = Math.max((int) (depthNoise / 3.0 + 3.0 + this.coverMap.nextDouble() * 0.25), 1);
-
-        int minY = pos.getMinY();
-        int maxY = pos.getMaxY();
+        soilDepth = maxY - (height - soilDepth);
+        if (soilDepth <= 0) {
+            return;
+        }
 
         for (int localY = maxY; localY >= minY; localY--) {
             IBlockState current = writer.get(localX, localY, localZ);
@@ -148,10 +160,11 @@ public class CoverSurfaceComposer implements SurfaceComposer {
             }
             if (current == this.replaceBlock) {
                 if (depth == -1) {
-                    if (soilDepth <= 0) {
+                    // TODO: Not possible
+                    /*if (soilDepth <= 0) {
                         currentTop = AIR;
                         currentFiller = this.replaceBlock;
-                    }
+                    }*/
                     depth = soilDepth;
 
                     writer.set(localX, localY, localZ, currentTop);
@@ -166,6 +179,6 @@ public class CoverSurfaceComposer implements SurfaceComposer {
 
     @Override
     public RegionComponentType<?>[] getDependencies() {
-        return new RegionComponentType[] { this.coverComponent };
+        return new RegionComponentType[] { this.heightComponent, this.coverComponent };
     }
 }

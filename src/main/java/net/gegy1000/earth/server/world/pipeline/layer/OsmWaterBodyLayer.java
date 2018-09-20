@@ -82,13 +82,14 @@ public class OsmWaterBodyLayer extends OsmWaterLayer {
     }
 
     private boolean isWaterArea(OsmEntity entity) {
-        return OsmDataParser.hasTag(entity, "waterway", "riverbank")
+        boolean waterArea = OsmDataParser.hasTag(entity, "waterway", "riverbank")
                 || OsmDataParser.hasTag(entity, "natural", "water")
                 || OsmDataParser.hasTag(entity, "water", "river");
+        return waterArea && !OsmDataParser.hasKey(entity, "tunnel");
     }
 
     private boolean isWaterLine(OsmEntity entity) {
-        return OsmDataParser.hasTag(entity, "waterway", "river");
+        return OsmDataParser.hasTag(entity, "waterway", "river") && !OsmDataParser.hasKey(entity, "tunnel");
     }
 
     private void fillExistingWater(DataView view, ShortRasterTile resultTile, RasterCanvas canvas) {

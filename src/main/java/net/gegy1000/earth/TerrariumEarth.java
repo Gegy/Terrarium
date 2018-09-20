@@ -11,7 +11,7 @@ import net.gegy1000.earth.server.world.CoverDebugWorldDefinition;
 import net.gegy1000.earth.server.world.EarthWorldType;
 import net.gegy1000.earth.server.world.pipeline.source.EarthRemoteData;
 import net.gegy1000.earth.server.world.pipeline.source.SrtmHeightSource;
-import net.gegy1000.terrarium.server.capability.BlankStorage;
+import net.gegy1000.terrarium.server.capability.VoidStorage;
 import net.minecraft.world.WorldType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
@@ -55,7 +55,7 @@ public class TerrariumEarth {
 
     @Mod.EventHandler
     public static void onPreInit(FMLPreInitializationEvent event) {
-        CapabilityManager.INSTANCE.register(EarthCapability.class, new BlankStorage<>(), EarthCapability.Impl.class);
+        CapabilityManager.INSTANCE.register(EarthCapability.class, new VoidStorage<>(), EarthCapability.Impl.class);
         PROXY.onPreInit();
 
         MinecraftForge.TERRAIN_GEN_BUS.register(EarthDecorationEventHandler.class);
