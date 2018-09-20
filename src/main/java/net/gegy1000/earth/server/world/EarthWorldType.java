@@ -1,6 +1,7 @@
 package net.gegy1000.earth.server.world;
 
 import com.google.common.collect.Lists;
+import net.gegy1000.cubicglue.CubicGlue;
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.client.gui.EarthCustomizationGui;
 import net.gegy1000.earth.server.capability.EarthCapability;
@@ -206,16 +207,18 @@ public class EarthWorldType extends TerrariumWorldType {
 
         @Override
         public TerrariumGenerator buildGenerator(boolean preview) {
-            // TODO: Leave out bedrock if cubic chunks
             int heightOrigin = this.settings.getInteger(HEIGHT_ORIGIN);
             List<ConstructedCover<?>> coverTypes = this.constructCoverTypes();
             BasicTerrariumGenerator.Builder builder = BasicTerrariumGenerator.builder()
                     .withSurfaceComposer(new HeightmapSurfaceComposer(RegionComponentType.HEIGHT, Blocks.STONE.getDefaultState()))
                     .withSurfaceComposer(new WaterFillSurfaceComposer(RegionComponentType.HEIGHT, EarthComponentTypes.WATER, Blocks.WATER.getDefaultState()))
                     .withSurfaceComposer(new CoverSurfaceComposer(this.world, RegionComponentType.HEIGHT, RegionComponentType.COVER, coverTypes, !preview && this.settings.getBoolean(ENABLE_DECORATION), Blocks.STONE.getDefaultState()))
-                    .withSurfaceComposer(new BedrockSurfaceComposer(this.world, Blocks.BEDROCK.getDefaultState(), Math.min(heightOrigin - 1, 5)))
                     .withBiomeComposer(new CoverBiomeComposer(RegionComponentType.COVER, coverTypes))
                     .withSpawnPosition(new Coordinate(this.earthCoordinates, this.settings.getDouble(SPAWN_LATITUDE), this.settings.getDouble(SPAWN_LONGITUDE)));
+
+            if (!CubicGlue.isCubic(this.world)) {
+                builder.withSurfaceComposer(new BedrockSurfaceComposer(this.world, Blocks.BEDROCK.getDefaultState(), Math.min(heightOrigin - 1, 5)));
+            }
 
             if (!preview) {
                 if (this.settings.getBoolean(ENABLE_CAVE_GENERATION)) {

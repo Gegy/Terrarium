@@ -160,13 +160,7 @@ public class CoverSurfaceComposer implements SurfaceComposer {
             }
             if (current == this.replaceBlock) {
                 if (depth == -1) {
-                    // TODO: Not possible
-                    /*if (soilDepth <= 0) {
-                        currentTop = AIR;
-                        currentFiller = this.replaceBlock;
-                    }*/
                     depth = soilDepth;
-
                     writer.set(localX, localY, localZ, currentTop);
                 } else if (depth-- > 0) {
                     writer.set(localX, localY, localZ, currentFiller);
