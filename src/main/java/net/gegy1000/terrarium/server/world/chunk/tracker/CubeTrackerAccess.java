@@ -1,6 +1,5 @@
 package net.gegy1000.terrarium.server.world.chunk.tracker;
 
-import com.google.common.collect.Lists;
 import io.github.opencubicchunks.cubicchunks.api.util.XYZMap;
 import io.github.opencubicchunks.cubicchunks.core.server.CubeWatcher;
 import io.github.opencubicchunks.cubicchunks.core.server.PlayerCubeMap;
@@ -13,13 +12,13 @@ import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 public class CubeTrackerAccess implements ChunkTrackerAccess {
     public static Field cubeWatchersField;
@@ -50,15 +49,29 @@ public class CubeTrackerAccess implements ChunkTrackerAccess {
         PlayerChunkMap chunkTracker = this.world.getPlayerChunkMap();
 
         if (chunkTracker instanceof PlayerCubeMap) {
-            List<CubeWatcher> watchers = getSortedWatchers((PlayerCubeMap) chunkTracker);
+            XYZMap<CubeWatcher> watchers = getWatchers((PlayerCubeMap) chunkTracker);
 
-            Set<ChunkPos> queuedColumns = this.collectQueuedColumns(watchers);
-
-            Set<TrackedColumn> columns = new LinkedHashSet<>();
+            Map<ChunkPos, ColumnState> columnStates = new HashMap<>();
             for (CubeWatcher watcher : watchers) {
-                ChunkPos pos = new ChunkPos(watcher.getX(), watcher.getZ());
-                columns.add(new TrackedColumn(pos, queuedColumns.contains(pos)));
+                ChunkPos columnPos = new ChunkPos(watcher.getX(), watcher.getZ());
+                ColumnState state = columnStates.get(columnPos);
+
+                double distance = getClosestPlayerDistance(watcher);
+                boolean queued = watcher.getCube() == null || watcher.getCube() instanceof HookedChunkMarker;
+
+                if (state == null) {
+                    columnStates.put(columnPos, new ColumnState(distance, queued));
+                } else {
+                    state.merge(distance, queued);
+                }
             }
+
+            List<TrackedColumn> columns = new ArrayList<>(columnStates.size());
+            for (Map.Entry<ChunkPos, ColumnState> entry : columnStates.entrySet()) {
+                columns.add(new TrackedColumn(entry.getKey(), entry.getValue().queued));
+            }
+
+            columns.sort(Comparator.comparingDouble(c -> columnStates.get(c.getPos()).distance));
 
             return columns;
         }
@@ -66,32 +79,16 @@ public class CubeTrackerAccess implements ChunkTrackerAccess {
         return Collections.emptyList();
     }
 
-    private Set<ChunkPos> collectQueuedColumns(List<CubeWatcher> watchers) {
-        Set<ChunkPos> queuedColumns = new HashSet<>();
-        for (CubeWatcher watcher : watchers) {
-            if (watcher.getCube() == null || watcher.getCube() instanceof HookedChunkMarker) {
-                queuedColumns.add(new ChunkPos(watcher.getX(), watcher.getZ()));
-            }
-        }
-        return queuedColumns;
-    }
-
     @SuppressWarnings("unchecked")
-    private static List<CubeWatcher> getSortedWatchers(PlayerCubeMap cubeTracker) {
+    private static XYZMap<CubeWatcher> getWatchers(PlayerCubeMap cubeTracker) {
         if (cubeWatchersField != null) {
             try {
-                XYZMap<CubeWatcher> watchers = (XYZMap<CubeWatcher>) cubeWatchersField.get(cubeTracker);
-
-                // TODO: Sort once in column form
-                List<CubeWatcher> sortedWatchers = Lists.newArrayList(watchers);
-                sortedWatchers.sort(Comparator.comparingDouble(CubeTrackerAccess::getClosestPlayerDistance));
-
-                return sortedWatchers;
+                return (XYZMap<CubeWatcher>) cubeWatchersField.get(cubeTracker);
             } catch (Exception e) {
-                Terrarium.LOGGER.error("Failed to get player column entries", e);
+                Terrarium.LOGGER.error("Failed to get player cube entries", e);
             }
         }
-        return Collections.emptyList();
+        return new XYZMap<>(0.0F, 0);
     }
 
     private static double getClosestPlayerDistance(CubeWatcher watcher) {
@@ -101,5 +98,24 @@ public class CubeTrackerAccess implements ChunkTrackerAccess {
             Terrarium.LOGGER.error("Failed to get closest player distance", e);
         }
         return 0.0;
+    }
+
+    private static class ColumnState {
+        private double distance;
+        private boolean queued;
+
+        public ColumnState(double distance, boolean queued) {
+            this.distance = distance;
+            this.queued = queued;
+        }
+
+        public void merge(double distance, boolean queued) {
+            if (distance < this.distance) {
+                this.distance = distance;
+            }
+            if (queued) {
+                this.queued = true;
+            }
+        }
     }
 }
