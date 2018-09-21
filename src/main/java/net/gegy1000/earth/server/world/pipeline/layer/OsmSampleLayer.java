@@ -12,8 +12,9 @@ import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
 import net.minecraft.util.math.MathHelper;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 
 public class OsmSampleLayer implements DataLayer<OsmTile> {
     private final TiledDataSource<OsmTile> overpassSource;
@@ -52,7 +53,23 @@ public class OsmSampleLayer implements DataLayer<OsmTile> {
 
     @Override
     public Collection<DataTileKey<?>> getRequiredData(LayerContext context, DataView view) {
-        return Collections.emptyList();
+        List<DataTileKey<?>> requiredData = new ArrayList<>();
+
+        DataView bufferView = view.grow(16, 16, 16, 16);
+
+        DataTilePos blockMinTilePos = this.getTilePos(bufferView.getMinCoordinate());
+        DataTilePos blockMaxTilePos = this.getTilePos(bufferView.getMaxCoordinate());
+
+        DataTilePos minTilePos = DataTilePos.min(blockMinTilePos, blockMaxTilePos);
+        DataTilePos maxTilePos = DataTilePos.max(blockMinTilePos, blockMaxTilePos);
+
+        for (int tileZ = minTilePos.getTileZ(); tileZ <= maxTilePos.getTileZ(); tileZ++) {
+            for (int tileX = minTilePos.getTileX(); tileX <= maxTilePos.getTileX(); tileX++) {
+                requiredData.add(new DataTileKey<>(this.overpassSource, tileX, tileZ));
+            }
+        }
+
+        return requiredData;
     }
 
     private DataTilePos getTilePos(Coordinate coordinate) {

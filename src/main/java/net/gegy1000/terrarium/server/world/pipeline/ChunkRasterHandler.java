@@ -33,11 +33,11 @@ public class ChunkRasterHandler {
         builder.put(componentType, new Data<>((RegionComponentType<? extends RasterDataAccess<V>>) componentType));
     }
 
-    public void fillRasters(int originX, int originZ, Collection<RegionComponentType<?>> components) {
+    public void fillRastersPartial(int originX, int originZ, Collection<RegionComponentType<?>> components) {
         for (RegionComponentType<?> componentType : components) {
             Data<?, ?> data = this.chunkRasters.get(componentType);
             if (data != null) {
-                data.fillRaster(originX, originZ, true);
+                data.fillRasterPartial(originX, originZ);
             }
         }
     }
@@ -45,7 +45,7 @@ public class ChunkRasterHandler {
     public void fillRasters(int originX, int originZ) {
         for (Map.Entry<RegionComponentType<?>, Data<?, ?>> entry : this.chunkRasters.entrySet()) {
             Data<?, ?> data = entry.getValue();
-            data.fillRaster(originX, originZ, false);
+            data.fillRaster(originX, originZ);
         }
     }
 
@@ -67,9 +67,17 @@ public class ChunkRasterHandler {
             this.raster = componentType.createDefaultData(16, 16);
         }
 
-        public void fillRaster(int originX, int originZ, boolean allowPartial) {
+        public void fillRasterPartial(int originX, int originZ) {
             if (this.currentX != originX || this.currentZ != originZ) {
-                this.raster = ChunkRasterHandler.this.regionHandler.fillRaster(this.componentType, this.raster, originX, originZ, 16, 16, allowPartial);
+                this.raster = ChunkRasterHandler.this.regionHandler.computePartialRaster(this.componentType, originX, originZ, 16, 16);
+                this.currentX = originX;
+                this.currentZ = originZ;
+            }
+        }
+
+        public void fillRaster(int originX, int originZ) {
+            if (this.currentX != originX || this.currentZ != originZ) {
+                ChunkRasterHandler.this.regionHandler.fillRaster(this.componentType, this.raster, originX, originZ);
                 this.currentX = originX;
                 this.currentZ = originZ;
             }

@@ -55,8 +55,6 @@ public class PreviewRenderer {
             GlStateManager.rotate(rotationX, 1.0F, 0.0F, 0.0F);
             GlStateManager.rotate(rotationY, 0.0F, 1.0F, 0.0F);
 
-            GlStateManager.translate(0.0, -preview.getHeightOffset(), 0.0);
-
             RenderHelper.enableStandardItemLighting();
 
             preview.renderChunks();

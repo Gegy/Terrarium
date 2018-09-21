@@ -248,9 +248,9 @@ public class TerrariumCustomizationGui extends GuiScreen {
     protected void rebuildState() {
         this.deletePreview();
 
-        BufferBuilder[] builders = new BufferBuilder[8];
+        BufferBuilder[] builders = new BufferBuilder[512];
         for (int i = 0; i < builders.length; i++) {
-            builders[i] = new BufferBuilder(0x4000);
+            builders[i] = new BufferBuilder(0x400);
         }
 
         try {

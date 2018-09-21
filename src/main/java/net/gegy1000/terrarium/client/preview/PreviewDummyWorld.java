@@ -45,18 +45,13 @@ public class PreviewDummyWorld extends World {
         return worldSettings;
     }
 
-    // TODO: Remove: Cubic Chunks for preview
-    public GluedColumnGenerator getColumnGenerator() {
-        return new GluedColumnGenerator(this, this.generator);
-    }
-
     public ComposableCubeGenerator getCubeGenerator() {
         return this.generator;
     }
 
     @Override
     protected IChunkProvider createChunkProvider() {
-        return new ChunkCache(this.getColumnGenerator());
+        return new ChunkCache(new GluedColumnGenerator(this, this.generator));
     }
 
     @Override

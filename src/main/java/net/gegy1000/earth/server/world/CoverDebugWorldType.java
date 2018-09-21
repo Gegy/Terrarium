@@ -38,11 +38,11 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-public class CoverDebugWorldDefinition extends TerrariumWorldType {
+public class CoverDebugWorldType extends TerrariumWorldType {
     private static final ResourceLocation IDENTIFIER = new ResourceLocation(TerrariumEarth.MODID, "debug_generator");
     private static final ResourceLocation PRESET = new ResourceLocation(TerrariumEarth.MODID, "debug_default");
 
-    public CoverDebugWorldDefinition() {
+    public CoverDebugWorldType() {
         super("earth_debug", IDENTIFIER, PRESET);
     }
 

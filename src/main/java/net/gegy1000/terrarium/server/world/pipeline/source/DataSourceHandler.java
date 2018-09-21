@@ -34,20 +34,29 @@ public class DataSourceHandler {
 
     private final Cache<DataTileKey<?>, TiledDataAccess> tileCache = CacheBuilder.newBuilder()
             .maximumSize(32)
-            .expireAfterAccess(20, TimeUnit.SECONDS)
+            .expireAfterAccess(30, TimeUnit.SECONDS)
             .build();
 
     private final Map<DataTileKey<?>, TileFuture<?>> queuedTiles = new HashMap<>();
 
+    private final Object lock = new Object();
+
     public void enqueueData(Set<DataTileKey<?>> requiredData) {
         for (DataTileKey<?> key : requiredData) {
-            if (!this.queuedTiles.containsKey(key)) {
+            if (this.shouldQueueData(key)) {
                 this.enqueueTile(key);
             }
         }
         this.collectCompletedTiles();
     }
 
+    private boolean shouldQueueData(DataTileKey<?> key) {
+        synchronized (this.lock) {
+            return !this.queuedTiles.containsKey(key) && this.tileCache.getIfPresent(key) == null;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
     private <T extends TiledDataAccess> TileFuture<T> enqueueTile(DataTileKey<T> key) {
         TileFuture<T> future = new TileFuture<>(key);
         future.submitTo(this.loadService);
@@ -66,14 +75,20 @@ public class DataSourceHandler {
                 return result;
             }
 
-            TileFuture<T> tileFuture = (TileFuture<T>) this.queuedTiles.get(key);
-            if (tileFuture == null) {
-                tileFuture = this.enqueueTile(key);
+            TileFuture<T> tileFuture;
+            synchronized (this.lock) {
+                tileFuture = (TileFuture<T>) this.queuedTiles.get(key);
+                if (tileFuture == null) {
+                    tileFuture = this.enqueueTile(key);
+                }
             }
 
             T loadedResult = this.parseResult(tileFuture);
-            this.queuedTiles.remove(key);
-            this.tileCache.put(key, loadedResult);
+
+            synchronized (this.lock) {
+                this.queuedTiles.remove(key);
+                this.tileCache.put(key, loadedResult);
+            }
 
             return loadedResult;
         } catch (Exception e) {
@@ -89,16 +104,25 @@ public class DataSourceHandler {
             return;
         }
 
-        Set<DataTileKey<?>> completedTiles = new HashSet<>();
-        for (TileFuture<?> future : this.queuedTiles.values()) {
-            if (future.isComplete()) {
-                TiledDataAccess parsedResult = this.parseResult(future);
-                this.tileCache.put(future.key, parsedResult);
-                completedTiles.add(future.key);
+        Set<TileFuture<?>> completedTiles = new HashSet<>();
+
+        synchronized (this.lock) {
+            for (TileFuture<?> future : this.queuedTiles.values()) {
+                if (future.isComplete()) {
+                    completedTiles.add(future);
+                }
             }
         }
 
-        completedTiles.forEach(this.queuedTiles::remove);
+        for (TileFuture<?> future : completedTiles) {
+            TiledDataAccess parsedResult = this.parseResult(future);
+            this.tileCache.put(future.key, parsedResult);
+            synchronized (this.lock) {
+                this.queuedTiles.remove(future.key);
+            }
+        }
+
+        System.out.println(this.queuedTiles.size() + " / " + this.tileCache.size());
     }
 
     private <T extends TiledDataAccess> T parseResult(TileFuture<T> future) {

@@ -1,5 +1,6 @@
 package net.gegy1000.terrarium.client.preview;
 
+import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.client.render.TerrariumVertexFormats;
 import net.minecraft.block.BlockGrass;
@@ -11,12 +12,10 @@ import net.minecraft.client.renderer.WorldVertexBufferUploader;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.ColorizerGrass;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.opengl.GL11;
@@ -29,17 +28,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.function.Supplier;
 
+// TODO: Rendering lots of small display lists is slow
 @SideOnly(Side.CLIENT)
 public class PreviewChunk {
-    private static final EnumFacing[] PREVIEW_FACES = new EnumFacing[] { EnumFacing.UP, EnumFacing.NORTH, EnumFacing.SOUTH, EnumFacing.WEST, EnumFacing.EAST };
+    public static final EnumFacing[] PREVIEW_FACES = new EnumFacing[] { EnumFacing.UP, EnumFacing.NORTH, EnumFacing.SOUTH, EnumFacing.WEST, EnumFacing.EAST };
     private static final Map<Biome, Integer> BIOME_GRASS_COLORS = new HashMap<>();
 
-    private final ChunkPrimer chunk;
-    private final Biome[] biomes;
+    private final PreviewChunkData chunkData;
+    private final PreviewColumnData column;
 
-    private final ChunkPos pos;
-    private final int globalX;
-    private final int globalZ;
+    private final CubicPos pos;
 
     private final IBlockAccess previewAccess;
 
@@ -61,18 +59,20 @@ public class PreviewChunk {
         }
     }
 
-    public PreviewChunk(ChunkPrimer chunk, Biome[] biomes, ChunkPos pos, IBlockAccess previewAccess) {
-        this.chunk = chunk;
-        this.biomes = biomes;
+    public PreviewChunk(PreviewChunkData chunkData, PreviewColumnData column, CubicPos pos, IBlockAccess previewAccess) {
+        this.chunkData = chunkData;
+        this.column = column;
         this.pos = pos;
         this.previewAccess = previewAccess;
-
-        this.globalX = this.pos.getXStart();
-        this.globalZ = this.pos.getZStart();
     }
 
-    public void executeBuild(ExecutorService executor, Supplier<BufferBuilder> builderSupplier) {
+    public void submitBuild(ExecutorService executor, Supplier<BufferBuilder> builderSupplier) {
         synchronized (this.buildLock) {
+            if (this.shouldSkip()) {
+                this.geometry = new EmptyGeometry();
+                return;
+            }
+
             this.builderResult = executor.submit(() -> {
                 BufferBuilder builder = builderSupplier.get();
                 if (builder == null) {
@@ -82,6 +82,10 @@ public class PreviewChunk {
                 return builder;
             });
         }
+    }
+
+    private boolean shouldSkip() {
+        return this.chunkData.isEmpty();
     }
 
     public BufferBuilder performUpload() {
@@ -147,11 +151,16 @@ public class PreviewChunk {
         return new DisplayListGeometry(id);
     }
 
-    public void render(int cameraX, int cameraZ) {
+    public void render() {
         Geometry geometry = this.geometry;
+
         if (geometry != null) {
+            int offsetX = this.pos.getMinX();
+            int offsetY = this.pos.getMinY();
+            int offsetZ = this.pos.getMinZ();
+
             GlStateManager.pushMatrix();
-            GlStateManager.translate(this.globalX - cameraX, 0.0, this.globalZ - cameraZ);
+            GlStateManager.translate(offsetX, offsetY, offsetZ);
             geometry.render();
             GlStateManager.popMatrix();
         }
@@ -176,36 +185,69 @@ public class PreviewChunk {
     public void buildBlocks(BufferBuilder builder) {
         builder.begin(GL11.GL_QUADS, TerrariumVertexFormats.POSITION_COLOR_NORMAL);
 
-        ChunkPrimer chunk = this.chunk;
-        IBlockAccess previewAccess = this.previewAccess;
-        int globalX = this.globalX;
-        int globalZ = this.globalZ;
+        int globalX = this.pos.getMinX();
+        int globalY = this.pos.getMinY();
+        int globalZ = this.pos.getMinZ();
 
-        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
-        for (int z = 0; z < 16; z++) {
-            for (int x = 0; x < 16; x++) {
-                Biome biome = this.biomes[x + z * 16];
-                for (int y = 0; y < 256; y++) {
-                    IBlockState state = chunk.getBlockState(x, y, z);
-                    if (state.getBlock() != Blocks.AIR) {
-                        this.buildBlock(builder, chunk, previewAccess, globalX, globalZ, pos, z, x, biome, y, state);
-                    }
-                }
-            }
+        if (!this.chunkData.isFilled()) {
+            this.buildAllBlocks(builder, globalX, globalY, globalZ);
+        } else {
+            this.buildEdgeBlocks(builder, globalX, globalY, globalZ);
         }
 
         builder.setTranslation(0.0, 0.0, 0.0);
     }
 
-    private void buildBlock(BufferBuilder builder, ChunkPrimer chunk, IBlockAccess previewAccess, int globalX, int globalZ, BlockPos.MutableBlockPos pos, int z, int x, Biome biome, int y, IBlockState state) {
-        pos.setPos(globalX + x, y, globalZ + z);
+    private void buildAllBlocks(BufferBuilder builder, int globalX, int globalY, int globalZ) {
+        PreviewChunkData chunkData = this.chunkData;
+        Biome[] biomes = this.column.getBiomes();
+
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        for (int z = 0; z < 16; z++) {
+            for (int x = 0; x < 16; x++) {
+                Biome biome = biomes[x + z * 16];
+                for (int y = 0; y < 16; y++) {
+                    IBlockState state = chunkData.get(x, y, z);
+                    if (state.getBlock() != Blocks.AIR) {
+                        pos.setPos(globalX + x, globalY + y, globalZ + z);
+                        this.buildBlock(builder, pos, x, y, z, biome, state);
+                    }
+                }
+            }
+        }
+    }
+
+    private void buildEdgeBlocks(BufferBuilder builder, int globalX, int globalY, int globalZ) {
+        PreviewChunkData chunkData = this.chunkData;
+        Biome[] biomes = this.column.getBiomes();
+
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        for (int z = 0; z < 16; z++) {
+            for (int x = 0; x < 16; x++) {
+                Biome biome = biomes[x + z * 16];
+                for (int y = 0; y < 16; y++) {
+                    if (x <= 0 || x >= 15 || z <= 0 || z >= 15 || y <= 0 || y >= 15) {
+                        IBlockState state = chunkData.get(x, y, z);
+                        if (state.getBlock() != Blocks.AIR) {
+                            pos.setPos(globalX + x, globalY + y, globalZ + z);
+                            this.buildBlock(builder, pos, x, y, z, biome, state);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void buildBlock(BufferBuilder builder, BlockPos globalPos, int x, int y, int z, Biome biome, IBlockState state) {
+        PreviewChunkData chunkData = this.chunkData;
+        IBlockAccess previewAccess = this.previewAccess;
 
         List<EnumFacing> faces = new ArrayList<>(6);
         for (EnumFacing facing : PREVIEW_FACES) {
-            BlockPos offset = pos.offset(facing);
+            BlockPos offset = globalPos.offset(facing);
             IBlockState neighbourState;
-            if (x > 0 && x < 15 && z > 0 && z < 15 && y > 0 && y < 255) {
-                neighbourState = chunk.getBlockState(offset.getX() & 15, offset.getY(), offset.getZ() & 15);
+            if (x > 0 && x < 15 && z > 0 && z < 15 && y > 0 && y < 15) {
+                neighbourState = chunkData.get(offset.getX() & 15, offset.getY() & 15, offset.getZ() & 15);
             } else {
                 neighbourState = previewAccess.getBlockState(offset);
             }
@@ -215,17 +257,17 @@ public class PreviewChunk {
         }
 
         if (!faces.isEmpty()) {
-            this.buildFaces(builder, faces, state, biome, pos, x, z);
+            this.buildFaces(builder, faces, state, biome, globalPos, x, y, z);
         }
     }
 
-    private void buildFaces(BufferBuilder builder, List<EnumFacing> faces, IBlockState state, Biome biome, BlockPos pos, int x, int z) {
-        int color = this.getBlockColor(state, biome, pos);
+    private void buildFaces(BufferBuilder builder, List<EnumFacing> faces, IBlockState state, Biome biome, BlockPos globalPos, int x, int y, int z) {
+        int color = this.getBlockColor(state, biome, globalPos);
         int red = (color >> 16) & 0xFF;
         int green = (color >> 8) & 0xFF;
         int blue = color & 0xFF;
 
-        builder.setTranslation(x, pos.getY(), z);
+        builder.setTranslation(x, y, z);
 
         for (EnumFacing face : faces) {
             this.buildFace(builder, face, red, green, blue);

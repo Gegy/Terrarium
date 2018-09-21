@@ -3,7 +3,6 @@ package net.gegy1000.terrarium.server.world.region;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import net.gegy1000.cubicglue.CubicGlue;
-import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.world.chunk.tracker.ChunkTrackerAccess;
 import net.gegy1000.terrarium.server.world.chunk.tracker.ChunkTrackerHooks;
@@ -47,7 +46,6 @@ public class RegionGenerationHandler {
 
     private static ChunkTrackerAccess createTrackerAccess(World world) {
         if (!(world instanceof WorldServer)) {
-            Terrarium.LOGGER.warn("Unable to hook player chunk map, this may have extremely negative impacts on performance!");
             return new FallbackTrackerAccess();
         }
         if (CubicGlue.isCubic(world)) {
@@ -159,10 +157,21 @@ public class RegionGenerationHandler {
         return this.createDefaultRegion(pos);
     }
 
-    public <T extends RasterDataAccess<V>, V> T fillRaster(RegionComponentType<T> componentType, T result, int originX, int originZ, int width, int height, boolean allowPartial) {
-        if (allowPartial && !this.hasRegions(originX, originZ, width, height)) {
-            return this.dataProvider.populatePartialData(this, componentType, originX, originZ, width, height);
+    public void prepareAreaData(int originX, int originZ, int width, int height) {
+        RegionTilePos minPos = this.getRegionPos(originX, originZ);
+        RegionTilePos maxPos = this.getRegionPos(originX + width, originZ + height);
+        for (int regionZ = minPos.getTileZ(); regionZ <= maxPos.getTileZ(); regionZ++) {
+            for (int regionX = minPos.getTileX(); regionX <= maxPos.getTileX(); regionX++) {
+                this.dataProvider.prepareRegionData(this, new RegionTilePos(regionX, regionZ));
+            }
         }
+    }
+
+    public <T extends RasterDataAccess<V>, V> void fillRaster(RegionComponentType<T> componentType, T result, int originX, int originZ) {
+        int width = result.getWidth();
+        int height = result.getHeight();
+
+        this.prepareAreaData(originX, originZ, width, height);
 
         for (int localZ = 0; localZ < height; localZ++) {
             int blockZ = originZ + localZ;
@@ -177,8 +186,16 @@ public class RegionGenerationHandler {
                 result.set(localX, localZ, value);
             }
         }
+    }
 
-        return result;
+    public <T extends RasterDataAccess<V>, V> T computePartialRaster(RegionComponentType<T> componentType, int originX, int originZ, int width, int height) {
+        if (!this.hasRegions(originX, originZ, width, height)) {
+            return this.dataProvider.populatePartialData(this, componentType, originX, originZ, width, height);
+        } else {
+            T result = componentType.createDefaultData(width, height);
+            this.fillRaster(componentType, result, originX, originZ);
+            return result;
+        }
     }
 
     private boolean hasRegions(int originX, int originZ, int width, int height) {
@@ -199,7 +216,7 @@ public class RegionGenerationHandler {
     }
 
     private GenerationRegion generate(RegionTilePos pos) {
-        RegionData data = this.dataProvider.populateData(this, pos, GenerationRegion.BUFFERED_SIZE, GenerationRegion.BUFFERED_SIZE);
+        RegionData data = this.dataProvider.populateData(this, pos);
         return new GenerationRegion(pos, data);
     }
 
@@ -211,8 +228,8 @@ public class RegionGenerationHandler {
         this.chunkRasterHandler.fillRasters(originX, originZ);
     }
 
-    public void prepareChunk(int originX, int originZ, Collection<RegionComponentType<?>> components) {
-        this.chunkRasterHandler.fillRasters(originX, originZ, components);
+    public void prepareChunkPartial(int originX, int originZ, Collection<RegionComponentType<?>> components) {
+        this.chunkRasterHandler.fillRastersPartial(originX, originZ, components);
     }
 
     public <T extends RasterDataAccess<V>, V> T getCachedChunkRaster(RegionComponentType<T> componentType) {

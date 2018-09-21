@@ -7,7 +7,7 @@ import net.gegy1000.earth.server.command.GeoTeleportCommand;
 import net.gegy1000.earth.server.command.GeoToolCommand;
 import net.gegy1000.earth.server.message.EarthMapGuiMessage;
 import net.gegy1000.earth.server.message.EarthPanoramaMessage;
-import net.gegy1000.earth.server.world.CoverDebugWorldDefinition;
+import net.gegy1000.earth.server.world.CoverDebugWorldType;
 import net.gegy1000.earth.server.world.EarthWorldType;
 import net.gegy1000.earth.server.world.pipeline.source.EarthRemoteData;
 import net.gegy1000.earth.server.world.pipeline.source.SrtmHeightSource;
@@ -46,7 +46,7 @@ public class TerrariumEarth {
     public static ServerProxy PROXY;
 
     public static final WorldType EARTH_TYPE = new EarthWorldType().create();
-    public static final WorldType COVER_DEBUG_TYPE = new CoverDebugWorldDefinition().create();
+    public static final WorldType COVER_DEBUG_TYPE = new CoverDebugWorldType().create();
 
     public static final SimpleNetworkWrapper NETWORK = NetworkRegistry.INSTANCE.newSimpleChannel(TerrariumEarth.MODID);
 

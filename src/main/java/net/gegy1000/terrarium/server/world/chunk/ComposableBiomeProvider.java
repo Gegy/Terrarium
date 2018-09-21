@@ -107,7 +107,7 @@ public class ComposableBiomeProvider extends BiomeProvider {
         ChunkCompositionProcedure compositionProcedure = this.compositionProcedure.get();
 
         if (this.isChunkGeneration(x, z, width, height)) {
-            regionHandler.prepareChunk(x, z, compositionProcedure.getBiomeDependencies());
+            regionHandler.prepareChunkPartial(x, z, compositionProcedure.getBiomeDependencies());
             Biome[] biomeBuffer = compositionProcedure.composeBiomes(regionHandler, x >> 4, z >> 4);
             System.arraycopy(biomeBuffer, 0, biomes, 0, biomeBuffer.length);
             return;
@@ -128,7 +128,7 @@ public class ComposableBiomeProvider extends BiomeProvider {
                 int minZ = Math.max(minChunkZ, z);
                 int maxZ = Math.min((chunkZ + 1) << 4, z + height);
 
-                regionHandler.prepareChunk(minChunkX, minChunkZ, compositionProcedure.getBiomeDependencies());
+                regionHandler.prepareChunkPartial(minChunkX, minChunkZ, compositionProcedure.getBiomeDependencies());
                 Biome[] biomeBuffer = compositionProcedure.composeBiomes(regionHandler, chunkX, chunkZ);
 
                 for (int localZ = minZ; localZ < maxZ; localZ++) {

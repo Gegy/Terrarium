@@ -18,6 +18,10 @@ public class ShortRasterTile implements TiledDataAccess, NumberRasterTile<Short>
         this.height = height;
     }
 
+    public ShortRasterTile(int width, int height) {
+        this(new short[width * height], width, height);
+    }
+
     public ShortRasterTile(DataView view) {
         this.data = new short[view.getWidth() * view.getHeight()];
         this.width = view.getWidth();
