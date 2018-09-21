@@ -121,8 +121,6 @@ public class DataSourceHandler {
                 this.queuedTiles.remove(future.key);
             }
         }
-
-        System.out.println(this.queuedTiles.size() + " / " + this.tileCache.size());
     }
 
     private <T extends TiledDataAccess> T parseResult(TileFuture<T> future) {

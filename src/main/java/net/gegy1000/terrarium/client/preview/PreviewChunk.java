@@ -28,7 +28,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.function.Supplier;
 
-// TODO: Rendering lots of small display lists is slow
 @SideOnly(Side.CLIENT)
 public class PreviewChunk {
     public static final EnumFacing[] PREVIEW_FACES = new EnumFacing[] { EnumFacing.UP, EnumFacing.NORTH, EnumFacing.SOUTH, EnumFacing.WEST, EnumFacing.EAST };
