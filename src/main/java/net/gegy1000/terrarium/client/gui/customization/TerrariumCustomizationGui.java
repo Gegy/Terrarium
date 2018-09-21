@@ -13,6 +13,7 @@ import net.gegy1000.terrarium.server.world.generator.customization.GenerationSet
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPreset;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.CustomizationCategory;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.CustomizationWidget;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiCreateWorld;
 import net.minecraft.client.gui.GuiScreen;
@@ -77,6 +78,13 @@ public class TerrariumCustomizationGui extends GuiScreen {
                 Terrarium.LOGGER.error("Failed to deserialize settings: {}", settingsString, e);
             }
         }
+    }
+
+    @Override
+    public void onResize(Minecraft client, int w, int h) {
+        this.freeze = true;
+        super.onResize(client, w, h);
+        this.freeze = false;
     }
 
     @Override
@@ -248,7 +256,7 @@ public class TerrariumCustomizationGui extends GuiScreen {
     protected void rebuildState() {
         this.deletePreview();
 
-        BufferBuilder[] builders = new BufferBuilder[512];
+        BufferBuilder[] builders = new BufferBuilder[256];
         for (int i = 0; i < builders.length; i++) {
             builders[i] = new BufferBuilder(0x400);
         }

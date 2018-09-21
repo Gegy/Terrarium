@@ -128,7 +128,7 @@ public class WorldPreview implements IBlockAccess {
 
     private void submitChunk(CubicPos pos, PreviewChunkData data, PreviewColumnData columnData) {
         PreviewChunk chunk = new PreviewChunk(data, columnData, pos, this);
-        chunk.submitBuild(this.executor, this::takeBuilder);
+        chunk.submitBuild(this.executor, this::takeBuilder, this::returnBuilder);
         synchronized (this.lock) {
             this.previewChunks.add(chunk);
         }

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 @SideOnly(Side.CLIENT)
@@ -65,7 +66,7 @@ public class PreviewChunk {
         this.previewAccess = previewAccess;
     }
 
-    public void submitBuild(ExecutorService executor, Supplier<BufferBuilder> builderSupplier) {
+    public void submitBuild(ExecutorService executor, Supplier<BufferBuilder> builderSupplier, Consumer<BufferBuilder> builderReturn) {
         synchronized (this.buildLock) {
             if (this.shouldSkip()) {
                 this.geometry = new EmptyGeometry();
@@ -78,6 +79,11 @@ public class PreviewChunk {
                     return null;
                 }
                 this.buildBlocks(builder);
+                if (builder.getVertexCount() <= 0) {
+                    builder.finishDrawing();
+                    builderReturn.accept(builder);
+                    return null;
+                }
                 return builder;
             });
         }
@@ -95,6 +101,8 @@ public class PreviewChunk {
                 oldGeometry.delete();
             }
             this.geometry = this.buildGeometry(completedBuilder);
+        } else {
+            this.geometry = new EmptyGeometry();
         }
         return completedBuilder;
     }
