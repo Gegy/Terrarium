@@ -5,9 +5,11 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 
+import javax.annotation.Nullable;
 import java.util.Set;
 
 public interface ChunkTrackerHooks extends ICapabilityProvider {
+    @Nullable
     static ChunkTrackerHooks createHooks(WorldServer world) {
         if (CubicGlue.isCubic(world)) {
             return createCubicHooks(world);

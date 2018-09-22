@@ -62,8 +62,12 @@ public class TerrariumEarth {
         MinecraftForge.ORE_GEN_BUS.register(EarthDecorationEventHandler.class);
 
         Thread thread = new Thread(() -> {
-            EarthRemoteData.loadInfo();
-            SrtmHeightSource.loadValidTiles();
+            try {
+                EarthRemoteData.loadInfo();
+                SrtmHeightSource.loadValidTiles();
+            } catch (Throwable t) {
+                LOGGER.warn("Failed to load remote Earth data {}", t.toString());
+            }
         }, "Terrarium Remote Load");
         thread.setDaemon(true);
         thread.start();

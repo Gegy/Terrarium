@@ -1,7 +1,6 @@
 package net.gegy1000.earth.server.world.pipeline.source;
 
 import net.gegy1000.earth.TerrariumEarth;
-import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
@@ -32,7 +31,7 @@ public class SrtmHeightSource extends TiledDataSource<ShortRasterTile> {
         super(new ResourceLocation(TerrariumEarth.MODID, "srtm"), new File(GLOBAL_CACHE_ROOT, cacheRoot), new Coordinate(coordinateState, TILE_SIZE, TILE_SIZE));
     }
 
-    public static void loadValidTiles() {
+    public static void loadValidTiles() throws IOException {
         try (DataInputStream input = new DataInputStream(new BufferedInputStream(new GZIPInputStream(SrtmHeightSource.getTilesURL().openStream())))) {
             int count = input.readInt();
             for (int i = 0; i < count; i++) {
@@ -40,8 +39,6 @@ public class SrtmHeightSource extends TiledDataSource<ShortRasterTile> {
                 int longitude = input.readShort();
                 VALID_TILES.add(new DataTilePos(longitude, -latitude));
             }
-        } catch (IOException e) {
-            Terrarium.LOGGER.error("Failed to load valid height tiles", e);
         }
     }
 

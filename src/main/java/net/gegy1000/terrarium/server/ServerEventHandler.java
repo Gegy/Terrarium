@@ -24,7 +24,7 @@ import java.util.Collection;
 
 @Mod.EventBusSubscriber(modid = Terrarium.MODID)
 public class ServerEventHandler {
-    private static final long REGION_TRACK_INTERVAL = 1000;
+    private static final long REGION_TRACK_INTERVAL = 2000;
     private static long lastRegionTrackTime;
 
     @SubscribeEvent(priority = EventPriority.LOWEST)

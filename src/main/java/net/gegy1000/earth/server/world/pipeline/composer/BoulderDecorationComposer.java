@@ -49,8 +49,8 @@ public class BoulderDecorationComposer implements DecorationComposer {
             int localX = this.random.nextInt(16);
             int localZ = this.random.nextInt(16);
 
-            if (this.random.nextInt(32) == 0) {
-                if (slopeRaster.getByte(localX, localZ) >= CoverGenerator.MOUNTAINOUS_SLOPE || this.random.nextInt(60) == 0) {
+            if (this.random.nextInt(16) == 0) {
+                if (slopeRaster.getByte(localX, localZ) >= CoverGenerator.MOUNTAINOUS_SLOPE || this.random.nextInt(30) == 0) {
                     int spawnX = localX + globalX + 8;
                     int spawnZ = localZ + globalZ + 8;
 

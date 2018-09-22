@@ -28,22 +28,20 @@ public class EarthRemoteData {
 
     public static EarthRemoteData.Info info = new EarthRemoteData.Info("", "", "%s_%s.mat", "", "%s%s.hgt", "", "http://tile.openstreetmap.org", "%s/%s/%s.png", "", "", "");
 
-    public static void loadInfo() {
+    public static void loadInfo() throws IOException {
         try {
             URL url = new URL(INFO_JSON);
             info = EarthRemoteData.loadInfo(url.openStream());
             EarthRemoteData.cacheInfo(info);
         } catch (IOException e) {
-            TerrariumEarth.LOGGER.error("Failed to load remote Terrarium Earth info, checking cache", e);
+            TerrariumEarth.LOGGER.error("Failed to load remote Terrarium Earth info, checking cache {}", e.toString());
             EarthRemoteData.loadCachedInfo();
         }
     }
 
-    private static void loadCachedInfo() {
+    private static void loadCachedInfo() throws IOException {
         try (InputStream input = new GZIPInputStream(new FileInputStream(INFO_CACHE))) {
             info = loadInfo(input);
-        } catch (IOException e) {
-            TerrariumEarth.LOGGER.error("Failed to load cached Terrarium Earth info", e);
         }
     }
 
