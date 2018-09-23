@@ -243,7 +243,6 @@ public class TerrariumCustomizationGui extends GuiScreen {
     public void onGuiClosed() {
         if (!this.freeze) {
             super.onGuiClosed();
-
             this.deletePreview();
         }
     }
@@ -265,7 +264,6 @@ public class TerrariumCustomizationGui extends GuiScreen {
             this.preview = new WorldPreview(this.worldType, this.settings, builders);
         } catch (Throwable t) {
             Terrarium.LOGGER.error("Failed to update world preview", t);
-            this.deletePreview();
             this.mc.displayGuiScreen(this.parent);
         }
     }
@@ -278,9 +276,9 @@ public class TerrariumCustomizationGui extends GuiScreen {
     }
 
     private void deletePreview() {
-        WorldPreview preview = this.preview;
-        if (preview != null) {
-            preview.delete();
+        if (this.preview != null) {
+            this.preview.delete();
+            this.preview = null;
         }
     }
 

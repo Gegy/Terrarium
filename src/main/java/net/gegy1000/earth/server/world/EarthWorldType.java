@@ -60,6 +60,7 @@ import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.CoverDec
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.LakeDecorationComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.LavaLakeDecorationComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.VanillaBiomeDecorationComposer;
+import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.VanillaEntitySpawnComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.VanillaOreDecorationComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.structure.VanillaStructureComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.BedrockSurfaceComposer;
@@ -116,6 +117,7 @@ public class EarthWorldType extends TerrariumWorldType {
     public static final PropertyKey<Boolean> ENABLE_BUILDINGS = PropertyKey.createBoolean("enable_buildings");
     public static final PropertyKey<Boolean> ENABLE_STREETS = PropertyKey.createBoolean("enable_streets");
     public static final PropertyKey<Boolean> ENABLE_DEFAULT_FEATURES = PropertyKey.createBoolean("enable_default_features");
+    public static final PropertyKey<Boolean> ENABLE_DEFAULT_SPAWNING = PropertyKey.createBoolean("enable_default_spawning");
     public static final PropertyKey<Boolean> ENABLE_CAVE_GENERATION = PropertyKey.createBoolean("enable_cave_generation");
     public static final PropertyKey<Boolean> ENABLE_RESOURCE_GENERATION = PropertyKey.createBoolean("enable_resource_generation");
     public static final PropertyKey<Boolean> ENABLE_LAKE_GENERATION = PropertyKey.createBoolean("enable_lake_generation");
@@ -156,6 +158,7 @@ public class EarthWorldType extends TerrariumWorldType {
                 )
                 .withCategory("survival",
                         new ToggleWidget(ENABLE_DEFAULT_DECORATION),
+                        new ToggleWidget(ENABLE_DEFAULT_SPAWNING),
                         new ToggleWidget(ENABLE_DEFAULT_FEATURES),
                         new ToggleWidget(ENABLE_MOD_GENERATION),
                         new ToggleWidget(ENABLE_CAVE_GENERATION),
@@ -236,6 +239,9 @@ public class EarthWorldType extends TerrariumWorldType {
             if (this.settings.getBoolean(ENABLE_DEFAULT_DECORATION)) {
                 builder.withDecorationComposer(new VanillaBiomeDecorationComposer());
             }
+            if (this.settings.getBoolean(ENABLE_DEFAULT_SPAWNING)) {
+                builder.withDecorationComposer(new VanillaEntitySpawnComposer(this.world));
+            }
             if (this.settings.getBoolean(ENABLE_LAKE_GENERATION)) {
                 builder.withDecorationComposer(new LakeDecorationComposer(this.world));
             }
@@ -243,7 +249,7 @@ public class EarthWorldType extends TerrariumWorldType {
                 builder.withDecorationComposer(new LavaLakeDecorationComposer(this.world));
             }
             if (this.settings.getBoolean(ENABLE_RESOURCE_GENERATION)) {
-                builder.withDecorationComposer(new VanillaOreDecorationComposer());
+                builder.withDecorationComposer(new VanillaOreDecorationComposer(this.world));
             }
             if (this.settings.getBoolean(ENABLE_MOD_GENERATION)) {
                 builder.withDecorationComposer(new ModdedDecorationComposer(this.world));

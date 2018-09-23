@@ -7,16 +7,9 @@ import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentTyp
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 
 public class VanillaBiomeDecorationComposer implements DecorationComposer {
-    private static final long DECORATION_SEED = 24933181514746343L;
-
     @Override
     public void composeDecoration(RegionGenerationHandler regionHandler, CubicPos pos, ChunkPopulationWriter writer) {
         VanillaBiomeDecorator.decorate(pos, writer, writer.getCenterBiome());
-
-//        // TODO
-//        if (TerrainGen.populate(null, world, this.horizontalRandom, pos.getX(), pos.getZ(), false, PopulateChunkEvent.Populate.EventType.ANIMALS)) {
-//            WorldEntitySpawner.performWorldGenSpawning(world, biome, globalX + 8, globalZ + 8, 16, 16, this.horizontalRandom);
-//        }
     }
 
     @Override

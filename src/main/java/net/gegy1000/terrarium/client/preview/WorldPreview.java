@@ -7,6 +7,7 @@ import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
+import net.gegy1000.terrarium.server.world.pipeline.GenerationCancelledException;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
@@ -94,8 +95,10 @@ public class WorldPreview implements IBlockAccess {
             this.generator.setColumnHandler(this::handleGeneratedColumn);
 
             this.generator.initiate();
-        } catch (Exception e) {
-            Terrarium.LOGGER.error("Failed to generate preview chunks", e);
+        } catch (GenerationCancelledException e) {
+            // We can safely ignore
+        } catch (Throwable t) {
+            Terrarium.LOGGER.error("Failed to generate preview chunks", t);
         }
     }
 
@@ -122,6 +125,9 @@ public class WorldPreview implements IBlockAccess {
             this.generatedChunks.add(pos);
             PreviewChunkData data = this.chunkMap.get(getCubeKey(pos));
             PreviewColumnData columnData = this.columnMap.get(ChunkPos.asLong(pos.getX(), pos.getZ()));
+            if (this.executor.isShutdown() || this.executor.isTerminated()) {
+                return;
+            }
             this.submitChunk(pos, data, columnData);
         }
     }
@@ -199,7 +205,10 @@ public class WorldPreview implements IBlockAccess {
             }
         }
 
-        this.generator.close();
+        if (this.generator != null) {
+            this.generator.close();
+        }
+
         this.executor.shutdownNow();
 
         this.worldData.getRegionHandler().close();

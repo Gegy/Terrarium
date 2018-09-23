@@ -2,6 +2,7 @@ package net.gegy1000.terrarium.server.world.region;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.gegy1000.terrarium.Terrarium;
+import net.gegy1000.terrarium.server.world.pipeline.GenerationCancelledException;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -56,8 +57,12 @@ public class OffThreadGenerationDispatcher implements RegionGenerationDispatcher
         Map<RegionTilePos, GenerationRegion> completedRegions = new HashMap<>();
         for (RegionFuture future : this.queuedRegions.values()) {
             if (future.isComplete()) {
-                GenerationRegion region = future.getGeneratedRegion();
-                completedRegions.put(future.pos, region);
+                try {
+                    GenerationRegion region = future.getGeneratedRegion();
+                    completedRegions.put(future.pos, region);
+                } catch (InterruptedException e) {
+                    throw new GenerationCancelledException(e);
+                }
             }
         }
 
@@ -73,10 +78,14 @@ public class OffThreadGenerationDispatcher implements RegionGenerationDispatcher
             regionFuture = this.enqueueRegion(pos, false);
         }
 
-        GenerationRegion generatedRegion = regionFuture.getGeneratedRegion();
-        this.queuedRegions.remove(regionFuture.pos);
+        try {
+            GenerationRegion generatedRegion = regionFuture.getGeneratedRegion();
+            this.queuedRegions.remove(regionFuture.pos);
 
-        return generatedRegion;
+            return generatedRegion;
+        } catch (InterruptedException e) {
+            throw new GenerationCancelledException(e);
+        }
     }
 
     @Override
@@ -113,16 +122,15 @@ public class OffThreadGenerationDispatcher implements RegionGenerationDispatcher
         }
 
         @Nullable
-        public GenerationRegion getGeneratedRegion() {
+        public GenerationRegion getGeneratedRegion() throws InterruptedException {
             try {
                 if (this.future == null) {
                     return null;
                 }
                 return this.future.get();
             } catch (ExecutionException e) {
+                GenerationCancelledException.propagate(e);
                 Terrarium.LOGGER.error("Failed to retrieve generated region", e);
-                return null;
-            } catch (InterruptedException e) {
                 return null;
             }
         }

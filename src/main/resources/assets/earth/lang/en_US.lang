@@ -43,6 +43,7 @@ property.terrarium.beach_size.tooltip=Radius in blocks for beaches to be generat
 
 property.terrarium.enable_decoration.name=Enable Decoration
 property.terrarium.enable_default_decoration.name=Enable Default Decoration
+property.terrarium.enable_default_spawning.name=Enable Default Spawning
 property.terrarium.enable_buildings.name=Enable Buildings
 property.terrarium.enable_streets.name=Enable Streets
 
@@ -55,6 +56,7 @@ property.terrarium.enable_mod_generation.name=Enable Modded Generators
 
 property.terrarium.enable_decoration.tooltip=If enabled, decorations such as plants and trees will be placed
 property.terrarium.enable_default_decoration.tooltip=If enabled, vanilla and modded decorations will be placed.
+property.terrarium.enable_default_spawning.tooltip=If enabled, entities will be spawned in the world.
 property.terrarium.enable_buildings.tooltip=If enabled, buildings from OpenStreetMap will be generated
 property.terrarium.enable_streets.tooltip=If enabled, streets from OpenStreetMap will be generated
 

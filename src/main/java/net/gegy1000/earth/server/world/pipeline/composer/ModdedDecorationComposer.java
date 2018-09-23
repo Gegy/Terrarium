@@ -4,6 +4,7 @@ import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
 import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.cubicglue.util.PseudoRandomMap;
 import net.gegy1000.cubicglue.util.VanillaGeneratorCache;
+import net.gegy1000.cubicglue.util.wrapper.BiomeDecorationWorld;
 import net.gegy1000.earth.server.EarthDecorationEventHandler;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
@@ -33,6 +34,7 @@ public class ModdedDecorationComposer implements DecorationComposer {
 
         if (capturedGenerators != null && !capturedGenerators.isEmpty()) {
             World world = writer.getGlobal();
+            BiomeDecorationWorld wrappedWorld = new BiomeDecorationWorld(world, pos);
 
             IChunkProvider provider = world.getChunkProvider();
             IChunkGenerator generator = VanillaGeneratorCache.getGenerator(world);
@@ -47,7 +49,7 @@ public class ModdedDecorationComposer implements DecorationComposer {
 
             for (IWorldGenerator worldGenerator : capturedGenerators) {
                 this.horizontalRandom.setSeed(chunkSeed);
-                worldGenerator.generate(this.horizontalRandom, pos.getX(), pos.getZ(), world, generator, provider);
+                worldGenerator.generate(this.horizontalRandom, pos.getX(), pos.getZ(), wrappedWorld, generator, provider);
             }
         }
     }

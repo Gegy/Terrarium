@@ -7,6 +7,7 @@
     "spawn_longitude": 86.923641,
     "enable_decoration": true,
     "enable_default_decoration": true,
+    "enable_default_spawning": true,
     "world_scale": 0.015384,
     "height_scale": 1.5,
     "noise_scale": 0.0,

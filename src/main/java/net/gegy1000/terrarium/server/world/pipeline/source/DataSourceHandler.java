@@ -5,6 +5,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.world.pipeline.DataTileKey;
+import net.gegy1000.terrarium.server.world.pipeline.GenerationCancelledException;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.TiledDataAccess;
 import org.apache.commons.io.IOUtils;
 
@@ -44,10 +45,11 @@ public class DataSourceHandler {
     public void enqueueData(Set<DataTileKey<?>> requiredData) {
         for (DataTileKey<?> key : requiredData) {
             if (this.shouldQueueData(key)) {
-                this.enqueueTile(key);
+                synchronized (this.lock) {
+                    this.enqueueTile(key);
+                }
             }
         }
-        this.collectCompletedTiles();
     }
 
     private boolean shouldQueueData(DataTileKey<?> key) {
@@ -66,7 +68,11 @@ public class DataSourceHandler {
 
     @SuppressWarnings("unchecked")
     public <T extends TiledDataAccess> T getTile(TiledDataSource<T> source, DataTilePos pos) {
-        this.collectCompletedTiles();
+        try {
+            this.collectCompletedTiles();
+        } catch (InterruptedException e) {
+            throw new GenerationCancelledException(e);
+        }
 
         DataTileKey<T> key = new DataTileKey<>(source, pos.getTileX(), pos.getTileZ());
         try {
@@ -91,6 +97,8 @@ public class DataSourceHandler {
             }
 
             return loadedResult;
+        } catch (InterruptedException e) {
+            throw new GenerationCancelledException(e);
         } catch (Exception e) {
             Terrarium.LOGGER.warn("Unexpected exception occurred at {} from {}", pos, source.getIdentifier(), e);
             LoadingStateHandler.countFailure();
@@ -99,7 +107,7 @@ public class DataSourceHandler {
         return source.getDefaultTile();
     }
 
-    private void collectCompletedTiles() {
+    private void collectCompletedTiles() throws InterruptedException {
         if (this.queuedTiles.isEmpty()) {
             return;
         }
@@ -123,7 +131,7 @@ public class DataSourceHandler {
         }
     }
 
-    private <T extends TiledDataAccess> T parseResult(TileFuture<T> future) {
+    private <T extends TiledDataAccess> T parseResult(TileFuture<T> future) throws InterruptedException {
         DataTileKey<T> key = future.key;
         SourceResult<T> result = future.getResult();
         if (result.isError()) {
@@ -232,7 +240,7 @@ public class DataSourceHandler {
             return this.future.isDone() || this.future.isCancelled();
         }
 
-        public SourceResult<T> getResult() {
+        public SourceResult<T> getResult() throws InterruptedException {
             try {
                 if (this.future == null) {
                     return SourceResult.empty();
@@ -240,8 +248,6 @@ public class DataSourceHandler {
                 return this.future.get();
             } catch (ExecutionException e) {
                 return SourceResult.exception(e);
-            } catch (InterruptedException e) {
-                return SourceResult.empty();
             }
         }
 
