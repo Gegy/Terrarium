@@ -16,6 +16,8 @@ public abstract class PropertyKey<T> {
         this.type = type;
     }
 
+    public abstract JsonElement serializeValue(PropertyValue<T> value);
+
     @Nullable
     public abstract PropertyValue<T> parseValue(JsonElement element);
 

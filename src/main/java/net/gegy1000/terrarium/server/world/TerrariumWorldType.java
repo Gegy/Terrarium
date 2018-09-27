@@ -29,7 +29,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.Collection;
 
-// TODO: CubicGlue proxy needs to be based on whether the world has cubic chunks
 public abstract class TerrariumWorldType implements CubicWorldType {
     private final String name;
     private final ResourceLocation identifier;

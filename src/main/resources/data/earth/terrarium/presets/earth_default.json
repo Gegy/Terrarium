@@ -6,7 +6,7 @@
     "spawn_latitude": 27.988350,
     "spawn_longitude": 86.923641,
     "enable_decoration": true,
-    "enable_default_decoration": false,
+    "default_decoration": "none",
     "enable_default_spawning": true,
     "world_scale": 0.028571,
     "height_scale": 1.0,

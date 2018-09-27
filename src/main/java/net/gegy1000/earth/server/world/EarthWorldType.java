@@ -47,8 +47,10 @@ import net.gegy1000.terrarium.server.world.generator.customization.PropertyProto
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumCustomization;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPreset;
 import net.gegy1000.terrarium.server.world.generator.customization.property.BooleanKey;
+import net.gegy1000.terrarium.server.world.generator.customization.property.EnumKey;
 import net.gegy1000.terrarium.server.world.generator.customization.property.NumberKey;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
+import net.gegy1000.terrarium.server.world.generator.customization.widget.CycleWidget;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.InversePropertyConverter;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.SliderWidget;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.ToggleWidget;
@@ -110,7 +112,7 @@ public class EarthWorldType extends TerrariumWorldType {
     public static final PropertyKey<Number> SPAWN_LATITUDE = new NumberKey("spawn_latitude");
     public static final PropertyKey<Number> SPAWN_LONGITUDE = new NumberKey("spawn_longitude");
     public static final PropertyKey<Boolean> ENABLE_DECORATION = new BooleanKey("enable_decoration");
-    public static final PropertyKey<Boolean> ENABLE_DEFAULT_DECORATION = new BooleanKey("enable_default_decoration");
+    public static final PropertyKey<FeatureGenerationFormat> DEFAULT_DECORATION = new EnumKey<>("default_decoration", FeatureGenerationFormat.class);
     public static final PropertyKey<Number> WORLD_SCALE = new NumberKey("world_scale");
     public static final PropertyKey<Number> HEIGHT_SCALE = new NumberKey("height_scale");
     public static final PropertyKey<Number> NOISE_SCALE = new NumberKey("noise_scale");
@@ -146,11 +148,12 @@ public class EarthWorldType extends TerrariumWorldType {
     @Override
     public PropertyPrototype buildPropertyPrototype() {
         return PropertyPrototype.builder()
+                .withProperties(SPAWN_LATITUDE, SPAWN_LONGITUDE)
                 .withProperties(WORLD_SCALE, HEIGHT_SCALE, NOISE_SCALE)
                 .withProperties(OCEAN_DEPTH, HEIGHT_ORIGIN)
                 .withProperties(BEACH_SIZE)
                 .withProperties(ENABLE_DECORATION, ENABLE_BUILDINGS, ENABLE_STREETS)
-                .withProperties(ENABLE_DEFAULT_DECORATION, ENABLE_DEFAULT_SPAWNING, ENABLE_DEFAULT_FEATURES)
+                .withProperties(DEFAULT_DECORATION, ENABLE_DEFAULT_SPAWNING, ENABLE_DEFAULT_FEATURES)
                 .withProperties(ENABLE_MOD_GENERATION, ENABLE_CAVE_GENERATION, ENABLE_RESOURCE_GENERATION)
                 .withProperties(ENABLE_LAKE_GENERATION, ENABLE_LAVA_GENERATION)
                 .build();
@@ -173,7 +176,7 @@ public class EarthWorldType extends TerrariumWorldType {
                         new ToggleWidget(ENABLE_STREETS).locked()
                 )
                 .withCategory("survival",
-                        new ToggleWidget(ENABLE_DEFAULT_DECORATION),
+                        new CycleWidget<>(DEFAULT_DECORATION),
                         new ToggleWidget(ENABLE_DEFAULT_SPAWNING),
                         new ToggleWidget(ENABLE_DEFAULT_FEATURES),
                         new ToggleWidget(ENABLE_MOD_GENERATION),
@@ -252,7 +255,8 @@ public class EarthWorldType extends TerrariumWorldType {
                 builder.withDecorationComposer(new CoverDecorationComposer(this.world, RegionComponentType.COVER, coverTypes));
                 builder.withDecorationComposer(new BoulderDecorationComposer(this.world, RegionComponentType.SLOPE));
             }
-            if (this.settings.getBoolean(ENABLE_DEFAULT_DECORATION)) {
+            // TODO: Properly handle setting
+            if (this.settings.get(DEFAULT_DECORATION) == FeatureGenerationFormat.VANILLA) {
                 builder.withDecorationComposer(new VanillaBiomeDecorationComposer());
             }
             if (this.settings.getBoolean(ENABLE_DEFAULT_SPAWNING)) {

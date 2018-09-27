@@ -80,17 +80,16 @@ public class GenerationSettings {
     public JsonObject serialize() {
         JsonObject propertiesRoot = new JsonObject();
 
-        for (Map.Entry<PropertyKey<?>, PropertyValue<?>> entry : this.values.entrySet()) {
-            PropertyKey<?> key = entry.getKey();
-            PropertyValue<?> value = entry.getValue();
-            if (Number.class.isAssignableFrom(key.getType())) {
-                propertiesRoot.addProperty(key.getIdentifier(), (Number) value.get());
-            } else if (Boolean.class.isAssignableFrom(key.getType())) {
-                propertiesRoot.addProperty(key.getIdentifier(), (Boolean) value.get());
-            }
+        for (PropertyKey<?> key : this.keys.values()) {
+            JsonElement element = this.serializeProperty(key);
+            propertiesRoot.add(key.getIdentifier(), element);
         }
 
         return propertiesRoot;
+    }
+
+    private <T> JsonElement serializeProperty(PropertyKey<T> key) {
+        return key.serializeValue(this.getValue(key));
     }
 
     public String serializeString() {
@@ -146,6 +145,11 @@ public class GenerationSettings {
 
     public boolean getBoolean(PropertyKey<Boolean> key) {
         PropertyValue<Boolean> property = this.getValue(key);
+        return property.get();
+    }
+
+    public <T> T get(PropertyKey<T> key) {
+        PropertyValue<T> property = this.getValue(key);
         return property.get();
     }
 
