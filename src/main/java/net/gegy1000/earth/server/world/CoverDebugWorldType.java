@@ -16,6 +16,7 @@ import net.gegy1000.terrarium.server.world.cover.TerrariumCoverTypes;
 import net.gegy1000.terrarium.server.world.generator.BasicTerrariumGenerator;
 import net.gegy1000.terrarium.server.world.generator.TerrariumGenerator;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
+import net.gegy1000.terrarium.server.world.generator.customization.PropertyPrototype;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumCustomization;
 import net.gegy1000.terrarium.server.world.pipeline.TerrariumDataProvider;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
@@ -57,8 +58,13 @@ public class CoverDebugWorldType extends TerrariumWorldType {
     }
 
     @Override
+    public PropertyPrototype buildPropertyPrototype() {
+        return PropertyPrototype.EMPTY;
+    }
+
+    @Override
     public TerrariumCustomization buildCustomization() {
-        return TerrariumCustomization.builder().build();
+        return TerrariumCustomization.EMPTY;
     }
 
     @Override

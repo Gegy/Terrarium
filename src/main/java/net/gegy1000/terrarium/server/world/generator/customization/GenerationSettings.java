@@ -4,15 +4,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
 import net.gegy1000.cubicglue.api.CubicWorldType;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
-import net.gegy1000.terrarium.server.world.generator.customization.property.BooleanValue;
-import net.gegy1000.terrarium.server.world.generator.customization.property.NumberValue;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyValue;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.World;
 
 import java.util.Collection;
@@ -30,27 +26,31 @@ public class GenerationSettings {
 
     public static GenerationSettings parse(World world) {
         String generatorOptions = world.getWorldInfo().getGeneratorOptions();
-        GenerationSettings parsedSettings = GenerationSettings.deserialize(generatorOptions);
 
         CubicWorldType worldType = CubicWorldType.unwrap(world.getWorldType());
+
         if (worldType instanceof TerrariumWorldType) {
-            GenerationSettings presetSettings = ((TerrariumWorldType) worldType).getPreset().createProperties();
-            return presetSettings.union(parsedSettings);
+            TerrariumWorldType terrariumWorldType = (TerrariumWorldType) worldType;
+            PropertyPrototype prototype = terrariumWorldType.buildPropertyPrototype();
+
+            GenerationSettings parsedSettings = GenerationSettings.parse(prototype, generatorOptions);
+            GenerationSettings defaultSettings = terrariumWorldType.getPreset().createProperties(prototype);
+            return defaultSettings.union(parsedSettings);
         }
 
-        return parsedSettings;
+        throw new IllegalArgumentException("Cannot parse settings for non-terrarium world type");
     }
 
-    public static GenerationSettings deserialize(String json) {
+    public static GenerationSettings parse(PropertyPrototype prototype, String json) {
         JsonElement element = new JsonParser().parse(json);
         if (element instanceof JsonObject) {
-            return GenerationSettings.deserialize(element.getAsJsonObject());
+            return GenerationSettings.parse(prototype, element.getAsJsonObject());
         } else {
             return new GenerationSettings(new HashMap<>(), new HashMap<>());
         }
     }
 
-    public static GenerationSettings deserialize(JsonObject root) {
+    public static GenerationSettings parse(PropertyPrototype prototype, JsonObject root) {
         Map<String, PropertyKey<?>> keys = new HashMap<>();
         Map<PropertyKey<?>, PropertyValue<?>> values = new HashMap<>();
 
@@ -58,30 +58,23 @@ public class GenerationSettings {
             String identifier = propertyEntry.getKey();
             JsonElement propertyElement = propertyEntry.getValue();
 
-            Tuple<PropertyKey<?>, PropertyValue<?>> pair = GenerationSettings.parseKeyValuePair(identifier, propertyElement);
-            if (pair != null) {
-                PropertyKey<?> key = pair.getFirst();
-                PropertyValue<?> value = pair.getSecond();
-                keys.put(key.getIdentifier(), key);
-                values.put(key, value);
-            } else {
-                Terrarium.LOGGER.warn("Ignored invalid property {}: {}", identifier, propertyElement);
+            PropertyKey<?> key = prototype.getKey(identifier);
+            if (key == null) {
+                Terrarium.LOGGER.error("Ignored invalid property key '{}'", identifier);
+                continue;
             }
+
+            PropertyValue<?> value = key.parseValue(propertyElement);
+            if (value == null) {
+                Terrarium.LOGGER.error("Failed to parse invalid property with key '{}'");
+                continue;
+            }
+
+            keys.put(key.getIdentifier(), key);
+            values.put(key, value);
         }
 
         return new GenerationSettings(keys, values);
-    }
-
-    private static Tuple<PropertyKey<?>, PropertyValue<?>> parseKeyValuePair(String identifier, JsonElement element) {
-        if (element.isJsonPrimitive()) {
-            JsonPrimitive primitive = element.getAsJsonPrimitive();
-            if (primitive.isNumber()) {
-                return new Tuple<>(PropertyKey.createNumber(identifier), new NumberValue(primitive.getAsDouble()));
-            } else if (primitive.isBoolean()) {
-                return new Tuple<>(PropertyKey.createBoolean(identifier), new BooleanValue(primitive.getAsBoolean()));
-            }
-        }
-        return null;
     }
 
     public JsonObject serialize() {

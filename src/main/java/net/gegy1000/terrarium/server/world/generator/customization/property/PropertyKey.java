@@ -1,10 +1,13 @@
 package net.gegy1000.terrarium.server.world.generator.customization.property;
 
+import com.google.gson.JsonElement;
 import net.minecraft.client.resources.I18n;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class PropertyKey<T> {
+import javax.annotation.Nullable;
+
+public abstract class PropertyKey<T> {
     private final String identifier;
     private final Class<T> type;
 
@@ -13,13 +16,8 @@ public class PropertyKey<T> {
         this.type = type;
     }
 
-    public static PropertyKey<Number> createNumber(String identifier) {
-        return new PropertyKey<>(identifier, Number.class);
-    }
-
-    public static PropertyKey<Boolean> createBoolean(String identifier) {
-        return new PropertyKey<>(identifier, Boolean.class);
-    }
+    @Nullable
+    public abstract PropertyValue<T> parseValue(JsonElement element);
 
     public String getIdentifier() {
         return this.identifier;

@@ -6,8 +6,11 @@ import net.gegy1000.terrarium.server.world.generator.customization.widget.Custom
 import net.gegy1000.terrarium.server.world.generator.customization.widget.CustomizationWidget;
 
 import java.util.Collection;
+import java.util.Collections;
 
 public class TerrariumCustomization {
+    public static final TerrariumCustomization EMPTY = new TerrariumCustomization(Collections.emptyList());
+
     private final Collection<CustomizationCategory> categories;
 
     public TerrariumCustomization(Collection<CustomizationCategory> categories) {

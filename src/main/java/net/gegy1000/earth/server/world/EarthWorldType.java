@@ -43,8 +43,11 @@ import net.gegy1000.terrarium.server.world.cover.TerrariumCoverTypes;
 import net.gegy1000.terrarium.server.world.generator.BasicTerrariumGenerator;
 import net.gegy1000.terrarium.server.world.generator.TerrariumGenerator;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
+import net.gegy1000.terrarium.server.world.generator.customization.PropertyPrototype;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumCustomization;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPreset;
+import net.gegy1000.terrarium.server.world.generator.customization.property.BooleanKey;
+import net.gegy1000.terrarium.server.world.generator.customization.property.NumberKey;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.InversePropertyConverter;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.SliderWidget;
@@ -104,25 +107,25 @@ public class EarthWorldType extends TerrariumWorldType {
     private static final ResourceLocation IDENTIFIER = new ResourceLocation(TerrariumEarth.MODID, "earth_generator");
     private static final ResourceLocation PRESET = new ResourceLocation(TerrariumEarth.MODID, "earth_default");
 
-    public static final PropertyKey<Number> SPAWN_LATITUDE = PropertyKey.createNumber("spawn_latitude");
-    public static final PropertyKey<Number> SPAWN_LONGITUDE = PropertyKey.createNumber("spawn_longitude");
-    public static final PropertyKey<Boolean> ENABLE_DECORATION = PropertyKey.createBoolean("enable_decoration");
-    public static final PropertyKey<Boolean> ENABLE_DEFAULT_DECORATION = PropertyKey.createBoolean("enable_default_decoration");
-    public static final PropertyKey<Number> WORLD_SCALE = PropertyKey.createNumber("world_scale");
-    public static final PropertyKey<Number> HEIGHT_SCALE = PropertyKey.createNumber("height_scale");
-    public static final PropertyKey<Number> NOISE_SCALE = PropertyKey.createNumber("noise_scale");
-    public static final PropertyKey<Number> HEIGHT_ORIGIN = PropertyKey.createNumber("height_origin");
-    public static final PropertyKey<Number> OCEAN_DEPTH = PropertyKey.createNumber("ocean_depth");
-    public static final PropertyKey<Number> BEACH_SIZE = PropertyKey.createNumber("beach_size");
-    public static final PropertyKey<Boolean> ENABLE_BUILDINGS = PropertyKey.createBoolean("enable_buildings");
-    public static final PropertyKey<Boolean> ENABLE_STREETS = PropertyKey.createBoolean("enable_streets");
-    public static final PropertyKey<Boolean> ENABLE_DEFAULT_FEATURES = PropertyKey.createBoolean("enable_default_features");
-    public static final PropertyKey<Boolean> ENABLE_DEFAULT_SPAWNING = PropertyKey.createBoolean("enable_default_spawning");
-    public static final PropertyKey<Boolean> ENABLE_CAVE_GENERATION = PropertyKey.createBoolean("enable_cave_generation");
-    public static final PropertyKey<Boolean> ENABLE_RESOURCE_GENERATION = PropertyKey.createBoolean("enable_resource_generation");
-    public static final PropertyKey<Boolean> ENABLE_LAKE_GENERATION = PropertyKey.createBoolean("enable_lake_generation");
-    public static final PropertyKey<Boolean> ENABLE_LAVA_GENERATION = PropertyKey.createBoolean("enable_lava_generation");
-    public static final PropertyKey<Boolean> ENABLE_MOD_GENERATION = PropertyKey.createBoolean("enable_mod_generation");
+    public static final PropertyKey<Number> SPAWN_LATITUDE = new NumberKey("spawn_latitude");
+    public static final PropertyKey<Number> SPAWN_LONGITUDE = new NumberKey("spawn_longitude");
+    public static final PropertyKey<Boolean> ENABLE_DECORATION = new BooleanKey("enable_decoration");
+    public static final PropertyKey<Boolean> ENABLE_DEFAULT_DECORATION = new BooleanKey("enable_default_decoration");
+    public static final PropertyKey<Number> WORLD_SCALE = new NumberKey("world_scale");
+    public static final PropertyKey<Number> HEIGHT_SCALE = new NumberKey("height_scale");
+    public static final PropertyKey<Number> NOISE_SCALE = new NumberKey("noise_scale");
+    public static final PropertyKey<Number> HEIGHT_ORIGIN = new NumberKey("height_origin");
+    public static final PropertyKey<Number> OCEAN_DEPTH = new NumberKey("ocean_depth");
+    public static final PropertyKey<Number> BEACH_SIZE = new NumberKey("beach_size");
+    public static final PropertyKey<Boolean> ENABLE_BUILDINGS = new BooleanKey("enable_buildings");
+    public static final PropertyKey<Boolean> ENABLE_STREETS = new BooleanKey("enable_streets");
+    public static final PropertyKey<Boolean> ENABLE_DEFAULT_FEATURES = new BooleanKey("enable_default_features");
+    public static final PropertyKey<Boolean> ENABLE_DEFAULT_SPAWNING = new BooleanKey("enable_default_spawning");
+    public static final PropertyKey<Boolean> ENABLE_CAVE_GENERATION = new BooleanKey("enable_cave_generation");
+    public static final PropertyKey<Boolean> ENABLE_RESOURCE_GENERATION = new BooleanKey("enable_resource_generation");
+    public static final PropertyKey<Boolean> ENABLE_LAKE_GENERATION = new BooleanKey("enable_lake_generation");
+    public static final PropertyKey<Boolean> ENABLE_LAVA_GENERATION = new BooleanKey("enable_lava_generation");
+    public static final PropertyKey<Boolean> ENABLE_MOD_GENERATION = new BooleanKey("enable_mod_generation");
 
     public EarthWorldType() {
         super("earth", IDENTIFIER, PRESET);
@@ -138,6 +141,19 @@ public class EarthWorldType extends TerrariumWorldType {
     public Collection<ICapabilityProvider> createCapabilities(World world, GenerationSettings settings) {
         CoordinateState earthCoordinates = new LatLngCoordinateState(settings.getDouble(WORLD_SCALE) * SRTM_SCALE * 1200.0);
         return Lists.newArrayList(new EarthCapability.Impl(earthCoordinates));
+    }
+
+    @Override
+    public PropertyPrototype buildPropertyPrototype() {
+        return PropertyPrototype.builder()
+                .withProperties(WORLD_SCALE, HEIGHT_SCALE, NOISE_SCALE)
+                .withProperties(OCEAN_DEPTH, HEIGHT_ORIGIN)
+                .withProperties(BEACH_SIZE)
+                .withProperties(ENABLE_DECORATION, ENABLE_BUILDINGS, ENABLE_STREETS)
+                .withProperties(ENABLE_DEFAULT_DECORATION, ENABLE_DEFAULT_SPAWNING, ENABLE_DEFAULT_FEATURES)
+                .withProperties(ENABLE_MOD_GENERATION, ENABLE_CAVE_GENERATION, ENABLE_RESOURCE_GENERATION)
+                .withProperties(ENABLE_LAKE_GENERATION, ENABLE_LAVA_GENERATION)
+                .build();
     }
 
     @Override

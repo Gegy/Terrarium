@@ -10,6 +10,7 @@ import net.gegy1000.terrarium.client.preview.PreviewRenderer;
 import net.gegy1000.terrarium.client.preview.WorldPreview;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
+import net.gegy1000.terrarium.server.world.generator.customization.PropertyPrototype;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPreset;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.CustomizationCategory;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.CustomizationWidget;
@@ -68,14 +69,15 @@ public class TerrariumCustomizationGui extends GuiScreen {
             throw new IllegalArgumentException("Cannot customize world with preset of wrong world type");
         }
 
+        PropertyPrototype prototype = terrariumType.buildPropertyPrototype();
         String settingsString = parent.chunkProviderSettingsJson;
         if (Strings.isNullOrEmpty(settingsString)) {
-            this.setSettings(defaultPreset.createProperties());
+            this.setSettings(defaultPreset.createProperties(prototype));
         } else {
             try {
-                this.setSettings(GenerationSettings.deserialize(settingsString));
+                this.setSettings(GenerationSettings.parse(prototype, settingsString));
             } catch (JsonSyntaxException e) {
-                Terrarium.LOGGER.error("Failed to deserialize settings: {}", settingsString, e);
+                Terrarium.LOGGER.error("Failed to parse settings: {}", settingsString, e);
             }
         }
     }
@@ -248,7 +250,7 @@ public class TerrariumCustomizationGui extends GuiScreen {
     }
 
     public void applyPreset(TerrariumPreset preset) {
-        this.setSettings(preset.createProperties());
+        this.setSettings(preset.createProperties(this.terrariumType.buildPropertyPrototype()));
         this.previewDirty = true;
     }
 
