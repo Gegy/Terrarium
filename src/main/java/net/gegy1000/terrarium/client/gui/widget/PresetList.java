@@ -11,11 +11,13 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiListExtended;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.renderer.texture.TextureUtil;
+import net.minecraft.client.resources.IResource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import java.io.IOException;
 
 @SideOnly(Side.CLIENT)
 public class PresetList extends GuiListExtended {
@@ -106,10 +108,7 @@ public class PresetList extends GuiListExtended {
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 
             TextureManager textureManager = this.mc.getTextureManager();
-            textureManager.bindTexture(this.icon);
-            if (textureManager.getTexture(this.icon) == TextureUtil.MISSING_TEXTURE) {
-                textureManager.bindTexture(FALLBACK_ICON);
-            }
+            textureManager.bindTexture(this.computeIcon());
 
             Gui.drawModalRectWithCustomSizedTexture(x, y, 0.0F, 0.0F, 32, 32, 32.0F, 32.0F);
 
@@ -137,6 +136,20 @@ public class PresetList extends GuiListExtended {
 
         @Override
         public void mouseReleased(int slotIndex, int mouseX, int mouseY, int mouseEvent, int relativeX, int relativeY) {
+        }
+
+        private ResourceLocation computeIcon() {
+            if (this.mc.getTextureManager().getTexture(this.icon) != null) {
+                return this.icon;
+            }
+            try (IResource resource = this.mc.getResourceManager().getResource(this.icon)) {
+                if (resource != null) {
+                    return this.icon;
+                }
+            } catch (IOException e) {
+                // fall through
+            }
+            return FALLBACK_ICON;
         }
     }
 }

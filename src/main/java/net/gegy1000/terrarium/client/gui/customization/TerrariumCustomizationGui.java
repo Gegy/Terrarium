@@ -122,7 +122,11 @@ public class TerrariumCustomizationGui extends GuiScreen {
             List<GuiButton> currentWidgets = new ArrayList<>();
             currentWidgets.add(upLevelButton);
             for (CustomizationWidget widget : category.getWidgets()) {
-                currentWidgets.add(widget.createWidget(this.settings, 0, 0, 0, onPropertyChange));
+                try {
+                    currentWidgets.add(widget.createWidget(this.settings, 0, 0, 0, onPropertyChange));
+                } catch (Throwable t) {
+                    Terrarium.LOGGER.error("Failed to create widget for {}", widget, t);
+                }
             }
 
             CustomizationList currentList = new CustomizationList(this.mc, this, PADDING_X, TOP_OFFSET, previewWidth, previewHeight, currentWidgets);

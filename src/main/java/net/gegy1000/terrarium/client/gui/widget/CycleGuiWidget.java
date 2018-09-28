@@ -69,7 +69,7 @@ public class CycleGuiWidget<T extends Enum & CycleEnumProperty> extends GuiButto
             if (descriptionKey != null) {
                 String translatedKey = I18n.format(variant.getTranslationKey());
                 String translatedDescription = I18n.format(variant.getDescriptionKey());
-                lines.add(TextFormatting.YELLOW + String.format(" - %s: %s", translatedKey, TextFormatting.GRAY + translatedDescription));
+                lines.add(variant.getFormatting() + String.format(" - %s: %s", translatedKey, TextFormatting.GRAY + translatedDescription));
             }
         }
 
@@ -88,8 +88,8 @@ public class CycleGuiWidget<T extends Enum & CycleEnumProperty> extends GuiButto
         this.ordinal = ordinal;
 
         T variant = this.getVariant(this.ordinal);
-        String state = I18n.format(variant.getTranslationKey());
-        this.displayString = String.format("%s: %s", this.propertyKey.getLocalizedName(), TextFormatting.YELLOW + state);
+        String state = variant.getFormatting() + I18n.format(variant.getTranslationKey());
+        this.displayString = String.format("%s: %s", this.propertyKey.getLocalizedName(), state);
     }
 
     @Override

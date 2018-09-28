@@ -2,6 +2,8 @@ package net.gegy1000.terrarium.server.world.pipeline.composer.structure;
 
 import net.gegy1000.cubicglue.util.PseudoRandomMap;
 import net.gegy1000.cubicglue.util.wrapper.OverworldGeneratorWrapper;
+import net.gegy1000.earth.server.world.CubicGenerationFormat;
+import net.gegy1000.earth.server.world.FeatureGenerationFormat;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.util.math.BlockPos;
@@ -37,7 +39,7 @@ public class VanillaStructureComposer implements StructureComposer {
     private final MapGenStructure oceanMonumentGenerator;
     private final MapGenStructure woodlandMansionGenerator;
 
-    public VanillaStructureComposer(World world) {
+    public VanillaStructureComposer(World world, CubicGenerationFormat format) {
         this.world = world;
         this.randomMap = new PseudoRandomMap(world, STRUCTURE_SEED);
 

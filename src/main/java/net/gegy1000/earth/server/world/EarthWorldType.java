@@ -112,7 +112,6 @@ public class EarthWorldType extends TerrariumWorldType {
     public static final PropertyKey<Number> SPAWN_LATITUDE = new NumberKey("spawn_latitude");
     public static final PropertyKey<Number> SPAWN_LONGITUDE = new NumberKey("spawn_longitude");
     public static final PropertyKey<Boolean> ENABLE_DECORATION = new BooleanKey("enable_decoration");
-    public static final PropertyKey<FeatureGenerationFormat> DEFAULT_DECORATION = new EnumKey<>("default_decoration", FeatureGenerationFormat.class);
     public static final PropertyKey<Number> WORLD_SCALE = new NumberKey("world_scale");
     public static final PropertyKey<Number> HEIGHT_SCALE = new NumberKey("height_scale");
     public static final PropertyKey<Number> NOISE_SCALE = new NumberKey("noise_scale");
@@ -121,12 +120,13 @@ public class EarthWorldType extends TerrariumWorldType {
     public static final PropertyKey<Number> BEACH_SIZE = new NumberKey("beach_size");
     public static final PropertyKey<Boolean> ENABLE_BUILDINGS = new BooleanKey("enable_buildings");
     public static final PropertyKey<Boolean> ENABLE_STREETS = new BooleanKey("enable_streets");
-    public static final PropertyKey<Boolean> ENABLE_DEFAULT_FEATURES = new BooleanKey("enable_default_features");
-    public static final PropertyKey<Boolean> ENABLE_DEFAULT_SPAWNING = new BooleanKey("enable_default_spawning");
-    public static final PropertyKey<Boolean> ENABLE_CAVE_GENERATION = new BooleanKey("enable_cave_generation");
-    public static final PropertyKey<Boolean> ENABLE_RESOURCE_GENERATION = new BooleanKey("enable_resource_generation");
-    public static final PropertyKey<Boolean> ENABLE_LAKE_GENERATION = new BooleanKey("enable_lake_generation");
-    public static final PropertyKey<Boolean> ENABLE_LAVA_GENERATION = new BooleanKey("enable_lava_generation");
+    public static final PropertyKey<FeatureGenerationFormat> DEFAULT_DECORATION = new EnumKey<>("default_decoration", FeatureGenerationFormat.class);
+    public static final PropertyKey<FeatureGenerationFormat> DEFAULT_FEATURES = new EnumKey<>("default_features", FeatureGenerationFormat.class);
+    public static final PropertyKey<FeatureGenerationFormat> DEFAULT_SPAWNING = new EnumKey<>("default_spawning", FeatureGenerationFormat.class);
+    public static final PropertyKey<FeatureGenerationFormat> CAVE_GENERATION = new EnumKey<>("cave_generation", FeatureGenerationFormat.class);
+    public static final PropertyKey<FeatureGenerationFormat> RESOURCE_GENERATION = new EnumKey<>("resource_generation", FeatureGenerationFormat.class);
+    public static final PropertyKey<FeatureGenerationFormat> LAKE_GENERATION = new EnumKey<>("lake_generation", FeatureGenerationFormat.class);
+    public static final PropertyKey<FeatureGenerationFormat> LAVA_GENERATION = new EnumKey<>("lava_generation", FeatureGenerationFormat.class);
     public static final PropertyKey<Boolean> ENABLE_MOD_GENERATION = new BooleanKey("enable_mod_generation");
 
     public EarthWorldType() {
@@ -153,9 +153,9 @@ public class EarthWorldType extends TerrariumWorldType {
                 .withProperties(OCEAN_DEPTH, HEIGHT_ORIGIN)
                 .withProperties(BEACH_SIZE)
                 .withProperties(ENABLE_DECORATION, ENABLE_BUILDINGS, ENABLE_STREETS)
-                .withProperties(DEFAULT_DECORATION, ENABLE_DEFAULT_SPAWNING, ENABLE_DEFAULT_FEATURES)
-                .withProperties(ENABLE_MOD_GENERATION, ENABLE_CAVE_GENERATION, ENABLE_RESOURCE_GENERATION)
-                .withProperties(ENABLE_LAKE_GENERATION, ENABLE_LAVA_GENERATION)
+                .withProperties(DEFAULT_DECORATION, DEFAULT_SPAWNING, DEFAULT_FEATURES)
+                .withProperties(ENABLE_MOD_GENERATION, CAVE_GENERATION, RESOURCE_GENERATION)
+                .withProperties(LAKE_GENERATION, LAVA_GENERATION)
                 .build();
     }
 
@@ -175,15 +175,15 @@ public class EarthWorldType extends TerrariumWorldType {
                         new ToggleWidget(ENABLE_BUILDINGS).locked(),
                         new ToggleWidget(ENABLE_STREETS).locked()
                 )
-                .withCategory("survival",
+                .withCategory("integration",
                         new CycleWidget<>(DEFAULT_DECORATION),
-                        new ToggleWidget(ENABLE_DEFAULT_SPAWNING),
-                        new ToggleWidget(ENABLE_DEFAULT_FEATURES),
+                        new CycleWidget<>(DEFAULT_SPAWNING),
+                        new CycleWidget<>(DEFAULT_FEATURES),
                         new ToggleWidget(ENABLE_MOD_GENERATION),
-                        new ToggleWidget(ENABLE_CAVE_GENERATION),
-                        new ToggleWidget(ENABLE_RESOURCE_GENERATION),
-                        new ToggleWidget(ENABLE_LAKE_GENERATION),
-                        new ToggleWidget(ENABLE_LAVA_GENERATION)
+                        new CycleWidget<>(CAVE_GENERATION),
+                        new CycleWidget<>(RESOURCE_GENERATION),
+                        new CycleWidget<>(LAKE_GENERATION),
+                        new CycleWidget<>(LAVA_GENERATION)
                 )
                 .build();
     }
@@ -242,40 +242,59 @@ public class EarthWorldType extends TerrariumWorldType {
                 builder.withSurfaceComposer(new BedrockSurfaceComposer(this.world, Blocks.BEDROCK.getDefaultState(), Math.min(heightOrigin - 1, 5)));
             }
 
-            if (!preview) {
-                if (this.settings.getBoolean(ENABLE_CAVE_GENERATION)) {
-                    builder.withSurfaceComposer(new CaveSurfaceComposer(this.world));
-                }
-                if (this.settings.getBoolean(ENABLE_DEFAULT_FEATURES)) {
-                    builder.withStructureComposer(new VanillaStructureComposer(this.world));
-                }
-            }
-
             if (this.settings.getBoolean(ENABLE_DECORATION)) {
                 builder.withDecorationComposer(new CoverDecorationComposer(this.world, RegionComponentType.COVER, coverTypes));
                 builder.withDecorationComposer(new BoulderDecorationComposer(this.world, RegionComponentType.SLOPE));
             }
-            // TODO: Properly handle setting
-            if (this.settings.get(DEFAULT_DECORATION) == FeatureGenerationFormat.VANILLA) {
-                builder.withDecorationComposer(new VanillaBiomeDecorationComposer());
+
+            this.attachIntegrationComposers(preview, builder);
+
+            return builder.build();
+        }
+
+        private void attachIntegrationComposers(boolean preview, BasicTerrariumGenerator.Builder builder) {
+            boolean cubicWorld = CubicGlue.isCubic(this.world);
+
+            if (!preview) {
+                FeatureGenerationFormat caveGeneration = this.settings.get(CAVE_GENERATION);
+                if (!caveGeneration.isNone()) {
+                    builder.withSurfaceComposer(new CaveSurfaceComposer(this.world, caveGeneration.toCubic(cubicWorld)));
+                }
+
+                FeatureGenerationFormat defaultFeatures = this.settings.get(DEFAULT_FEATURES);
+                if (!defaultFeatures.isNone()) {
+                    builder.withStructureComposer(new VanillaStructureComposer(this.world, defaultFeatures.toCubic(cubicWorld)));
+                }
             }
-            if (this.settings.getBoolean(ENABLE_DEFAULT_SPAWNING)) {
-                builder.withDecorationComposer(new VanillaEntitySpawnComposer(this.world));
+
+            FeatureGenerationFormat defaultDecoration = this.settings.get(DEFAULT_DECORATION);
+            if (!defaultDecoration.isNone()) {
+                builder.withDecorationComposer(new VanillaBiomeDecorationComposer(defaultDecoration.toCubic(cubicWorld)));
             }
-            if (this.settings.getBoolean(ENABLE_LAKE_GENERATION)) {
-                builder.withDecorationComposer(new LakeDecorationComposer(this.world));
+
+            FeatureGenerationFormat defaultSpawning = this.settings.get(DEFAULT_SPAWNING);
+            if (!defaultSpawning.isNone()) {
+                builder.withDecorationComposer(new VanillaEntitySpawnComposer(this.world, defaultSpawning.toCubic(cubicWorld)));
             }
-            if (this.settings.getBoolean(ENABLE_LAVA_GENERATION)) {
-                builder.withDecorationComposer(new LavaLakeDecorationComposer(this.world));
+
+            FeatureGenerationFormat lakeGeneration = this.settings.get(LAKE_GENERATION);
+            if (!lakeGeneration.isNone()) {
+                builder.withDecorationComposer(new LakeDecorationComposer(this.world, lakeGeneration.toCubic(cubicWorld)));
             }
-            if (this.settings.getBoolean(ENABLE_RESOURCE_GENERATION)) {
-                builder.withDecorationComposer(new VanillaOreDecorationComposer(this.world));
+
+            FeatureGenerationFormat lavaGeneration = this.settings.get(LAVA_GENERATION);
+            if (!lavaGeneration.isNone()) {
+                builder.withDecorationComposer(new LavaLakeDecorationComposer(this.world, lavaGeneration.toCubic(cubicWorld)));
             }
+
+            FeatureGenerationFormat resourceGeneration = this.settings.get(RESOURCE_GENERATION);
+            if (!resourceGeneration.isNone()) {
+                builder.withDecorationComposer(new VanillaOreDecorationComposer(this.world, resourceGeneration.toCubic(cubicWorld)));
+            }
+
             if (this.settings.getBoolean(ENABLE_MOD_GENERATION)) {
                 builder.withDecorationComposer(new ModdedDecorationComposer(this.world));
             }
-
-            return builder.build();
         }
 
         private List<ConstructedCover<?>> constructCoverTypes() {

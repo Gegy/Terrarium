@@ -2,6 +2,7 @@ package net.gegy1000.terrarium.server.world.pipeline.composer.surface;
 
 import net.gegy1000.cubicglue.api.ChunkPrimeWriter;
 import net.gegy1000.cubicglue.util.CubicPos;
+import net.gegy1000.earth.server.world.CubicGenerationFormat;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.world.World;
@@ -16,7 +17,7 @@ public class CaveSurfaceComposer implements SurfaceComposer {
     private final MapGenBase caveGenerator;
     private final MapGenBase ravineGenerator;
 
-    public CaveSurfaceComposer(World world) {
+    public CaveSurfaceComposer(World world, CubicGenerationFormat format) {
         this.world = world;
         this.caveGenerator = TerrainGen.getModdedMapGen(new MapGenCaves(), InitMapGenEvent.EventType.CAVE);
         this.ravineGenerator = TerrainGen.getModdedMapGen(new MapGenRavine(), InitMapGenEvent.EventType.RAVINE);
