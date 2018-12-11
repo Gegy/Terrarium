@@ -1,6 +1,6 @@
 package net.gegy1000.earth.server.world;
 
-public enum CubicGenerationFormat {
+public enum CubicIntegrationFormat {
     VANILLA,
     CUBIC
 }

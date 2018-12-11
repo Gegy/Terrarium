@@ -3,15 +3,15 @@ package net.gegy1000.earth.server.world;
 import net.gegy1000.terrarium.server.world.generator.customization.property.CycleEnumProperty;
 import net.minecraft.util.text.TextFormatting;
 
-public enum FeatureGenerationFormat implements CycleEnumProperty {
+public enum GenerationIntegrationFormat implements CycleEnumProperty {
     NONE("none", TextFormatting.RED),
-    VANILLA("vanilla", TextFormatting.YELLOW),
-    CUSTOM("custom", TextFormatting.YELLOW);
+    CUSTOM("custom", TextFormatting.YELLOW),
+    VANILLA("vanilla", TextFormatting.YELLOW);
 
     private final String key;
     private final TextFormatting formatting;
 
-    FeatureGenerationFormat(String key, TextFormatting formatting) {
+    GenerationIntegrationFormat(String key, TextFormatting formatting) {
         this.key = key;
         this.formatting = formatting;
     }
@@ -36,20 +36,16 @@ public enum FeatureGenerationFormat implements CycleEnumProperty {
         return this.formatting;
     }
 
-    public boolean isNone() {
-        return this == NONE;
+    public boolean shouldGenerate() {
+        return this != NONE;
     }
 
-    public CubicGenerationFormat toCubic(boolean cubicWorld) {
+    public CubicIntegrationFormat toCubic(boolean cubicWorld) {
         switch (this) {
             case VANILLA:
-                return CubicGenerationFormat.VANILLA;
+                return CubicIntegrationFormat.VANILLA;
             case CUSTOM:
-                if (cubicWorld) {
-                    return CubicGenerationFormat.CUBIC;
-                } else {
-                    return CubicGenerationFormat.VANILLA;
-                }
+                return cubicWorld ? CubicIntegrationFormat.CUBIC : CubicIntegrationFormat.VANILLA;
             default:
                 throw new IllegalStateException("Cannot coerce disabled generation into a cubic format!");
         }

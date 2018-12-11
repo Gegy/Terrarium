@@ -5,8 +5,7 @@ import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.cubicglue.util.PseudoRandomMap;
 import net.gegy1000.cubicglue.util.wrapper.BiomeDecorationWorld;
 import net.gegy1000.earth.server.EarthDecorationEventHandler;
-import net.gegy1000.earth.server.world.CubicGenerationFormat;
-import net.gegy1000.earth.server.world.FeatureGenerationFormat;
+import net.gegy1000.earth.server.world.CubicIntegrationFormat;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
@@ -35,7 +34,7 @@ public class VanillaOreDecorationComposer implements DecorationComposer {
         }
     }
 
-    public VanillaOreDecorationComposer(World world, CubicGenerationFormat format) {
+    public VanillaOreDecorationComposer(World world, CubicIntegrationFormat format) {
         this.randomMap = new PseudoRandomMap(world, DECORATION_SEED);
     }
 
