@@ -1,0 +1,39 @@
+# GUI
+
+gui.terrarium.accept=Принять
+gui.terrarium.preset=Установить Предустановку
+
+gui.terrarium.remote_data_warning.1=Внимание: «Terrarium» загружает данные из интернета!
+gui.terrarium.remote_data_warning.2=Для генерации чанков, могут потребоваться разные данные.
+gui.terrarium.remote_data_warning.3=Это может стать причиной к крупному использованию данных, с учётом от создаваемых чанков.
+gui.terrarium.remote_data_warning.4=Данные запрашиваются только для чанков, которые просматривают игроки, и затем кэшируются.
+gui.terrarium.remote_data_warning.5=«Terrarium» не несёт ответственности за возможное причинение ущерба.
+
+gui.terrarium.select_preset.name=Выберите предустановку мира
+
+options.terrarium.customize_world_title.name=Настроить генерацию мира
+options.terrarium.preview_world_title.name=Предосмотр генерации мира
+
+state.terrarium.cached.name=Получение кэшированных данных
+state.terrarium.online.name=Получение онлайн данных
+state.terrarium.no_connection.name=Отсутствует соединение
+
+state.terrarium.cached.tooltip=Загрузка географических данных из локального кэша.
+state.terrarium.online.tooltip=Загрузка географических данных из онлайн-источника.
+state.terrarium.no_connection.tooltip=Невозможно загрузить географические данные. Проверьте интернет соединение!
+
+property.terrarium.slider_range.name=Расстояние: [%.2f-%.2f]
+property.terrarium.slider_fine.name=Удерживайте SHIFT для подкорректировки
+property.terrarium.locked.name=Прибыла новая версия!
+
+# Toasts
+
+toast.terrarium.data_failure.title=Сбои данных «Terrarium»
+toast.terrarium.data_failure.desc=Невозможно загрузить %s данных тайлов
+
+# Config
+
+config.terrarium.enable_data_status_icon=Включить значок состояния данных
+config.terrarium.enable_data_status_icon.tooltip=При значении «true» нынешнее состояние потоковой передачи данных, будет отображаться в левом верхнем углу экрана.
+config.terrarium.accept_remote_data=Принято предупреждение удалённых данных
+config.terrarium.accept_remote_data.tooltip=При значении «true», вы больше не будете предупреждены об использовании удалённых данных. (Автоматически устанавливается через GUI)
