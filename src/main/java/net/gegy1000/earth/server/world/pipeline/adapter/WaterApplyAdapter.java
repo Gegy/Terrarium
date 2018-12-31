@@ -1,16 +1,16 @@
 package net.gegy1000.earth.server.world.pipeline.adapter;
 
-import net.gegy1000.earth.server.world.cover.EarthCoverTypes;
+import net.gegy1000.earth.server.world.cover.EarthCoverBiomes;
 import net.gegy1000.earth.server.world.pipeline.source.tile.WaterRasterTile;
 import net.gegy1000.terrarium.server.util.FloodFill;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
-import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.cover.TerrariumCoverTypes;
+import net.gegy1000.terrarium.server.world.cover.TerrariumCover;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.RegionAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.BiomeRasterTile;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.gegy1000.terrarium.server.world.region.RegionData;
+import net.minecraft.world.biome.Biome;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -19,19 +19,19 @@ public class WaterApplyAdapter implements RegionAdapter {
     protected final CoordinateState geoCoordinateState;
     protected final RegionComponentType<WaterRasterTile> waterComponent;
     protected final RegionComponentType<ShortRasterTile> heightComponent;
-    protected final RegionComponentType<CoverRasterTile> coverComponent;
+    protected final RegionComponentType<BiomeRasterTile> biomeComponent;
 
-    public WaterApplyAdapter(CoordinateState geoCoordinateState, RegionComponentType<WaterRasterTile> waterComponent, RegionComponentType<ShortRasterTile> heightComponent, RegionComponentType<CoverRasterTile> coverComponent) {
+    public WaterApplyAdapter(CoordinateState geoCoordinateState, RegionComponentType<WaterRasterTile> waterComponent, RegionComponentType<ShortRasterTile> heightComponent, RegionComponentType<BiomeRasterTile> biomeComponent) {
         this.geoCoordinateState = geoCoordinateState;
         this.waterComponent = waterComponent;
         this.heightComponent = heightComponent;
-        this.coverComponent = coverComponent;
+        this.biomeComponent = biomeComponent;
     }
 
     @Override
     public void adapt(RegionData data, int x, int z, int width, int height) {
         short[] heightBuffer = data.getOrExcept(this.heightComponent).getShortData();
-        CoverType[] coverBuffer = data.getOrExcept(this.coverComponent).getData();
+        Biome[] biomeBuffer = data.getOrExcept(this.biomeComponent).getData();
         WaterRasterTile waterTile = data.getOrExcept(this.waterComponent);
 
         List<FloodFill.Point> unselectedPoints = new LinkedList<>();
@@ -40,11 +40,11 @@ public class WaterApplyAdapter implements RegionAdapter {
                 int index = localX + localY * width;
                 int sampleType = waterTile.getWaterType(localX, localY);
                 if (WaterRasterTile.isWater(sampleType)) {
-                    coverBuffer[index] = EarthCoverTypes.WATER;
+                    biomeBuffer[index] = EarthCoverBiomes.WATER;
                 } else {
-                    CoverType<?> currentCover = coverBuffer[index];
-                    if (currentCover == EarthCoverTypes.WATER) {
-                        coverBuffer[index] = TerrariumCoverTypes.PLACEHOLDER;
+                    Biome currentBiome = biomeBuffer[index];
+                    if (currentBiome == EarthCoverBiomes.WATER) {
+                        biomeBuffer[index] = TerrariumCover.NONE;
                         unselectedPoints.add(new FloodFill.Point(localX, localY));
                         heightBuffer[index] = (short) Math.max(1, heightBuffer[index]);
                     }
@@ -54,17 +54,17 @@ public class WaterApplyAdapter implements RegionAdapter {
 
         for (FloodFill.Point point : unselectedPoints) {
             CoverSelectVisitor visitor = new CoverSelectVisitor();
-            FloodFill.floodVisit(coverBuffer, width, height, point, visitor);
-            coverBuffer[point.getX() + point.getY() * width] = visitor.getResult();
+            FloodFill.floodVisit(biomeBuffer, width, height, point, visitor);
+            biomeBuffer[point.getX() + point.getY() * width] = visitor.getResult();
         }
     }
 
-    protected class CoverSelectVisitor implements FloodFill.Visitor<CoverType> {
-        protected CoverType result = null;
+    protected class CoverSelectVisitor implements FloodFill.Visitor<Biome> {
+        protected Biome result = null;
 
         @Override
-        public CoverType visit(FloodFill.Point point, CoverType sampled) {
-            if (sampled != TerrariumCoverTypes.PLACEHOLDER) {
+        public Biome visit(FloodFill.Point point, Biome sampled) {
+            if (sampled != TerrariumCover.NONE) {
                 this.result = sampled;
                 return null;
             }
@@ -72,13 +72,13 @@ public class WaterApplyAdapter implements RegionAdapter {
         }
 
         @Override
-        public boolean canVisit(FloodFill.Point point, CoverType sampled) {
-            return sampled != EarthCoverTypes.WATER;
+        public boolean canVisit(FloodFill.Point point, Biome sampled) {
+            return sampled != EarthCoverBiomes.WATER;
         }
 
-        public CoverType getResult() {
+        public Biome getResult() {
             if (this.result == null) {
-                return EarthCoverTypes.RAINFED_CROPS;
+                return EarthCoverBiomes.RAINFED_CROPS;
             }
             return this.result;
         }

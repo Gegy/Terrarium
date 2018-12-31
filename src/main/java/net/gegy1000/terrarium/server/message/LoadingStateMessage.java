@@ -1,44 +1,34 @@
 package net.gegy1000.terrarium.server.message;
 
-import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.networking.CustomPayloadPacketRegistry;
+import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.world.pipeline.source.LoadingState;
 import net.gegy1000.terrarium.server.world.pipeline.source.LoadingStateHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraft.client.network.packet.CustomPayloadClientPacket;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.PacketByteBuf;
 
-public class LoadingStateMessage implements IMessage {
-	private LoadingState state;
+public class LoadingStateMessage {
+    private static final Identifier IDENTIFIER = new Identifier(Terrarium.MODID, "load_state");
 
-    public LoadingStateMessage() {
+    public static void registerTo(CustomPayloadPacketRegistry registry) {
+        registry.register(IDENTIFIER, (ctx, buf) -> {
+            if (ctx.getPacketEnvironment() == EnvType.CLIENT) {
+                boolean hasState = buf.readBoolean();
+                LoadingState state = hasState ? LoadingState.values()[buf.readInt()] : null;
+                ctx.getTaskQueue().execute(() -> LoadingStateHandler.updateRemoteState(state));
+            }
+        });
     }
 
-    public LoadingStateMessage(LoadingState state) {
-        this.state = state;
-    }
-
-    @Override
-    public void fromBytes(ByteBuf buf) {
-        boolean hasState = buf.readBoolean();
-        if (hasState) {
-    		this.state = LoadingState.values()[buf.readInt()];
-    	}
-    }
-
-    @Override
-    public void toBytes(ByteBuf buf) {
-        boolean hasState = this.state != null;
-        buf.writeBoolean(hasState);
-    	if (hasState) {
-    		buf.writeInt(this.state.ordinal());
-    	}
-    }
-
-    public static class Handler implements IMessageHandler<LoadingStateMessage, IMessage> {
-        @Override
-        public IMessage onMessage(LoadingStateMessage message, MessageContext ctx) {
-            LoadingStateHandler.updateRemoteState(message.state);
-            return null;
+    public static CustomPayloadClientPacket create(LoadingState state) {
+        PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+        buf.writeBoolean(state != null);
+        if (state != null) {
+            buf.writeInt(state.ordinal());
         }
+        return new CustomPayloadClientPacket(IDENTIFIER, buf);
     }
 }

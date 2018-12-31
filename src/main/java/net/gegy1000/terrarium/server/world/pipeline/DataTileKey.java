@@ -29,8 +29,8 @@ public class DataTileKey<T extends TiledDataAccess> {
             return true;
         }
 
-        if (o instanceof DataTileKey) {
-            DataTileKey key = (DataTileKey) o;
+        if (o instanceof DataTileKey<?>) {
+            DataTileKey<?> key = (DataTileKey<?>) o;
             return key.source == this.source && key.tileX == this.tileX && key.tileZ == this.tileZ;
         }
 

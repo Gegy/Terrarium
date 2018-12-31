@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "package": "net.gegy1000.terrarium.mixin.client",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "MixinNewLevelGui",
+    "MixinCustomizeButton",
+    "MixinClientWorld",
+    "MixinStateOverlay",
+    "MixinMinecraftClient"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

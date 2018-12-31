@@ -8,7 +8,7 @@ import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
 import net.gegy1000.terrarium.server.world.pipeline.source.SourceResult;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 import org.tukaani.xz.SingleXZInputStream;
 
 import javax.annotation.Nullable;
@@ -29,7 +29,7 @@ public class SrtmHeightSource extends TiledDataSource<ShortRasterTile> {
     private static final Set<DataTilePos> VALID_TILES = new HashSet<>();
 
     public SrtmHeightSource(CoordinateState coordinateState, String cacheRoot) {
-        super(new ResourceLocation(TerrariumEarth.MODID, "srtm"), new File(GLOBAL_CACHE_ROOT, cacheRoot), new Coordinate(coordinateState, TILE_SIZE, TILE_SIZE));
+        super(new Identifier(TerrariumEarth.MODID, "srtm"), new File(GLOBAL_CACHE_ROOT, cacheRoot), new Coordinate(coordinateState, TILE_SIZE, TILE_SIZE));
     }
 
     public static void loadValidTiles() {

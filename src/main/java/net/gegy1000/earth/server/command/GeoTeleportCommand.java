@@ -1,130 +1,124 @@
 package net.gegy1000.earth.server.command;
 
-import com.google.common.base.Strings;
-import net.gegy1000.earth.TerrariumEarth;
-import net.gegy1000.earth.server.capability.EarthCapability;
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.Dynamic3CommandExceptionType;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import net.gegy1000.earth.server.world.EarthGeneratorConfig;
 import net.gegy1000.terrarium.Terrarium;
+import net.gegy1000.terrarium.server.util.Point2d;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
-import net.minecraft.command.CommandBase;
-import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.command.WrongUsageException;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.command.arguments.Vec2ArgumentType;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.TextFormatter;
+import net.minecraft.text.TranslatableTextComponent;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.math.Vec2f;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.gen.Heightmap;
 
-import javax.vecmath.Vector2d;
 import java.io.IOException;
 
-public class GeoTeleportCommand extends CommandBase {
-    @Override
-    public String getName() {
-        return "geotp";
+import static net.minecraft.server.command.ServerCommandManager.argument;
+import static net.minecraft.server.command.ServerCommandManager.literal;
+
+public class GeoTeleportCommand {
+    private static final SimpleCommandExceptionType WRONG_WORLD = new SimpleCommandExceptionType(
+            new TranslatableTextComponent("commands.earth.wrong_world")
+    );
+    private static final DynamicCommandExceptionType NOT_FOUND = new DynamicCommandExceptionType((place) -> {
+        return new TranslatableTextComponent("commands.earth.geotp.not_found", place);
+    });
+    private static final Dynamic3CommandExceptionType GEOCODE_ERROR = new Dynamic3CommandExceptionType((place, type, message) -> {
+        return new TranslatableTextComponent("commands.earth.geotp.error", place, type, message);
+    });
+
+    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
+        dispatcher.register(
+                literal("geotp")
+                        .requires(source -> source.hasPermissionLevel(2))
+                        .then(argument("coordinate", Vec2ArgumentType.create()).executes(GeoTeleportCommand::runCoordinate))
+        );
+        dispatcher.register(
+                literal("geotp")
+                        .requires(source -> source.hasPermissionLevel(2))
+                        .then(argument("location", StringArgumentType.greedyString()).executes(GeoTeleportCommand::runLocation))
+        );
     }
 
-    @Override
-    public int getRequiredPermissionLevel() {
-        return 2;
+    private static int runCoordinate(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        Vec2f location = Vec2ArgumentType.getVec2Argument(context, "coordinate");
+        return run(context.getSource(), new CoordinateLocation(location.x, location.y));
     }
 
-    @Override
-    public String getUsage(ICommandSender sender) {
-        return DeferredTranslator.translateString(sender, "commands.earth.geotp.usage");
+    private static int runLocation(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        String location = StringArgumentType.getString(context, "location");
+        return run(context.getSource(), new GeocodeLocation(location));
     }
 
-    @Override
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-        EntityPlayerMP player = CommandBase.getCommandSenderAsPlayer(sender);
+    private static int run(ServerCommandSource source, CommandLocation location) throws CommandSyntaxException {
+        ServerPlayerEntity player = source.getPlayer();
 
-        EarthCapability earthData = player.world.getCapability(TerrariumEarth.earthCap, null);
-        if (earthData != null) {
-            String argument = String.join(" ", args).replace(',', ' ');
-            String[] locationInput = argument.split("\\s+");
-
-            Thread thread = new Thread(() -> {
-                try {
-                    CommandLocation location = this.parseLocation(sender, locationInput);
-                    this.teleport(player, location.getCoordinate(sender, earthData));
-                } catch (CommandException e) {
-                    TextComponentTranslation message = new TextComponentTranslation(e.getMessage(), e.getErrorObjects());
-                    message.getStyle().setColor(TextFormatting.RED);
-                    sender.sendMessage(message);
-                }
-            });
-            thread.setDaemon(true);
-            thread.start();
-        } else {
-            throw DeferredTranslator.createException(player, "commands.earth.wrong_world");
+        EarthGeneratorConfig config = EarthGeneratorConfig.get(source.getWorld());
+        if (config == null) {
+            throw WRONG_WORLD.create();
         }
-    }
 
-    private CommandLocation parseLocation(ICommandSender sender, String[] input) throws WrongUsageException {
-        CommandLocation location = this.parseCoordinateLocation(input);
-
-        if (location == null) {
-            String place = String.join(" ", input);
-            if (Strings.isNullOrEmpty(place)) {
-                throw new WrongUsageException(this.getUsage(sender));
+        Thread thread = new Thread(() -> {
+            try {
+                teleport(source, location.getCoordinate(player, config));
+            } catch (CommandSyntaxException e) {
+                source.sendError(TextFormatter.message(e.getRawMessage()));
             }
-            location = new GeocodeLocation(place);
-        }
+        });
+        thread.setDaemon(true);
+        thread.start();
 
-        return location;
+        return 1;
     }
 
-    private CommandLocation parseCoordinateLocation(String[] input) {
-        if (input.length == 2) {
-            double[] coordinates = new double[2];
-            for (int i = 0; i < 2; i++) {
-                try {
-                    coordinates[i] = Double.parseDouble(input[i]);
-                } catch (NumberFormatException e) {
-                    return null;
-                }
-            }
-            return new CoordinateLocation(coordinates[0], coordinates[1]);
-        }
-        return null;
-    }
+    private static void teleport(ServerCommandSource source, Coordinate coordinate) throws CommandSyntaxException {
+        ServerPlayerEntity player = source.getPlayer();
 
-    private void teleport(EntityPlayerMP player, Coordinate coordinate) {
         int blockX = MathHelper.floor(coordinate.getBlockX());
         int blockZ = MathHelper.floor(coordinate.getBlockZ());
 
         Chunk chunk = player.world.getChunk(blockX >> 4, blockZ >> 4);
-        int height = chunk.getHeightValue(blockX & 15, blockZ & 15);
+        int height = chunk.sampleHeightmap(Heightmap.Type.MOTION_BLOCKING, blockX & 15, blockZ & 15);
 
-        player.dismountRidingEntity();
-        player.connection.setPlayerLocation(coordinate.getBlockX(), height + 0.5, coordinate.getBlockZ(), 180.0F, 0.0F);
-        player.motionY = 0.0;
+        player.stopRiding();
+        player.networkHandler.method_14363(coordinate.getBlockX(), height + 0.5, coordinate.getBlockZ(), 180.0F, 0.0F);
+        player.velocityY = 0.0;
         player.onGround = true;
 
-        player.sendMessage(DeferredTranslator.translate(player, new TextComponentTranslation("commands.earth.geotp.success", coordinate.getX(), coordinate.getZ())));
+        source.sendFeedback(new TranslatableTextComponent("commands.earth.geotp.success", coordinate.getX(), coordinate.getZ()), true);
     }
 
     private interface CommandLocation {
-        Coordinate getCoordinate(ICommandSender sender, EarthCapability worldData) throws CommandException;
+        Coordinate getCoordinate(PlayerEntity player, EarthGeneratorConfig config) throws CommandSyntaxException;
     }
 
-    private class CoordinateLocation implements CommandLocation {
+    private static class CoordinateLocation implements CommandLocation {
         private final double latitude;
         private final double longitude;
 
-        private CoordinateLocation(double latitude, double z) {
+        private CoordinateLocation(double latitude, double longitude) {
             this.latitude = latitude;
-            this.longitude = z;
+            this.longitude = longitude;
         }
 
         @Override
-        public Coordinate getCoordinate(ICommandSender sender, EarthCapability worldData) {
-            return new Coordinate(worldData.getGeoCoordinate(), this.latitude, this.longitude);
+        public Coordinate getCoordinate(PlayerEntity player, EarthGeneratorConfig config) {
+            return new Coordinate(config.getGeoCoordinate(), this.latitude, this.longitude);
         }
     }
 
-    private class GeocodeLocation implements CommandLocation {
+    private static class GeocodeLocation implements CommandLocation {
         private final String place;
 
         private GeocodeLocation(String place) {
@@ -132,17 +126,17 @@ public class GeoTeleportCommand extends CommandBase {
         }
 
         @Override
-        public Coordinate getCoordinate(ICommandSender sender, EarthCapability worldData) throws CommandException {
+        public Coordinate getCoordinate(PlayerEntity player, EarthGeneratorConfig config) throws CommandSyntaxException {
             try {
-                Vector2d coordinate = worldData.getGeocoder().get(this.place);
+                Point2d coordinate = config.getGeocoder().get(this.place);
                 if (coordinate == null) {
-                    throw DeferredTranslator.createException(sender, "commands.earth.geotp.not_found", this.place);
+                    throw NOT_FOUND.create(this.place);
                 }
 
-                return new Coordinate(worldData.getGeoCoordinate(), coordinate.getX(), coordinate.getY());
+                return new Coordinate(config.getGeoCoordinate(), coordinate.x, coordinate.y);
             } catch (IOException e) {
                 Terrarium.LOGGER.error("Failed to get geocode for {}", this.place, e);
-                throw DeferredTranslator.createException(sender, "commands.earth.geotp.error", this.place, e.getClass().getSimpleName(), e.getMessage());
+                throw GEOCODE_ERROR.create(this.place, e.getClass().getSimpleName(), e.getMessage());
             }
         }
     }

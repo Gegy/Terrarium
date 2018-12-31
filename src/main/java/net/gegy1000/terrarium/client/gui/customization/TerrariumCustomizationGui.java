@@ -1,47 +1,44 @@
 package net.gegy1000.terrarium.client.gui.customization;
 
-import com.google.common.base.Strings;
+import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.mojang.datafixers.Dynamic;
+import com.mojang.datafixers.types.JsonOps;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.gegy1000.terrarium.Terrarium;
-import net.gegy1000.terrarium.client.gui.widget.ActionButtonWidget;
 import net.gegy1000.terrarium.client.gui.widget.CustomizationList;
 import net.gegy1000.terrarium.client.preview.PreviewController;
 import net.gegy1000.terrarium.client.preview.PreviewRenderer;
 import net.gegy1000.terrarium.client.preview.WorldPreview;
-import net.gegy1000.terrarium.server.world.TerrariumWorldType;
-import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
-import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPreset;
-import net.gegy1000.terrarium.server.world.generator.customization.widget.CustomizationCategory;
-import net.gegy1000.terrarium.server.world.generator.customization.widget.CustomizationWidget;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiCreateWorld;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.resources.I18n;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-import org.lwjgl.input.Keyboard;
+import net.gegy1000.terrarium.server.world.TerrariumGeneratorType;
+import net.gegy1000.terrarium.server.world.customization.GenerationSettings;
+import net.gegy1000.terrarium.server.world.customization.PropertyPrototype;
+import net.gegy1000.terrarium.server.world.customization.TerrariumPreset;
+import net.gegy1000.terrarium.server.world.customization.widget.CustomizationCategory;
+import net.gegy1000.terrarium.server.world.customization.widget.CustomizationWidget;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.menu.NewLevelGui;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.datafixers.NbtOps;
+import net.minecraft.nbt.CompoundTag;
+import org.lwjgl.glfw.GLFW;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-@SideOnly(Side.CLIENT)
-public class TerrariumCustomizationGui extends GuiScreen {
-    protected static final int DONE_BUTTON = 0;
-    protected static final int CANCEL_BUTTON = 1;
-    protected static final int PREVIEW_BUTTON = 2;
-
-    protected static final int PRESET_BUTTON = 3;
-
+@Environment(EnvType.CLIENT)
+public class TerrariumCustomizationGui extends Gui {
     protected static final int TOP_OFFSET = 32;
     protected static final int BOTTOM_OFFSET = 64;
     protected static final int PADDING_X = 5;
 
-    protected final GuiCreateWorld parent;
+    protected final NewLevelGui parent;
 
-    protected final TerrariumWorldType worldType;
+    protected final TerrariumGeneratorType<?> worldType;
 
     protected GenerationSettings settings;
 
@@ -56,73 +53,96 @@ public class TerrariumCustomizationGui extends GuiScreen {
 
     protected boolean freeze;
 
-    public TerrariumCustomizationGui(GuiCreateWorld parent, TerrariumWorldType worldType, TerrariumPreset defaultPreset) {
+    public TerrariumCustomizationGui(NewLevelGui parent, TerrariumGeneratorType<?> worldType, TerrariumPreset defaultPreset) {
         this.parent = parent;
         this.worldType = worldType;
         if (!defaultPreset.getWorldType().equals(worldType.getIdentifier())) {
             throw new IllegalArgumentException("Cannot customize world with preset of wrong world type");
         }
-        String settingsString = parent.chunkProviderSettingsJson;
-        if (Strings.isNullOrEmpty(settingsString)) {
-            this.setSettings(defaultPreset.createProperties());
+        PropertyPrototype prototype = worldType.buildPropertyPrototype();
+        CompoundTag settings = parent.field_3200;
+        if (settings == null || settings.isEmpty()) {
+            this.setSettings(defaultPreset.createSettings(prototype));
         } else {
             try {
-                this.setSettings(GenerationSettings.deserialize(settingsString));
+                this.setSettings(GenerationSettings.deserialize(prototype, new Dynamic<>(NbtOps.INSTANCE, settings)));
             } catch (JsonSyntaxException e) {
-                Terrarium.LOGGER.error("Failed to deserialize settings: {}", settingsString, e);
+                Terrarium.LOGGER.error("Failed to deserialize settings: {}", settings, e);
             }
         }
     }
 
     @Override
-    public void initGui() {
+    public void onInitialized() {
         int previewWidth = this.width / 2 - PADDING_X * 2;
         int previewHeight = this.height - TOP_OFFSET - BOTTOM_OFFSET;
         int previewX = this.width / 2 + PADDING_X;
         int previewY = TOP_OFFSET;
 
-        this.renderer = new PreviewRenderer(this, this.width / 2 + PADDING_X, previewY, previewWidth, previewHeight);
+        this.renderer = new PreviewRenderer(this, this.width / 2.0F + PADDING_X, previewY, previewWidth, previewHeight);
         this.controller = new PreviewController(this.renderer, 0.3F, 1.0F);
 
-        this.buttonList.clear();
-        this.addButton(new GuiButton(DONE_BUTTON, this.width / 2 - 154, this.height - 28, 150, 20, I18n.format("gui.done")));
-        this.addButton(new GuiButton(CANCEL_BUTTON, this.width / 2 + 4, this.height - 28, 150, 20, I18n.format("gui.cancel")));
-        this.addButton(new GuiButton(PREVIEW_BUTTON, previewX + previewWidth - 20, previewY, 20, 20, "..."));
-
-        this.addButton(new GuiButton(PRESET_BUTTON, this.width / 2 - 154, this.height - 52, 150, 20, I18n.format("gui.terrarium.preset")));
-
-        ActionButtonWidget upLevelButton = new ActionButtonWidget(0, 0, 0, "<<") {
+        this.addButton(new ButtonWidget(0, this.width / 2 - 154, this.height - 28, 150, 20, I18n.translate("gui.done")) {
             @Override
-            protected void handlePress() {
-                TerrariumCustomizationGui.this.activeList = TerrariumCustomizationGui.this.categoryList;
+            public void onPressed(double mouseX, double mouseY) {
+                TerrariumCustomizationGui.this.parent.field_3200 = (CompoundTag) TerrariumCustomizationGui.this.settings.serialize(NbtOps.INSTANCE).getValue();
+                TerrariumCustomizationGui.this.client.openGui(TerrariumCustomizationGui.this.parent);
+            }
+        });
+        this.addButton(new ButtonWidget(1, this.width / 2 + 4, this.height - 28, 150, 20, I18n.translate("gui.cancel")) {
+            @Override
+            public void onPressed(double mouseX, double mouseY) {
+                TerrariumCustomizationGui.this.client.openGui(TerrariumCustomizationGui.this.parent);
+            }
+        });
+        this.addButton(new ButtonWidget(2, previewX + previewWidth - 20, previewY, 20, 20, "...") {
+            @Override
+            public void onPressed(double mouseX, double mouseY) {
+                TerrariumCustomizationGui.this.previewLarge();
+            }
+        });
+
+        this.addButton(new ButtonWidget(3, this.width / 2 - 154, this.height - 52, 150, 20, I18n.translate("gui.terrarium.preset")) {
+            @Override
+            public void onPressed(double mouseX, double mouseY) {
+                TerrariumCustomizationGui.this.freeze = true;
+                TerrariumCustomizationGui.this.client.openGui(new SelectPresetGui(TerrariumCustomizationGui.this, TerrariumCustomizationGui.this.worldType));
+            }
+        });
+
+        this.listeners.add(this.controller);
+
+        ButtonWidget upLevelButton = new ButtonWidget(0, 0, 0, "<<") {
+            @Override
+            public void onPressed(double mouseX, double mouseY) {
+                TerrariumCustomizationGui.this.updateActiveList(TerrariumCustomizationGui.this.categoryList);
             }
         };
 
         Runnable onPropertyChange = () -> this.previewDirty = true;
 
-        List<GuiButton> categoryListWidgets = new ArrayList<>();
+        List<ButtonWidget> categoryListWidgets = new ArrayList<>();
 
         Collection<CustomizationCategory> categories = this.worldType.getCustomization().getCategories();
         for (CustomizationCategory category : categories) {
-            List<GuiButton> currentWidgets = new ArrayList<>();
+            List<ButtonWidget> currentWidgets = new ArrayList<>();
             currentWidgets.add(upLevelButton);
             for (CustomizationWidget widget : category.getWidgets()) {
                 currentWidgets.add(widget.createWidget(this.settings, 0, 0, 0, onPropertyChange));
             }
 
-            CustomizationList currentList = new CustomizationList(this.mc, this, PADDING_X, TOP_OFFSET, previewWidth, previewHeight, currentWidgets);
+            CustomizationList currentList = new CustomizationList(this.client, this, PADDING_X, TOP_OFFSET, previewWidth, previewHeight, currentWidgets);
 
-            categoryListWidgets.add(new ActionButtonWidget(0, 0, 0, category.getLocalizedName()) {
+            categoryListWidgets.add(new ButtonWidget(0, 0, 0, category.getLocalizedName()) {
                 @Override
-                protected void handlePress() {
+                public void onPressed(double mouseX, double mouseY) {
                     TerrariumCustomizationGui.this.activeList = currentList;
                 }
             });
         }
 
-        this.categoryList = new CustomizationList(this.mc, this, PADDING_X, TOP_OFFSET, previewWidth, previewHeight, categoryListWidgets);
-
-        this.activeList = this.categoryList;
+        this.categoryList = new CustomizationList(this.client, this, PADDING_X, TOP_OFFSET, previewWidth, previewHeight, categoryListWidgets);
+        this.updateActiveList(this.categoryList);
 
         if (!this.freeze) {
             if (this.preview != null) {
@@ -135,31 +155,17 @@ public class TerrariumCustomizationGui extends GuiScreen {
         this.freeze = false;
     }
 
-    @Override
-    protected void actionPerformed(GuiButton button) {
-        if (button.enabled && button.visible) {
-            switch (button.id) {
-                case DONE_BUTTON:
-                    this.parent.chunkProviderSettingsJson = this.settings.serializeString();
-                    this.mc.displayGuiScreen(this.parent);
-                    break;
-                case CANCEL_BUTTON:
-                    this.mc.displayGuiScreen(this.parent);
-                    break;
-                case PREVIEW_BUTTON:
-                    this.previewLarge();
-                    break;
-                case PRESET_BUTTON:
-                    this.freeze = true;
-                    this.mc.displayGuiScreen(new SelectPresetGui(this, this.worldType));
-                    break;
-            }
+    protected void updateActiveList(CustomizationList list) {
+        if (this.activeList != null) {
+            this.listeners.remove(list);
         }
+        this.activeList = list;
+        this.listeners.add(list);
     }
 
     @Override
-    public void updateScreen() {
-        super.updateScreen();
+    public void update() {
+        super.update();
 
         if (this.previewDirty) {
             this.rebuildState();
@@ -170,71 +176,42 @@ public class TerrariumCustomizationGui extends GuiScreen {
     }
 
     @Override
-    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-        super.mouseClicked(mouseX, mouseY, mouseButton);
-
-        this.controller.mouseClicked(mouseX, mouseY, mouseButton);
-        this.activeList.mouseClicked(mouseX, mouseY, mouseButton);
-    }
-
-    @Override
-    protected void mouseReleased(int mouseX, int mouseY, int mouseButton) {
-        super.mouseReleased(mouseX, mouseY, mouseButton);
-
-        this.controller.mouseReleased(mouseX, mouseY, mouseButton);
-        this.activeList.mouseReleased(mouseX, mouseY, mouseButton);
-    }
-
-    @Override
-    protected void mouseClickMove(int mouseX, int mouseY, int mouseButton, long timeSinceLastClick) {
-        super.mouseClickMove(mouseX, mouseY, mouseButton, timeSinceLastClick);
-
-        this.controller.mouseDragged(mouseX, mouseY, mouseButton);
-    }
-
-    @Override
-    public void handleMouseInput() throws IOException {
-        super.handleMouseInput();
-        this.activeList.handleMouseInput();
-    }
-
-    @Override
-    protected void keyTyped(char typedChar, int keyCode) {
-        if (keyCode == Keyboard.KEY_ESCAPE) {
-            this.mc.displayGuiScreen(this.parent);
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+            this.client.openGui(this.parent);
+            return true;
         }
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
-    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-        this.controller.updateMouse(mouseX, mouseY);
-
-        this.drawDefaultBackground();
+    public void draw(int mouseX, int mouseY, float partialTicks) {
+        this.drawBackground();
 
         float zoom = this.controller.getZoom(partialTicks);
         float rotationX = this.controller.getRotationX(partialTicks);
         float rotationY = this.controller.getRotationY(partialTicks);
         this.renderer.render(this.preview, zoom, rotationX, rotationY);
 
-        this.activeList.drawScreen(mouseX, mouseY, partialTicks);
+        this.activeList.draw(mouseX, mouseY, partialTicks);
 
-        String title = I18n.format("options.terrarium.customize_world_title.name");
-        this.drawCenteredString(this.fontRenderer, title, this.width / 2, 20, 0xFFFFFF);
+        String title = I18n.translate("options.terrarium.customize_world_title.name");
+        this.drawStringCentered(this.fontRenderer, title, this.width / 2, 20, 0xFFFFFF);
 
-        super.drawScreen(mouseX, mouseY, partialTicks);
+        super.draw(mouseX, mouseY, partialTicks);
     }
 
     @Override
-    public void onGuiClosed() {
+    public void onClosed() {
         if (!this.freeze) {
-            super.onGuiClosed();
+            super.onClosed();
 
             this.deletePreview();
         }
     }
 
     public void applyPreset(TerrariumPreset preset) {
-        this.setSettings(preset.createProperties());
+        this.setSettings(preset.createSettings(this.worldType.buildPropertyPrototype()));
         this.previewDirty = true;
     }
 
@@ -245,13 +222,14 @@ public class TerrariumCustomizationGui extends GuiScreen {
         for (int i = 0; i < builders.length; i++) {
             builders[i] = new BufferBuilder(0x4000);
         }
-        this.preview = new WorldPreview(this.worldType, this.settings, builders);
+        this.preview = new WorldPreview(this.worldType.getGenerator(), this.settings, builders);
     }
 
     private void previewLarge() {
         if (this.preview != null) {
             this.freeze = true;
-            this.mc.displayGuiScreen(new PreviewWorldGui(this.preview, this, this.settings.serializeString()));
+            String settingsString = new Gson().toJson(this.settings.serialize(JsonOps.INSTANCE).getValue());
+            this.client.openGui(new PreviewWorldGui(this.preview, this, settingsString));
         }
     }
 

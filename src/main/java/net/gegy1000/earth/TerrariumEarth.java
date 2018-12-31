@@ -1,65 +1,37 @@
 package net.gegy1000.earth;
 
-import net.gegy1000.earth.server.EarthDecorationEventHandler;
-import net.gegy1000.earth.server.ServerProxy;
-import net.gegy1000.earth.server.capability.EarthCapability;
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.commands.CommandRegistry;
+import net.fabricmc.fabric.networking.CustomPayloadPacketRegistry;
 import net.gegy1000.earth.server.command.GeoTeleportCommand;
 import net.gegy1000.earth.server.command.GeoToolCommand;
 import net.gegy1000.earth.server.message.EarthMapGuiMessage;
 import net.gegy1000.earth.server.message.EarthPanoramaMessage;
-import net.gegy1000.earth.server.world.CoverDebugWorldType;
-import net.gegy1000.earth.server.world.EarthWorldType;
+import net.gegy1000.earth.server.world.CoverDebugGeneratorType;
+import net.gegy1000.earth.server.world.EarthGeneratorType;
 import net.gegy1000.earth.server.world.pipeline.source.EarthRemoteData;
 import net.gegy1000.earth.server.world.pipeline.source.SrtmHeightSource;
-import net.gegy1000.terrarium.server.capability.BlankStorage;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityInject;
-import net.minecraftforge.common.capabilities.CapabilityManager;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
-import net.minecraftforge.fml.common.network.NetworkCheckHandler;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
-import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
-import net.minecraftforge.fml.relauncher.Side;
+import net.minecraft.world.level.LevelGeneratorType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Map;
-
-@Mod(modid = TerrariumEarth.MODID, name = "Terrarium: Earth", version = TerrariumEarth.VERSION, acceptedMinecraftVersions = "[1.12]", dependencies = "required-after:terrarium@[0.1.0,]")
-public class TerrariumEarth {
+public class TerrariumEarth implements ModInitializer, EarthProxy {
     public static final String MODID = "earth";
     public static final String VERSION = "2.0.0-dev";
 
-    public static final String CLIENT_PROXY = "net.gegy1000.earth.client.ClientProxy";
-    public static final String SERVER_PROXY = "net.gegy1000.earth.server.ServerProxy";
-
     public static final Logger LOGGER = LogManager.getLogger(MODID);
 
-    @SidedProxy(clientSide = CLIENT_PROXY, serverSide = SERVER_PROXY)
-    public static ServerProxy PROXY;
+    public static EarthProxy proxy;
 
-    public static final EarthWorldType EARTH_TYPE = new EarthWorldType();
-    public static final CoverDebugWorldType COVER_DEBUG_TYPE = new CoverDebugWorldType();
+    public static final LevelGeneratorType EARTH_TYPE = new EarthGeneratorType().create();
+    public static final LevelGeneratorType COVER_DEBUG_TYPE = new CoverDebugGeneratorType().create();
 
-    public static final SimpleNetworkWrapper NETWORK = NetworkRegistry.INSTANCE.newSimpleChannel(TerrariumEarth.MODID);
+    public TerrariumEarth() {
+        proxy = this;
+    }
 
-    @CapabilityInject(EarthCapability.class)
-    public static Capability<EarthCapability> earthCap;
-
-    @Mod.EventHandler
-    public static void onPreInit(FMLPreInitializationEvent event) {
-        CapabilityManager.INSTANCE.register(EarthCapability.class, new BlankStorage<>(), EarthCapability.Impl.class);
-        PROXY.onPreInit();
-
-        MinecraftForge.TERRAIN_GEN_BUS.register(EarthDecorationEventHandler.class);
-        MinecraftForge.ORE_GEN_BUS.register(EarthDecorationEventHandler.class);
-
+    @Override
+    public void onInitialize() {
         Thread thread = new Thread(() -> {
             EarthRemoteData.loadInfo();
             SrtmHeightSource.loadValidTiles();
@@ -67,28 +39,10 @@ public class TerrariumEarth {
         thread.setDaemon(true);
         thread.start();
 
-        NETWORK.registerMessage(EarthMapGuiMessage.Handler.class, EarthMapGuiMessage.class, 0, Side.CLIENT);
-        NETWORK.registerMessage(EarthPanoramaMessage.Handler.class, EarthPanoramaMessage.class, 1, Side.CLIENT);
-    }
+        EarthMapGuiMessage.registerTo(CustomPayloadPacketRegistry.CLIENT);
+        EarthPanoramaMessage.registerTo(CustomPayloadPacketRegistry.CLIENT);
 
-    @Mod.EventHandler
-    public static void onInit(FMLInitializationEvent event) {
-        PROXY.onInit();
-    }
-
-    @Mod.EventHandler
-    public static void onPostInit(FMLPostInitializationEvent event) {
-        PROXY.onPostInit();
-    }
-
-    @NetworkCheckHandler
-    public static boolean onCheckNetwork(Map<String, String> mods, Side side) {
-        return !mods.containsKey(TerrariumEarth.MODID) || mods.get(TerrariumEarth.MODID).equals(VERSION);
-    }
-
-    @Mod.EventHandler
-    public static void onServerStarting(FMLServerStartingEvent event) {
-        event.registerServerCommand(new GeoTeleportCommand());
-        event.registerServerCommand(new GeoToolCommand());
+        CommandRegistry.INSTANCE.register(false, GeoTeleportCommand::register);
+        CommandRegistry.INSTANCE.register(false, GeoToolCommand::register);
     }
 }

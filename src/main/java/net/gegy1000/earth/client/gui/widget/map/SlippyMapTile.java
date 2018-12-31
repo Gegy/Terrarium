@@ -1,15 +1,14 @@
 package net.gegy1000.earth.client.gui.widget.map;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.util.ResourceLocation;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.texture.NativeImage;
+import net.minecraft.client.texture.NativeImageBackedTexture;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.awt.image.BufferedImage;
-
-@SideOnly(Side.CLIENT)
+@Environment(EnvType.CLIENT)
 public class SlippyMapTile {
     private final SlippyMapTilePos pos;
 
@@ -17,8 +16,8 @@ public class SlippyMapTile {
 
     private float transition;
 
-    private BufferedImage image;
-    private ResourceLocation location;
+    private NativeImage image;
+    private Identifier location;
 
     public SlippyMapTile(SlippyMapTilePos pos) {
         this.pos = pos;
@@ -30,13 +29,13 @@ public class SlippyMapTile {
         }
     }
 
-    public void supplyImage(BufferedImage image) {
+    public void supplyImage(NativeImage image) {
         synchronized (this.lock) {
             this.image = image;
         }
     }
 
-    public ResourceLocation getLocation() {
+    public Identifier getLocation() {
         if (this.location == null && this.image != null) {
             this.location = this.uploadImage();
         }
@@ -48,16 +47,16 @@ public class SlippyMapTile {
     }
 
     public void delete() {
-        Minecraft.getMinecraft().getTextureManager().deleteTexture(this.location);
+        MinecraftClient.getInstance().getTextureManager().destroyTexture(this.location);
     }
 
-    private ResourceLocation uploadImage() {
+    private Identifier uploadImage() {
         synchronized (this.lock) {
-            BufferedImage image = this.image;
+            NativeImage image = this.image;
             this.image = null;
 
-            DynamicTexture texture = new DynamicTexture(image);
-            return Minecraft.getMinecraft().getTextureManager().getDynamicTextureLocation("terrarium_map_" + this.pos.toString(), texture);
+            NativeImageBackedTexture texture = new NativeImageBackedTexture(image);
+            return MinecraftClient.getInstance().getTextureManager().registerDynamicTexture("terrarium_map_" + this.pos.toString(), texture);
         }
     }
 

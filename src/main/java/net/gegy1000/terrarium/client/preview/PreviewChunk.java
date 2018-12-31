@@ -1,24 +1,24 @@
 package net.gegy1000.terrarium.client.preview;
 
+import com.mojang.blaze3d.platform.GlStateManager;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.client.render.TerrariumVertexFormats;
-import net.minecraft.block.BlockGrass;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GLAllocation;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.WorldVertexBufferUploader;
-import net.minecraft.init.Blocks;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.GrassBlock;
+import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.BufferRenderer;
+import net.minecraft.client.render.block.GrassColorHandler;
+import net.minecraft.client.util.GlAllocationUtils;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.ColorizerGrass;
-import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.BlockView;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.chunk.ChunkPrimer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.ChunkPos;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
@@ -29,19 +29,18 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.function.Supplier;
 
-@SideOnly(Side.CLIENT)
+@Environment(EnvType.CLIENT)
 public class PreviewChunk {
-    private static final EnumFacing[] PREVIEW_FACES = new EnumFacing[] { EnumFacing.UP, EnumFacing.NORTH, EnumFacing.SOUTH, EnumFacing.WEST, EnumFacing.EAST };
+    private static final Direction[] PREVIEW_FACES = new Direction[] { Direction.UP, Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST };
     private static final Map<Biome, Integer> BIOME_GRASS_COLORS = new HashMap<>();
 
-    private final ChunkPrimer chunk;
-    private final Biome[] biomes;
+    private final Chunk chunk;
 
     private final ChunkPos pos;
     private final int globalX;
     private final int globalZ;
 
-    private final IBlockAccess previewAccess;
+    private final BlockView previewAccess;
 
     private final Object buildLock = new Object();
     private Future<BufferBuilder> builderResult;
@@ -49,21 +48,20 @@ public class PreviewChunk {
     private Geometry geometry;
 
     static {
-        for (Biome biome : Biome.REGISTRY) {
+        for (Biome biome : Biome.BIOMES) {
             try {
                 float temperature = MathHelper.clamp(biome.getTemperature(BlockPos.ORIGIN), 0.0F, 1.0F);
                 float rainfall = MathHelper.clamp(biome.getRainfall(), 0.0F, 1.0F);
-                int color = ColorizerGrass.getGrassColor(temperature, rainfall);
+                int color = GrassColorHandler.getColor(temperature, rainfall);
                 BIOME_GRASS_COLORS.put(biome, color);
             } catch (Exception e) {
-                Terrarium.LOGGER.error("Failed to get {} grass color", biome.getBiomeName(), e);
+                Terrarium.LOGGER.error("Failed to get {} grass color", biome.getTextComponent().getFormattedText(), e);
             }
         }
     }
 
-    public PreviewChunk(ChunkPrimer chunk, Biome[] biomes, ChunkPos pos, IBlockAccess previewAccess) {
+    public PreviewChunk(Chunk chunk, ChunkPos pos, BlockView previewAccess) {
         this.chunk = chunk;
-        this.biomes = biomes;
         this.pos = pos;
         this.previewAccess = previewAccess;
 
@@ -128,7 +126,7 @@ public class PreviewChunk {
     private Geometry buildGeometry(BufferBuilder builder) {
         if (builder == null || builder.getVertexCount() == 0) {
             if (builder != null) {
-                builder.finishDrawing();
+                builder.end();
             }
             return new EmptyGeometry();
         }
@@ -137,12 +135,12 @@ public class PreviewChunk {
     }
 
     private Geometry buildDisplayList(BufferBuilder builder) {
-        int id = GLAllocation.generateDisplayLists(1);
+        int id = GlAllocationUtils.genLists(1);
 
-        builder.finishDrawing();
-        GlStateManager.glNewList(id, GL11.GL_COMPILE);
-        new WorldVertexBufferUploader().draw(builder);
-        GlStateManager.glEndList();
+        builder.end();
+        GlStateManager.newList(id, GL11.GL_COMPILE);
+        new BufferRenderer().draw(builder);
+        GlStateManager.endList();
 
         return new DisplayListGeometry(id);
     }
@@ -151,7 +149,7 @@ public class PreviewChunk {
         Geometry geometry = this.geometry;
         if (geometry != null) {
             GlStateManager.pushMatrix();
-            GlStateManager.translate(this.globalX - cameraX, 0.0, this.globalZ - cameraZ);
+            GlStateManager.translatef(this.globalX - cameraX, 0.0F, this.globalZ - cameraZ);
             geometry.render();
             GlStateManager.popMatrix();
         }
@@ -176,17 +174,20 @@ public class PreviewChunk {
     public void buildBlocks(BufferBuilder builder) {
         builder.begin(GL11.GL_QUADS, TerrariumVertexFormats.POSITION_COLOR_NORMAL);
 
-        ChunkPrimer chunk = this.chunk;
-        IBlockAccess previewAccess = this.previewAccess;
+        Chunk chunk = this.chunk;
+        BlockView previewAccess = this.previewAccess;
         int globalX = this.globalX;
         int globalZ = this.globalZ;
 
-        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        Biome[] biomes = chunk.getBiomeArray();
+
+        BlockPos.Mutable pos = new BlockPos.Mutable();
         for (int z = 0; z < 16; z++) {
             for (int x = 0; x < 16; x++) {
-                Biome biome = this.biomes[x + z * 16];
+                Biome biome = biomes[x + z * 16];
                 for (int y = 0; y < 256; y++) {
-                    IBlockState state = chunk.getBlockState(x, y, z);
+                    pos.set(x, y, z);
+                    BlockState state = chunk.getBlockState(pos);
                     if (state.getBlock() != Blocks.AIR) {
                         this.buildBlock(builder, chunk, previewAccess, globalX, globalZ, pos, z, x, biome, y, state);
                     }
@@ -194,23 +195,23 @@ public class PreviewChunk {
             }
         }
 
-        builder.setTranslation(0.0, 0.0, 0.0);
+        builder.setOffset(0.0, 0.0, 0.0);
     }
 
-    private void buildBlock(BufferBuilder builder, ChunkPrimer chunk, IBlockAccess previewAccess, int globalX, int globalZ, BlockPos.MutableBlockPos pos, int z, int x, Biome biome, int y, IBlockState state) {
-        pos.setPos(globalX + x, y, globalZ + z);
+    private void buildBlock(BufferBuilder builder, Chunk chunk, BlockView previewAccess, int globalX, int globalZ, BlockPos.Mutable pos, int z, int x, Biome biome, int y, BlockState state) {
+        pos.set(globalX + x, y, globalZ + z);
 
-        List<EnumFacing> faces = new ArrayList<>(6);
-        for (EnumFacing facing : PREVIEW_FACES) {
-            BlockPos offset = pos.offset(facing);
-            IBlockState neighbourState;
+        List<Direction> faces = new ArrayList<>(6);
+        for (Direction direction : PREVIEW_FACES) {
+            BlockPos offset = pos.offset(direction);
+            BlockState neighbourState;
             if (x > 0 && x < 15 && z > 0 && z < 15 && y > 0 && y < 255) {
-                neighbourState = chunk.getBlockState(offset.getX() & 15, offset.getY(), offset.getZ() & 15);
+                neighbourState = chunk.getBlockState(offset);
             } else {
                 neighbourState = previewAccess.getBlockState(offset);
             }
             if (neighbourState.getBlock() == Blocks.AIR) {
-                faces.add(facing);
+                faces.add(direction);
             }
         }
 
@@ -219,64 +220,64 @@ public class PreviewChunk {
         }
     }
 
-    private void buildFaces(BufferBuilder builder, List<EnumFacing> faces, IBlockState state, Biome biome, BlockPos pos, int x, int z) {
+    private void buildFaces(BufferBuilder builder, List<Direction> faces, BlockState state, Biome biome, BlockPos pos, int x, int z) {
         int color = this.getBlockColor(state, biome, pos);
         int red = (color >> 16) & 0xFF;
         int green = (color >> 8) & 0xFF;
         int blue = color & 0xFF;
 
-        builder.setTranslation(x, pos.getY(), z);
+        builder.setOffset(x, pos.getY(), z);
 
-        for (EnumFacing face : faces) {
+        for (Direction face : faces) {
             this.buildFace(builder, face, red, green, blue);
         }
     }
 
-    private int getBlockColor(IBlockState state, Biome biome, BlockPos pos) {
-        if (!(state.getBlock() instanceof BlockGrass)) {
-            return state.getMapColor(this.previewAccess, pos).colorValue;
+    private int getBlockColor(BlockState state, Biome biome, BlockPos pos) {
+        if (!(state.getBlock() instanceof GrassBlock)) {
+            return state.getMaterialColor(this.previewAccess, pos).color;
         } else {
             return BIOME_GRASS_COLORS.getOrDefault(biome, 0);
         }
     }
 
-    private void buildFace(BufferBuilder builder, EnumFacing facing, int red, int green, int blue) {
-        switch (facing) {
+    private void buildFace(BufferBuilder builder, Direction direction, int red, int green, int blue) {
+        switch (direction) {
             case NORTH:
-                builder.pos(0.0, 0.0, 0.0).color(red, green, blue, 255).normal(0.0F, 0.0F, -1.0F).endVertex();
-                builder.pos(0.0, 1.0, 0.0).color(red, green, blue, 255).normal(0.0F, 0.0F, -1.0F).endVertex();
-                builder.pos(1.0, 1.0, 0.0).color(red, green, blue, 255).normal(0.0F, 0.0F, -1.0F).endVertex();
-                builder.pos(1.0, 0.0, 0.0).color(red, green, blue, 255).normal(0.0F, 0.0F, -1.0F).endVertex();
+                builder.vertex(0.0, 0.0, 0.0).color(red, green, blue, 255).normal(0.0F, 0.0F, -1.0F).next();
+                builder.vertex(0.0, 1.0, 0.0).color(red, green, blue, 255).normal(0.0F, 0.0F, -1.0F).next();
+                builder.vertex(1.0, 1.0, 0.0).color(red, green, blue, 255).normal(0.0F, 0.0F, -1.0F).next();
+                builder.vertex(1.0, 0.0, 0.0).color(red, green, blue, 255).normal(0.0F, 0.0F, -1.0F).next();
                 break;
             case SOUTH:
-                builder.pos(0.0, 0.0, 1.0).color(red, green, blue, 255).normal(0.0F, 0.0F, 1.0F).endVertex();
-                builder.pos(1.0, 0.0, 1.0).color(red, green, blue, 255).normal(0.0F, 0.0F, 1.0F).endVertex();
-                builder.pos(1.0, 1.0, 1.0).color(red, green, blue, 255).normal(0.0F, 0.0F, 1.0F).endVertex();
-                builder.pos(0.0, 1.0, 1.0).color(red, green, blue, 255).normal(0.0F, 0.0F, 1.0F).endVertex();
+                builder.vertex(0.0, 0.0, 1.0).color(red, green, blue, 255).normal(0.0F, 0.0F, 1.0F).next();
+                builder.vertex(1.0, 0.0, 1.0).color(red, green, blue, 255).normal(0.0F, 0.0F, 1.0F).next();
+                builder.vertex(1.0, 1.0, 1.0).color(red, green, blue, 255).normal(0.0F, 0.0F, 1.0F).next();
+                builder.vertex(0.0, 1.0, 1.0).color(red, green, blue, 255).normal(0.0F, 0.0F, 1.0F).next();
                 break;
             case WEST:
-                builder.pos(0.0, 0.0, 0.0).color(red, green, blue, 255).normal(-1.0F, 0.0F, 0.0F).endVertex();
-                builder.pos(0.0, 0.0, 1.0).color(red, green, blue, 255).normal(-1.0F, 0.0F, 0.0F).endVertex();
-                builder.pos(0.0, 1.0, 1.0).color(red, green, blue, 255).normal(-1.0F, 0.0F, 0.0F).endVertex();
-                builder.pos(0.0, 1.0, 0.0).color(red, green, blue, 255).normal(-1.0F, 0.0F, 0.0F).endVertex();
+                builder.vertex(0.0, 0.0, 0.0).color(red, green, blue, 255).normal(-1.0F, 0.0F, 0.0F).next();
+                builder.vertex(0.0, 0.0, 1.0).color(red, green, blue, 255).normal(-1.0F, 0.0F, 0.0F).next();
+                builder.vertex(0.0, 1.0, 1.0).color(red, green, blue, 255).normal(-1.0F, 0.0F, 0.0F).next();
+                builder.vertex(0.0, 1.0, 0.0).color(red, green, blue, 255).normal(-1.0F, 0.0F, 0.0F).next();
                 break;
             case EAST:
-                builder.pos(1.0, 1.0, 0.0).color(red, green, blue, 255).normal(1.0F, 0.0F, 0.0F).endVertex();
-                builder.pos(1.0, 1.0, 1.0).color(red, green, blue, 255).normal(1.0F, 0.0F, 0.0F).endVertex();
-                builder.pos(1.0, 0.0, 1.0).color(red, green, blue, 255).normal(1.0F, 0.0F, 0.0F).endVertex();
-                builder.pos(1.0, 0.0, 0.0).color(red, green, blue, 255).normal(1.0F, 0.0F, 0.0F).endVertex();
+                builder.vertex(1.0, 1.0, 0.0).color(red, green, blue, 255).normal(1.0F, 0.0F, 0.0F).next();
+                builder.vertex(1.0, 1.0, 1.0).color(red, green, blue, 255).normal(1.0F, 0.0F, 0.0F).next();
+                builder.vertex(1.0, 0.0, 1.0).color(red, green, blue, 255).normal(1.0F, 0.0F, 0.0F).next();
+                builder.vertex(1.0, 0.0, 0.0).color(red, green, blue, 255).normal(1.0F, 0.0F, 0.0F).next();
                 break;
             case UP:
-                builder.pos(0.0, 1.0, 1.0).color(red, green, blue, 255).normal(0.0F, 1.0F, 0.0F).endVertex();
-                builder.pos(1.0, 1.0, 1.0).color(red, green, blue, 255).normal(0.0F, 1.0F, 0.0F).endVertex();
-                builder.pos(1.0, 1.0, 0.0).color(red, green, blue, 255).normal(0.0F, 1.0F, 0.0F).endVertex();
-                builder.pos(0.0, 1.0, 0.0).color(red, green, blue, 255).normal(0.0F, 1.0F, 0.0F).endVertex();
+                builder.vertex(0.0, 1.0, 1.0).color(red, green, blue, 255).normal(0.0F, 1.0F, 0.0F).next();
+                builder.vertex(1.0, 1.0, 1.0).color(red, green, blue, 255).normal(0.0F, 1.0F, 0.0F).next();
+                builder.vertex(1.0, 1.0, 0.0).color(red, green, blue, 255).normal(0.0F, 1.0F, 0.0F).next();
+                builder.vertex(0.0, 1.0, 0.0).color(red, green, blue, 255).normal(0.0F, 1.0F, 0.0F).next();
                 break;
             case DOWN:
-                builder.pos(0.0, 0.0, 0.0).color(red, green, blue, 255).normal(0.0F, 1.0F, 0.0F).endVertex();
-                builder.pos(1.0, 0.0, 0.0).color(red, green, blue, 255).normal(0.0F, 1.0F, 0.0F).endVertex();
-                builder.pos(1.0, 0.0, 1.0).color(red, green, blue, 255).normal(0.0F, 1.0F, 0.0F).endVertex();
-                builder.pos(0.0, 0.0, 1.0).color(red, green, blue, 255).normal(0.0F, 1.0F, 0.0F).endVertex();
+                builder.vertex(0.0, 0.0, 0.0).color(red, green, blue, 255).normal(0.0F, 1.0F, 0.0F).next();
+                builder.vertex(1.0, 0.0, 0.0).color(red, green, blue, 255).normal(0.0F, 1.0F, 0.0F).next();
+                builder.vertex(1.0, 0.0, 1.0).color(red, green, blue, 255).normal(0.0F, 1.0F, 0.0F).next();
+                builder.vertex(0.0, 0.0, 1.0).color(red, green, blue, 255).normal(0.0F, 1.0F, 0.0F).next();
                 break;
         }
     }
@@ -301,7 +302,7 @@ public class PreviewChunk {
 
         @Override
         public void delete() {
-            GLAllocation.deleteDisplayLists(this.id);
+            GlAllocationUtils.deleteSingletonList(this.id);
         }
     }
 

@@ -1,11 +1,11 @@
 package net.gegy1000.earth.server.command;
 
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.StringTextComponent;
+import net.minecraft.text.TextComponent;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,12 +15,12 @@ public class ContainerUi {
     public static final int PADDING = 1;
     public static final int PADDED_WIDTH = WIDTH - PADDING * 2;
 
-    private final EntityPlayerMP player;
-    private final ITextComponent title;
+    private final ServerPlayerEntity player;
+    private final TextComponent title;
     private final Element[] elements;
     private final int rows;
 
-    private ContainerUi(EntityPlayerMP player, ITextComponent title, Element[] elements) {
+    private ContainerUi(ServerPlayerEntity player, TextComponent title, Element[] elements) {
         this.player = player;
         this.title = title;
         this.elements = elements;
@@ -28,7 +28,7 @@ public class ContainerUi {
         this.resolveRows();
     }
 
-    public static Builder builder(EntityPlayerMP player) {
+    public static Builder builder(ServerPlayerEntity player) {
         return new Builder(player);
     }
 
@@ -67,11 +67,11 @@ public class ContainerUi {
     }
 
     public static class Builder {
-        private final EntityPlayerMP player;
+        private final ServerPlayerEntity player;
         private final List<Element> elements = new ArrayList<>();
-        private ITextComponent title = new TextComponentString("Container");
+        private TextComponent title = new StringTextComponent("Container");
 
-        private Builder(EntityPlayerMP player) {
+        private Builder(ServerPlayerEntity player) {
             this.player = player;
         }
 
@@ -81,7 +81,7 @@ public class ContainerUi {
             return this;
         }
 
-        public Builder withTitle(ITextComponent title) {
+        public Builder withTitle(TextComponent title) {
             this.title = title;
             return this;
         }
@@ -126,7 +126,7 @@ public class ContainerUi {
 
         public ItemStack createStack() {
             ItemStack stack = new ItemStack(this.icon, 1);
-            stack.setStackDisplayName(this.name);
+            stack.setDisplayName(new StringTextComponent(this.name));
             return stack;
         }
 

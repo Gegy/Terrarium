@@ -1,14 +1,14 @@
 package net.gegy1000.earth.server.world.pipeline.adapter;
 
 import net.gegy1000.terrarium.server.util.FloodFill;
-import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.cover.TerrariumCoverTypes;
+import net.gegy1000.terrarium.server.world.cover.TerrariumCover;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.RegionAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.BiomeRasterTile;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.gegy1000.terrarium.server.world.region.RegionData;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.biome.Biome;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -17,29 +17,29 @@ import java.util.Set;
 
 public class WaterFlattenAdapter implements RegionAdapter {
     private final RegionComponentType<ShortRasterTile> heightComponent;
-    private final RegionComponentType<CoverRasterTile> coverComponent;
+    private final RegionComponentType<BiomeRasterTile> biomeComponent;
     private final int flattenRange;
 
-    private final CoverType waterCoverType;
+    private final Biome waterBiome;
 
-    public WaterFlattenAdapter(RegionComponentType<ShortRasterTile> heightComponent, RegionComponentType<CoverRasterTile> coverComponent, int flattenRange, CoverType waterCoverType) {
+    public WaterFlattenAdapter(RegionComponentType<ShortRasterTile> heightComponent, RegionComponentType<BiomeRasterTile> biomeComponent, int flattenRange, Biome waterBiome) {
         this.heightComponent = heightComponent;
-        this.coverComponent = coverComponent;
+        this.biomeComponent = biomeComponent;
         this.flattenRange = flattenRange;
-        this.waterCoverType = waterCoverType;
+        this.waterBiome = waterBiome;
     }
 
     @Override
     public void adapt(RegionData data, int x, int z, int width, int height) {
         ShortRasterTile heightTile = data.getOrExcept(this.heightComponent);
-        CoverRasterTile coverTile = data.getOrExcept(this.coverComponent);
+        BiomeRasterTile coverTile = data.getOrExcept(this.biomeComponent);
 
         short[] heightBuffer = heightTile.getShortData();
-        CoverType[] coverBuffer = coverTile.getData();
+        Biome[] coverBuffer = coverTile.getData();
 
         for (int localZ = 0; localZ < height; localZ++) {
             for (int localX = 0; localX < width; localX++) {
-                if (coverBuffer[localX + localZ * width] == this.waterCoverType) {
+                if (coverBuffer[localX + localZ * width] == this.waterBiome) {
                     AverageCoverHeightVisitor visitor = new AverageCoverHeightVisitor(heightBuffer, width);
                     FloodFill.floodVisit(coverBuffer, width, height, new FloodFill.Point(localX, localZ), visitor);
 
@@ -53,13 +53,13 @@ public class WaterFlattenAdapter implements RegionAdapter {
         }
 
         for (int i = 0; i < coverBuffer.length; i++) {
-            if (coverBuffer[i] == TerrariumCoverTypes.PLACEHOLDER) {
-                coverBuffer[i] = this.waterCoverType;
+            if (coverBuffer[i] == TerrariumCover.NONE) {
+                coverBuffer[i] = this.waterBiome;
             }
         }
     }
 
-    private void flattenArea(List<FloodFill.Point> waterPoints, short targetHeight, short[] heightBuffer, CoverType[] coverBuffer, int width, int height) {
+    private void flattenArea(List<FloodFill.Point> waterPoints, short targetHeight, short[] heightBuffer, Biome[] coverBuffer, int width, int height) {
         Set<FloodFill.Point> sourcePoints = new HashSet<>();
 
         for (FloodFill.Point point : waterPoints) {
@@ -94,15 +94,15 @@ public class WaterFlattenAdapter implements RegionAdapter {
                 && (z >= height - 1 || Math.abs(heightBuffer[index + width] - targetHeight) > 0);
     }
 
-    private boolean hasNeighbouringLand(int x, int z, CoverType[] coverBuffer, int width, int height) {
+    private boolean hasNeighbouringLand(int x, int z, Biome[] coverBuffer, int width, int height) {
         int index = x + z * width;
-        return (x > 0 && coverBuffer[index - 1] != TerrariumCoverTypes.PLACEHOLDER)
-                || (x < width - 1 && coverBuffer[index + 1] != TerrariumCoverTypes.PLACEHOLDER)
-                || (z > 0 && coverBuffer[index - width] != TerrariumCoverTypes.PLACEHOLDER)
-                || (z < height - 1 && coverBuffer[index + width] != TerrariumCoverTypes.PLACEHOLDER);
+        return (x > 0 && coverBuffer[index - 1] != TerrariumCover.NONE)
+                || (x < width - 1 && coverBuffer[index + 1] != TerrariumCover.NONE)
+                || (z > 0 && coverBuffer[index - width] != TerrariumCover.NONE)
+                || (z < height - 1 && coverBuffer[index + width] != TerrariumCover.NONE);
     }
 
-    private class AverageCoverHeightVisitor implements FloodFill.Visitor<CoverType> {
+    private class AverageCoverHeightVisitor implements FloodFill.Visitor<Biome> {
         private final short[] heightBuffer;
         private final int width;
 
@@ -116,15 +116,15 @@ public class WaterFlattenAdapter implements RegionAdapter {
         }
 
         @Override
-        public CoverType visit(FloodFill.Point point, CoverType sampled) {
+        public Biome visit(FloodFill.Point point, Biome sampled) {
             this.totalHeight += this.heightBuffer[point.getX() + point.getY() * this.width];
             this.visitedPoints.add(point);
-            return TerrariumCoverTypes.PLACEHOLDER;
+            return TerrariumCover.NONE;
         }
 
         @Override
-        public boolean canVisit(FloodFill.Point point, CoverType sampled) {
-            return sampled == WaterFlattenAdapter.this.waterCoverType;
+        public boolean canVisit(FloodFill.Point point, Biome sampled) {
+            return sampled == WaterFlattenAdapter.this.waterBiome;
         }
 
         private short getAverageHeight() {

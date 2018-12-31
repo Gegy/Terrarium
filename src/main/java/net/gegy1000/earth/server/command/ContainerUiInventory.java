@@ -2,28 +2,28 @@ package net.gegy1000.earth.server.command;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.IInventory;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.TextComponent;
+import net.minecraft.util.DefaultedList;
 
-public class ContainerUiInventory implements IInventory {
-    private final EntityPlayerMP player;
-    private final ITextComponent title;
+public class ContainerUiInventory implements Inventory {
+    private final ServerPlayerEntity player;
+    private final TextComponent title;
 
     private final Int2ObjectMap<ContainerUi.Element> elements;
     private final int rows;
 
-    private final NonNullList<ItemStack> stacks;
+    private final DefaultedList<ItemStack> stacks;
 
-    public ContainerUiInventory(EntityPlayerMP player, ITextComponent title, ContainerUi.Element[] elements, int rows) {
+    public ContainerUiInventory(ServerPlayerEntity player, TextComponent title, ContainerUi.Element[] elements, int rows) {
         this.player = player;
         this.title = title;
         this.rows = rows;
 
-        this.stacks = NonNullList.withSize(this.getSizeInventory(), ItemStack.EMPTY);
+        this.stacks = DefaultedList.create(this.getInvSize(), ItemStack.EMPTY);
 
         this.elements = new Int2ObjectOpenHashMap<>();
         for (ContainerUi.Element element : elements) {
@@ -34,47 +34,47 @@ public class ContainerUiInventory implements IInventory {
     }
 
     @Override
-    public int getSizeInventory() {
+    public int getInvSize() {
         return this.rows * ContainerUi.WIDTH;
     }
 
     @Override
-    public boolean isEmpty() {
+    public boolean isInvEmpty() {
         return false;
     }
 
     @Override
-    public ItemStack getStackInSlot(int index) {
+    public ItemStack getInvStack(int index) {
         return this.stacks.get(index);
     }
 
     @Override
-    public ItemStack decrStackSize(int index, int count) {
+    public ItemStack takeInvStack(int index, int count) {
         this.handleElementClick(index);
         return ItemStack.EMPTY;
     }
 
     @Override
-    public ItemStack removeStackFromSlot(int index) {
+    public ItemStack removeInvStack(int index) {
         this.handleElementClick(index);
         return ItemStack.EMPTY;
     }
 
     private void handleElementClick(int index) {
-        this.player.inventory.setItemStack(ItemStack.EMPTY);
+        this.player.inventory.setCursorStack(ItemStack.EMPTY);
         ContainerUi.Element element = this.elements.get(index);
         if (element != null) {
-            this.player.closeScreen();
+            this.player.closeGui();
             element.handleClick();
         }
     }
 
     @Override
-    public void setInventorySlotContents(int index, ItemStack stack) {
+    public void setInvStack(int index, ItemStack stack) {
     }
 
     @Override
-    public int getInventoryStackLimit() {
+    public int getInvMaxStackAmount() {
         return 1;
     }
 
@@ -83,53 +83,43 @@ public class ContainerUiInventory implements IInventory {
     }
 
     @Override
-    public boolean isUsableByPlayer(EntityPlayer player) {
+    public boolean canPlayerUseInv(PlayerEntity player) {
         return true;
     }
 
     @Override
-    public void openInventory(EntityPlayer player) {
+    public void onInvOpen(PlayerEntity player) {
     }
 
     @Override
-    public void closeInventory(EntityPlayer player) {
+    public void onInvClose(PlayerEntity player) {
     }
 
     @Override
-    public boolean isItemValidForSlot(int index, ItemStack stack) {
+    public boolean isValidInvStack(int index, ItemStack stack) {
         return false;
     }
 
     @Override
-    public int getField(int id) {
+    public int getInvProperty(int id) {
         return 0;
     }
 
     @Override
-    public void setField(int id, int value) {
+    public void setInvProperty(int id, int value) {
     }
 
     @Override
-    public int getFieldCount() {
+    public int getInvPropertyCount() {
         return 0;
     }
 
     @Override
-    public void clear() {
+    public void clearInv() {
     }
 
     @Override
-    public String getName() {
-        return "Container UI";
-    }
-
-    @Override
-    public boolean hasCustomName() {
-        return false;
-    }
-
-    @Override
-    public ITextComponent getDisplayName() {
+    public TextComponent getName() {
         return this.title;
     }
 }

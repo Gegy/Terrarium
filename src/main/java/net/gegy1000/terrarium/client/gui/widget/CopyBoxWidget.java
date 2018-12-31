@@ -1,22 +1,21 @@
 package net.gegy1000.terrarium.client.gui.widget;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.gegy1000.terrarium.Terrarium;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.client.config.GuiUtils;
+import net.gegy1000.terrarium.client.gui.GuiRenderUtils;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.FontRenderer;
+import net.minecraft.client.gui.Drawable;
+import net.minecraft.client.gui.GuiEventListener;
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.util.Identifier;
 
 import java.util.List;
 
-public class CopyBoxWidget extends Gui {
-    private static final ResourceLocation WIDGETS_TEXTURE = new ResourceLocation(Terrarium.MODID, "textures/gui/widgets.png");
-    private static final Minecraft MC = Minecraft.getMinecraft();
+public class CopyBoxWidget extends Drawable implements GuiEventListener {
+    private static final Identifier WIDGETS_TEXTURE = new Identifier(Terrarium.MODID, "textures/gui/widgets.png");
+    private static final MinecraftClient CLIENT = MinecraftClient.getInstance();
     private static final int CLIPBOARD_PADDING = 2;
 
     private final int x;
@@ -48,11 +47,11 @@ public class CopyBoxWidget extends Gui {
 
         int clipboardSize = Math.min(this.width, this.height) - CLIPBOARD_PADDING * 2;
 
-        String text = this.fontRenderer.trimStringToWidth(this.text, this.width - 8 - clipboardSize);
+        String text = this.fontRenderer.wrapStringToWidth(this.text, this.width - 8 - clipboardSize);
 
         int textX = this.x + 4;
         int textY = this.y + (this.height - 8) / 2;
-        this.fontRenderer.drawStringWithShadow(text, textX, textY, 0xFFFFFF);
+        this.fontRenderer.drawWithShadow(text, textX, textY, 0xFFFFFF);
 
         int minClipboardX = this.x + this.width - clipboardSize - CLIPBOARD_PADDING;
         int minClipboardY = this.y + CLIPBOARD_PADDING;
@@ -65,22 +64,20 @@ public class CopyBoxWidget extends Gui {
             drawRect(minClipboardX, minClipboardY, maxClipboardX, maxClipboardY, 0xFFA0A0A0);
         }
 
-        MC.getTextureManager().bindTexture(WIDGETS_TEXTURE);
-        this.drawTexturedModalRect(minClipboardX, minClipboardY, 64, 0, clipboardSize, clipboardSize);
+        CLIENT.getTextureManager().bindTexture(WIDGETS_TEXTURE);
+        this.drawTexturedRect(minClipboardX, minClipboardY, 64, 0, clipboardSize, clipboardSize);
 
         if (this.copied) {
-            ScaledResolution resolution = new ScaledResolution(MC);
-            List<String> lines = Lists.newArrayList(I18n.format("gui.copy_box.copied.name"));
-            int screenWidth = resolution.getScaledWidth();
-            int screenHeight = resolution.getScaledHeight();
-            GuiUtils.drawHoveringText(lines, (minClipboardX + maxClipboardX) / 2, (minClipboardY + maxClipboardY) / 2, screenWidth, screenHeight, -1, this.fontRenderer);
+            List<String> lines = Lists.newArrayList(I18n.translate("gui.copy_box.copied.name"));
+            GuiRenderUtils.drawTooltip(lines, (minClipboardX + maxClipboardX) / 2, (minClipboardY + maxClipboardY) / 2);
 
             GlStateManager.disableLighting();
-            GlStateManager.enableTexture2D();
+            GlStateManager.enableTexture();
         }
     }
 
-    public void mouseClicked(int mouseX, int mouseY) {
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
         int clipboardWidth = Math.min(this.width, this.height) - CLIPBOARD_PADDING * 2;
 
         int minClipboardX = this.x + this.width - clipboardWidth - CLIPBOARD_PADDING;
@@ -89,8 +86,11 @@ public class CopyBoxWidget extends Gui {
         int maxClipboardY = this.y + this.height - CLIPBOARD_PADDING;
 
         if (mouseX >= minClipboardX && mouseY >= minClipboardY && mouseX <= maxClipboardX && mouseY <= maxClipboardY) {
-            GuiScreen.setClipboardString(this.text);
+            MinecraftClient.getInstance().keyboard.setClipboard(this.text);
             this.copied = true;
+            return true;
         }
+
+        return false;
     }
 }

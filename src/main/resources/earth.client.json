@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "net.gegy1000.earth.mixin.client",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "MixinTextField",
+    "MixinLoadingScreen"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

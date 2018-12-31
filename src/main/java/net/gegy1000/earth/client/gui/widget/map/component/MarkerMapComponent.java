@@ -1,18 +1,19 @@
 package net.gegy1000.earth.client.gui.widget.map.component;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.gegy1000.earth.client.gui.widget.map.SlippyMap;
 import net.gegy1000.earth.client.gui.widget.map.SlippyMapPoint;
 import net.gegy1000.terrarium.Terrarium;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
 
-@SideOnly(Side.CLIENT)
+@Environment(EnvType.CLIENT)
 public class MarkerMapComponent implements MapComponent {
-    private static final ResourceLocation WIDGETS_TEXTURE = new ResourceLocation(Terrarium.MODID, "textures/gui/widgets.png");
+    private static final MinecraftClient CLIENT = MinecraftClient.getInstance();
+    private static final Identifier WIDGETS_TEXTURE = new Identifier(Terrarium.MODID, "textures/gui/widgets.png");
 
     private SlippyMapPoint marker;
     private boolean canMove;
@@ -31,22 +32,25 @@ public class MarkerMapComponent implements MapComponent {
     }
 
     @Override
-    public void onDrawMap(SlippyMap map, ScaledResolution resolution, int mouseX, int mouseY) {
+    public void onDrawMap(SlippyMap map, double mouseX, double mouseY) {
         if (this.marker != null) {
-            int scale = resolution.getScaleFactor();
+            double scale = CLIENT.window.method_4495();
 
-            int markerX = this.marker.getX(map.getCameraZoom()) - map.getCameraX();
-            int markerY = this.marker.getY(map.getCameraZoom()) - map.getCameraY();
+            double markerX = this.marker.getX(map.getCameraZoom()) - map.getCameraX();
+            double markerY = this.marker.getY(map.getCameraZoom()) - map.getCameraY();
 
-            Minecraft.getMinecraft().getTextureManager().bindTexture(WIDGETS_TEXTURE);
-            Gui.drawScaledCustomSizeModalRect(markerX - 4 * scale, markerY - 8 * scale, 0.0F, 32.0F, 16, 16, 8 * scale, 8 * scale, 256, 256);
+            CLIENT.getTextureManager().bindTexture(WIDGETS_TEXTURE);
+
+            int x = MathHelper.floor(markerX - 4 * scale);
+            int y = MathHelper.floor(markerY - 8 * scale);
+            Gui.drawTexturedRect(x, y, 0.0F, 32.0F, 16, 16, MathHelper.floor(8 * scale), MathHelper.floor(8 * scale), 256, 256);
         }
     }
 
     @Override
-    public void onMapClicked(SlippyMap map, ScaledResolution resolution, int mouseX, int mouseY) {
+    public void onMapClicked(SlippyMap map, double mouseX, double mouseY) {
         if (this.canMove) {
-            int scale = resolution.getScaleFactor();
+            double scale = CLIENT.window.method_4495();
             this.marker = new SlippyMapPoint(mouseX * scale + map.getCameraX(), mouseY * scale + map.getCameraY(), map.getCameraZoom());
         }
     }

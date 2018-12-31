@@ -1,19 +1,22 @@
 package net.gegy1000.earth.server.world.pipeline.composer;
 
 import net.gegy1000.earth.server.world.pipeline.layer.DebugMap;
+import net.gegy1000.terrarium.server.world.TerrariumGeneratorConfig;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
+import net.gegy1000.terrarium.server.world.pipeline.composer.chunk.ChunkComposer;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
-import net.minecraft.init.Blocks;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntitySign;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.SignBlockEntity;
+import net.minecraft.class_2919;
+import net.minecraft.text.StringTextComponent;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.world.World;
-import net.minecraft.world.gen.IChunkGenerator;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.ChunkPos;
+import net.minecraft.world.gen.chunk.ChunkGenerator;
 
-public class DebugSignDecorationComposer implements DecorationComposer {
+public class DebugSignDecorationComposer implements ChunkComposer<TerrariumGeneratorConfig> {
     private final RegionComponentType<ShortRasterTile> heightComponent;
 
     public DebugSignDecorationComposer(RegionComponentType<ShortRasterTile> heightComponent) {
@@ -21,25 +24,26 @@ public class DebugSignDecorationComposer implements DecorationComposer {
     }
 
     @Override
-    public void composeDecoration(IChunkGenerator generator, World world, RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
-        int globalX = chunkX << 4;
-        int globalZ = chunkZ << 4;
+    public void compose(ChunkGenerator<TerrariumGeneratorConfig> generator, Chunk chunk, class_2919 random, RegionGenerationHandler regionHandler) {
+        ChunkPos chunkPos = chunk.getPos();
+        int globalX = chunkPos.getXStart();
+        int globalZ = chunkPos.getZStart();
 
         ShortRasterTile heightRaster = regionHandler.getCachedChunkRaster(this.heightComponent);
 
-        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        BlockPos.Mutable pos = new BlockPos.Mutable();
 
         for (int localZ = 0; localZ < 16; localZ++) {
             for (int localX = 0; localX < 16; localX++) {
                 String[] signText = DebugMap.getSign(globalX + localX, globalZ + localZ);
                 if (signText != null) {
-                    pos.setPos(localX + globalX, heightRaster.getShort(localX, localZ) + 1, localZ + globalZ);
-                    world.setBlockState(pos, Blocks.STANDING_SIGN.getDefaultState());
-                    TileEntity entity = world.getTileEntity(pos);
-                    if (entity instanceof TileEntitySign) {
-                        TileEntitySign signEntity = (TileEntitySign) entity;
-                        for (int i = 0; i < signEntity.signText.length && i < signText.length; i++) {
-                            signEntity.signText[i] = new TextComponentString(signText[i]);
+                    pos.set(localX + globalX, heightRaster.getShort(localX, localZ) + 1, localZ + globalZ);
+                    chunk.setBlockState(pos, Blocks.OAK_SIGN.getDefaultState(), false);
+                    BlockEntity entity = chunk.getBlockEntity(pos);
+                    if (entity instanceof SignBlockEntity) {
+                        SignBlockEntity signEntity = (SignBlockEntity) entity;
+                        for (int i = 0; i < signEntity.text.length && i < signText.length; i++) {
+                            signEntity.text[i] = new StringTextComponent(signText[i]);
                         }
                     }
                 }

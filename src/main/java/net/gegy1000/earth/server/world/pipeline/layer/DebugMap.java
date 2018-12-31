@@ -1,10 +1,10 @@
 package net.gegy1000.earth.server.world.pipeline.layer;
 
 import com.google.common.base.CaseFormat;
-import net.gegy1000.earth.server.world.cover.EarthCoverTypes;
+import net.gegy1000.earth.server.world.cover.EarthCoverBiomes;
 import net.gegy1000.earth.server.world.cover.LatitudinalZone;
-import net.gegy1000.terrarium.server.world.cover.TerrariumCoverTypes;
-import net.gegy1000.terrarium.server.world.cover.CoverType;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.Biomes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +34,7 @@ public class DebugMap {
             }
         }
 
-        return new DebugCover(TerrariumCoverTypes.DEBUG, LatitudinalZone.TEMPERATE);
+        return new DebugCover(Biomes.DEFAULT, LatitudinalZone.TEMPERATE);
     }
 
     public static String[] getSign(int x, int z) {
@@ -61,8 +61,8 @@ public class DebugMap {
         List<String> lines = new ArrayList<>();
 
         String zoneName = cover.getZone().name().toLowerCase(Locale.ENGLISH);
-        String coverType = cover.getCoverType().getClass().getSimpleName();
-        String[] coverWords = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, coverType).split("_");
+        String biome = cover.getBiome().getClass().getSimpleName();
+        String[] coverWords = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, biome).split("_");
 
         lines.add(zoneName);
 
@@ -83,29 +83,29 @@ public class DebugMap {
     }
 
     private static DebugCover getGridCover(int gridX, int gridZ) {
-        int effectiveGridX = gridX + EarthCoverTypes.Glob.TYPES.length / 2;
+        int effectiveGridX = gridX + EarthCoverBiomes.Glob.TYPES.length / 2;
         int effectiveGridZ = gridZ + LatitudinalZone.ZONES.length / 2;
 
-        if (effectiveGridX >= 0 && effectiveGridX < EarthCoverTypes.Glob.TYPES.length && effectiveGridZ >= 0 && effectiveGridZ < LatitudinalZone.ZONES.length) {
-            CoverType coverType = EarthCoverTypes.Glob.TYPES[effectiveGridX].getCoverType();
+        if (effectiveGridX >= 0 && effectiveGridX < EarthCoverBiomes.Glob.TYPES.length && effectiveGridZ >= 0 && effectiveGridZ < LatitudinalZone.ZONES.length) {
+            Biome biome = EarthCoverBiomes.Glob.TYPES[effectiveGridX].getBiome();
             LatitudinalZone zone = LatitudinalZone.ZONES[effectiveGridZ];
-            return new DebugCover(coverType, zone);
+            return new DebugCover(biome, zone);
         }
 
         return null;
     }
 
     public static class DebugCover {
-        private final CoverType coverType;
+        private final Biome biome;
         private final LatitudinalZone zone;
 
-        public DebugCover(CoverType coverType, LatitudinalZone zone) {
-            this.coverType = coverType;
+        public DebugCover(Biome biome, LatitudinalZone zone) {
+            this.biome = biome;
             this.zone = zone;
         }
 
-        public CoverType getCoverType() {
-            return this.coverType;
+        public Biome getBiome() {
+            return this.biome;
         }
 
         public LatitudinalZone getZone() {

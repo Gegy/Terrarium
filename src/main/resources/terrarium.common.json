@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "package": "net.gegy1000.terrarium.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "MixinOverworldDimension",
+    "MixinSlimeEntity",
+    "MixinServerWorld",
+    "MixinPlayerManager",
+    "MixinServerChunkManager",
+    "MixinChunkTracker",
+    "MixinAnvilSaveHandler",
+    "MixinLevelGeneratorType",
+    "MixinDedicatedServer"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

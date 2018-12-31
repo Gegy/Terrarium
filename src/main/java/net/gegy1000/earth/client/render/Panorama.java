@@ -1,22 +1,23 @@
 package net.gegy1000.earth.client.render;
 
 import net.gegy1000.earth.TerrariumEarth;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.texture.NativeImage;
+import net.minecraft.client.texture.NativeImageBackedTexture;
+import net.minecraft.util.Identifier;
 
 import java.awt.image.BufferedImage;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Panorama {
-    private static final Minecraft MC = Minecraft.getMinecraft();
+    private static final MinecraftClient CLIENT = MinecraftClient.getInstance();
 
     private static final int BASE_PANORAMA_WIDTH = 416;
     private static final int TILE_SIZE = 512;
 
     private final String id;
-    private final ResourceLocation textureLocation;
-    private final DynamicTexture texture;
+    private final Identifier textureLocation;
+    private final NativeImageBackedTexture texture;
 
     private final int stitchedWidth;
     private final int stitchedHeight;
@@ -27,14 +28,14 @@ public class Panorama {
 
     public Panorama(String id, String suffix, int zoom) {
         this.id = id;
-        this.textureLocation = new ResourceLocation(TerrariumEarth.MODID, "panorama_" + id.hashCode() + "_" + suffix);
+        this.textureLocation = new Identifier(TerrariumEarth.MODID, "panorama_" + id.hashCode() + "_" + suffix);
 
         this.zoom = zoom;
         this.stitchedWidth = (1 << this.zoom) * BASE_PANORAMA_WIDTH;
         this.stitchedHeight = this.stitchedWidth / 2;
 
-        this.texture = new DynamicTexture(this.stitchedWidth, this.stitchedHeight);
-        MC.getTextureManager().loadTexture(this.textureLocation, this.texture);
+        this.texture = new NativeImageBackedTexture(this.stitchedWidth, this.stitchedHeight, true);
+        CLIENT.getTextureManager().registerTexture(this.textureLocation, this.texture);
 
         Thread thread = new Thread(this::loadTiles);
         thread.setName("Panorama Load Thread");
@@ -64,28 +65,32 @@ public class Panorama {
         int maxX = Math.min(image.getWidth(), this.stitchedWidth - originX);
         int maxY = Math.min(image.getHeight(), this.stitchedHeight - originY);
 
-        int[] data = this.texture.getTextureData();
+        NativeImage nativeImage = this.texture.getImage();
+        if (nativeImage == null) {
+            throw new IllegalStateException("Panorama image has been released");
+        }
+
         for (int localY = 0; localY < maxY; localY++) {
             for (int localX = 0; localX < maxX; localX++) {
                 int globalX = originX + localX;
                 int globalY = originY + localY;
-                data[globalX + globalY * this.stitchedWidth] = image.getRGB(localX, localY);
+                nativeImage.setPixelRGBA(globalX, globalY, image.getRGB(localX, localY));
             }
         }
 
         this.textureDirty.set(true);
     }
 
-    public ResourceLocation getTextureLocation() {
+    public Identifier getTextureLocation() {
         if (this.textureDirty.get()) {
             this.textureDirty.set(false);
-            this.texture.updateDynamicTexture();
+            this.texture.upload();
         }
         return this.textureLocation;
     }
 
     public void delete() {
-        MC.getTextureManager().deleteTexture(this.textureLocation);
+        CLIENT.getTextureManager().destroyTexture(this.textureLocation);
     }
 
     public boolean hasLoaded() {

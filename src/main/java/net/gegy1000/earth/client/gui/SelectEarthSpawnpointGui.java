@@ -4,17 +4,14 @@ import net.gegy1000.earth.client.gui.widget.map.PlaceSearchWidget;
 import net.gegy1000.earth.client.gui.widget.map.SlippyMapPoint;
 import net.gegy1000.earth.client.gui.widget.map.SlippyMapWidget;
 import net.gegy1000.earth.client.gui.widget.map.component.MarkerMapComponent;
-import net.gegy1000.earth.server.world.EarthWorldType;
+import net.gegy1000.earth.server.world.EarthGeneratorType;
 import net.gegy1000.earth.server.world.pipeline.source.GoogleGeocoder;
-import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.resources.I18n;
-import org.lwjgl.input.Keyboard;
+import net.gegy1000.terrarium.server.world.customization.GenerationSettings;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.resource.language.I18n;
 
-import java.io.IOException;
-
-public class SelectEarthSpawnpointGui extends GuiScreen {
+public class SelectEarthSpawnpointGui extends Gui {
     private static final int SELECT_BUTTON = 0;
     private static final int CANCEL_BUTTON = 1;
     private static final int SEARCH_FIELD = 2;
@@ -30,27 +27,44 @@ public class SelectEarthSpawnpointGui extends GuiScreen {
     }
 
     @Override
-    public void initGui() {
+    public void onInitialized() {
         if (this.mapWidget != null) {
             this.mapWidget.close();
         }
 
-        Keyboard.enableRepeatEvents(true);
+        this.client.keyboard.enableRepeatEvents(true);
 
         this.mapWidget = new SlippyMapWidget(20, 20, this.width - 40, this.height - 60);
 
         GenerationSettings settings = this.parent.getSettings();
 
-        double latitude = settings.getDouble(EarthWorldType.SPAWN_LATITUDE);
-        double longitude = settings.getDouble(EarthWorldType.SPAWN_LONGITUDE);
+        double latitude = settings.getDouble(EarthGeneratorType.SPAWN_LATITUDE);
+        double longitude = settings.getDouble(EarthGeneratorType.SPAWN_LONGITUDE);
         this.markerComponent = new MarkerMapComponent(new SlippyMapPoint(latitude, longitude)).allowMovement();
         this.mapWidget.addComponent(this.markerComponent);
 
         this.searchWidget = new PlaceSearchWidget(SEARCH_FIELD, 25, 25, 200, 20, new GoogleGeocoder(), this::handleSearch);
-        this.searchWidget.setFocused(true);
+        this.searchWidget.setHasFocus(true);
 
-        this.addButton(new GuiButton(SELECT_BUTTON, this.width / 2 - 154, this.height - 28, 150, 20, I18n.format("gui.done")));
-        this.addButton(new GuiButton(CANCEL_BUTTON, this.width / 2 + 4, this.height - 28, 150, 20, I18n.format("gui.cancel")));
+        this.listeners.add(this.searchWidget);
+        this.listeners.add(this.mapWidget);
+
+        this.addButton(new ButtonWidget(SELECT_BUTTON, this.width / 2 - 154, this.height - 28, 150, 20, I18n.translate("gui.done")) {
+            @Override
+            public void onPressed(double mouseX, double mouseY) {
+                SelectEarthSpawnpointGui.this.client.openGui(SelectEarthSpawnpointGui.this.parent);
+                SlippyMapPoint marker = SelectEarthSpawnpointGui.this.markerComponent.getMarker();
+                if (marker != null) {
+                    SelectEarthSpawnpointGui.this.parent.applySpawnpoint(marker.getLatitude(), marker.getLongitude());
+                }
+            }
+        });
+        this.addButton(new ButtonWidget(CANCEL_BUTTON, this.width / 2 + 4, this.height - 28, 150, 20, I18n.translate("gui.cancel")) {
+            @Override
+            public void onPressed(double mouseX, double mouseY) {
+                SelectEarthSpawnpointGui.this.client.openGui(SelectEarthSpawnpointGui.this.parent);
+            }
+        });
     }
 
     private void handleSearch(double latitude, double longitude) {
@@ -59,67 +73,25 @@ public class SelectEarthSpawnpointGui extends GuiScreen {
     }
 
     @Override
-    protected void actionPerformed(GuiButton button) {
-        if (button.enabled) {
-            this.mc.displayGuiScreen(this.parent);
-            if (button.id == SELECT_BUTTON) {
-                SlippyMapPoint marker = this.markerComponent.getMarker();
-                if (marker != null) {
-                    this.parent.applySpawnpoint(marker.getLatitude(), marker.getLongitude());
-                }
-            }
-        }
+    public void draw(int mouseX, int mouseY, float delta) {
+        super.drawBackground();
+        this.mapWidget.draw(mouseX, mouseY, delta);
+        this.searchWidget.render(mouseX, mouseY, delta);
+        this.drawStringCentered(this.fontRenderer, I18n.translate("gui.earth.spawnpoint"), this.width / 2, 4, 0xFFFFFF);
+        super.draw(mouseX, mouseY, delta);
     }
 
     @Override
-    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-        super.drawDefaultBackground();
-        this.mapWidget.draw(mouseX, mouseY, partialTicks);
-        this.searchWidget.draw(mouseX, mouseY);
-        this.drawCenteredString(this.fontRenderer, I18n.format("gui.earth.spawnpoint"), this.width / 2, 4, 0xFFFFFF);
-        super.drawScreen(mouseX, mouseY, partialTicks);
+    public void update() {
+        super.update();
+        this.searchWidget.tick();
     }
 
     @Override
-    public void updateScreen() {
-        super.updateScreen();
-        this.searchWidget.update();
-    }
-
-    @Override
-    protected void keyTyped(char typedChar, int keyCode) throws IOException {
-        if (this.searchWidget.isFocused() && this.searchWidget.textboxKeyTyped(typedChar, keyCode)) {
-            return;
-        }
-        super.keyTyped(typedChar, keyCode);
-    }
-
-    @Override
-    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-        super.mouseClicked(mouseX, mouseY, mouseButton);
-        if (this.searchWidget.mouseClicked(mouseX, mouseY, mouseButton)) {
-            return;
-        }
-        this.mapWidget.mouseClicked(mouseX, mouseY);
-    }
-
-    @Override
-    protected void mouseClickMove(int mouseX, int mouseY, int mouseButton, long timeSinceLastClick) {
-        super.mouseClickMove(mouseX, mouseY, mouseButton, timeSinceLastClick);
-        this.mapWidget.mouseDragged(mouseX, mouseY);
-    }
-
-    @Override
-    protected void mouseReleased(int mouseX, int mouseY, int mouseButton) {
-        super.mouseReleased(mouseX, mouseY, mouseButton);
-        this.mapWidget.mouseReleased(mouseX, mouseY);
-    }
-
-    @Override
-    public void onGuiClosed() {
-        super.onGuiClosed();
+    public void onClosed() {
+        super.onClosed();
         this.mapWidget.close();
-        this.searchWidget.onGuiClosed();
-        Keyboard.enableRepeatEvents(false);
+        this.searchWidget.onClosed();
+        this.client.keyboard.enableRepeatEvents(false);
     }
 }

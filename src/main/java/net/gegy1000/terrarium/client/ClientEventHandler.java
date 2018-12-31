@@ -1,61 +1,36 @@
 package net.gegy1000.terrarium.client;
 
+import net.fabricmc.fabric.events.client.ClientTickEvent;
 import net.gegy1000.terrarium.Terrarium;
+import net.gegy1000.terrarium.api.CustomLevelGenerator;
+import net.gegy1000.terrarium.client.event.GuiChangeEvent;
 import net.gegy1000.terrarium.client.gui.RemoteDataWarningGui;
-import net.gegy1000.terrarium.server.config.TerrariumConfig;
+import net.gegy1000.terrarium.server.event.WorldEvent;
 import net.gegy1000.terrarium.server.message.TerrariumHandshakeMessage;
-import net.gegy1000.terrarium.server.world.TerrariumWorldType;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiCreateWorld;
-import net.minecraft.client.gui.GuiScreen;
+import net.gegy1000.terrarium.server.world.TerrariumGeneratorType;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldType;
-import net.minecraftforge.client.event.GuiOpenEvent;
-import net.minecraftforge.client.event.GuiScreenEvent;
-import net.minecraftforge.event.world.WorldEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-@SideOnly(Side.CLIENT)
-@Mod.EventBusSubscriber(modid = Terrarium.MODID, value = Side.CLIENT)
 public class ClientEventHandler {
-    private static final Minecraft MC = Minecraft.getMinecraft();
-    private static final int STRUCTURES_BUTTON_ID = 4;
+    private static final MinecraftClient CLIENT = MinecraftClient.getInstance();
 
     private static int gameTicks = 0;
 
     private static boolean awaitingLoad;
     private static boolean handshakeQueued;
 
-    @SubscribeEvent
-    public static void onTick(TickEvent.ClientTickEvent event) {
-        if (event.phase == TickEvent.Phase.END) {
-            gameTicks++;
+    public static void register() {
+        ClientTickEvent.CLIENT.register(ClientEventHandler::onTick);
+        GuiChangeEvent.HANDLERS.register(ClientEventHandler::onGuiChange);
 
-            if (MC.player != null && MC.player.ticksExisted > 1) {
-                if (awaitingLoad) {
-                    awaitingLoad = false;
-                    if (!TerrariumConfig.acceptedRemoteDataWarning) {
-                        MC.displayGuiScreen(new RemoteDataWarningGui(MC.currentScreen));
-                    }
-                }
-                if (handshakeQueued) {
-                    handshakeQueued = false;
-                    Terrarium.NETWORK.sendToServer(new TerrariumHandshakeMessage());
-                }
-            }
-        }
+        WorldEvent.LOAD.register(ClientEventHandler::onJoinWorld);
     }
 
-    @SubscribeEvent
-    public static void onJoinWorld(WorldEvent.Load event) {
-        World world = event.getWorld();
-        if (world.isRemote) {
-            if (world.getWorldType() instanceof TerrariumWorldType && MC.isIntegratedServerRunning()) {
+    private static void onJoinWorld(World world) {
+        if (world.isClient) {
+            CustomLevelGenerator customGenerator = CustomLevelGenerator.unwrap(world.getGeneratorType());
+            if (customGenerator instanceof TerrariumGeneratorType && CLIENT.method_1496()) {
                 awaitingLoad = true;
             }
             if (Terrarium.serverHasMod) {
@@ -64,44 +39,28 @@ public class ClientEventHandler {
         }
     }
 
-    @SubscribeEvent
-    public static void onGuiChange(GuiOpenEvent event) {
-        GuiScreen currentScreen = MC.currentScreen;
-        if (currentScreen instanceof RemoteDataWarningGui && !((RemoteDataWarningGui) currentScreen).isComplete()) {
-            event.setCanceled(true);
-            ((RemoteDataWarningGui) currentScreen).setParent(event.getGui());
-        }
-    }
+    private static void onTick(MinecraftClient client) {
+        gameTicks++;
 
-    @SubscribeEvent
-    public static void onGuiPostInit(GuiScreenEvent.InitGuiEvent.Post event) {
-        GuiScreen currentScreen = event.getGui();
-        if (currentScreen instanceof GuiCreateWorld) {
-            GuiButton structuresButton = event.getButtonList().get(STRUCTURES_BUTTON_ID);
-            int selectedWorldIndex = ClientProxy.getSelectedWorldType((GuiCreateWorld) currentScreen);
-            WorldType worldType = WorldType.WORLD_TYPES[selectedWorldIndex];
-            if (worldType instanceof TerrariumWorldType) {
-                structuresButton.visible = false;
+        if (client.player != null && client.player.age > 1) {
+            if (awaitingLoad) {
+                awaitingLoad = false;
+                client.openGui(new RemoteDataWarningGui(client.currentGui));
+            }
+            if (handshakeQueued) {
+                handshakeQueued = false;
+                client.getNetworkHandler().sendPacket(TerrariumHandshakeMessage.createServerbound());
             }
         }
     }
 
-    @SubscribeEvent
-    public static void onGuiButton(GuiScreenEvent.ActionPerformedEvent.Post event) {
-        GuiScreen currentScreen = event.getGui();
-        if (currentScreen instanceof GuiCreateWorld && event.getButton().id == 5) {
-            GuiButton structuresButton = event.getButtonList().get(STRUCTURES_BUTTON_ID);
-            int selectedWorldIndex = ClientProxy.getSelectedWorldType((GuiCreateWorld) currentScreen);
-            WorldType worldType = WorldType.WORLD_TYPES[selectedWorldIndex];
-            if (worldType instanceof TerrariumWorldType) {
-                TerrariumWorldType terrariumWorldType = (TerrariumWorldType) worldType;
-                if (terrariumWorldType.isHidden() && !GuiScreen.isShiftKeyDown()) {
-                    ClientProxy.actionPerformed(currentScreen, event.getButton());
-                } else {
-                    structuresButton.visible = false;
-                }
-            }
+    private static Gui onGuiChange(Gui newGui) {
+        Gui currentGui = CLIENT.currentGui;
+        if (currentGui instanceof RemoteDataWarningGui && !((RemoteDataWarningGui) currentGui).isComplete()) {
+            ((RemoteDataWarningGui) currentGui).setParent(newGui);
+            return currentGui;
         }
+        return newGui;
     }
 
     public static int getGameTicks() {

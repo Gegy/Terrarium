@@ -1,21 +1,20 @@
 package net.gegy1000.terrarium.client.gui.widget;
 
 import com.google.common.collect.Lists;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.gegy1000.terrarium.client.gui.GuiRenderUtils;
-import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
-import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyValue;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.gegy1000.terrarium.server.world.customization.property.PropertyKey;
+import net.gegy1000.terrarium.server.world.customization.property.PropertyValue;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.text.TextFormat;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@SideOnly(Side.CLIENT)
-public class ToggleGuiWidget extends GuiButton implements TooltipRenderer {
+@Environment(EnvType.CLIENT)
+public class ToggleGuiWidget extends ButtonWidget implements TooltipRenderer {
     private final PropertyKey<Boolean> propertyKey;
     private final PropertyValue<Boolean> property;
 
@@ -43,12 +42,12 @@ public class ToggleGuiWidget extends GuiButton implements TooltipRenderer {
     }
 
     @Override
-    public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+    public void draw(int mouseX, int mouseY, float delta) {
         if (this.visible) {
-            super.drawButton(mc, mouseX, mouseY, partialTicks);
+            super.draw(mouseX, mouseY, delta);
 
             if (this.isSelected(mouseX, mouseY)) {
-                this.hoverTime += partialTicks;
+                this.hoverTime += delta;
             } else {
                 this.hoverTime = 0;
             }
@@ -65,10 +64,10 @@ public class ToggleGuiWidget extends GuiButton implements TooltipRenderer {
 
     private List<String> getTooltip() {
         if (this.locked) {
-            return Lists.newArrayList(TextFormatting.GRAY + I18n.format("property.terrarium.locked.name"));
+            return Lists.newArrayList(TextFormat.GRAY + I18n.translate("property.terrarium.locked.name"));
         } else {
-            String name = TextFormatting.BLUE + this.propertyKey.getLocalizedName();
-            String tooltip = TextFormatting.GRAY + this.propertyKey.getLocalizedTooltip();
+            String name = TextFormat.BLUE + this.propertyKey.getLocalizedName();
+            String tooltip = TextFormat.GRAY + this.propertyKey.getLocalizedTooltip();
             return Lists.newArrayList(name, tooltip);
         }
     }
@@ -83,17 +82,17 @@ public class ToggleGuiWidget extends GuiButton implements TooltipRenderer {
 
         this.state = state;
 
-        String stateKey = I18n.format(this.state ? "gui.yes" : "gui.no");
+        String stateKey = I18n.translate(this.state ? "gui.yes" : "gui.no");
         if (this.state) {
-            stateKey = TextFormatting.GREEN + stateKey;
+            stateKey = TextFormat.GREEN + stateKey;
         } else {
-            stateKey = TextFormatting.RED + stateKey;
+            stateKey = TextFormat.RED + stateKey;
         }
-        this.displayString = String.format("%s: %s", this.propertyKey.getLocalizedName(), stateKey);
+        this.text = String.format("%s: %s", this.propertyKey.getLocalizedName(), stateKey);
     }
 
     @Override
-    public boolean mousePressed(Minecraft mc, int mouseX, int mouseY) {
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (this.isSelected(mouseX, mouseY)) {
             if (!this.locked) {
                 this.setState(!this.state);
@@ -101,9 +100,5 @@ public class ToggleGuiWidget extends GuiButton implements TooltipRenderer {
             return true;
         }
         return false;
-    }
-
-    private boolean isSelected(int mouseX, int mouseY) {
-        return this.visible && mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
     }
 }

@@ -1,9 +1,9 @@
 package net.gegy1000.earth.client.gui.widget.map;
 
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
-@SideOnly(Side.CLIENT)
+@Environment(EnvType.CLIENT)
 public class SlippyMapTilePos {
     private final int x;
     private final int y;

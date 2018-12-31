@@ -4,16 +4,14 @@ import net.gegy1000.terrarium.client.gui.widget.CopyBoxWidget;
 import net.gegy1000.terrarium.client.preview.PreviewController;
 import net.gegy1000.terrarium.client.preview.PreviewRenderer;
 import net.gegy1000.terrarium.client.preview.WorldPreview;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.resources.I18n;
-import org.lwjgl.input.Keyboard;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.resource.language.I18n;
+import org.lwjgl.glfw.GLFW;
 
-import java.io.IOException;
-
-public class PreviewWorldGui extends GuiScreen {
+public class PreviewWorldGui extends Gui {
     private final WorldPreview preview;
-    private final GuiScreen parent;
+    private final Gui parent;
     private final String generatorSettings;
 
     private PreviewRenderer renderer;
@@ -21,80 +19,59 @@ public class PreviewWorldGui extends GuiScreen {
 
     private CopyBoxWidget settingsBox;
 
-    public PreviewWorldGui(WorldPreview preview, GuiScreen parent, String generatorSettings) {
+    public PreviewWorldGui(WorldPreview preview, Gui parent, String generatorSettings) {
         this.preview = preview;
         this.parent = parent;
         this.generatorSettings = generatorSettings;
     }
 
     @Override
-    public void initGui() {
-        this.buttonList.clear();
-        this.addButton(new GuiButton(0, 8, this.height - 30, 150, 20, I18n.format("gui.done")));
+    public void onInitialized() {
+        this.addButton(new ButtonWidget(0, 8, this.height - 30, 150, 20, I18n.translate("gui.done")) {
+            @Override
+            public void onPressed(double mouseX, double mouseY) {
+                PreviewWorldGui.this.client.openGui(PreviewWorldGui.this.parent);
+            }
+        });
 
         this.renderer = new PreviewRenderer(this, 8.0, 21.0, this.width - 16.0, this.height - 57.0);
         this.controller = new PreviewController(this.renderer, 0.4F, 1.5F);
 
         this.settingsBox = new CopyBoxWidget(8 + 150 + 8, this.height - 28, this.width - (8 * 2) - 150 - 8, 20, this.generatorSettings, this.fontRenderer);
+
+        this.listeners.add(this.controller);
+        this.listeners.add(this.settingsBox);
     }
 
     @Override
-    protected void actionPerformed(GuiButton button) {
-        this.mc.displayGuiScreen(this.parent);
-    }
-
-    @Override
-    public void updateScreen() {
-        super.updateScreen();
-
+    public void update() {
+        super.update();
         this.controller.update();
     }
 
     @Override
-    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-        super.mouseClicked(mouseX, mouseY, mouseButton);
+    public void draw(int mouseX, int mouseY, float delta) {
+        this.drawBackground();
 
-        this.controller.mouseClicked(mouseX, mouseY, mouseButton);
-        this.settingsBox.mouseClicked(mouseX, mouseY);
-    }
+        String title = I18n.translate("options.terrarium.preview_world_title.name");
+        this.drawStringCentered(this.fontRenderer, title, this.width / 2, 4, 0xFFFFFF);
 
-    @Override
-    protected void mouseReleased(int mouseX, int mouseY, int mouseButton) {
-        super.mouseReleased(mouseX, mouseY, mouseButton);
-
-        this.controller.mouseReleased(mouseX, mouseY, mouseButton);
-    }
-
-    @Override
-    protected void mouseClickMove(int mouseX, int mouseY, int mouseButton, long timeSinceLastClick) {
-        super.mouseClickMove(mouseX, mouseY, mouseButton, timeSinceLastClick);
-
-        this.controller.mouseDragged(mouseX, mouseY, mouseButton);
-    }
-
-    @Override
-    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-        this.controller.updateMouse(mouseX, mouseY);
-
-        this.drawDefaultBackground();
-
-        String title = I18n.format("options.terrarium.preview_world_title.name");
-        this.drawCenteredString(this.fontRenderer, title, this.width / 2, 4, 0xFFFFFF);
-
-        float zoom = this.controller.getZoom(partialTicks);
-        float rotationX = this.controller.getRotationX(partialTicks);
-        float rotationY = this.controller.getRotationY(partialTicks);
+        float zoom = this.controller.getZoom(delta);
+        float rotationX = this.controller.getRotationX(delta);
+        float rotationY = this.controller.getRotationY(delta);
         this.renderer.render(this.preview, zoom, rotationX, rotationY);
 
         this.settingsBox.draw(mouseX, mouseY);
 
-        super.drawScreen(mouseX, mouseY, partialTicks);
+        super.draw(mouseX, mouseY, delta);
     }
 
     @Override
-    protected void keyTyped(char typedChar, int keyCode) {
-        if (keyCode == Keyboard.KEY_ESCAPE) {
-            this.mc.displayGuiScreen(this.parent);
+    public boolean keyPressed(int keyCode, int scancode, int mods) {
+        if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+            this.client.openGui(this.parent);
+            return true;
         }
+        return false;
     }
 }

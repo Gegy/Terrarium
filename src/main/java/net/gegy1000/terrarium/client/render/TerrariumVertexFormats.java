@@ -1,18 +1,18 @@
 package net.gegy1000.terrarium.client.render;
 
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.render.VertexFormat;
+import net.minecraft.client.render.VertexFormats;
 
-@SideOnly(Side.CLIENT)
+@Environment(EnvType.CLIENT)
 public class TerrariumVertexFormats {
     public static final VertexFormat POSITION_COLOR_NORMAL = new VertexFormat();
 
     static {
-        POSITION_COLOR_NORMAL.addElement(DefaultVertexFormats.POSITION_3F);
-        POSITION_COLOR_NORMAL.addElement(DefaultVertexFormats.COLOR_4UB);
-        POSITION_COLOR_NORMAL.addElement(DefaultVertexFormats.NORMAL_3B);
-        POSITION_COLOR_NORMAL.addElement(DefaultVertexFormats.PADDING_1B);
+        POSITION_COLOR_NORMAL.add(VertexFormats.POSITION_ELEMENT);
+        POSITION_COLOR_NORMAL.add(VertexFormats.COLOR_ELEMENT);
+        POSITION_COLOR_NORMAL.add(VertexFormats.NORMAL_ELEMENT);
+        POSITION_COLOR_NORMAL.add(VertexFormats.PADDING_ELEMENT);
     }
 }

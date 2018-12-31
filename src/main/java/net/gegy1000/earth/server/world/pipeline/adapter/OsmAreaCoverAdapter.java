@@ -2,18 +2,18 @@ package net.gegy1000.earth.server.world.pipeline.adapter;
 
 import com.vividsolutions.jts.geom.MultiPolygon;
 import de.topobyte.osm4j.core.model.iface.OsmEntity;
-import net.gegy1000.earth.server.world.cover.EarthCoverTypes;
+import net.gegy1000.earth.server.world.cover.EarthCoverBiomes;
 import net.gegy1000.earth.server.world.pipeline.source.osm.OsmDataParser;
 import net.gegy1000.earth.server.world.pipeline.source.tile.OsmTile;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
-import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.pipeline.DataView;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.RegionAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.BiomeRasterTile;
 import net.gegy1000.terrarium.server.world.rasterization.OsmShapeProducer;
 import net.gegy1000.terrarium.server.world.rasterization.RasterCanvas;
 import net.gegy1000.terrarium.server.world.region.RegionData;
+import net.minecraft.world.biome.Biome;
 
 import java.awt.Rectangle;
 import java.awt.geom.Area;
@@ -25,28 +25,28 @@ import java.util.function.Predicate;
 public class OsmAreaCoverAdapter implements RegionAdapter {
     private final CoordinateState geoCoordinateState;
     private final RegionComponentType<OsmTile> osmComponent;
-    private final RegionComponentType<CoverRasterTile> coverComponent;
+    private final RegionComponentType<BiomeRasterTile> biomeComponent;
 
     private final List<Type> polygonTypes = new ArrayList<>();
-    private final List<CoverType<?>> coverTypes = new ArrayList<>();
+    private final List<Biome> biomes = new ArrayList<>();
 
-    public OsmAreaCoverAdapter(CoordinateState geoCoordinateState, RegionComponentType<OsmTile> osmComponent, RegionComponentType<CoverRasterTile> coverComponent) {
+    public OsmAreaCoverAdapter(CoordinateState geoCoordinateState, RegionComponentType<OsmTile> osmComponent, RegionComponentType<BiomeRasterTile> biomeComponent) {
         this.geoCoordinateState = geoCoordinateState;
         this.osmComponent = osmComponent;
-        this.coverComponent = coverComponent;
+        this.biomeComponent = biomeComponent;
 
-        this.addCoverType(EarthCoverTypes.OPEN_BROADLEAF_DECIDUOUS, this::isWoodedArea);
-        this.addCoverType(EarthCoverTypes.SHRUBLAND, this::isScrubArea);
-        this.addCoverType(EarthCoverTypes.SCREE, this::isScree);
-        this.addCoverType(EarthCoverTypes.FLOODED_GRASSLAND, this::isWetlandArea);
-        this.addCoverType(EarthCoverTypes.IRRIGATED_CROPS, this::isFarmlandArea);
-        this.addCoverType(EarthCoverTypes.FLOWER_FIELD, this::isFlowerField);
-        this.addCoverType(EarthCoverTypes.SNOW, this::isGlacierArea);
+        this.addBiome(EarthCoverBiomes.OPEN_BROADLEAF_DECIDUOUS, this::isWoodedArea);
+        this.addBiome(EarthCoverBiomes.SHRUBLAND, this::isScrubArea);
+        this.addBiome(EarthCoverBiomes.SCREE, this::isScree);
+        this.addBiome(EarthCoverBiomes.FLOODED_GRASSLAND, this::isWetlandArea);
+        this.addBiome(EarthCoverBiomes.IRRIGATED_CROPS, this::isFarmlandArea);
+        this.addBiome(EarthCoverBiomes.FLOWER_FIELD, this::isFlowerField);
+        this.addBiome(EarthCoverBiomes.SNOW, this::isGlacierArea);
     }
 
-    private void addCoverType(CoverType<?> coverType, Predicate<OsmEntity> filter) {
+    private void addBiome(Biome biome, Predicate<OsmEntity> filter) {
         this.polygonTypes.add(new Type(this.polygonTypes.size(), filter));
-        this.coverTypes.add(coverType);
+        this.biomes.add(biome);
     }
 
     private boolean isFarmlandArea(OsmEntity entity) {
@@ -88,7 +88,7 @@ public class OsmAreaCoverAdapter implements RegionAdapter {
     @Override
     public void adapt(RegionData data, int x, int z, int width, int height) {
         OsmTile osmTile = data.getOrExcept(this.osmComponent);
-        CoverRasterTile coverTile = data.getOrExcept(this.coverComponent);
+        BiomeRasterTile biomeTile = data.getOrExcept(this.biomeComponent);
 
         Collection<Result> polygons = this.collectPolygons(new DataView(x, z, width, height), osmTile);
 
@@ -111,8 +111,8 @@ public class OsmAreaCoverAdapter implements RegionAdapter {
                 for (int localX = 0; localX < width; localX++) {
                     int value = canvas.getData(localX, localZ);
                     if (value != 0) {
-                        CoverType<?> coverType = this.coverTypes.get(value - 1);
-                        coverTile.set(localX, localZ, coverType);
+                        Biome biome = this.biomes.get(value - 1);
+                        biomeTile.set(localX, localZ, biome);
                     }
                 }
             }

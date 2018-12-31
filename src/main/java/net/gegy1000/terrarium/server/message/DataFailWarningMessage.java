@@ -1,36 +1,34 @@
 package net.gegy1000.terrarium.server.message;
 
-import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.fabric.networking.CustomPayloadPacketRegistry;
 import net.gegy1000.terrarium.Terrarium;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.gegy1000.terrarium.client.toast.DataFailToast;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.packet.CustomPayloadClientPacket;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.PacketByteBuf;
 
-public class DataFailWarningMessage implements IMessage {
-    private int failCount;
+public class DataFailWarningMessage {
+    private static final Identifier IDENTIFIER = new Identifier(Terrarium.MODID, "fail_warn");
 
-    public DataFailWarningMessage() {
+    public static void registerTo(CustomPayloadPacketRegistry registry) {
+        registry.register(IDENTIFIER, (ctx, buf) -> {
+            if (ctx.getPacketEnvironment() == EnvType.CLIENT) {
+                int failCount = buf.readUnsignedShort();
+                ctx.getTaskQueue().execute(() -> displayFailToast(failCount));
+            }
+        });
     }
 
-    public DataFailWarningMessage(int failCount) {
-        this.failCount = failCount;
+    private static void displayFailToast(int failCount) {
+        MinecraftClient.getInstance().getToastManager().add(new DataFailToast(failCount));
     }
 
-    @Override
-    public void fromBytes(ByteBuf buf) {
-        this.failCount = buf.readUnsignedShort();
-    }
-
-    @Override
-    public void toBytes(ByteBuf buf) {
-        buf.writeShort(this.failCount & 0xFFFF);
-    }
-
-    public static class Handler implements IMessageHandler<DataFailWarningMessage, IMessage> {
-        @Override
-        public IMessage onMessage(DataFailWarningMessage message, MessageContext ctx) {
-            Terrarium.PROXY.scheduleTask(ctx, () -> Terrarium.PROXY.openWarnToast(message.failCount));
-            return null;
-        }
+    public static CustomPayloadClientPacket create(int failCount) {
+        PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+        buf.writeShort(failCount & 0xFFFF);
+        return new CustomPayloadClientPacket(IDENTIFIER, buf);
     }
 }

@@ -1,84 +1,60 @@
 package net.gegy1000.terrarium.client.gui.widget;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import com.mojang.blaze3d.platform.GlStateManager;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.EntryListWidget;
 
-import java.util.ArrayList;
 import java.util.List;
 
-@SideOnly(Side.CLIENT)
-public class CustomizationList extends ListGuiWidget {
-    private final Minecraft client;
-    private final GuiScreen parent;
-
-    private final List<SingleWidgetEntry> entries = new ArrayList<>();
-
-    public CustomizationList(Minecraft client, GuiScreen parent, int x, int y, int width, int height, List<GuiButton> widgets) {
+@Environment(EnvType.CLIENT)
+public class CustomizationList extends ListGuiWidget<CustomizationList.SingleWidgetEntry> {
+    public CustomizationList(MinecraftClient client, Gui parent, int x, int y, int width, int height, List<ButtonWidget> widgets) {
         super(client, parent.width, parent.height, x, y, width, height, 20);
-        this.client = client;
-        this.parent = parent;
 
-        for (GuiButton widget : widgets) {
-            this.entries.add(new SingleWidgetEntry(widget));
+        for (ButtonWidget widget : widgets) {
+            this.addEntry(new SingleWidgetEntry(widget));
         }
     }
 
     @Override
-    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-        super.drawScreen(mouseX, mouseY, partialTicks);
-
-        if (this.isMouseYWithinSlotBounds(mouseY)) {
-            for (SingleWidgetEntry element : this.entries) {
-                element.drawTooltip(mouseX, mouseY);
+    public void draw(int mouseX, int mouseY, float partialTicks) {
+        super.draw(mouseX, mouseY, partialTicks);
+        if (this.isSelected(mouseX, mouseY)) {
+            for (SingleWidgetEntry entry : this.getEntries()) {
+                entry.drawTooltip(mouseX, mouseY);
             }
         }
     }
 
-    @Override
-    public IGuiListEntry getListEntry(int index) {
-        return this.entries.get(index);
-    }
+    public class SingleWidgetEntry extends EntryListWidget.Entry<SingleWidgetEntry> {
+        private final ButtonWidget button;
 
-    @Override
-    protected int getSize() {
-        return this.entries.size();
-    }
-
-    public class SingleWidgetEntry implements IGuiListEntry {
-        private final GuiButton button;
-
-        public SingleWidgetEntry(GuiButton button) {
+        public SingleWidgetEntry(ButtonWidget button) {
             this.button = button;
         }
 
         @Override
-        public void updatePosition(int slotIndex, int x, int y, float partialTicks) {
-        }
-
-        @Override
-        public void drawEntry(int slotIndex, int x, int y, int listWidth, int slotHeight, int mouseX, int mouseY, boolean isSelected, float partialTicks) {
+        public void draw(int var1, int var2, int mouseX, int mouseY, boolean selected, float delta) {
             if (this.button != null) {
-                this.button.width = listWidth - 10;
-                this.button.x = CustomizationList.this.left + 5;
-                this.button.y = y;
-                this.button.drawButton(CustomizationList.this.client, mouseX, mouseY, partialTicks);
+                this.button.setWidth(CustomizationList.this.width - 10);
+                this.button.x = CustomizationList.this.x1 + 5;
+                this.button.y = this.getY();
+                this.button.draw(mouseX, mouseY, delta);
             }
         }
 
         @Override
-        public boolean mousePressed(int slotIndex, int mouseX, int mouseY, int mouseEvent, int relativeX, int relativeY) {
-            return this.button != null && this.button.mousePressed(CustomizationList.this.client, mouseX, mouseY);
+        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            return this.button != null && this.button.mouseClicked(mouseX, mouseY, button);
         }
 
         @Override
-        public void mouseReleased(int slotIndex, int mouseX, int mouseY, int mouseEvent, int relativeX, int relativeY) {
-            if (this.button != null) {
-                this.button.mouseReleased(mouseX, mouseY);
-            }
+        public boolean mouseReleased(double mouseX, double mouseY, int button) {
+            return this.button != null && this.button.mouseReleased(mouseX, mouseY, button);
         }
 
         public void drawTooltip(int mouseX, int mouseY) {
@@ -88,13 +64,11 @@ public class CustomizationList extends ListGuiWidget {
         }
 
         private void drawTooltip(TooltipRenderer renderer, int mouseX, int mouseY) {
-            int width = CustomizationList.this.parent.width;
-            int height = CustomizationList.this.parent.height;
             renderer.renderTooltip(mouseX, mouseY);
 
             GlStateManager.disableLighting();
-            GlStateManager.disableDepth();
-            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+            GlStateManager.disableDepthTest();
+            GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
 }

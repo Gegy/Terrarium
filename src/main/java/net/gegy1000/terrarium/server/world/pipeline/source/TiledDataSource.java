@@ -2,7 +2,7 @@ package net.gegy1000.terrarium.server.world.pipeline.source;
 
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.TiledDataAccess;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -12,11 +12,11 @@ import java.io.InputStream;
 public abstract class TiledDataSource<T extends TiledDataAccess> {
     public static final File GLOBAL_CACHE_ROOT = new File(".", "mods/terrarium/cache/");
 
-    protected final ResourceLocation identifier;
+    protected final Identifier identifier;
     protected final File cacheRoot;
     protected final Coordinate tileSize;
 
-    protected TiledDataSource(ResourceLocation identifier, File cacheRoot, Coordinate tileSize) {
+    protected TiledDataSource(Identifier identifier, File cacheRoot, Coordinate tileSize) {
         this.identifier = identifier;
         this.cacheRoot = cacheRoot;
         this.tileSize = tileSize;
@@ -25,7 +25,7 @@ public abstract class TiledDataSource<T extends TiledDataAccess> {
         }
     }
 
-    public ResourceLocation getIdentifier() {
+    public Identifier getIdentifier() {
         return this.identifier;
     }
 

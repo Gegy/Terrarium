@@ -4,17 +4,14 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.gegy1000.earth.server.world.pipeline.source.EarthRemoteData;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.client.texture.NativeImage;
 import org.apache.commons.io.IOUtils;
 
-import javax.imageio.ImageIO;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -30,7 +27,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
-@SideOnly(Side.CLIENT)
+@Environment(EnvType.CLIENT)
 public class SlippyMapTileCache {
     private static final File CACHE_ROOT = new File(TiledDataSource.GLOBAL_CACHE_ROOT, "carto");
     private static final int CACHE_SIZE = 256;
@@ -86,9 +83,9 @@ public class SlippyMapTileCache {
         }
     }
 
-    private BufferedImage downloadImage(SlippyMapTilePos pos) {
+    private NativeImage downloadImage(SlippyMapTilePos pos) {
         try (InputStream input = this.getStream(pos)) {
-            return ImageIO.read(input);
+            return NativeImage.fromInputStream(input);
         } catch (IOException e) {
             Terrarium.LOGGER.error("Failed to load map tile {}", e.getClass().getName());
         }
@@ -127,18 +124,22 @@ public class SlippyMapTileCache {
         }
     }
 
-    private BufferedImage createErrorImage() {
-        BufferedImage result = new BufferedImage(SlippyMap.TILE_SIZE, SlippyMap.TILE_SIZE, BufferedImage.TYPE_INT_RGB);
-        Graphics2D graphics = result.createGraphics();
-        FontMetrics metrics = graphics.getFontMetrics();
+    private NativeImage createErrorImage() {
+        // TODO
+//        BufferedImage result = new BufferedImage(SlippyMap.TILE_SIZE, SlippyMap.TILE_SIZE, BufferedImage.TYPE_INT_RGB);
+//        Graphics2D graphics = result.createGraphics();
+//        FontMetrics metrics = graphics.getFontMetrics();
+//
+//        String message = "Failed to download tile";
+//
+//        int x = (SlippyMap.TILE_SIZE - metrics.stringWidth(message)) / 2;
+//        int y = (SlippyMap.TILE_SIZE - metrics.getHeight()) / 2;
+//        graphics.drawString(message, x, y);
+//
+//        graphics.dispose();
 
-        String message = "Failed to download tile";
-
-        int x = (SlippyMap.TILE_SIZE - metrics.stringWidth(message)) / 2;
-        int y = (SlippyMap.TILE_SIZE - metrics.getHeight()) / 2;
-        graphics.drawString(message, x, y);
-
-        graphics.dispose();
+        NativeImage result = new NativeImage(NativeImage.Format.RGB, SlippyMap.TILE_SIZE, SlippyMap.TILE_SIZE, false);
+        result.fillRGBA(0, 0, result.getWidth(), result.getHeight(), 0xA0A0A0);
 
         return result;
     }

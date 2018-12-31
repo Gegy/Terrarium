@@ -1,6 +1,5 @@
 package net.gegy1000.terrarium.server.util;
 
-import javax.vecmath.Point2i;
 import java.util.Iterator;
 
 public class SpiralIterator implements Iterator<Point2i> {

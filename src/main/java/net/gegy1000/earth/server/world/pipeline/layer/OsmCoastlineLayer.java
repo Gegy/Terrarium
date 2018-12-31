@@ -19,7 +19,6 @@ import net.minecraft.util.math.MathHelper;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 // TODO: If osm data is available, fill the area with land/water first
@@ -172,9 +171,9 @@ public class OsmCoastlineLayer extends OsmWaterLayer {
     protected void floodCoastMap(DataView view, ShortRasterTile resultTile) {
         Object2ShortMap<FloodFill.Point> floodSources = this.createFloodSources(view, resultTile);
 
-        for (Map.Entry<FloodFill.Point, Short> entry : floodSources.entrySet()) {
+        for (Object2ShortMap.Entry<FloodFill.Point> entry : floodSources.object2ShortEntrySet()) {
             FloodFill.Point point = entry.getKey();
-            int floodType = entry.getValue();
+            int floodType = entry.getShortValue();
             short sampled = resultTile.getShort(point.getX(), point.getY());
             if ((sampled & TYPE_MASK) != BANK) {
                 FillVisitor visitor = new FillVisitor((short) floodType);

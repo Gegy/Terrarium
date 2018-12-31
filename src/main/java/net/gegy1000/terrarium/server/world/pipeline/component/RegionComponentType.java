@@ -2,16 +2,16 @@ package net.gegy1000.terrarium.server.world.pipeline.component;
 
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.util.ArrayUtils;
-import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.cover.TerrariumCoverTypes;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.BiomeRasterTile;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.TiledDataAccess;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.UnsignedByteRasterTile;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.Biomes;
 
 public abstract class RegionComponentType<T extends TiledDataAccess> {
-    public static final RegionComponentType<ShortRasterTile> HEIGHT = new RegionComponentType<ShortRasterTile>(new ResourceLocation(Terrarium.MODID, "height"), ShortRasterTile.class) {
+    public static final RegionComponentType<ShortRasterTile> HEIGHT = new RegionComponentType<ShortRasterTile>(new Identifier(Terrarium.MODID, "height"), ShortRasterTile.class) {
         @Override
         public ShortRasterTile createDefaultData(int width, int height) {
             short[] data = new short[width * height];
@@ -19,7 +19,7 @@ public abstract class RegionComponentType<T extends TiledDataAccess> {
         }
     };
 
-    public static final RegionComponentType<UnsignedByteRasterTile> SLOPE = new RegionComponentType<UnsignedByteRasterTile>(new ResourceLocation(Terrarium.MODID, "slope"), UnsignedByteRasterTile.class) {
+    public static final RegionComponentType<UnsignedByteRasterTile> SLOPE = new RegionComponentType<UnsignedByteRasterTile>(new Identifier(Terrarium.MODID, "slope"), UnsignedByteRasterTile.class) {
         @Override
         public UnsignedByteRasterTile createDefaultData(int width, int height) {
             byte[] data = new byte[width * height];
@@ -27,18 +27,18 @@ public abstract class RegionComponentType<T extends TiledDataAccess> {
         }
     };
 
-    public static final RegionComponentType<CoverRasterTile> COVER = new RegionComponentType<CoverRasterTile>(new ResourceLocation(Terrarium.MODID, "cover"), CoverRasterTile.class) {
+    public static final RegionComponentType<BiomeRasterTile> BIOME = new RegionComponentType<BiomeRasterTile>(new Identifier(Terrarium.MODID, "biome"), BiomeRasterTile.class) {
         @Override
-        public CoverRasterTile createDefaultData(int width, int height) {
-            CoverType[] data = ArrayUtils.defaulted(new CoverType[width * height], TerrariumCoverTypes.PLACEHOLDER);
-            return new CoverRasterTile(data, width, height);
+        public BiomeRasterTile createDefaultData(int width, int height) {
+            Biome[] data = ArrayUtils.defaulted(new Biome[width * height], Biomes.DEFAULT);
+            return new BiomeRasterTile(data, width, height);
         }
     };
 
-    private final ResourceLocation identifier;
+    private final Identifier identifier;
     private final Class<T> type;
 
-    public RegionComponentType(ResourceLocation identifier, Class<T> type) {
+    public RegionComponentType(Identifier identifier, Class<T> type) {
         this.identifier = identifier;
         this.type = type;
     }
@@ -49,7 +49,7 @@ public abstract class RegionComponentType<T extends TiledDataAccess> {
         return this.type;
     }
 
-    public ResourceLocation getIdentifier() {
+    public Identifier getIdentifier() {
         return this.identifier;
     }
 

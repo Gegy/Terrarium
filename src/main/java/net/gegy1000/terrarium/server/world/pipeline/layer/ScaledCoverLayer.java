@@ -4,19 +4,19 @@ import net.gegy1000.terrarium.server.util.Voronoi;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.pipeline.DataLayer;
 import net.gegy1000.terrarium.server.world.pipeline.DataView;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.BiomeRasterTile;
 
-public class ScaledCoverLayer extends BufferedScalingLayer<CoverRasterTile> {
+public class ScaledCoverLayer extends BufferedScalingLayer<BiomeRasterTile> {
     private final Voronoi voronoi;
 
-    public ScaledCoverLayer(DataLayer<CoverRasterTile> parent, CoordinateState coordinateState) {
+    public ScaledCoverLayer(DataLayer<BiomeRasterTile> parent, CoordinateState coordinateState) {
         super(parent, 1, 1, coordinateState);
         this.voronoi = new Voronoi(Voronoi.DistanceFunc.EUCLIDEAN, 0.9, 4, 1000);
     }
 
     @Override
-    protected CoverRasterTile apply(CoverRasterTile parent, DataView view, DataView parentView, double scaleFactorX, double scaleFactorY, double originOffsetX, double originOffsetY) {
-        CoverRasterTile result = new CoverRasterTile(view);
+    protected BiomeRasterTile apply(BiomeRasterTile parent, DataView view, DataView parentView, double scaleFactorX, double scaleFactorY, double originOffsetX, double originOffsetY) {
+        BiomeRasterTile result = new BiomeRasterTile(view);
         this.voronoi.scale(parent.getData(), result.getData(), parentView, view, scaleFactorX, scaleFactorY, originOffsetX, originOffsetY);
         return result;
     }

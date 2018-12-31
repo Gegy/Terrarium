@@ -1,13 +1,12 @@
 package net.gegy1000.earth.client.gui.widget.map.component;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.gegy1000.earth.client.gui.widget.map.SlippyMap;
-import net.minecraft.client.gui.ScaledResolution;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
-@SideOnly(Side.CLIENT)
+@Environment(EnvType.CLIENT)
 public interface MapComponent {
-    void onDrawMap(SlippyMap map, ScaledResolution resolution, int mouseX, int mouseY);
+    void onDrawMap(SlippyMap map, double mouseX, double mouseY);
 
-    void onMapClicked(SlippyMap map, ScaledResolution resolution, int mouseX, int mouseY);
+    void onMapClicked(SlippyMap map, double mouseX, double mouseY);
 }

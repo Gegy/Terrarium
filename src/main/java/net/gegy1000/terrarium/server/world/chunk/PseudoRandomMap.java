@@ -15,7 +15,7 @@ public class PseudoRandomMap {
     }
 
     public PseudoRandomMap(World world, long localSeed) {
-        this(world.getWorldInfo().getSeed(), localSeed);
+        this(world.getLevelProperties().getSeed(), localSeed);
     }
 
     public void initPosSeed(int x, int z) {

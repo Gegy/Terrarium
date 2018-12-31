@@ -1,15 +1,15 @@
 package net.gegy1000.earth.server.world.pipeline.source;
 
 import net.gegy1000.earth.TerrariumEarth;
-import net.gegy1000.earth.server.world.cover.EarthCoverTypes;
+import net.gegy1000.earth.server.world.cover.EarthCoverBiomes;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
-import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
 import net.gegy1000.terrarium.server.world.pipeline.source.SourceResult;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
-import net.minecraft.util.ResourceLocation;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.BiomeRasterTile;
+import net.minecraft.util.Identifier;
+import net.minecraft.world.biome.Biome;
 import org.tukaani.xz.SingleXZInputStream;
 
 import java.io.DataInputStream;
@@ -18,12 +18,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-public class GlobcoverSource extends TiledDataSource<CoverRasterTile> {
+public class GlobcoverSource extends TiledDataSource<BiomeRasterTile> {
     public static final int TILE_SIZE = 2560;
-    private static final CoverRasterTile DEFAULT_TILE = new CoverRasterTile(TILE_SIZE, TILE_SIZE);
+    private static final BiomeRasterTile DEFAULT_TILE = new BiomeRasterTile(TILE_SIZE, TILE_SIZE);
 
     public GlobcoverSource(CoordinateState coordinateState, String cacheRoot) {
-        super(new ResourceLocation(TerrariumEarth.MODID, "globcover"), new File(GLOBAL_CACHE_ROOT, cacheRoot), new Coordinate(coordinateState, TILE_SIZE, TILE_SIZE));
+        super(new Identifier(TerrariumEarth.MODID, "globcover"), new File(GLOBAL_CACHE_ROOT, cacheRoot), new Coordinate(coordinateState, TILE_SIZE, TILE_SIZE));
     }
 
     @Override
@@ -48,12 +48,12 @@ public class GlobcoverSource extends TiledDataSource<CoverRasterTile> {
     }
 
     @Override
-    public CoverRasterTile getDefaultTile() {
+    public BiomeRasterTile getDefaultTile() {
         return DEFAULT_TILE;
     }
 
     @Override
-    public SourceResult<CoverRasterTile> parseStream(DataTilePos pos, InputStream stream) throws IOException {
+    public SourceResult<BiomeRasterTile> parseStream(DataTilePos pos, InputStream stream) throws IOException {
         try (DataInputStream input = new DataInputStream(stream)) {
             int width = input.readUnsignedShort();
             int height = input.readUnsignedShort();
@@ -68,12 +68,12 @@ public class GlobcoverSource extends TiledDataSource<CoverRasterTile> {
             byte[] buffer = new byte[width * height];
             input.readFully(buffer);
 
-            CoverType[] cover = new CoverType[buffer.length];
+            Biome[] biomes = new Biome[buffer.length];
             for (int i = 0; i < buffer.length; i++) {
-                cover[i] = EarthCoverTypes.Glob.get(buffer[i]).getCoverType();
+                biomes[i] = EarthCoverBiomes.Glob.get(buffer[i]).getBiome();
             }
 
-            return SourceResult.success(new CoverRasterTile(cover, offsetX, offsetZ, width, height));
+            return SourceResult.success(new BiomeRasterTile(biomes, offsetX, offsetZ, width, height));
         }
     }
 }

@@ -1,22 +1,22 @@
 package net.gegy1000.earth.client.gui.widget.map;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.ScaledResolution;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
-@SideOnly(Side.CLIENT)
+@Environment(EnvType.CLIENT)
 public class SlippyMap {
     public static final int TILE_SIZE = 256;
 
     public static final int MIN_ZOOM = 3;
     public static final int MAX_ZOOM = 15;
 
-    private static final Minecraft MC = Minecraft.getMinecraft();
+    private static final MinecraftClient CLIENT = MinecraftClient.getInstance();
 
     private final int width;
     private final int height;
@@ -28,7 +28,7 @@ public class SlippyMap {
         this.width = width;
         this.height = height;
 
-        int scale = new ScaledResolution(MC).getScaleFactor();
+        double scale = CLIENT.window.method_4495();
         this.camera = new Camera(new SlippyMapPoint(0.0, 0.0), width * scale, height * scale);
     }
 
@@ -37,33 +37,32 @@ public class SlippyMap {
     }
 
     public void focus(double latitude, double longitude, int zoom) {
-        int scale = new ScaledResolution(MC).getScaleFactor();
+        double scale = CLIENT.window.method_4495();
         SlippyMapPoint point = new SlippyMapPoint(latitude, longitude);
         this.camera.focus(point.getX(zoom), point.getY(zoom), zoom, this.width * scale, this.height * scale);
     }
 
-    public void zoom(int step, int pivotX, int pivotY) {
-        int scale = new ScaledResolution(MC).getScaleFactor();
+    public void zoom(int step, double pivotX, double pivotY) {
+        double scale = CLIENT.window.method_4495();
         this.camera.zoom(step, pivotX * scale, pivotY * scale);
     }
 
-    public void drag(int deltaX, int deltaY) {
-        int scale = new ScaledResolution(MC).getScaleFactor();
+    public void drag(double deltaX, double deltaY) {
+        double scale = CLIENT.window.method_4495();
         this.camera.pan(deltaX * scale, deltaY * scale);
     }
 
-    public List<SlippyMapTilePos> getVisibleTiles() {
-        ScaledResolution resolution = new ScaledResolution(MC);
-        int scale = resolution.getScaleFactor();
+    public Collection<SlippyMapTilePos> getVisibleTiles() {
+        double scale = CLIENT.window.method_4495();
 
-        int cameraX = this.camera.getX();
-        int cameraY = this.camera.getY();
+        double cameraX = this.camera.getX();
+        double cameraY = this.camera.getY();
         int cameraZoom = this.camera.getZoom();
 
-        int minX = MathHelper.floor((double) cameraX / TILE_SIZE);
-        int minY = MathHelper.floor((double) cameraY / TILE_SIZE);
-        int maxX = MathHelper.ceil((double) (cameraX + this.width * scale) / TILE_SIZE);
-        int maxY = MathHelper.ceil((double) (cameraY + this.height * scale) / TILE_SIZE);
+        int minX = MathHelper.floor(cameraX / TILE_SIZE);
+        int minY = MathHelper.floor(cameraY / TILE_SIZE);
+        int maxX = MathHelper.ceil((cameraX + this.width * scale) / TILE_SIZE);
+        int maxY = MathHelper.ceil((cameraY + this.height * scale) / TILE_SIZE);
 
         List<SlippyMapTilePos> visibleTiles = new ArrayList<>();
         for (int tileY = minY; tileY < maxY; tileY++) {
@@ -75,7 +74,7 @@ public class SlippyMap {
         return visibleTiles;
     }
 
-    public List<SlippyMapTilePos> cascadeTiles(List<SlippyMapTilePos> tiles) {
+    public List<SlippyMapTilePos> cascadeTiles(Collection<SlippyMapTilePos> tiles) {
         List<SlippyMapTilePos> cascaded = new ArrayList<>(tiles.size());
         for (SlippyMapTilePos pos : tiles) {
             this.cascadeTile(cascaded, pos);
@@ -96,11 +95,11 @@ public class SlippyMap {
         }
     }
 
-    public int getCameraX() {
+    public double getCameraX() {
         return this.camera.getX();
     }
 
-    public int getCameraY() {
+    public double getCameraY() {
         return this.camera.getY();
     }
 
@@ -116,22 +115,22 @@ public class SlippyMap {
         private SlippyMapPoint origin;
         private int zoom = MIN_ZOOM;
 
-        private Camera(SlippyMapPoint origin, int width, int height) {
+        private Camera(SlippyMapPoint origin, double width, double height) {
             this.origin = origin.translate(-width / 2, -height / 2, this.zoom);
         }
 
-        public void focus(int x, int y, int zoom, int width, int height) {
+        public void focus(double x, double y, int zoom, double width, double height) {
             this.origin = new SlippyMapPoint(x, y, zoom).translate(-width / 2, -height / 2, zoom);
             this.zoom = zoom;
         }
 
-        public void pan(int deltaX, int deltaY) {
+        public void pan(double deltaX, double deltaY) {
             this.origin = this.origin.translate(deltaX, deltaY, this.zoom);
         }
 
-        public void zoom(int steps, int pivotX, int pivotY) {
-            int originX = this.origin.getX(this.zoom);
-            int originY = this.origin.getY(this.zoom);
+        public void zoom(int steps, double pivotX, double pivotY) {
+            double originX = this.origin.getX(this.zoom);
+            double originY = this.origin.getY(this.zoom);
 
             this.zoom += steps;
 
@@ -141,22 +140,22 @@ public class SlippyMap {
                 this.zoom = MAX_ZOOM;
             } else {
                 if (steps > 0) {
-                    int newX = originX * 2 + pivotX;
-                    int newY = originY * 2 + pivotY;
+                    double newX = originX * 2 + pivotX;
+                    double newY = originY * 2 + pivotY;
                     this.origin = new SlippyMapPoint(newX, newY, this.zoom);
                 } else if (steps < 0) {
-                    int newX = (originX - pivotX) / 2;
-                    int newY = (originY - pivotY) / 2;
+                    double newX = (originX - pivotX) / 2;
+                    double newY = (originY - pivotY) / 2;
                     this.origin = new SlippyMapPoint(newX, newY, this.zoom);
                 }
             }
         }
 
-        public int getX() {
+        public double getX() {
             return this.origin.getX(this.zoom);
         }
 
-        public int getY() {
+        public double getY() {
             return this.origin.getY(this.zoom);
         }
 

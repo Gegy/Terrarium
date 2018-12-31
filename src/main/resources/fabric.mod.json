@@ -1,0 +1,16 @@
+{
+  "id": "terrarium",
+  "name": "Terrarium",
+  "version": "0.1.0-dev",
+  "side": "universal",
+  "initializers": [
+    "net.gegy1000.terrarium.Terrarium",
+    "net.gegy1000.terrarium.TerrariumClient",
+    "net.gegy1000.earth.TerrariumEarth",
+    "net.gegy1000.earth.TerrariumEarthClient"
+  ],
+  "mixins": {
+    "client": "terrarium.client.json",
+    "common": "terrarium.common.json"
+  }
+}

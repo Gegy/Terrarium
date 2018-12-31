@@ -1,71 +1,52 @@
 package net.gegy1000.terrarium.server;
 
-import net.gegy1000.terrarium.Terrarium;
-import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
-import net.gegy1000.terrarium.server.capability.TerrariumExternalCapProvider;
-import net.gegy1000.terrarium.server.world.TerrariumWorldType;
-import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
-import net.minecraft.entity.player.EntityPlayer;
+import com.mojang.datafixers.Dynamic;
+import net.gegy1000.terrarium.api.CustomLevelGenerator;
+import net.gegy1000.terrarium.server.event.PlayerEvent;
+import net.gegy1000.terrarium.server.event.WorldEvent;
+import net.gegy1000.terrarium.server.world.TerrariumGeneratorType;
+import net.gegy1000.terrarium.server.world.customization.GenerationSettings;
+import net.gegy1000.terrarium.server.world.customization.PropertyPrototype;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.event.world.WorldEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-@Mod.EventBusSubscriber(modid = Terrarium.MODID)
 public class TerrariumHandshakeTracker {
-    private static final Set<EntityPlayer> FRIENDLY_PLAYERS = new HashSet<>();
+    private static final Set<PlayerEntity> FRIENDLY_PLAYERS = new HashSet<>();
     private static GenerationSettings providedSettings;
 
-    public static void markPlayerFriendly(EntityPlayer player) {
+    public static void register() {
+        WorldEvent.UNLOAD.register(world -> FRIENDLY_PLAYERS.removeAll(world.players));
+        PlayerEvent.DISCONNECT.register(FRIENDLY_PLAYERS::remove);
+    }
+
+    public static void markPlayerFriendly(PlayerEntity player) {
         FRIENDLY_PLAYERS.add(player);
     }
 
-    public static void provideSettings(World world, GenerationSettings settings) {
-        providedSettings = settings;
-
-        if (world == null || !(world.getWorldType() instanceof TerrariumWorldType)) {
+    public static <T> void provideSettings(World world, Dynamic<T> settings) {
+        CustomLevelGenerator generatorType = CustomLevelGenerator.unwrap(world.getGeneratorType());
+        if (!(generatorType instanceof TerrariumGeneratorType)) {
             return;
         }
 
-        TerrariumExternalCapProvider external = world.getCapability(TerrariumCapabilities.externalProviderCapability, null);
-        if (external == null) {
-            return;
-        }
-
-        TerrariumWorldType worldType = (TerrariumWorldType) world.getWorldType();
-        Collection<ICapabilityProvider> capabilities = worldType.createCapabilities(world, providedSettings);
-        for (ICapabilityProvider provider : capabilities) {
-            external.addExternal(provider);
-        }
+        PropertyPrototype prototype = ((TerrariumGeneratorType) generatorType).buildPropertyPrototype();
+        providedSettings = GenerationSettings.deserialize(prototype, settings);
     }
 
-    public static boolean isFriendly(EntityPlayer player) {
+    public static boolean isFriendly(PlayerEntity player) {
         return FRIENDLY_PLAYERS.contains(player);
     }
 
-    public static Set<EntityPlayer> getFriends() {
+    public static Set<PlayerEntity> getFriends() {
         return new HashSet<>(FRIENDLY_PLAYERS);
     }
 
     @Nullable
     public static GenerationSettings getProvidedSettings() {
         return providedSettings;
-    }
-
-    @SubscribeEvent
-    public static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
-        FRIENDLY_PLAYERS.remove(event.player);
-    }
-
-    @SubscribeEvent
-    public static void onWorldUnload(WorldEvent.Unload event) {
-        FRIENDLY_PLAYERS.removeAll(event.getWorld().playerEntities);
     }
 }

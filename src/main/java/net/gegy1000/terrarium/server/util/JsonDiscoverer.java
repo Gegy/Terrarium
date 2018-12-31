@@ -5,19 +5,18 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import net.gegy1000.terrarium.Terrarium;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.fml.common.ModContainer;
-import net.minecraftforge.fml.common.ProgressManager;
+import net.minecraft.resource.Resource;
+import net.minecraft.resource.ResourceManager;
+import net.minecraft.util.Identifier;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.io.InputStreamReader;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.function.Function;
 
 public class JsonDiscoverer<T> {
@@ -31,53 +30,40 @@ public class JsonDiscoverer<T> {
         this(root -> new Gson().fromJson(root, parseType));
     }
 
-    public List<Result<T>> discoverFiles(String dataRoot, String basePath) {
-        List<ModContainer> activeModList = Loader.instance().getActiveModList();
-        ProgressManager.ProgressBar bar = ProgressManager.push("Discovering files", activeModList.size());
+    public Collection<Result<T>> discoverFiles(ResourceManager resourceManager, String basePath) {
+        Collection<Result<T>> discoveries = new ArrayList<>();
 
-        List<Result<T>> discoveries = new ArrayList<>();
-
-        for (ModContainer mod : activeModList) {
-            bar.step(mod.getName());
-
-            String base = dataRoot + "/" + mod.getModId() + "/" + basePath;
-            CraftingHelper.findFiles(mod, base, root -> true, (root, path) -> {
-                Path relativePath = root.relativize(path);
-                if (!"json".equals(FilenameUtils.getExtension(path.toString())) || relativePath.getNameCount() > 1) {
-                    return true;
-                }
-
-                String name = FilenameUtils.removeExtension(relativePath.toString()).replaceAll("\\\\", "/");
-                ResourceLocation key = new ResourceLocation(mod.getModId(), name);
-
-                try (BufferedReader reader = Files.newBufferedReader(path)) {
-                    JsonObject rootObject = new JsonParser().parse(reader).getAsJsonObject();
-                    discoveries.add(new Result<>(key, this.parser.apply(rootObject)));
-                } catch (JsonParseException e) {
-                    Terrarium.LOGGER.error("Couldn't parse JSON for {}", key, e);
-                } catch (IOException e) {
-                    Terrarium.LOGGER.error("Couldn't read JSON {} from {}", key, path, e);
-                }
-
-                return true;
-            }, false, false);
+        for (Identifier location : resourceManager.findResources(basePath, s -> s.endsWith(".json"))) {
+            try (Resource resource = resourceManager.getResource(location)) {
+                Identifier key = this.resolveKey(basePath, location);
+                BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getInputStream()));
+                JsonObject rootObject = new JsonParser().parse(reader).getAsJsonObject();
+                discoveries.add(new Result<>(key, this.parser.apply(rootObject)));
+            } catch (JsonParseException e) {
+                Terrarium.LOGGER.error("Couldn't parse JSON for {}", location, e);
+            } catch (IOException e) {
+                Terrarium.LOGGER.error("Couldn't read JSON for {}", location, e);
+            }
         }
-
-        ProgressManager.pop(bar);
 
         return discoveries;
     }
 
+    private Identifier resolveKey(String basePath, Identifier location) {
+        Path path = Paths.get(basePath).relativize(Paths.get(location.getPath()));
+        return new Identifier(location.getNamespace(), FilenameUtils.removeExtension(path.toString()));
+    }
+
     public static class Result<T> {
-        private final ResourceLocation key;
+        private final Identifier key;
         private final T parsed;
 
-        private Result(ResourceLocation key, T parsed) {
+        private Result(Identifier key, T parsed) {
             this.key = key;
             this.parsed = parsed;
         }
 
-        public ResourceLocation getKey() {
+        public Identifier getKey() {
             return this.key;
         }
 

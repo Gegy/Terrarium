@@ -1,37 +1,8 @@
 package net.gegy1000.earth.client.render;
 
-import net.gegy1000.earth.TerrariumEarth;
-import net.gegy1000.earth.server.capability.EarthCapability;
-import net.gegy1000.earth.server.config.TerrariumEarthConfig;
-import net.gegy1000.terrarium.server.util.FlipFlopTimer;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.renderer.GLAllocation;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.OpenGlHelper;
-import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.tileentity.TileEntityBeaconRenderer;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.world.World;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.event.world.WorldEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.glu.GLU;
-import org.lwjgl.util.glu.Sphere;
-
-import javax.annotation.Nullable;
-
-@SideOnly(Side.CLIENT)
-@Mod.EventBusSubscriber(modid = TerrariumEarth.MODID, value = Side.CLIENT)
+// TODO: Panorama
+/*@Environment(EnvType.CLIENT)
+@Mod.EventBusSubscriber(modid = TerrariumEarth.MODID, value = EnvType.CLIENT)
 public class PanoramaHandler {
     private static final String ATTRIBUTION = "\u00a9 Google Street View";
 
@@ -50,7 +21,7 @@ public class PanoramaHandler {
     public static void onRenderGui(RenderGameOverlayEvent.Post event) {
         if (event.getType() == RenderGameOverlayEvent.ElementType.ALL) {
             if (state != null) {
-                state.renderGui(Minecraft.getMinecraft(), event.getResolution(), event.getPartialTicks());
+                state.renderGui(MinecraftClient.getInstance(), event.getResolution(), event.getPartialTicks());
             }
         }
     }
@@ -58,8 +29,8 @@ public class PanoramaHandler {
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event) {
         if (state != null && event.phase == TickEvent.Phase.START) {
-            Minecraft mc = Minecraft.getMinecraft();
-            EntityPlayer player = mc.player;
+            MinecraftClient client = MinecraftClient.getInstance();
+            PlayerEntity player = client.player;
             if (player != null) {
                 State newState = state.update(player.world, player);
                 if (newState != state) {
@@ -73,20 +44,20 @@ public class PanoramaHandler {
     @SubscribeEvent
     public static void onRenderWorldLast(RenderWorldLastEvent event) {
         if (state != null) {
-            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+            GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             GlStateManager.enableFog();
             GlStateManager.enableCull();
-            GlStateManager.enableTexture2D();
-            RenderHelper.enableStandardItemLighting();
+            GlStateManager.enableTexture();
+            GuiLighting.enableForItems();
 
             OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240, 240);
 
-            World world = Minecraft.getMinecraft().world;
+            World world = MinecraftClient.getInstance().world;
 
             float partialTicks = event.getPartialTicks();
-            double ticks = world.getTotalWorldTime() + partialTicks;
+            double ticks = world.getTime() + partialTicks;
 
-            state.renderWorld(Minecraft.getMinecraft(), partialTicks, (float) (ticks - lastTicks));
+            state.renderWorld(MinecraftClient.getInstance(), partialTicks, (float) (ticks - lastTicks));
 
             lastTicks = ticks;
 
@@ -102,17 +73,17 @@ public class PanoramaHandler {
     }
 
     public interface State {
-        default void renderWorld(Minecraft mc, float partialTicks, float deltaTicks) {
+        default void renderWorld(MinecraftClient client, float partialTicks, float deltaTicks) {
         }
 
-        default void renderGui(Minecraft mc, ScaledResolution resolution, float partialTicks) {
+        default void renderGui(MinecraftClient client, float partialTicks) {
         }
 
         default void delete() {
         }
 
         @Nullable
-        default State update(World world, EntityPlayer player) {
+        default State update(World world, PlayerEntity player) {
             return this;
         }
     }
@@ -129,38 +100,38 @@ public class PanoramaHandler {
         }
 
         @Override
-        public void renderWorld(Minecraft mc, float partialTicks, float deltaTicks) {
-            EarthCapability earthData = mc.world.getCapability(TerrariumEarth.earthCap, null);
-            if (earthData != null) {
-                double blockX = earthData.getX(this.latitude, this.longitude);
-                double blockZ = earthData.getZ(this.latitude, this.longitude);
+        public void renderWorld(MinecraftClient client, float partialTicks, float deltaTicks) {
+            EarthGeneratorConfig config = EarthGeneratorConfig.get(client.world);
+            if (config != null) {
+                double blockX = config.getX(this.latitude, this.longitude);
+                double blockZ = config.getZ(this.latitude, this.longitude);
 
-                double deltaX = blockX - TileEntityRendererDispatcher.staticPlayerX;
-                double deltaZ = blockZ - TileEntityRendererDispatcher.staticPlayerZ;
-                double y = -TileEntityRendererDispatcher.staticPlayerY;
-                long worldTime = mc.world.getTotalWorldTime();
+                double deltaX = blockX - BlockEntityRenderDispatcher.renderOffsetX;
+                double deltaZ = blockZ - BlockEntityRenderDispatcher.renderOffsetZ;
+                double y = -BlockEntityRenderDispatcher.renderOffsetY;
+                long worldTime = client.world.getTime();
 
                 GlStateManager.disableFog();
 
-                mc.getTextureManager().bindTexture(TileEntityBeaconRenderer.TEXTURE_BEACON_BEAM);
-                TileEntityBeaconRenderer.renderBeamSegment(deltaX, y, deltaZ, partialTicks, 1.0F, worldTime, 0, 256, new float[] { 0.2F, 1.0F, 0.2F });
+                client.getTextureManager().bindTexture(BeaconBlockEntityRenderer.TEXTURE_BEACON_BEAM);
+                BeaconBlockEntityRenderer.method_3545(deltaX, y, deltaZ, partialTicks, 1.0F, worldTime, 0, 256, new float[] { 0.2F, 1.0F, 0.2F });
 
                 GlStateManager.enableFog();
-                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+                GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             }
         }
 
         @Nullable
         @Override
-        public State update(World world, EntityPlayer player) {
-            EarthCapability earthData = world.getCapability(TerrariumEarth.earthCap, null);
-            if (earthData != null) {
-                double blockX = earthData.getX(this.latitude, this.longitude);
-                double blockZ = earthData.getZ(this.latitude, this.longitude);
-                double deltaX = player.posX - blockX;
-                double deltaZ = player.posZ - blockZ;
+        public State update(World world, PlayerEntity player) {
+            EarthGeneratorConfig config = EarthGeneratorConfig.get(world);
+            if (config != null) {
+                double blockX = config.getX(this.latitude, this.longitude);
+                double blockZ = config.getZ(this.latitude, this.longitude);
+                double deltaX = player.x - blockX;
+                double deltaZ = player.z - blockZ;
                 if (deltaX * deltaX + deltaZ * deltaZ < IMMERSION_MIN_DISTANCE) {
-                    return new Immersed(this.id, blockX, player.posY, blockZ);
+                    return new Immersed(this.id, blockX, player.y, blockZ);
                 }
                 return this;
             }
@@ -200,64 +171,64 @@ public class PanoramaHandler {
         }
 
         @Override
-        public void renderWorld(Minecraft mc, float partialTicks, float deltaTicks) {
-            GlStateManager.cullFace(GlStateManager.CullFace.FRONT);
+        public void renderWorld(MinecraftClient client, float partialTicks, float deltaTicks) {
+            GlStateManager.cullFace(GlStateManager.FaceSides.FRONT);
             GlStateManager.disableLighting();
-            GlStateManager.disableDepth();
+            GlStateManager.disableDepthTest();
             GlStateManager.enableBlend();
 
             GlStateManager.pushMatrix();
 
             this.updateAnimation(deltaTicks);
 
-            double renderX = this.originX - TileEntityRendererDispatcher.staticPlayerX;
-            double renderY = this.originY - TileEntityRendererDispatcher.staticPlayerY;
-            double renderZ = this.originZ - TileEntityRendererDispatcher.staticPlayerZ;
+            double renderX = this.originX - BlockEntityRenderDispatcher.renderOffsetX;
+            double renderY = this.originY - BlockEntityRenderDispatcher.renderOffsetY;
+            double renderZ = this.originZ - BlockEntityRenderDispatcher.renderOffsetZ;
 
-            GlStateManager.translate(renderX, renderY, renderZ);
+            GlStateManager.translated(renderX, renderY, renderZ);
 
-            GlStateManager.scale(1.0F, 1.0F, -1.0F);
-            GlStateManager.rotate(-90.0F, 0.0F, 1.0F, 0.0F);
-            GlStateManager.rotate(-90.0F, 1.0F, 0.0F, 0.0F);
+            GlStateManager.scalef(1.0F, 1.0F, -1.0F);
+            GlStateManager.rotatef(-90.0F, 0.0F, 1.0F, 0.0F);
+            GlStateManager.rotatef(-90.0F, 1.0F, 0.0F, 0.0F);
 
             float fadeValue = this.fadeAnimation.getValue();
 
             float scale = (1.0F - fadeValue) * 1.4F + 1.0F;
-            GlStateManager.scale(scale, scale, scale);
-            GlStateManager.color(1.0F, 1.0F, 1.0F, fadeValue);
+            GlStateManager.scalef(scale, scale, scale);
+            GlStateManager.color4f(1.0F, 1.0F, 1.0F, fadeValue);
 
             if (this.sphereDisplayList == Integer.MIN_VALUE) {
-                this.sphereDisplayList = GLAllocation.generateDisplayLists(1);
-                GlStateManager.glNewList(this.sphereDisplayList, GL11.GL_COMPILE);
+                this.sphereDisplayList = GlAllocationUtils.genLists(1);
+                GlStateManager.newList(this.sphereDisplayList, GL11.GL_COMPILE);
                 this.sphere.draw(SPHERE_RADIUS, SPHERE_RESOLUTION, SPHERE_RESOLUTION);
-                GlStateManager.glEndList();
+                GlStateManager.endList();
             }
 
             if (this.basePanorama != null) {
-                mc.getTextureManager().bindTexture(this.basePanorama.getTextureLocation());
+                client.getTextureManager().bindTexture(this.basePanorama.getTextureLocation());
                 GlStateManager.callList(this.sphereDisplayList);
             }
 
             if (this.panorama != null) {
-                mc.getTextureManager().bindTexture(this.panorama.getTextureLocation());
+                client.getTextureManager().bindTexture(this.panorama.getTextureLocation());
                 GlStateManager.callList(this.sphereDisplayList);
             }
 
             GlStateManager.popMatrix();
 
-            GlStateManager.cullFace(GlStateManager.CullFace.BACK);
+            GlStateManager.cullFace(GlStateManager.FaceSides.BACK);
             GlStateManager.disableBlend();
-            GlStateManager.enableDepth();
+            GlStateManager.enableDepthTest();
             GlStateManager.enableLighting();
         }
 
         @Override
-        public void renderGui(Minecraft mc, ScaledResolution resolution, float partialTicks) {
-            FontRenderer fontRenderer = mc.fontRenderer;
+        public void renderGui(MinecraftClient client, float partialTicks) {
+            FontRenderer fontRenderer = client.fontRenderer;
             int attributionMaxX = fontRenderer.getStringWidth(ATTRIBUTION) + 10;
-            int attributionOriginY = resolution.getScaledHeight() - fontRenderer.FONT_HEIGHT - 4;
-            Gui.drawRect(0, attributionOriginY, attributionMaxX, resolution.getScaledHeight(), 0xC0101010);
-            fontRenderer.drawString(ATTRIBUTION, 5, attributionOriginY + fontRenderer.FONT_HEIGHT / 2 - 1, 0xFFFFFFFF);
+            int attributionOriginY = client.window.getScaledHeight() - fontRenderer.fontHeight - 4;
+            Gui.drawRect(0, attributionOriginY, attributionMaxX, client.window.getScaledHeight(), 0xC0101010);
+            fontRenderer.draw(ATTRIBUTION, 5, attributionOriginY + fontRenderer.fontHeight / 2.0F - 1, 0xFFFFFFFF);
         }
 
         private void updateAnimation(float deltaTicks) {
@@ -270,7 +241,7 @@ public class PanoramaHandler {
 
             if (this.fadeAnimation.isRight() && this.loadedBase) {
                 if (this.panorama == null) {
-                    this.panorama = new Panorama(this.id, "full", TerrariumEarthConfig.streetViewZoom);
+                    this.panorama = new Panorama(this.id, "full", 2);
                 } else if (this.basePanorama != null && this.panorama.hasLoaded()) {
                     this.basePanorama.delete();
                     this.basePanorama = null;
@@ -280,12 +251,12 @@ public class PanoramaHandler {
 
         @Nullable
         @Override
-        public State update(World world, EntityPlayer player) {
+        public State update(World world, PlayerEntity player) {
             if (this.fadeAnimation.isRight()) {
                 double maxDistance = SPHERE_RADIUS / 5.0;
-                double deltaX = player.posX - this.originX;
-                double deltaY = player.posY - this.originY;
-                double deltaZ = player.posZ - this.originZ;
+                double deltaX = player.x - this.originX;
+                double deltaY = player.y - this.originY;
+                double deltaZ = player.z - this.originZ;
                 if (deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ > maxDistance * maxDistance) {
                     this.fadeAnimation.setTarget(FlipFlopTimer.Side.LEFT);
                 }
@@ -306,7 +277,7 @@ public class PanoramaHandler {
             if (this.panorama != null) {
                 this.panorama.delete();
             }
-            GlStateManager.glDeleteLists(this.sphereDisplayList, 1);
+            GlAllocationUtils.deleteSingletonList(this.sphereDisplayList);
         }
     }
-}
+}*/

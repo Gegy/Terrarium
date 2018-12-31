@@ -1,64 +1,64 @@
 package net.gegy1000.earth.client;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.gegy1000.terrarium.Terrarium;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.server.integrated.IntegratedServer;
-import net.minecraft.world.WorldSettings;
-import net.minecraft.world.WorldType;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.world.level.LevelGeneratorType;
+import net.minecraft.world.level.LevelInfo;
 
 import java.lang.reflect.Field;
 
-@SideOnly(Side.CLIENT)
+@Environment(EnvType.CLIENT)
 public class LoadingWorldGetter {
-    private static final Minecraft MC = Minecraft.getMinecraft();
+    private static final MinecraftClient CLIENT = MinecraftClient.getInstance();
 
-    private static Field worldSettingsField;
+    private static Field levelInfoField;
 
-    public static void onPostInit() {
+    static {
         try {
-            LoadingWorldGetter.worldSettingsField = LoadingWorldGetter.reflectWorldSettingsField();
+            LoadingWorldGetter.levelInfoField = LoadingWorldGetter.reflectLevelInfoField();
         } catch (Exception e) {
-            Terrarium.LOGGER.warn("Failed to reflect world settings field", e);
+            Terrarium.LOGGER.warn("Failed to reflect level info field", e);
         }
     }
 
-    private static Field reflectWorldSettingsField() throws Exception {
-        Field worldSettingsField = null;
+    private static Field reflectLevelInfoField() throws Exception {
+        Field levelInfoField = null;
         for (Field field : IntegratedServer.class.getDeclaredFields()) {
-            if (field.getType() == WorldSettings.class) {
+            if (field.getType() == LevelInfo.class) {
                 field.setAccessible(true);
-                worldSettingsField = field;
+                levelInfoField = field;
             }
         }
-        if (worldSettingsField == null) {
-            throw new ReflectiveOperationException("Could not find WorldSettings field");
+        if (levelInfoField == null) {
+            throw new ReflectiveOperationException("Could not find LevelInfo field");
         }
-        return worldSettingsField;
+        return levelInfoField;
     }
 
-    public static WorldType getLoadingWorldType() {
-        WorldType worldType = null;
-        if (MC.world != null) {
-            worldType = MC.world.getWorldType();
-        } else if (MC.getIntegratedServer() != null) {
+    public static LevelGeneratorType getLoadingWorldType() {
+        LevelGeneratorType generatorType = null;
+        if (CLIENT.world != null) {
+            generatorType = CLIENT.world.getGeneratorType();
+        } else if (CLIENT.getServer() != null) {
             try {
-                WorldSettings serverSettings = LoadingWorldGetter.getServerSettings(MC.getIntegratedServer());
+                LevelInfo serverSettings = LoadingWorldGetter.getServerSettings(CLIENT.getServer());
                 if (serverSettings != null) {
-                    worldType = serverSettings.getTerrainType();
+                    generatorType = serverSettings.getGeneratorType();
                 }
             } catch (Exception e) {
                 Terrarium.LOGGER.warn("Failed to get IntegratedServer world settings", e);
             }
         }
-        return worldType;
+        return generatorType;
     }
 
-    private static WorldSettings getServerSettings(IntegratedServer server) throws Exception {
-        if (LoadingWorldGetter.worldSettingsField == null) {
+    private static LevelInfo getServerSettings(IntegratedServer server) throws Exception {
+        if (LoadingWorldGetter.levelInfoField == null) {
             return null;
         }
-        return (WorldSettings) LoadingWorldGetter.worldSettingsField.get(server);
+        return (LevelInfo) LoadingWorldGetter.levelInfoField.get(server);
     }
 }

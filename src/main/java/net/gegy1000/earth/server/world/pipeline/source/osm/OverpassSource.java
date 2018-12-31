@@ -8,7 +8,7 @@ import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
 import net.gegy1000.terrarium.server.world.pipeline.source.SourceResult;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 import org.apache.commons.io.IOUtils;
 
 import java.io.BufferedInputStream;
@@ -41,8 +41,8 @@ public class OverpassSource extends TiledDataSource<OsmTile> {
 
     private String query;
 
-    public OverpassSource(CoordinateState latLngCoordinate, double tileSize, String cacheRoot, ResourceLocation queryLocation, int queryVersion) {
-        super(new ResourceLocation(TerrariumEarth.MODID, "overpass"), new File(GLOBAL_CACHE_ROOT, cacheRoot), new Coordinate(latLngCoordinate, tileSize, tileSize));
+    public OverpassSource(CoordinateState latLngCoordinate, double tileSize, String cacheRoot, Identifier queryLocation, int queryVersion) {
+        super(new Identifier(TerrariumEarth.MODID, "overpass"), new File(GLOBAL_CACHE_ROOT, cacheRoot), new Coordinate(latLngCoordinate, tileSize, tileSize));
         this.queryVersion = queryVersion;
 
         this.shouldSample = Math.abs(this.tileSize.getBlockX()) > 512 || Math.abs(this.tileSize.getBlockZ()) > 512;

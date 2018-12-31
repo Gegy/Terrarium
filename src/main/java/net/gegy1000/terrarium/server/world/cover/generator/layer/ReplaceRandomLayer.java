@@ -1,40 +1,24 @@
 package net.gegy1000.terrarium.server.world.cover.generator.layer;
 
-import net.minecraft.world.gen.layer.GenLayer;
-import net.minecraft.world.gen.layer.IntCache;
+import net.minecraft.class_3630;
+import net.minecraft.class_3661;
 
-public class ReplaceRandomLayer extends GenLayer {
+public class ReplaceRandomLayer implements class_3661 {
     private final int replace;
     private final int replacement;
     private final int chance;
 
-    public ReplaceRandomLayer(int replace, int replacement, int chance, long seed, GenLayer parent) {
-        super(seed);
+    public ReplaceRandomLayer(int replace, int replacement, int chance) {
         this.replace = replace;
         this.replacement = replacement;
         this.chance = chance;
-        this.parent = parent;
     }
 
     @Override
-    public int[] getInts(int areaX, int areaY, int areaWidth, int areaHeight) {
-        int[] parent = this.parent.getInts(areaX, areaY, areaWidth, areaHeight);
-        int[] result = IntCache.getIntCache(areaWidth * areaHeight);
-        for (int z = 0; z < areaHeight; z++) {
-            for (int x = 0; x < areaWidth; x++) {
-                int index = x + z * areaWidth;
-                int sample = parent[index];
-                result[index] = this.shouldReplace(areaX + x, areaY + z, sample) ? this.replacement : sample;
-            }
+    public int method_15866(class_3630 context, int value) {
+        if (value == this.replace && context.nextInt(this.chance) == 0) {
+            return this.replacement;
         }
-        return result;
-    }
-
-    private boolean shouldReplace(long x, long z, int sample) {
-        if (sample == this.replace) {
-            this.initChunkSeed(x, z);
-            return this.nextInt(this.chance) == 0;
-        }
-        return false;
+        return value;
     }
 }

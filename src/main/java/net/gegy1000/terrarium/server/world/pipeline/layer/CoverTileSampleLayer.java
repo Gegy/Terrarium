@@ -2,20 +2,20 @@ package net.gegy1000.terrarium.server.world.pipeline.layer;
 
 import net.gegy1000.terrarium.server.world.pipeline.DataView;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.BiomeRasterTile;
 
-public class CoverTileSampleLayer extends TiledDataSampleLayer<CoverRasterTile> {
-    public CoverTileSampleLayer(TiledDataSource<? extends CoverRasterTile> source) {
+public class CoverTileSampleLayer extends TiledDataSampleLayer<BiomeRasterTile> {
+    public CoverTileSampleLayer(TiledDataSource<? extends BiomeRasterTile> source) {
         super(source);
     }
 
     @Override
-    protected CoverRasterTile createTile(DataView view) {
-        return new CoverRasterTile(view);
+    protected BiomeRasterTile createTile(DataView view) {
+        return new BiomeRasterTile(view);
     }
 
     @Override
-    protected void copy(CoverRasterTile origin, CoverRasterTile target, int originX, int originY, int targetX, int targetY) {
+    protected void copy(BiomeRasterTile origin, BiomeRasterTile target, int originX, int originY, int targetX, int targetY) {
         target.set(targetX, targetY, origin.get(originX, originY));
     }
 }

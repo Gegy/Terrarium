@@ -1,8 +1,8 @@
 package net.gegy1000.terrarium.server.world.cover;
 
 import net.gegy1000.earth.server.world.cover.LatitudinalZone;
-import net.minecraft.init.Biomes;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.Biomes;
 
 import java.util.function.Function;
 
@@ -10,7 +10,7 @@ public class CoverBiomeSelectors {
     public static final Function<LatitudinalZone, Biome> BROADLEAF_FOREST_SELECTOR = zone -> {
         switch (zone) {
             case FRIGID:
-                return Biomes.COLD_TAIGA;
+                return Biomes.SNOWY_TAIGA;
             case TEMPERATE:
             case SUBTROPICS:
                 return Biomes.FOREST;
@@ -23,7 +23,7 @@ public class CoverBiomeSelectors {
     public static final Function<LatitudinalZone, Biome> NEEDLELEAF_FOREST_SELECTOR = zone -> {
         switch (zone) {
             case FRIGID:
-                return Biomes.COLD_TAIGA;
+                return Biomes.SNOWY_TAIGA;
             case TEMPERATE:
                 return Biomes.TAIGA;
             case SUBTROPICS:
@@ -39,11 +39,11 @@ public class CoverBiomeSelectors {
                 return Biomes.TAIGA;
             case SUBTROPICS:
             case TEMPERATE:
-                return Biomes.SWAMPLAND;
+                return Biomes.SWAMP;
             case TROPICS:
                 return Biomes.JUNGLE;
         }
-        return Biomes.SWAMPLAND;
+        return Biomes.SWAMP;
     };
 
     public static final Function<LatitudinalZone, Biome> SALINE_FLOODED_SELECTOR = zone -> {
@@ -52,17 +52,17 @@ public class CoverBiomeSelectors {
                 return Biomes.TAIGA;
             case SUBTROPICS:
             case TEMPERATE:
-                return Biomes.SWAMPLAND;
+                return Biomes.SWAMP;
             case TROPICS:
                 return Biomes.FOREST;
         }
-        return Biomes.SWAMPLAND;
+        return Biomes.SWAMP;
     };
 
     public static final Function<LatitudinalZone, Biome> FOREST_SHRUBLAND_SELECTOR = zone -> {
         switch (zone) {
             case FRIGID:
-                return Biomes.ICE_PLAINS;
+                return Biomes.SNOWY_TUNDRA;
             case SUBTROPICS:
             case TEMPERATE:
                 return Biomes.PLAINS;

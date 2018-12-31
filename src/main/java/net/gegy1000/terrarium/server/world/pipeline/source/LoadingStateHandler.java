@@ -1,21 +1,19 @@
 package net.gegy1000.terrarium.server.world.pipeline.source;
 
-import net.gegy1000.earth.TerrariumEarth;
-import net.gegy1000.terrarium.Terrarium;
+import net.fabricmc.fabric.events.TickEvent;
+import net.fabricmc.fabric.events.client.ClientTickEvent;
 import net.gegy1000.terrarium.server.TerrariumHandshakeTracker;
+import net.gegy1000.terrarium.server.event.WorldEvent;
 import net.gegy1000.terrarium.server.message.DataFailWarningMessage;
 import net.gegy1000.terrarium.server.message.LoadingStateMessage;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraftforge.event.world.WorldEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraft.client.network.packet.CustomPayloadClientPacket;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 import java.util.LinkedList;
 
-@Mod.EventBusSubscriber(modid = TerrariumEarth.MODID)
 public class LoadingStateHandler {
     private static final LinkedList<LoadingState> CURRENT_STATE = new LinkedList<>();
 
@@ -34,8 +32,17 @@ public class LoadingStateHandler {
     private static LoadingState lastBroadcastState;
     private static long lastStateBroadcastTime;
 
-    @SubscribeEvent
-    public static void onWorldLoad(WorldEvent.Load event) {
+    public static void register() {
+        TickEvent.SERVER.register(server -> onTick());
+        WorldEvent.LOAD.register(LoadingStateHandler::onWorldLoad);
+        WorldEvent.UNLOAD.register(LoadingStateHandler::onWorldUnload);
+    }
+
+    public static void registerClient() {
+        ClientTickEvent.CLIENT.register(client -> onTick());
+    }
+
+    private static void onWorldLoad(World world) {
         CURRENT_STATE.clear();
         remoteState = null;
         lastBroadcastState = null;
@@ -45,15 +52,13 @@ public class LoadingStateHandler {
         lastFailNotificationTime = time;
     }
 
-    @SubscribeEvent
-    public static void onWorldUnload(WorldEvent.Unload event) {
+    private static void onWorldUnload(World world) {
         CURRENT_STATE.clear();
         remoteState = null;
         lastBroadcastState = null;
     }
 
-    @SubscribeEvent
-    public static void onTick(TickEvent event) {
+    private static void onTick() {
         long time = System.currentTimeMillis();
 
         if (time - lastFailNotificationTime > FAIL_NOTIFICATION_INTERVAL) {
@@ -77,18 +82,16 @@ public class LoadingStateHandler {
     }
 
     private static void broadcastFailNotification(int failCount) {
-        DataFailWarningMessage message = new DataFailWarningMessage(failCount);
-        for (EntityPlayer player : TerrariumHandshakeTracker.getFriends()) {
-            Terrarium.NETWORK.sendTo(message, (EntityPlayerMP) player);
+        CustomPayloadClientPacket packet = DataFailWarningMessage.create(failCount);
+        for (PlayerEntity player : TerrariumHandshakeTracker.getFriends()) {
+            ((ServerPlayerEntity) player).networkHandler.sendPacket(packet);
         }
     }
 
     private static void broadcastCurrentState(LoadingState state) {
-        if (Terrarium.PROXY.hasServer()) {
-            LoadingStateMessage message = new LoadingStateMessage(state);
-            for (EntityPlayer player : TerrariumHandshakeTracker.getFriends()) {
-                Terrarium.NETWORK.sendTo(message, (EntityPlayerMP) player);
-            }
+        CustomPayloadClientPacket packet = LoadingStateMessage.create(state);
+        for (PlayerEntity player : TerrariumHandshakeTracker.getFriends()) {
+            ((ServerPlayerEntity) player).networkHandler.sendPacket(packet);
         }
         lastBroadcastState = state;
     }

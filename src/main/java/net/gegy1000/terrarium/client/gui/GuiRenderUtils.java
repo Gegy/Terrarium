@@ -1,37 +1,37 @@
 package net.gegy1000.terrarium.client.gui;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraftforge.fml.client.config.GuiUtils;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import com.mojang.blaze3d.platform.GlStateManager;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Gui;
 import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 
-@SideOnly(Side.CLIENT)
+@Environment(EnvType.CLIENT)
 public class GuiRenderUtils {
-    private static final Minecraft MC = Minecraft.getMinecraft();
+    private static final MinecraftClient CLIENT = MinecraftClient.getInstance();
 
-    public static void drawCenteredString(String text, int x, int y, int color) {
-        MC.fontRenderer.drawString(text, x - MC.fontRenderer.getStringWidth(text) / 2, y, color);
+    public static void drawStringCentered(String text, int x, int y, int color) {
+        CLIENT.fontRenderer.draw(text, x - CLIENT.fontRenderer.getStringWidth(text) / 2.0F, y, color);
     }
 
-    public static void drawTooltip(List<String> lines, int mouseX, int mouseY) {
-        ScaledResolution resolution = new ScaledResolution(MC);
-        GuiUtils.drawHoveringText(lines, mouseX, mouseY, resolution.getScaledWidth(), resolution.getScaledHeight(), 350, MC.fontRenderer);
+    public static void drawTooltip(List<String> lines, double mouseX, double mouseY) {
+        Gui currentGui = CLIENT.currentGui;
+        if (currentGui != null) {
+            currentGui.drawTooltip(lines, (int) mouseX, (int) mouseY);
+        }
 
         GlStateManager.disableLighting();
-        GlStateManager.disableDepth();
-        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.disableDepthTest();
+        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     public static void scissor(double x, double y, double width, double height) {
-        GuiScreen screen = MC.currentScreen;
+        Gui screen = CLIENT.currentGui;
         if (screen != null) {
-            double scaleFactor = new ScaledResolution(MC).getScaleFactor();
+            double scaleFactor = CLIENT.window.method_4495();
             GL11.glScissor((int) (x * scaleFactor), (int) ((screen.height - (y + height)) * scaleFactor), (int) (width * scaleFactor), (int) (height * scaleFactor));
         }
     }

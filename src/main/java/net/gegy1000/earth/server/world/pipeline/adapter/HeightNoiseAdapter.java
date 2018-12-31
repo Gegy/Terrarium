@@ -5,8 +5,8 @@ import net.gegy1000.terrarium.server.world.pipeline.adapter.RegionAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.gegy1000.terrarium.server.world.region.RegionData;
+import net.minecraft.util.math.noise.OctaveSimplexNoiseSampler;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.NoiseGeneratorOctaves;
 
 import java.util.Random;
 
@@ -14,7 +14,7 @@ public class HeightNoiseAdapter implements RegionAdapter {
     private final RegionComponentType<ShortRasterTile> heightComponent;
     private final RegionComponentType<WaterRasterTile> waterComponent;
 
-    private final NoiseGeneratorOctaves heightNoise;
+    private final OctaveSimplexNoiseSampler heightNoise;
     private final double noiseMax;
     private final double noiseScaleXZ;
     private final double noiseScaleY;
@@ -23,7 +23,8 @@ public class HeightNoiseAdapter implements RegionAdapter {
         this.heightComponent = heightComponent;
         this.waterComponent = waterComponent;
 
-        this.heightNoise = new NoiseGeneratorOctaves(new Random(world.getWorldInfo().getSeed()), octaveCount);
+        Random random = new Random(world.getLevelProperties().getSeed());
+        this.heightNoise = new OctaveSimplexNoiseSampler(random, octaveCount);
 
         double max = 0.0;
         double scale = 1.0;
@@ -43,14 +44,17 @@ public class HeightNoiseAdapter implements RegionAdapter {
         WaterRasterTile waterTile = data.getOrExcept(this.waterComponent);
 
         short[] heightBuffer = heightTile.getShortData();
-
-        double[] noise = new double[width * height];
-        this.heightNoise.generateNoiseOctaves(noise, z, x, width, height, this.noiseScaleXZ, this.noiseScaleXZ, 0.0);
-
         short[] waterBuffer = waterTile.getShortData();
-        for (int i = 0; i < noise.length; i++) {
-            if (WaterRasterTile.isLand(waterBuffer[i])) {
-                heightBuffer[i] += (noise[i] + this.noiseMax) / (this.noiseMax * 2.0) * this.noiseScaleY * 35.0;
+
+        for (int localZ = 0; localZ < height; localZ++) {
+            for (int localX = 0; localX < width; localX++) {
+                int index = localX + localZ * width;
+                if (WaterRasterTile.isLand(waterBuffer[index])) {
+                    double sampleX = (x + localX) * this.noiseScaleXZ;
+                    double sampleZ = (z + localZ) * this.noiseScaleXZ;
+                    double noise = this.heightNoise.sample(sampleX, sampleZ);
+                    heightBuffer[index] += (noise + this.noiseMax) / (this.noiseMax * 2.0) * this.noiseScaleY * 35.0;
+                }
             }
         }
     }

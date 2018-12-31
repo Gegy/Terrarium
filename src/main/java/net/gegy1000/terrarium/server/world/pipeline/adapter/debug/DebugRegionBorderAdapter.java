@@ -1,25 +1,25 @@
 package net.gegy1000.terrarium.server.world.pipeline.adapter.debug;
 
-import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.cover.TerrariumCoverTypes;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.RegionAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.BiomeRasterTile;
 import net.gegy1000.terrarium.server.world.region.GenerationRegion;
 import net.gegy1000.terrarium.server.world.region.RegionData;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.Biomes;
 
 public class DebugRegionBorderAdapter implements RegionAdapter {
-    private final RegionComponentType<CoverRasterTile> coverComponent;
+    private final RegionComponentType<BiomeRasterTile> biomeComponent;
 
-    public DebugRegionBorderAdapter(RegionComponentType<CoverRasterTile> coverComponent) {
-        this.coverComponent = coverComponent;
+    public DebugRegionBorderAdapter(RegionComponentType<BiomeRasterTile> biomeComponent) {
+        this.biomeComponent = biomeComponent;
     }
 
     @Override
     public void adapt(RegionData data, int x, int z, int width, int height) {
-        CoverRasterTile coverTile = data.getOrExcept(this.coverComponent);
+        BiomeRasterTile coverTile = data.getOrExcept(this.biomeComponent);
 
-        CoverType[] cover = coverTile.getData();
+        Biome[] biomes = coverTile.getData();
 
         int minX = GenerationRegion.BUFFER;
         int minZ = GenerationRegion.BUFFER;
@@ -28,7 +28,7 @@ public class DebugRegionBorderAdapter implements RegionAdapter {
         for (int localZ = minZ; localZ < maxZ; localZ++) {
             for (int localX = minX; localX < maxX; localX++) {
                 if (localX == minX || localX == maxX - 1 || localZ == minZ || localZ == maxZ - 1) {
-                    cover[localX + localZ * width] = TerrariumCoverTypes.DEBUG;
+                    biomes[localX + localZ * width] = Biomes.THE_END;
                 }
             }
         }

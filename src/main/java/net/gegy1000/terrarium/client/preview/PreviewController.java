@@ -1,12 +1,15 @@
 package net.gegy1000.terrarium.client.preview;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.GuiEventListener;
 import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-import org.lwjgl.input.Mouse;
 
-@SideOnly(Side.CLIENT)
-public class PreviewController {
+@Environment(EnvType.CLIENT)
+public class PreviewController implements GuiEventListener {
+    private static final MinecraftClient CLIENT = MinecraftClient.getInstance();
+
     private final PreviewRenderer renderer;
 
     private final float minZoom;
@@ -21,8 +24,6 @@ public class PreviewController {
     private float zoom;
     private float prevZoom;
 
-    private int prevMouseX;
-    private int prevMouseY;
     private boolean mouseDown;
 
     public PreviewController(PreviewRenderer renderer, float minZoom, float maxZoom) {
@@ -43,35 +44,37 @@ public class PreviewController {
         }
     }
 
-    public void mouseClicked(int mouseX, int mouseY, int mouseButton) {
-        if (mouseButton == 0 && this.isSelected(mouseX, mouseY)) {
-            this.mouseDown = true;
-        }
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        return button == 0 && this.isSelected(mouseX, mouseY);
     }
 
-    public void mouseReleased(int mouseX, int mouseY, int mouseButton) {
-        if (mouseButton == 0) {
-            this.mouseDown = false;
-        }
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+        this.rotationY += deltaX * 0.5F;
+        this.rotationX += deltaY * 0.5F;
+
+        this.rotationX = MathHelper.clamp(this.rotationX, 10.0F, 50.0F);
+
+        return true;
     }
 
-    public void mouseDragged(int mouseX, int mouseY, int mouseButton) {
-        if (this.mouseDown) {
-            this.rotationY += (mouseX - this.prevMouseX) * 0.5F;
-            this.rotationX += (mouseY - this.prevMouseY) * 0.5F;
-
-            this.rotationX = MathHelper.clamp(this.rotationX, 10.0F, 50.0F);
-        }
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        this.mouseDown = false;
+        return true;
     }
 
-    public void updateMouse(int mouseX, int mouseY) {
-        this.prevMouseX = mouseX;
-        this.prevMouseY = mouseY;
-
-        int scroll = Mouse.getDWheel();
+    @Override
+    public boolean mouseScrolled(double scrollAmount) {
+        double mouseX = CLIENT.mouse.getX();
+        double mouseY = CLIENT.mouse.getY();
         if (this.isSelected(mouseX, mouseY)) {
-            this.zoom = MathHelper.clamp(this.zoom + scroll / 1600.0F, this.minZoom, this.maxZoom);
+            float zoomAmount = (float) (scrollAmount / 1600.0);
+            this.zoom = MathHelper.clamp(this.zoom + zoomAmount, this.minZoom, this.maxZoom);
+            return true;
         }
+        return false;
     }
 
     public float getRotationX(float partialTicks) {
@@ -86,7 +89,7 @@ public class PreviewController {
         return this.prevZoom + (this.zoom - this.prevZoom) * partialTicks;
     }
 
-    private boolean isSelected(int mouseX, int mouseY) {
+    private boolean isSelected(double mouseX, double mouseY) {
         return mouseX >= this.renderer.getX() && mouseY >= this.renderer.getY()
                 && mouseX <= this.renderer.getX() + this.renderer.getWidth()
                 && mouseY <= this.renderer.getY() + this.renderer.getHeight();

@@ -1,13 +1,14 @@
 package net.gegy1000.earth.client.gui.widget.map;
 
+import net.gegy1000.earth.api.WidgetArea;
 import net.gegy1000.terrarium.Terrarium;
+import net.gegy1000.terrarium.server.util.Point2d;
 import net.gegy1000.terrarium.server.world.pipeline.source.Geocoder;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.GuiTextField;
-import org.lwjgl.input.Keyboard;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.FontRenderer;
+import net.minecraft.client.gui.widget.TextFieldWidget;
+import org.lwjgl.glfw.GLFW;
 
-import javax.vecmath.Vector2d;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,7 +18,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-public class PlaceSearchWidget extends GuiTextField {
+public class PlaceSearchWidget extends TextFieldWidget {
     private static final int SUGGESTION_COUNT = 3;
     private static final int SUGGESTION_HEIGHT = 20;
 
@@ -35,13 +36,14 @@ public class PlaceSearchWidget extends GuiTextField {
     private String lastSearchText;
 
     public PlaceSearchWidget(int id, int x, int y, int width, int height, Geocoder geocoder, SearchHandler searchHandler) {
-        super(id, Minecraft.getMinecraft().fontRenderer, x, y, width, height);
+        super(id, MinecraftClient.getInstance().fontRenderer, x, y, width, height);
         this.geocoder = geocoder;
         this.searchHandler = searchHandler;
     }
 
-    public void update() {
-        super.updateCursorCounter();
+    @Override
+    public void tick() {
+        super.tick();
 
         if (this.queriedSuggestions != null && this.queriedSuggestions.isDone()) {
             this.suggestions.clear();
@@ -74,55 +76,61 @@ public class PlaceSearchWidget extends GuiTextField {
     }
 
     @Override
-    public boolean getEnableBackgroundDrawing() {
+    public boolean hasBorder() {
         return false;
     }
 
     @Override
-    public int getWidth() {
-        return this.width - 8;
+    public int method_1859() {
+        return super.method_1859() - 8;
     }
 
-    public void draw(int mouseX, int mouseY) {
-        if (this.getVisible()) {
-            drawRect(this.x - 1, this.y - 1, this.x + this.width + 1, this.y + this.height + 1, 0xFFA0A0A0);
-            drawRect(this.x, this.y, this.x + this.width, this.y + this.height, this.state.getBackgroundColor());
+    @Override
+    public void render(int mouseX, int mouseY, float delta) {
+        if (this.isVisible()) {
+            WidgetArea area = (WidgetArea) this;
+            int x = area.getWidgetX();
+            int y = area.getWidgetY();
+            int width = area.getWidgetWidth();
+            int height = area.getWidgetHeight();
 
-            super.drawTextBox();
+            drawRect(x - 1, y - 1, x + width + 1, y + height + 1, 0xFFA0A0A0);
+            drawRect(x, y, x + width, y + height, this.state.getBackgroundColor());
+
+            super.render(mouseX, mouseY, delta);
 
             if (!this.suggestions.isEmpty() && this.isFocused()) {
-                FontRenderer fontRenderer = Minecraft.getMinecraft().fontRenderer;
-
+                FontRenderer fontRenderer = MinecraftClient.getInstance().fontRenderer;
                 int suggestionBoxHeight = SUGGESTION_HEIGHT * this.suggestions.size() + 2;
-                int suggestionOriginY = this.y + this.height;
-                drawRect(this.x - 1, suggestionOriginY, this.x + this.width + 1, suggestionOriginY + suggestionBoxHeight, 0xFFA0A0A0);
+                int suggestionOriginY = y + height;
+                drawRect(x - 1, suggestionOriginY, x + width + 1, suggestionOriginY + suggestionBoxHeight, 0xFFA0A0A0);
 
                 for (int i = 0; i < this.suggestions.size(); i++) {
-                    String suggestion = fontRenderer.trimStringToWidth(this.suggestions.get(i), this.width - 8);
-                    int suggestionX = this.x;
+                    String suggestion = fontRenderer.wrapStringToWidth(this.suggestions.get(i), width - 8);
                     int suggestionY = suggestionOriginY + i * SUGGESTION_HEIGHT + 1;
 
-                    if (mouseX >= suggestionX && mouseY >= suggestionY && mouseX <= suggestionX + this.width && mouseY <= suggestionY + SUGGESTION_HEIGHT) {
-                        drawRect(suggestionX, suggestionY, suggestionX + this.width, suggestionY + SUGGESTION_HEIGHT, 0xFF5078A0);
+                    if (mouseX >= x && mouseY >= suggestionY && mouseX <= x + width && mouseY <= suggestionY + SUGGESTION_HEIGHT) {
+                        drawRect(x, suggestionY, x + width, suggestionY + SUGGESTION_HEIGHT, 0xFF5078A0);
                     }
 
-                    fontRenderer.drawStringWithShadow(suggestion, suggestionX + 4, suggestionY + (SUGGESTION_HEIGHT - fontRenderer.FONT_HEIGHT) / 2, 0xFFFFFFFF);
+                    fontRenderer.drawWithShadow(suggestion, x + 4, suggestionY + (SUGGESTION_HEIGHT - fontRenderer.fontHeight) / 2.0F, 0xFFFFFFFF);
                 }
             }
         }
     }
 
     @Override
-    public boolean mouseClicked(int mouseX, int mouseY, int mouseButton) {
-        if (this.getVisible() && this.isFocused()) {
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (this.isVisible() && this.isFocused()) {
             if (!this.suggestions.isEmpty()) {
-                int suggestionOriginY = this.y + this.height;
+                WidgetArea area = (WidgetArea) this;
+                int suggestionOriginY = area.getWidgetY() + area.getWidgetHeight();
 
                 for (int i = 0; i < this.suggestions.size(); i++) {
-                    int suggestionX = this.x;
+                    int suggestionX = area.getWidgetX();
                     int suggestionY = suggestionOriginY + i * SUGGESTION_HEIGHT + 1;
 
-                    if (mouseX >= suggestionX && mouseY >= suggestionY && mouseX <= suggestionX + this.width && mouseY <= suggestionY + SUGGESTION_HEIGHT) {
+                    if (mouseX >= suggestionX && mouseY >= suggestionY && mouseX <= suggestionX + area.getWidgetWidth() && mouseY <= suggestionY + SUGGESTION_HEIGHT) {
                         this.setText(this.suggestions.get(i));
                         this.state = State.FOUND;
                         this.handleAccept();
@@ -132,40 +140,40 @@ public class PlaceSearchWidget extends GuiTextField {
             }
         }
 
-        return super.mouseClicked(mouseX, mouseY, mouseButton);
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
-    public boolean textboxKeyTyped(char typedChar, int keyCode) {
+    public boolean keyPressed(int keyCode, int scanCode, int mods) {
         if (!this.isFocused()) {
             return false;
         }
 
         this.pause = false;
 
-        if (keyCode == Keyboard.KEY_RETURN) {
+        if (keyCode == GLFW.GLFW_KEY_ENTER) {
             this.handleAccept();
             this.suggestions.clear();
             return true;
         }
 
-        if (super.textboxKeyTyped(typedChar, keyCode)) {
+        if (super.keyPressed(keyCode, scanCode, mods)) {
             this.state = State.OK;
         }
 
         return false;
     }
 
-    public void onGuiClosed() {
+    public void onClosed() {
         this.executor.shutdownNow();
     }
 
     private void handleAccept() {
         String text = this.getText();
         try {
-            Vector2d coordinate = this.geocoder.get(text);
+            Point2d coordinate = this.geocoder.get(text);
             if (coordinate != null) {
-                this.searchHandler.handle(coordinate.getX(), coordinate.getY());
+                this.searchHandler.handle(coordinate.x, coordinate.y);
                 this.state = State.FOUND;
             } else {
                 this.state = State.NOT_FOUND;

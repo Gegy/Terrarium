@@ -1,6 +1,7 @@
 package net.gegy1000.earth.server.world.pipeline.adapter;
 
 import net.gegy1000.earth.server.world.pipeline.source.tile.WaterRasterTile;
+import net.gegy1000.terrarium.server.util.Point2i;
 import net.gegy1000.terrarium.server.util.SpiralIterator;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.RegionAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
@@ -9,7 +10,6 @@ import net.gegy1000.terrarium.server.world.region.GenerationRegion;
 import net.gegy1000.terrarium.server.world.region.RegionData;
 
 import javax.annotation.Nullable;
-import javax.vecmath.Point2i;
 
 public class WaterLevelingAdapter implements RegionAdapter {
     private static final int CENTER_RANGE = GenerationRegion.BUFFER;

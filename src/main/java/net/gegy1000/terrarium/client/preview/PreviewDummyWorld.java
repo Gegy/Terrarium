@@ -1,142 +1,118 @@
 package net.gegy1000.terrarium.client.preview;
 
-import net.gegy1000.terrarium.server.world.chunk.ComposableChunkGenerator;
-import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.profiler.Profiler;
-import net.minecraft.world.GameType;
+import com.mojang.datafixers.types.JsonOps;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.gegy1000.terrarium.server.world.customization.GenerationSettings;
+import net.minecraft.block.Block;
+import net.minecraft.class_3689;
+import net.minecraft.client.world.DummyClientTickScheduler;
+import net.minecraft.client.world.DummyWorldSaveHandler;
+import net.minecraft.fluid.Fluid;
+import net.minecraft.recipe.RecipeManager;
+import net.minecraft.scoreboard.Scoreboard;
+import net.minecraft.tag.TagManager;
+import net.minecraft.world.BlockView;
+import net.minecraft.world.GameMode;
+import net.minecraft.world.PersistentStateManager;
+import net.minecraft.world.TickScheduler;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldProvider;
-import net.minecraft.world.WorldProviderSurface;
-import net.minecraft.world.WorldSettings;
-import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.IChunkProvider;
-import net.minecraft.world.chunk.storage.IChunkLoader;
-import net.minecraft.world.gen.ChunkProviderServer;
-import net.minecraft.world.gen.IChunkGenerator;
-import net.minecraft.world.gen.structure.template.TemplateManager;
-import net.minecraft.world.storage.IPlayerFileData;
-import net.minecraft.world.storage.ISaveHandler;
-import net.minecraft.world.storage.WorldInfo;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.world.chunk.ChunkManager;
+import net.minecraft.world.chunk.ChunkStatus;
+import net.minecraft.world.chunk.light.LightingProvider;
+import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.gen.chunk.ChunkGenerator;
+import net.minecraft.world.level.LevelGeneratorType;
+import net.minecraft.world.level.LevelInfo;
+import net.minecraft.world.level.LevelProperties;
 
-import java.io.File;
+import javax.annotation.Nullable;
+import java.util.function.BooleanSupplier;
 
-@SideOnly(Side.CLIENT)
+@Environment(EnvType.CLIENT)
 public class PreviewDummyWorld extends World {
-    private final ComposableChunkGenerator generator;
+    private static final DummyWorldSaveHandler SAVE_HANDLER = new DummyWorldSaveHandler();
+    private final ChunkGenerator<?> generator;
 
-    public PreviewDummyWorld(WorldType worldType, GenerationSettings settings) {
-        super(new SaveHandler(), new WorldInfo(createSettings(worldType, settings), "terrarium_preview"), new WorldProviderSurface(), new Profiler(), false);
-
-        int dimension = this.provider.getDimension();
-        this.provider.setWorld(this);
-        this.provider.setDimension(dimension);
-
-        this.generator = new ComposableChunkGenerator(this);
-        this.chunkProvider = this.createChunkProvider();
-
-        this.initCapabilities();
+    public PreviewDummyWorld(LevelGeneratorType generatorType, GenerationSettings settings) {
+        super(
+                SAVE_HANDLER,
+                new PersistentStateManager(SAVE_HANDLER),
+                new LevelProperties(createInfo(generatorType, settings), ""),
+                DimensionType.OVERWORLD,
+                (world, dimension) -> new PreviewChunkManager(),
+                new class_3689(() -> 0),
+                false
+        );
+        this.generator = this.dimension.createChunkGenerator();
     }
 
-    private static WorldSettings createSettings(WorldType worldType, GenerationSettings settings) {
-        WorldSettings worldSettings = new WorldSettings(0, GameType.ADVENTURE, false, false, worldType);
-        worldSettings.setGeneratorOptions(settings.serializeString());
-        return worldSettings;
+    private static LevelInfo createInfo(LevelGeneratorType generatorType, GenerationSettings settings) {
+        LevelInfo levelInfo = new LevelInfo(0, GameMode.ADVENTURE, false, false, generatorType);
+        levelInfo.method_8579(settings.serialize(JsonOps.INSTANCE).getValue());
+        return levelInfo;
     }
 
-    public ComposableChunkGenerator getGenerator() {
+    public ChunkGenerator<?> getGenerator() {
         return this.generator;
     }
 
     @Override
-    protected IChunkProvider createChunkProvider() {
-        return new ChunkCache(this.generator);
+    public TickScheduler<Block> getBlockTickScheduler() {
+        return new DummyClientTickScheduler<>();
     }
 
     @Override
-    protected boolean isChunkLoaded(int x, int z, boolean allowEmpty) {
-        return false;
+    public TickScheduler<Fluid> getFluidTickScheduler() {
+        return new DummyClientTickScheduler<>();
     }
 
-    private static class ChunkCache extends ChunkProviderServer {
-        public ChunkCache(IChunkGenerator generator) {
-            super(null, null, generator);
-        }
-
-        @Override
-        public Chunk getLoadedChunk(int x, int z) {
-            return null;
-        }
-
-        @Override
-        public Chunk provideChunk(int x, int z) {
-            return null;
-        }
-
-        @Override
-        public boolean tick() {
-            return false;
-        }
-
-        @Override
-        public String makeString() {
-            return "PreviewDummyWorld.ChunkCache";
-        }
-
-        @Override
-        public boolean isChunkGeneratedAt(int x, int z) {
-            return false;
-        }
+    @Override
+    public Scoreboard getScoreboard() {
+        return new Scoreboard();
     }
 
-    private static class SaveHandler implements ISaveHandler {
+    @Override
+    public RecipeManager getRecipeManager() {
+        return new RecipeManager();
+    }
+
+    @Override
+    public TagManager getTagManager() {
+        return new TagManager();
+    }
+
+    private static class PreviewChunkManager extends ChunkManager {
+        @Nullable
         @Override
-        public WorldInfo loadWorldInfo() {
-            return null;
+        public Chunk getChunkSync(int x, int z, ChunkStatus status, boolean var4) {
+            throw new UnsupportedOperationException();
         }
 
         @Override
-        public void checkSessionLock() {
+        public void tick(BooleanSupplier var1) {
+            throw new UnsupportedOperationException();
         }
 
         @Override
-        public IChunkLoader getChunkLoader(WorldProvider provider) {
-            return null;
+        public String getStatus() {
+            throw new UnsupportedOperationException();
         }
 
         @Override
-        public void saveWorldInfoWithPlayer(WorldInfo worldInformation, NBTTagCompound tagCompound) {
+        public ChunkGenerator<?> getChunkGenerator() {
+            throw new UnsupportedOperationException();
         }
 
         @Override
-        public void saveWorldInfo(WorldInfo worldInformation) {
+        public LightingProvider getLightingProvider() {
+            throw new UnsupportedOperationException();
         }
 
         @Override
-        public IPlayerFileData getPlayerNBTManager() {
-            return null;
-        }
-
-        @Override
-        public void flush() {
-        }
-
-        @Override
-        public File getWorldDirectory() {
-            return null;
-        }
-
-        @Override
-        public File getMapFileFromName(String mapName) {
-            return null;
-        }
-
-        @Override
-        public TemplateManager getStructureTemplateManager() {
-            return null;
+        public BlockView getWorldAsView() {
+            throw new UnsupportedOperationException();
         }
     }
 }

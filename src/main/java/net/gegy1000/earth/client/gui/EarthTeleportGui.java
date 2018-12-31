@@ -5,14 +5,11 @@ import net.gegy1000.earth.client.gui.widget.map.SlippyMapPoint;
 import net.gegy1000.earth.client.gui.widget.map.SlippyMapWidget;
 import net.gegy1000.earth.client.gui.widget.map.component.MarkerMapComponent;
 import net.gegy1000.earth.server.world.pipeline.source.GoogleGeocoder;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.resources.I18n;
-import org.lwjgl.input.Keyboard;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.resource.language.I18n;
 
-import java.io.IOException;
-
-public class EarthTeleportGui extends GuiScreen {
+public class EarthTeleportGui extends Gui {
     private static final int ACCEPT_BUTTON = 0;
     private static final int CANCEL_BUTTON = 1;
     private static final int SEARCH_FIELD = 2;
@@ -30,16 +27,27 @@ public class EarthTeleportGui extends GuiScreen {
     }
 
     @Override
-    public void initGui() {
+    public void onInitialized() {
         if (this.mapWidget != null) {
             this.mapWidget.close();
         }
 
-        Keyboard.enableRepeatEvents(true);
+        this.client.keyboard.enableRepeatEvents(true);
 
-        this.buttonList.clear();
-        this.addButton(new GuiButton(ACCEPT_BUTTON, this.width / 2 - 155, this.height - 28, 150, 20, I18n.format("gui.button.earth.teleport")));
-        this.addButton(new GuiButton(CANCEL_BUTTON, this.width / 2 + 5, this.height - 28, 150, 20, I18n.format("gui.cancel")));
+        this.addButton(new ButtonWidget(ACCEPT_BUTTON, this.width / 2 - 155, this.height - 28, 150, 20, I18n.translate("gui.button.earth.teleport")) {
+            @Override
+            public void onPressed(double mouseX, double mouseY) {
+                SlippyMapPoint marker = EarthTeleportGui.this.markerComponent.getMarker();
+                EarthTeleportGui.this.method_2230(String.format("/geotp %s %s", marker.getLatitude(), marker.getLongitude()));
+                EarthTeleportGui.this.client.openGui(null);
+            }
+        });
+        this.addButton(new ButtonWidget(CANCEL_BUTTON, this.width / 2 + 5, this.height - 28, 150, 20, I18n.translate("gui.cancel")) {
+            @Override
+            public void onPressed(double mouseX, double mouseY) {
+                EarthTeleportGui.this.client.openGui(null);
+            }
+        });
 
         this.mapWidget = new SlippyMapWidget(60, 20, this.width - 120, this.height - 80);
         this.mapWidget.getMap().focus(this.latitude, this.longitude, 5);
@@ -48,6 +56,9 @@ public class EarthTeleportGui extends GuiScreen {
         this.mapWidget.addComponent(this.markerComponent);
 
         this.searchWidget = new PlaceSearchWidget(SEARCH_FIELD, 65, 25, 180, 20, new GoogleGeocoder(), this::handleSearch);
+
+        this.listeners.add(this.mapWidget);
+        this.listeners.add(this.searchWidget);
     }
 
     private void handleSearch(double latitude, double longitude) {
@@ -56,74 +67,28 @@ public class EarthTeleportGui extends GuiScreen {
     }
 
     @Override
-    protected void actionPerformed(GuiButton button) throws IOException {
-        super.actionPerformed(button);
-        if (button.visible) {
-            switch (button.id) {
-                case ACCEPT_BUTTON:
-                    SlippyMapPoint marker = this.markerComponent.getMarker();
-                    this.sendChatMessage(String.format("/geotp %s %s", marker.getLatitude(), marker.getLongitude()));
-                    this.mc.displayGuiScreen(null);
-                    break;
-                case CANCEL_BUTTON:
-                    this.mc.displayGuiScreen(null);
-                    break;
-            }
-        }
+    public void draw(int mouseX, int mouseY, float delta) {
+        this.drawBackground();
+
+        this.mapWidget.draw(mouseX, mouseY, delta);
+        this.searchWidget.render(mouseX, mouseY, delta);
+
+        this.drawStringCentered(this.fontRenderer, I18n.translate("gui.earth.teleport"), this.width / 2, 4, 0xFFFFFF);
+
+        super.draw(mouseX, mouseY, delta);
     }
 
     @Override
-    public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-        this.drawDefaultBackground();
-
-        this.mapWidget.draw(mouseX, mouseY, partialTicks);
-        this.searchWidget.draw(mouseX, mouseY);
-
-        this.drawCenteredString(this.fontRenderer, I18n.format("gui.earth.teleport"), this.width / 2, 4, 0xFFFFFF);
-
-        super.drawScreen(mouseX, mouseY, partialTicks);
+    public void update() {
+        super.update();
+        this.searchWidget.tick();
     }
 
     @Override
-    public void updateScreen() {
-        super.updateScreen();
-        this.searchWidget.update();
-    }
-
-    @Override
-    protected void keyTyped(char typedChar, int keyCode) throws IOException {
-        if (this.searchWidget.isFocused() && this.searchWidget.textboxKeyTyped(typedChar, keyCode)) {
-            return;
-        }
-        super.keyTyped(typedChar, keyCode);
-    }
-
-    @Override
-    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-        super.mouseClicked(mouseX, mouseY, mouseButton);
-        if (this.searchWidget.mouseClicked(mouseX, mouseY, mouseButton)) {
-            return;
-        }
-        this.mapWidget.mouseClicked(mouseX, mouseY);
-    }
-
-    @Override
-    protected void mouseClickMove(int mouseX, int mouseY, int mouseButton, long timeSinceLastClick) {
-        super.mouseClickMove(mouseX, mouseY, mouseButton, timeSinceLastClick);
-        this.mapWidget.mouseDragged(mouseX, mouseY);
-    }
-
-    @Override
-    protected void mouseReleased(int mouseX, int mouseY, int mouseButton) {
-        super.mouseReleased(mouseX, mouseY, mouseButton);
-        this.mapWidget.mouseReleased(mouseX, mouseY);
-    }
-
-    @Override
-    public void onGuiClosed() {
-        super.onGuiClosed();
+    public void onClosed() {
+        super.onClosed();
         this.mapWidget.close();
-        this.searchWidget.onGuiClosed();
-        Keyboard.enableRepeatEvents(false);
+        this.searchWidget.onClosed();
+        this.client.keyboard.enableRepeatEvents(false);
     }
 }

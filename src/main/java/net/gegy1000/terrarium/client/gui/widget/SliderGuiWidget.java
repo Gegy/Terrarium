@@ -1,25 +1,24 @@
 package net.gegy1000.terrarium.client.gui.widget;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.platform.GlStateManager;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.gegy1000.terrarium.client.gui.GuiRenderUtils;
-import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
-import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyValue;
-import net.gegy1000.terrarium.server.world.generator.customization.widget.WidgetPropertyConverter;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.resources.I18n;
+import net.gegy1000.terrarium.server.world.customization.property.PropertyKey;
+import net.gegy1000.terrarium.server.world.customization.property.PropertyValue;
+import net.gegy1000.terrarium.server.world.customization.widget.WidgetPropertyConverter;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.text.TextFormat;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@SideOnly(Side.CLIENT)
-public class SliderGuiWidget extends GuiButton implements TooltipRenderer {
+@Environment(EnvType.CLIENT)
+public class SliderGuiWidget extends ButtonWidget implements TooltipRenderer {
     private final PropertyKey<Number> propertyKey;
     private final PropertyValue<Number> property;
 
@@ -34,8 +33,6 @@ public class SliderGuiWidget extends GuiButton implements TooltipRenderer {
     private final double fineStep;
 
     private double position;
-
-    private boolean mouseDown;
 
     private float hoverTime;
 
@@ -62,91 +59,90 @@ public class SliderGuiWidget extends GuiButton implements TooltipRenderer {
     }
 
     public void setSliderPosition(double position) {
+        position = MathHelper.clamp(position, 0.0, 1.0);
+
         double value = this.toValue(position);
         if (this.converter != null) {
             value = this.converter.toUser(value);
         }
 
         this.position = position;
-        this.displayString = String.format("%s: %.2f", this.propertyKey.getLocalizedName(), value);
+        this.text = String.format("%s: %.2f", this.propertyKey.getLocalizedName(), value);
     }
 
     @Override
-    public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-        if (this.visible) {
-            super.drawButton(mc, mouseX, mouseY, partialTicks);
+    public void draw(int mouseX, int mouseY, float delta) {
+        super.draw(mouseX, mouseY, delta);
 
-            if (super.mousePressed(mc, mouseX, mouseY)) {
-                this.hoverTime += partialTicks;
+        if (this.visible) {
+            if (super.isSelected(mouseX, mouseY)) {
+                this.hoverTime += delta;
             } else {
                 this.hoverTime = 0;
             }
+
+            GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+
+            int sliderX = this.x + (int) (this.position * (this.width - 8));
+            this.drawTexturedRect(sliderX, this.y, 0, 66, 4, 20);
+            this.drawTexturedRect(sliderX + 4, this.y, 196, 66, 4, 20);
         }
     }
 
     @Override
     public void renderTooltip(int mouseX, int mouseY) {
         if (this.hoverTime >= 15) {
-            String name = TextFormatting.BLUE + this.propertyKey.getLocalizedName();
-            String tooltip = TextFormatting.GRAY + this.propertyKey.getLocalizedTooltip();
-            String defaults = TextFormatting.YELLOW + I18n.format("property.terrarium.slider_range.name", this.min, this.max);
+            String name = TextFormat.BLUE + this.propertyKey.getLocalizedName();
+            String tooltip = TextFormat.GRAY + this.propertyKey.getLocalizedTooltip();
+            String defaults = TextFormat.YELLOW + I18n.translate("property.terrarium.slider_range.name", this.min, this.max);
             List<String> lines = Lists.newArrayList(name, tooltip, defaults);
             if (Math.abs(this.step - this.fineStep) > 1E-6) {
-                lines.add(TextFormatting.DARK_GRAY.toString() + TextFormatting.ITALIC + I18n.format("property.terrarium.slider_fine.name"));
+                lines.add(TextFormat.DARK_GRAY.toString() + TextFormat.ITALIC + I18n.translate("property.terrarium.slider_fine.name"));
             }
             GuiRenderUtils.drawTooltip(lines, mouseX, mouseY);
         }
     }
 
     @Override
-    protected int getHoverState(boolean mouseOver) {
+    protected int getTextureId(boolean var1) {
         return 0;
     }
 
     @Override
-    protected void mouseDragged(Minecraft mc, int mouseX, int mouseY) {
-        if (this.visible) {
-            if (this.mouseDown) {
-                this.setSliderPosition(MathHelper.clamp(this.getMousePosition(mouseX), 0.0, 1.0));
-                this.hoverTime = 0;
-            }
-
-            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            this.drawTexturedModalRect(this.x + (int) (this.position * (this.width - 8)), this.y, 0, 66, 4, 20);
-            this.drawTexturedModalRect(this.x + (int) (this.position * (this.width - 8)) + 4, this.y, 196, 66, 4, 20);
-        }
-    }
-
-    @Override
-    public boolean mousePressed(Minecraft mc, int mouseX, int mouseY) {
-        if (super.mousePressed(mc, mouseX, mouseY)) {
-            this.setSliderPosition(MathHelper.clamp(this.getMousePosition(mouseX), 0.0, 1.0));
-            this.mouseDown = true;
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (this.isSelected(mouseX, mouseY)) {
+            this.setSliderPosition(this.getMousePosition(mouseX));
+            this.hoverTime = 0;
             return true;
         }
         return false;
     }
 
-    private double getMousePosition(int mouseX) {
-        return this.step((double) (mouseX - (this.x + 4)) / (double) (this.width - 8));
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+        this.setSliderPosition(this.getMousePosition(mouseX));
+        this.hoverTime = 0;
+        return true;
     }
 
     @Override
-    public void mouseReleased(int mouseX, int mouseY) {
-        if (this.mouseDown) {
-            this.mouseDown = false;
-            double value = this.toValue(this.position);
-            if (Math.abs(this.property.get().doubleValue() - value) > 1e-06) {
-                this.property.set(value);
-                for (Runnable listener : this.listeners) {
-                    listener.run();
-                }
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        double value = this.toValue(this.position);
+        if (Math.abs(this.property.get().doubleValue() - value) > 1e-06) {
+            this.property.set(value);
+            for (Runnable listener : this.listeners) {
+                listener.run();
             }
         }
+        return true;
+    }
+
+    private double getMousePosition(double mouseX) {
+        return this.step((mouseX - (this.x + 4)) / (this.width - 8));
     }
 
     private double step(double position) {
-        return this.step(position, GuiScreen.isShiftKeyDown() ? this.fineStep : this.step);
+        return this.step(position, Gui.isShiftPressed() ? this.fineStep : this.step);
     }
 
     private double step(double position, double step) {
