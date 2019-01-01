@@ -1,4 +1,4 @@
-package net.gegy1000.earth.mixin.client;
+package net.gegy1000.terrarium.mixin.client.earth;
 
 import net.gegy1000.earth.client.LoadingWorldGetter;
 import net.gegy1000.earth.server.world.EarthGeneratorType;
@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+// TODO: Move
 @Mixin({ WorkingGui.class, DownloadingTerrainGui.class })
 public class MixinLoadingScreen {
     @Inject(method = "draw(IIF)V", at = @At("RETURN"))

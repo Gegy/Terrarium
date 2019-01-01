@@ -2,6 +2,7 @@ package net.gegy1000.terrarium.server.world.chunk;
 
 import net.minecraft.world.World;
 
+// TODO: Phase out in favour of vanilla random
 public class PseudoRandomMap {
     private static final long PRIME_1 = 6364136223846793005L;
     private static final long PRIME_2 = 1442695040888963407L;

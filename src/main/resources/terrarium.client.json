@@ -7,7 +7,9 @@
     "MixinCustomizeButton",
     "MixinClientWorld",
     "MixinStateOverlay",
-    "MixinMinecraftClient"
+    "MixinMinecraftClient",
+    "earth.MixinTextField",
+    "earth.MixinLoadingScreen"
   ],
   "injectors": {
     "defaultRequire": 1

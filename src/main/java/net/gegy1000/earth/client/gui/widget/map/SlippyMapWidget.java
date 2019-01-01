@@ -142,7 +142,7 @@ public class SlippyMapWidget extends Drawable implements GuiEventListener {
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        this.map.drag(deltaX, deltaY);
+        this.map.drag(-deltaX, -deltaY);
         this.mouseDragged = true;
 
         return true;
@@ -163,8 +163,9 @@ public class SlippyMapWidget extends Drawable implements GuiEventListener {
 
     @Override
     public boolean mouseScrolled(double scrollAmount) {
-        double mouseX = CLIENT.mouse.getX();
-        double mouseY = CLIENT.mouse.getY();
+        double scale = CLIENT.window.method_4495();
+        double mouseX = CLIENT.mouse.getX() / scale;
+        double mouseY = CLIENT.mouse.getY() / scale;
         if (this.isSelected(mouseX, mouseY)) {
             int scrollSteps = MathHelper.floor(Math.signum(scrollAmount));
             this.map.zoom(scrollSteps, mouseX - this.x, mouseY - this.y);

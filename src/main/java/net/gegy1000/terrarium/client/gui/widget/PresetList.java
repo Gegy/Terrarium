@@ -18,7 +18,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.SystemUtil;
 
 @Environment(EnvType.CLIENT)
-public class PresetList extends ListGuiWidget<PresetList.PresetEntry> {
+public class PresetList extends EntryListWidget<PresetList.PresetEntry> {
     private static final Identifier FALLBACK_ICON = new Identifier(Terrarium.MODID, "textures/preset/fallback.png");
     private static final Identifier ICON_OVERLAY = new Identifier("textures/gui/world_selection.png");
 
@@ -29,7 +29,7 @@ public class PresetList extends ListGuiWidget<PresetList.PresetEntry> {
     private int selectedIndex = -1;
 
     public PresetList(MinecraftClient client, SelectPresetGui parent, TerrariumGeneratorType worldType) {
-        super(client, parent.width, parent.height, 0, 0, 32, parent.height - 64, 36);
+        super(client, parent.width, parent.height, 32, parent.height - 64, 36);
         this.parent = parent;
 
         this.presets = ImmutableList.copyOf(TerrariumPresetRegistry.INSTANCE.getPresets());
@@ -51,13 +51,13 @@ public class PresetList extends ListGuiWidget<PresetList.PresetEntry> {
     }
 
     @Override
-    public int getEntryWidth() {
-        return super.getEntryWidth() + 50;
+    protected int getScrollbarPosition() {
+        return super.getScrollbarPosition() + 20;
     }
 
     @Override
-    protected int getScrollbarPosition() {
-        return super.getScrollbarPosition() + 20;
+    public int getEntryWidth() {
+        return super.getEntryWidth() + 50;
     }
 
     @Override
@@ -109,7 +109,7 @@ public class PresetList extends ListGuiWidget<PresetList.PresetEntry> {
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             PresetList.this.selectPreset(this.field_2143);
 
-            if (mouseX < 32 || SystemUtil.getMeasuringTimeMili() - this.lastClickTime < 250) {
+            if (mouseX - this.getX() < 32 || SystemUtil.getMeasuringTimeMili() - this.lastClickTime < 250) {
                 PresetList.this.applyPreset();
                 return true;
             }

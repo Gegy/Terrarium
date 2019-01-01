@@ -2,7 +2,6 @@ package net.gegy1000.earth.server.world.biome;
 
 import net.gegy1000.earth.server.world.surface.EarthSurfaceBuilders;
 import net.gegy1000.terrarium.server.world.cover.CoverSettings;
-import net.gegy1000.terrarium.server.world.surface.VoidSurfaceConfig;
 import net.minecraft.entity.EntityCategory;
 import net.minecraft.entity.EntityType;
 import net.minecraft.world.biome.Biome;
@@ -18,7 +17,7 @@ import net.minecraft.world.gen.feature.PillagerOutpostFeatureConfig;
 public final class BareBiome extends Biome implements FakeBiome {
     public BareBiome() {
         super(new CoverSettings()
-                .configureSurfaceBuilder(EarthSurfaceBuilders.BARE, VoidSurfaceConfig.INSTANCE)
+                .configureSurfaceBuilder(EarthSurfaceBuilders.DYNAMIC, EarthSurfaceBuilders.BARE_CONFIG)
                 .category(Category.DESERT)
         );
 

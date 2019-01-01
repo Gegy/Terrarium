@@ -33,7 +33,6 @@ import java.util.function.BooleanSupplier;
 @Environment(EnvType.CLIENT)
 public class PreviewDummyWorld extends World {
     private static final DummyWorldSaveHandler SAVE_HANDLER = new DummyWorldSaveHandler();
-    private final ChunkGenerator<?> generator;
 
     public PreviewDummyWorld(LevelGeneratorType generatorType, GenerationSettings settings) {
         super(
@@ -41,11 +40,10 @@ public class PreviewDummyWorld extends World {
                 new PersistentStateManager(SAVE_HANDLER),
                 new LevelProperties(createInfo(generatorType, settings), ""),
                 DimensionType.OVERWORLD,
-                (world, dimension) -> new PreviewChunkManager(),
+                (world, dimension) -> new PreviewChunkManager(dimension.createChunkGenerator()),
                 new class_3689(() -> 0),
                 false
         );
-        this.generator = this.dimension.createChunkGenerator();
     }
 
     private static LevelInfo createInfo(LevelGeneratorType generatorType, GenerationSettings settings) {
@@ -55,7 +53,7 @@ public class PreviewDummyWorld extends World {
     }
 
     public ChunkGenerator<?> getGenerator() {
-        return this.generator;
+        return this.chunkManager.getChunkGenerator();
     }
 
     @Override
@@ -84,6 +82,12 @@ public class PreviewDummyWorld extends World {
     }
 
     private static class PreviewChunkManager extends ChunkManager {
+        private final ChunkGenerator<?> generator;
+
+        public PreviewChunkManager(ChunkGenerator<?> generator) {
+            this.generator = generator;
+        }
+
         @Nullable
         @Override
         public Chunk getChunkSync(int x, int z, ChunkStatus status, boolean var4) {
@@ -102,7 +106,7 @@ public class PreviewDummyWorld extends World {
 
         @Override
         public ChunkGenerator<?> getChunkGenerator() {
-            throw new UnsupportedOperationException();
+            return this.generator;
         }
 
         @Override

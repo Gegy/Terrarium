@@ -1,13 +1,14 @@
 package net.gegy1000.terrarium.server.world.surface;
 
-import com.mojang.datafixers.Dynamic;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.surfacebuilder.SurfaceConfig;
+import net.minecraft.world.gen.surfacebuilder.TernarySurfaceConfig;
 
-public enum VoidSurfaceConfig implements SurfaceConfig {
-    INSTANCE;
+import java.util.Random;
 
+public abstract class DynamicSurfaceConfig implements SurfaceConfig {
     @Override
     public BlockState getTopMaterial() {
         return Blocks.AIR.getDefaultState();
@@ -18,7 +19,5 @@ public enum VoidSurfaceConfig implements SurfaceConfig {
         return Blocks.AIR.getDefaultState();
     }
 
-    public static VoidSurfaceConfig deserialize(Dynamic<?> dynamic) {
-        return VoidSurfaceConfig.INSTANCE;
-    }
+    protected abstract TernarySurfaceConfig buildConfig(Random random, Chunk chunk, int x, int z, int y, double surfaceNoise);
 }

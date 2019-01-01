@@ -1,4 +1,4 @@
-package net.gegy1000.earth.mixin.client;
+package net.gegy1000.terrarium.mixin.client.earth;
 
 import net.gegy1000.earth.api.WidgetArea;
 import net.minecraft.client.gui.widget.TextFieldWidget;

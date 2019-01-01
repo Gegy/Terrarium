@@ -21,8 +21,8 @@ public class CustomizationList extends ListGuiWidget<CustomizationList.SingleWid
     }
 
     @Override
-    public void draw(int mouseX, int mouseY, float partialTicks) {
-        super.draw(mouseX, mouseY, partialTicks);
+    public void draw(int mouseX, int mouseY, float delta) {
+        super.draw(mouseX, mouseY, delta);
         if (this.isSelected(mouseX, mouseY)) {
             for (SingleWidgetEntry entry : this.getEntries()) {
                 entry.drawTooltip(mouseX, mouseY);

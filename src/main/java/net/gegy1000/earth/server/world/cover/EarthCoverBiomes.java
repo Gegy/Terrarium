@@ -1,34 +1,36 @@
 package net.gegy1000.earth.server.world.cover;
 
 import net.gegy1000.earth.server.world.biome.BareBiome;
+import net.gegy1000.earth.server.world.biome.SnowBiome;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.Biomes;
 
 public class EarthCoverBiomes {
     public static final Biome BARE = new BareBiome();
-    public static final Biome BEACH = new BareBiome();
-    public static final Biome BROADLEAF_EVERGREEN = new BareBiome();
-    public static final Biome CLOSED_BROADLEAF_DECIDUOUS = new BareBiome();
-    public static final Biome CLOSED_NEEDLELEAF_EVERGREEN = new BareBiome();
-    public static final Biome CROPLAND_WITH_VEGETATION = new BareBiome();
-    public static final Biome FLOODED_GRASSLAND = new BareBiome();
-    public static final Biome FOREST_SHRUBLAND_WITH_GRASS = new BareBiome();
-    public static final Biome FRESH_FLOODED_FOREST = new BareBiome();
-    public static final Biome GRASSLAND = new BareBiome();
-    public static final Biome GRASS_WITH_FOREST_SHRUBLAND = new BareBiome();
-    public static final Biome IRRIGATED_CROPS = new BareBiome();
-    public static final Biome MIXED_BROAD_NEEEDLELEAF = new BareBiome();
-    public static final Biome OPEN_BROADLEAF_DECIDUOUS = new BareBiome();
-    public static final Biome OPEN_NEEDLELEAF = new BareBiome();
-    public static final Biome RAINFED_CROPS = new BareBiome();
-    public static final Biome SALINE_FLOODED_FOREST = new BareBiome();
-    public static final Biome SHRUBLAND = new BareBiome();
-    public static final Biome SNOW = new BareBiome();
+    public static final Biome BEACH = Biomes.BEACH;
+    public static final Biome BROADLEAF_EVERGREEN = Biomes.JUNGLE;
+    public static final Biome CLOSED_BROADLEAF_DECIDUOUS = Biomes.FOREST;
+    public static final Biome CLOSED_NEEDLELEAF_EVERGREEN = Biomes.TAIGA;
+    public static final Biome CROPLAND_WITH_VEGETATION = Biomes.PLAINS;
+    public static final Biome FLOODED_GRASSLAND = Biomes.SWAMP;
+    public static final Biome FOREST_SHRUBLAND_WITH_GRASS = Biomes.PLAINS;
+    public static final Biome FRESH_FLOODED_FOREST = Biomes.BAMBOO_JUNGLE;
+    public static final Biome GRASSLAND = Biomes.PLAINS;
+    public static final Biome GRASS_WITH_FOREST_SHRUBLAND = Biomes.PLAINS;
+    public static final Biome IRRIGATED_CROPS = Biomes.PLAINS;
+    public static final Biome MIXED_BROAD_NEEEDLELEAF = Biomes.FOREST;
+    public static final Biome OPEN_BROADLEAF_DECIDUOUS = Biomes.FOREST;
+    public static final Biome OPEN_NEEDLELEAF = Biomes.TAIGA;
+    public static final Biome RAINFED_CROPS = Biomes.PLAINS;
+    public static final Biome SALINE_FLOODED_FOREST = Biomes.BAMBOO_JUNGLE;
+    public static final Biome SHRUBLAND = Biomes.PLAINS;
+    public static final Biome SNOW = new SnowBiome();
     public static final Biome SPARSE_VEGETATION = new BareBiome();
-    public static final Biome URBAN = new BareBiome();
-    public static final Biome VEGETATION_WITH_CROPLAND = new BareBiome();
-    public static final Biome WATER = new BareBiome();
-    public static final Biome FLOWER_FIELD = new BareBiome();
-    public static final Biome SCREE = new BareBiome();
+    public static final Biome URBAN = Biomes.PLAINS;
+    public static final Biome VEGETATION_WITH_CROPLAND = Biomes.PLAINS;
+    public static final Biome WATER = Biomes.OCEAN;
+    public static final Biome FLOWER_FIELD = Biomes.SUNFLOWER_PLAINS;
+    public static final Biome SCREE = Biomes.GRAVELLY_MOUNTAINS;
 
     public enum Glob {
         IRRIGATED_CROPS(11, EarthCoverBiomes.IRRIGATED_CROPS),
