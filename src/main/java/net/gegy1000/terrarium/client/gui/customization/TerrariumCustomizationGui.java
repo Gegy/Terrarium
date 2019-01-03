@@ -13,6 +13,7 @@ import net.gegy1000.terrarium.server.world.generator.customization.GenerationSet
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPreset;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.CustomizationCategory;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.CustomizationWidget;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiCreateWorld;
 import net.minecraft.client.gui.GuiScreen;
@@ -222,6 +223,16 @@ public class TerrariumCustomizationGui extends GuiScreen {
         this.drawCenteredString(this.fontRenderer, title, this.width / 2, 20, 0xFFFFFF);
 
         super.drawScreen(mouseX, mouseY, partialTicks);
+    }
+
+    @Override
+    public void onResize(Minecraft client, int width, int height) {
+        this.freeze = true;
+        try {
+            super.onResize(client, width, height);
+        } finally {
+            this.freeze = false;
+        }
     }
 
     @Override

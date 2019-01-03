@@ -9,5 +9,7 @@ public interface RegionGenerationDispatcher {
 
     GenerationRegion get(RegionTilePos pos);
 
+    void cancel(RegionTilePos pos);
+
     void close();
 }

@@ -41,7 +41,7 @@ public class DataSourceHandler {
 
     public void enqueueData(Set<DataTileKey<?>> requiredData) {
         for (DataTileKey<?> key : requiredData) {
-            if (!this.queuedTiles.containsKey(key)) {
+            if (!this.tileCache.asMap().containsKey(key) && !this.queuedTiles.containsKey(key)) {
                 this.enqueueTile(key);
             }
         }

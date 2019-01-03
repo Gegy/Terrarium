@@ -10,6 +10,7 @@ import net.gegy1000.earth.server.world.pipeline.EarthComponentTypes;
 import net.gegy1000.earth.server.world.pipeline.adapter.BeachAdapter;
 import net.gegy1000.earth.server.world.pipeline.adapter.HeightNoiseAdapter;
 import net.gegy1000.earth.server.world.pipeline.adapter.OsmAreaCoverAdapter;
+import net.gegy1000.earth.server.world.pipeline.adapter.SlopeNoiseAdapter;
 import net.gegy1000.earth.server.world.pipeline.adapter.WaterApplyAdapter;
 import net.gegy1000.earth.server.world.pipeline.adapter.WaterCarveAdapter;
 import net.gegy1000.earth.server.world.pipeline.adapter.WaterLevelingAdapter;
@@ -277,6 +278,7 @@ public class EarthWorldType extends TerrariumWorldType {
                     .withAdapter(new HeightTransformAdapter(this.world, RegionComponentType.HEIGHT, this.settings.getDouble(HEIGHT_SCALE) * this.worldScale, heightOrigin))
                     .withAdapter(new WaterLevelingAdapter(EarthComponentTypes.WATER, RegionComponentType.HEIGHT, heightOrigin + 1))
                     .withAdapter(new WaterCarveAdapter(EarthComponentTypes.WATER, RegionComponentType.HEIGHT, this.settings.getInteger(OCEAN_DEPTH)))
+                    .withAdapter(new SlopeNoiseAdapter(this.world, RegionComponentType.SLOPE, this.settings.getDouble(NOISE_SCALE)))
 //                    .withAdapter(new OceanDepthCorrectionAdapter(RegionComponentType.HEIGHT, this.properties.getInteger(OCEAN_DEPTH)))
                     .withAdapter(new BeachAdapter(this.world, RegionComponentType.COVER, EarthComponentTypes.WATER, this.settings.getInteger(BEACH_SIZE), EarthCoverTypes.BEACH))
 //                    .withAdapter(new WaterFlattenAdapter(RegionComponentType.HEIGHT, RegionComponentType.COVER, 15, EarthCoverTypes.WATER))

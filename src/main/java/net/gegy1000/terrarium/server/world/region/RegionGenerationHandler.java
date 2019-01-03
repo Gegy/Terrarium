@@ -10,10 +10,12 @@ import net.gegy1000.terrarium.server.world.pipeline.source.DataSourceHandler;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.RasterDataAccess;
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerChunkMapEntry;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -37,6 +39,46 @@ public class RegionGenerationHandler {
         this.chunkRasterHandler = new ChunkRasterHandler(this, dataProvider);
     }
 
+    public void enqueueArea(BlockPos min, BlockPos max) {
+        RegionTilePos minRegion = this.getRegionPos(min.getX(), min.getZ());
+        RegionTilePos maxRegion = this.getRegionPos(max.getX(), max.getZ());
+
+        int width = maxRegion.getTileX() - minRegion.getTileX() + 1;
+        int height = maxRegion.getTileZ() - minRegion.getTileZ() + 1;
+        Collection<RegionTilePos> regions = new ArrayList<>(width * height);
+        for (int regionZ = minRegion.getTileZ(); regionZ <= maxRegion.getTileZ(); regionZ++) {
+            for (int regionX = minRegion.getTileX(); regionX <= maxRegion.getTileX(); regionX++) {
+                regions.add(new RegionTilePos(regionX, regionZ));
+            }
+        }
+
+        for (RegionTilePos region : regions) {
+            this.dataProvider.enqueueData(this.sourceHandler, region);
+        }
+
+        this.trackRegions(regions);
+    }
+
+    public void trackRegions(Collection<RegionTilePos> regions) {
+        this.dispatcher.setRequiredRegions(regions);
+
+        Set<RegionTilePos> untrackedRegions = this.regionCache.keySet().stream()
+                .filter(pos -> !regions.contains(pos))
+                .collect(Collectors.toSet());
+        untrackedRegions.forEach(pos -> {
+            this.regionCache.remove(pos);
+            this.dispatcher.cancel(pos);
+        });
+
+        Collection<GenerationRegion> completedRegions = this.dispatcher.collectCompletedRegions();
+        for (GenerationRegion region : completedRegions) {
+            if (region == null) {
+                continue;
+            }
+            this.regionCache.put(region.getPos(), region);
+        }
+    }
+
     public void trackRegions(WorldServer world, PlayerChunkMap chunkTracker) {
         List<PlayerChunkMapEntry> chunkEntries = PlayerChunkMapHooks.getSortedChunkEntries(chunkTracker);
 
@@ -49,7 +91,6 @@ public class RegionGenerationHandler {
         untrackedChunks.forEach(this.chunkStateMap::remove);
 
         Collection<RegionTilePos> requiredRegions = this.collectRequiredRegions(world, chunkTracker, chunkEntries);
-        this.dispatcher.setRequiredRegions(requiredRegions);
 
         if (chunkTracker instanceof PlayerChunkMapHooks.Wrapper) {
             PlayerChunkMapHooks.Wrapper hookedTracker = (PlayerChunkMapHooks.Wrapper) chunkTracker;
@@ -65,18 +106,7 @@ public class RegionGenerationHandler {
             }
         }
 
-        Set<RegionTilePos> untrackedRegions = this.regionCache.keySet().stream()
-                .filter(pos -> !requiredRegions.contains(pos))
-                .collect(Collectors.toSet());
-        untrackedRegions.forEach(this.regionCache::remove);
-
-        Collection<GenerationRegion> completedRegions = this.dispatcher.collectCompletedRegions();
-        for (GenerationRegion region : completedRegions) {
-            if (region == null) {
-                continue;
-            }
-            this.regionCache.put(region.getPos(), region);
-        }
+        this.trackRegions(requiredRegions);
     }
 
     private Collection<RegionTilePos> collectRequiredRegions(WorldServer world, PlayerChunkMap chunkTracker, List<PlayerChunkMapEntry> chunkEntries) {
@@ -174,7 +204,9 @@ public class RegionGenerationHandler {
     }
 
     private GenerationRegion generate(RegionTilePos pos) {
-        RegionData data = this.dataProvider.populateData(this, pos, GenerationRegion.BUFFERED_SIZE, GenerationRegion.BUFFERED_SIZE);
+        this.dataProvider.enqueueData(this.sourceHandler, pos);
+        RegionData data = this.dataProvider.populateData(this.sourceHandler, pos);
+
         return new GenerationRegion(pos, data);
     }
 

@@ -84,7 +84,12 @@ public class WorldPreview implements IBlockAccess {
             this.centerPos = new ChunkPos(0, 0);
         }
 
-        this.centerBlockPos = new BlockPos(this.centerPos.x << 4, 0, this.centerPos.z << 4);
+        this.centerBlockPos = new BlockPos(this.centerPos.getXStart(), 0, this.centerPos.getZStart());
+
+        int viewRangeBlocks = VIEW_RANGE << 4;
+        BlockPos minPos = this.centerBlockPos.add(-viewRangeBlocks, 0, -viewRangeBlocks);
+        BlockPos maxPos = this.centerBlockPos.add(viewRangeBlocks + 16, 0, viewRangeBlocks + 16);
+        this.worldData.getRegionHandler().enqueueArea(minPos, maxPos);
 
         this.executor.submit(() -> {
             try {
@@ -93,7 +98,7 @@ public class WorldPreview implements IBlockAccess {
                     if (this.executor.isTerminated() || this.executor.isShutdown()) {
                         break;
                     }
-                    chunk.executeBuild(this.executor, this::takeBuilder);
+                    chunk.submitBuild(this.executor, this::takeBuilder, this::returnBuilder);
                 }
                 this.previewChunks = chunks;
             } catch (Exception e) {
