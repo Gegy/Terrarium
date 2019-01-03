@@ -48,7 +48,11 @@ public abstract class TiledDataSource<T extends TiledDataAccess> {
     public abstract SourceResult<T> parseStream(DataTilePos pos, InputStream stream) throws IOException;
 
     @Nullable
-    public DataTilePos getFinalTilePos(DataTilePos pos) {
+    public T getLocalTile(DataTilePos pos) {
+        return null;
+    }
+
+    public DataTilePos getLoadTilePos(DataTilePos pos) {
         return pos;
     }
 

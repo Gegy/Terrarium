@@ -13,6 +13,7 @@ import net.gegy1000.earth.server.world.pipeline.adapter.SlopeNoiseAdapter;
 import net.gegy1000.earth.server.world.pipeline.adapter.WaterApplyAdapter;
 import net.gegy1000.earth.server.world.pipeline.adapter.WaterCarveAdapter;
 import net.gegy1000.earth.server.world.pipeline.adapter.WaterLevelingAdapter;
+import net.gegy1000.earth.server.world.pipeline.adapter.WorldEdgeAdapter;
 import net.gegy1000.earth.server.world.pipeline.composer.BoulderDecorationComposer;
 import net.gegy1000.earth.server.world.pipeline.composer.ModdedDecorationComposer;
 import net.gegy1000.earth.server.world.pipeline.composer.WaterFillSurfaceComposer;
@@ -77,6 +78,7 @@ import net.gegy1000.terrarium.server.world.pipeline.source.tile.UnsignedByteRast
 import net.minecraft.client.gui.GuiCreateWorld;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.fml.relauncher.Side;
@@ -264,6 +266,9 @@ public class EarthWorldType extends TerrariumWorldType {
 
             DataLayer<WaterRasterTile> waterProducer = new WaterProcessorLayer(waterBankLayer);
 
+            BlockPos minPos = new Coordinate(this.earthCoordinates, -90.0, -180.0).toBlockPos();
+            BlockPos maxPos = new Coordinate(this.earthCoordinates, 90.0, 180.0).toBlockPos();
+
             return TerrariumDataProvider.builder()
                     .withComponent(RegionComponentType.HEIGHT, heightProducer)
                     .withComponent(RegionComponentType.SLOPE, this.createSlopeProducer(heightSampler))
@@ -279,6 +284,7 @@ public class EarthWorldType extends TerrariumWorldType {
                     .withAdapter(new SlopeNoiseAdapter(this.world, RegionComponentType.SLOPE, this.settings.getDouble(NOISE_SCALE)))
 //                    .withAdapter(new OceanDepthCorrectionAdapter(RegionComponentType.HEIGHT, this.properties.getInteger(OCEAN_DEPTH)))
                     .withAdapter(new BeachAdapter(this.world, RegionComponentType.COVER, EarthComponentTypes.WATER, this.settings.getInteger(BEACH_SIZE), EarthCoverTypes.BEACH))
+                    .withAdapter(new WorldEdgeAdapter(RegionComponentType.HEIGHT, RegionComponentType.COVER, this.settings.getInteger(HEIGHT_ORIGIN), minPos, maxPos))
 //                    .withAdapter(new WaterFlattenAdapter(RegionComponentType.HEIGHT, RegionComponentType.COVER, 15, EarthCoverTypes.WATER))
                     .build();
         }
