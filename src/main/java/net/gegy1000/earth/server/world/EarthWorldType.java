@@ -10,17 +10,17 @@ import net.gegy1000.earth.server.world.cover.EarthCoverTypes;
 import net.gegy1000.earth.server.world.pipeline.EarthComponentTypes;
 import net.gegy1000.earth.server.world.pipeline.adapter.BeachAdapter;
 import net.gegy1000.earth.server.world.pipeline.adapter.HeightNoiseAdapter;
-import net.gegy1000.earth.server.world.pipeline.adapter.OsmAreaCoverAdapter;
+import net.gegy1000.earth.server.world.pipeline.adapter.SlopeNoiseAdapter;
 import net.gegy1000.earth.server.world.pipeline.adapter.WaterApplyAdapter;
 import net.gegy1000.earth.server.world.pipeline.adapter.WaterCarveAdapter;
 import net.gegy1000.earth.server.world.pipeline.adapter.WaterLevelingAdapter;
+import net.gegy1000.earth.server.world.pipeline.adapter.WorldEdgeAdapter;
 import net.gegy1000.earth.server.world.pipeline.composer.BoulderDecorationComposer;
 import net.gegy1000.earth.server.world.pipeline.composer.ModdedDecorationComposer;
 import net.gegy1000.earth.server.world.pipeline.composer.WaterFillSurfaceComposer;
 import net.gegy1000.earth.server.world.pipeline.layer.OsmCoastlineLayer;
 import net.gegy1000.earth.server.world.pipeline.layer.OsmPopulatorLayer;
 import net.gegy1000.earth.server.world.pipeline.layer.OsmSampleLayer;
-import net.gegy1000.earth.server.world.pipeline.layer.OsmWaterBodyLayer;
 import net.gegy1000.earth.server.world.pipeline.layer.WaterBankPopulatorLayer;
 import net.gegy1000.earth.server.world.pipeline.layer.WaterProcessorLayer;
 import net.gegy1000.earth.server.world.pipeline.source.GlobcoverSource;
@@ -85,6 +85,7 @@ import net.minecraft.client.gui.GuiCreateWorld;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldType;
@@ -319,9 +320,12 @@ public class EarthWorldType extends TerrariumWorldType {
 
             DataLayer<ShortRasterTile> waterBankLayer = new WaterBankPopulatorLayer(coverProducer, heightProducer);
             waterBankLayer = new OsmCoastlineLayer(waterBankLayer, osmProducer, this.earthCoordinates);
-            waterBankLayer = new OsmWaterBodyLayer(waterBankLayer, osmProducer, this.earthCoordinates);
+//            waterBankLayer = new OsmWaterBodyLayer(waterBankLayer, osmProducer, this.earthCoordinates);
 
             DataLayer<WaterRasterTile> waterProducer = new WaterProcessorLayer(waterBankLayer);
+
+            BlockPos minPos = new Coordinate(this.earthCoordinates, -90.0, -180.0).toBlockPos();
+            BlockPos maxPos = new Coordinate(this.earthCoordinates, 90.0, 180.0).toBlockPos();
 
             return TerrariumDataProvider.builder()
                     .withComponent(RegionComponentType.HEIGHT, heightProducer)
@@ -329,14 +333,16 @@ public class EarthWorldType extends TerrariumWorldType {
                     .withComponent(RegionComponentType.COVER, coverProducer)
                     .withComponent(EarthComponentTypes.OSM, osmProducer)
                     .withComponent(EarthComponentTypes.WATER, waterProducer)
-                    .withAdapter(new OsmAreaCoverAdapter(this.earthCoordinates, EarthComponentTypes.OSM, RegionComponentType.COVER))
+//                    .withAdapter(new OsmAreaCoverAdapter(this.earthCoordinates, EarthComponentTypes.OSM, RegionComponentType.COVER))
                     .withAdapter(new WaterApplyAdapter(this.earthCoordinates, EarthComponentTypes.WATER, RegionComponentType.HEIGHT, RegionComponentType.COVER))
                     .withAdapter(new HeightNoiseAdapter(this.world, RegionComponentType.HEIGHT, EarthComponentTypes.WATER, 2, 0.04, this.settings.getDouble(NOISE_SCALE)))
                     .withAdapter(new HeightTransformAdapter(RegionComponentType.HEIGHT, this.settings.getDouble(HEIGHT_SCALE) * this.worldScale, heightOrigin))
                     .withAdapter(new WaterLevelingAdapter(EarthComponentTypes.WATER, RegionComponentType.HEIGHT, heightOrigin + 1))
                     .withAdapter(new WaterCarveAdapter(EarthComponentTypes.WATER, RegionComponentType.HEIGHT, this.settings.getInteger(OCEAN_DEPTH)))
+                    .withAdapter(new SlopeNoiseAdapter(this.world, RegionComponentType.SLOPE, this.settings.getDouble(NOISE_SCALE)))
 //                    .withAdapter(new OceanDepthCorrectionAdapter(RegionComponentType.HEIGHT, this.properties.getInteger(OCEAN_DEPTH)))
                     .withAdapter(new BeachAdapter(this.world, RegionComponentType.COVER, EarthComponentTypes.WATER, this.settings.getInteger(BEACH_SIZE), EarthCoverTypes.BEACH))
+                    .withAdapter(new WorldEdgeAdapter(RegionComponentType.HEIGHT, RegionComponentType.COVER, this.settings.getInteger(HEIGHT_ORIGIN), minPos, maxPos))
 //                    .withAdapter(new WaterFlattenAdapter(RegionComponentType.HEIGHT, RegionComponentType.COVER, 15, EarthCoverTypes.WATER))
                     .build();
         }
@@ -365,6 +371,13 @@ public class EarthWorldType extends TerrariumWorldType {
             sources.add(new OverpassSource(
                     this.earthCoordinates,
                     0.3,
+                    "osm/coastline",
+                    new ResourceLocation(TerrariumEarth.MODID, "query/coastline_overpass_query.oql"),
+                    1
+            ));
+            /*sources.add(new OverpassSource(
+                    this.earthCoordinates,
+                    0.3,
                     "osm/outline",
                     new ResourceLocation(TerrariumEarth.MODID, "query/outline_overpass_query.oql"),
                     12
@@ -376,7 +389,7 @@ public class EarthWorldType extends TerrariumWorldType {
                     new ResourceLocation(TerrariumEarth.MODID, "query/natural_overpass_query.oql"),
                     1
             ));
-            /*sources.add(new OverpassSource(
+            sources.add(new OverpassSource(
                     this.earthCoordinates,
                     0.1,
                     "osm/general",

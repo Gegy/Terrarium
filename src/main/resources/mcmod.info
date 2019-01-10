@@ -5,6 +5,7 @@
     "description": "Data-based world generation library",
     "version": "${version}",
     "url": "https://github.com/gegy1000/Terrarium/",
+    "logoFile": "assets/terrarium/banner.png",
     "authorList": [
       "gegy1000"
     ],
@@ -17,6 +18,7 @@
     "description": "Generation of the Earth in a new customizable world type",
     "version": "${version}",
     "url": "https://github.com/gegy1000/Terrarium/",
+    "logoFile": "assets/terrarium/banner.png",
     "authorList": [
       "gegy1000"
     ],

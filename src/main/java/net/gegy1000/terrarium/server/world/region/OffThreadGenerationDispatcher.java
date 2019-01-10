@@ -89,6 +89,14 @@ public class OffThreadGenerationDispatcher implements RegionGenerationDispatcher
     }
 
     @Override
+    public void cancel(RegionTilePos pos) {
+        RegionFuture future = this.queuedRegions.get(pos);
+        if (future != null) {
+            future.cancel();
+        }
+    }
+
+    @Override
     public void close() {
         this.regionLoadService.shutdownNow();
     }

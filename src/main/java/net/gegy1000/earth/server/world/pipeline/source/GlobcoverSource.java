@@ -12,15 +12,28 @@ import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
 import net.minecraft.util.ResourceLocation;
 import org.tukaani.xz.SingleXZInputStream;
 
+import javax.annotation.Nullable;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Arrays;
 
 public class GlobcoverSource extends TiledDataSource<CoverRasterTile> {
     public static final int TILE_SIZE = 2560;
     private static final CoverRasterTile DEFAULT_TILE = new CoverRasterTile(TILE_SIZE, TILE_SIZE);
+
+    private static final int MIN_X = -26;
+    private static final int MIN_Y = -13;
+
+    private static final int MAX_X = 25;
+    private static final int MAX_Y = 9;
+
+    static {
+        CoverType[] data = DEFAULT_TILE.getData();
+        Arrays.fill(data, EarthCoverTypes.SNOW);
+    }
 
     public GlobcoverSource(CoordinateState coordinateState, String cacheRoot) {
         super(new ResourceLocation(TerrariumEarth.MODID, "globcover"), new File(GLOBAL_CACHE_ROOT, cacheRoot), new Coordinate(coordinateState, TILE_SIZE, TILE_SIZE));
@@ -52,6 +65,17 @@ public class GlobcoverSource extends TiledDataSource<CoverRasterTile> {
         return DEFAULT_TILE;
     }
 
+    @Nullable
+    @Override
+    public CoverRasterTile getLocalTile(DataTilePos pos) {
+        int x = pos.getTileX();
+        int y = pos.getTileZ();
+        if (x < MIN_X || y < MIN_Y || x > MAX_X || y > MAX_Y) {
+            return DEFAULT_TILE;
+        }
+        return null;
+    }
+
     @Override
     public SourceResult<CoverRasterTile> parseStream(DataTilePos pos, InputStream stream) throws IOException {
         try (DataInputStream input = new DataInputStream(stream)) {
@@ -68,12 +92,19 @@ public class GlobcoverSource extends TiledDataSource<CoverRasterTile> {
             byte[] buffer = new byte[width * height];
             input.readFully(buffer);
 
-            CoverType[] cover = new CoverType[buffer.length];
-            for (int i = 0; i < buffer.length; i++) {
-                cover[i] = EarthCoverTypes.Glob.get(buffer[i]).getCoverType();
+            CoverType[] cover = new CoverType[TILE_SIZE * TILE_SIZE];
+            Arrays.fill(cover, EarthCoverTypes.SNOW);
+
+            for (int bufferZ = 0; bufferZ < height; bufferZ++) {
+                for (int bufferX = 0; bufferX < width; bufferX++) {
+                    int tileX = bufferX + offsetX;
+                    int tileZ = bufferZ + offsetZ;
+                    byte globId = buffer[bufferX + bufferZ * width];
+                    cover[tileX + tileZ * TILE_SIZE] = EarthCoverTypes.Glob.get(globId).getCoverType();
+                }
             }
 
-            return SourceResult.success(new CoverRasterTile(cover, offsetX, offsetZ, width, height));
+            return SourceResult.success(new CoverRasterTile(cover, TILE_SIZE, TILE_SIZE));
         }
     }
 }

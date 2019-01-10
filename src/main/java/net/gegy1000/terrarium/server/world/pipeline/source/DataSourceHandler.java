@@ -160,15 +160,17 @@ public class DataSourceHandler {
 
     private <T extends TiledDataAccess> SourceResult<T> loadTile(DataTileKey<T> key) {
         TiledDataSource<T> source = key.getSource();
-        DataTilePos finalPos = source.getFinalTilePos(key.toPos());
-        if (finalPos == null) {
-            return SourceResult.empty();
+        T localTile = source.getLocalTile(key.toPos());
+        if (localTile != null) {
+            return SourceResult.success(localTile);
         }
-        File cachedFile = new File(source.getCacheRoot(), source.getCachedName(finalPos));
-        if (!source.shouldLoadCache(finalPos, cachedFile)) {
-            return this.loadRemoteTile(source, finalPos, cachedFile);
+
+        DataTilePos loadPos = source.getLoadTilePos(key.toPos());
+        File cachedFile = new File(source.getCacheRoot(), source.getCachedName(loadPos));
+        if (!source.shouldLoadCache(loadPos, cachedFile)) {
+            return this.loadRemoteTile(source, loadPos, cachedFile);
         } else {
-            return this.loadCachedTile(source, finalPos, cachedFile);
+            return this.loadCachedTile(source, loadPos, cachedFile);
         }
     }
 

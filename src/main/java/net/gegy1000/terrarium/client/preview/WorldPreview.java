@@ -90,6 +90,11 @@ public class WorldPreview implements IBlockAccess {
             BlockPos centerChunkPos = new BlockPos(spawnChunkX, averageHeight >> 4, spawnChunkZ);
             this.centerBlockPos = new BlockPos((centerChunkPos.getX() << 4) + 8, averageHeight, (centerChunkPos.getZ() << 4) + 8);
 
+            int viewRangeBlocks = VIEW_RANGE << 4;
+            BlockPos minPos = this.centerBlockPos.add(-viewRangeBlocks, 0, -viewRangeBlocks);
+            BlockPos maxPos = this.centerBlockPos.add(viewRangeBlocks + 16, 0, viewRangeBlocks + 16);
+            this.worldData.getRegionHandler().trackArea(minPos, maxPos);
+
             this.generator = new PreviewChunkGenerator(centerChunkPos, this.world.getCubeGenerator(), VIEW_RANGE);
             this.generator.setCubeHandler(this::handleGeneratedCube);
             this.generator.setColumnHandler(this::handleGeneratedColumn);

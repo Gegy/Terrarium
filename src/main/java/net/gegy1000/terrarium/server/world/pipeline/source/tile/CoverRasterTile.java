@@ -9,32 +9,22 @@ import java.util.Arrays;
 
 public class CoverRasterTile implements RasterDataAccess<CoverType>, TiledDataAccess {
     private final CoverType[] cover;
-    private final int offsetX;
-    private final int offsetZ;
     private final int width;
     private final int height;
 
-    public CoverRasterTile(CoverType[] cover, int offsetX, int offsetZ, int width, int height) {
+    public CoverRasterTile(CoverType[] cover, int width, int height) {
         if (cover.length != width * height) {
             throw new IllegalArgumentException("Given width and height do not match cover length!");
         }
         this.cover = cover;
-        this.offsetX = offsetX;
-        this.offsetZ = offsetZ;
         this.width = width;
         this.height = height;
     }
 
     public CoverRasterTile(DataView view) {
         this.cover = new CoverType[view.getWidth() * view.getHeight()];
-        this.offsetX = 0;
-        this.offsetZ = 0;
         this.width = view.getWidth();
         this.height = view.getHeight();
-    }
-
-    public CoverRasterTile(CoverType[] cover, int width, int height) {
-        this(cover, 0, 0, width, height);
     }
 
     public CoverRasterTile(int width, int height) {
@@ -53,12 +43,12 @@ public class CoverRasterTile implements RasterDataAccess<CoverType>, TiledDataAc
 
     @Override
     public void set(int x, int z, CoverType value) {
-        this.cover[(x - this.offsetX) + (z - this.offsetZ) * this.width] = value;
+        this.cover[x + z * this.width] = value;
     }
 
     @Override
     public CoverType get(int x, int z) {
-        return this.cover[(x - this.offsetX) + (z - this.offsetZ) * this.width];
+        return this.cover[x + z * this.width];
     }
 
     @Override

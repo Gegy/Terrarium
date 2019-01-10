@@ -9,6 +9,7 @@ import net.gegy1000.terrarium.server.world.pipeline.component.AttachedComponent;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponent;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.layer.CachedLayerContext;
+import net.gegy1000.terrarium.server.world.pipeline.source.DataSourceHandler;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.TiledDataAccess;
 import net.gegy1000.terrarium.server.world.region.GenerationRegion;
 import net.gegy1000.terrarium.server.world.region.RegionData;
@@ -23,6 +24,8 @@ import java.util.Map;
 import java.util.Set;
 
 public class TerrariumDataProvider {
+    private static final int DATA_SIZE = GenerationRegion.BUFFERED_SIZE;
+
     private final ImmutableMap<RegionComponentType<?>, AttachedComponent<?>> attachedComponents;
     private final ImmutableList<RegionAdapter> adapters;
 
@@ -38,28 +41,21 @@ public class TerrariumDataProvider {
         return new Builder();
     }
 
-    public void prepareRegionData(RegionGenerationHandler generationHandler, RegionTilePos pos) {
-        CachedLayerContext context = new CachedLayerContext(generationHandler.getSourceHandler());
-        DataView view = new DataView(pos.getMinBufferedX(), pos.getMinBufferedZ(), GenerationRegion.BUFFERED_SIZE, GenerationRegion.BUFFERED_SIZE);
+    public void enqueueData(DataSourceHandler sourceHandler, RegionTilePos pos) {
+        CachedLayerContext context = new CachedLayerContext(sourceHandler);
+        DataView view = new DataView(pos.getMinBufferedX(), pos.getMinBufferedZ(), DATA_SIZE, DATA_SIZE);
 
         Set<DataTileKey<?>> requiredData = new HashSet<>();
         for (AttachedComponent<?> attachedComponent : this.attachedComponents.values()) {
             requiredData.addAll(attachedComponent.getRequiredData(context, view));
         }
 
-        generationHandler.getSourceHandler().enqueueData(requiredData);
+        sourceHandler.enqueueData(requiredData);
     }
 
-    public RegionData populateData(RegionGenerationHandler generationHandler, RegionTilePos pos) {
-        CachedLayerContext context = new CachedLayerContext(generationHandler.getSourceHandler());
-        DataView view = new DataView(pos.getMinBufferedX(), pos.getMinBufferedZ(), GenerationRegion.BUFFERED_SIZE, GenerationRegion.BUFFERED_SIZE);
-
-        Set<DataTileKey<?>> requiredData = new HashSet<>();
-        for (AttachedComponent<?> attachedComponent : this.attachedComponents.values()) {
-            requiredData.addAll(attachedComponent.getRequiredData(context, view));
-        }
-
-        generationHandler.getSourceHandler().enqueueData(requiredData);
+    public RegionData populateData(DataSourceHandler sourceHandler, RegionTilePos pos) {
+        CachedLayerContext context = new CachedLayerContext(sourceHandler);
+        DataView view = new DataView(pos.getMinBufferedX(), pos.getMinBufferedZ(), DATA_SIZE, DATA_SIZE);
 
         Map<RegionComponentType<?>, RegionComponent<?>> populatedComponents = new HashMap<>();
         for (AttachedComponent<?> attachedComponent : this.attachedComponents.values()) {
@@ -74,17 +70,17 @@ public class TerrariumDataProvider {
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends TiledDataAccess> T populatePartialData(RegionGenerationHandler generationHandler, RegionComponentType<T> componentType, int x, int z, int width, int height) {
+    public <T extends TiledDataAccess> T populatePartialData(DataSourceHandler sourceHandler, RegionComponentType<T> componentType, int x, int z, int width, int height) {
         AttachedComponent<T> attachedComponent = (AttachedComponent<T>) this.attachedComponents.get(componentType);
         if (attachedComponent == null) {
             throw new IllegalArgumentException("Cannot populate partial data tile for component that is not attached!");
         }
 
-        CachedLayerContext context = new CachedLayerContext(generationHandler.getSourceHandler());
+        CachedLayerContext context = new CachedLayerContext(sourceHandler);
         DataView view = new DataView(x, z, width, height);
 
         Set<DataTileKey<?>> requiredData = new HashSet<>(attachedComponent.getRequiredData(context, view));
-        generationHandler.getSourceHandler().enqueueData(requiredData);
+        sourceHandler.enqueueData(requiredData);
 
         RegionComponent<T> component = attachedComponent.createAndPopulate(context, view);
         return component.getData();
@@ -102,7 +98,7 @@ public class TerrariumDataProvider {
     private void applyAdapters(RegionData data, RegionTilePos pos) {
         for (RegionAdapter adapter : this.adapters) {
             try {
-                adapter.adapt(data, pos.getMinBufferedX(), pos.getMinBufferedZ(), GenerationRegion.BUFFERED_SIZE, GenerationRegion.BUFFERED_SIZE);
+                adapter.adapt(data, pos.getMinBufferedX(), pos.getMinBufferedZ(), DATA_SIZE, DATA_SIZE);
             } catch (Exception e) {
                 Terrarium.LOGGER.warn("Failed to run adapter {}", adapter.getClass().getName(), e);
             }

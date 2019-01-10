@@ -15,10 +15,12 @@ import net.gegy1000.terrarium.server.world.pipeline.TerrariumDataProvider;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataSourceHandler;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.RasterDataAccess;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -58,28 +60,31 @@ public class RegionGenerationHandler {
         return new CubeTrackerAccess(world);
     }
 
-    public void trackRegions(WorldServer world) {
-        Collection<TrackedColumn> columnEntries = this.chunkTrackerAccess.getSortedTrackedColumns();
+    public void trackArea(BlockPos min, BlockPos max) {
+        Collection<RegionTilePos> regions = this.getRegions(min.getX(), min.getZ(), max.getX(), max.getZ());
+        for (RegionTilePos region : regions) {
+            this.dataProvider.enqueueData(this.sourceHandler, region);
+        }
+        this.trackRegions(regions);
+    }
 
-        Set<ChunkPos> trackedChunks = columnEntries.stream()
-                .map(TrackedColumn::getPos)
-                .collect(Collectors.toSet());
-        Set<ChunkPos> untrackedChunks = this.chunkStateMap.keySet().stream()
-                .filter(pos -> !trackedChunks.contains(pos))
-                .collect(Collectors.toSet());
-        untrackedChunks.forEach(this.chunkStateMap::remove);
+    public void enqueueArea(int minX, int minZ, int maxX, int maxZ) {
+        Collection<RegionTilePos> regions = this.getRegions(minX, minZ, maxX, maxZ);
+        for (RegionTilePos region : regions) {
+            this.dataProvider.enqueueData(this.sourceHandler, region);
+        }
+    }
 
-        ChunkTrackerHooks chunkHooks = world.getCapability(TerrariumCapabilities.chunkHooksCapability, null);
-
-        Collection<RegionTilePos> requiredRegions = this.collectRequiredRegions(world, chunkHooks, columnEntries);
-        this.dispatcher.setRequiredRegions(requiredRegions);
-
-        this.unpauseChunks(chunkHooks);
+    public void trackRegions(Collection<RegionTilePos> regions) {
+        this.dispatcher.setRequiredRegions(regions);
 
         Set<RegionTilePos> untrackedRegions = this.regionCache.keySet().stream()
-                .filter(pos -> !requiredRegions.contains(pos))
+                .filter(pos -> !regions.contains(pos))
                 .collect(Collectors.toSet());
-        untrackedRegions.forEach(this.regionCache::remove);
+        untrackedRegions.forEach(pos -> {
+            this.regionCache.remove(pos);
+            this.dispatcher.cancel(pos);
+        });
 
         Collection<GenerationRegion> completedRegions = this.dispatcher.collectCompletedRegions();
         for (GenerationRegion region : completedRegions) {
@@ -88,6 +93,18 @@ public class RegionGenerationHandler {
             }
             this.regionCache.put(region.getPos(), region);
         }
+    }
+
+    public void trackRegions(WorldServer world) {
+        Collection<TrackedColumn> columnEntries = this.chunkTrackerAccess.getSortedTrackedColumns();
+        ChunkTrackerHooks chunkHooks = world.getCapability(TerrariumCapabilities.chunkHooksCapability, null);
+
+        Collection<RegionTilePos> requiredRegions = this.collectRequiredRegions(world, chunkHooks, columnEntries);
+        this.dispatcher.setRequiredRegions(requiredRegions);
+
+        this.unpauseChunks(chunkHooks);
+
+        this.trackRegions(requiredRegions);
     }
 
     private void unpauseChunks(ChunkTrackerHooks chunkHooks) {
@@ -142,6 +159,22 @@ public class RegionGenerationHandler {
         return new RegionTilePos(Math.floorDiv(blockX, GenerationRegion.SIZE), Math.floorDiv(blockZ, GenerationRegion.SIZE));
     }
 
+    private Collection<RegionTilePos> getRegions(int minX, int minZ, int maxX, int maxZ) {
+        RegionTilePos minRegion = this.getRegionPos(minX, minZ);
+        RegionTilePos maxRegion = this.getRegionPos(maxX, maxZ);
+
+        int width = maxRegion.getTileX() - minRegion.getTileX() + 1;
+        int height = maxRegion.getTileZ() - minRegion.getTileZ() + 1;
+        Collection<RegionTilePos> regions = new ArrayList<>(width * height);
+        for (int regionZ = minRegion.getTileZ(); regionZ <= maxRegion.getTileZ(); regionZ++) {
+            for (int regionX = minRegion.getTileX(); regionX <= maxRegion.getTileX(); regionX++) {
+                regions.add(new RegionTilePos(regionX, regionZ));
+            }
+        }
+
+        return regions;
+    }
+
     public GenerationRegion get(RegionTilePos pos) {
         GenerationRegion cachedRegion = this.regionCache.get(pos);
         if (cachedRegion != null) {
@@ -157,21 +190,11 @@ public class RegionGenerationHandler {
         return this.createDefaultRegion(pos);
     }
 
-    public void prepareAreaData(int originX, int originZ, int width, int height) {
-        RegionTilePos minPos = this.getRegionPos(originX, originZ);
-        RegionTilePos maxPos = this.getRegionPos(originX + width, originZ + height);
-        for (int regionZ = minPos.getTileZ(); regionZ <= maxPos.getTileZ(); regionZ++) {
-            for (int regionX = minPos.getTileX(); regionX <= maxPos.getTileX(); regionX++) {
-                this.dataProvider.prepareRegionData(this, new RegionTilePos(regionX, regionZ));
-            }
-        }
-    }
-
     public <T extends RasterDataAccess<V>, V> void fillRaster(RegionComponentType<T> componentType, T result, int originX, int originZ) {
         int width = result.getWidth();
         int height = result.getHeight();
 
-        this.prepareAreaData(originX, originZ, width, height);
+        this.enqueueArea(originX, originZ, originX + width, originZ + height);
 
         for (int localZ = 0; localZ < height; localZ++) {
             int blockZ = originZ + localZ;
@@ -190,7 +213,7 @@ public class RegionGenerationHandler {
 
     public <T extends RasterDataAccess<V>, V> T computePartialRaster(RegionComponentType<T> componentType, int originX, int originZ, int width, int height) {
         if (!this.hasRegions(originX, originZ, width, height)) {
-            return this.dataProvider.populatePartialData(this, componentType, originX, originZ, width, height);
+            return this.dataProvider.populatePartialData(this.sourceHandler, componentType, originX, originZ, width, height);
         } else {
             T result = componentType.createDefaultData(width, height);
             this.fillRaster(componentType, result, originX, originZ);
@@ -216,7 +239,9 @@ public class RegionGenerationHandler {
     }
 
     private GenerationRegion generate(RegionTilePos pos) {
-        RegionData data = this.dataProvider.populateData(this, pos);
+        this.dataProvider.enqueueData(this.sourceHandler, pos);
+        RegionData data = this.dataProvider.populateData(this.sourceHandler, pos);
+
         return new GenerationRegion(pos, data);
     }
 

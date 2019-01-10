@@ -1,0 +1,9 @@
+[out:json]
+[timeout:30][bbox:{{bbox}}];
+
+(
+  way["natural"="coastline"];
+  rel["natural"="coastline"];
+);
+(._;>;);
+out geom qt;

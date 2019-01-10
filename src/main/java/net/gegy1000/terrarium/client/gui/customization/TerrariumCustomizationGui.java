@@ -83,13 +83,6 @@ public class TerrariumCustomizationGui extends GuiScreen {
     }
 
     @Override
-    public void onResize(Minecraft client, int w, int h) {
-        this.freeze = true;
-        super.onResize(client, w, h);
-        this.freeze = false;
-    }
-
-    @Override
     public void initGui() {
         int previewWidth = this.width / 2 - PADDING_X * 2;
         int previewHeight = this.height - TOP_OFFSET - BOTTOM_OFFSET;
@@ -243,6 +236,16 @@ public class TerrariumCustomizationGui extends GuiScreen {
         this.drawCenteredString(this.fontRenderer, title, this.width / 2, 20, 0xFFFFFF);
 
         super.drawScreen(mouseX, mouseY, partialTicks);
+    }
+
+    @Override
+    public void onResize(Minecraft client, int width, int height) {
+        this.freeze = true;
+        try {
+            super.onResize(client, width, height);
+        } finally {
+            this.freeze = false;
+        }
     }
 
     @Override

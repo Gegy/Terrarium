@@ -43,7 +43,7 @@ public class SnowCover extends EarthCoverType implements BeachyCover {
         public void populateBlockCover(Random random, int originX, int originZ, IBlockState[] coverBlockBuffer) {
             UnsignedByteRasterTile slopeRaster = this.context.getSlopeRaster();
             this.iterateChunk((localX, localZ) -> {
-                int slope = slopeRaster.getByte(localX, localZ) + random.nextInt(30) - random.nextInt(30);
+                int slope = slopeRaster.getByte(localX, localZ);
                 coverBlockBuffer[localX + localZ * 16] = slope >= EXTREME_CLIFF_SLOPE ? DARK_ROCK : SNOW;
             });
         }

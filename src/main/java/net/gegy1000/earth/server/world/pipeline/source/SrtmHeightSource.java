@@ -35,9 +35,9 @@ public class SrtmHeightSource extends TiledDataSource<ShortRasterTile> {
         try (DataInputStream input = new DataInputStream(new BufferedInputStream(new GZIPInputStream(SrtmHeightSource.getTilesURL().openStream())))) {
             int count = input.readInt();
             for (int i = 0; i < count; i++) {
-                int latitude = input.readShort();
+                int latitude = -input.readShort();
                 int longitude = input.readShort();
-                VALID_TILES.add(new DataTilePos(longitude, -latitude));
+                VALID_TILES.add(new DataTilePos(longitude, latitude));
             }
         }
     }
@@ -88,13 +88,18 @@ public class SrtmHeightSource extends TiledDataSource<ShortRasterTile> {
         return DEFAULT_TILE;
     }
 
+    @Override
+    public DataTilePos getLoadTilePos(DataTilePos pos) {
+        return new DataTilePos(pos.getTileX(), pos.getTileZ() + 1);
+    }
+
     @Nullable
     @Override
-    public DataTilePos getFinalTilePos(DataTilePos pos) {
+    public ShortRasterTile getLocalTile(DataTilePos pos) {
         if (!VALID_TILES.isEmpty() && !VALID_TILES.contains(pos)) {
-            return null;
+            return DEFAULT_TILE;
         }
-        return new DataTilePos(pos.getTileX(), pos.getTileZ() + 1);
+        return null;
     }
 
     @Override
