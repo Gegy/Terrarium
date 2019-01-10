@@ -73,7 +73,7 @@ public class OsmWaterBodyLayer extends OsmWaterLayer {
                 }
             }
 
-            DebugImageWriter.write("water_" + view.getX() + "_" + view.getY() + "_b", resultTile.getData(), OsmCoastlineLayer.BANK_DEBUG, view.getWidth(), view.getHeight());
+            DebugImageWriter.write("water_" + view.getX() + "_" + view.getY() + "_b", resultTile.getData(), BANK_DEBUG, view.getWidth(), view.getHeight());
 
             return resultTile;
         }

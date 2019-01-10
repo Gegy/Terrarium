@@ -12,6 +12,7 @@ import net.gegy1000.terrarium.server.world.cover.CoverBiomeSelectors;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectionSeedLayer;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.UnsignedByteRasterTile;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
@@ -64,7 +65,13 @@ public class ShrublandCover extends EarthCoverType {
 
         @Override
         public void populateBlockCover(Random random, int originX, int originZ, IBlockState[] coverBlockBuffer) {
+            UnsignedByteRasterTile slopeRaster = this.context.getSlopeRaster();
+
             this.coverFromLayer(coverBlockBuffer, originX, originZ, this.coverSelector, (sampledValue, localX, localZ) -> {
+                if (slopeRaster.getByte(localX, localZ) >= CLIFF_SLOPE) {
+                    return HARDENED_CLAY;
+                }
+
                 switch (sampledValue) {
                     case LAYER_GRASS:
                         return GRASS;
@@ -79,13 +86,15 @@ public class ShrublandCover extends EarthCoverType {
         @Override
         public void decorate(CubicPos chunkPos, ChunkPrimeWriter writer, Random random) {
             ShortRasterTile heightRaster = this.context.getHeightRaster();
+            UnsignedByteRasterTile slopeRaster = this.context.getSlopeRaster();
             int[] grassLayer = this.sampleChunk(this.grassSelector, chunkPos);
 
             this.iterateChunk((localX, localZ) -> {
                 int grassType = grassLayer[localX + localZ * 16];
                 if (grassType != 0 && random.nextInt(4) == 0) {
-                    int y = heightRaster.getShort(localX, localZ);
-                    if (grassType == 1) {
+                    int slope = slopeRaster.getByte(localX, localZ);
+                    if (slope < CLIFF_SLOPE && grassType == 1) {
+                        int y = heightRaster.getShort(localX, localZ);
                         writer.set(localX, y + 1, localZ, TALL_GRASS);
                     }
                 }
