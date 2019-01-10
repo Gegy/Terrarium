@@ -39,7 +39,7 @@ import java.util.concurrent.Executors;
 @SideOnly(Side.CLIENT)
 public class WorldPreview implements IBlockAccess {
     private static final int VIEW_RANGE = 12;
-    private static final int VIEW_WIDTH = VIEW_RANGE * 2 + 1;
+    private static final int VIEW_SIZE = VIEW_RANGE * 2 + 1;
 
     private final ExecutorService executor = Executors.newFixedThreadPool(2, new ThreadFactoryBuilder().setDaemon(true).setNameFormat("preview-build-%d").build());
 
@@ -53,11 +53,11 @@ public class WorldPreview implements IBlockAccess {
 
     private BlockPos centerBlockPos = BlockPos.ORIGIN;
 
-    private final Long2ObjectMap<PreviewColumnData> columnMap = new Long2ObjectOpenHashMap<>(VIEW_WIDTH * VIEW_WIDTH);
-    private final Long2ObjectMap<PreviewChunkData> chunkMap = new Long2ObjectOpenHashMap<>(VIEW_WIDTH * VIEW_WIDTH * VIEW_WIDTH);
+    private final Long2ObjectMap<PreviewColumnData> columnMap = new Long2ObjectOpenHashMap<>(VIEW_SIZE * VIEW_SIZE);
+    private final Long2ObjectMap<PreviewChunkData> chunkMap = new Long2ObjectOpenHashMap<>(VIEW_SIZE * VIEW_SIZE * VIEW_SIZE);
 
     private final Set<CubicPos> generatedChunks = new HashSet<>();
-    private final List<PreviewChunk> previewChunks = new ArrayList<>(VIEW_WIDTH * VIEW_WIDTH * VIEW_WIDTH);
+    private final List<PreviewChunk> previewChunks = new ArrayList<>(VIEW_SIZE * VIEW_SIZE * VIEW_SIZE);
 
     private final Object lock = new Object();
 
@@ -161,24 +161,29 @@ public class WorldPreview implements IBlockAccess {
     }
 
     private short computeAverageHeight(int chunkX, int chunkZ) {
-        int viewWidthBlocks = VIEW_WIDTH << 4;
+        int viewSizeBlocks = VIEW_SIZE << 4;
 
         int originX = (chunkX - VIEW_RANGE) << 4;
         int originZ = (chunkZ - VIEW_RANGE) << 4;
 
-        ShortRasterTile tile = new ShortRasterTile(viewWidthBlocks, viewWidthBlocks);
+        ShortRasterTile tile = new ShortRasterTile(viewSizeBlocks, viewSizeBlocks);
 
         RegionGenerationHandler regionHandler = this.worldData.getRegionHandler();
         regionHandler.fillRaster(RegionComponentType.HEIGHT, tile, originX, originZ);
 
         long total = 0;
+        long maxHeight = 0;
 
         short[] shortData = tile.getShortData();
         for (short value : shortData) {
+            if (value > maxHeight) {
+                maxHeight = value;
+            }
             total += value;
         }
 
-        return (short) (total / shortData.length);
+        long averageHeight = total / shortData.length;
+        return (short) ((averageHeight + maxHeight + maxHeight) / 3);
     }
 
     public void renderChunks() {
