@@ -7,9 +7,12 @@ import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
+import net.minecraft.command.EntityNotFoundException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -37,9 +40,9 @@ public class GeoTeleportCommand extends CommandBase {
 
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-        EntityPlayerMP player = CommandBase.getCommandSenderAsPlayer(sender);
+        Entity entity = getTeleportedEntity(server, sender, args);
 
-        EarthCapability earthData = player.world.getCapability(TerrariumEarth.earthCap, null);
+        EarthCapability earthData = entity.world.getCapability(TerrariumEarth.earthCap, null);
         if (earthData != null) {
             String argument = String.join(" ", args).replace(',', ' ');
             String[] locationInput = argument.split("\\s+");
@@ -47,7 +50,7 @@ public class GeoTeleportCommand extends CommandBase {
             Thread thread = new Thread(() -> {
                 try {
                     CommandLocation location = this.parseLocation(sender, locationInput);
-                    this.teleport(player, location.getCoordinate(sender, earthData));
+                    this.teleport(entity, location.getCoordinate(sender, earthData));
                 } catch (CommandException e) {
                     TextComponentTranslation message = new TextComponentTranslation(e.getMessage(), e.getErrorObjects());
                     message.getStyle().setColor(TextFormatting.RED);
@@ -57,7 +60,33 @@ public class GeoTeleportCommand extends CommandBase {
             thread.setDaemon(true);
             thread.start();
         } else {
-            throw DeferredTranslator.createException(player, "commands.earth.wrong_world");
+            throw DeferredTranslator.createException(entity, "commands.earth.wrong_world");
+        }
+    }
+
+    private static Entity getTeleportedEntity(MinecraftServer server, ICommandSender sender, String[] args) throws EntityNotFoundException {
+        EntityPlayerMP player = getPlayerSender(sender);
+
+        if (args.length == 3) {
+            try {
+                return getEntity(server, sender, args[0]);
+            } catch (CommandException e) {
+                // If we failed to parse an entity selector, it's probably not an entity selector. Let's use the sender
+            }
+        }
+
+        if (player == null) {
+            throw new EntityNotFoundException("Not player or no entity selector given");
+        }
+
+        return player;
+    }
+
+    private static EntityPlayerMP getPlayerSender(ICommandSender sender) {
+        try {
+            return getCommandSenderAsPlayer(sender);
+        } catch (CommandException e) {
+            return null;
         }
     }
 
@@ -90,19 +119,24 @@ public class GeoTeleportCommand extends CommandBase {
         return null;
     }
 
-    private void teleport(EntityPlayerMP player, Coordinate coordinate) {
+    private void teleport(Entity entity, Coordinate coordinate) {
         int blockX = MathHelper.floor(coordinate.getBlockX());
         int blockZ = MathHelper.floor(coordinate.getBlockZ());
 
-        Chunk chunk = player.world.getChunk(blockX >> 4, blockZ >> 4);
+        Chunk chunk = entity.world.getChunk(blockX >> 4, blockZ >> 4);
         int height = chunk.getHeightValue(blockX & 15, blockZ & 15);
 
-        player.dismountRidingEntity();
-        player.connection.setPlayerLocation(coordinate.getBlockX(), height + 0.5, coordinate.getBlockZ(), 180.0F, 0.0F);
-        player.motionY = 0.0;
-        player.onGround = true;
+        entity.dismountRidingEntity();
 
-        player.sendMessage(DeferredTranslator.translate(player, new TextComponentTranslation("commands.earth.geotp.success", coordinate.getX(), coordinate.getZ())));
+        if (entity instanceof EntityPlayerMP) {
+            NetHandlerPlayServer connection = ((EntityPlayerMP) entity).connection;
+            connection.setPlayerLocation(coordinate.getBlockX(), height + 0.5, coordinate.getBlockZ(), 180.0F, 0.0F);
+        }
+
+        entity.motionY = 0.0;
+        entity.onGround = true;
+
+        entity.sendMessage(DeferredTranslator.translate(entity, new TextComponentTranslation("commands.earth.geotp.success", coordinate.getX(), coordinate.getZ())));
     }
 
     private interface CommandLocation {
