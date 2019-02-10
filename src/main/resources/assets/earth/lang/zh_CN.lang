@@ -1,0 +1,97 @@
+# Generators
+
+generator.terrarium.earth=地球
+generator.terrarium.earth_debug=地球（除错）
+
+# GUI
+
+container.earth.geotool.name=地球工具箱
+geotool.earth.locate.success=你位于 %s
+
+gui.earth.credits=Terrarium 数据由以下提供：
+gui.earth.spawnpoint=设置出生点
+gui.earth.locate=定位玩家
+gui.earth.teleport=传送玩家
+
+gui.button.earth.teleport=传送
+
+gui.copy_box.copied.name=已复制到剪贴板！
+
+# Customization Categories
+
+category.terrarium.world.name=世界属性
+category.terrarium.features.name=特性属性
+category.terrarium.survival.name=生存属性
+
+# World Properties
+
+property.terrarium.world_scale.name=世界尺度
+property.terrarium.height_scale.name=高度尺度
+property.terrarium.noise_scale.name=噪点尺度
+property.terrarium.ocean_depth.name=海洋深度
+property.terrarium.height_origin.name=高度准线
+property.terrarium.beach_size.name=沙滩大小
+
+property.terrarium.world_scale.tooltip=现实生活中多少米对应着游戏中一个方块
+property.terrarium.height_scale.tooltip=在高度上从米到方块的乘子
+property.terrarium.noise_scale.tooltip=应用于整个世界的在高度上随机噪点生成效果乘子。 0 = 无噪点，1 = 默认噪点
+property.terrarium.ocean_depth.tooltip=生成的海洋底部深度
+property.terrarium.height_origin.tooltip=游戏中对应于海平面的高度
+property.terrarium.beach_size.tooltip=在海岸线周围生成海滩的半径
+
+# Feature Properties
+
+property.terrarium.enable_decoration.name=启用装饰
+property.terrarium.enable_default_decoration.name=启用默认装饰
+property.terrarium.enable_buildings.name=启用建筑物
+property.terrarium.enable_streets.name=启用街道
+
+property.terrarium.enable_default_features.name=启用默认特性
+property.terrarium.enable_cave_generation.name=启用洞穴生成
+property.terrarium.enable_resource_generation.name=启用资源生成
+property.terrarium.enable_lake_generation.name=启用湖泊生成
+property.terrarium.enable_lava_generation.name=启用岩浆生成
+property.terrarium.enable_mod_generation.name=启用模组生成
+
+property.terrarium.enable_decoration.tooltip=若启用，将放置植物和树木等装饰品
+property.terrarium.enable_default_decoration.tooltip=若启用，将放置原版和模组的装饰品
+property.terrarium.enable_buildings.tooltip=若启用，将生成来源于 OpenStreetMap 的建筑物
+property.terrarium.enable_streets.tooltip=若启用，将生成来源于 OpenStreetMap 的街道
+
+property.terrarium.enable_default_features.tooltip=若启用，将生成所有原版和模组的地图特性和结构
+property.terrarium.enable_cave_generation.tooltip=若启用，将随机生成洞穴和沟壑
+property.terrarium.enable_resource_generation.tooltip=若启用，将在整个世界上随机生成资源
+property.terrarium.enable_lake_generation.tooltip=若启用，将随机生成湖泊水体
+property.terrarium.enable_lava_generation.tooltip=若启用，将会在地表上下随机生成岩浆湖
+property.terrarium.enable_mod_generation.tooltip=若启用，将运行模组的生成器。既包括矿石又包括结构。
+
+# Presets
+
+preset.earth_default.name=地球：默认
+preset.earth_default.desc=默认地球生成器
+preset.earth_survival.name=地球：生存
+preset.earth_survival.desc=为生存体验优化的地球生成器
+
+# Commands
+
+commands.earth.wrong_world=不能在这个世界内使用命令。
+
+commands.earth.geotp.usage=geotp <纬度> <经度> 或 geotp <地点>
+commands.earth.geotp.not_found=无法找到 "%s"
+commands.earth.geotp.success=成功传送至 %s， %s
+commands.earth.geotp.error=在查找 "%s" 时出现错误： %s： %s
+
+commands.earth.geotool.usage=地理工具
+
+# Status
+
+status.earth.panorama.searching=搜索附近的全景图...
+status.earth.panorama.none_found=未发现附近的全景图！
+status.earth.panorama.found=发现附近的全景图！移动到标记区域以查看！
+status.earth.panorama.error=定位附近的全景图时出现错误
+status.earth.panorama.immersed=Immersed in located panorama!
+
+# Config
+
+config.earth.street_view_zoom=街景缩放
+config.earth.street_view_zoom.tooltip=加载街景图像的缩放级别。值越高分辨率越高。
