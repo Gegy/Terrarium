@@ -1,0 +1,39 @@
+# GUI
+
+gui.terrarium.accept=接受
+gui.terrarium.preset=设置预设
+
+gui.terrarium.remote_data_warning.1=警告：Terrarium 从互联网上下载数据！
+gui.terrarium.remote_data_warning.2=区块生成可能需要各种数据。
+gui.terrarium.remote_data_warning.3=这可能导致大量的数据使用，取决于生成的区块。
+gui.terrarium.remote_data_warning.4=仅为玩家查看的区块请求数据，之后数据即被缓存。
+gui.terrarium.remote_data_warning.5=Terrarium 不为任何造成的损失负责。
+
+gui.terrarium.select_preset.name=选择世界预设
+
+options.terrarium.customize_world_title.name=自定义世界生成
+options.terrarium.preview_world_title.name=预览世界生成
+
+state.terrarium.cached.name=检索缓存数据中
+state.terrarium.online.name=检索在线数据中
+state.terrarium.no_connection.name=无连接
+
+state.terrarium.cached.tooltip=从本地缓存加载地理数据
+state.terrarium.online.tooltip=从在线来源加载地理数据
+state.terrarium.no_connection.tooltip=无法加载地理数据。检查您的互联网连接！
+
+property.terrarium.slider_range.name=范围： [%.2f-%.2f]
+property.terrarium.slider_fine.name=按住 SHIFT 微调
+property.terrarium.locked.name=在未来版本到来！
+
+# Toasts
+
+toast.terrarium.data_failure.title=Terrarium 数据失败
+toast.terrarium.data_failure.desc=加载 %s 数据片失败
+
+# Config
+
+config.terrarium.enable_data_status_icon=启用数据状态图标
+config.terrarium.enable_data_status_icon.tooltip=如果启用，则数据流的当前状态将显示在窗口的左上角
+config.terrarium.accept_remote_data=自动接受远程数据警告
+config.terrarium.accept_remote_data.tooltip=如果启用，则不再向您发出有关远程数据使用情况的警告。（通过GUI自动设置）
