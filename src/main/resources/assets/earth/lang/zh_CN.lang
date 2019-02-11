@@ -89,7 +89,7 @@ status.earth.panorama.searching=搜索附近的全景图...
 status.earth.panorama.none_found=未发现附近的全景图！
 status.earth.panorama.found=发现附近的全景图！移动到标记区域以查看！
 status.earth.panorama.error=定位附近的全景图时出现错误
-status.earth.panorama.immersed=Immersed in located panorama!
+status.earth.panorama.immersed=全景图已展示！
 
 # Config
 
