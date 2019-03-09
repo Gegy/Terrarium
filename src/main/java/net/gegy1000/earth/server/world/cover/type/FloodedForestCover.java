@@ -11,9 +11,14 @@ import net.minecraft.world.gen.layer.GenLayerFuzzyZoom;
 import net.minecraft.world.gen.layer.GenLayerVoronoiZoom;
 import net.minecraft.world.gen.layer.GenLayerZoom;
 
+import java.awt.Color;
 import java.util.Random;
 
 public abstract class FloodedForestCover extends ForestCover {
+    public FloodedForestCover(Color approximateColor) {
+        super(approximateColor);
+    }
+
     @Override
     public abstract Surface createSurfaceGenerator(EarthCoverContext context);
 

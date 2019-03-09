@@ -17,6 +17,7 @@ import net.minecraft.world.gen.layer.GenLayer;
 import net.minecraft.world.gen.layer.GenLayerFuzzyZoom;
 import net.minecraft.world.gen.layer.GenLayerVoronoiZoom;
 
+import java.awt.Color;
 import java.util.Random;
 
 public class RainfedCropsCover extends EarthCoverType {
@@ -25,6 +26,10 @@ public class RainfedCropsCover extends EarthCoverType {
 
     private static final int LAYER_SHORT_GRASS = 0;
     private static final int LAYER_TALL_GRASS = 1;
+
+    public RainfedCropsCover() {
+        super(new Color(0xFFFF63));
+    }
 
     @Override
     public EarthSurfaceGenerator createSurfaceGenerator(EarthCoverContext context) {

@@ -12,9 +12,14 @@ import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 
+import java.awt.Color;
 import java.util.Random;
 
 public class FreshFloodedForestCover extends FloodedForestCover {
+    public FreshFloodedForestCover() {
+        super(new Color(0x00785A));
+    }
+
     @Override
     public Surface createSurfaceGenerator(EarthCoverContext context) {
         return new Surface(context, this, Blocks.GRASS.getDefaultState(), true);

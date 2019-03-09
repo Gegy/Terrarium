@@ -17,6 +17,7 @@ import net.minecraft.world.gen.layer.GenLayer;
 import net.minecraft.world.gen.layer.GenLayerFuzzyZoom;
 import net.minecraft.world.gen.layer.GenLayerVoronoiZoom;
 
+import java.awt.Color;
 import java.util.Random;
 
 public abstract class ForestCover extends EarthCoverType {
@@ -25,6 +26,10 @@ public abstract class ForestCover extends EarthCoverType {
     protected static final int LAYER_PRIMARY = 0;
     protected static final int LAYER_DIRT = 1;
     protected static final int LAYER_PODZOL = 2;
+
+    public ForestCover(Color approximateColor) {
+        super(approximateColor);
+    }
 
     @Override
     public EarthSurfaceGenerator createSurfaceGenerator(EarthCoverContext context) {

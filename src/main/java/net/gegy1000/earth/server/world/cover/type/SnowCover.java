@@ -13,11 +13,16 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.world.biome.Biome;
 
+import java.awt.Color;
 import java.util.Random;
 
 public class SnowCover extends EarthCoverType implements BeachyCover {
     private static final IBlockState SNOW = Blocks.SNOW.getDefaultState();
     private static final IBlockState DARK_ROCK = Blocks.STAINED_HARDENED_CLAY.getDefaultState().withProperty(BlockStainedHardenedClay.COLOR, EnumDyeColor.BROWN);
+
+    public SnowCover() {
+        super(new Color(0xFFFFFF));
+    }
 
     @Override
     public EarthSurfaceGenerator createSurfaceGenerator(EarthCoverContext context) {

@@ -19,12 +19,17 @@ import net.minecraft.world.gen.layer.GenLayer;
 import net.minecraft.world.gen.layer.GenLayerFuzzyZoom;
 import net.minecraft.world.gen.layer.GenLayerVoronoiZoom;
 
+import java.awt.Color;
 import java.util.Random;
 
 public class GrasslandCover extends EarthCoverType {
     private static final int LAYER_GRASS = 0;
     private static final int LAYER_DIRT = 1;
     private static final int LAYER_PODZOL = 2;
+
+    public GrasslandCover() {
+        super(new Color(0xFFB431));
+    }
 
     @Override
     public EarthSurfaceGenerator createSurfaceGenerator(EarthCoverContext context) {

@@ -52,12 +52,26 @@ public class PreviewRenderer {
 
             GlStateManager.translate((this.x + this.gui.width) / 2.0 / scaleFactor, (this.y + this.height) / 2.0 / scaleFactor, 0.0);
             GlStateManager.scale(zoom, -zoom, zoom);
-            GlStateManager.rotate(rotationX, 1.0F, 0.0F, 0.0F);
-            GlStateManager.rotate(rotationY, 0.0F, 1.0F, 0.0F);
+            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 
             RenderHelper.enableStandardItemLighting();
 
+            GlStateManager.pushMatrix();
+            GlStateManager.translate(0.0, 0.0, -100.0);
+            GlStateManager.rotate(rotationX, 1.0F, 0.0F, 0.0F);
+            GlStateManager.rotate(rotationY, 0.0F, 1.0F, 0.0F);
+
+            preview.renderHeightMesh();
+
+            GlStateManager.popMatrix();
+
+            GlStateManager.pushMatrix();
+            GlStateManager.rotate(rotationX, 1.0F, 0.0F, 0.0F);
+            GlStateManager.rotate(rotationY, 0.0F, 1.0F, 0.0F);
+
             preview.renderChunks();
+
+            GlStateManager.popMatrix();
 
             GlStateManager.disableLighting();
             GlStateManager.disableDepth();

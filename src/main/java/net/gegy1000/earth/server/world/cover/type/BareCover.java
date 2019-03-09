@@ -19,12 +19,17 @@ import net.minecraft.world.gen.layer.GenLayer;
 import net.minecraft.world.gen.layer.GenLayerFuzzyZoom;
 import net.minecraft.world.gen.layer.GenLayerVoronoiZoom;
 
+import java.awt.Color;
 import java.util.Random;
 
 public class BareCover extends EarthCoverType {
     private static final int LAYER_DIRT = 0;
     private static final int LAYER_GRAVEL = 1;
     private static final int LAYER_SAND = 2;
+
+    public BareCover() {
+        super(new Color(0xFFF5D6));
+    }
 
     @Override
     public Biome getBiome(EarthCoverContext context, int x, int z) {

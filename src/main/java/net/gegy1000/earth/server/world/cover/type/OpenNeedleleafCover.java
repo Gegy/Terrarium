@@ -11,9 +11,14 @@ import net.gegy1000.terrarium.server.world.feature.tree.GenerousTreeGenerator;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 
+import java.awt.Color;
 import java.util.Random;
 
 public class OpenNeedleleafCover extends ForestCover {
+    public OpenNeedleleafCover() {
+        super(new Color(0x286300));
+    }
+
     @Override
     public EarthDecorationGenerator createDecorationGenerator(EarthCoverContext context) {
         return new Decoration(context, this);

@@ -11,9 +11,14 @@ import net.minecraft.init.Biomes;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 
+import java.awt.Color;
 import java.util.Random;
 
 public class MixedBroadNeedleleafCover extends ForestCover {
+    public MixedBroadNeedleleafCover() {
+        super(new Color(0x788300));
+    }
+
     @Override
     public EarthDecorationGenerator createDecorationGenerator(EarthCoverContext context) {
         return new Decoration(context, this);

@@ -15,9 +15,14 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 
+import java.awt.Color;
 import java.util.Random;
 
 public class SalineFloodedForestCover extends FloodedForestCover {
+    public SalineFloodedForestCover() {
+        super(new Color(0x009578));
+    }
+
     @Override
     public Surface createSurfaceGenerator(EarthCoverContext context) {
         return new Surface(context, this);

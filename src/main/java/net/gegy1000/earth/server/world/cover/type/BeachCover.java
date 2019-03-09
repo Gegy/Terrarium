@@ -16,9 +16,14 @@ import net.minecraft.init.Biomes;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 
+import java.awt.Color;
 import java.util.Random;
 
 public class BeachCover extends EarthCoverType implements BeachyCover {
+    public BeachCover() {
+        super(new Color(0xFFEBAE));
+    }
+
     @Override
     public CoverSurfaceGenerator<EarthCoverContext> createSurfaceGenerator(EarthCoverContext context) {
         return new Surface(context, this);

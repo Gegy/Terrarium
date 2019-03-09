@@ -9,10 +9,13 @@ import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.pipeline.GenerationCancelledException;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
+import net.gegy1000.terrarium.server.world.pipeline.source.DataSourceHandler;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.init.Biomes;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
@@ -59,6 +62,8 @@ public class WorldPreview implements IBlockAccess {
     private final Set<CubicPos> generatedChunks = new HashSet<>();
     private final List<PreviewChunk> previewChunks = new ArrayList<>(VIEW_SIZE * VIEW_SIZE * VIEW_SIZE);
 
+    private PreviewHeightMesh heightMesh;
+
     private final Object lock = new Object();
 
     public WorldPreview(WorldType worldType, GenerationSettings settings, BufferBuilder[] builders) {
@@ -85,15 +90,26 @@ public class WorldPreview implements IBlockAccess {
         int spawnChunkZ = spawnPosition.getZ() >> 4;
 
         try {
-            short averageHeight = this.computeAverageHeight(spawnChunkX, spawnChunkZ);
-
-            BlockPos centerChunkPos = new BlockPos(spawnChunkX, averageHeight >> 4, spawnChunkZ);
-            this.centerBlockPos = new BlockPos((centerChunkPos.getX() << 4) + 8, averageHeight, (centerChunkPos.getZ() << 4) + 8);
-
             int viewRangeBlocks = VIEW_RANGE << 4;
             BlockPos minPos = this.centerBlockPos.add(-viewRangeBlocks, 0, -viewRangeBlocks);
             BlockPos maxPos = this.centerBlockPos.add(viewRangeBlocks + 16, 0, viewRangeBlocks + 16);
             this.worldData.getRegionHandler().trackArea(minPos, maxPos);
+
+            int viewSizeBlocks = VIEW_SIZE << 4;
+
+            int originX = (spawnChunkX - VIEW_RANGE) << 4;
+            int originZ = (spawnChunkZ - VIEW_RANGE) << 4;
+
+            ShortRasterTile heightTile = this.generateHeightTile(originX, originZ, viewSizeBlocks);
+            CoverRasterTile coverTile = this.generateCoverTile(originX, originZ, viewSizeBlocks);
+
+            this.heightMesh = new PreviewHeightMesh(heightTile, coverTile);
+            this.heightMesh.submitTo(this.executor, 5);
+
+            short averageHeight = this.computeAverageHeight(heightTile);
+
+            BlockPos centerChunkPos = new BlockPos(spawnChunkX, averageHeight >> 4, spawnChunkZ);
+            this.centerBlockPos = new BlockPos((centerChunkPos.getX() << 4) + 8, averageHeight, (centerChunkPos.getZ() << 4) + 8);
 
             this.generator = new PreviewChunkGenerator(centerChunkPos, this.world.getCubeGenerator(), VIEW_RANGE);
             this.generator.setCubeHandler(this::handleGeneratedCube);
@@ -139,7 +155,7 @@ public class WorldPreview implements IBlockAccess {
 
     private void submitChunk(CubicPos pos, PreviewChunkData data, PreviewColumnData columnData) {
         PreviewChunk chunk = new PreviewChunk(data, columnData, pos, this);
-        chunk.submitBuild(this.executor, this::takeBuilder, this::returnBuilder);
+        chunk.submitTo(this.executor, this::takeBuilder, this::returnBuilder);
         synchronized (this.lock) {
             this.previewChunks.add(chunk);
         }
@@ -160,21 +176,29 @@ public class WorldPreview implements IBlockAccess {
                 && pos.getX() <= VIEW_RANGE && pos.getY() <= VIEW_RANGE && pos.getZ() <= VIEW_RANGE;
     }
 
-    private short computeAverageHeight(int chunkX, int chunkZ) {
-        int viewSizeBlocks = VIEW_SIZE << 4;
-
-        int originX = (chunkX - VIEW_RANGE) << 4;
-        int originZ = (chunkZ - VIEW_RANGE) << 4;
-
-        ShortRasterTile tile = new ShortRasterTile(viewSizeBlocks, viewSizeBlocks);
+    private ShortRasterTile generateHeightTile(int originX, int originZ, int size) {
+        ShortRasterTile tile = new ShortRasterTile(size, size);
 
         RegionGenerationHandler regionHandler = this.worldData.getRegionHandler();
         regionHandler.fillRaster(RegionComponentType.HEIGHT, tile, originX, originZ);
 
+        return tile;
+    }
+
+    private CoverRasterTile generateCoverTile(int originX, int originZ, int size) {
+        CoverRasterTile tile = new CoverRasterTile(size, size);
+
+        RegionGenerationHandler regionHandler = this.worldData.getRegionHandler();
+        regionHandler.fillRaster(RegionComponentType.COVER, tile, originX, originZ);
+
+        return tile;
+    }
+
+    private short computeAverageHeight(ShortRasterTile heightTile) {
         long total = 0;
         long maxHeight = 0;
 
-        short[] shortData = tile.getShortData();
+        short[] shortData = heightTile.getShortData();
         for (short value : shortData) {
             if (value > maxHeight) {
                 maxHeight = value;
@@ -186,9 +210,27 @@ public class WorldPreview implements IBlockAccess {
         return (short) ((averageHeight + maxHeight + maxHeight) / 3);
     }
 
+    public void renderHeightMesh() {
+        if (this.heightMesh == null) {
+            return;
+        }
+
+        synchronized (this.lock) {
+            int offsetHorizontal = VIEW_RANGE << 4;
+            int offsetVertical = (this.centerBlockPos.getY() >> 4) << 4;
+
+            GlStateManager.pushMatrix();
+            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+            GlStateManager.translate(-offsetHorizontal, -offsetVertical, -offsetHorizontal);
+            this.heightMesh.render();
+            GlStateManager.popMatrix();
+        }
+    }
+
     public void renderChunks() {
         synchronized (this.lock) {
             this.performUploads(this.previewChunks);
+
             for (PreviewChunk chunk : this.previewChunks) {
                 chunk.render();
             }
@@ -196,6 +238,10 @@ public class WorldPreview implements IBlockAccess {
     }
 
     private void performUploads(List<PreviewChunk> previewChunks) {
+        if (this.heightMesh != null) {
+            this.heightMesh.performUpload();
+        }
+
         long startTime = System.nanoTime();
 
         Iterator<PreviewChunk> iterator = previewChunks.iterator();
@@ -222,6 +268,7 @@ public class WorldPreview implements IBlockAccess {
         this.executor.shutdownNow();
 
         this.worldData.getRegionHandler().close();
+        DataSourceHandler.INSTANCE.cancelLoading();
     }
 
     public BufferBuilder takeBuilder() {

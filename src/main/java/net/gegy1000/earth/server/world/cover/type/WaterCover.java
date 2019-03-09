@@ -14,9 +14,14 @@ import net.minecraft.world.gen.layer.GenLayerFuzzyZoom;
 import net.minecraft.world.gen.layer.GenLayerVoronoiZoom;
 import net.minecraft.world.gen.layer.IntCache;
 
+import java.awt.Color;
 import java.util.Random;
 
 public class WaterCover extends EarthCoverType {
+    public WaterCover() {
+        super(new Color(0x0046C7));
+    }
+
     @Override
     public EarthSurfaceGenerator createSurfaceGenerator(EarthCoverContext context) {
         return new Surface(context, this);

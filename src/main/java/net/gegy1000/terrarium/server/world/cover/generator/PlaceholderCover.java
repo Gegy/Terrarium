@@ -27,11 +27,6 @@ public class PlaceholderCover implements CoverType<CoverGenerationContext> {
         return Biomes.DEFAULT;
     }
 
-    @Override
-    public Class<CoverGenerationContext> getRequiredContext() {
-        return CoverGenerationContext.class;
-    }
-
     private static class Surface extends CoverSurfaceGenerator<CoverGenerationContext> {
         private Surface(CoverGenerationContext context, CoverType<CoverGenerationContext> coverType) {
             super(context, coverType);

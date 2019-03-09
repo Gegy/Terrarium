@@ -7,7 +7,13 @@ import net.gegy1000.terrarium.server.world.cover.CoverSurfaceGenerator;
 import net.minecraft.init.Biomes;
 import net.minecraft.world.biome.Biome;
 
+import java.awt.Color;
+
 public class UrbanCover extends EarthCoverType {
+    public UrbanCover() {
+        super(new Color(0xAAC700));
+    }
+
     @Override
     public CoverSurfaceGenerator<EarthCoverContext> createSurfaceGenerator(EarthCoverContext context) {
         return new CoverSurfaceGenerator.Inherit<>(context, this);

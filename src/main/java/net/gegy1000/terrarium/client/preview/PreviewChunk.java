@@ -44,7 +44,7 @@ public class PreviewChunk {
     private final Object buildLock = new Object();
     private Future<BufferBuilder> builderResult;
 
-    private Geometry geometry;
+    private PreviewGeometry geometry;
 
     static {
         for (Biome biome : Biome.REGISTRY) {
@@ -66,10 +66,10 @@ public class PreviewChunk {
         this.previewAccess = previewAccess;
     }
 
-    public void submitBuild(ExecutorService executor, Supplier<BufferBuilder> builderSupplier, Consumer<BufferBuilder> builderReturn) {
+    public void submitTo(ExecutorService executor, Supplier<BufferBuilder> builderSupplier, Consumer<BufferBuilder> builderReturn) {
         synchronized (this.buildLock) {
             if (this.shouldSkip()) {
-                this.geometry = new EmptyGeometry();
+                this.geometry = PreviewGeometry.EMPTY;
                 return;
             }
 
@@ -96,13 +96,13 @@ public class PreviewChunk {
     public BufferBuilder performUpload() {
         BufferBuilder completedBuilder = this.getCompletedBuilder();
         if (completedBuilder != null) {
-            Geometry oldGeometry = this.geometry;
+            PreviewGeometry oldGeometry = this.geometry;
             if (oldGeometry != null) {
                 oldGeometry.delete();
             }
             this.geometry = this.buildGeometry(completedBuilder);
         } else {
-            this.geometry = new EmptyGeometry();
+            this.geometry = PreviewGeometry.EMPTY;
         }
         return completedBuilder;
     }
@@ -136,18 +136,18 @@ public class PreviewChunk {
         }
     }
 
-    private Geometry buildGeometry(BufferBuilder builder) {
+    private PreviewGeometry buildGeometry(BufferBuilder builder) {
         if (builder == null || builder.getVertexCount() == 0) {
             if (builder != null) {
                 builder.finishDrawing();
             }
-            return new EmptyGeometry();
+            return PreviewGeometry.EMPTY;
         }
         // TODO: Switch to VBO is GameSettings prefers it
         return this.buildDisplayList(builder);
     }
 
-    private Geometry buildDisplayList(BufferBuilder builder) {
+    private PreviewGeometry buildDisplayList(BufferBuilder builder) {
         int id = GLAllocation.generateDisplayLists(1);
 
         builder.finishDrawing();
@@ -155,11 +155,11 @@ public class PreviewChunk {
         new WorldVertexBufferUploader().draw(builder);
         GlStateManager.glEndList();
 
-        return new DisplayListGeometry(id);
+        return new PreviewGeometry.DisplayList(id);
     }
 
     public void render() {
-        Geometry geometry = this.geometry;
+        PreviewGeometry geometry = this.geometry;
 
         if (geometry != null) {
             int offsetX = this.pos.getMinX();
@@ -174,7 +174,7 @@ public class PreviewChunk {
     }
 
     public void delete() {
-        Geometry geometry = this.geometry;
+        PreviewGeometry geometry = this.geometry;
         if (geometry != null) {
             geometry.delete();
         }
@@ -327,40 +327,6 @@ public class PreviewChunk {
                 builder.pos(1.0, 0.0, 1.0).color(red, green, blue, 255).normal(0.0F, 1.0F, 0.0F).endVertex();
                 builder.pos(0.0, 0.0, 1.0).color(red, green, blue, 255).normal(0.0F, 1.0F, 0.0F).endVertex();
                 break;
-        }
-    }
-
-    private interface Geometry {
-        void render();
-
-        void delete();
-    }
-
-    private class DisplayListGeometry implements Geometry {
-        private final int id;
-
-        private DisplayListGeometry(int id) {
-            this.id = id;
-        }
-
-        @Override
-        public void render() {
-            GlStateManager.callList(this.id);
-        }
-
-        @Override
-        public void delete() {
-            GLAllocation.deleteDisplayLists(this.id);
-        }
-    }
-
-    private class EmptyGeometry implements Geometry {
-        @Override
-        public void render() {
-        }
-
-        @Override
-        public void delete() {
         }
     }
 }

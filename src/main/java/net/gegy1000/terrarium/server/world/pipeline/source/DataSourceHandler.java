@@ -29,7 +29,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-public class DataSourceHandler {
+public enum DataSourceHandler {
+    INSTANCE;
+
     private final ExecutorService loadService = Executors.newFixedThreadPool(2, new ThreadFactoryBuilder().setNameFormat("terrarium-data-loader-%s").setDaemon(true).build());
     private final ExecutorService cacheService = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("terrarium-cache-service").setDaemon(true).build());
 
@@ -41,6 +43,18 @@ public class DataSourceHandler {
     private final Map<DataTileKey<?>, TileFuture<?>> queuedTiles = new HashMap<>();
 
     private final Object lock = new Object();
+
+    public void clear() {
+        this.cancelLoading();
+        this.tileCache.invalidateAll();
+    }
+
+    public void cancelLoading() {
+        for (TileFuture<?> future : this.queuedTiles.values()) {
+            future.cancel();
+        }
+        this.queuedTiles.clear();
+    }
 
     public void enqueueData(Set<DataTileKey<?>> requiredData) {
         for (DataTileKey<?> key : requiredData) {
@@ -257,6 +271,10 @@ public class DataSourceHandler {
             if (!service.isShutdown()) {
                 this.future = service.submit(() -> DataSourceHandler.this.loadTileRobustly(this.key));
             }
+        }
+
+        public void cancel() {
+            this.future.cancel(true);
         }
     }
 }

@@ -39,6 +39,10 @@ public class HeightNoiseAdapter implements RegionAdapter {
 
     @Override
     public void adapt(RegionData data, int x, int z, int width, int height) {
+        if (this.noiseScaleY > -1e-3 && this.noiseScaleY < 1e-3) {
+            return;
+        }
+
         ShortRasterTile heightTile = data.getOrExcept(this.heightComponent);
         WaterRasterTile waterTile = data.getOrExcept(this.waterComponent);
 

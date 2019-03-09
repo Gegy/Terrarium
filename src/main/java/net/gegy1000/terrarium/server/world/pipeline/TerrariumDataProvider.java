@@ -13,7 +13,6 @@ import net.gegy1000.terrarium.server.world.pipeline.source.DataSourceHandler;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.TiledDataAccess;
 import net.gegy1000.terrarium.server.world.region.GenerationRegion;
 import net.gegy1000.terrarium.server.world.region.RegionData;
-import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.gegy1000.terrarium.server.world.region.RegionTilePos;
 
 import java.util.ArrayList;
@@ -41,8 +40,8 @@ public class TerrariumDataProvider {
         return new Builder();
     }
 
-    public void enqueueData(DataSourceHandler sourceHandler, RegionTilePos pos) {
-        CachedLayerContext context = new CachedLayerContext(sourceHandler);
+    public void enqueueData(RegionTilePos pos) {
+        CachedLayerContext context = new CachedLayerContext(DataSourceHandler.INSTANCE);
         DataView view = new DataView(pos.getMinBufferedX(), pos.getMinBufferedZ(), DATA_SIZE, DATA_SIZE);
 
         Set<DataTileKey<?>> requiredData = new HashSet<>();
@@ -50,11 +49,11 @@ public class TerrariumDataProvider {
             requiredData.addAll(attachedComponent.getRequiredData(context, view));
         }
 
-        sourceHandler.enqueueData(requiredData);
+        DataSourceHandler.INSTANCE.enqueueData(requiredData);
     }
 
-    public RegionData populateData(DataSourceHandler sourceHandler, RegionTilePos pos) {
-        CachedLayerContext context = new CachedLayerContext(sourceHandler);
+    public RegionData populateData(RegionTilePos pos) {
+        CachedLayerContext context = new CachedLayerContext(DataSourceHandler.INSTANCE);
         DataView view = new DataView(pos.getMinBufferedX(), pos.getMinBufferedZ(), DATA_SIZE, DATA_SIZE);
 
         Map<RegionComponentType<?>, RegionComponent<?>> populatedComponents = new HashMap<>();
@@ -70,17 +69,17 @@ public class TerrariumDataProvider {
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends TiledDataAccess> T populatePartialData(DataSourceHandler sourceHandler, RegionComponentType<T> componentType, int x, int z, int width, int height) {
+    public <T extends TiledDataAccess> T populatePartialData(RegionComponentType<T> componentType, int x, int z, int width, int height) {
         AttachedComponent<T> attachedComponent = (AttachedComponent<T>) this.attachedComponents.get(componentType);
         if (attachedComponent == null) {
             throw new IllegalArgumentException("Cannot populate partial data tile for component that is not attached!");
         }
 
-        CachedLayerContext context = new CachedLayerContext(sourceHandler);
+        CachedLayerContext context = new CachedLayerContext(DataSourceHandler.INSTANCE);
         DataView view = new DataView(x, z, width, height);
 
         Set<DataTileKey<?>> requiredData = new HashSet<>(attachedComponent.getRequiredData(context, view));
-        sourceHandler.enqueueData(requiredData);
+        DataSourceHandler.INSTANCE.enqueueData(requiredData);
 
         RegionComponent<T> component = attachedComponent.createAndPopulate(context, view);
         return component.getData();

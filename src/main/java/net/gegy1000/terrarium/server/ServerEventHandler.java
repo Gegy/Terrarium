@@ -9,6 +9,7 @@ import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.chunk.tracker.ChunkTrackerHooks;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
+import net.gegy1000.terrarium.server.world.pipeline.source.DataSourceHandler;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
@@ -48,6 +49,7 @@ public class ServerEventHandler {
             TerrariumWorldData worldData = TerrariumWorldData.get(world);
             if (worldData != null) {
                 worldData.getRegionHandler().close();
+                DataSourceHandler.INSTANCE.clear();
             }
         }
     }

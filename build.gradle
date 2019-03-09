@@ -37,6 +37,9 @@ repositories {
   maven {
     url = "https://oss.sonatype.org/content/repositories/public/"
   }
+  maven {
+    url = "https://repo.spongepowered.org/maven/"
+  }
 }
 
 configurations {

@@ -11,9 +11,14 @@ import net.gegy1000.terrarium.server.world.feature.tree.GenerousTreeGenerator;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 
+import java.awt.Color;
 import java.util.Random;
 
 public class BroadleafEvergreenCover extends ForestCover {
+    public BroadleafEvergreenCover() {
+        super(new Color(0x006300));
+    }
+
     @Override
     public EarthDecorationGenerator createDecorationGenerator(EarthCoverContext context) {
         return new Decoration(context, this);

@@ -21,6 +21,7 @@ import net.minecraft.world.gen.layer.GenLayer;
 import net.minecraft.world.gen.layer.GenLayerFuzzyZoom;
 import net.minecraft.world.gen.layer.GenLayerVoronoiZoom;
 
+import java.awt.Color;
 import java.util.Random;
 
 public class IrrigatedCropsCover extends EarthCoverType {
@@ -39,6 +40,10 @@ public class IrrigatedCropsCover extends EarthCoverType {
     private static final IBlockState POTATOES = Blocks.POTATOES.getDefaultState();
 
     private static final IBlockState FENCE = Blocks.OAK_FENCE.getDefaultState();
+
+    public IrrigatedCropsCover() {
+        super(new Color(0xAAEFEF));
+    }
 
     @Override
     public EarthSurfaceGenerator createSurfaceGenerator(EarthCoverContext context) {

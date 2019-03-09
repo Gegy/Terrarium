@@ -2,7 +2,6 @@ package net.gegy1000.terrarium.client.preview;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.gegy1000.cubicglue.util.CubicPos;
-import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.world.chunk.ComposableCubeGenerator;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -54,11 +53,7 @@ public class PreviewChunkGenerator {
 
                 CubeHandler cubeHandler = this.cubeHandler;
                 if (cubeHandler != null) {
-                    try {
-                        cubeHandler.onCubeGenerated(pos, writer.build());
-                    } catch (Throwable t) {
-                        Terrarium.LOGGER.error("Error thrown while handling preview cube generation", t);
-                    }
+                    cubeHandler.onCubeGenerated(pos, writer.build());
                 }
             });
         }
@@ -94,11 +89,7 @@ public class PreviewChunkGenerator {
             for (int x = -this.chunkRadius; x <= this.chunkRadius; x++) {
                 ChunkPos columnPos = new ChunkPos(x + this.originChunkPos.getX(), z + this.originChunkPos.getZ());
                 Biome[] biomes = this.cubeGenerator.populateBiomes(columnPos, new Biome[256]);
-                try {
-                    columnHandler.onColumnGenerated(new ChunkPos(x, z), new PreviewColumnData(biomes));
-                } catch (Throwable t) {
-                    Terrarium.LOGGER.error("Error thrown while handling preview column generation", t);
-                }
+                columnHandler.onColumnGenerated(new ChunkPos(x, z), new PreviewColumnData(biomes));
             }
         }
     }

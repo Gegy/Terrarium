@@ -18,11 +18,16 @@ import net.minecraft.world.gen.layer.GenLayer;
 import net.minecraft.world.gen.layer.GenLayerFuzzyZoom;
 import net.minecraft.world.gen.layer.GenLayerVoronoiZoom;
 
+import java.awt.Color;
 import java.util.Random;
 
 public class SparseVegetationCover extends EarthCoverType {
     private static final int LAYER_GRASS = 0;
     private static final int LAYER_DIRT = 1;
+
+    public SparseVegetationCover() {
+        super(new Color(0xFFEBAE));
+    }
 
     @Override
     public EarthSurfaceGenerator createSurfaceGenerator(EarthCoverContext context) {
