@@ -1,6 +1,7 @@
 package net.gegy1000.terrarium.server.capability;
 
 import com.google.common.base.Strings;
+import net.gegy1000.terrarium.server.support.SpongeSupport;
 import net.gegy1000.terrarium.server.world.TerrariumGeneratorInitializer;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.chunk.TerrariumChunkGenerator;
@@ -49,8 +50,10 @@ public interface TerrariumWorldData extends ICapabilityProvider {
             }
 
             IChunkGenerator chunkGenerator = ((ChunkProviderServer) chunkProvider).chunkGenerator;
+            chunkGenerator = SpongeSupport.unwrapChunkGenerator(chunkGenerator);
+
             if (!(chunkGenerator instanceof TerrariumChunkGenerator)) {
-                throw new IllegalStateException("Terrarium chunk generator must implement TerrariumChunkGenerator");
+                throw new IllegalStateException("Expected generator of type TerrariumChunkGenerator, but got " + chunkGenerator.getClass().getSimpleName());
             }
 
             TerrariumGeneratorInitializer initializer = worldType.createInitializer(world, (TerrariumChunkGenerator) chunkGenerator, this.settings);
