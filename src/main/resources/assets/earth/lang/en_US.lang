@@ -21,7 +21,7 @@ gui.copy_box.copied.name=Copied to clipboard!
 
 category.terrarium.world.name=World Properties
 category.terrarium.features.name=Feature Properties
-category.terrarium.integration.name=Integration Properties
+category.terrarium.procedural_features.name=Procedural Feature Properties
 
 # World Properties
 

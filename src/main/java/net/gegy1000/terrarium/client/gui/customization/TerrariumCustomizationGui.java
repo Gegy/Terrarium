@@ -90,7 +90,7 @@ public class TerrariumCustomizationGui extends GuiScreen {
         int previewX = this.width / 2 + PADDING_X;
         int previewY = TOP_OFFSET;
 
-        this.renderer = new PreviewRenderer(this, this.width / 2 + PADDING_X, previewY, previewWidth, previewHeight);
+        this.renderer = new PreviewRenderer(this, this.width / 2.0F + PADDING_X, previewY, previewWidth, previewHeight);
         this.controller = new PreviewController(this.renderer, 0.3F, 1.0F);
 
         this.buttonList.clear();

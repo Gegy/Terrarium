@@ -1,6 +1,5 @@
 package net.gegy1000.earth;
 
-import net.gegy1000.earth.server.EarthDecorationEventHandler;
 import net.gegy1000.earth.server.ServerProxy;
 import net.gegy1000.earth.server.capability.EarthCapability;
 import net.gegy1000.earth.server.command.GeoTeleportCommand;
@@ -13,7 +12,6 @@ import net.gegy1000.earth.server.world.pipeline.source.EarthRemoteData;
 import net.gegy1000.earth.server.world.pipeline.source.SrtmHeightSource;
 import net.gegy1000.terrarium.server.capability.VoidStorage;
 import net.minecraft.world.WorldType;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.CapabilityManager;
@@ -55,11 +53,8 @@ public class TerrariumEarth {
 
     @Mod.EventHandler
     public static void onPreInit(FMLPreInitializationEvent event) {
-        CapabilityManager.INSTANCE.register(EarthCapability.class, new VoidStorage<>(), EarthCapability.Impl.class);
+        CapabilityManager.INSTANCE.register(EarthCapability.class, new VoidStorage<>(), EarthCapability.None::new);
         PROXY.onPreInit();
-
-        MinecraftForge.TERRAIN_GEN_BUS.register(EarthDecorationEventHandler.class);
-        MinecraftForge.ORE_GEN_BUS.register(EarthDecorationEventHandler.class);
 
         Thread thread = new Thread(() -> {
             try {

@@ -4,7 +4,6 @@ import net.gegy1000.cubicglue.CubicGlue;
 import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
 import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.cubicglue.util.PseudoRandomMap;
-import net.gegy1000.earth.server.world.CubicIntegrationFormat;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.world.World;
@@ -17,7 +16,7 @@ public class VanillaEntitySpawnComposer implements DecorationComposer {
     private final PseudoRandomMap randomMap;
     private final Random random = new Random(0);
 
-    public VanillaEntitySpawnComposer(World world, CubicIntegrationFormat format) {
+    public VanillaEntitySpawnComposer(World world) {
         this.randomMap = new PseudoRandomMap(world, SPAWN_SEED);
     }
 
@@ -26,7 +25,7 @@ public class VanillaEntitySpawnComposer implements DecorationComposer {
         this.randomMap.initPosSeed(pos.getMinX(), pos.getMinY(), pos.getMinZ());
         this.random.setSeed(this.randomMap.next());
 
-        CubicGlue.proxy(writer.getGlobal()).spawnEntities(pos, writer, this.random);
+        CubicGlue.proxy(writer.getGlobal()).populateEntities(pos, writer, this.random);
     }
 
     @Override

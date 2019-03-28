@@ -35,6 +35,58 @@ public interface EarthCapability extends ICapabilityProvider {
     @Nullable
     BlockPos estimateSurface(World world, int blockX, int blockZ);
 
+    @Override
+    default boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing facing) {
+        return capability == TerrariumEarth.earthCap;
+    }
+
+    @Nullable
+    @Override
+    default <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing) {
+        if (capability == TerrariumEarth.earthCap) {
+            return TerrariumEarth.earthCap.cast(this);
+        }
+        return null;
+    }
+
+    class None implements EarthCapability {
+        @Override
+        public Geocoder getGeocoder() {
+            return Geocoder.VOID;
+        }
+
+        @Override
+        public CoordinateState getGeoCoordinate() {
+            return CoordinateState.BLOCK;
+        }
+
+        @Override
+        public double getLatitude(double x, double z) {
+            return CoordinateState.BLOCK.getX(x, z);
+        }
+
+        @Override
+        public double getLongitude(double x, double z) {
+            return CoordinateState.BLOCK.getZ(x, z);
+        }
+
+        @Override
+        public double getX(double latitude, double longitude) {
+            return CoordinateState.BLOCK.getBlockX(latitude, longitude);
+        }
+
+        @Override
+        public double getZ(double latitude, double longitude) {
+            return CoordinateState.BLOCK.getBlockZ(latitude, longitude);
+        }
+
+        @Nullable
+        @Override
+        public BlockPos estimateSurface(World world, int blockX, int blockZ) {
+            return world.getTopSolidOrLiquidBlock(new BlockPos(blockX, 0, blockZ));
+        }
+    }
+
     class Impl implements EarthCapability {
         private final CoordinateState geoCoordinate;
         private final Geocoder geocoder;
@@ -91,20 +143,6 @@ public interface EarthCapability extends ICapabilityProvider {
 
             int height = heightRaster.getShort(blockX - region.getMinX(), blockZ - region.getMinZ()) + 1;
             return new BlockPos(blockX, height, blockZ);
-        }
-
-        @Override
-        public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing facing) {
-            return capability == TerrariumEarth.earthCap;
-        }
-
-        @Nullable
-        @Override
-        public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing) {
-            if (capability == TerrariumEarth.earthCap) {
-                return TerrariumEarth.earthCap.cast(this);
-            }
-            return null;
         }
     }
 }
