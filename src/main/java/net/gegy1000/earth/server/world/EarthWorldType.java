@@ -5,6 +5,7 @@ import net.gegy1000.cubicglue.CubicGlue;
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.client.gui.EarthCustomizationGui;
 import net.gegy1000.earth.server.capability.EarthCapability;
+import net.gegy1000.earth.server.world.coordinate.ClimateRasterCoordinateState;
 import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthCoverTypes;
 import net.gegy1000.earth.server.world.pipeline.EarthComponentTypes;
@@ -20,10 +21,13 @@ import net.gegy1000.earth.server.world.pipeline.composer.WaterFillSurfaceCompose
 import net.gegy1000.earth.server.world.pipeline.layer.OsmCoastlineLayer;
 import net.gegy1000.earth.server.world.pipeline.layer.OsmPopulatorLayer;
 import net.gegy1000.earth.server.world.pipeline.layer.OsmSampleLayer;
+import net.gegy1000.earth.server.world.pipeline.layer.RainfallSampleLayer;
+import net.gegy1000.earth.server.world.pipeline.layer.TemperatureSampleLayer;
 import net.gegy1000.earth.server.world.pipeline.layer.WaterBankPopulatorLayer;
 import net.gegy1000.earth.server.world.pipeline.layer.WaterProcessorLayer;
 import net.gegy1000.earth.server.world.pipeline.source.GlobcoverSource;
 import net.gegy1000.earth.server.world.pipeline.source.SrtmHeightSource;
+import net.gegy1000.earth.server.world.pipeline.source.WorldClimateDataset;
 import net.gegy1000.earth.server.world.pipeline.source.osm.OverpassSource;
 import net.gegy1000.earth.server.world.pipeline.source.tile.OsmTile;
 import net.gegy1000.earth.server.world.pipeline.source.tile.WaterRasterTile;
@@ -67,11 +71,13 @@ import net.gegy1000.terrarium.server.world.pipeline.composer.surface.CoverSurfac
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.HeightmapSurfaceComposer;
 import net.gegy1000.terrarium.server.world.pipeline.layer.CoverTileSampleLayer;
 import net.gegy1000.terrarium.server.world.pipeline.layer.ScaledCoverLayer;
+import net.gegy1000.terrarium.server.world.pipeline.layer.ScaledFloatLayer;
 import net.gegy1000.terrarium.server.world.pipeline.layer.ScaledShortLayer;
 import net.gegy1000.terrarium.server.world.pipeline.layer.ScaledUnsignedByteLater;
 import net.gegy1000.terrarium.server.world.pipeline.layer.ShortTileSampleLayer;
 import net.gegy1000.terrarium.server.world.pipeline.layer.SlopeProducerLayer;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.source.tile.FloatRasterTile;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
 import net.gegy1000.terrarium.server.world.pipeline.source.tile.UnsignedByteRasterTile;
 import net.minecraft.client.gui.GuiCreateWorld;
@@ -94,9 +100,14 @@ import java.util.stream.Collectors;
 
 public class EarthWorldType extends TerrariumWorldType {
     private static final double EARTH_CIRCUMFERENCE = 40075000.0;
+
     private static final double SRTM_WIDTH = 1200.0 * 360.0;
+    private static final double GLOB_WIDTH = 360.0 * 360.0;
+    private static final double CLIMATE_WIDTH = WorldClimateDataset.WIDTH;
+
     private static final double SRTM_SCALE = EARTH_CIRCUMFERENCE / SRTM_WIDTH;
-    private static final double GLOB_RATIO = 10.0 / 3.0;
+    private static final double GLOB_SCALE = EARTH_CIRCUMFERENCE / GLOB_WIDTH;
+    private static final double CLIMATE_SCALE = EARTH_CIRCUMFERENCE / CLIMATE_WIDTH;
 
     private static final int HIGHEST_POINT_METERS = 8900;
 
@@ -195,6 +206,7 @@ public class EarthWorldType extends TerrariumWorldType {
         private final CoordinateState earthCoordinates;
         private final CoordinateState srtmRaster;
         private final CoordinateState globcoverRaster;
+        private final CoordinateState climateRaster;
 
         private Initializer(World world, GenerationSettings settings) {
             this.world = world;
@@ -203,7 +215,8 @@ public class EarthWorldType extends TerrariumWorldType {
             this.worldScale = settings.getDouble(WORLD_SCALE);
             this.earthCoordinates = new LatLngCoordinateState(this.worldScale * SRTM_SCALE * 1200.0);
             this.srtmRaster = new ScaledCoordinateState(this.worldScale * SRTM_SCALE);
-            this.globcoverRaster = new ScaledCoordinateState(this.worldScale * SRTM_SCALE * GLOB_RATIO);
+            this.globcoverRaster = new ScaledCoordinateState(this.worldScale * GLOB_SCALE);
+            this.climateRaster = new ClimateRasterCoordinateState(this.worldScale * CLIMATE_SCALE);
         }
 
         @Override
@@ -269,8 +282,14 @@ public class EarthWorldType extends TerrariumWorldType {
 
             DataLayer<WaterRasterTile> waterProducer = new WaterProcessorLayer(waterBankLayer);
 
+            DataLayer<ShortRasterTile> annualRainfallSampler = new ScaledShortLayer(new RainfallSampleLayer(), this.climateRaster, Interpolation.Method.LINEAR);
+            DataLayer<FloatRasterTile> averageTemperatureSampler = new ScaledFloatLayer(new TemperatureSampleLayer(), this.climateRaster, Interpolation.Method.LINEAR);
+
             BlockPos minPos = new Coordinate(this.earthCoordinates, -90.0, -180.0).toBlockPos();
             BlockPos maxPos = new Coordinate(this.earthCoordinates, 90.0, 180.0).toBlockPos();
+
+            // TODO: Rather than constructing a data provider that dictates data flow, let's rather
+            //  have data flow be specified explicitly through a function
 
             return TerrariumDataProvider.builder()
                     .withComponent(RegionComponentType.HEIGHT, heightProducer)
@@ -278,6 +297,8 @@ public class EarthWorldType extends TerrariumWorldType {
                     .withComponent(RegionComponentType.COVER, coverProducer)
                     .withComponent(EarthComponentTypes.OSM, osmProducer)
                     .withComponent(EarthComponentTypes.WATER, waterProducer)
+                    .withComponent(EarthComponentTypes.AVERAGE_TEMPERATURE, averageTemperatureSampler)
+                    .withComponent(EarthComponentTypes.ANNUAL_RAINFALL, annualRainfallSampler)
 //                    .withAdapter(new OsmAreaCoverAdapter(this.earthCoordinates, EarthComponentTypes.OSM, RegionComponentType.COVER))
                     .withAdapter(new WaterApplyAdapter(this.earthCoordinates, EarthComponentTypes.WATER, RegionComponentType.HEIGHT, RegionComponentType.COVER))
                     .withAdapter(new HeightNoiseAdapter(this.world, RegionComponentType.HEIGHT, EarthComponentTypes.WATER, 2, 0.04, this.settings.getDouble(NOISE_SCALE)))

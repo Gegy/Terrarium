@@ -115,7 +115,7 @@ public enum DataSourceHandler {
             throw new GenerationCancelledException(e);
         } catch (Exception e) {
             Terrarium.LOGGER.warn("Unexpected exception occurred at {} from {}", pos, source.getIdentifier(), e);
-            LoadingStateHandler.countFailure();
+            LoadingStateHandler.recordFailure();
         }
 
         return source.getDefaultTile();
@@ -150,7 +150,7 @@ public enum DataSourceHandler {
         SourceResult<T> result = future.getResult();
         if (result.isError()) {
             Terrarium.LOGGER.warn("Loading tile at {} from {} gave error {}: {}", key.toPos(), key.getSource().getIdentifier(), result.getError(), result.getErrorCause());
-            LoadingStateHandler.countFailure();
+            LoadingStateHandler.recordFailure();
             return key.getSource().getDefaultTile();
         }
         T value = result.getValue();

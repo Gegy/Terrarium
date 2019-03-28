@@ -1,5 +1,6 @@
 package net.gegy1000.earth;
 
+import com.google.common.base.Preconditions;
 import net.gegy1000.earth.server.ServerProxy;
 import net.gegy1000.earth.server.capability.EarthCapability;
 import net.gegy1000.earth.server.command.GeoTeleportCommand;
@@ -10,12 +11,14 @@ import net.gegy1000.earth.server.world.CoverDebugWorldType;
 import net.gegy1000.earth.server.world.EarthWorldType;
 import net.gegy1000.earth.server.world.pipeline.source.EarthRemoteData;
 import net.gegy1000.earth.server.world.pipeline.source.SrtmHeightSource;
+import net.gegy1000.earth.server.world.pipeline.source.WorldClimateDataset;
 import net.gegy1000.terrarium.server.capability.VoidStorage;
 import net.minecraft.world.WorldType;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.ProgressManager;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -28,6 +31,9 @@ import net.minecraftforge.fml.relauncher.Side;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.annotation.Nonnull;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 
 @Mod(modid = TerrariumEarth.MODID, name = "Terrarium: Earth", version = TerrariumEarth.VERSION, acceptedMinecraftVersions = "[1.12]", dependencies = "required-after:terrarium@[0.1.0,]")
@@ -45,6 +51,8 @@ public class TerrariumEarth {
 
     public static final WorldType EARTH_TYPE = new EarthWorldType().create();
     public static final WorldType COVER_DEBUG_TYPE = new CoverDebugWorldType().create();
+
+    private static WorldClimateDataset climateDataset;
 
     public static final SimpleNetworkWrapper NETWORK = NetworkRegistry.INSTANCE.newSimpleChannel(TerrariumEarth.MODID);
 
@@ -79,6 +87,18 @@ public class TerrariumEarth {
     @Mod.EventHandler
     public static void onPostInit(FMLPostInitializationEvent event) {
         PROXY.onPostInit();
+
+        ProgressManager.ProgressBar bar = ProgressManager.push("Loading Basic Datasets", 1);
+        bar.step("Global Climate");
+
+        try {
+            InputStream input = WorldClimateDataset.class.getResourceAsStream("/data/earth/global_climate.dat");
+            climateDataset = WorldClimateDataset.parse(input);
+        } catch (IOException e) {
+            LOGGER.error("Failed to load world climate dataset!", e);
+        }
+
+        ProgressManager.pop(bar);
     }
 
     @NetworkCheckHandler
@@ -90,5 +110,11 @@ public class TerrariumEarth {
     public static void onServerStarting(FMLServerStartingEvent event) {
         event.registerServerCommand(new GeoTeleportCommand());
         event.registerServerCommand(new GeoToolCommand());
+    }
+
+    @Nonnull
+    public static WorldClimateDataset getClimateDataset() {
+        Preconditions.checkNotNull(climateDataset, "Climate dataset not yet loaded!");
+        return climateDataset;
     }
 }

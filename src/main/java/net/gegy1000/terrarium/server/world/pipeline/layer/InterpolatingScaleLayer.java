@@ -46,8 +46,8 @@ public abstract class InterpolatingScaleLayer<T extends NumberRasterTile<?>> ext
                 int originX = MathHelper.floor(sampleX);
                 double intermediateX = sampleX - originX;
 
-                double heightValue = this.interpolatePoint(sampled, originX, originZ, intermediateX, intermediateZ);
-                result.setDouble(scaledX, scaledZ, heightValue);
+                double interpolatedValue = this.interpolatePoint(sampled, originX, originZ, intermediateX, intermediateZ);
+                result.setDouble(scaledX, scaledZ, interpolatedValue);
             }
         }
     }
@@ -63,6 +63,6 @@ public abstract class InterpolatingScaleLayer<T extends NumberRasterTile<?>> ext
             }
         }
 
-        return (short) this.interpolationMethod.lerp2d(this.sampleBuffer, intermediateX, intermediateZ);
+        return this.interpolationMethod.lerp2d(this.sampleBuffer, intermediateX, intermediateZ);
     }
 }
