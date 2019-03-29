@@ -1,7 +1,7 @@
 package net.gegy1000.terrarium.server.world.pipeline.component;
 
 import net.gegy1000.terrarium.Terrarium;
-import net.gegy1000.terrarium.server.world.pipeline.DataView;
+import net.gegy1000.terrarium.server.world.pipeline.data.DataView;
 import net.gegy1000.terrarium.server.world.pipeline.data.Data;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataEngine;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataFuture;
@@ -21,7 +21,7 @@ public final class AttachedComponent<T extends Data> {
         return this.type;
     }
 
-    public CompletableFuture<RegionComponent<T>> createAndPopulate(DataEngine engine, DataView view) {
+    public CompletableFuture<RegionComponent<?>> createAndPopulate(DataEngine engine, DataView view) {
         return engine.load(this.future, view)
                 .thenApply(data -> new RegionComponent<>(this.type, data))
                 .handle((component, throwable) -> {

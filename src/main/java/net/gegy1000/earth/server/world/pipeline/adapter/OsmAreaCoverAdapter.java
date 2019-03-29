@@ -7,7 +7,7 @@ import net.gegy1000.earth.server.world.pipeline.source.osm.OsmDataParser;
 import net.gegy1000.earth.server.world.pipeline.source.tile.OsmData;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.pipeline.DataView;
+import net.gegy1000.terrarium.server.world.pipeline.data.DataView;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.RegionAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.CoverRaster;

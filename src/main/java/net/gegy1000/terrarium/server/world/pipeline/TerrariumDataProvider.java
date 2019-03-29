@@ -12,6 +12,7 @@ import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentTyp
 import net.gegy1000.terrarium.server.world.pipeline.data.Data;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataEngine;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataFuture;
+import net.gegy1000.terrarium.server.world.pipeline.data.DataView;
 import net.gegy1000.terrarium.server.world.region.GenerationRegion;
 import net.gegy1000.terrarium.server.world.region.RegionData;
 import net.gegy1000.terrarium.server.world.region.RegionTilePos;
@@ -22,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 public class TerrariumDataProvider {
     private static final int DATA_SIZE = GenerationRegion.BUFFERED_SIZE;
@@ -43,20 +45,12 @@ public class TerrariumDataProvider {
         return new Builder();
     }
 
-    @SuppressWarnings("unchecked")
-    public Collection<CompletableFuture<RegionComponent<?>>> loadComponents(RegionTilePos pos) {
+    public RegionData populateData(RegionTilePos pos) {
         DataView view = new DataView(pos.getMinBufferedX(), pos.getMinBufferedZ(), DATA_SIZE, DATA_SIZE);
 
-        Collection<CompletableFuture<RegionComponent<?>>> components = new ArrayList<>();
-        for (AttachedComponent<?> component : this.attachedComponents.values()) {
-            components.add((CompletableFuture<RegionComponent<?>>) (Object) component.createAndPopulate(this.engine, view));
-        }
-
-        return components;
-    }
-
-    public RegionData populateData(RegionTilePos pos) {
-        Collection<CompletableFuture<RegionComponent<?>>> componentFutures = this.loadComponents(pos);
+        List<CompletableFuture<RegionComponent<?>>> componentFutures = this.attachedComponents.values().stream()
+                .map(c -> c.createAndPopulate(this.engine, view))
+                .collect(Collectors.toList());
 
         Collection<RegionComponent<?>> components = FutureUtil.joinAll(componentFutures).join();
 
@@ -73,14 +67,14 @@ public class TerrariumDataProvider {
 
     @SuppressWarnings("unchecked")
     public <T extends Data> T populatePartialData(RegionComponentType<T> componentType, int x, int z, int width, int height) {
-        AttachedComponent<T> attachedComponent = (AttachedComponent<T>) this.attachedComponents.get(componentType);
+        AttachedComponent<?> attachedComponent = this.attachedComponents.get(componentType);
         if (attachedComponent == null) {
             throw new IllegalArgumentException("Cannot populate partial data tile for component that is not attached!");
         }
 
         DataView view = new DataView(x, z, width, height);
 
-        RegionComponent<T> component = attachedComponent.createAndPopulate(this.engine, view).join();
+        RegionComponent<T> component = (RegionComponent<T>) attachedComponent.createAndPopulate(this.engine, view).join();
         return component.getData();
     }
 

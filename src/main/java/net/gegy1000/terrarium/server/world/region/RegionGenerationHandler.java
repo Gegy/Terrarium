@@ -57,13 +57,6 @@ public class RegionGenerationHandler {
         return new CubeTrackerAccess(world);
     }
 
-    public void enqueueArea(int minX, int minZ, int maxX, int maxZ) {
-        Collection<RegionTilePos> regions = this.getRegions(minX, minZ, maxX, maxZ);
-        for (RegionTilePos region : regions) {
-            this.dataProvider.loadComponents(region);
-        }
-    }
-
     public void trackRegions(Collection<RegionTilePos> regions) {
         this.dispatcher.setRequiredRegions(regions);
 
@@ -183,8 +176,6 @@ public class RegionGenerationHandler {
         int width = result.getWidth();
         int height = result.getHeight();
 
-        this.enqueueArea(originX, originZ, originX + width, originZ + height);
-
         for (int localZ = 0; localZ < height; localZ++) {
             int blockZ = originZ + localZ;
 
@@ -228,9 +219,7 @@ public class RegionGenerationHandler {
     }
 
     private GenerationRegion generate(RegionTilePos pos) {
-        this.dataProvider.loadComponents(pos);
         RegionData data = this.dataProvider.populateData(pos);
-
         return new GenerationRegion(pos, data);
     }
 

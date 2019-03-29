@@ -1,7 +1,7 @@
 package net.gegy1000.terrarium.server.world.pipeline.data.function;
 
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
-import net.gegy1000.terrarium.server.world.pipeline.DataView;
+import net.gegy1000.terrarium.server.world.pipeline.data.DataView;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataFuture;
 import net.gegy1000.terrarium.server.world.pipeline.data.RasterConstructor;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ByteRaster;

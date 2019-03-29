@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -56,32 +55,17 @@ public enum DataSourceHandler {
         this.queuedTiles.clear();
     }
 
-    public void enqueueData(Set<DataTileKey<?>> requiredData) {
-        for (DataTileKey<?> key : requiredData) {
-            if (this.shouldQueueData(key)) {
-                synchronized (this.lock) {
-                    this.enqueueTile(key);
-                }
-            }
-        }
-    }
-
     private <T extends Data> CompletableFuture<T> enqueueTile(DataTileKey<T> key) {
         CompletableFuture<T> future = CompletableFuture.supplyAsync(() -> this.loadTileRobustly(key), this.loadService)
                 .handle((result, throwable) -> {
-                    SourceResult<T> finalResult = throwable == null ? result : SourceResult.exception(throwable);
-                    return this.parseResult(key, finalResult);
-                })
-                .whenComplete((result, t) -> this.handleResult(key, result));
+                    T parsedResult = this.parseResult(key, throwable == null ? result : SourceResult.exception(throwable));
+                    this.handleResult(key, parsedResult);
+                    return parsedResult;
+                });
 
         this.queuedTiles.put(key, future);
-        return future;
-    }
 
-    private boolean shouldQueueData(DataTileKey<?> key) {
-        synchronized (this.lock) {
-            return !this.queuedTiles.containsKey(key) && this.tileCache.getIfPresent(key) == null;
-        }
+        return future;
     }
 
     @SuppressWarnings("unchecked")
@@ -93,15 +77,9 @@ public enum DataSourceHandler {
                 return CompletableFuture.completedFuture(result);
             }
 
-            CompletableFuture<T> tileFuture;
             synchronized (this.lock) {
-                tileFuture = (CompletableFuture<T>) this.queuedTiles.get(key);
-                if (tileFuture == null) {
-                    tileFuture = this.enqueueTile(key);
-                }
+                return (CompletableFuture<T>) this.queuedTiles.computeIfAbsent(key, this::enqueueTile);
             }
-
-            return tileFuture;
         } catch (Exception e) {
             Terrarium.LOGGER.warn("Unexpected exception occurred at {} from {}", pos, source.getIdentifier(), e);
             LoadingStateHandler.recordFailure();
@@ -129,8 +107,8 @@ public enum DataSourceHandler {
     }
 
     private <T extends Data> void handleResult(DataTileKey<T> key, T result) {
-        this.tileCache.put(key, result);
         synchronized (this.lock) {
+            this.tileCache.put(key, result);
             this.queuedTiles.remove(key);
         }
     }
@@ -162,9 +140,9 @@ public enum DataSourceHandler {
 
     private <T extends Data> SourceResult<T> loadTile(DataTileKey<T> key) {
         TiledDataSource<T> source = key.getSource();
-        T localTile = source.getLocalTile(key.toPos());
-        if (localTile != null) {
-            return SourceResult.success(localTile);
+        T forcedTile = source.getForcedTile(key.toPos());
+        if (forcedTile != null) {
+            return SourceResult.success(forcedTile);
         }
 
         DataTilePos loadPos = source.getLoadTilePos(key.toPos());

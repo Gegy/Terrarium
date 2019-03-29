@@ -2,6 +2,7 @@ package net.gegy1000.earth.server.world.pipeline;
 
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.world.pipeline.source.tile.OsmData;
+import net.gegy1000.earth.server.world.pipeline.source.tile.SoilRaster;
 import net.gegy1000.earth.server.world.pipeline.source.tile.WaterRaster;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.FloatRaster;
@@ -20,6 +21,13 @@ public class EarthComponentTypes {
         @Override
         public WaterRaster createDefaultData(int width, int height) {
             return new WaterRaster(new short[width * height], width, height);
+        }
+    };
+
+    public static final RegionComponentType<SoilRaster> SOIL = new RegionComponentType<SoilRaster>(new ResourceLocation(TerrariumEarth.MODID, "soil"), SoilRaster.class) {
+        @Override
+        public SoilRaster createDefaultData(int width, int height) {
+            return new SoilRaster(width, height);
         }
     };
 

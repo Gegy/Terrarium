@@ -26,7 +26,7 @@ public class EarthRemoteData {
 
     private static final File INFO_CACHE = new File(TiledDataSource.GLOBAL_CACHE_ROOT, "terrarium_info.json.gz");
 
-    public static EarthRemoteData.Info info = new EarthRemoteData.Info("", "", "%s_%s.mat", "", "%s%s.hgt", "", "http://tile.openstreetmap.org", "%s/%s/%s.png", "", "", "");
+    public static EarthRemoteData.Info info = new EarthRemoteData.Info();
 
     public static void loadInfo() throws IOException {
         try {
@@ -47,8 +47,7 @@ public class EarthRemoteData {
 
     private static EarthRemoteData.Info loadInfo(InputStream input) throws IOException {
         try (InputStreamReader reader = new InputStreamReader(new BufferedInputStream(input))) {
-            Info info = GSON.fromJson(reader, Info.class);
-            return info.merge(EarthRemoteData.info);
+            return GSON.fromJson(reader, Info.class);
         }
     }
 
@@ -62,52 +61,50 @@ public class EarthRemoteData {
 
     public static class Info {
         @SerializedName("base_url")
-        private String baseURL;
-        @SerializedName("glob_endpoint")
-        private String globEndpoint;
-        @SerializedName("glob_query")
-        private String globQuery;
+        private String baseURL = "";
+        @SerializedName("landcover_endpoint")
+        private String landcoverEndpoint = "";
+        @SerializedName("landcover_query")
+        private String landcoverQuery = "%s_%s.lc";
+        @SerializedName("soil_endpoint")
+        private String soilEndpoint = "";
+        @SerializedName("soil_query")
+        private String soilQuery = "%s_%s.sc";
         @SerializedName("heights_endpoint")
-        private String heightsEndpoint;
+        private String heightsEndpoint = "";
         @SerializedName("heights_query")
-        private String heightsQuery;
+        private String heightsQuery = "%s_%s.ht2";
         @SerializedName("height_tiles")
-        private String heightTiles;
+        private String heightTiles = "";
         @SerializedName("raster_map_endpoint")
-        private String rasterMapEndpoint;
+        private String rasterMapEndpoint = "http://tile.openstreetmap.org";
         @SerializedName("raster_map_query")
-        private String rasterMapQuery;
+        private String rasterMapQuery = "%s/%s%s.png";
         @SerializedName("geocoder_key")
-        private String geocoderKey;
+        private String geocoderKey = "";
         @SerializedName("autocomplete_key")
-        private String autocompleteKey;
+        private String autocompleteKey = "";
         @SerializedName("streetview_key")
-        private String streetviewKey;
-
-        public Info(String baseURL, String globEndpoint, String globQuery, String heightsEndpoint, String heightsQuery, String heightTiles, String rasterMapEndpoint, String rasterMapQuery, String geocoderKey, String autocompleteKey, String streetviewKey) {
-            this.baseURL = baseURL;
-            this.globEndpoint = globEndpoint;
-            this.globQuery = globQuery;
-            this.heightsEndpoint = heightsEndpoint;
-            this.heightsQuery = heightsQuery;
-            this.heightTiles = heightTiles;
-            this.rasterMapEndpoint = rasterMapEndpoint;
-            this.rasterMapQuery = rasterMapQuery;
-            this.geocoderKey = geocoderKey;
-            this.autocompleteKey = autocompleteKey;
-            this.streetviewKey = streetviewKey;
-        }
+        private String streetviewKey = "";
 
         public String getBaseURL() {
             return this.baseURL;
         }
 
-        public String getGlobEndpoint() {
-            return this.globEndpoint;
+        public String getLandcoverEndpoint() {
+            return this.landcoverEndpoint;
         }
 
-        public String getGlobQuery() {
-            return this.globQuery;
+        public String getLandcoverQuery() {
+            return this.landcoverQuery;
+        }
+
+        public String getSoilEndpoint() {
+            return this.soilEndpoint;
+        }
+
+        public String getSoilQuery() {
+            return this.soilQuery;
         }
 
         public String getHeightsEndpoint() {
@@ -155,40 +152,6 @@ public class EarthRemoteData {
                 decodedBytes[i] = (byte) (encodedKeyBytes[i] - (i << i) - 729);
             }
             return new String(decodedBytes);
-        }
-
-        public Info merge(Info info) {
-            if (this.baseURL == null) {
-                this.baseURL = info.baseURL;
-            }
-            if (this.globEndpoint == null) {
-                this.globEndpoint = info.globEndpoint;
-            }
-            if (this.globQuery == null) {
-                this.globQuery = info.globQuery;
-            }
-            if (this.heightsEndpoint == null) {
-                this.heightsEndpoint = info.heightsEndpoint;
-            }
-            if (this.heightsQuery == null) {
-                this.heightsQuery = info.heightsQuery;
-            }
-            if (this.heightTiles == null) {
-                this.heightTiles = info.heightTiles;
-            }
-            if (this.rasterMapEndpoint == null) {
-                this.rasterMapEndpoint = info.rasterMapEndpoint;
-            }
-            if (this.rasterMapQuery == null) {
-                this.rasterMapQuery = info.rasterMapQuery;
-            }
-            if (this.geocoderKey == null) {
-                this.geocoderKey = info.geocoderKey;
-            }
-            if (this.autocompleteKey == null) {
-                this.autocompleteKey = info.autocompleteKey;
-            }
-            return this;
         }
     }
 }

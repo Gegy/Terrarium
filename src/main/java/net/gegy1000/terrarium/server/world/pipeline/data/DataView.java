@@ -1,4 +1,4 @@
-package net.gegy1000.terrarium.server.world.pipeline;
+package net.gegy1000.terrarium.server.world.pipeline.data;
 
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 

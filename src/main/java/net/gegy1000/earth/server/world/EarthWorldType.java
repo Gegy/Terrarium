@@ -21,11 +21,13 @@ import net.gegy1000.earth.server.world.pipeline.data.ClimateSampler;
 import net.gegy1000.earth.server.world.pipeline.data.OsmSampler;
 import net.gegy1000.earth.server.world.pipeline.data.OsmWaterProcessor;
 import net.gegy1000.earth.server.world.pipeline.data.WaterProducer;
-import net.gegy1000.earth.server.world.pipeline.source.GlobcoverSource;
+import net.gegy1000.earth.server.world.pipeline.source.LandCoverSource;
+import net.gegy1000.earth.server.world.pipeline.source.SoilCoverSource;
 import net.gegy1000.earth.server.world.pipeline.source.SrtmHeightSource;
 import net.gegy1000.earth.server.world.pipeline.source.WorldClimateDataset;
 import net.gegy1000.earth.server.world.pipeline.source.osm.OverpassSource;
 import net.gegy1000.earth.server.world.pipeline.source.tile.OsmData;
+import net.gegy1000.earth.server.world.pipeline.source.tile.SoilRaster;
 import net.gegy1000.earth.server.world.pipeline.source.tile.WaterRaster;
 import net.gegy1000.terrarium.client.gui.customization.TerrariumCustomizationGui;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
@@ -93,12 +95,11 @@ public class EarthWorldType extends TerrariumWorldType {
     private static final double EARTH_CIRCUMFERENCE = 40075000.0;
 
     private static final double SRTM_WIDTH = 1200.0 * 360.0;
-    private static final double GLOB_WIDTH = 360.0 * 360.0;
-    private static final double CLIMATE_WIDTH = WorldClimateDataset.WIDTH;
 
     private static final double SRTM_SCALE = EARTH_CIRCUMFERENCE / SRTM_WIDTH;
-    private static final double GLOB_SCALE = EARTH_CIRCUMFERENCE / GLOB_WIDTH;
-    private static final double CLIMATE_SCALE = EARTH_CIRCUMFERENCE / CLIMATE_WIDTH;
+    private static final double LANDCOVER_SCALE = EARTH_CIRCUMFERENCE / LandCoverSource.GLOBAL_WIDTH;
+    private static final double SOIL_SCALE = EARTH_CIRCUMFERENCE / SoilCoverSource.GLOBAL_WIDTH;
+    private static final double CLIMATE_SCALE = EARTH_CIRCUMFERENCE / WorldClimateDataset.WIDTH;
 
     private static final int HIGHEST_POINT_METERS = 8900;
 
@@ -196,7 +197,8 @@ public class EarthWorldType extends TerrariumWorldType {
 
         private final CoordinateState earthCoordinates;
         private final CoordinateState srtmRaster;
-        private final CoordinateState globcoverRaster;
+        private final CoordinateState landcoverRaster;
+        private final CoordinateState soilRaster;
         private final CoordinateState climateRaster;
 
         private Initializer(World world, GenerationSettings settings) {
@@ -206,7 +208,8 @@ public class EarthWorldType extends TerrariumWorldType {
             this.worldScale = settings.getDouble(WORLD_SCALE);
             this.earthCoordinates = new LatLngCoordinateState(this.worldScale * SRTM_SCALE * 1200.0);
             this.srtmRaster = new ScaledCoordinateState(this.worldScale * SRTM_SCALE);
-            this.globcoverRaster = new ScaledCoordinateState(this.worldScale * GLOB_SCALE);
+            this.landcoverRaster = new ScaledCoordinateState(this.worldScale * LANDCOVER_SCALE);
+            this.soilRaster = new ScaledCoordinateState(this.worldScale * SOIL_SCALE);
             this.climateRaster = new ScaledCoordinateState(this.worldScale * CLIMATE_SCALE);
         }
 
@@ -270,9 +273,13 @@ public class EarthWorldType extends TerrariumWorldType {
             DataFuture<UnsignedByteRaster> slope = SlopeProducer.produce(heightSampler);
             slope = InterpolationScaler.LINEAR.scaleFrom(slope, this.srtmRaster, UnsignedByteRaster::new);
 
-            GlobcoverSource globcoverSource = new GlobcoverSource(this.globcoverRaster, "globcover");
-            DataFuture<CoverRaster> cover = RasterSourceSampler.sample(globcoverSource, CoverRaster::new);
-            cover = VoronoiScaler.scaleFrom(cover, this.globcoverRaster, CoverRaster::new);
+            LandCoverSource landCoverSource = new LandCoverSource(this.landcoverRaster, "landcover");
+            DataFuture<CoverRaster> cover = RasterSourceSampler.sample(landCoverSource, CoverRaster::new);
+            cover = VoronoiScaler.scaleFrom(cover, this.landcoverRaster, CoverRaster::new);
+
+            SoilCoverSource soilSource = new SoilCoverSource(this.soilRaster, "soil");
+            DataFuture<SoilRaster> soil = RasterSourceSampler.sample(soilSource, SoilRaster::new);
+            soil = VoronoiScaler.scaleFrom(soil, this.soilRaster, SoilRaster::new);
 
             DataFuture<OsmData> osm = this.createOsmProducer();
 
@@ -303,6 +310,7 @@ public class EarthWorldType extends TerrariumWorldType {
                     .withComponent(EarthComponentTypes.WATER, waterProducer)
                     .withComponent(EarthComponentTypes.AVERAGE_TEMPERATURE, averageTemperature)
                     .withComponent(EarthComponentTypes.ANNUAL_RAINFALL, annualRainfall)
+                    .withComponent(EarthComponentTypes.SOIL, soil)
 //                    .withAdapter(new OsmAreaCoverAdapter(this.earthCoordinates, EarthComponentTypes.OSM, RegionComponentType.COVER))
                     .withAdapter(new WaterApplyAdapter(this.earthCoordinates, EarthComponentTypes.WATER, RegionComponentType.HEIGHT, RegionComponentType.COVER))
                     .withAdapter(new HeightNoiseAdapter(this.world, RegionComponentType.HEIGHT, EarthComponentTypes.WATER, 2, 0.04, this.settings.getDouble(NOISE_SCALE)))

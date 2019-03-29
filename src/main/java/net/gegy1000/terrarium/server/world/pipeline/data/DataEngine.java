@@ -1,6 +1,5 @@
 package net.gegy1000.terrarium.server.world.pipeline.data;
 
-import net.gegy1000.terrarium.server.world.pipeline.DataView;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataSourceHandler;
 
 import java.util.concurrent.CompletableFuture;

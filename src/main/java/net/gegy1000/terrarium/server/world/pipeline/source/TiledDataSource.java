@@ -48,7 +48,7 @@ public abstract class TiledDataSource<T extends Data> {
     public abstract SourceResult<T> parseStream(DataTilePos pos, InputStream stream) throws IOException;
 
     @Nullable
-    public T getLocalTile(DataTilePos pos) {
+    public T getForcedTile(DataTilePos pos) {
         return null;
     }
 

@@ -1,6 +1,5 @@
 package net.gegy1000.terrarium.server.world.pipeline.data;
 
-import net.gegy1000.terrarium.server.world.pipeline.DataView;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.RasterData;
 
 public interface RasterConstructor<T extends RasterData<?>> {

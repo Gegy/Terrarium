@@ -83,11 +83,11 @@ public class DebugMap {
     }
 
     private static DebugCover getGridCover(int gridX, int gridZ) {
-        int effectiveGridX = gridX + EarthCoverTypes.Glob.TYPES.length / 2;
+        int effectiveGridX = gridX + EarthCoverTypes.Classification.TYPES.length / 2;
         int effectiveGridZ = gridZ + LatitudinalZone.ZONES.length / 2;
 
-        if (effectiveGridX >= 0 && effectiveGridX < EarthCoverTypes.Glob.TYPES.length && effectiveGridZ >= 0 && effectiveGridZ < LatitudinalZone.ZONES.length) {
-            CoverType coverType = EarthCoverTypes.Glob.TYPES[effectiveGridX].getCoverType();
+        if (effectiveGridX >= 0 && effectiveGridX < EarthCoverTypes.Classification.TYPES.length && effectiveGridZ >= 0 && effectiveGridZ < LatitudinalZone.ZONES.length) {
+            CoverType coverType = EarthCoverTypes.Classification.TYPES[effectiveGridX].getCoverType();
             LatitudinalZone zone = LatitudinalZone.ZONES[effectiveGridZ];
             return new DebugCover(coverType, zone);
         }

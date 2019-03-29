@@ -95,7 +95,7 @@ public class SrtmHeightSource extends TiledDataSource<ShortRaster> {
 
     @Nullable
     @Override
-    public ShortRaster getLocalTile(DataTilePos pos) {
+    public ShortRaster getForcedTile(DataTilePos pos) {
         if (!VALID_TILES.isEmpty() && !VALID_TILES.contains(pos)) {
             return DEFAULT_TILE;
         }

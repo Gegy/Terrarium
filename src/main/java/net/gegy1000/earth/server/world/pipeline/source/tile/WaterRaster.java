@@ -1,6 +1,6 @@
 package net.gegy1000.earth.server.world.pipeline.source.tile;
 
-import net.gegy1000.terrarium.server.world.pipeline.DataView;
+import net.gegy1000.terrarium.server.world.pipeline.data.DataView;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 
 public class WaterRaster extends ShortRaster {
