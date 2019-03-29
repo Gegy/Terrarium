@@ -5,7 +5,7 @@ import net.gegy1000.terrarium.server.world.cover.ConstructedCover;
 import net.gegy1000.terrarium.server.world.cover.CoverGenerationContext;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.CoverRaster;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.init.Biomes;
 import net.minecraft.world.biome.Biome;
@@ -15,12 +15,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class CoverBiomeComposer implements BiomeComposer {
-    private final RegionComponentType<CoverRasterTile> coverComponent;
+    private final RegionComponentType<CoverRaster> coverComponent;
     private final Map<CoverType<?>, CoverGenerationContext> context;
 
     private final Biome[] biomeBuffer = new Biome[16 * 16];
 
-    public CoverBiomeComposer(RegionComponentType<CoverRasterTile> coverComponent, List<ConstructedCover<?>> coverTypes) {
+    public CoverBiomeComposer(RegionComponentType<CoverRaster> coverComponent, List<ConstructedCover<?>> coverTypes) {
         this.coverComponent = coverComponent;
         this.context = coverTypes.stream().collect(Collectors.toMap(ConstructedCover::getType, ConstructedCover::getContext));
     }
@@ -30,7 +30,7 @@ public class CoverBiomeComposer implements BiomeComposer {
         int globalX = chunkX << 4;
         int globalZ = chunkZ << 4;
 
-        CoverRasterTile coverRaster = regionHandler.getCachedChunkRaster(this.coverComponent);
+        CoverRaster coverRaster = regionHandler.getCachedChunkRaster(this.coverComponent);
         for (int localZ = 0; localZ < 16; localZ++) {
             for (int localX = 0; localX < 16; localX++) {
                 CoverType<?> coverType = coverRaster.get(localX, localZ);

@@ -3,16 +3,16 @@ package net.gegy1000.terrarium.server.world.pipeline.composer.surface;
 import net.gegy1000.cubicglue.api.ChunkPrimeWriter;
 import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.block.state.IBlockState;
 
 public class OceanFillSurfaceComposer implements SurfaceComposer {
-    private final RegionComponentType<ShortRasterTile> heightComponent;
+    private final RegionComponentType<ShortRaster> heightComponent;
     private final IBlockState block;
     private final int oceanLevel;
 
-    public OceanFillSurfaceComposer(RegionComponentType<ShortRasterTile> heightComponent, IBlockState block, int oceanLevel) {
+    public OceanFillSurfaceComposer(RegionComponentType<ShortRaster> heightComponent, IBlockState block, int oceanLevel) {
         this.heightComponent = heightComponent;
         this.block = block;
         this.oceanLevel = oceanLevel;
@@ -20,7 +20,7 @@ public class OceanFillSurfaceComposer implements SurfaceComposer {
 
     @Override
     public void composeSurface(RegionGenerationHandler regionHandler, CubicPos pos, ChunkPrimeWriter writer) {
-        ShortRasterTile heightRaster = regionHandler.getCachedChunkRaster(this.heightComponent);
+        ShortRaster heightRaster = regionHandler.getCachedChunkRaster(this.heightComponent);
 
         int minY = pos.getMinY();
         int maxY = pos.getMaxY();

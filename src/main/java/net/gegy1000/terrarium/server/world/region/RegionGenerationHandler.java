@@ -13,8 +13,7 @@ import net.gegy1000.terrarium.server.world.chunk.tracker.TrackedColumn;
 import net.gegy1000.terrarium.server.world.pipeline.ChunkRasterHandler;
 import net.gegy1000.terrarium.server.world.pipeline.TerrariumDataProvider;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.RasterDataAccess;
-import net.minecraft.util.math.BlockPos;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.RasterData;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
@@ -58,18 +57,10 @@ public class RegionGenerationHandler {
         return new CubeTrackerAccess(world);
     }
 
-    public void trackArea(BlockPos min, BlockPos max) {
-        Collection<RegionTilePos> regions = this.getRegions(min.getX(), min.getZ(), max.getX(), max.getZ());
-        for (RegionTilePos region : regions) {
-            this.dataProvider.enqueueData(region);
-        }
-        this.trackRegions(regions);
-    }
-
     public void enqueueArea(int minX, int minZ, int maxX, int maxZ) {
         Collection<RegionTilePos> regions = this.getRegions(minX, minZ, maxX, maxZ);
         for (RegionTilePos region : regions) {
-            this.dataProvider.enqueueData(region);
+            this.dataProvider.loadComponents(region);
         }
     }
 
@@ -188,7 +179,7 @@ public class RegionGenerationHandler {
         return this.createDefaultRegion(pos);
     }
 
-    public <T extends RasterDataAccess<V>, V> void fillRaster(RegionComponentType<T> componentType, T result, int originX, int originZ) {
+    public <T extends RasterData<V>, V> void fillRaster(RegionComponentType<T> componentType, T result, int originX, int originZ) {
         int width = result.getWidth();
         int height = result.getHeight();
 
@@ -209,7 +200,7 @@ public class RegionGenerationHandler {
         }
     }
 
-    public <T extends RasterDataAccess<V>, V> T computePartialRaster(RegionComponentType<T> componentType, int originX, int originZ, int width, int height) {
+    public <T extends RasterData<V>, V> T computePartialRaster(RegionComponentType<T> componentType, int originX, int originZ, int width, int height) {
         if (!this.hasRegions(originX, originZ, width, height)) {
             return this.dataProvider.populatePartialData(componentType, originX, originZ, width, height);
         } else {
@@ -237,7 +228,7 @@ public class RegionGenerationHandler {
     }
 
     private GenerationRegion generate(RegionTilePos pos) {
-        this.dataProvider.enqueueData(pos);
+        this.dataProvider.loadComponents(pos);
         RegionData data = this.dataProvider.populateData(pos);
 
         return new GenerationRegion(pos, data);
@@ -255,7 +246,7 @@ public class RegionGenerationHandler {
         this.chunkRasterHandler.fillRastersPartial(originX, originZ, components);
     }
 
-    public <T extends RasterDataAccess<V>, V> T getCachedChunkRaster(RegionComponentType<T> componentType) {
+    public <T extends RasterData<V>, V> T getCachedChunkRaster(RegionComponentType<T> componentType) {
         return this.chunkRasterHandler.getChunkRaster(componentType);
     }
 

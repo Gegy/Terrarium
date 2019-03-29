@@ -10,7 +10,7 @@ import net.gegy1000.earth.server.world.cover.LatitudinalZone;
 import net.gegy1000.terrarium.server.world.cover.CoverSurfaceGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.feature.tree.GenerousTreeGenerator;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.UnsignedByteRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.UnsignedByteRaster;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Biomes;
 import net.minecraft.world.World;
@@ -46,7 +46,7 @@ public class BeachCover extends EarthCoverType implements BeachyCover {
 
         @Override
         public void populateBlockCover(Random random, int originX, int originZ, IBlockState[] coverBlockBuffer) {
-            UnsignedByteRasterTile slopeRaster = this.context.getSlopeRaster();
+            UnsignedByteRaster slopeRaster = this.context.getSlopeRaster();
             this.iterateChunk((localX, localZ) -> {
                 int slope = slopeRaster.getByte(localX, localZ);
                 coverBlockBuffer[localX + localZ * 16] = slope >= CLIFF_SLOPE ? COBBLESTONE : SAND;

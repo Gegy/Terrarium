@@ -11,8 +11,8 @@ import net.gegy1000.earth.server.world.cover.LatitudinalZone;
 import net.gegy1000.terrarium.server.world.cover.CoverBiomeSelectors;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectionSeedLayer;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.UnsignedByteRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.UnsignedByteRaster;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
@@ -70,7 +70,7 @@ public class ShrublandCover extends EarthCoverType {
 
         @Override
         public void populateBlockCover(Random random, int originX, int originZ, IBlockState[] coverBlockBuffer) {
-            UnsignedByteRasterTile slopeRaster = this.context.getSlopeRaster();
+            UnsignedByteRaster slopeRaster = this.context.getSlopeRaster();
 
             this.coverFromLayer(coverBlockBuffer, originX, originZ, this.coverSelector, (sampledValue, localX, localZ) -> {
                 if (slopeRaster.getByte(localX, localZ) >= CLIFF_SLOPE) {
@@ -90,8 +90,8 @@ public class ShrublandCover extends EarthCoverType {
 
         @Override
         public void decorate(CubicPos chunkPos, ChunkPrimeWriter writer, Random random) {
-            ShortRasterTile heightRaster = this.context.getHeightRaster();
-            UnsignedByteRasterTile slopeRaster = this.context.getSlopeRaster();
+            ShortRaster heightRaster = this.context.getHeightRaster();
+            UnsignedByteRaster slopeRaster = this.context.getSlopeRaster();
             int[] grassLayer = this.sampleChunk(this.grassSelector, chunkPos);
 
             this.iterateChunk((localX, localZ) -> {

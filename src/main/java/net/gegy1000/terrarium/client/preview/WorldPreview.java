@@ -10,8 +10,8 @@ import net.gegy1000.terrarium.server.world.generator.customization.GenerationSet
 import net.gegy1000.terrarium.server.world.pipeline.GenerationCancelledException;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataSourceHandler;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.CoverRaster;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -90,18 +90,13 @@ public class WorldPreview implements IBlockAccess {
         int spawnChunkZ = spawnPosition.getZ() >> 4;
 
         try {
-            int viewRangeBlocks = VIEW_RANGE << 4;
-            BlockPos minPos = this.centerBlockPos.add(-viewRangeBlocks, 0, -viewRangeBlocks);
-            BlockPos maxPos = this.centerBlockPos.add(viewRangeBlocks + 16, 0, viewRangeBlocks + 16);
-            this.worldData.getRegionHandler().trackArea(minPos, maxPos);
-
             int viewSizeBlocks = VIEW_SIZE << 4;
 
             int originX = (spawnChunkX - VIEW_RANGE) << 4;
             int originZ = (spawnChunkZ - VIEW_RANGE) << 4;
 
-            ShortRasterTile heightTile = this.generateHeightTile(originX, originZ, viewSizeBlocks);
-            CoverRasterTile coverTile = this.generateCoverTile(originX, originZ, viewSizeBlocks);
+            ShortRaster heightTile = this.generateHeightTile(originX, originZ, viewSizeBlocks);
+            CoverRaster coverTile = this.generateCoverTile(originX, originZ, viewSizeBlocks);
 
             this.heightMesh = new PreviewHeightMesh(heightTile, coverTile);
             this.heightMesh.submitTo(this.executor, 5);
@@ -176,8 +171,8 @@ public class WorldPreview implements IBlockAccess {
                 && pos.getX() <= VIEW_RANGE && pos.getY() <= VIEW_RANGE && pos.getZ() <= VIEW_RANGE;
     }
 
-    private ShortRasterTile generateHeightTile(int originX, int originZ, int size) {
-        ShortRasterTile tile = new ShortRasterTile(size, size);
+    private ShortRaster generateHeightTile(int originX, int originZ, int size) {
+        ShortRaster tile = new ShortRaster(size, size);
 
         RegionGenerationHandler regionHandler = this.worldData.getRegionHandler();
         regionHandler.fillRaster(RegionComponentType.HEIGHT, tile, originX, originZ);
@@ -185,8 +180,8 @@ public class WorldPreview implements IBlockAccess {
         return tile;
     }
 
-    private CoverRasterTile generateCoverTile(int originX, int originZ, int size) {
-        CoverRasterTile tile = new CoverRasterTile(size, size);
+    private CoverRaster generateCoverTile(int originX, int originZ, int size) {
+        CoverRaster tile = new CoverRaster(size, size);
 
         RegionGenerationHandler regionHandler = this.worldData.getRegionHandler();
         regionHandler.fillRaster(RegionComponentType.COVER, tile, originX, originZ);
@@ -194,7 +189,7 @@ public class WorldPreview implements IBlockAccess {
         return tile;
     }
 
-    private short computeAverageHeight(ShortRasterTile heightTile) {
+    private short computeAverageHeight(ShortRaster heightTile) {
         long total = 0;
         long maxHeight = 0;
 

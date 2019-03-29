@@ -1,7 +1,7 @@
 package net.gegy1000.earth.server.world.pipeline.source.osm;
 
 import net.gegy1000.earth.TerrariumEarth;
-import net.gegy1000.earth.server.world.pipeline.source.tile.OsmTile;
+import net.gegy1000.earth.server.world.pipeline.source.tile.OsmData;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
@@ -30,10 +30,10 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
-public class OverpassSource extends TiledDataSource<OsmTile> {
+public class OverpassSource extends TiledDataSource<OsmData> {
     private static final double SAMPLE_BUFFER = 5e-4;
     private static final String OVERPASS_ENDPOINT = "http://www.overpass-api.de/api/interpreter";
-    private static final OsmTile DEFAULT_TILE = new OsmTile();
+    private static final OsmData DEFAULT_TILE = new OsmData();
 
     private final int queryVersion;
 
@@ -123,12 +123,12 @@ public class OverpassSource extends TiledDataSource<OsmTile> {
     }
 
     @Override
-    public OsmTile getDefaultTile() {
+    public OsmData getDefaultTile() {
         return DEFAULT_TILE;
     }
 
     @Override
-    public SourceResult<OsmTile> parseStream(DataTilePos pos, InputStream stream) throws IOException {
+    public SourceResult<OsmData> parseStream(DataTilePos pos, InputStream stream) throws IOException {
         try {
             return SourceResult.success(OsmDataParser.parse(stream));
         } catch (RuntimeException e) {

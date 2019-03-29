@@ -1,10 +1,10 @@
 package net.gegy1000.earth.server.world.pipeline.adapter;
 
-import net.gegy1000.earth.server.world.pipeline.source.tile.WaterRasterTile;
+import net.gegy1000.earth.server.world.pipeline.source.tile.WaterRaster;
 import net.gegy1000.terrarium.server.util.SpiralIterator;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.RegionAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.region.GenerationRegion;
 import net.gegy1000.terrarium.server.world.region.RegionData;
 
@@ -15,11 +15,11 @@ public class WaterLevelingAdapter implements RegionAdapter {
     private static final int CENTER_RANGE = GenerationRegion.BUFFER;
     private static final float CENTER_RANGE_SQUARED = (CENTER_RANGE * CENTER_RANGE) * 2.0F;
 
-    private final RegionComponentType<WaterRasterTile> waterComponent;
-    private final RegionComponentType<ShortRasterTile> heightComponent;
+    private final RegionComponentType<WaterRaster> waterComponent;
+    private final RegionComponentType<ShortRaster> heightComponent;
     private final int oceanLevel;
 
-    public WaterLevelingAdapter(RegionComponentType<WaterRasterTile> waterComponent, RegionComponentType<ShortRasterTile> heightComponent, int oceanLevel) {
+    public WaterLevelingAdapter(RegionComponentType<WaterRaster> waterComponent, RegionComponentType<ShortRaster> heightComponent, int oceanLevel) {
         this.waterComponent = waterComponent;
         this.heightComponent = heightComponent;
         this.oceanLevel = oceanLevel;
@@ -27,18 +27,18 @@ public class WaterLevelingAdapter implements RegionAdapter {
 
     @Override
     public void adapt(RegionData data, int x, int z, int width, int height) {
-        WaterRasterTile waterTile = data.getOrExcept(this.waterComponent);
-        ShortRasterTile heightTile = data.getOrExcept(this.heightComponent);
+        WaterRaster waterTile = data.getOrExcept(this.waterComponent);
+        ShortRaster heightTile = data.getOrExcept(this.heightComponent);
 
         for (int localZ = 0; localZ < height; localZ++) {
             for (int localX = 0; localX < width; localX++) {
                 int waterType = waterTile.getWaterType(localX, localZ);
-                if (waterType == WaterRasterTile.OCEAN) {
+                if (waterType == WaterRaster.OCEAN) {
                     waterTile.setWaterLevel(localX, localZ, this.oceanLevel);
-                } else if (waterType == WaterRasterTile.RIVER_CENTER) {
+                } else if (waterType == WaterRaster.RIVER_CENTER) {
                     int levelHeight = Math.max(heightTile.getShort(localX, localZ), this.oceanLevel);
                     waterTile.setWaterLevel(localX, localZ, levelHeight);
-                } else if (waterType == WaterRasterTile.RIVER) {
+                } else if (waterType == WaterRaster.RIVER) {
                     int riverLevel = this.getRiverLevel(waterTile, heightTile, localX, localZ, width, height);
                     waterTile.setWaterLevel(localX, localZ, riverLevel);
                 }
@@ -46,7 +46,7 @@ public class WaterLevelingAdapter implements RegionAdapter {
         }
     }
 
-    private int getRiverLevel(WaterRasterTile waterTile, ShortRasterTile heightTile, int localX, int localZ, int width, int height) {
+    private int getRiverLevel(WaterRaster waterTile, ShortRaster heightTile, int localX, int localZ, int width, int height) {
         Point2i riverCenter = getRiverCenter(waterTile, localX, localZ, width, height);
         if (riverCenter != null) {
             int levelHeight = Math.max(heightTile.getShort(localX, localZ), this.oceanLevel);
@@ -63,7 +63,7 @@ public class WaterLevelingAdapter implements RegionAdapter {
         return Math.max(getLevelHeight(heightTile, localX, localZ, width, height), this.oceanLevel);
     }
 
-    private static short getLevelHeight(ShortRasterTile heightTile, int localX, int localZ, int width, int height) {
+    private static short getLevelHeight(ShortRaster heightTile, int localX, int localZ, int width, int height) {
         int totalValue = 0;
         int count = 0;
         for (int offsetZ = -CENTER_RANGE; offsetZ <= CENTER_RANGE; offsetZ++) {
@@ -80,13 +80,13 @@ public class WaterLevelingAdapter implements RegionAdapter {
     }
 
     @Nullable
-    private static Point2i getRiverCenter(WaterRasterTile waterTile, int localX, int localZ, int width, int height) {
+    private static Point2i getRiverCenter(WaterRaster waterTile, int localX, int localZ, int width, int height) {
         for (Point2i point : SpiralIterator.of(GenerationRegion.BUFFER)) {
             int globalX = point.x + localX;
             int globalY = point.y + localZ;
             if (globalX >= 0 && globalY >= 0 && globalX < width && globalY < height) {
                 int waterType = waterTile.getWaterType(globalX, globalY);
-                if (waterType == WaterRasterTile.RIVER_CENTER) {
+                if (waterType == WaterRaster.RIVER_CENTER) {
                     return new Point2i(globalX, globalY);
                 }
             }

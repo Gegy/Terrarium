@@ -2,10 +2,10 @@ package net.gegy1000.earth.server.world.pipeline.composer;
 
 import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
 import net.gegy1000.cubicglue.util.CubicPos;
-import net.gegy1000.earth.server.world.pipeline.layer.DebugMap;
+import net.gegy1000.earth.server.world.pipeline.data.DebugMap;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
@@ -14,9 +14,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 
 public class DebugSignDecorationComposer implements DecorationComposer {
-    private final RegionComponentType<ShortRasterTile> heightComponent;
+    private final RegionComponentType<ShortRaster> heightComponent;
 
-    public DebugSignDecorationComposer(RegionComponentType<ShortRasterTile> heightComponent) {
+    public DebugSignDecorationComposer(RegionComponentType<ShortRaster> heightComponent) {
         this.heightComponent = heightComponent;
     }
 
@@ -28,7 +28,7 @@ public class DebugSignDecorationComposer implements DecorationComposer {
         int minY = pos.getMinY();
         int maxY = pos.getMaxY();
 
-        ShortRasterTile heightRaster = regionHandler.getCachedChunkRaster(this.heightComponent);
+        ShortRaster heightRaster = regionHandler.getCachedChunkRaster(this.heightComponent);
 
         BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
 

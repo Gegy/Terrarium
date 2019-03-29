@@ -3,7 +3,7 @@ package net.gegy1000.terrarium.server.world.pipeline;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.RasterDataAccess;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.RasterData;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 
 import java.util.Collection;
@@ -20,7 +20,7 @@ public class ChunkRasterHandler {
 
         ImmutableSet<RegionComponentType<?>> componentTypes = dataSystem.getAttachedComponentTypes();
         for (RegionComponentType<?> componentType : componentTypes) {
-            if (RasterDataAccess.class.isAssignableFrom(componentType.getType())) {
+            if (RasterData.class.isAssignableFrom(componentType.getType())) {
                 this.put(chunkRastersBuilder, componentType);
             }
         }
@@ -30,7 +30,7 @@ public class ChunkRasterHandler {
 
     @SuppressWarnings("unchecked")
     private <V> void put(ImmutableMap.Builder<RegionComponentType<?>, Data<?, ?>> builder, RegionComponentType<?> componentType) {
-        builder.put(componentType, new Data<>((RegionComponentType<? extends RasterDataAccess<V>>) componentType));
+        builder.put(componentType, new Data<>((RegionComponentType<? extends RasterData<V>>) componentType));
     }
 
     public void fillRastersPartial(int originX, int originZ, Collection<RegionComponentType<?>> components) {
@@ -50,12 +50,12 @@ public class ChunkRasterHandler {
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends RasterDataAccess<V>, V> T getChunkRaster(RegionComponentType<T> componentType) {
+    public <T extends RasterData<V>, V> T getChunkRaster(RegionComponentType<T> componentType) {
         Data<T, V> data = (Data<T, V>) this.chunkRasters.get(componentType);
         return data.getRaster();
     }
 
-    private class Data<T extends RasterDataAccess<V>, V> {
+    private class Data<T extends RasterData<V>, V> {
         private final RegionComponentType<T> componentType;
         private T raster;
 

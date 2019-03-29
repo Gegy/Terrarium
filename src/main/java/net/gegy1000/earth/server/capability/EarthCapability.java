@@ -7,7 +7,7 @@ import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.source.Geocoder;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.region.GenerationRegion;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.util.EnumFacing;
@@ -136,7 +136,7 @@ public interface EarthCapability extends ICapabilityProvider {
 
             RegionGenerationHandler regionHandler = worldData.getRegionHandler();
             GenerationRegion region = regionHandler.get(blockX, blockZ);
-            ShortRasterTile heightRaster = region.getData().get(RegionComponentType.HEIGHT);
+            ShortRaster heightRaster = region.getData().get(RegionComponentType.HEIGHT);
             if (heightRaster == null) {
                 return null;
             }

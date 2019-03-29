@@ -6,7 +6,7 @@ import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
 import net.gegy1000.terrarium.server.world.pipeline.source.SourceResult;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.minecraft.util.ResourceLocation;
 import org.tukaani.xz.SingleXZInputStream;
 
@@ -21,9 +21,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
-public class SrtmHeightSource extends TiledDataSource<ShortRasterTile> {
+public class SrtmHeightSource extends TiledDataSource<ShortRaster> {
     public static final int TILE_SIZE = 1200;
-    private static final ShortRasterTile DEFAULT_TILE = new ShortRasterTile(new short[TILE_SIZE * TILE_SIZE], TILE_SIZE, TILE_SIZE);
+    private static final ShortRaster DEFAULT_TILE = new ShortRaster(new short[TILE_SIZE * TILE_SIZE], TILE_SIZE, TILE_SIZE);
 
     private static final Set<DataTilePos> VALID_TILES = new HashSet<>();
 
@@ -84,7 +84,7 @@ public class SrtmHeightSource extends TiledDataSource<ShortRasterTile> {
     }
 
     @Override
-    public ShortRasterTile getDefaultTile() {
+    public ShortRaster getDefaultTile() {
         return DEFAULT_TILE;
     }
 
@@ -95,7 +95,7 @@ public class SrtmHeightSource extends TiledDataSource<ShortRasterTile> {
 
     @Nullable
     @Override
-    public ShortRasterTile getLocalTile(DataTilePos pos) {
+    public ShortRaster getLocalTile(DataTilePos pos) {
         if (!VALID_TILES.isEmpty() && !VALID_TILES.contains(pos)) {
             return DEFAULT_TILE;
         }
@@ -103,7 +103,7 @@ public class SrtmHeightSource extends TiledDataSource<ShortRasterTile> {
     }
 
     @Override
-    public SourceResult<ShortRasterTile> parseStream(DataTilePos pos, InputStream stream) throws IOException {
+    public SourceResult<ShortRaster> parseStream(DataTilePos pos, InputStream stream) throws IOException {
         try (DataInputStream input = new DataInputStream(stream)) {
             short[] heightmap = new short[TILE_SIZE * TILE_SIZE];
             short origin = input.readShort();
@@ -116,7 +116,7 @@ public class SrtmHeightSource extends TiledDataSource<ShortRasterTile> {
                     heightmap[i] = (short) ((input.readByte() & 0xFF) + origin);
                 }
             }
-            return SourceResult.success(new ShortRasterTile(heightmap, TILE_SIZE, TILE_SIZE));
+            return SourceResult.success(new ShortRaster(heightmap, TILE_SIZE, TILE_SIZE));
         }
     }
 }

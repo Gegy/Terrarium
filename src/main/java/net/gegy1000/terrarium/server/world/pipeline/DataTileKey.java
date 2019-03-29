@@ -2,9 +2,9 @@ package net.gegy1000.terrarium.server.world.pipeline;
 
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.TiledDataAccess;
+import net.gegy1000.terrarium.server.world.pipeline.data.Data;
 
-public class DataTileKey<T extends TiledDataAccess> {
+public class DataTileKey<T extends Data> {
     private final TiledDataSource<T> source;
     private final int tileX;
     private final int tileZ;

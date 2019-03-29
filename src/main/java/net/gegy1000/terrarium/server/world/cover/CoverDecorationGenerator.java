@@ -2,7 +2,7 @@ package net.gegy1000.terrarium.server.world.cover;
 
 import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
 import net.gegy1000.cubicglue.util.CubicPos;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.CoverRaster;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -22,7 +22,7 @@ public abstract class CoverDecorationGenerator<T extends CoverGenerationContext>
 
     protected void decorateScatter(Random random, CubicPos chunkPos, ChunkPopulationWriter writer, int count, ScatterDecorateConsumer decorator) {
         World world = this.context.getWorld();
-        CoverRasterTile coverRaster = this.context.getCoverRaster();
+        CoverRaster coverRaster = this.context.getCoverRaster();
 
         BlockPos.MutableBlockPos pos = this.mutablePos;
 

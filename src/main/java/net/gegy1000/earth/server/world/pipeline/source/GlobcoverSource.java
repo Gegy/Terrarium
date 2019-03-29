@@ -8,7 +8,7 @@ import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
 import net.gegy1000.terrarium.server.world.pipeline.source.SourceResult;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.CoverRaster;
 import net.minecraft.util.ResourceLocation;
 import org.tukaani.xz.SingleXZInputStream;
 
@@ -20,9 +20,9 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Arrays;
 
-public class GlobcoverSource extends TiledDataSource<CoverRasterTile> {
+public class GlobcoverSource extends TiledDataSource<CoverRaster> {
     public static final int TILE_SIZE = 2560;
-    private static final CoverRasterTile DEFAULT_TILE = new CoverRasterTile(TILE_SIZE, TILE_SIZE);
+    private static final CoverRaster DEFAULT_TILE = new CoverRaster(TILE_SIZE, TILE_SIZE);
 
     private static final int MIN_X = -26;
     private static final int MIN_Y = -13;
@@ -61,13 +61,13 @@ public class GlobcoverSource extends TiledDataSource<CoverRasterTile> {
     }
 
     @Override
-    public CoverRasterTile getDefaultTile() {
+    public CoverRaster getDefaultTile() {
         return DEFAULT_TILE;
     }
 
     @Nullable
     @Override
-    public CoverRasterTile getLocalTile(DataTilePos pos) {
+    public CoverRaster getLocalTile(DataTilePos pos) {
         int x = pos.getTileX();
         int y = pos.getTileZ();
         if (x < MIN_X || y < MIN_Y || x > MAX_X || y > MAX_Y) {
@@ -77,7 +77,7 @@ public class GlobcoverSource extends TiledDataSource<CoverRasterTile> {
     }
 
     @Override
-    public SourceResult<CoverRasterTile> parseStream(DataTilePos pos, InputStream stream) throws IOException {
+    public SourceResult<CoverRaster> parseStream(DataTilePos pos, InputStream stream) throws IOException {
         try (DataInputStream input = new DataInputStream(stream)) {
             int width = input.readUnsignedShort();
             int height = input.readUnsignedShort();
@@ -104,7 +104,7 @@ public class GlobcoverSource extends TiledDataSource<CoverRasterTile> {
                 }
             }
 
-            return SourceResult.success(new CoverRasterTile(cover, TILE_SIZE, TILE_SIZE));
+            return SourceResult.success(new CoverRaster(cover, TILE_SIZE, TILE_SIZE));
         }
     }
 }

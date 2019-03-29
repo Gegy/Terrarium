@@ -10,6 +10,9 @@ public final class WorldClimateDataset {
     public static final int WIDTH = 4320;
     public static final int HEIGHT = 2160;
 
+    private static final int OFFSET_X = WorldClimateDataset.WIDTH / 2;
+    private static final int OFFSET_Y = WorldClimateDataset.HEIGHT / 2;
+
     private static final int NO_DATA = 0;
 
     private static final float STANDARD_TEMPERATURE = 14.0F;
@@ -112,10 +115,12 @@ public final class WorldClimateDataset {
     }
 
     private static int index(int x, int y) {
-        return x + y * WIDTH;
+        return (x + OFFSET_X) + (y + OFFSET_Y) * WIDTH;
     }
 
     private static boolean outOfBounds(int x, int y) {
+        x += OFFSET_X;
+        y += OFFSET_Y;
         return x < 0 || y < 0 || x >= WIDTH || y >= HEIGHT;
     }
 

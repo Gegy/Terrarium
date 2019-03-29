@@ -3,8 +3,8 @@ package net.gegy1000.terrarium.client.preview;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.client.render.TerrariumVertexFormats;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.CoverRaster;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.GlStateManager;
@@ -20,13 +20,13 @@ import java.util.concurrent.Future;
 public class PreviewHeightMesh {
     private static final Vector3f NORMAL_STORE = new Vector3f();
 
-    private final ShortRasterTile heightTile;
-    private final CoverRasterTile coverTile;
+    private final ShortRaster heightTile;
+    private final CoverRaster coverTile;
 
     private Future<BufferBuilder> heightMeshResult;
     private int heightMeshDisplayList = -1;
 
-    public PreviewHeightMesh(ShortRasterTile heightTile, CoverRasterTile coverTile) {
+    public PreviewHeightMesh(ShortRaster heightTile, CoverRaster coverTile) {
         this.heightTile = heightTile;
         this.coverTile = coverTile;
     }

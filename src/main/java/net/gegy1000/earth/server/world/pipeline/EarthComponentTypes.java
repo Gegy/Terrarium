@@ -1,39 +1,39 @@
 package net.gegy1000.earth.server.world.pipeline;
 
 import net.gegy1000.earth.TerrariumEarth;
-import net.gegy1000.earth.server.world.pipeline.source.tile.OsmTile;
-import net.gegy1000.earth.server.world.pipeline.source.tile.WaterRasterTile;
+import net.gegy1000.earth.server.world.pipeline.source.tile.OsmData;
+import net.gegy1000.earth.server.world.pipeline.source.tile.WaterRaster;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.FloatRasterTile;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.FloatRaster;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.minecraft.util.ResourceLocation;
 
 public class EarthComponentTypes {
-    public static final RegionComponentType<OsmTile> OSM = new RegionComponentType<OsmTile>(new ResourceLocation(TerrariumEarth.MODID, "osm"), OsmTile.class) {
+    public static final RegionComponentType<OsmData> OSM = new RegionComponentType<OsmData>(new ResourceLocation(TerrariumEarth.MODID, "osm"), OsmData.class) {
         @Override
-        public OsmTile createDefaultData(int width, int height) {
-            return new OsmTile();
+        public OsmData createDefaultData(int width, int height) {
+            return new OsmData();
         }
     };
 
-    public static final RegionComponentType<WaterRasterTile> WATER = new RegionComponentType<WaterRasterTile>(new ResourceLocation(TerrariumEarth.MODID, "water"), WaterRasterTile.class) {
+    public static final RegionComponentType<WaterRaster> WATER = new RegionComponentType<WaterRaster>(new ResourceLocation(TerrariumEarth.MODID, "water"), WaterRaster.class) {
         @Override
-        public WaterRasterTile createDefaultData(int width, int height) {
-            return new WaterRasterTile(new short[width * height], width, height);
+        public WaterRaster createDefaultData(int width, int height) {
+            return new WaterRaster(new short[width * height], width, height);
         }
     };
 
-    public static final RegionComponentType<FloatRasterTile> AVERAGE_TEMPERATURE = new RegionComponentType<FloatRasterTile>(new ResourceLocation(TerrariumEarth.MODID, "temperature"), FloatRasterTile.class) {
+    public static final RegionComponentType<FloatRaster> AVERAGE_TEMPERATURE = new RegionComponentType<FloatRaster>(new ResourceLocation(TerrariumEarth.MODID, "temperature"), FloatRaster.class) {
         @Override
-        public FloatRasterTile createDefaultData(int width, int height) {
-            return new FloatRasterTile(width, height);
+        public FloatRaster createDefaultData(int width, int height) {
+            return new FloatRaster(width, height);
         }
     };
 
-    public static final RegionComponentType<ShortRasterTile> ANNUAL_RAINFALL = new RegionComponentType<ShortRasterTile>(new ResourceLocation(TerrariumEarth.MODID, "rainfall"), ShortRasterTile.class) {
+    public static final RegionComponentType<ShortRaster> ANNUAL_RAINFALL = new RegionComponentType<ShortRaster>(new ResourceLocation(TerrariumEarth.MODID, "rainfall"), ShortRaster.class) {
         @Override
-        public ShortRasterTile createDefaultData(int width, int height) {
-            return new ShortRasterTile(width, height);
+        public ShortRaster createDefaultData(int width, int height) {
+            return new ShortRaster(width, height);
         }
     };
 }

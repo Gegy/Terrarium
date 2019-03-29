@@ -7,7 +7,7 @@ import net.gegy1000.terrarium.server.world.cover.CoverGenerator;
 import net.gegy1000.terrarium.server.world.feature.BoulderGenerator;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.UnsignedByteRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.UnsignedByteRaster;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.block.BlockStone;
 import net.minecraft.init.Blocks;
@@ -21,12 +21,12 @@ public class BoulderDecorationComposer implements DecorationComposer {
 
     private static final BoulderGenerator BOULDER_GENERATOR = new BoulderGenerator(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.ANDESITE), 0);
 
-    private final RegionComponentType<UnsignedByteRasterTile> slopeComponent;
+    private final RegionComponentType<UnsignedByteRaster> slopeComponent;
 
     private final PseudoRandomMap decorationMap;
     private final Random random;
 
-    public BoulderDecorationComposer(World world, RegionComponentType<UnsignedByteRasterTile> slopeComponent) {
+    public BoulderDecorationComposer(World world, RegionComponentType<UnsignedByteRaster> slopeComponent) {
         this.slopeComponent = slopeComponent;
 
         this.decorationMap = new PseudoRandomMap(world, DECORATION_SEED);
@@ -42,7 +42,7 @@ public class BoulderDecorationComposer implements DecorationComposer {
         this.decorationMap.initPosSeed(globalX, globalY, globalZ);
         this.random.setSeed(this.decorationMap.next());
 
-        UnsignedByteRasterTile slopeRaster = regionHandler.getCachedChunkRaster(this.slopeComponent);
+        UnsignedByteRaster slopeRaster = regionHandler.getCachedChunkRaster(this.slopeComponent);
 
         BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
         for (int i = 0; i < 2; i++) {

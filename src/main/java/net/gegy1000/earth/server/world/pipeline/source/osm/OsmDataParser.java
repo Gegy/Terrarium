@@ -19,7 +19,7 @@ import de.topobyte.osm4j.geometry.RegionBuilderResult;
 import de.topobyte.osm4j.geometry.WayBuilder;
 import de.topobyte.osm4j.geometry.WayBuilderResult;
 import net.gegy1000.terrarium.Terrarium;
-import net.gegy1000.earth.server.world.pipeline.source.tile.OsmTile;
+import net.gegy1000.earth.server.world.pipeline.source.tile.OsmData;
 import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
@@ -37,9 +37,9 @@ public class OsmDataParser {
         WAY_BUILDER.setMissingEntitiesStrategy(MissingEntitiesStrategy.BUILD_PARTIAL);
     }
 
-    public static OsmTile parse(InputStream input) throws IOException {
+    public static OsmData parse(InputStream input) throws IOException {
         InMemoryMapDataSet entities = OsmDataParser.parseEntities(input);
-        return OsmTile.fromDataSet(entities);
+        return OsmData.fromDataSet(entities);
     }
 
     private static InMemoryMapDataSet parseEntities(InputStream input) throws IOException {

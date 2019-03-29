@@ -4,34 +4,34 @@ import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.util.ArrayUtils;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.TerrariumCoverTypes;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.TiledDataAccess;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.UnsignedByteRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.CoverRaster;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
+import net.gegy1000.terrarium.server.world.pipeline.data.Data;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.UnsignedByteRaster;
 import net.minecraft.util.ResourceLocation;
 
-public abstract class RegionComponentType<T extends TiledDataAccess> {
-    public static final RegionComponentType<ShortRasterTile> HEIGHT = new RegionComponentType<ShortRasterTile>(new ResourceLocation(Terrarium.MODID, "height"), ShortRasterTile.class) {
+public abstract class RegionComponentType<T extends Data> {
+    public static final RegionComponentType<ShortRaster> HEIGHT = new RegionComponentType<ShortRaster>(new ResourceLocation(Terrarium.MODID, "height"), ShortRaster.class) {
         @Override
-        public ShortRasterTile createDefaultData(int width, int height) {
+        public ShortRaster createDefaultData(int width, int height) {
             short[] data = new short[width * height];
-            return new ShortRasterTile(data, width, height);
+            return new ShortRaster(data, width, height);
         }
     };
 
-    public static final RegionComponentType<UnsignedByteRasterTile> SLOPE = new RegionComponentType<UnsignedByteRasterTile>(new ResourceLocation(Terrarium.MODID, "slope"), UnsignedByteRasterTile.class) {
+    public static final RegionComponentType<UnsignedByteRaster> SLOPE = new RegionComponentType<UnsignedByteRaster>(new ResourceLocation(Terrarium.MODID, "slope"), UnsignedByteRaster.class) {
         @Override
-        public UnsignedByteRasterTile createDefaultData(int width, int height) {
+        public UnsignedByteRaster createDefaultData(int width, int height) {
             byte[] data = new byte[width * height];
-            return new UnsignedByteRasterTile(data, width, height);
+            return new UnsignedByteRaster(data, width, height);
         }
     };
 
-    public static final RegionComponentType<CoverRasterTile> COVER = new RegionComponentType<CoverRasterTile>(new ResourceLocation(Terrarium.MODID, "cover"), CoverRasterTile.class) {
+    public static final RegionComponentType<CoverRaster> COVER = new RegionComponentType<CoverRaster>(new ResourceLocation(Terrarium.MODID, "cover"), CoverRaster.class) {
         @Override
-        public CoverRasterTile createDefaultData(int width, int height) {
+        public CoverRaster createDefaultData(int width, int height) {
             CoverType[] data = ArrayUtils.defaulted(new CoverType[width * height], TerrariumCoverTypes.PLACEHOLDER);
-            return new CoverRasterTile(data, width, height);
+            return new CoverRaster(data, width, height);
         }
     };
 

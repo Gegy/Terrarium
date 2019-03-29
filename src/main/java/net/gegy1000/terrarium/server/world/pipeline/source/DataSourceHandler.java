@@ -4,9 +4,9 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.gegy1000.terrarium.Terrarium;
+import net.gegy1000.terrarium.server.util.FutureUtil;
 import net.gegy1000.terrarium.server.world.pipeline.DataTileKey;
-import net.gegy1000.terrarium.server.world.pipeline.GenerationCancelledException;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.TiledDataAccess;
+import net.gegy1000.terrarium.server.world.pipeline.data.Data;
 import org.apache.commons.io.IOUtils;
 
 import java.io.BufferedInputStream;
@@ -19,14 +19,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 public enum DataSourceHandler {
@@ -35,12 +35,12 @@ public enum DataSourceHandler {
     private final ExecutorService loadService = Executors.newFixedThreadPool(2, new ThreadFactoryBuilder().setNameFormat("terrarium-data-loader-%s").setDaemon(true).build());
     private final ExecutorService cacheService = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("terrarium-cache-service").setDaemon(true).build());
 
-    private final Cache<DataTileKey<?>, TiledDataAccess> tileCache = CacheBuilder.newBuilder()
+    private final Cache<DataTileKey<?>, Data> tileCache = CacheBuilder.newBuilder()
             .maximumSize(32)
             .expireAfterAccess(30, TimeUnit.SECONDS)
             .build();
 
-    private final Map<DataTileKey<?>, TileFuture<?>> queuedTiles = new HashMap<>();
+    private final Map<DataTileKey<?>, CompletableFuture<?>> queuedTiles = new HashMap<>();
 
     private final Object lock = new Object();
 
@@ -50,8 +50,8 @@ public enum DataSourceHandler {
     }
 
     public void cancelLoading() {
-        for (TileFuture<?> future : this.queuedTiles.values()) {
-            future.cancel();
+        for (CompletableFuture<?> future : this.queuedTiles.values()) {
+            future.cancel(true);
         }
         this.queuedTiles.clear();
     }
@@ -66,6 +66,18 @@ public enum DataSourceHandler {
         }
     }
 
+    private <T extends Data> CompletableFuture<T> enqueueTile(DataTileKey<T> key) {
+        CompletableFuture<T> future = CompletableFuture.supplyAsync(() -> this.loadTileRobustly(key), this.loadService)
+                .handle((result, throwable) -> {
+                    SourceResult<T> finalResult = throwable == null ? result : SourceResult.exception(throwable);
+                    return this.parseResult(key, finalResult);
+                })
+                .whenComplete((result, t) -> this.handleResult(key, result));
+
+        this.queuedTiles.put(key, future);
+        return future;
+    }
+
     private boolean shouldQueueData(DataTileKey<?> key) {
         synchronized (this.lock) {
             return !this.queuedTiles.containsKey(key) && this.tileCache.getIfPresent(key) == null;
@@ -73,81 +85,57 @@ public enum DataSourceHandler {
     }
 
     @SuppressWarnings("unchecked")
-    private <T extends TiledDataAccess> TileFuture<T> enqueueTile(DataTileKey<T> key) {
-        TileFuture<T> future = new TileFuture<>(key);
-        future.submitTo(this.loadService);
-        this.queuedTiles.put(key, future);
-        return future;
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T extends TiledDataAccess> T getTile(TiledDataSource<T> source, DataTilePos pos) {
-        try {
-            this.collectCompletedTiles();
-        } catch (InterruptedException e) {
-            throw new GenerationCancelledException(e);
-        }
-
+    public <T extends Data> CompletableFuture<T> getTile(TiledDataSource<T> source, DataTilePos pos) {
         DataTileKey<T> key = new DataTileKey<>(source, pos.getTileX(), pos.getTileZ());
         try {
             T result = (T) this.tileCache.getIfPresent(key);
             if (result != null) {
-                return result;
+                return CompletableFuture.completedFuture(result);
             }
 
-            TileFuture<T> tileFuture;
+            CompletableFuture<T> tileFuture;
             synchronized (this.lock) {
-                tileFuture = (TileFuture<T>) this.queuedTiles.get(key);
+                tileFuture = (CompletableFuture<T>) this.queuedTiles.get(key);
                 if (tileFuture == null) {
                     tileFuture = this.enqueueTile(key);
                 }
             }
 
-            T loadedResult = this.parseResult(tileFuture);
-
-            synchronized (this.lock) {
-                this.queuedTiles.remove(key);
-                this.tileCache.put(key, loadedResult);
-            }
-
-            return loadedResult;
-        } catch (InterruptedException e) {
-            throw new GenerationCancelledException(e);
+            return tileFuture;
         } catch (Exception e) {
             Terrarium.LOGGER.warn("Unexpected exception occurred at {} from {}", pos, source.getIdentifier(), e);
             LoadingStateHandler.recordFailure();
         }
 
-        return source.getDefaultTile();
+        return CompletableFuture.completedFuture(source.getDefaultTile());
     }
 
-    private void collectCompletedTiles() throws InterruptedException {
-        if (this.queuedTiles.isEmpty()) {
-            return;
+    public <T extends Data> CompletableFuture<Collection<DataTileEntry<T>>> getTiles(
+            TiledDataSource<T> source,
+            DataTilePos min,
+            DataTilePos max
+    ) {
+        Collection<CompletableFuture<DataTileEntry<T>>> tiles = new ArrayList<>();
+
+        for (int tileZ = min.getTileZ(); tileZ <= max.getTileZ(); tileZ++) {
+            for (int tileX = min.getTileX(); tileX <= max.getTileX(); tileX++) {
+                DataTilePos pos = new DataTilePos(tileX, tileZ);
+                CompletableFuture<T> tile = this.getTile(source, pos);
+                tiles.add(tile.thenApply(t -> new DataTileEntry<>(pos, t)));
+            }
         }
 
-        Set<TileFuture<?>> completedTiles = new HashSet<>();
+        return FutureUtil.joinAll(tiles);
+    }
 
+    private <T extends Data> void handleResult(DataTileKey<T> key, T result) {
+        this.tileCache.put(key, result);
         synchronized (this.lock) {
-            for (TileFuture<?> future : this.queuedTiles.values()) {
-                if (future.isComplete()) {
-                    completedTiles.add(future);
-                }
-            }
-        }
-
-        for (TileFuture<?> future : completedTiles) {
-            TiledDataAccess parsedResult = this.parseResult(future);
-            this.tileCache.put(future.key, parsedResult);
-            synchronized (this.lock) {
-                this.queuedTiles.remove(future.key);
-            }
+            this.queuedTiles.remove(key);
         }
     }
 
-    private <T extends TiledDataAccess> T parseResult(TileFuture<T> future) throws InterruptedException {
-        DataTileKey<T> key = future.key;
-        SourceResult<T> result = future.getResult();
+    private <T extends Data> T parseResult(DataTileKey<T> key, SourceResult<T> result) {
         if (result.isError()) {
             Terrarium.LOGGER.warn("Loading tile at {} from {} gave error {}: {}", key.toPos(), key.getSource().getIdentifier(), result.getError(), result.getErrorCause());
             LoadingStateHandler.recordFailure();
@@ -160,7 +148,7 @@ public enum DataSourceHandler {
         return value;
     }
 
-    private <T extends TiledDataAccess> SourceResult<T> loadTileRobustly(DataTileKey<T> key) {
+    private <T extends Data> SourceResult<T> loadTileRobustly(DataTileKey<T> key) {
         SourceResult<T> result = this.loadTile(key);
         if (result.isError() && result.getError() == SourceResult.Error.MALFORMED) {
             TiledDataSource<T> source = key.getSource();
@@ -172,7 +160,7 @@ public enum DataSourceHandler {
         return result;
     }
 
-    private <T extends TiledDataAccess> SourceResult<T> loadTile(DataTileKey<T> key) {
+    private <T extends Data> SourceResult<T> loadTile(DataTileKey<T> key) {
         TiledDataSource<T> source = key.getSource();
         T localTile = source.getLocalTile(key.toPos());
         if (localTile != null) {
@@ -188,7 +176,7 @@ public enum DataSourceHandler {
         }
     }
 
-    private <T extends TiledDataAccess> SourceResult<T> loadRemoteTile(TiledDataSource<T> source, DataTilePos pos, File cachedFile) {
+    private <T extends Data> SourceResult<T> loadRemoteTile(TiledDataSource<T> source, DataTilePos pos, File cachedFile) {
         LoadingStateHandler.pushState(LoadingState.LOADING_REMOTE);
         try (InputStream remoteStream = source.getRemoteStream(pos)) {
             InputStream cachingStream = this.getCachingStream(remoteStream, cachedFile);
@@ -203,7 +191,7 @@ public enum DataSourceHandler {
         }
     }
 
-    private <T extends TiledDataAccess> SourceResult<T> loadCachedTile(TiledDataSource<T> source, DataTilePos pos, File cachedFile) {
+    private <T extends Data> SourceResult<T> loadCachedTile(TiledDataSource<T> source, DataTilePos pos, File cachedFile) {
         LoadingStateHandler.pushState(LoadingState.LOADING_CACHED);
         try {
             return source.parseStream(pos, source.getWrappedStream(new BufferedInputStream(new FileInputStream(cachedFile))));
@@ -242,39 +230,5 @@ public enum DataSourceHandler {
     public void close() {
         this.loadService.shutdown();
         this.cacheService.shutdown();
-    }
-
-    private class TileFuture<T extends TiledDataAccess> {
-        private final DataTileKey<T> key;
-        private Future<SourceResult<T>> future;
-
-        private TileFuture(DataTileKey<T> key) {
-            this.key = key;
-        }
-
-        public boolean isComplete() {
-            return this.future.isDone() || this.future.isCancelled();
-        }
-
-        public SourceResult<T> getResult() throws InterruptedException {
-            try {
-                if (this.future == null) {
-                    return SourceResult.empty();
-                }
-                return this.future.get();
-            } catch (ExecutionException e) {
-                return SourceResult.exception(e);
-            }
-        }
-
-        public void submitTo(ExecutorService service) {
-            if (!service.isShutdown()) {
-                this.future = service.submit(() -> DataSourceHandler.this.loadTileRobustly(this.key));
-            }
-        }
-
-        public void cancel() {
-            this.future.cancel(true);
-        }
     }
 }

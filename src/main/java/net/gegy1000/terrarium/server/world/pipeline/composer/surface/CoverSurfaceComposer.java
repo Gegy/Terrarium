@@ -10,8 +10,8 @@ import net.gegy1000.terrarium.server.world.cover.CoverGenerationContext;
 import net.gegy1000.terrarium.server.world.cover.CoverSurfaceGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.CoverRaster;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -36,8 +36,8 @@ public class CoverSurfaceComposer implements SurfaceComposer {
     private final Random random;
     private final PseudoRandomMap coverMap;
 
-    private final RegionComponentType<ShortRasterTile> heightComponent;
-    private final RegionComponentType<CoverRasterTile> coverComponent;
+    private final RegionComponentType<ShortRaster> heightComponent;
+    private final RegionComponentType<CoverRaster> coverComponent;
 
     private final boolean decorate;
     private final IBlockState replaceBlock;
@@ -51,8 +51,8 @@ public class CoverSurfaceComposer implements SurfaceComposer {
 
     public CoverSurfaceComposer(
             World world,
-            RegionComponentType<ShortRasterTile> heightComponent,
-            RegionComponentType<CoverRasterTile> coverComponent,
+            RegionComponentType<ShortRaster> heightComponent,
+            RegionComponentType<CoverRaster> coverComponent,
             List<ConstructedCover<?>> coverTypes,
             boolean decorate,
             IBlockState replaceBlock
@@ -77,8 +77,8 @@ public class CoverSurfaceComposer implements SurfaceComposer {
         int globalY = pos.getMinY();
         int globalZ = pos.getMinZ();
 
-        ShortRasterTile heightRaster = regionHandler.getCachedChunkRaster(this.heightComponent);
-        CoverRasterTile coverRaster = regionHandler.getCachedChunkRaster(this.coverComponent);
+        ShortRaster heightRaster = regionHandler.getCachedChunkRaster(this.heightComponent);
+        CoverRaster coverRaster = regionHandler.getCachedChunkRaster(this.coverComponent);
 
         this.depthBuffer = this.depthNoise.getRegion(this.depthBuffer, globalX, globalZ, 16, 16, 0.0625, 0.0625, 1.0);
 
@@ -115,7 +115,7 @@ public class CoverSurfaceComposer implements SurfaceComposer {
         }
     }
 
-    private void populateBlockCover(CoverRasterTile coverBuffer, int globalX, int globalZ) {
+    private void populateBlockCover(CoverRaster coverBuffer, int globalX, int globalZ) {
         this.localCoverTypes.clear();
         for (int localZ = 0; localZ < 16; localZ++) {
             for (int localX = 0; localX < 16; localX++) {

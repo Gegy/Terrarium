@@ -48,7 +48,7 @@ public class DataView {
     }
 
     public DataView grow(int lowerX, int lowerY, int upperX, int upperY) {
-        return new DataView(this.x - lowerX, this.y - lowerY, this.width + upperX, this.height + upperY);
+        return new DataView(this.x - lowerX, this.y - lowerY, this.width + upperX + lowerX, this.height + upperY + lowerY);
     }
 
     public boolean contains(DataView view) {

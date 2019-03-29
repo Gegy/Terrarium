@@ -8,7 +8,7 @@ import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverDecorationGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectionSeedLayer;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Biomes;
 import net.minecraft.world.biome.Biome;
@@ -79,7 +79,7 @@ public class FlowerFieldCover extends EarthCoverType {
 
         @Override
         public void decorate(CubicPos chunkPos, ChunkPrimeWriter writer, Random random) {
-            ShortRasterTile heightRaster = this.context.getHeightRaster();
+            ShortRaster heightRaster = this.context.getHeightRaster();
             int[] plantLayer = this.sampleChunk(this.plantSelector, chunkPos);
 
             this.iterateChunk((localX, localZ) -> {

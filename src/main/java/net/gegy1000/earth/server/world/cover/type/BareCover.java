@@ -9,8 +9,8 @@ import net.gegy1000.earth.server.world.cover.EarthDecorationGenerator;
 import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectWeightedLayer;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.UnsignedByteRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.UnsignedByteRaster;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Biomes;
 import net.minecraft.world.World;
@@ -77,8 +77,8 @@ public class BareCover extends EarthCoverType {
 
         @Override
         public void decorate(CubicPos chunkPos, ChunkPrimeWriter writer, Random random) {
-            ShortRasterTile heightRaster = this.context.getHeightRaster();
-            UnsignedByteRasterTile slopeRaster = this.context.getSlopeRaster();
+            ShortRaster heightRaster = this.context.getHeightRaster();
+            UnsignedByteRaster slopeRaster = this.context.getSlopeRaster();
             this.iterateChunk((localX, localZ) -> {
                 int slope = slopeRaster.getByte(localX, localZ);
                 if (slope < MOUNTAINOUS_SLOPE && random.nextInt(250) == 0) {
@@ -89,9 +89,9 @@ public class BareCover extends EarthCoverType {
         }
 
         private class Provider implements BlockProvider {
-            private final UnsignedByteRasterTile slopeRaster;
+            private final UnsignedByteRaster slopeRaster;
 
-            private Provider(UnsignedByteRasterTile slopeRaster) {
+            private Provider(UnsignedByteRaster slopeRaster) {
                 this.slopeRaster = slopeRaster;
             }
 
@@ -118,7 +118,7 @@ public class BareCover extends EarthCoverType {
         @Override
         public void decorate(CubicPos chunkPos, ChunkPopulationWriter writer, Random random) {
             World world = this.context.getWorld();
-            UnsignedByteRasterTile slopeRaster = this.context.getSlopeRaster();
+            UnsignedByteRaster slopeRaster = this.context.getSlopeRaster();
 
             this.preventIntersection(5);
 

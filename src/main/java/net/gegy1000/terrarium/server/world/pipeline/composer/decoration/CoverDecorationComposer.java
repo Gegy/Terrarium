@@ -9,7 +9,7 @@ import net.gegy1000.terrarium.server.world.cover.CoverDecorationGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverGenerationContext;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.CoverRaster;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.world.World;
 
@@ -26,7 +26,7 @@ public class CoverDecorationComposer implements DecorationComposer {
     private final Random random;
     private final PseudoRandomMap coverMap;
 
-    private final RegionComponentType<CoverRasterTile> coverComponent;
+    private final RegionComponentType<CoverRaster> coverComponent;
 
     private final List<CoverGenerationContext> context;
     private final Map<CoverType<?>, CoverDecorationGenerator<?>> generators;
@@ -34,7 +34,7 @@ public class CoverDecorationComposer implements DecorationComposer {
 
     public CoverDecorationComposer(
             World world,
-            RegionComponentType<CoverRasterTile> coverComponent,
+            RegionComponentType<CoverRaster> coverComponent,
             List<ConstructedCover<?>> coverTypes
     ) {
         this.random = new Random(world.getWorldInfo().getSeed() ^ DECORATION_SEED);
@@ -52,7 +52,7 @@ public class CoverDecorationComposer implements DecorationComposer {
         int globalY = pos.getMinY();
         int globalZ = pos.getMinZ();
 
-        CoverRasterTile coverRaster = regionHandler.getCachedChunkRaster(this.coverComponent);
+        CoverRaster coverRaster = regionHandler.getCachedChunkRaster(this.coverComponent);
 
         this.coverTypes.clear();
         for (int localZ = 0; localZ < 16; localZ++) {

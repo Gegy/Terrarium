@@ -5,8 +5,8 @@ import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.TerrariumCoverTypes;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.RegionAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.CoverRaster;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.region.RegionData;
 import net.minecraft.util.math.MathHelper;
 
@@ -16,13 +16,13 @@ import java.util.List;
 import java.util.Set;
 
 public class WaterFlattenAdapter implements RegionAdapter {
-    private final RegionComponentType<ShortRasterTile> heightComponent;
-    private final RegionComponentType<CoverRasterTile> coverComponent;
+    private final RegionComponentType<ShortRaster> heightComponent;
+    private final RegionComponentType<CoverRaster> coverComponent;
     private final int flattenRange;
 
     private final CoverType waterCoverType;
 
-    public WaterFlattenAdapter(RegionComponentType<ShortRasterTile> heightComponent, RegionComponentType<CoverRasterTile> coverComponent, int flattenRange, CoverType waterCoverType) {
+    public WaterFlattenAdapter(RegionComponentType<ShortRaster> heightComponent, RegionComponentType<CoverRaster> coverComponent, int flattenRange, CoverType waterCoverType) {
         this.heightComponent = heightComponent;
         this.coverComponent = coverComponent;
         this.flattenRange = flattenRange;
@@ -31,8 +31,8 @@ public class WaterFlattenAdapter implements RegionAdapter {
 
     @Override
     public void adapt(RegionData data, int x, int z, int width, int height) {
-        ShortRasterTile heightTile = data.getOrExcept(this.heightComponent);
-        CoverRasterTile coverTile = data.getOrExcept(this.coverComponent);
+        ShortRaster heightTile = data.getOrExcept(this.heightComponent);
+        CoverRaster coverTile = data.getOrExcept(this.coverComponent);
 
         short[] heightBuffer = heightTile.getShortData();
         CoverType[] coverBuffer = coverTile.getData();
