@@ -1,21 +1,21 @@
 package net.gegy1000.terrarium.server.world.pipeline.composer.surface;
 
+import net.gegy1000.cubicglue.api.ChunkPrimeWriter;
+import net.gegy1000.cubicglue.util.CubicPos;
+import net.gegy1000.cubicglue.util.PseudoRandomMap;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.util.ArrayUtils;
-import net.gegy1000.terrarium.server.world.chunk.PseudoRandomMap;
 import net.gegy1000.terrarium.server.world.cover.ConstructedCover;
 import net.gegy1000.terrarium.server.world.cover.CoverGenerationContext;
 import net.gegy1000.terrarium.server.world.cover.CoverSurfaceGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.cover.generator.primer.CoverChunkPrimer;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.CoverRaster;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
-import net.minecraft.world.chunk.ChunkPrimer;
-import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
 
 import java.util.HashSet;
@@ -36,7 +36,8 @@ public class CoverSurfaceComposer implements SurfaceComposer {
     private final Random random;
     private final PseudoRandomMap coverMap;
 
-    private final RegionComponentType<CoverRasterTile> coverComponent;
+    private final RegionComponentType<ShortRaster> heightComponent;
+    private final RegionComponentType<CoverRaster> coverComponent;
 
     private final boolean decorate;
     private final IBlockState replaceBlock;
@@ -50,7 +51,8 @@ public class CoverSurfaceComposer implements SurfaceComposer {
 
     public CoverSurfaceComposer(
             World world,
-            RegionComponentType<CoverRasterTile> coverComponent,
+            RegionComponentType<ShortRaster> heightComponent,
+            RegionComponentType<CoverRaster> coverComponent,
             List<ConstructedCover<?>> coverTypes,
             boolean decorate,
             IBlockState replaceBlock
@@ -59,6 +61,7 @@ public class CoverSurfaceComposer implements SurfaceComposer {
         this.depthNoise = new NoiseGeneratorPerlin(this.random, 4);
         this.coverMap = new PseudoRandomMap(world.getWorldInfo().getSeed(), this.random.nextLong());
 
+        this.heightComponent = heightComponent;
         this.coverComponent = coverComponent;
 
         this.decorate = decorate;
@@ -69,11 +72,13 @@ public class CoverSurfaceComposer implements SurfaceComposer {
     }
 
     @Override
-    public void composeSurface(IChunkGenerator generator, ChunkPrimer primer, RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
-        int globalX = chunkX << 4;
-        int globalZ = chunkZ << 4;
+    public void composeSurface(RegionGenerationHandler regionHandler, CubicPos pos, ChunkPrimeWriter writer) {
+        int globalX = pos.getMinX();
+        int globalY = pos.getMinY();
+        int globalZ = pos.getMinZ();
 
-        CoverRasterTile coverRaster = regionHandler.getCachedChunkRaster(this.coverComponent);
+        ShortRaster heightRaster = regionHandler.getCachedChunkRaster(this.heightComponent);
+        CoverRaster coverRaster = regionHandler.getCachedChunkRaster(this.coverComponent);
 
         this.depthBuffer = this.depthNoise.getRegion(this.depthBuffer, globalX, globalZ, 16, 16, 0.0625, 0.0625, 1.0);
 
@@ -85,13 +90,16 @@ public class CoverSurfaceComposer implements SurfaceComposer {
 
         for (int localZ = 0; localZ < 16; localZ++) {
             for (int localX = 0; localX < 16; localX++) {
-                this.coverMap.initPosSeed(localX + globalX, localZ + globalZ);
-                this.coverColumn(primer, localX, localZ, this.depthBuffer[localX + localZ * 16]);
+                int height = heightRaster.getShort(localX, localZ);
+                if (pos.getMinY() <= height) {
+                    this.coverMap.initPosSeed(localX + globalX, globalY, localZ + globalZ);
+                    this.coverColumn(pos, writer, localX, localZ, height, this.depthBuffer[localX + localZ * 16]);
+                }
             }
         }
 
         if (this.decorate) {
-            this.coverMap.initPosSeed(globalX, globalZ);
+            this.coverMap.initPosSeed(globalX, globalY, globalZ);
             long randomSeed = this.coverMap.next();
 
             for (CoverType type : this.localCoverTypes) {
@@ -99,7 +107,7 @@ public class CoverSurfaceComposer implements SurfaceComposer {
                 if (coverGenerator != null) {
                     this.random.setSeed(randomSeed);
                     this.random.setSeed(this.random.nextLong());
-                    coverGenerator.decorate(globalX, globalZ, new CoverChunkPrimer(primer), this.random);
+                    coverGenerator.decorate(pos, writer, this.random);
                 } else {
                     Terrarium.LOGGER.warn("Tried to generate with non-registered cover: {}", type);
                 }
@@ -107,7 +115,7 @@ public class CoverSurfaceComposer implements SurfaceComposer {
         }
     }
 
-    private void populateBlockCover(CoverRasterTile coverBuffer, int globalX, int globalZ) {
+    private void populateBlockCover(CoverRaster coverBuffer, int globalX, int globalZ) {
         this.localCoverTypes.clear();
         for (int localZ = 0; localZ < 16; localZ++) {
             for (int localX = 0; localX < 16; localX++) {
@@ -128,32 +136,34 @@ public class CoverSurfaceComposer implements SurfaceComposer {
         }
     }
 
-    private void coverColumn(ChunkPrimer primer, int localX, int localZ, double depthNoise) {
+    private void coverColumn(CubicPos pos, ChunkPrimeWriter writer, int localX, int localZ, int height, double depthNoise) {
         int index = localX + localZ * 16;
 
         IBlockState currentTop = this.coverBlockBuffer[index];
         IBlockState currentFiller = this.fillerBlockBuffer[index];
 
+        int minY = pos.getMinY();
+        int maxY = Math.min(pos.getMaxY(), height);
+
         int depth = -1;
         int soilDepth = Math.max((int) (depthNoise / 3.0 + 3.0 + this.coverMap.nextDouble() * 0.25), 1);
+        soilDepth = maxY - (height - soilDepth);
+        if (soilDepth <= 0) {
+            return;
+        }
 
-        for (int localY = 255; localY >= 0; localY--) {
-            IBlockState current = primer.getBlockState(localX, localY, localZ);
+        for (int localY = maxY; localY >= minY; localY--) {
+            IBlockState current = writer.get(localX, localY, localZ);
             while (current == AIR && --localY >= 0) {
-                current = primer.getBlockState(localX, localY, localZ);
+                current = writer.get(localX, localY, localZ);
                 depth = -1;
             }
             if (current == this.replaceBlock) {
                 if (depth == -1) {
-                    if (soilDepth <= 0) {
-                        currentTop = AIR;
-                        currentFiller = this.replaceBlock;
-                    }
                     depth = soilDepth;
-
-                    primer.setBlockState(localX, localY, localZ, currentTop);
+                    writer.set(localX, localY, localZ, currentTop);
                 } else if (depth-- > 0) {
-                    primer.setBlockState(localX, localY, localZ, currentFiller);
+                    writer.set(localX, localY, localZ, currentFiller);
                 } else {
                     break;
                 }
@@ -163,6 +173,6 @@ public class CoverSurfaceComposer implements SurfaceComposer {
 
     @Override
     public RegionComponentType<?>[] getDependencies() {
-        return new RegionComponentType[] { this.coverComponent };
+        return new RegionComponentType[] { this.heightComponent, this.coverComponent };
     }
 }

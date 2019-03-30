@@ -2,24 +2,26 @@ package net.gegy1000.terrarium.server.world.region;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
-import net.gegy1000.terrarium.server.world.chunk.PlayerChunkMapHooks;
+import net.gegy1000.cubicglue.CubicGlue;
+import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
+import net.gegy1000.terrarium.server.world.chunk.tracker.ChunkTrackerAccess;
+import net.gegy1000.terrarium.server.world.chunk.tracker.ChunkTrackerHooks;
+import net.gegy1000.terrarium.server.world.chunk.tracker.ColumnTrackerAccess;
+import net.gegy1000.terrarium.server.world.chunk.tracker.CubeTrackerAccess;
+import net.gegy1000.terrarium.server.world.chunk.tracker.FallbackTrackerAccess;
+import net.gegy1000.terrarium.server.world.chunk.tracker.TrackedColumn;
 import net.gegy1000.terrarium.server.world.pipeline.ChunkRasterHandler;
 import net.gegy1000.terrarium.server.world.pipeline.TerrariumDataProvider;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.source.DataSourceHandler;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.RasterDataAccess;
-import net.minecraft.server.management.PlayerChunkMap;
-import net.minecraft.server.management.PlayerChunkMapEntry;
-import net.minecraft.util.math.BlockPos;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.RasterData;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.chunk.Chunk;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -30,33 +32,29 @@ public class RegionGenerationHandler {
 
     private final Map<RegionTilePos, GenerationRegion> regionCache = new HashMap<>();
     private final RegionGenerationDispatcher dispatcher = new OffThreadGenerationDispatcher(this::generate);
-    private final DataSourceHandler sourceHandler = new DataSourceHandler();
 
+    private final ChunkTrackerAccess chunkTrackerAccess;
     private final Object2BooleanMap<ChunkPos> chunkStateMap = new Object2BooleanOpenHashMap<>();
 
-    public RegionGenerationHandler(TerrariumDataProvider dataProvider) {
+    public RegionGenerationHandler(World world, TerrariumDataProvider dataProvider) {
         this.dataProvider = dataProvider;
         this.chunkRasterHandler = new ChunkRasterHandler(this, dataProvider);
+
+        this.chunkTrackerAccess = createTrackerAccess(world);
     }
 
-    public void enqueueArea(BlockPos min, BlockPos max) {
-        RegionTilePos minRegion = this.getRegionPos(min.getX(), min.getZ());
-        RegionTilePos maxRegion = this.getRegionPos(max.getX(), max.getZ());
-
-        int width = maxRegion.getTileX() - minRegion.getTileX() + 1;
-        int height = maxRegion.getTileZ() - minRegion.getTileZ() + 1;
-        Collection<RegionTilePos> regions = new ArrayList<>(width * height);
-        for (int regionZ = minRegion.getTileZ(); regionZ <= maxRegion.getTileZ(); regionZ++) {
-            for (int regionX = minRegion.getTileX(); regionX <= maxRegion.getTileX(); regionX++) {
-                regions.add(new RegionTilePos(regionX, regionZ));
-            }
+    private static ChunkTrackerAccess createTrackerAccess(World world) {
+        if (!(world instanceof WorldServer)) {
+            return new FallbackTrackerAccess();
         }
-
-        for (RegionTilePos region : regions) {
-            this.dataProvider.enqueueData(this.sourceHandler, region);
+        if (CubicGlue.isCubic(world)) {
+            return createCubeTracker((WorldServer) world);
         }
+        return new ColumnTrackerAccess((WorldServer) world);
+    }
 
-        this.trackRegions(regions);
+    private static ChunkTrackerAccess createCubeTracker(WorldServer world) {
+        return new CubeTrackerAccess(world);
     }
 
     public void trackRegions(Collection<RegionTilePos> regions) {
@@ -79,51 +77,45 @@ public class RegionGenerationHandler {
         }
     }
 
-    public void trackRegions(WorldServer world, PlayerChunkMap chunkTracker) {
-        List<PlayerChunkMapEntry> chunkEntries = PlayerChunkMapHooks.getSortedChunkEntries(chunkTracker);
+    public void trackRegions(WorldServer world) {
+        Collection<TrackedColumn> columnEntries = this.chunkTrackerAccess.getSortedTrackedColumns();
+        ChunkTrackerHooks chunkHooks = world.getCapability(TerrariumCapabilities.chunkHooksCapability, null);
 
-        Set<ChunkPos> trackedChunks = chunkEntries.stream()
-                .map(PlayerChunkMapEntry::getPos)
-                .collect(Collectors.toSet());
-        Set<ChunkPos> untrackedChunks = this.chunkStateMap.keySet().stream()
-                .filter(pos -> !trackedChunks.contains(pos))
-                .collect(Collectors.toSet());
-        untrackedChunks.forEach(this.chunkStateMap::remove);
+        Collection<RegionTilePos> requiredRegions = this.collectRequiredRegions(world, chunkHooks, columnEntries);
+        this.dispatcher.setRequiredRegions(requiredRegions);
 
-        Collection<RegionTilePos> requiredRegions = this.collectRequiredRegions(world, chunkTracker, chunkEntries);
+        this.unpauseChunks(chunkHooks);
 
-        if (chunkTracker instanceof PlayerChunkMapHooks.Wrapper) {
-            PlayerChunkMapHooks.Wrapper hookedTracker = (PlayerChunkMapHooks.Wrapper) chunkTracker;
-            Set<ChunkPos> hookedChunks = hookedTracker.getHookedChunks();
-            if (!hookedChunks.isEmpty()) {
-                Set<ChunkPos> unhooked = hookedChunks.stream()
+        this.trackRegions(requiredRegions);
+    }
+
+    private void unpauseChunks(ChunkTrackerHooks chunkHooks) {
+        if (chunkHooks != null) {
+            Set<ChunkPos> pausedChunks = chunkHooks.getPausedChunks();
+            if (!pausedChunks.isEmpty()) {
+                Set<ChunkPos> unhooked = pausedChunks.stream()
                         .filter(chunkPos -> {
                             RegionTilePos regionPos = this.getRegionPos(chunkPos.getXStart(), chunkPos.getZStart());
                             return this.regionCache.containsKey(regionPos);
                         })
                         .collect(Collectors.toSet());
-                unhooked.forEach(hookedTracker::unhookChunk);
+                unhooked.forEach(chunkHooks::unpauseChunk);
             }
         }
-
-        this.trackRegions(requiredRegions);
     }
 
-    private Collection<RegionTilePos> collectRequiredRegions(WorldServer world, PlayerChunkMap chunkTracker, List<PlayerChunkMapEntry> chunkEntries) {
+    private Collection<RegionTilePos> collectRequiredRegions(WorldServer world, ChunkTrackerHooks chunkHooks, Collection<TrackedColumn> chunkEntries) {
         Set<RegionTilePos> requiredRegions = new LinkedHashSet<>();
 
-        for (PlayerChunkMapEntry entry : chunkEntries) {
-            Chunk chunk = entry.getChunk();
-            if (chunk == null) {
+        for (TrackedColumn entry : chunkEntries) {
+            if (entry.isQueued()) {
                 ChunkPos chunkPos = entry.getPos();
-                if (this.isChunkSaved(world, chunkPos)) {
+                if (this.computeChunkSaved(world, chunkPos)) {
                     continue;
                 }
                 RegionTilePos regionPos = this.getRegionPos(chunkPos.getXStart(), chunkPos.getZStart());
-                if (!this.regionCache.containsKey(regionPos)) {
-                    if (chunkTracker instanceof PlayerChunkMapHooks.Wrapper) {
-                        ((PlayerChunkMapHooks.Wrapper) chunkTracker).hookChunk(chunkPos);
-                    }
+                if (chunkHooks != null && !this.regionCache.containsKey(regionPos)) {
+                    chunkHooks.pauseChunk(chunkPos);
                 }
                 requiredRegions.add(regionPos);
             }
@@ -132,7 +124,7 @@ public class RegionGenerationHandler {
         return requiredRegions;
     }
 
-    private boolean isChunkSaved(WorldServer world, ChunkPos pos) {
+    private boolean computeChunkSaved(WorldServer world, ChunkPos pos) {
         if (this.chunkStateMap.containsKey(pos)) {
             return this.chunkStateMap.get(pos);
         }
@@ -147,6 +139,22 @@ public class RegionGenerationHandler {
 
     private RegionTilePos getRegionPos(int blockX, int blockZ) {
         return new RegionTilePos(Math.floorDiv(blockX, GenerationRegion.SIZE), Math.floorDiv(blockZ, GenerationRegion.SIZE));
+    }
+
+    private Collection<RegionTilePos> getRegions(int minX, int minZ, int maxX, int maxZ) {
+        RegionTilePos minRegion = this.getRegionPos(minX, minZ);
+        RegionTilePos maxRegion = this.getRegionPos(maxX, maxZ);
+
+        int width = maxRegion.getTileX() - minRegion.getTileX() + 1;
+        int height = maxRegion.getTileZ() - minRegion.getTileZ() + 1;
+        Collection<RegionTilePos> regions = new ArrayList<>(width * height);
+        for (int regionZ = minRegion.getTileZ(); regionZ <= maxRegion.getTileZ(); regionZ++) {
+            for (int regionX = minRegion.getTileX(); regionX <= maxRegion.getTileX(); regionX++) {
+                regions.add(new RegionTilePos(regionX, regionZ));
+            }
+        }
+
+        return regions;
     }
 
     public GenerationRegion get(RegionTilePos pos) {
@@ -164,10 +172,9 @@ public class RegionGenerationHandler {
         return this.createDefaultRegion(pos);
     }
 
-    public <T extends RasterDataAccess<V>, V> T fillRaster(RegionComponentType<T> componentType, T result, int originX, int originZ, int width, int height, boolean allowPartial) {
-        if (allowPartial && !this.hasRegions(originX, originZ, width, height)) {
-            return this.dataProvider.populatePartialData(this, componentType, originX, originZ, width, height);
-        }
+    public <T extends RasterData<V>, V> void fillRaster(RegionComponentType<T> componentType, T result, int originX, int originZ) {
+        int width = result.getWidth();
+        int height = result.getHeight();
 
         for (int localZ = 0; localZ < height; localZ++) {
             int blockZ = originZ + localZ;
@@ -182,8 +189,16 @@ public class RegionGenerationHandler {
                 result.set(localX, localZ, value);
             }
         }
+    }
 
-        return result;
+    public <T extends RasterData<V>, V> T computePartialRaster(RegionComponentType<T> componentType, int originX, int originZ, int width, int height) {
+        if (!this.hasRegions(originX, originZ, width, height)) {
+            return this.dataProvider.populatePartialData(componentType, originX, originZ, width, height);
+        } else {
+            T result = componentType.createDefaultData(width, height);
+            this.fillRaster(componentType, result, originX, originZ);
+            return result;
+        }
     }
 
     private boolean hasRegions(int originX, int originZ, int width, int height) {
@@ -204,9 +219,7 @@ public class RegionGenerationHandler {
     }
 
     private GenerationRegion generate(RegionTilePos pos) {
-        this.dataProvider.enqueueData(this.sourceHandler, pos);
-        RegionData data = this.dataProvider.populateData(this.sourceHandler, pos);
-
+        RegionData data = this.dataProvider.populateData(pos);
         return new GenerationRegion(pos, data);
     }
 
@@ -218,20 +231,15 @@ public class RegionGenerationHandler {
         this.chunkRasterHandler.fillRasters(originX, originZ);
     }
 
-    public void prepareChunk(int originX, int originZ, Collection<RegionComponentType<?>> components) {
-        this.chunkRasterHandler.fillRasters(originX, originZ, components);
+    public void prepareChunkPartial(int originX, int originZ, Collection<RegionComponentType<?>> components) {
+        this.chunkRasterHandler.fillRastersPartial(originX, originZ, components);
     }
 
-    public <T extends RasterDataAccess<V>, V> T getCachedChunkRaster(RegionComponentType<T> componentType) {
+    public <T extends RasterData<V>, V> T getCachedChunkRaster(RegionComponentType<T> componentType) {
         return this.chunkRasterHandler.getChunkRaster(componentType);
-    }
-
-    public DataSourceHandler getSourceHandler() {
-        return this.sourceHandler;
     }
 
     public void close() {
         this.dispatcher.close();
-        this.sourceHandler.close();
     }
 }

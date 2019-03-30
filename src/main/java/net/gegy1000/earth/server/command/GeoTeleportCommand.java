@@ -14,10 +14,12 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.World;
 
 import javax.vecmath.Vector2d;
 import java.io.IOException;
@@ -50,7 +52,7 @@ public class GeoTeleportCommand extends CommandBase {
             Thread thread = new Thread(() -> {
                 try {
                     CommandLocation location = this.parseLocation(sender, locationInput);
-                    this.teleport(entity, location.getCoordinate(sender, earthData));
+                    this.teleport(entity, earthData, location.getCoordinate(sender, earthData));
                 } catch (CommandException e) {
                     TextComponentTranslation message = new TextComponentTranslation(e.getMessage(), e.getErrorObjects());
                     message.getStyle().setColor(TextFormatting.RED);
@@ -119,24 +121,43 @@ public class GeoTeleportCommand extends CommandBase {
         return null;
     }
 
-    private void teleport(Entity entity, Coordinate coordinate) {
+    private void teleport(Entity entity, EarthCapability earthData, Coordinate coordinate) {
         int blockX = MathHelper.floor(coordinate.getBlockX());
         int blockZ = MathHelper.floor(coordinate.getBlockZ());
 
-        Chunk chunk = entity.world.getChunk(blockX >> 4, blockZ >> 4);
-        int height = chunk.getHeightValue(blockX & 15, blockZ & 15);
+        int height = this.getHeight(entity.world, earthData, blockX, blockZ);
 
         entity.dismountRidingEntity();
+
+        entity.lastTickPosX = entity.posX;
+        entity.lastTickPosY = entity.posY;
+        entity.lastTickPosZ = entity.posZ;
+
+        entity.motionX = 0.0;
+        entity.motionY = 0.0;
+        entity.motionZ = 0.0;
+
+        entity.onGround = true;
 
         if (entity instanceof EntityPlayerMP) {
             NetHandlerPlayServer connection = ((EntityPlayerMP) entity).connection;
             connection.setPlayerLocation(coordinate.getBlockX(), height + 0.5, coordinate.getBlockZ(), 180.0F, 0.0F);
         }
 
-        entity.motionY = 0.0;
-        entity.onGround = true;
-
         entity.sendMessage(DeferredTranslator.translate(entity, new TextComponentTranslation("commands.earth.geotp.success", coordinate.getX(), coordinate.getZ())));
+    }
+
+    private int getHeight(World world, EarthCapability earthData, int x, int z) {
+        BlockPos surface = earthData.estimateSurface(world, x, z);
+        if (surface != null) {
+            BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos(surface);
+            while (world.getBlockState(pos).getMaterial().blocksMovement()) {
+                pos.move(EnumFacing.UP);
+            }
+            return pos.getY();
+        }
+
+        return world.getTopSolidOrLiquidBlock(new BlockPos(x, 0, z)).getY();
     }
 
     private interface CommandLocation {

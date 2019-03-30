@@ -5,10 +5,9 @@ import net.gegy1000.earth.server.world.coordinate.DebugLatLngCoordinateState;
 import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthCoverTypes;
 import net.gegy1000.earth.server.world.pipeline.composer.DebugSignDecorationComposer;
-import net.gegy1000.earth.server.world.pipeline.layer.DebugCoverPopulator;
+import net.gegy1000.earth.server.world.pipeline.data.DebugCoverPopulator;
 import net.gegy1000.terrarium.server.world.TerrariumGeneratorInitializer;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
-import net.gegy1000.terrarium.server.world.chunk.TerrariumChunkGenerator;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.cover.ConstructedCover;
@@ -17,6 +16,7 @@ import net.gegy1000.terrarium.server.world.cover.TerrariumCoverTypes;
 import net.gegy1000.terrarium.server.world.generator.BasicTerrariumGenerator;
 import net.gegy1000.terrarium.server.world.generator.TerrariumGenerator;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
+import net.gegy1000.terrarium.server.world.generator.customization.PropertyPrototype;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumCustomization;
 import net.gegy1000.terrarium.server.world.pipeline.TerrariumDataProvider;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
@@ -25,8 +25,7 @@ import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.CoverDec
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.BedrockSurfaceComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.CoverSurfaceComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.HeightmapSurfaceComposer;
-import net.gegy1000.terrarium.server.world.pipeline.layer.ConstantShortProducer;
-import net.gegy1000.terrarium.server.world.pipeline.layer.ConstantUnsignedBytePopulator;
+import net.gegy1000.terrarium.server.world.pipeline.data.function.ConstantRasterProducer;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
@@ -48,7 +47,7 @@ public class CoverDebugWorldType extends TerrariumWorldType {
     }
 
     @Override
-    public TerrariumGeneratorInitializer createInitializer(World world, TerrariumChunkGenerator chunkGenerator, GenerationSettings settings) {
+    public TerrariumGeneratorInitializer createInitializer(World world, GenerationSettings settings) {
         return new Initializer(world);
     }
 
@@ -58,8 +57,13 @@ public class CoverDebugWorldType extends TerrariumWorldType {
     }
 
     @Override
-    protected TerrariumCustomization buildCustomization() {
-        return TerrariumCustomization.builder().build();
+    public PropertyPrototype buildPropertyPrototype() {
+        return PropertyPrototype.EMPTY;
+    }
+
+    @Override
+    public TerrariumCustomization buildCustomization() {
+        return TerrariumCustomization.EMPTY;
     }
 
     @Override
@@ -68,7 +72,7 @@ public class CoverDebugWorldType extends TerrariumWorldType {
     }
 
     @Override
-    public boolean handleSlimeSpawnReduction(Random random, World world) {
+    public boolean shouldReduceSlimes(World world, Random random) {
         return true;
     }
 
@@ -85,7 +89,7 @@ public class CoverDebugWorldType extends TerrariumWorldType {
             List<ConstructedCover<?>> coverTypes = this.buildCoverTypes(zoneGeoCoordinates);
             return BasicTerrariumGenerator.builder()
                     .withSurfaceComposer(new HeightmapSurfaceComposer(RegionComponentType.HEIGHT, Blocks.QUARTZ_BLOCK.getDefaultState()))
-                    .withSurfaceComposer(new CoverSurfaceComposer(this.world, RegionComponentType.COVER, coverTypes, true,Blocks.QUARTZ_BLOCK.getDefaultState()))
+                    .withSurfaceComposer(new CoverSurfaceComposer(this.world, RegionComponentType.HEIGHT, RegionComponentType.COVER, coverTypes, true, Blocks.QUARTZ_BLOCK.getDefaultState()))
                     .withSurfaceComposer(new BedrockSurfaceComposer(this.world, Blocks.BEDROCK.getDefaultState(), 0))
                     .withDecorationComposer(new CoverDecorationComposer(this.world, RegionComponentType.COVER, coverTypes))
                     .withDecorationComposer(new DebugSignDecorationComposer(RegionComponentType.HEIGHT))
@@ -107,9 +111,9 @@ public class CoverDebugWorldType extends TerrariumWorldType {
         @Override
         public TerrariumDataProvider buildDataProvider() {
             return TerrariumDataProvider.builder()
-                    .withComponent(RegionComponentType.HEIGHT, new ConstantShortProducer((short) 62))
-                    .withComponent(RegionComponentType.SLOPE, new ConstantUnsignedBytePopulator(0))
-                    .withComponent(RegionComponentType.COVER, new DebugCoverPopulator())
+                    .withComponent(RegionComponentType.HEIGHT, ConstantRasterProducer.shortRaster((short) 62))
+                    .withComponent(RegionComponentType.SLOPE, ConstantRasterProducer.unsignedByteRaster(0))
+                    .withComponent(RegionComponentType.COVER, DebugCoverPopulator.populate())
                     .build();
         }
     }

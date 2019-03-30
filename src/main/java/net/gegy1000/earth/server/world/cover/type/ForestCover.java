@@ -1,5 +1,7 @@
 package net.gegy1000.earth.server.world.cover.type;
 
+import net.gegy1000.cubicglue.api.ChunkPrimeWriter;
+import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthCoverType;
 import net.gegy1000.earth.server.world.cover.EarthDecorationGenerator;
@@ -8,14 +10,14 @@ import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.ReplaceRandomLayer;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectWeightedLayer;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectionSeedLayer;
-import net.gegy1000.terrarium.server.world.cover.generator.primer.CoverPrimer;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.gen.layer.GenLayer;
 import net.minecraft.world.gen.layer.GenLayerFuzzyZoom;
 import net.minecraft.world.gen.layer.GenLayerVoronoiZoom;
 
+import java.awt.Color;
 import java.util.Random;
 
 public abstract class ForestCover extends EarthCoverType {
@@ -24,6 +26,10 @@ public abstract class ForestCover extends EarthCoverType {
     protected static final int LAYER_PRIMARY = 0;
     protected static final int LAYER_DIRT = 1;
     protected static final int LAYER_PODZOL = 2;
+
+    public ForestCover(Color approximateColor) {
+        super(approximateColor);
+    }
 
     @Override
     public EarthSurfaceGenerator createSurfaceGenerator(EarthCoverContext context) {
@@ -105,19 +111,19 @@ public abstract class ForestCover extends EarthCoverType {
         }
 
         @Override
-        public void decorate(int originX, int originZ, CoverPrimer primer, Random random) {
-            ShortRasterTile heightRaster = this.context.getHeightRaster();
+        public void decorate(CubicPos chunkPos, ChunkPrimeWriter writer, Random random) {
+            ShortRaster heightRaster = this.context.getHeightRaster();
 
             this.iterateChunk((localX, localZ) -> {
                 if (random.nextInt(4) == 0) {
                     int y = heightRaster.getShort(localX, localZ);
-                    IBlockState state = primer.getBlockState(localX, y, localZ);
+                    IBlockState state = writer.get(localX, y, localZ);
                     if (state.getMaterial() == Material.WATER) {
                         if (random.nextInt(16) == 0) {
-                            primer.setBlockState(localX, y + 1, localZ, LILYPAD);
+                            writer.set(localX, y + 1, localZ, LILYPAD);
                         }
                     } else {
-                        primer.setBlockState(localX, y + 1, localZ, TALL_GRASS);
+                        writer.set(localX, y + 1, localZ, TALL_GRASS);
                     }
                 }
             });

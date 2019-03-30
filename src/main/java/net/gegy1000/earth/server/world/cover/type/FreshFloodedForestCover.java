@@ -1,5 +1,7 @@
 package net.gegy1000.earth.server.world.cover.type;
 
+import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
+import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthDecorationGenerator;
 import net.gegy1000.earth.server.world.cover.LatitudinalZone;
@@ -10,9 +12,14 @@ import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 
+import java.awt.Color;
 import java.util.Random;
 
 public class FreshFloodedForestCover extends FloodedForestCover {
+    public FreshFloodedForestCover() {
+        super(new Color(0x00785A));
+    }
+
     @Override
     public Surface createSurfaceGenerator(EarthCoverContext context) {
         return new Surface(context, this, Blocks.GRASS.getDefaultState(), true);
@@ -34,17 +41,17 @@ public class FreshFloodedForestCover extends FloodedForestCover {
         }
 
         @Override
-        public void decorate(int originX, int originZ, Random random) {
+        public void decorate(CubicPos chunkPos, ChunkPopulationWriter writer, Random random) {
             World world = this.context.getWorld();
 
-            LatitudinalZone zone = this.context.getZone(originX, originZ);
+            LatitudinalZone zone = this.context.getZone(chunkPos);
 
             this.preventIntersection(1);
 
-            int[] clearingLayer = this.sampleChunk(this.clearingSelector, originX, originZ);
-            int[] heightOffsetLayer = this.sampleChunk(this.heightOffsetSelector, originX, originZ);
+            int[] clearingLayer = this.sampleChunk(this.clearingSelector, chunkPos);
+            int[] heightOffsetLayer = this.sampleChunk(this.heightOffsetSelector, chunkPos);
 
-            this.decorateScatter(random, originX, originZ, this.range(random, 10, 14), (pos, localX, localZ) -> {
+            this.decorateScatter(random, chunkPos, writer, this.range(random, 10, 14), (pos, localX, localZ) -> {
                 int index = localX + localZ * 16;
                 if (clearingLayer[index] == 0) {
                     int height = this.range(random, 5, 8) + this.sampleHeightOffset(heightOffsetLayer, localX, localZ);

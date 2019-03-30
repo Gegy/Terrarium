@@ -1,6 +1,7 @@
 package net.gegy1000.terrarium.server.world.chunk;
 
 import com.google.common.base.Predicate;
+import net.gegy1000.terrarium.server.world.chunk.tracker.HookedChunkMarker;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Biomes;
@@ -19,7 +20,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Random;
 
-public class PlaceholderChunk extends Chunk {
+public class PlaceholderChunk extends Chunk implements HookedChunkMarker {
     public PlaceholderChunk(World world, int x, int z) {
         super(world, x, z);
     }

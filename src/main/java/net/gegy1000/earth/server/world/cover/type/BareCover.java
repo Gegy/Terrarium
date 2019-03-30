@@ -1,14 +1,16 @@
 package net.gegy1000.earth.server.world.cover.type;
 
+import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
+import net.gegy1000.cubicglue.api.ChunkPrimeWriter;
+import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthCoverType;
 import net.gegy1000.earth.server.world.cover.EarthDecorationGenerator;
 import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectWeightedLayer;
-import net.gegy1000.terrarium.server.world.cover.generator.primer.CoverPrimer;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.UnsignedByteRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.UnsignedByteRaster;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Biomes;
 import net.minecraft.world.World;
@@ -17,12 +19,17 @@ import net.minecraft.world.gen.layer.GenLayer;
 import net.minecraft.world.gen.layer.GenLayerFuzzyZoom;
 import net.minecraft.world.gen.layer.GenLayerVoronoiZoom;
 
+import java.awt.Color;
 import java.util.Random;
 
 public class BareCover extends EarthCoverType {
     private static final int LAYER_DIRT = 0;
     private static final int LAYER_GRAVEL = 1;
     private static final int LAYER_SAND = 2;
+
+    public BareCover() {
+        super(new Color(0xFFF5D6));
+    }
 
     @Override
     public Biome getBiome(EarthCoverContext context, int x, int z) {
@@ -69,22 +76,22 @@ public class BareCover extends EarthCoverType {
         }
 
         @Override
-        public void decorate(int originX, int originZ, CoverPrimer primer, Random random) {
-            ShortRasterTile heightRaster = this.context.getHeightRaster();
-            UnsignedByteRasterTile slopeRaster = this.context.getSlopeRaster();
+        public void decorate(CubicPos chunkPos, ChunkPrimeWriter writer, Random random) {
+            ShortRaster heightRaster = this.context.getHeightRaster();
+            UnsignedByteRaster slopeRaster = this.context.getSlopeRaster();
             this.iterateChunk((localX, localZ) -> {
                 int slope = slopeRaster.getByte(localX, localZ);
                 if (slope < MOUNTAINOUS_SLOPE && random.nextInt(250) == 0) {
                     int y = heightRaster.getShort(localX, localZ);
-                    primer.setBlockState(localX, y + 1, localZ, DEAD_BUSH);
+                    writer.set(localX, y + 1, localZ, DEAD_BUSH);
                 }
             });
         }
 
         private class Provider implements BlockProvider {
-            private final UnsignedByteRasterTile slopeRaster;
+            private final UnsignedByteRaster slopeRaster;
 
-            private Provider(UnsignedByteRasterTile slopeRaster) {
+            private Provider(UnsignedByteRaster slopeRaster) {
                 this.slopeRaster = slopeRaster;
             }
 
@@ -109,13 +116,13 @@ public class BareCover extends EarthCoverType {
         }
 
         @Override
-        public void decorate(int originX, int originZ, Random random) {
+        public void decorate(CubicPos chunkPos, ChunkPopulationWriter writer, Random random) {
             World world = this.context.getWorld();
-            UnsignedByteRasterTile slopeRaster = this.context.getSlopeRaster();
+            UnsignedByteRaster slopeRaster = this.context.getSlopeRaster();
 
             this.preventIntersection(5);
 
-            this.decorateScatter(random, originX, originZ, this.range(random, -16, 1), (pos, localX, localZ) -> {
+            this.decorateScatter(random, chunkPos, writer, this.range(random, -16, 1), (pos, localX, localZ) -> {
                 if (slopeRaster.getByte(localX, localZ) < MOUNTAINOUS_SLOPE) {
                     OAK_TALL_SHRUB.generate(world, random, pos);
                 }

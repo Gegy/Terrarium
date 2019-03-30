@@ -1,9 +1,9 @@
 package net.gegy1000.earth.client.render;
 
-import net.gegy1000.terrarium.Terrarium;
+import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.client.LoadingWorldGetter;
+import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.client.gui.GuiRenderUtils;
-import net.gegy1000.earth.server.world.EarthWorldType;
 import net.minecraft.client.LoadingScreenRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiDownloadTerrain;
@@ -29,7 +29,7 @@ public class LoadingScreenOverlay {
     private static Field framebufferField;
 
     public static void onRender() {
-        if (LoadingWorldGetter.getLoadingWorldType() instanceof EarthWorldType) {
+        if (LoadingWorldGetter.getLoadingWorldType() == TerrariumEarth.EARTH_TYPE) {
             ScaledResolution resolution = new ScaledResolution(MC);
 
             int x = resolution.getScaledWidth() / 2;
@@ -38,7 +38,7 @@ public class LoadingScreenOverlay {
             String header = TextFormatting.YELLOW.toString() + TextFormatting.BOLD + I18n.format("gui.earth.credits");
             GuiRenderUtils.drawCenteredString(header, x, y, 0xFFFFFF);
             GuiRenderUtils.drawCenteredString(TextFormatting.GRAY + "NASA SRTM,", x, y + 11, 0xFFFFFF);
-            GuiRenderUtils.drawCenteredString(TextFormatting.GRAY + "ESA GlobCover,", x, y + 20, 0xFFFFFF);
+            GuiRenderUtils.drawCenteredString(TextFormatting.GRAY + "ESA LandCover,", x, y + 20, 0xFFFFFF);
             GuiRenderUtils.drawCenteredString(TextFormatting.GRAY + "Google APIs,", x, y + 29, 0xFFFFFF);
             GuiRenderUtils.drawCenteredString(TextFormatting.GRAY + "\u00a9 OpenStreetMap Contributors", x, y + 38, 0xFFFFFF);
         }

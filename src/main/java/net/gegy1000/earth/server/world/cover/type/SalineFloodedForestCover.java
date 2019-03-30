@@ -1,21 +1,28 @@
 package net.gegy1000.earth.server.world.cover.type;
 
+import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
+import net.gegy1000.cubicglue.api.ChunkPrimeWriter;
+import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthDecorationGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverBiomeSelectors;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.cover.generator.primer.CoverPrimer;
 import net.gegy1000.terrarium.server.world.feature.tree.GenerousTreeGenerator;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 
+import java.awt.Color;
 import java.util.Random;
 
 public class SalineFloodedForestCover extends FloodedForestCover {
+    public SalineFloodedForestCover() {
+        super(new Color(0x009578));
+    }
+
     @Override
     public Surface createSurfaceGenerator(EarthCoverContext context) {
         return new Surface(context, this);
@@ -37,15 +44,15 @@ public class SalineFloodedForestCover extends FloodedForestCover {
         }
 
         @Override
-        public void decorate(int originX, int originZ, CoverPrimer primer, Random random) {
-            ShortRasterTile heightRaster = this.context.getHeightRaster();
+        public void decorate(CubicPos chunkPos, ChunkPrimeWriter writer, Random random) {
+            ShortRaster heightRaster = this.context.getHeightRaster();
 
             this.iterateChunk((localX, localZ) -> {
                 if (random.nextInt(3) == 0) {
                     int y = heightRaster.getShort(localX, localZ);
-                    IBlockState state = primer.getBlockState(localX, y, localZ);
+                    IBlockState state = writer.get(localX, y, localZ);
                     if (state.getMaterial() == Material.GROUND) {
-                        primer.setBlockState(localX, y + 1, localZ, TALL_GRASS);
+                        writer.set(localX, y + 1, localZ, TALL_GRASS);
                     }
                 }
             });
@@ -58,15 +65,15 @@ public class SalineFloodedForestCover extends FloodedForestCover {
         }
 
         @Override
-        public void decorate(int originX, int originZ, Random random) {
+        public void decorate(CubicPos chunkPos, ChunkPopulationWriter writer, Random random) {
             World world = this.context.getWorld();
 
             this.preventIntersection(1);
 
-            int[] clearingLayer = this.sampleChunk(this.clearingSelector, originX, originZ);
-            int[] heightOffsetLayer = this.sampleChunk(this.heightOffsetSelector, originX, originZ);
+            int[] clearingLayer = this.sampleChunk(this.clearingSelector, chunkPos);
+            int[] heightOffsetLayer = this.sampleChunk(this.heightOffsetSelector, chunkPos);
 
-            this.decorateScatter(random, originX, originZ, this.range(random, 8, 10), (pos, localX, localZ) -> {
+            this.decorateScatter(random, chunkPos, writer, this.range(random, 8, 10), (pos, localX, localZ) -> {
                 if (clearingLayer[localX + localZ * 16] == 0) {
                     int height = this.range(random, 5, 8) + this.sampleHeightOffset(heightOffsetLayer, localX, localZ);
                     BlockPos ground = pos.down();

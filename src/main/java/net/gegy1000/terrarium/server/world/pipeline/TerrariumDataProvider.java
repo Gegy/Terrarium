@@ -4,27 +4,31 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import net.gegy1000.terrarium.Terrarium;
+import net.gegy1000.terrarium.server.util.FutureUtil;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.RegionAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.component.AttachedComponent;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponent;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.layer.CachedLayerContext;
-import net.gegy1000.terrarium.server.world.pipeline.source.DataSourceHandler;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.TiledDataAccess;
+import net.gegy1000.terrarium.server.world.pipeline.data.Data;
+import net.gegy1000.terrarium.server.world.pipeline.data.DataEngine;
+import net.gegy1000.terrarium.server.world.pipeline.data.DataFuture;
+import net.gegy1000.terrarium.server.world.pipeline.data.DataView;
 import net.gegy1000.terrarium.server.world.region.GenerationRegion;
 import net.gegy1000.terrarium.server.world.region.RegionData;
-import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.gegy1000.terrarium.server.world.region.RegionTilePos;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 public class TerrariumDataProvider {
     private static final int DATA_SIZE = GenerationRegion.BUFFERED_SIZE;
+
+    private final DataEngine engine = new DataEngine();
 
     private final ImmutableMap<RegionComponentType<?>, AttachedComponent<?>> attachedComponents;
     private final ImmutableList<RegionAdapter> adapters;
@@ -41,48 +45,36 @@ public class TerrariumDataProvider {
         return new Builder();
     }
 
-    public void enqueueData(DataSourceHandler sourceHandler, RegionTilePos pos) {
-        CachedLayerContext context = new CachedLayerContext(sourceHandler);
+    public RegionData populateData(RegionTilePos pos) {
         DataView view = new DataView(pos.getMinBufferedX(), pos.getMinBufferedZ(), DATA_SIZE, DATA_SIZE);
 
-        Set<DataTileKey<?>> requiredData = new HashSet<>();
-        for (AttachedComponent<?> attachedComponent : this.attachedComponents.values()) {
-            requiredData.addAll(attachedComponent.getRequiredData(context, view));
+        List<CompletableFuture<RegionComponent<?>>> componentFutures = this.attachedComponents.values().stream()
+                .map(c -> c.createAndPopulate(this.engine, view))
+                .collect(Collectors.toList());
+
+        Collection<RegionComponent<?>> components = FutureUtil.joinAll(componentFutures).join();
+
+        Map<RegionComponentType<?>, RegionComponent<?>> componentMap = new HashMap<>();
+        for (RegionComponent<?> component : components) {
+            componentMap.put(component.getType(), component);
         }
 
-        sourceHandler.enqueueData(requiredData);
-    }
-
-    public RegionData populateData(DataSourceHandler sourceHandler, RegionTilePos pos) {
-        CachedLayerContext context = new CachedLayerContext(sourceHandler);
-        DataView view = new DataView(pos.getMinBufferedX(), pos.getMinBufferedZ(), DATA_SIZE, DATA_SIZE);
-
-        Map<RegionComponentType<?>, RegionComponent<?>> populatedComponents = new HashMap<>();
-        for (AttachedComponent<?> attachedComponent : this.attachedComponents.values()) {
-            RegionComponent<?> component = attachedComponent.createAndPopulate(context, view);
-            populatedComponents.put(attachedComponent.getType(), component);
-        }
-
-        RegionData data = new RegionData(populatedComponents);
+        RegionData data = new RegionData(componentMap);
         this.applyAdapters(data, pos);
 
         return data;
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends TiledDataAccess> T populatePartialData(RegionGenerationHandler generationHandler, RegionComponentType<T> componentType, int x, int z, int width, int height) {
-        AttachedComponent<T> attachedComponent = (AttachedComponent<T>) this.attachedComponents.get(componentType);
+    public <T extends Data> T populatePartialData(RegionComponentType<T> componentType, int x, int z, int width, int height) {
+        AttachedComponent<?> attachedComponent = this.attachedComponents.get(componentType);
         if (attachedComponent == null) {
             throw new IllegalArgumentException("Cannot populate partial data tile for component that is not attached!");
         }
 
-        CachedLayerContext context = new CachedLayerContext(generationHandler.getSourceHandler());
         DataView view = new DataView(x, z, width, height);
 
-        Set<DataTileKey<?>> requiredData = new HashSet<>(attachedComponent.getRequiredData(context, view));
-        generationHandler.getSourceHandler().enqueueData(requiredData);
-
-        RegionComponent<T> component = attachedComponent.createAndPopulate(context, view);
+        RegionComponent<T> component = (RegionComponent<T>) attachedComponent.createAndPopulate(this.engine, view).join();
         return component.getData();
     }
 
@@ -116,8 +108,8 @@ public class TerrariumDataProvider {
         private Builder() {
         }
 
-        public <T extends TiledDataAccess> Builder withComponent(RegionComponentType<T> type, DataLayer<T> producer) {
-            this.attachedComponents.put(type, new AttachedComponent<>(type, producer));
+        public <T extends Data> Builder withComponent(RegionComponentType<T> type, DataFuture<T> data) {
+            this.attachedComponents.put(type, new AttachedComponent<>(type, data));
             return this;
         }
 

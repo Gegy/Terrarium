@@ -1,11 +1,12 @@
 package net.gegy1000.terrarium.server.world.cover;
 
+import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.terrarium.server.world.feature.tree.GenerousDenseShrubGenerator;
 import net.gegy1000.terrarium.server.world.feature.tree.GenerousPineGenerator;
 import net.gegy1000.terrarium.server.world.feature.tree.GenerousTaigaGenerator;
 import net.gegy1000.terrarium.server.world.feature.tree.SmallShrubGenerator;
 import net.gegy1000.terrarium.server.world.feature.tree.TallShrubGenerator;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.CoverRaster;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDirt;
 import net.minecraft.block.BlockDoublePlant;
@@ -111,7 +112,7 @@ public abstract class CoverGenerator<T extends CoverGenerationContext> {
     }
 
     protected final void iterateChunk(PointConsumer handler) {
-        CoverRasterTile coverRaster = this.context.getCoverRaster();
+        CoverRaster coverRaster = this.context.getCoverRaster();
         for (int localZ = 0; localZ < 16; localZ++) {
             for (int localX = 0; localX < 16; localX++) {
                 if (coverRaster.get(localX, localZ) == this.coverType) {
@@ -123,6 +124,11 @@ public abstract class CoverGenerator<T extends CoverGenerationContext> {
 
     protected final int range(Random random, int minimum, int maximum) {
         return random.nextInt((maximum - minimum) + 1) + minimum;
+    }
+
+    protected final int[] sampleChunk(GenLayer layer, CubicPos pos) {
+        IntCache.resetIntCache();
+        return layer.getInts(pos.getMinX(), pos.getMinZ(), 16, 16);
     }
 
     protected final int[] sampleChunk(GenLayer layer, int x, int z) {

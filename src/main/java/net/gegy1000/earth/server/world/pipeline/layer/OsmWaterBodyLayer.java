@@ -1,16 +1,15 @@
-package net.gegy1000.earth.server.world.pipeline.layer;
+/*package net.gegy1000.earth.server.world.pipeline.layer;
 
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import de.topobyte.osm4j.core.model.iface.OsmEntity;
 import net.gegy1000.earth.server.world.pipeline.source.osm.OsmDataParser;
-import net.gegy1000.earth.server.world.pipeline.source.tile.OsmTile;
+import net.gegy1000.earth.server.world.pipeline.source.tile.OsmData;
 import net.gegy1000.terrarium.server.util.FloodFill;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
-import net.gegy1000.terrarium.server.world.pipeline.DataLayer;
-import net.gegy1000.terrarium.server.world.pipeline.DataView;
+import net.gegy1000.terrarium.server.world.pipeline.data.DataView;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.debug.DebugImageWriter;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.rasterization.OsmShapeProducer;
 import net.gegy1000.terrarium.server.world.rasterization.RasterCanvas;
 
@@ -26,18 +25,18 @@ public class OsmWaterBodyLayer extends OsmWaterLayer {
 
     private final CoordinateState geoCoordinateState;
 
-    public OsmWaterBodyLayer(DataLayer<ShortRasterTile> parent, DataLayer<OsmTile> osmLayer, CoordinateState geoCoordinateState) {
+    public OsmWaterBodyLayer(DataLayer<ShortRaster> parent, DataLayer<OsmData> osmLayer, CoordinateState geoCoordinateState) {
         super(parent, osmLayer);
         this.geoCoordinateState = geoCoordinateState;
     }
 
     @Override
-    protected ShortRasterTile applyWater(DataView view, ShortRasterTile waterTile, OsmTile osmTile) {
+    protected ShortRaster applyWater(DataView view, ShortRaster waterTile, OsmData osmTile) {
         Collection<MultiPolygon> waterPolygons = osmTile.collectPolygons(view, this.geoCoordinateState, this::isWaterArea);
         Collection<LineString> waterLines = osmTile.collectLines(view, this.geoCoordinateState, this::isWaterLine);
 
         if (!waterPolygons.isEmpty() || !waterLines.isEmpty()) {
-            ShortRasterTile resultTile = waterTile.copy();
+            ShortRaster resultTile = waterTile.copy();
 
             RasterCanvas canvas = new RasterCanvas(view.getWidth(), view.getHeight());
             canvas.setOrigin(view.getX(), view.getY());
@@ -82,16 +81,17 @@ public class OsmWaterBodyLayer extends OsmWaterLayer {
     }
 
     private boolean isWaterArea(OsmEntity entity) {
-        return OsmDataParser.hasTag(entity, "waterway", "riverbank")
+        boolean waterArea = OsmDataParser.hasTag(entity, "waterway", "riverbank")
                 || OsmDataParser.hasTag(entity, "natural", "water")
                 || OsmDataParser.hasTag(entity, "water", "river");
+        return waterArea && !OsmDataParser.hasKey(entity, "tunnel");
     }
 
     private boolean isWaterLine(OsmEntity entity) {
-        return OsmDataParser.hasTag(entity, "waterway", "river");
+        return OsmDataParser.hasTag(entity, "waterway", "river") && !OsmDataParser.hasKey(entity, "tunnel");
     }
 
-    private void fillExistingWater(DataView view, ShortRasterTile resultTile, RasterCanvas canvas) {
+    private void fillExistingWater(DataView view, ShortRaster resultTile, RasterCanvas canvas) {
         int width = view.getWidth();
         int height = view.getHeight();
         for (int localZ = 0; localZ < height; localZ++) {
@@ -101,7 +101,7 @@ public class OsmWaterBodyLayer extends OsmWaterLayer {
         }
     }
 
-    private void fillExistingWater(DataView view, ShortRasterTile resultTile, RasterCanvas canvas, int localX, int localZ) {
+    private void fillExistingWater(DataView view, ShortRaster resultTile, RasterCanvas canvas, int localX, int localZ) {
         int value = canvas.getData(localX, localZ);
         if (value == RIVER_COLOR) {
             FloodFill.Point origin = new FloodFill.Point(localX, localZ);
@@ -124,4 +124,4 @@ public class OsmWaterBodyLayer extends OsmWaterLayer {
             return sampledType == RIVER;
         }
     }
-}
+}*/

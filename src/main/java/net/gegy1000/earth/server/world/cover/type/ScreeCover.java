@@ -14,12 +14,17 @@ import net.minecraft.world.gen.layer.GenLayer;
 import net.minecraft.world.gen.layer.GenLayerFuzzyZoom;
 import net.minecraft.world.gen.layer.GenLayerVoronoiZoom;
 
+import java.awt.Color;
 import java.util.Random;
 
 public class ScreeCover extends EarthCoverType implements BeachyCover {
     private static final int LAYER_STONE = 0;
     private static final int LAYER_GRAVEL = 1;
     private static final int LAYER_DIRT = 2;
+
+    public ScreeCover() {
+        super(new Color(0xAFAFAF));
+    }
 
     @Override
     public EarthSurfaceGenerator createSurfaceGenerator(EarthCoverContext context) {

@@ -10,15 +10,18 @@ import net.gegy1000.terrarium.client.preview.PreviewRenderer;
 import net.gegy1000.terrarium.client.preview.WorldPreview;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
+import net.gegy1000.terrarium.server.world.generator.customization.PropertyPrototype;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPreset;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.CustomizationCategory;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.CustomizationWidget;
+import net.gegy1000.terrarium.server.world.pipeline.source.DataSourceHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiCreateWorld;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.world.WorldType;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.input.Keyboard;
@@ -42,7 +45,8 @@ public class TerrariumCustomizationGui extends GuiScreen {
 
     protected final GuiCreateWorld parent;
 
-    protected final TerrariumWorldType worldType;
+    protected final WorldType worldType;
+    protected final TerrariumWorldType terrariumType;
 
     protected GenerationSettings settings;
 
@@ -57,20 +61,24 @@ public class TerrariumCustomizationGui extends GuiScreen {
 
     protected boolean freeze;
 
-    public TerrariumCustomizationGui(GuiCreateWorld parent, TerrariumWorldType worldType, TerrariumPreset defaultPreset) {
+    public TerrariumCustomizationGui(GuiCreateWorld parent, WorldType worldType, TerrariumWorldType terrariumType, TerrariumPreset defaultPreset) {
         this.parent = parent;
         this.worldType = worldType;
-        if (!defaultPreset.getWorldType().equals(worldType.getIdentifier())) {
+        this.terrariumType = terrariumType;
+
+        if (!defaultPreset.getWorldType().equals(terrariumType.getIdentifier())) {
             throw new IllegalArgumentException("Cannot customize world with preset of wrong world type");
         }
+
+        PropertyPrototype prototype = terrariumType.buildPropertyPrototype();
         String settingsString = parent.chunkProviderSettingsJson;
         if (Strings.isNullOrEmpty(settingsString)) {
-            this.setSettings(defaultPreset.createProperties());
+            this.setSettings(defaultPreset.createProperties(prototype));
         } else {
             try {
-                this.setSettings(GenerationSettings.deserialize(settingsString));
+                this.setSettings(GenerationSettings.parse(prototype, settingsString));
             } catch (JsonSyntaxException e) {
-                Terrarium.LOGGER.error("Failed to deserialize settings: {}", settingsString, e);
+                Terrarium.LOGGER.error("Failed to parse settings: {}", settingsString, e);
             }
         }
     }
@@ -82,7 +90,7 @@ public class TerrariumCustomizationGui extends GuiScreen {
         int previewX = this.width / 2 + PADDING_X;
         int previewY = TOP_OFFSET;
 
-        this.renderer = new PreviewRenderer(this, this.width / 2 + PADDING_X, previewY, previewWidth, previewHeight);
+        this.renderer = new PreviewRenderer(this, this.width / 2.0F + PADDING_X, previewY, previewWidth, previewHeight);
         this.controller = new PreviewController(this.renderer, 0.3F, 1.0F);
 
         this.buttonList.clear();
@@ -103,12 +111,16 @@ public class TerrariumCustomizationGui extends GuiScreen {
 
         List<GuiButton> categoryListWidgets = new ArrayList<>();
 
-        Collection<CustomizationCategory> categories = this.worldType.getCustomization().getCategories();
+        Collection<CustomizationCategory> categories = this.terrariumType.getCustomization().getCategories();
         for (CustomizationCategory category : categories) {
             List<GuiButton> currentWidgets = new ArrayList<>();
             currentWidgets.add(upLevelButton);
             for (CustomizationWidget widget : category.getWidgets()) {
-                currentWidgets.add(widget.createWidget(this.settings, 0, 0, 0, onPropertyChange));
+                try {
+                    currentWidgets.add(widget.createWidget(this.settings, 0, 0, 0, onPropertyChange));
+                } catch (Throwable t) {
+                    Terrarium.LOGGER.error("Failed to create widget for {}", widget, t);
+                }
             }
 
             CustomizationList currentList = new CustomizationList(this.mc, this, PADDING_X, TOP_OFFSET, previewWidth, previewHeight, currentWidgets);
@@ -141,10 +153,12 @@ public class TerrariumCustomizationGui extends GuiScreen {
         if (button.enabled && button.visible) {
             switch (button.id) {
                 case DONE_BUTTON:
+                    this.freeze = false;
                     this.parent.chunkProviderSettingsJson = this.settings.serializeString();
                     this.mc.displayGuiScreen(this.parent);
                     break;
                 case CANCEL_BUTTON:
+                    this.freeze = false;
                     this.mc.displayGuiScreen(this.parent);
                     break;
                 case PREVIEW_BUTTON:
@@ -152,7 +166,7 @@ public class TerrariumCustomizationGui extends GuiScreen {
                     break;
                 case PRESET_BUTTON:
                     this.freeze = true;
-                    this.mc.displayGuiScreen(new SelectPresetGui(this, this.worldType));
+                    this.mc.displayGuiScreen(new SelectPresetGui(this, this.terrariumType));
                     break;
             }
         }
@@ -239,24 +253,30 @@ public class TerrariumCustomizationGui extends GuiScreen {
     public void onGuiClosed() {
         if (!this.freeze) {
             super.onGuiClosed();
-
             this.deletePreview();
+            DataSourceHandler.INSTANCE.clear();
         }
     }
 
     public void applyPreset(TerrariumPreset preset) {
-        this.setSettings(preset.createProperties());
+        this.setSettings(preset.createProperties(this.terrariumType.buildPropertyPrototype()));
         this.previewDirty = true;
     }
 
     protected void rebuildState() {
         this.deletePreview();
 
-        BufferBuilder[] builders = new BufferBuilder[8];
+        BufferBuilder[] builders = new BufferBuilder[256];
         for (int i = 0; i < builders.length; i++) {
-            builders[i] = new BufferBuilder(0x4000);
+            builders[i] = new BufferBuilder(0x400);
         }
-        this.preview = new WorldPreview(this.worldType, this.settings, builders);
+
+        try {
+            this.preview = new WorldPreview(this.worldType, this.settings, builders);
+        } catch (Throwable t) {
+            Terrarium.LOGGER.error("Failed to update world preview", t);
+            this.mc.displayGuiScreen(this.parent);
+        }
     }
 
     private void previewLarge() {
@@ -267,9 +287,9 @@ public class TerrariumCustomizationGui extends GuiScreen {
     }
 
     private void deletePreview() {
-        WorldPreview preview = this.preview;
-        if (preview != null) {
-            preview.delete();
+        if (this.preview != null) {
+            this.preview.delete();
+            this.preview = null;
         }
     }
 

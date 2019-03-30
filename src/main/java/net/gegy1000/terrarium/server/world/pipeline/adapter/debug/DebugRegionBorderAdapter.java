@@ -4,20 +4,20 @@ import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.TerrariumCoverTypes;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.RegionAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.CoverRaster;
 import net.gegy1000.terrarium.server.world.region.GenerationRegion;
 import net.gegy1000.terrarium.server.world.region.RegionData;
 
 public class DebugRegionBorderAdapter implements RegionAdapter {
-    private final RegionComponentType<CoverRasterTile> coverComponent;
+    private final RegionComponentType<CoverRaster> coverComponent;
 
-    public DebugRegionBorderAdapter(RegionComponentType<CoverRasterTile> coverComponent) {
+    public DebugRegionBorderAdapter(RegionComponentType<CoverRaster> coverComponent) {
         this.coverComponent = coverComponent;
     }
 
     @Override
     public void adapt(RegionData data, int x, int z, int width, int height) {
-        CoverRasterTile coverTile = data.getOrExcept(this.coverComponent);
+        CoverRaster coverTile = data.getOrExcept(this.coverComponent);
 
         CoverType[] cover = coverTile.getData();
 

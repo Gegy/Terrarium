@@ -22,7 +22,7 @@ sourceCompatibility = targetCompatibility = "1.8"
 minecraft {
   version = "1.12.2-14.23.4.2729"
   runDir = "minecraft"
-  mappings = "snapshot_20180716"
+  mappings = "stable_39"
 }
 
 repositories {
@@ -34,6 +34,12 @@ repositories {
   maven {
     url = "https://maven.gegy1000.net"
   }
+  maven {
+    url = "https://oss.sonatype.org/content/repositories/public/"
+  }
+  maven {
+    url = "https://repo.spongepowered.org/maven/"
+  }
 }
 
 configurations {
@@ -42,6 +48,9 @@ configurations {
 }
 
 dependencies {
+  deobfCompile 'io.github.opencubicchunks:cubicchunks-api:1.12.2-0.0-SNAPSHOT'
+  deobfCompile 'io.github.opencubicchunks:cubicchunks:1.12.2-0.0-SNAPSHOT'
+  embed 'net.gegy1000:cubic-glue:0.3.0-SNAPSHOT'
   embed('de.topobyte:osm4j-core-mc:0.1.0') {
     exclude group: 'it.unimi.dsi', module: 'fastutil'
     exclude group: 'org.apache.commons'

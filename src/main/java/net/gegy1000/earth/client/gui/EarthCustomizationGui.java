@@ -7,12 +7,13 @@ import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPres
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiCreateWorld;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.world.WorldType;
 
 public class EarthCustomizationGui extends TerrariumCustomizationGui {
     private static final int SPAWNPOINT_BUTTON = 4;
 
-    public EarthCustomizationGui(GuiCreateWorld parent, TerrariumWorldType worldType, TerrariumPreset defaultPreset) {
-        super(parent, worldType, defaultPreset);
+    public EarthCustomizationGui(GuiCreateWorld parent, WorldType worldType, TerrariumWorldType terrariumType, TerrariumPreset defaultPreset) {
+        super(parent, worldType, terrariumType, defaultPreset);
     }
 
     @Override

@@ -1,9 +1,9 @@
 package net.gegy1000.earth.server.world.pipeline.adapter;
 
-import net.gegy1000.earth.server.world.pipeline.source.tile.WaterRasterTile;
+import net.gegy1000.earth.server.world.pipeline.source.tile.WaterRaster;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.RegionAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.region.RegionData;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.NoiseGeneratorOctaves;
@@ -11,15 +11,15 @@ import net.minecraft.world.gen.NoiseGeneratorOctaves;
 import java.util.Random;
 
 public class HeightNoiseAdapter implements RegionAdapter {
-    private final RegionComponentType<ShortRasterTile> heightComponent;
-    private final RegionComponentType<WaterRasterTile> waterComponent;
+    private final RegionComponentType<ShortRaster> heightComponent;
+    private final RegionComponentType<WaterRaster> waterComponent;
 
     private final NoiseGeneratorOctaves heightNoise;
     private final double noiseMax;
     private final double noiseScaleXZ;
     private final double noiseScaleY;
 
-    public HeightNoiseAdapter(World world, RegionComponentType<ShortRasterTile> heightComponent, RegionComponentType<WaterRasterTile> waterComponent, int octaveCount, double noiseScaleXZ, double noiseScaleY) {
+    public HeightNoiseAdapter(World world, RegionComponentType<ShortRaster> heightComponent, RegionComponentType<WaterRaster> waterComponent, int octaveCount, double noiseScaleXZ, double noiseScaleY) {
         this.heightComponent = heightComponent;
         this.waterComponent = waterComponent;
 
@@ -39,8 +39,12 @@ public class HeightNoiseAdapter implements RegionAdapter {
 
     @Override
     public void adapt(RegionData data, int x, int z, int width, int height) {
-        ShortRasterTile heightTile = data.getOrExcept(this.heightComponent);
-        WaterRasterTile waterTile = data.getOrExcept(this.waterComponent);
+        if (this.noiseScaleY > -1e-3 && this.noiseScaleY < 1e-3) {
+            return;
+        }
+
+        ShortRaster heightTile = data.getOrExcept(this.heightComponent);
+        WaterRaster waterTile = data.getOrExcept(this.waterComponent);
 
         short[] heightBuffer = heightTile.getShortData();
 
@@ -49,7 +53,7 @@ public class HeightNoiseAdapter implements RegionAdapter {
 
         short[] waterBuffer = waterTile.getShortData();
         for (int i = 0; i < noise.length; i++) {
-            if (WaterRasterTile.isLand(waterBuffer[i])) {
+            if (WaterRaster.isLand(waterBuffer[i])) {
                 heightBuffer[i] += (noise[i] + this.noiseMax) / (this.noiseMax * 2.0) * this.noiseScaleY * 35.0;
             }
         }

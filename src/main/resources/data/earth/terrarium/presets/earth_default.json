@@ -6,7 +6,6 @@
     "spawn_latitude": 27.988350,
     "spawn_longitude": 86.923641,
     "enable_decoration": true,
-    "enable_default_decoration": false,
     "world_scale": 0.028571,
     "height_scale": 1.0,
     "noise_scale": 0.5,
@@ -15,11 +14,6 @@
     "beach_size": 4,
     "enable_buildings": false,
     "enable_streets": false,
-    "enable_default_features": false,
-    "enable_cave_generation": false,
-    "enable_resource_generation": false,
-    "enable_lake_generation": false,
-    "enable_lava_generation": false,
-    "enable_mod_generation": false
+    "cave_generation": false
   }
 }

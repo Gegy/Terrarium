@@ -1,5 +1,7 @@
 package net.gegy1000.earth.server.world.cover.type;
 
+import net.gegy1000.cubicglue.api.ChunkPrimeWriter;
+import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthCoverType;
 import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
@@ -9,8 +11,7 @@ import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.ConnectHorizontalLayer;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.OutlineEdgeLayer;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectionSeedLayer;
-import net.gegy1000.terrarium.server.world.cover.generator.primer.CoverPrimer;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.minecraft.block.BlockCrops;
 import net.minecraft.block.BlockFarmland;
 import net.minecraft.block.state.IBlockState;
@@ -20,6 +21,7 @@ import net.minecraft.world.gen.layer.GenLayer;
 import net.minecraft.world.gen.layer.GenLayerFuzzyZoom;
 import net.minecraft.world.gen.layer.GenLayerVoronoiZoom;
 
+import java.awt.Color;
 import java.util.Random;
 
 public class IrrigatedCropsCover extends EarthCoverType {
@@ -38,6 +40,10 @@ public class IrrigatedCropsCover extends EarthCoverType {
     private static final IBlockState POTATOES = Blocks.POTATOES.getDefaultState();
 
     private static final IBlockState FENCE = Blocks.OAK_FENCE.getDefaultState();
+
+    public IrrigatedCropsCover() {
+        super(new Color(0xAAEFEF));
+    }
 
     @Override
     public EarthSurfaceGenerator createSurfaceGenerator(EarthCoverContext context) {
@@ -89,9 +95,9 @@ public class IrrigatedCropsCover extends EarthCoverType {
         }
 
         @Override
-        public void decorate(int originX, int originZ, CoverPrimer primer, Random random) {
-            ShortRasterTile heightRaster = this.context.getHeightRaster();
-            int[] cropLayer = this.sampleChunk(this.cropSelector, originX, originZ);
+        public void decorate(CubicPos chunkPos, ChunkPrimeWriter writer, Random random) {
+            ShortRaster heightRaster = this.context.getHeightRaster();
+            int[] cropLayer = this.sampleChunk(this.cropSelector, chunkPos);
 
             this.iterateChunk((localX, localZ) -> {
                 int y = heightRaster.getShort(localX, localZ);
@@ -99,13 +105,13 @@ public class IrrigatedCropsCover extends EarthCoverType {
 
                 if (state.getBlock() instanceof BlockCrops) {
                     if (random.nextInt(20) != 0) {
-                        if (primer.getBlockState(localX, y, localZ).getBlock() instanceof BlockFarmland) {
-                            primer.setBlockState(localX, y + 1, localZ, state.withProperty(BlockCrops.AGE, random.nextInt(8)));
+                        if (writer.get(localX, y, localZ).getBlock() instanceof BlockFarmland) {
+                            writer.set(localX, y + 1, localZ, state.withProperty(BlockCrops.AGE, random.nextInt(8)));
                         }
                     }
                 } else {
-                    primer.setBlockState(localX, y, localZ, COARSE_DIRT);
-                    primer.setBlockState(localX, y + 1, localZ, state);
+                    writer.set(localX, y, localZ, COARSE_DIRT);
+                    writer.set(localX, y + 1, localZ, state);
                 }
             });
         }

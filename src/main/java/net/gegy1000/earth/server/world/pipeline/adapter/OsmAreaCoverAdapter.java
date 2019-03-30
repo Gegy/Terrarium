@@ -4,13 +4,13 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 import de.topobyte.osm4j.core.model.iface.OsmEntity;
 import net.gegy1000.earth.server.world.cover.EarthCoverTypes;
 import net.gegy1000.earth.server.world.pipeline.source.osm.OsmDataParser;
-import net.gegy1000.earth.server.world.pipeline.source.tile.OsmTile;
+import net.gegy1000.earth.server.world.pipeline.source.tile.OsmData;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.pipeline.DataView;
+import net.gegy1000.terrarium.server.world.pipeline.data.DataView;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.RegionAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.CoverRaster;
 import net.gegy1000.terrarium.server.world.rasterization.OsmShapeProducer;
 import net.gegy1000.terrarium.server.world.rasterization.RasterCanvas;
 import net.gegy1000.terrarium.server.world.region.RegionData;
@@ -24,13 +24,13 @@ import java.util.function.Predicate;
 
 public class OsmAreaCoverAdapter implements RegionAdapter {
     private final CoordinateState geoCoordinateState;
-    private final RegionComponentType<OsmTile> osmComponent;
-    private final RegionComponentType<CoverRasterTile> coverComponent;
+    private final RegionComponentType<OsmData> osmComponent;
+    private final RegionComponentType<CoverRaster> coverComponent;
 
     private final List<Type> polygonTypes = new ArrayList<>();
     private final List<CoverType<?>> coverTypes = new ArrayList<>();
 
-    public OsmAreaCoverAdapter(CoordinateState geoCoordinateState, RegionComponentType<OsmTile> osmComponent, RegionComponentType<CoverRasterTile> coverComponent) {
+    public OsmAreaCoverAdapter(CoordinateState geoCoordinateState, RegionComponentType<OsmData> osmComponent, RegionComponentType<CoverRaster> coverComponent) {
         this.geoCoordinateState = geoCoordinateState;
         this.osmComponent = osmComponent;
         this.coverComponent = coverComponent;
@@ -87,8 +87,8 @@ public class OsmAreaCoverAdapter implements RegionAdapter {
 
     @Override
     public void adapt(RegionData data, int x, int z, int width, int height) {
-        OsmTile osmTile = data.getOrExcept(this.osmComponent);
-        CoverRasterTile coverTile = data.getOrExcept(this.coverComponent);
+        OsmData osmTile = data.getOrExcept(this.osmComponent);
+        CoverRaster coverTile = data.getOrExcept(this.coverComponent);
 
         Collection<Result> polygons = this.collectPolygons(new DataView(x, z, width, height), osmTile);
 
@@ -119,7 +119,7 @@ public class OsmAreaCoverAdapter implements RegionAdapter {
         }
     }
 
-    private Collection<Result> collectPolygons(DataView view, OsmTile osmTile) {
+    private Collection<Result> collectPolygons(DataView view, OsmData osmTile) {
         List<Result> results = new ArrayList<>();
         for (Type type : this.polygonTypes) {
             Collection<MultiPolygon> coverPolygons = osmTile.collectPolygons(view, this.geoCoordinateState, type.filter);

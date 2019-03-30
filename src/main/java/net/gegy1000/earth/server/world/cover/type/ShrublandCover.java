@@ -1,5 +1,8 @@
 package net.gegy1000.earth.server.world.cover.type;
 
+import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
+import net.gegy1000.cubicglue.api.ChunkPrimeWriter;
+import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthCoverType;
 import net.gegy1000.earth.server.world.cover.EarthDecorationGenerator;
@@ -8,9 +11,8 @@ import net.gegy1000.earth.server.world.cover.LatitudinalZone;
 import net.gegy1000.terrarium.server.world.cover.CoverBiomeSelectors;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectionSeedLayer;
-import net.gegy1000.terrarium.server.world.cover.generator.primer.CoverPrimer;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.UnsignedByteRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.UnsignedByteRaster;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
@@ -18,11 +20,16 @@ import net.minecraft.world.gen.layer.GenLayer;
 import net.minecraft.world.gen.layer.GenLayerFuzzyZoom;
 import net.minecraft.world.gen.layer.GenLayerVoronoiZoom;
 
+import java.awt.Color;
 import java.util.Random;
 
 public class ShrublandCover extends EarthCoverType {
     private static final int LAYER_GRASS = 0;
     private static final int LAYER_DIRT = 1;
+
+    public ShrublandCover() {
+        super(new Color(0x956300));
+    }
 
     @Override
     public EarthSurfaceGenerator createSurfaceGenerator(EarthCoverContext context) {
@@ -63,7 +70,7 @@ public class ShrublandCover extends EarthCoverType {
 
         @Override
         public void populateBlockCover(Random random, int originX, int originZ, IBlockState[] coverBlockBuffer) {
-            UnsignedByteRasterTile slopeRaster = this.context.getSlopeRaster();
+            UnsignedByteRaster slopeRaster = this.context.getSlopeRaster();
 
             this.coverFromLayer(coverBlockBuffer, originX, originZ, this.coverSelector, (sampledValue, localX, localZ) -> {
                 if (slopeRaster.getByte(localX, localZ) >= CLIFF_SLOPE) {
@@ -82,10 +89,10 @@ public class ShrublandCover extends EarthCoverType {
         }
 
         @Override
-        public void decorate(int originX, int originZ, CoverPrimer primer, Random random) {
-            ShortRasterTile heightRaster = this.context.getHeightRaster();
-            UnsignedByteRasterTile slopeRaster = this.context.getSlopeRaster();
-            int[] grassLayer = this.sampleChunk(this.grassSelector, originX, originZ);
+        public void decorate(CubicPos chunkPos, ChunkPrimeWriter writer, Random random) {
+            ShortRaster heightRaster = this.context.getHeightRaster();
+            UnsignedByteRaster slopeRaster = this.context.getSlopeRaster();
+            int[] grassLayer = this.sampleChunk(this.grassSelector, chunkPos);
 
             this.iterateChunk((localX, localZ) -> {
                 int grassType = grassLayer[localX + localZ * 16];
@@ -93,7 +100,7 @@ public class ShrublandCover extends EarthCoverType {
                     int slope = slopeRaster.getByte(localX, localZ);
                     if (slope < CLIFF_SLOPE && grassType == 1) {
                         int y = heightRaster.getShort(localX, localZ);
-                        primer.setBlockState(localX, y + 1, localZ, TALL_GRASS);
+                        writer.set(localX, y + 1, localZ, TALL_GRASS);
                     }
                 }
             });
@@ -106,19 +113,19 @@ public class ShrublandCover extends EarthCoverType {
         }
 
         @Override
-        public void decorate(int originX, int originZ, Random random) {
+        public void decorate(CubicPos chunkPos, ChunkPopulationWriter writer, Random random) {
             World world = this.context.getWorld();
-            LatitudinalZone zone = this.context.getZone(originX, originZ);
+            LatitudinalZone zone = this.context.getZone(chunkPos);
 
             this.preventIntersection(2);
 
             int oakShrubCount = this.getOakShrubCount(random, zone);
-            this.decorateScatter(random, originX, originZ, oakShrubCount, (pos, localX, localZ) -> OAK_TALL_SHRUB.generate(world, random, pos));
-            this.decorateScatter(random, originX, originZ, oakShrubCount, (pos, localX, localZ) -> OAK_SMALL_SHRUB.generate(world, random, pos));
+            this.decorateScatter(random, chunkPos, writer, oakShrubCount, (pos, localX, localZ) -> OAK_TALL_SHRUB.generate(world, random, pos));
+            this.decorateScatter(random, chunkPos, writer, oakShrubCount, (pos, localX, localZ) -> OAK_SMALL_SHRUB.generate(world, random, pos));
 
             int acaciaShrubCount = this.getAcaciaShrubCount(random, zone);
-            this.decorateScatter(random, originX, originZ, acaciaShrubCount, (pos, localX, localZ) -> ACACIA_TALL_SHRUB.generate(world, random, pos));
-            this.decorateScatter(random, originX, originZ, acaciaShrubCount, (pos, localX, localZ) -> ACACIA_SMALL_SHRUB.generate(world, random, pos));
+            this.decorateScatter(random, chunkPos, writer, acaciaShrubCount, (pos, localX, localZ) -> ACACIA_TALL_SHRUB.generate(world, random, pos));
+            this.decorateScatter(random, chunkPos, writer, acaciaShrubCount, (pos, localX, localZ) -> ACACIA_SMALL_SHRUB.generate(world, random, pos));
 
             this.stopIntersectionPrevention();
         }

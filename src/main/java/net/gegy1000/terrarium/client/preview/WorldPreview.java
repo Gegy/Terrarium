@@ -3,14 +3,19 @@ package net.gegy1000.terrarium.client.preview;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.terrarium.Terrarium;
-import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
-import net.gegy1000.terrarium.server.world.chunk.ComposableChunkGenerator;
-import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
+import net.gegy1000.terrarium.server.world.pipeline.GenerationCancelledException;
+import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
+import net.gegy1000.terrarium.server.world.pipeline.source.DataSourceHandler;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.CoverRaster;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
+import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.init.Biomes;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
@@ -20,16 +25,15 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -38,24 +42,29 @@ import java.util.concurrent.Executors;
 @SideOnly(Side.CLIENT)
 public class WorldPreview implements IBlockAccess {
     private static final int VIEW_RANGE = 12;
+    private static final int VIEW_SIZE = VIEW_RANGE * 2 + 1;
 
-    private final ExecutorService executor = Executors.newFixedThreadPool(3, new ThreadFactoryBuilder().setDaemon(true).setNameFormat("terrarium-preview-%d").build());
+    private final ExecutorService executor = Executors.newFixedThreadPool(2, new ThreadFactoryBuilder().setDaemon(true).setNameFormat("preview-build-%d").build());
 
     private final WorldType worldType;
+    private final PreviewDummyWorld world;
+    private final TerrariumWorldData worldData;
 
     private final BlockingQueue<BufferBuilder> builderQueue;
 
-    private final ComposableChunkGenerator chunkGenerator;
+    private PreviewChunkGenerator generator;
 
-    private final ChunkPos centerPos;
-    private final BlockPos centerBlockPos;
+    private BlockPos centerBlockPos = BlockPos.ORIGIN;
 
-    private final Long2ObjectMap<ChunkData> chunkMap = new Long2ObjectOpenHashMap<>(VIEW_RANGE * 2 * VIEW_RANGE * 2);
+    private final Long2ObjectMap<PreviewColumnData> columnMap = new Long2ObjectOpenHashMap<>(VIEW_SIZE * VIEW_SIZE);
+    private final Long2ObjectMap<PreviewChunkData> chunkMap = new Long2ObjectOpenHashMap<>(VIEW_SIZE * VIEW_SIZE * VIEW_SIZE);
 
-    private final TerrariumWorldData worldData;
+    private final Set<CubicPos> generatedChunks = new HashSet<>();
+    private final List<PreviewChunk> previewChunks = new ArrayList<>(VIEW_SIZE * VIEW_SIZE * VIEW_SIZE);
 
-    private List<PreviewChunk> previewChunks = null;
-    private int heightOffset = 64;
+    private PreviewHeightMesh heightMesh;
+
+    private final Object lock = new Object();
 
     public WorldPreview(WorldType worldType, GenerationSettings settings, BufferBuilder[] builders) {
         this.worldType = worldType;
@@ -63,66 +72,178 @@ public class WorldPreview implements IBlockAccess {
         this.builderQueue = new ArrayBlockingQueue<>(builders.length);
         Collections.addAll(this.builderQueue, builders);
 
-        PreviewDummyWorld world;
-
         TerrariumWorldData.PREVIEW_WORLD.set(true);
         try {
-            world = new PreviewDummyWorld(this.worldType, settings);
-            this.worldData = world.getCapability(TerrariumCapabilities.worldDataCapability, null);
+            this.world = new PreviewDummyWorld(this.worldType, settings);
+            this.worldData = TerrariumWorldData.get(this.world);
             if (this.worldData == null) {
-                throw new IllegalStateException("Failed to get world data capability from preview world");
+                throw new IllegalStateException("Terrarium World Capability not present on preview world");
             }
         } finally {
             TerrariumWorldData.PREVIEW_WORLD.set(false);
         }
 
-        this.chunkGenerator = world.getGenerator();
-        Coordinate spawnPosition = this.worldData.getSpawnPosition();
-        if (spawnPosition != null) {
-            this.centerPos = new ChunkPos(spawnPosition.toBlockPos());
-        } else {
-            this.centerPos = new ChunkPos(0, 0);
+        this.executor.submit(this::initiateGeneration);
+    }
+
+    private void initiateGeneration() {
+        BlockPos spawnPosition = this.worldData.getSpawnPosition().toBlockPos();
+
+        int spawnChunkX = spawnPosition.getX() >> 4;
+        int spawnChunkZ = spawnPosition.getZ() >> 4;
+
+        try {
+            int viewSizeBlocks = VIEW_SIZE << 4;
+
+            int originX = (spawnChunkX - VIEW_RANGE) << 4;
+            int originZ = (spawnChunkZ - VIEW_RANGE) << 4;
+
+            ShortRaster heightTile = this.generateHeightTile(originX, originZ, viewSizeBlocks);
+            CoverRaster coverTile = this.generateCoverTile(originX, originZ, viewSizeBlocks);
+
+            this.heightMesh = new PreviewHeightMesh(heightTile, coverTile);
+            this.heightMesh.submitTo(this.executor, 5);
+
+            short averageHeight = this.computeAverageHeight(heightTile);
+
+            BlockPos centerChunkPos = new BlockPos(spawnChunkX, averageHeight >> 4, spawnChunkZ);
+            this.centerBlockPos = new BlockPos((centerChunkPos.getX() << 4) + 8, averageHeight, (centerChunkPos.getZ() << 4) + 8);
+
+            this.generator = new PreviewChunkGenerator(centerChunkPos, this.world.getCubeGenerator(), VIEW_RANGE);
+            this.generator.setCubeHandler(this::handleGeneratedCube);
+            this.generator.setColumnHandler(this::handleGeneratedColumn);
+
+            this.generator.initiate();
+        } catch (GenerationCancelledException e) {
+            // We can safely ignore
+        } catch (Throwable t) {
+            Terrarium.LOGGER.error("Failed to generate preview chunks", t);
+        }
+    }
+
+    private void handleGeneratedCube(CubicPos localPos, PreviewChunkData chunkData) {
+        long key = getCubeKey(localPos.getX(), localPos.getY(), localPos.getZ());
+        this.chunkMap.put(key, chunkData);
+
+        this.notifyUpdate(localPos);
+
+        for (EnumFacing facing : PreviewChunk.PREVIEW_FACES) {
+            CubicPos neighborPos = localPos.offset(facing.getOpposite());
+            if (this.containsChunk(neighborPos) && this.chunkMap.containsKey(getCubeKey(neighborPos))) {
+                this.notifyUpdate(neighborPos);
+            }
+        }
+    }
+
+    private void handleGeneratedColumn(ChunkPos localPos, PreviewColumnData columnData) {
+        this.columnMap.put(ChunkPos.asLong(localPos.x, localPos.z), columnData);
+    }
+
+    private void notifyUpdate(CubicPos pos) {
+        if (!this.generatedChunks.contains(pos) && this.hasRequiredNeighbors(pos)) {
+            this.generatedChunks.add(pos);
+            PreviewChunkData data = this.chunkMap.get(getCubeKey(pos));
+            PreviewColumnData columnData = this.columnMap.get(ChunkPos.asLong(pos.getX(), pos.getZ()));
+            if (this.executor.isShutdown() || this.executor.isTerminated()) {
+                return;
+            }
+            this.submitChunk(pos, data, columnData);
+        }
+    }
+
+    private void submitChunk(CubicPos pos, PreviewChunkData data, PreviewColumnData columnData) {
+        PreviewChunk chunk = new PreviewChunk(data, columnData, pos, this);
+        chunk.submitTo(this.executor, this::takeBuilder, this::returnBuilder);
+        synchronized (this.lock) {
+            this.previewChunks.add(chunk);
+        }
+    }
+
+    private boolean hasRequiredNeighbors(CubicPos pos) {
+        for (EnumFacing facing : PreviewChunk.PREVIEW_FACES) {
+            CubicPos neighborPos = pos.offset(facing);
+            if (this.containsChunk(neighborPos) && !this.chunkMap.containsKey(getCubeKey(neighborPos))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean containsChunk(CubicPos pos) {
+        return pos.getX() >= -VIEW_RANGE && pos.getY() >= -VIEW_RANGE && pos.getZ() >= -VIEW_RANGE
+                && pos.getX() <= VIEW_RANGE && pos.getY() <= VIEW_RANGE && pos.getZ() <= VIEW_RANGE;
+    }
+
+    private ShortRaster generateHeightTile(int originX, int originZ, int size) {
+        ShortRaster tile = new ShortRaster(size, size);
+
+        RegionGenerationHandler regionHandler = this.worldData.getRegionHandler();
+        regionHandler.fillRaster(RegionComponentType.HEIGHT, tile, originX, originZ);
+
+        return tile;
+    }
+
+    private CoverRaster generateCoverTile(int originX, int originZ, int size) {
+        CoverRaster tile = new CoverRaster(size, size);
+
+        RegionGenerationHandler regionHandler = this.worldData.getRegionHandler();
+        regionHandler.fillRaster(RegionComponentType.COVER, tile, originX, originZ);
+
+        return tile;
+    }
+
+    private short computeAverageHeight(ShortRaster heightTile) {
+        long total = 0;
+        long maxHeight = 0;
+
+        short[] shortData = heightTile.getShortData();
+        for (short value : shortData) {
+            if (value > maxHeight) {
+                maxHeight = value;
+            }
+            total += value;
         }
 
-        this.centerBlockPos = new BlockPos(this.centerPos.getXStart(), 0, this.centerPos.getZStart());
+        long averageHeight = total / shortData.length;
+        return (short) ((averageHeight + maxHeight + maxHeight) / 3);
+    }
 
-        int viewRangeBlocks = VIEW_RANGE << 4;
-        BlockPos minPos = this.centerBlockPos.add(-viewRangeBlocks, 0, -viewRangeBlocks);
-        BlockPos maxPos = this.centerBlockPos.add(viewRangeBlocks + 16, 0, viewRangeBlocks + 16);
-        this.worldData.getRegionHandler().enqueueArea(minPos, maxPos);
+    public void renderHeightMesh() {
+        if (this.heightMesh == null) {
+            return;
+        }
 
-        this.executor.submit(() -> {
-            try {
-                List<PreviewChunk> chunks = this.generateChunks();
-                for (PreviewChunk chunk : chunks) {
-                    if (this.executor.isTerminated() || this.executor.isShutdown()) {
-                        break;
-                    }
-                    chunk.submitBuild(this.executor, this::takeBuilder, this::returnBuilder);
-                }
-                this.previewChunks = chunks;
-            } catch (Exception e) {
-                Terrarium.LOGGER.error("Failed to generate preview chunks", e);
-            }
-        });
+        synchronized (this.lock) {
+            int offsetHorizontal = VIEW_RANGE << 4;
+            int offsetVertical = (this.centerBlockPos.getY() >> 4) << 4;
+
+            GlStateManager.pushMatrix();
+            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+            GlStateManager.translate(-offsetHorizontal, -offsetVertical, -offsetHorizontal);
+            this.heightMesh.render();
+            GlStateManager.popMatrix();
+        }
     }
 
     public void renderChunks() {
-        List<PreviewChunk> previewChunks = this.previewChunks;
-        if (previewChunks != null) {
-            this.performUploads(previewChunks);
+        synchronized (this.lock) {
+            this.performUploads(this.previewChunks);
 
-            for (PreviewChunk chunk : previewChunks) {
-                chunk.render(this.centerBlockPos.getX(), this.centerBlockPos.getZ());
+            for (PreviewChunk chunk : this.previewChunks) {
+                chunk.render();
             }
         }
     }
 
     private void performUploads(List<PreviewChunk> previewChunks) {
+        if (this.heightMesh != null) {
+            this.heightMesh.performUpload();
+        }
+
         long startTime = System.nanoTime();
 
         Iterator<PreviewChunk> iterator = previewChunks.iterator();
-        while (System.nanoTime() - startTime < 3000000 && iterator.hasNext()) {
+        while (System.nanoTime() - startTime < 5000000 && iterator.hasNext()) {
             PreviewChunk chunk = iterator.next();
             if (chunk.isUploadReady()) {
                 this.returnBuilder(chunk.performUpload());
@@ -131,15 +252,21 @@ public class WorldPreview implements IBlockAccess {
     }
 
     public void delete() {
-        List<PreviewChunk> previewChunks = this.previewChunks;
-        if (previewChunks != null) {
-            for (PreviewChunk chunk : previewChunks) {
+        synchronized (this.lock) {
+            for (PreviewChunk chunk : this.previewChunks) {
                 chunk.cancelGeneration();
                 chunk.delete();
             }
         }
-        this.executor.shutdown();
+
+        if (this.generator != null) {
+            this.generator.close();
+        }
+
+        this.executor.shutdownNow();
+
         this.worldData.getRegionHandler().close();
+        DataSourceHandler.INSTANCE.cancelLoading();
     }
 
     public BufferBuilder takeBuilder() {
@@ -159,40 +286,6 @@ public class WorldPreview implements IBlockAccess {
         }
     }
 
-    private List<PreviewChunk> generateChunks() {
-        int totalHeight = 0;
-
-        List<ChunkPos> chunkPositions = new ArrayList<>();
-        for (int z = -VIEW_RANGE; z <= VIEW_RANGE; z++) {
-            for (int x = -VIEW_RANGE; x <= VIEW_RANGE; x++) {
-                ChunkPos pos = new ChunkPos(this.centerPos.x + x, this.centerPos.z + z);
-
-                ChunkPrimer chunk = this.chunkGenerator.generatePrimer(pos.x, pos.z);
-                Biome[] biomes = Arrays.copyOf(this.chunkGenerator.provideBiomes(pos.x, pos.z), 256);
-                this.chunkMap.put(ChunkPos.asLong(pos.x, pos.z), new ChunkData(chunk, biomes));
-
-                chunkPositions.add(pos);
-            }
-        }
-
-        chunkPositions.sort(Comparator.comparing(pos -> {
-            int deltaX = pos.x - this.centerPos.x;
-            int deltaZ = pos.z - this.centerPos.z;
-            return deltaX * deltaX + deltaZ * deltaZ;
-        }));
-
-        List<PreviewChunk> previewChunks = new ArrayList<>();
-        for (ChunkPos pos : chunkPositions) {
-            ChunkData chunk = this.chunkMap.get(ChunkPos.asLong(pos.x, pos.z));
-            totalHeight += chunk.primer.findGroundBlockIdx(8, 8) + 16;
-            previewChunks.add(new PreviewChunk(chunk.primer, chunk.biomes, pos, this));
-        }
-
-        this.heightOffset = totalHeight / previewChunks.size();
-
-        return previewChunks;
-    }
-
     @Override
     public TileEntity getTileEntity(BlockPos pos) {
         return null;
@@ -205,12 +298,12 @@ public class WorldPreview implements IBlockAccess {
 
     @Override
     public IBlockState getBlockState(BlockPos pos) {
-        if (pos.getY() > 255 || pos.getY() < 0) {
-            return Blocks.AIR.getDefaultState();
-        }
-        ChunkData chunk = this.chunkMap.get(ChunkPos.asLong(pos.getX() >> 4, pos.getZ() >> 4));
+        int chunkX = pos.getX() >> 4;
+        int chunkY = pos.getY() >> 4;
+        int chunkZ = pos.getZ() >> 4;
+        PreviewChunkData chunk = this.chunkMap.get(getCubeKey(chunkX, chunkY, chunkZ));
         if (chunk != null) {
-            return chunk.primer.getBlockState(pos.getX() & 15, pos.getY() & 255, pos.getZ() & 15);
+            return chunk.get(pos.getX() & 0xF, pos.getY() & 0xF, pos.getZ() & 0xF);
         }
         return Blocks.STONE.getDefaultState();
     }
@@ -241,17 +334,11 @@ public class WorldPreview implements IBlockAccess {
         return this.getBlockState(pos).isFullCube();
     }
 
-    public int getHeightOffset() {
-        return this.heightOffset;
+    private static long getCubeKey(int x, int y, int z) {
+        return ((long) x & 0xFFFFF) << 40 | ((long) y & 0xFFFFF) << 20 | ((long) z & 0xFFFFF);
     }
 
-    private class ChunkData {
-        private final ChunkPrimer primer;
-        private final Biome[] biomes;
-
-        private ChunkData(ChunkPrimer primer, Biome[] biomes) {
-            this.primer = primer;
-            this.biomes = biomes;
-        }
+    private static long getCubeKey(CubicPos pos) {
+        return getCubeKey(pos.getX(), pos.getY(), pos.getZ());
     }
 }

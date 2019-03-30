@@ -9,7 +9,13 @@ import net.minecraft.world.gen.layer.GenLayer;
 import net.minecraft.world.gen.layer.GenLayerFuzzyZoom;
 import net.minecraft.world.gen.layer.GenLayerVoronoiZoom;
 
+import java.awt.Color;
+
 public abstract class ClosedForestCover extends ForestCover {
+    public ClosedForestCover(Color approximateColor) {
+        super(approximateColor);
+    }
+
     @Override
     public EarthSurfaceGenerator createSurfaceGenerator(EarthCoverContext context) {
         return new Surface(context, this);

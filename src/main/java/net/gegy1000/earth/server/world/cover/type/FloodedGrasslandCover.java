@@ -1,5 +1,7 @@
 package net.gegy1000.earth.server.world.cover.type;
 
+import net.gegy1000.cubicglue.api.ChunkPrimeWriter;
+import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthCoverType;
 import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
@@ -9,8 +11,7 @@ import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.OutlineEdgeLayer;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.ReplaceRandomLayer;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectionSeedLayer;
-import net.gegy1000.terrarium.server.world.cover.generator.primer.CoverPrimer;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.minecraft.block.BlockDoublePlant;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.state.IBlockState;
@@ -20,12 +21,17 @@ import net.minecraft.world.gen.layer.GenLayerFuzzyZoom;
 import net.minecraft.world.gen.layer.GenLayerVoronoiZoom;
 import net.minecraft.world.gen.layer.GenLayerZoom;
 
+import java.awt.Color;
 import java.util.Random;
 
 public class FloodedGrasslandCover extends EarthCoverType {
     private static final int LAYER_GRASS = 0;
     private static final int LAYER_DIRT = 1;
     private static final int LAYER_PODZOL = 2;
+
+    public FloodedGrasslandCover() {
+        super(new Color(0x00DC83));
+    }
 
     @Override
     public EarthSurfaceGenerator createSurfaceGenerator(EarthCoverContext context) {
@@ -106,25 +112,25 @@ public class FloodedGrasslandCover extends EarthCoverType {
         }
 
         @Override
-        public void decorate(int originX, int originZ, CoverPrimer primer, Random random) {
-            ShortRasterTile heightRaster = this.context.getHeightRaster();
+        public void decorate(CubicPos chunkPos, ChunkPrimeWriter writer, Random random) {
+            ShortRaster heightRaster = this.context.getHeightRaster();
 
-            int[] grassLayer = this.sampleChunk(this.grassSelector, originX, originZ);
+            int[] grassLayer = this.sampleChunk(this.grassSelector, chunkPos);
 
             this.iterateChunk((localX, localZ) -> {
                 int index = localX + localZ * 16;
                 if (grassLayer[index] == 1 && random.nextInt(6) != 0) {
                     int y = heightRaster.getShort(localX, localZ);
-                    IBlockState ground = primer.getBlockState(localX, y, localZ);
+                    IBlockState ground = writer.get(localX, y, localZ);
                     if (ground.getBlock() instanceof BlockLiquid) {
                         if (random.nextInt(3) == 0) {
-                            primer.setBlockState(localX, y + 1, localZ, LILYPAD);
+                            writer.set(localX, y + 1, localZ, LILYPAD);
                         }
                     } else if (random.nextInt(3) != 0) {
-                        primer.setBlockState(localX, y + 1, localZ, TALL_GRASS);
+                        writer.set(localX, y + 1, localZ, TALL_GRASS);
                     } else {
-                        primer.setBlockState(localX, y + 1, localZ, DOUBLE_TALL_GRASS);
-                        primer.setBlockState(localX, y + 2, localZ, DOUBLE_TALL_GRASS.withProperty(BlockDoublePlant.HALF, BlockDoublePlant.EnumBlockHalf.UPPER));
+                        writer.set(localX, y + 1, localZ, DOUBLE_TALL_GRASS);
+                        writer.set(localX, y + 2, localZ, DOUBLE_TALL_GRASS.withProperty(BlockDoublePlant.HALF, BlockDoublePlant.EnumBlockHalf.UPPER));
                     }
                 }
             });

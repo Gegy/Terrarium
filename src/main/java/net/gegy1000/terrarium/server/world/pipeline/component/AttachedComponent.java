@@ -1,31 +1,35 @@
 package net.gegy1000.terrarium.server.world.pipeline.component;
 
-import net.gegy1000.terrarium.server.world.pipeline.DataLayer;
-import net.gegy1000.terrarium.server.world.pipeline.DataTileKey;
-import net.gegy1000.terrarium.server.world.pipeline.DataView;
-import net.gegy1000.terrarium.server.world.pipeline.layer.LayerContext;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.TiledDataAccess;
+import net.gegy1000.terrarium.Terrarium;
+import net.gegy1000.terrarium.server.world.pipeline.data.DataView;
+import net.gegy1000.terrarium.server.world.pipeline.data.Data;
+import net.gegy1000.terrarium.server.world.pipeline.data.DataEngine;
+import net.gegy1000.terrarium.server.world.pipeline.data.DataFuture;
 
-import java.util.Collection;
+import java.util.concurrent.CompletableFuture;
 
-public final class AttachedComponent<T extends TiledDataAccess> {
+public final class AttachedComponent<T extends Data> {
     private final RegionComponentType<T> type;
-    private final DataLayer<T> layer;
+    private final DataFuture<T> future;
 
-    public AttachedComponent(RegionComponentType<T> type, DataLayer<T> layer) {
+    public AttachedComponent(RegionComponentType<T> type, DataFuture<T> future) {
         this.type = type;
-        this.layer = layer;
+        this.future = future;
     }
 
     public RegionComponentType<T> getType() {
         return this.type;
     }
 
-    public RegionComponent<T> createAndPopulate(LayerContext context, DataView view) {
-        return new RegionComponent<>(this.type, context.apply(this.layer, view));
-    }
-
-    public Collection<DataTileKey<?>> getRequiredData(LayerContext context, DataView view) {
-        return this.layer.getRequiredData(context, view);
+    public CompletableFuture<RegionComponent<?>> createAndPopulate(DataEngine engine, DataView view) {
+        return engine.load(this.future, view)
+                .thenApply(data -> new RegionComponent<>(this.type, data))
+                .handle((component, throwable) -> {
+                    if (throwable != null) {
+                        Terrarium.LOGGER.error("Failed to load component {}", this.type.getIdentifier(), throwable);
+                        return this.type.createDefaultComponent(view.getWidth(), view.getHeight());
+                    }
+                    return component;
+                });
     }
 }

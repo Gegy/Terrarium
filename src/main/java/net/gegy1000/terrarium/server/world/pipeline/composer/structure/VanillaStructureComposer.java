@@ -1,14 +1,14 @@
 package net.gegy1000.terrarium.server.world.pipeline.composer.structure;
 
-import net.gegy1000.terrarium.server.world.chunk.OverworldChunkGeneratorWrapper;
-import net.gegy1000.terrarium.server.world.chunk.PseudoRandomMap;
-import net.gegy1000.terrarium.server.world.chunk.TerrariumChunkGenerator;
+import net.gegy1000.cubicglue.util.PseudoRandomMap;
+import net.gegy1000.cubicglue.util.wrapper.OverworldGeneratorWrapper;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.ChunkPrimer;
+import net.minecraft.world.gen.ChunkGeneratorOverworld;
 import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.gen.structure.MapGenMineshaft;
 import net.minecraft.world.gen.structure.MapGenScatteredFeature;
@@ -37,11 +37,11 @@ public class VanillaStructureComposer implements StructureComposer {
     private final MapGenStructure oceanMonumentGenerator;
     private final MapGenStructure woodlandMansionGenerator;
 
-    public VanillaStructureComposer(World world, TerrariumChunkGenerator generator) {
+    public VanillaStructureComposer(World world) {
         this.world = world;
         this.randomMap = new PseudoRandomMap(world, STRUCTURE_SEED);
 
-        OverworldChunkGeneratorWrapper overworldWrapper = new OverworldChunkGeneratorWrapper(world, generator);
+        ChunkGeneratorOverworld overworldWrapper = OverworldGeneratorWrapper.from(world);
 
         this.strongholdGenerator = (MapGenStructure) TerrainGen.getModdedMapGen(new MapGenStronghold(), InitMapGenEvent.EventType.STRONGHOLD);
         this.villageGenerator = (MapGenStructure) TerrainGen.getModdedMapGen(new MapGenVillage(), InitMapGenEvent.EventType.VILLAGE);

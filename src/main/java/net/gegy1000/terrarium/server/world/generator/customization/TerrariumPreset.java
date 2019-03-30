@@ -11,9 +11,9 @@ public class TerrariumPreset {
     private final String name;
     private final ResourceLocation worldType;
     private final ResourceLocation icon;
-    private final GenerationSettings properties;
+    private final JsonObject properties;
 
-    public TerrariumPreset(String name, ResourceLocation worldType, ResourceLocation icon, GenerationSettings properties) {
+    public TerrariumPreset(String name, ResourceLocation worldType, ResourceLocation icon, JsonObject properties) {
         this.name = name;
         this.worldType = worldType;
         this.icon = new ResourceLocation(icon.getNamespace(), "textures/preset/" + icon.getNamespace() + ".png");
@@ -26,7 +26,7 @@ public class TerrariumPreset {
         ResourceLocation icon = new ResourceLocation(JsonUtils.getString(root, "icon"));
 
         JsonObject properties = JsonUtils.getJsonObject(root, "properties");
-        return new TerrariumPreset(name, worldType, icon, GenerationSettings.deserialize(properties));
+        return new TerrariumPreset(name, worldType, icon, properties);
     }
 
     @SideOnly(Side.CLIENT)
@@ -43,8 +43,8 @@ public class TerrariumPreset {
         return this.icon;
     }
 
-    public GenerationSettings createProperties() {
-        return GenerationSettings.deserialize(this.properties.serialize());
+    public GenerationSettings createProperties(PropertyPrototype prototype) {
+        return GenerationSettings.parse(prototype, this.properties);
     }
 
     public ResourceLocation getWorldType() {

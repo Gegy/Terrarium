@@ -1,12 +1,7 @@
 package net.gegy1000.terrarium.server.capability;
 
-import com.google.common.base.Strings;
-import net.gegy1000.terrarium.Terrarium;
-import net.gegy1000.terrarium.server.support.SpongeSupport;
 import net.gegy1000.terrarium.server.world.TerrariumGeneratorInitializer;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
-import net.gegy1000.terrarium.server.world.chunk.ComposableChunkGenerator;
-import net.gegy1000.terrarium.server.world.chunk.TerrariumChunkGenerator;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.generator.ChunkCompositionProcedure;
 import net.gegy1000.terrarium.server.world.generator.TerrariumGenerator;
@@ -14,14 +9,18 @@ import net.gegy1000.terrarium.server.world.generator.customization.GenerationSet
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-import net.minecraft.world.chunk.IChunkProvider;
-import net.minecraft.world.gen.ChunkProviderServer;
-import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 
+import javax.annotation.Nullable;
+
 public interface TerrariumWorldData extends ICapabilityProvider {
     ThreadLocal<Boolean> PREVIEW_WORLD = ThreadLocal.withInitial(() -> false);
+
+    @Nullable
+    static TerrariumWorldData get(World world) {
+        return world.getCapability(TerrariumCapabilities.worldDataCapability, null);
+    }
 
     GenerationSettings getSettings();
 
@@ -37,31 +36,11 @@ public interface TerrariumWorldData extends ICapabilityProvider {
         private final RegionGenerationHandler regionHandler;
 
         public Implementation(World world, TerrariumWorldType worldType) {
-            String generatorOptions = world.getWorldInfo().getGeneratorOptions();
+            this.settings = GenerationSettings.parse(world);
 
-            GenerationSettings presetSettings = worldType.getPreset().createProperties();
-            if (Strings.isNullOrEmpty(generatorOptions)) {
-                this.settings = presetSettings;
-            } else {
-                this.settings = presetSettings.union(GenerationSettings.deserialize(generatorOptions));
-            }
-
-            IChunkProvider chunkProvider = world.getChunkProvider();
-            if (!(chunkProvider instanceof ChunkProviderServer)) {
-                throw new IllegalStateException("Cannot create Terrarium generator with invalid chunk provider " + chunkProvider);
-            }
-
-            IChunkGenerator chunkGenerator = ((ChunkProviderServer) chunkProvider).chunkGenerator;
-            chunkGenerator = SpongeSupport.unwrapChunkGenerator(chunkGenerator);
-
-            if (!(chunkGenerator instanceof TerrariumChunkGenerator)) {
-                Terrarium.LOGGER.warn("Expected generator of type TerrariumChunkGenerator, but got " + chunkGenerator.getClass().getSimpleName());
-                chunkGenerator = new ComposableChunkGenerator(world);
-            }
-
-            TerrariumGeneratorInitializer initializer = worldType.createInitializer(world, (TerrariumChunkGenerator) chunkGenerator, this.settings);
+            TerrariumGeneratorInitializer initializer = worldType.createInitializer(world, this.settings);
             this.generator = initializer.buildGenerator(PREVIEW_WORLD.get());
-            this.regionHandler = new RegionGenerationHandler(initializer.buildDataProvider());
+            this.regionHandler = new RegionGenerationHandler(world, initializer.buildDataProvider());
         }
 
         @Override

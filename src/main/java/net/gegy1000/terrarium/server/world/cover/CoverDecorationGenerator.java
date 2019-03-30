@@ -1,6 +1,8 @@
 package net.gegy1000.terrarium.server.world.cover;
 
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
+import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
+import net.gegy1000.cubicglue.util.CubicPos;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.CoverRaster;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -16,24 +18,31 @@ public abstract class CoverDecorationGenerator<T extends CoverGenerationContext>
         super(context, coverType);
     }
 
-    public abstract void decorate(int originX, int originZ, Random random);
+    public abstract void decorate(CubicPos chunkPos, ChunkPopulationWriter writer, Random random);
 
-    protected void decorateScatter(Random random, int originX, int originZ, int count, ScatterDecorateConsumer decorator) {
+    protected void decorateScatter(Random random, CubicPos chunkPos, ChunkPopulationWriter writer, int count, ScatterDecorateConsumer decorator) {
         World world = this.context.getWorld();
-        CoverRasterTile coverRaster = this.context.getCoverRaster();
+        CoverRaster coverRaster = this.context.getCoverRaster();
+
+        BlockPos.MutableBlockPos pos = this.mutablePos;
 
         for (int i = 0; i < count; i++) {
             int scatterX = random.nextInt(16);
             int scatterZ = random.nextInt(16);
 
             if (coverRaster.get(scatterX, scatterZ) == this.coverType) {
-                this.mutablePos.setPos(originX + scatterX, 0, originZ + scatterZ);
+                pos.setPos(chunkPos.getCenterX() + scatterX, 0, chunkPos.getCenterZ() + scatterZ);
 
-                if (this.tryPlace(random, this.mutablePos, scatterX, scatterZ)) {
-                    BlockPos topBlock = world.getHeight(this.mutablePos);
+                if (this.tryPlace(random, pos, scatterX, scatterZ)) {
+                    BlockPos topBlock = writer.getSurface(pos);
+                    if (topBlock == null) {
+                        continue;
+                    }
+
                     if (!world.isAirBlock(topBlock)) {
                         world.setBlockToAir(topBlock);
                     }
+
                     decorator.handlePoint(topBlock, scatterX, scatterZ);
                 }
             }
@@ -81,7 +90,7 @@ public abstract class CoverDecorationGenerator<T extends CoverGenerationContext>
         }
 
         @Override
-        public void decorate(int originX, int originZ, Random random) {
+        public void decorate(CubicPos chunkPos, ChunkPopulationWriter writer, Random random) {
         }
     }
 }

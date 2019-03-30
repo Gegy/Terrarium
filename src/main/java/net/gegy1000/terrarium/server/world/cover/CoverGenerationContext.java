@@ -1,8 +1,8 @@
 package net.gegy1000.terrarium.server.world.cover;
 
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.CoverRaster;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.world.World;
 
@@ -13,18 +13,18 @@ public interface CoverGenerationContext {
 
     void prepareChunk(RegionGenerationHandler regionHandler);
 
-    ShortRasterTile getHeightRaster();
+    ShortRaster getHeightRaster();
 
-    CoverRasterTile getCoverRaster();
+    CoverRaster getCoverRaster();
 
     class Default implements CoverGenerationContext {
         private final World world;
-        private final RegionComponentType<ShortRasterTile> heightComponent;
-        private final RegionComponentType<CoverRasterTile> coverComponent;
-        private ShortRasterTile heightTile;
-        private CoverRasterTile coverTile;
+        private final RegionComponentType<ShortRaster> heightComponent;
+        private final RegionComponentType<CoverRaster> coverComponent;
+        private ShortRaster heightTile;
+        private CoverRaster coverTile;
 
-        public Default(World world, RegionComponentType<ShortRasterTile> heightComponent, RegionComponentType<CoverRasterTile> coverComponent) {
+        public Default(World world, RegionComponentType<ShortRaster> heightComponent, RegionComponentType<CoverRaster> coverComponent) {
             this.world = world;
             this.heightComponent = heightComponent;
             this.coverComponent = coverComponent;
@@ -47,12 +47,12 @@ public interface CoverGenerationContext {
         }
 
         @Override
-        public ShortRasterTile getHeightRaster() {
+        public ShortRaster getHeightRaster() {
             return this.heightTile;
         }
 
         @Override
-        public CoverRasterTile getCoverRaster() {
+        public CoverRaster getCoverRaster() {
             return this.coverTile;
         }
     }

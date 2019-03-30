@@ -1,5 +1,7 @@
 package net.gegy1000.earth.server.world.cover.type;
 
+import net.gegy1000.cubicglue.api.ChunkPrimeWriter;
+import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthCoverType;
 import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
@@ -7,8 +9,7 @@ import net.gegy1000.terrarium.server.world.cover.CoverBiomeSelectors;
 import net.gegy1000.terrarium.server.world.cover.CoverDecorationGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectWeightedLayer;
-import net.gegy1000.terrarium.server.world.cover.generator.primer.CoverPrimer;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.minecraft.block.BlockDoublePlant;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.biome.Biome;
@@ -16,6 +17,7 @@ import net.minecraft.world.gen.layer.GenLayer;
 import net.minecraft.world.gen.layer.GenLayerFuzzyZoom;
 import net.minecraft.world.gen.layer.GenLayerVoronoiZoom;
 
+import java.awt.Color;
 import java.util.Random;
 
 public class RainfedCropsCover extends EarthCoverType {
@@ -24,6 +26,10 @@ public class RainfedCropsCover extends EarthCoverType {
 
     private static final int LAYER_SHORT_GRASS = 0;
     private static final int LAYER_TALL_GRASS = 1;
+
+    public RainfedCropsCover() {
+        super(new Color(0xFFFF63));
+    }
 
     @Override
     public EarthSurfaceGenerator createSurfaceGenerator(EarthCoverContext context) {
@@ -79,22 +85,22 @@ public class RainfedCropsCover extends EarthCoverType {
         }
 
         @Override
-        public void decorate(int originX, int originZ, CoverPrimer primer, Random random) {
-            ShortRasterTile heightRaster = this.context.getHeightRaster();
-            int[] grassLayer = this.sampleChunk(this.grassSelector, originX, originZ);
+        public void decorate(CubicPos chunkPos, ChunkPrimeWriter writer, Random random) {
+            ShortRaster heightRaster = this.context.getHeightRaster();
+            int[] grassLayer = this.sampleChunk(this.grassSelector, chunkPos);
 
             this.iterateChunk((localX, localZ) -> {
                 int y = heightRaster.getShort(localX, localZ);
                 switch (grassLayer[localX + localZ * 16]) {
                     case LAYER_SHORT_GRASS:
                         if (random.nextInt(3) == 0) {
-                            primer.setBlockState(localX, y + 1, localZ, TALL_GRASS);
+                            writer.set(localX, y + 1, localZ, TALL_GRASS);
                         }
                         break;
                     case LAYER_TALL_GRASS:
                         if (random.nextInt(2) == 0) {
-                            primer.setBlockState(localX, y + 1, localZ, DOUBLE_TALL_GRASS);
-                            primer.setBlockState(localX, y + 2, localZ, DOUBLE_TALL_GRASS.withProperty(BlockDoublePlant.HALF, BlockDoublePlant.EnumBlockHalf.UPPER));
+                            writer.set(localX, y + 1, localZ, DOUBLE_TALL_GRASS);
+                            writer.set(localX, y + 2, localZ, DOUBLE_TALL_GRASS.withProperty(BlockDoublePlant.HALF, BlockDoublePlant.EnumBlockHalf.UPPER));
                         }
                         break;
                 }

@@ -1,12 +1,13 @@
 package net.gegy1000.earth.server.world.cover;
 
-import net.gegy1000.terrarium.server.world.chunk.PseudoRandomMap;
+import net.gegy1000.cubicglue.util.CubicPos;
+import net.gegy1000.cubicglue.util.PseudoRandomMap;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.cover.CoverGenerationContext;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.CoverRasterTile;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.ShortRasterTile;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.UnsignedByteRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.CoverRaster;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.UnsignedByteRaster;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.world.World;
 
@@ -14,13 +15,13 @@ public class EarthCoverContext implements CoverGenerationContext {
     private static final long ZONE_SCATTER_SEED = 2016944452769570983L;
 
     private final World world;
-    private final RegionComponentType<ShortRasterTile> heightComponent;
-    private final RegionComponentType<CoverRasterTile> coverComponent;
-    private final RegionComponentType<UnsignedByteRasterTile> slopeComponent;
+    private final RegionComponentType<ShortRaster> heightComponent;
+    private final RegionComponentType<CoverRaster> coverComponent;
+    private final RegionComponentType<UnsignedByteRaster> slopeComponent;
 
-    private ShortRasterTile heightTile;
-    private CoverRasterTile coverTile;
-    private UnsignedByteRasterTile slopeTile;
+    private ShortRaster heightTile;
+    private CoverRaster coverTile;
+    private UnsignedByteRaster slopeTile;
 
     private final CoordinateState latLngCoordinate;
 
@@ -30,9 +31,9 @@ public class EarthCoverContext implements CoverGenerationContext {
 
     public EarthCoverContext(
             World world,
-            RegionComponentType<ShortRasterTile> heightComponent,
-            RegionComponentType<CoverRasterTile> coverComponent,
-            RegionComponentType<UnsignedByteRasterTile> slopeComponent,
+            RegionComponentType<ShortRaster> heightComponent,
+            RegionComponentType<CoverRaster> coverComponent,
+            RegionComponentType<UnsignedByteRaster> slopeComponent,
             CoordinateState latLngCoordinate,
             boolean scatterZone) {
         this.world = world;
@@ -63,16 +64,16 @@ public class EarthCoverContext implements CoverGenerationContext {
     }
 
     @Override
-    public ShortRasterTile getHeightRaster() {
+    public ShortRaster getHeightRaster() {
         return this.heightTile;
     }
 
     @Override
-    public CoverRasterTile getCoverRaster() {
+    public CoverRaster getCoverRaster() {
         return this.coverTile;
     }
 
-    public UnsignedByteRasterTile getSlopeRaster() {
+    public UnsignedByteRaster getSlopeRaster() {
         return this.slopeTile;
     }
 
@@ -84,6 +85,10 @@ public class EarthCoverContext implements CoverGenerationContext {
 
         double latitude = this.latLngCoordinate.getX(globalX + offsetX, globalZ + offsetZ);
         return LatitudinalZone.get(latitude);
+    }
+
+    public LatitudinalZone getZone(CubicPos pos) {
+        return this.getZone(pos.getMinX() + 16, pos.getMinZ() + 16);
     }
 
     public CoordinateState getLatLngCoordinate() {

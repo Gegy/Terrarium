@@ -14,19 +14,19 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class TerrariumHandshakeMessage implements IMessage {
-    private GenerationSettings settings;
+    private String settings;
 
     public TerrariumHandshakeMessage() {
     }
 
     public TerrariumHandshakeMessage(GenerationSettings settings) {
-        this.settings = settings;
+        this.settings = settings.serializeString();
     }
 
     @Override
     public void fromBytes(ByteBuf buf) {
         if (buf.readBoolean()) {
-            this.settings = GenerationSettings.deserialize(ByteBufUtils.readUTF8String(buf));
+            this.settings = ByteBufUtils.readUTF8String(buf);
         }
     }
 
@@ -34,7 +34,7 @@ public class TerrariumHandshakeMessage implements IMessage {
     public void toBytes(ByteBuf buf) {
         buf.writeBoolean(this.settings != null);
         if (this.settings != null) {
-            ByteBufUtils.writeUTF8String(buf, this.settings.serializeString());
+            ByteBufUtils.writeUTF8String(buf, this.settings);
         }
     }
 

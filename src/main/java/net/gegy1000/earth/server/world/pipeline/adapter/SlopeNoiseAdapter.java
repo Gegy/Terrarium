@@ -2,7 +2,7 @@ package net.gegy1000.earth.server.world.pipeline.adapter;
 
 import net.gegy1000.terrarium.server.world.pipeline.adapter.RegionAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.source.tile.UnsignedByteRasterTile;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.UnsignedByteRaster;
 import net.gegy1000.terrarium.server.world.region.RegionData;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -11,12 +11,12 @@ import net.minecraft.world.gen.NoiseGeneratorOctaves;
 import java.util.Random;
 
 public class SlopeNoiseAdapter implements RegionAdapter {
-    private final RegionComponentType<UnsignedByteRasterTile> slopeComponent;
+    private final RegionComponentType<UnsignedByteRaster> slopeComponent;
     private final double scale;
 
     private final NoiseGeneratorOctaves slopeNoise;
 
-    public SlopeNoiseAdapter(World world, RegionComponentType<UnsignedByteRasterTile> slopeComponent, double scale) {
+    public SlopeNoiseAdapter(World world, RegionComponentType<UnsignedByteRaster> slopeComponent, double scale) {
         this.slopeComponent = slopeComponent;
         this.scale = scale;
 
@@ -25,7 +25,7 @@ public class SlopeNoiseAdapter implements RegionAdapter {
 
     @Override
     public void adapt(RegionData data, int x, int z, int width, int height) {
-        UnsignedByteRasterTile slopeTile = data.getOrExcept(this.slopeComponent);
+        UnsignedByteRaster slopeTile = data.getOrExcept(this.slopeComponent);
 
         double[] noise = new double[width * height];
         double frequency = (1.0 / this.scale) * 0.7;

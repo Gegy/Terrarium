@@ -1,7 +1,7 @@
 package net.gegy1000.terrarium.server.util;
 
-import net.gegy1000.terrarium.server.world.chunk.PseudoRandomMap;
-import net.gegy1000.terrarium.server.world.pipeline.DataView;
+import net.gegy1000.cubicglue.util.PseudoRandomMap;
+import net.gegy1000.terrarium.server.world.pipeline.data.DataView;
 import net.minecraft.util.math.MathHelper;
 
 public class Voronoi {

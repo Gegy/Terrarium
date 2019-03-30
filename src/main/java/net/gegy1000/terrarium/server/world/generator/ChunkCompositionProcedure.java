@@ -1,5 +1,8 @@
 package net.gegy1000.terrarium.server.world.generator;
 
+import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
+import net.gegy1000.cubicglue.api.ChunkPrimeWriter;
+import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.util.math.BlockPos;
@@ -12,9 +15,9 @@ import javax.annotation.Nullable;
 import java.util.Set;
 
 public interface ChunkCompositionProcedure {
-    void composeSurface(IChunkGenerator generator, ChunkPrimer primer, RegionGenerationHandler regionHandler, int chunkX, int chunkZ);
+    void composeSurface(RegionGenerationHandler regionHandler, CubicPos pos, ChunkPrimeWriter writer);
 
-    void composeDecoration(IChunkGenerator generator, World world, RegionGenerationHandler regionHandler, int chunkX, int chunkZ);
+    void composeDecoration(RegionGenerationHandler regionHandler, CubicPos pos, ChunkPopulationWriter writer);
 
     Biome[] composeBiomes(RegionGenerationHandler regionHandler, int chunkX, int chunkZ);
 

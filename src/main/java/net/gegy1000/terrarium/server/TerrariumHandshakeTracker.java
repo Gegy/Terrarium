@@ -1,10 +1,12 @@
 package net.gegy1000.terrarium.server;
 
+import net.gegy1000.cubicglue.api.CubicWorldType;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumExternalCapProvider;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
+import net.gegy1000.terrarium.server.world.generator.customization.PropertyPrototype;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -27,20 +29,25 @@ public class TerrariumHandshakeTracker {
         FRIENDLY_PLAYERS.add(player);
     }
 
-    public static void provideSettings(World world, GenerationSettings settings) {
-        providedSettings = settings;
-
-        if (world == null || !(world.getWorldType() instanceof TerrariumWorldType)) {
+    public static void provideSettings(World world, String settings) {
+        if (world == null) {
             return;
         }
+
+        CubicWorldType worldType = CubicWorldType.unwrap(world.getWorldType());
+        if (!(worldType instanceof TerrariumWorldType)) {
+            return;
+        }
+
+        PropertyPrototype prototype = ((TerrariumWorldType) worldType).buildPropertyPrototype();
+        providedSettings = GenerationSettings.parse(prototype, settings);
 
         TerrariumExternalCapProvider external = world.getCapability(TerrariumCapabilities.externalProviderCapability, null);
         if (external == null) {
             return;
         }
 
-        TerrariumWorldType worldType = (TerrariumWorldType) world.getWorldType();
-        Collection<ICapabilityProvider> capabilities = worldType.createCapabilities(world, providedSettings);
+        Collection<ICapabilityProvider> capabilities = ((TerrariumWorldType) worldType).createCapabilities(world, providedSettings);
         for (ICapabilityProvider provider : capabilities) {
             external.addExternal(provider);
         }

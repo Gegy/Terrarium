@@ -21,7 +21,7 @@ gui.copy_box.copied.name=Copied to clipboard!
 
 category.terrarium.world.name=World Properties
 category.terrarium.features.name=Feature Properties
-category.terrarium.survival.name=Survival Properties
+category.terrarium.procedural_features.name=Procedural Feature Properties
 
 # World Properties
 
@@ -42,28 +42,40 @@ property.terrarium.beach_size.tooltip=Radius in blocks for beaches to be generat
 # Feature Properties
 
 property.terrarium.enable_decoration.name=Enable Decoration
-property.terrarium.enable_default_decoration.name=Enable Default Decoration
+property.terrarium.default_decoration.name=Default Decoration
+property.terrarium.default_spawning.name=Default Spawning
 property.terrarium.enable_buildings.name=Enable Buildings
 property.terrarium.enable_streets.name=Enable Streets
 
-property.terrarium.enable_default_features.name=Enable Default Features
-property.terrarium.enable_cave_generation.name=Enable Cave Generation
-property.terrarium.enable_resource_generation.name=Enable Resource Generation
-property.terrarium.enable_lake_generation.name=Enable Lake Generation
-property.terrarium.enable_lava_generation.name=Enable Lava Generation
+property.terrarium.default_features.name=Default Features
+property.terrarium.cave_generation.name=Cave Generation
+property.terrarium.resource_generation.name=Resource Generation
+property.terrarium.lake_generation.name=Lake Generation
+property.terrarium.lava_generation.name=Lava Generation
 property.terrarium.enable_mod_generation.name=Enable Modded Generators
 
-property.terrarium.enable_decoration.tooltip=If enabled, decorations such as plants and trees will be placed
-property.terrarium.enable_default_decoration.tooltip=If enabled, vanilla and modded decorations will be placed.
+property.terrarium.enable_decoration.tooltip=If enabled, custom Earth decorations such as plants and trees will be placed
+property.terrarium.default_decoration.tooltip=If enabled, all vanilla and modded decorations will be placed within the world
+property.terrarium.default_spawning.tooltip=If enabled, entities will be spawned in the world
 property.terrarium.enable_buildings.tooltip=If enabled, buildings from OpenStreetMap will be generated
 property.terrarium.enable_streets.tooltip=If enabled, streets from OpenStreetMap will be generated
 
-property.terrarium.enable_default_features.tooltip=If enabled, all vanilla and modded map features and structures will be generated
-property.terrarium.enable_cave_generation.tooltip=If enabled, caves and ravines will be generated randomly
-property.terrarium.enable_resource_generation.tooltip=If enabled, resources will be randomly generated throughout in the world
-property.terrarium.enable_lake_generation.tooltip=If enabled, water lakes will be generated randomly
-property.terrarium.enable_lava_generation.tooltip=If enabled, lava lakes will be generated randomly above and below ground
-property.terrarium.enable_mod_generation.tooltip=If enabled, modded generators will run. This can include both ores and structures.
+property.terrarium.default_features.tooltip=If enabled, all vanilla and modded map features and structures will be generated
+property.terrarium.cave_generation.tooltip=If enabled, caves and ravines will be generated randomly
+property.terrarium.resource_generation.tooltip=If enabled, resources will be randomly generated throughout in the world
+property.terrarium.lake_generation.tooltip=If enabled, water lakes will be generated randomly
+property.terrarium.lava_generation.tooltip=If enabled, lava lakes will be generated randomly above and below ground
+property.terrarium.enable_mod_generation.tooltip=If enabled, modded generators will run. This can include both ores and structures
+
+# Property Variants
+
+property.earth.feature_generation_none.name=None
+property.earth.feature_generation_vanilla.name=Vanilla
+property.earth.feature_generation_custom.name=Custom
+
+property.earth.feature_generation_none.desc=This feature will be disabled
+property.earth.feature_generation_vanilla.desc=This feature will be generated with the vanilla generator (mod compatibility; bad integration)
+property.earth.feature_generation_custom.desc=This feature will be generated with a custom generator (less mod compatibility; full integration)
 
 # Presets
 

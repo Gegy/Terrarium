@@ -119,7 +119,7 @@ public class LoadingStateHandler {
         }
     }
 
-    public static void countFailure() {
+    public static void recordFailure() {
         synchronized (LOCK) {
             failCount++;
         }
