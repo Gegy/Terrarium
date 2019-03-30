@@ -1,10 +1,10 @@
 package net.gegy1000.earth.client.gui;
 
+import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.client.gui.widget.map.PlaceSearchWidget;
 import net.gegy1000.earth.client.gui.widget.map.SlippyMapPoint;
 import net.gegy1000.earth.client.gui.widget.map.SlippyMapWidget;
 import net.gegy1000.earth.client.gui.widget.map.component.MarkerMapComponent;
-import net.gegy1000.earth.server.world.pipeline.source.GoogleGeocoder;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
@@ -47,7 +47,7 @@ public class EarthTeleportGui extends GuiScreen {
         this.markerComponent = new MarkerMapComponent(new SlippyMapPoint(this.latitude, this.longitude)).allowMovement();
         this.mapWidget.addComponent(this.markerComponent);
 
-        this.searchWidget = new PlaceSearchWidget(SEARCH_FIELD, 65, 25, 180, 20, new GoogleGeocoder(), this::handleSearch);
+        this.searchWidget = new PlaceSearchWidget(SEARCH_FIELD, 65, 25, 180, 20, TerrariumEarth.getPreferredGeocoder(), this::handleSearch);
     }
 
     private void handleSearch(double latitude, double longitude) {

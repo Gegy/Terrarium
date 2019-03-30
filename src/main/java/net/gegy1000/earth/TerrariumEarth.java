@@ -1,17 +1,22 @@
 package net.gegy1000.earth;
 
+import com.google.common.base.Strings;
 import net.gegy1000.earth.server.EarthDecorationEventHandler;
 import net.gegy1000.earth.server.ServerProxy;
 import net.gegy1000.earth.server.capability.EarthCapability;
 import net.gegy1000.earth.server.command.GeoTeleportCommand;
 import net.gegy1000.earth.server.command.GeoToolCommand;
+import net.gegy1000.earth.server.config.TerrariumEarthConfig;
 import net.gegy1000.earth.server.message.EarthMapGuiMessage;
 import net.gegy1000.earth.server.message.EarthPanoramaMessage;
 import net.gegy1000.earth.server.world.CoverDebugWorldType;
 import net.gegy1000.earth.server.world.EarthWorldType;
 import net.gegy1000.earth.server.world.pipeline.source.EarthRemoteData;
+import net.gegy1000.earth.server.world.pipeline.source.GoogleGeocoder;
+import net.gegy1000.earth.server.world.pipeline.source.NominatimGeocoder;
 import net.gegy1000.earth.server.world.pipeline.source.SrtmHeightSource;
 import net.gegy1000.terrarium.server.capability.BlankStorage;
+import net.gegy1000.terrarium.server.world.pipeline.source.Geocoder;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
@@ -90,5 +95,13 @@ public class TerrariumEarth {
     public static void onServerStarting(FMLServerStartingEvent event) {
         event.registerServerCommand(new GeoTeleportCommand());
         event.registerServerCommand(new GeoToolCommand());
+    }
+
+    public static Geocoder getPreferredGeocoder() {
+        if (TerrariumEarthConfig.osmGeocoder || Strings.isNullOrEmpty(EarthRemoteData.info.getGeocoderKey())) {
+            return new NominatimGeocoder();
+        } else {
+            return new GoogleGeocoder();
+        }
     }
 }

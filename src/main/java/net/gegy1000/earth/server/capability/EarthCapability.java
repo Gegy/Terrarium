@@ -1,7 +1,6 @@
 package net.gegy1000.earth.server.capability;
 
 import net.gegy1000.earth.TerrariumEarth;
-import net.gegy1000.earth.server.world.pipeline.source.GoogleGeocoder;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.pipeline.source.Geocoder;
 import net.minecraft.util.EnumFacing;
@@ -30,7 +29,7 @@ public interface EarthCapability extends ICapabilityProvider {
 
         public Impl(CoordinateState geoCoordinate) {
             this.geoCoordinate = geoCoordinate;
-            this.geocoder = new GoogleGeocoder();
+            this.geocoder = TerrariumEarth.getPreferredGeocoder();
         }
 
         @Override

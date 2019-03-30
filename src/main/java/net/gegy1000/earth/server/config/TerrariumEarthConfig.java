@@ -16,6 +16,11 @@ public class TerrariumEarthConfig {
     @Config.RangeInt(min = 0, max = 4)
     public static int streetViewZoom = 2;
 
+    @Config.Name("osm_geocoder")
+    @Config.LangKey("config.earth.osm_geocoder")
+    @Config.Comment("If true, the Nominatim OpenStreetMap Geocoder will be used instead of Google's")
+    public static boolean osmGeocoder = false;
+
     @SubscribeEvent
     public static void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent event) {
         if (event.getModID().equals(TerrariumEarth.MODID)) {

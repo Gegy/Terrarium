@@ -96,3 +96,5 @@ status.earth.panorama.immersed=Immersed in located panorama!
 config.earth.street_view_zoom=Street View Zoom
 config.earth.street_view_zoom.tooltip=The zoom level to load street view images at. Higher values means higher resolution
 
+config.earth.osm_geocoder=Use OpenStreetMap Geocoder
+config.earth.osm_geocoder.tooltip=If true, the Nominatim OpenStreetMap Geocoder will be used instead of Google's
