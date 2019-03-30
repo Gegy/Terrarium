@@ -171,6 +171,9 @@ public class EarthWorldType extends TerrariumWorldType {
     @Override
     public boolean handleSlimeSpawnReduction(Random random, World world) {
         TerrariumWorldData worldData = this.getWorldData(world);
+        if (worldData == null) {
+            return false;
+        }
         return worldData.getSettings().getInteger(HEIGHT_ORIGIN) < 40;
     }
 

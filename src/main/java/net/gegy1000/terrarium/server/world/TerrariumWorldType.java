@@ -27,6 +27,7 @@ import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
@@ -122,12 +123,9 @@ public abstract class TerrariumWorldType extends WorldType {
         return false;
     }
 
+    @Nullable
     public final TerrariumWorldData getWorldData(World world) {
-        TerrariumWorldData worldData = world.getCapability(TerrariumCapabilities.worldDataCapability, null);
-        if (worldData == null) {
-            throw new IllegalStateException("Terrarium world capability not yet present");
-        }
-        return worldData;
+        return world.getCapability(TerrariumCapabilities.worldDataCapability, null);
     }
 
     public ResourceLocation getIdentifier() {
