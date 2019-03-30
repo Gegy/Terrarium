@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.world.pipeline.source.Geocoder;
-import net.minecraft.util.JsonUtils;
 
 import javax.vecmath.Vector2d;
 import java.io.BufferedInputStream;
@@ -38,9 +37,13 @@ public class NominatimGeocoder implements Geocoder {
             for (JsonElement element : root) {
                 JsonObject resultRoot = element.getAsJsonObject();
                 if (resultRoot.has("lat") && resultRoot.has("lon")) {
-                    double latitude = JsonUtils.getFloat(resultRoot, "lat");
-                    double longitude = JsonUtils.getFloat(resultRoot, "lon");
-                    return new Vector2d(latitude, longitude);
+                    try {
+                        double latitude = Double.parseDouble(resultRoot.get("lat").getAsString());
+                        double longitude = Double.parseDouble(resultRoot.get("lon").getAsString());
+                        return new Vector2d(latitude, longitude);
+                    } catch (NumberFormatException e) {
+                        Terrarium.LOGGER.error("Received malformed Nominatim latitude/longitude", e);
+                    }
                 }
             }
 
@@ -52,6 +55,6 @@ public class NominatimGeocoder implements Geocoder {
 
     @Override
     public String[] suggest(String place) {
-        return new String[0];
+        return null;
     }
 }

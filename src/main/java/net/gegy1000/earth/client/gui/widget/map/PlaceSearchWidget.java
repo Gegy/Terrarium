@@ -47,9 +47,13 @@ public class PlaceSearchWidget extends GuiTextField {
             this.suggestions.clear();
             try {
                 String[] result = this.queriedSuggestions.get();
-                this.suggestions.addAll(Arrays.asList(result).subList(0, Math.min(result.length, SUGGESTION_COUNT)));
-                if (this.suggestions.isEmpty()) {
-                    this.state = State.NOT_FOUND;
+                if (result != null) {
+                    this.suggestions.addAll(Arrays.asList(result).subList(0, Math.min(result.length, SUGGESTION_COUNT)));
+                    if (this.suggestions.isEmpty()) {
+                        this.state = State.NOT_FOUND;
+                    }
+                } else {
+                    this.state = State.OK;
                 }
                 this.queriedSuggestions = null;
             } catch (InterruptedException | ExecutionException e) {
