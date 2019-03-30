@@ -13,7 +13,7 @@ buildscript {
 
 apply plugin: "net.minecraftforge.gradle.forge"
 
-def mod_file = getModFile()
+def mod_file = getModFile("net.gegy1000.terrarium.Terrarium")
 version = getModField("VERSION", mod_file)
 group = "net.gegy1000"
 archivesBaseName = "terrarium"
@@ -94,21 +94,8 @@ processResources {
   }
 }
 
-String getModFile() {
-  String path = ""
-  FileTree tree = fileTree(dir: 'src/main/java')
-  tree.include '**/*.java'
-  tree.visit { element ->
-    if (element.file.isFile()) {
-      element.file.eachLine { String s ->
-        s = s.trim()
-        if (s.startsWith("@Mod")) {
-          path = "src/main/java/$element.relativePath"
-        }
-      }
-    }
-  }
-  return path
+String getModFile(String fq_name) {
+  return "src/main/java/${fq_name.replace('/', '.')}.java"
 }
 
 String getModField(String type, String mod_file) {
