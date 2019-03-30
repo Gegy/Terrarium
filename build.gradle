@@ -95,7 +95,7 @@ processResources {
 }
 
 String getModFile(String fq_name) {
-  return "src/main/java/${fq_name.replace('/', '.')}.java"
+  return "src/main/java/${fq_name.replace('.', '/')}.java"
 }
 
 String getModField(String type, String mod_file) {
