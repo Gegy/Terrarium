@@ -1,11 +1,11 @@
 package net.gegy1000.earth.client.gui;
 
+import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.client.gui.widget.map.PlaceSearchWidget;
 import net.gegy1000.earth.client.gui.widget.map.SlippyMapPoint;
 import net.gegy1000.earth.client.gui.widget.map.SlippyMapWidget;
 import net.gegy1000.earth.client.gui.widget.map.component.MarkerMapComponent;
 import net.gegy1000.earth.server.world.EarthWorldType;
-import net.gegy1000.earth.server.world.pipeline.source.GoogleGeocoder;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -46,7 +46,7 @@ public class SelectEarthSpawnpointGui extends GuiScreen {
         this.markerComponent = new MarkerMapComponent(new SlippyMapPoint(latitude, longitude)).allowMovement();
         this.mapWidget.addComponent(this.markerComponent);
 
-        this.searchWidget = new PlaceSearchWidget(SEARCH_FIELD, 25, 25, 200, 20, new GoogleGeocoder(), this::handleSearch);
+        this.searchWidget = new PlaceSearchWidget(SEARCH_FIELD, 25, 25, 200, 20, TerrariumEarth.getPreferredGeocoder(), this::handleSearch);
         this.searchWidget.setFocused(true);
 
         this.addButton(new GuiButton(SELECT_BUTTON, this.width / 2 - 154, this.height - 28, 150, 20, I18n.format("gui.done")));
