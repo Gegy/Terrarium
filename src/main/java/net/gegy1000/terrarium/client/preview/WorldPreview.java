@@ -76,6 +76,9 @@ public class WorldPreview implements IBlockAccess {
         try {
             this.world = new PreviewDummyWorld(this.worldType, settings);
             this.worldData = TerrariumWorldData.get(this.world);
+            if (this.worldData == null) {
+                throw new IllegalStateException("Terrarium World Capability not present on preview world");
+            }
         } finally {
             TerrariumWorldData.PREVIEW_WORLD.set(false);
         }

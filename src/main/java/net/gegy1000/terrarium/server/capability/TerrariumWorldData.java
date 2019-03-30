@@ -12,15 +12,14 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 
+import javax.annotation.Nullable;
+
 public interface TerrariumWorldData extends ICapabilityProvider {
     ThreadLocal<Boolean> PREVIEW_WORLD = ThreadLocal.withInitial(() -> false);
 
+    @Nullable
     static TerrariumWorldData get(World world) {
-        TerrariumWorldData worldData = world.getCapability(TerrariumCapabilities.worldDataCapability, null);
-        if (worldData == null) {
-            throw new IllegalStateException("Terrarium world capability not yet present");
-        }
-        return worldData;
+        return world.getCapability(TerrariumCapabilities.worldDataCapability, null);
     }
 
     GenerationSettings getSettings();
