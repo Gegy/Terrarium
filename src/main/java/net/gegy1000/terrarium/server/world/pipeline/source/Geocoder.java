@@ -1,5 +1,6 @@
 package net.gegy1000.terrarium.server.world.pipeline.source;
 
+import javax.annotation.Nullable;
 import javax.vecmath.Vector2d;
 import java.io.IOException;
 
@@ -12,11 +13,12 @@ public interface Geocoder {
 
         @Override
         public String[] suggest(String place) {
-            return new String[0];
+            return null;
         }
     };
 
     Vector2d get(String place) throws IOException;
 
+    @Nullable
     String[] suggest(String place) throws IOException;
 }
