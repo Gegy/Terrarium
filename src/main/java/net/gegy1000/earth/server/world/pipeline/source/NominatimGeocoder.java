@@ -16,13 +16,14 @@ import java.net.URL;
 import java.net.URLEncoder;
 
 public class NominatimGeocoder implements Geocoder {
-    private static final String GEOCODER_ADDRESS = "https://nominatim.openstreetmap.org/search/%s?format=jsonv2&limit=2";
+    private static final String GEOCODER_ADDRESS = "https://nominatim.openstreetmap.org/search/%s?format=jsonv2&limit=4";
 
     private static final JsonParser JSON_PARSER = new JsonParser();
 
     @Override
     public Vector2d get(String place) throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) new URL(String.format(GEOCODER_ADDRESS, URLEncoder.encode(place, "UTF-8"))).openConnection();
+        String encodedPlace = URLEncoder.encode(place, "UTF-8").replace("+", "%20");
+        HttpURLConnection connection = (HttpURLConnection) new URL(String.format(GEOCODER_ADDRESS, encodedPlace)).openConnection();
         connection.setRequestMethod("GET");
 
         connection.setRequestProperty("User-Agent", "terrarium-earth");
