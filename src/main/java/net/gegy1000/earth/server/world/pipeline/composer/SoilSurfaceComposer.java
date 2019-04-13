@@ -78,6 +78,9 @@ public class SoilSurfaceComposer implements SurfaceComposer {
         int minY = pos.getMinY();
         int maxY = Math.min(pos.getMaxY(), height);
 
+        int minX = pos.getMinX();
+        int minZ = pos.getMinZ();
+
         int depth = -1;
         int soilDepth = Math.max((int) (depthNoise / 3.0 + 3.0 + this.coverMap.nextDouble() * 0.25), 1);
         soilDepth = maxY - (height - soilDepth);
@@ -97,7 +100,7 @@ public class SoilSurfaceComposer implements SurfaceComposer {
                     depth = soilDepth + 1;
                 }
                 if (depth-- > 0) {
-                    writer.set(localX, localY, localZ, horizon.getState(localX, localZ, height - localY, this.random));
+                    writer.set(localX, localY, localZ, horizon.getState(localX + minX, localZ + minZ, height - localY, this.random));
                 } else {
                     break;
                 }

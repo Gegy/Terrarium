@@ -47,7 +47,19 @@ public final class SoilProducer {
             case HISTOSOLS:
             case PHAEOZEMS:
             case UMBRISOLS:
+            case ANDOSOLS:
+            case VERTISOLS:
                 return SoilConfigs.LOAMY_SOIL;
+            case ACRISOLS:
+            case ALISOLS:
+            case PLANOSOLS:
+            case SOLONETZ:
+            case GLEYSOLS:
+            case FLUVISOLS:
+            case LIXISOLS:
+            case LUVISOLS:
+            case NITISOLS:
+                return SoilConfigs.SILTY_SOIL;
             case CRYOSOLS:
             case FERRALSOLS:
             case KASTANOZEMS:
@@ -55,35 +67,15 @@ public final class SoilProducer {
             case GYPSISOLS:
             case SOLONCHAKS:
             case STAGNOSOLS:
-                return SoilConfigs.GRAVELLY;
-            case ACRISOLS:
-            case ALISOLS:
-                return SoilConfigs.ACRISOL;
-            case PLANOSOLS:
-            case SOLONETZ:
-                return SoilConfigs.COARSE_AND_CLAY;
+                return SoilConfigs.GRAVEL;
             case ARENOSOLS:
             case CALCISOLS:
-                return SoilConfigs.SANDY;
-            case ANDOSOLS:
-            case VERTISOLS:
-                return SoilConfigs.BLACK_SOIL;
+            case DURISOLS:
+                return SoilConfigs.SANDY_SOIL;
             case ALBELUVISOLS:
                 return SoilConfigs.ALBELUVISOL;
-            case DURISOLS:
-                return SoilConfigs.SANDY_DIRT;
-            case FLUVISOLS:
-                return SoilConfigs.SILTY_SOIL;
-            case GLEYSOLS:
-                return SoilConfigs.CLAY;
             case LEPTOSOLS:
                 return SoilConfigs.LEPTOSOL;
-            case LIXISOLS:
-                return SoilConfigs.LIXISOL;
-            case LUVISOLS:
-                return SoilConfigs.LUVISOL;
-            case NITISOLS:
-                return SoilConfigs.NITISOL;
             case PLINTHOSOLS:
                 return SoilConfigs.PLINTHOSOL;
             case PODZOLS:

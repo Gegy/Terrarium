@@ -16,6 +16,7 @@ import net.gegy1000.earth.server.world.pipeline.adapter.WaterCarveAdapter;
 import net.gegy1000.earth.server.world.pipeline.adapter.WaterLevelingAdapter;
 import net.gegy1000.earth.server.world.pipeline.adapter.WorldEdgeAdapter;
 import net.gegy1000.earth.server.world.pipeline.composer.BoulderDecorationComposer;
+import net.gegy1000.earth.server.world.pipeline.composer.EarthBiomeComposer;
 import net.gegy1000.earth.server.world.pipeline.composer.SoilSurfaceComposer;
 import net.gegy1000.earth.server.world.pipeline.composer.WaterFillSurfaceComposer;
 import net.gegy1000.earth.server.world.pipeline.data.ClimateSampler;
@@ -58,7 +59,6 @@ import net.gegy1000.terrarium.server.world.generator.customization.widget.Toggle
 import net.gegy1000.terrarium.server.world.pipeline.TerrariumDataProvider;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.HeightTransformAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.composer.biome.CoverBiomeComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.CoverDecorationComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.VanillaEntitySpawnComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.structure.VanillaStructureComposer;
@@ -72,7 +72,6 @@ import net.gegy1000.terrarium.server.world.pipeline.data.function.InterpolationS
 import net.gegy1000.terrarium.server.world.pipeline.data.function.RasterSourceSampler;
 import net.gegy1000.terrarium.server.world.pipeline.data.function.SlopeProducer;
 import net.gegy1000.terrarium.server.world.pipeline.data.function.VoronoiScaler;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.ByteRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.CoverRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.FloatRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
@@ -228,7 +227,7 @@ public class EarthWorldType extends TerrariumWorldType {
                     .withSurfaceComposer(new HeightmapSurfaceComposer(RegionComponentType.HEIGHT, Blocks.STONE.getDefaultState()))
                     .withSurfaceComposer(new WaterFillSurfaceComposer(RegionComponentType.HEIGHT, EarthComponentTypes.WATER, Blocks.WATER.getDefaultState()))
                     .withSurfaceComposer(new SoilSurfaceComposer(this.world, RegionComponentType.HEIGHT, EarthComponentTypes.SOIL, Blocks.STONE.getDefaultState()))
-                    .withBiomeComposer(new CoverBiomeComposer(RegionComponentType.COVER, coverTypes))
+                    .withBiomeComposer(new EarthBiomeComposer(this.world, EarthComponentTypes.AVERAGE_TEMPERATURE, EarthComponentTypes.ANNUAL_RAINFALL))
                     .withSpawnPosition(new Coordinate(this.earthCoordinates, this.settings.getDouble(SPAWN_LATITUDE), this.settings.getDouble(SPAWN_LONGITUDE)));
 
             if (!preview && this.settings.getBoolean(ENABLE_DECORATION)) {

@@ -1,12 +1,11 @@
 package net.gegy1000.earth.server.capability;
 
 import net.gegy1000.earth.TerrariumEarth;
-import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.source.Geocoder;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
+import net.gegy1000.terrarium.server.world.pipeline.source.Geocoder;
 import net.gegy1000.terrarium.server.world.region.GenerationRegion;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.util.EnumFacing;
@@ -128,7 +127,7 @@ public interface EarthCapability extends ICapabilityProvider {
         @Nullable
         @Override
         public BlockPos estimateSurface(World world, int blockX, int blockZ) {
-            TerrariumWorldData worldData = world.getCapability(TerrariumCapabilities.worldDataCapability, null);
+            TerrariumWorldData worldData = TerrariumWorldData.get(world);
             if (worldData == null) {
                 return null;
             }

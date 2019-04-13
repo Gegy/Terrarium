@@ -18,6 +18,7 @@ import net.gegy1000.earth.server.world.pipeline.source.SrtmHeightSource;
 import net.gegy1000.earth.server.world.pipeline.source.WorldClimateDataset;
 import net.gegy1000.terrarium.server.capability.VoidStorage;
 import net.gegy1000.terrarium.server.world.pipeline.source.Geocoder;
+import net.minecraft.launchwrapper.Launch;
 import net.minecraft.world.WorldType;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
@@ -64,8 +65,12 @@ public class TerrariumEarth {
     @CapabilityInject(EarthCapability.class)
     public static Capability<EarthCapability> earthCap;
 
+    private static boolean deobfuscatedEnvironment;
+
     @Mod.EventHandler
     public static void onPreInit(FMLPreInitializationEvent event) {
+        deobfuscatedEnvironment = (boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
+
         CapabilityManager.INSTANCE.register(EarthCapability.class, new VoidStorage<>(), EarthCapability.None::new);
         PROXY.onPreInit();
 
@@ -129,5 +134,9 @@ public class TerrariumEarth {
         } else {
             return new GoogleGeocoder();
         }
+    }
+
+    public static boolean isDeobfuscatedEnvironment() {
+        return deobfuscatedEnvironment;
     }
 }

@@ -1,5 +1,9 @@
 package net.gegy1000.terrarium.server.world.region;
 
+import com.google.common.base.Preconditions;
+import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.RasterData;
+
 public class GenerationRegion {
     public static final int BUFFER = 16;
 
@@ -32,5 +36,11 @@ public class GenerationRegion {
 
     public RegionData getData() {
         return this.data;
+    }
+
+    public <T extends RasterData<V>, V> V sample(RegionComponentType<T> componentType, int x, int z) {
+        T raster = this.data.get(componentType);
+        Preconditions.checkNotNull(raster, "raster not present");
+        return raster.get(x & 0xFF, z & 0xFF);
     }
 }
