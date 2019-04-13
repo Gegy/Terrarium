@@ -2,7 +2,7 @@ package net.gegy1000.earth.server.world.pipeline.composer;
 
 import net.gegy1000.cubicglue.util.PseudoRandomMap;
 import net.gegy1000.earth.server.world.biome.BiomeClassification;
-import net.gegy1000.earth.server.world.biome.BiomeMatcher;
+import net.gegy1000.earth.server.world.biome.BiomeClassifier;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.composer.biome.BiomeComposer;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.FloatRaster;
@@ -52,15 +52,15 @@ public final class EarthBiomeComposer implements BiomeComposer {
 
                 double rainfallNoise = this.noiseOffset(this.rainfallNoise, 100.0);
                 short rainfall = (short) (rainfallRaster.getShort(localX, localZ) + rainfallNoise);
-                classification.classifyRainfall(rainfall);
+                BiomeClassifier.classifyRainfall(classification, rainfall);
 
                 this.temperatureNoise.initPosSeed(globalX + localX, globalZ + localZ);
 
                 double temperatureNoise = this.noiseOffset(this.temperatureNoise, 1.0);
                 float temperature = (float) (temperatureRaster.getFloat(localX, localZ) + temperatureNoise);
-                classification.classifyTemperature(temperature);
+                BiomeClassifier.classifyTemperature(classification, temperature);
 
-                this.biomeBuffer[localX + localZ * 16] = BiomeMatcher.match(classification);
+                this.biomeBuffer[localX + localZ * 16] = classification.match();
 
                 classification.release();
             }

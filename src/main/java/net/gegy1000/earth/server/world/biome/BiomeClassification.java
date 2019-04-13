@@ -1,18 +1,39 @@
 package net.gegy1000.earth.server.world.biome;
 
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.gegy1000.earth.TerrariumEarth;
+import net.minecraft.init.Biomes;
+import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.BiomeDictionary;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class BiomeClassification {
+    private static Set<Biome> EXCLUDED_BIOMES = Stream.of(
+            BiomeDictionary.Type.END,
+            BiomeDictionary.Type.NETHER,
+            BiomeDictionary.Type.MAGICAL,
+            BiomeDictionary.Type.VOID,
+            BiomeDictionary.Type.SPOOKY,
+            BiomeDictionary.Type.HILLS,
+            BiomeDictionary.Type.MOUNTAIN
+    )
+            .flatMap(t -> BiomeDictionary.getBiomes(t).stream())
+            .collect(Collectors.toSet());
+
     private static final int POOL_SIZE = 16;
     private static final LinkedList<BiomeClassification> POOL = new LinkedList<>();
 
-    private final List<BiomeDictionary.Type> include = new ArrayList<>();
-    private final List<BiomeDictionary.Type> exclude = new ArrayList<>();
+    private final Object2IntOpenHashMap<Biome> frequencies = new Object2IntOpenHashMap<>();
+    private final Set<Biome> exclude = new HashSet<>(EXCLUDED_BIOMES);
+
+    private Biome matched = Biomes.PLAINS;
+    private int matchedFrequency;
 
     public static BiomeClassification take() {
         if (POOL.isEmpty()) {
@@ -33,56 +54,55 @@ public final class BiomeClassification {
     }
 
     void include(BiomeDictionary.Type type) {
-        this.include.add(type);
-        this.exclude.remove(type);
+        for (Biome biome : BiomeDictionary.getBiomes(type)) {
+            if (this.exclude.contains(biome)) {
+                continue;
+            }
+            int frequency = this.frequencies.addTo(biome, 1) + 1;
+            if (frequency > this.matchedFrequency) {
+                this.matched = biome;
+                this.matchedFrequency = frequency;
+            }
+        }
     }
 
     void exclude(BiomeDictionary.Type type) {
-        this.exclude.add(type);
-        this.include.remove(type);
+        for (Biome biome : BiomeDictionary.getBiomes(type)) {
+            int frequency = this.frequencies.removeInt(biome);
+            if (frequency >= this.matchedFrequency) {
+                this.recomputeMatched();
+            }
+
+            this.exclude.add(biome);
+        }
     }
 
-    List<BiomeDictionary.Type> getInclude() {
-        return this.include;
-    }
+    private void recomputeMatched() {
+        this.matchedFrequency = 0;
+        this.matched = Biomes.PLAINS;
 
-    List<BiomeDictionary.Type> getExclude() {
-        return this.exclude;
+        for (Object2IntMap.Entry<Biome> entry : this.frequencies.object2IntEntrySet()) {
+            int frequency = entry.getIntValue();
+            if (frequency > this.matchedFrequency) {
+                this.matched = Biomes.PLAINS;
+                this.matchedFrequency = frequency;
+            }
+        }
     }
 
     public void release() {
-        this.include.clear();
+        this.frequencies.clear();
+
         this.exclude.clear();
+        this.exclude.addAll(EXCLUDED_BIOMES);
+
+        this.matched = Biomes.PLAINS;
+        this.matchedFrequency = 0;
+
         returnToPool(this);
     }
 
-    @Override
-    public String toString() {
-        return "BiomeClassification{" + this.include + "}";
-    }
-
-    public void classifyRainfall(short rainfall) {
-        this.exclude(BiomeDictionary.Type.WET);
-        this.exclude(BiomeDictionary.Type.DRY);
-
-        if (rainfall < 250) {
-            this.include(BiomeDictionary.Type.DRY);
-        } else if (rainfall > 1500) {
-            this.include(BiomeDictionary.Type.WET);
-        }
-    }
-
-    public void classifyTemperature(float temperature) {
-        this.exclude(BiomeDictionary.Type.COLD);
-        this.exclude(BiomeDictionary.Type.HOT);
-
-        if (temperature < 12.0F) {
-            if (temperature < 0.0F) {
-                this.include(BiomeDictionary.Type.SNOWY);
-            }
-            this.include(BiomeDictionary.Type.COLD);
-        } else if (temperature > 22.0F) {
-            this.include(BiomeDictionary.Type.HOT);
-        }
+    public Biome match() {
+        return this.matched;
     }
 }
