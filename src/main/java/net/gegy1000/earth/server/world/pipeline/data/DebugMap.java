@@ -1,10 +1,10 @@
 package net.gegy1000.earth.server.world.pipeline.data;
 
 import com.google.common.base.CaseFormat;
-import net.gegy1000.earth.server.world.cover.EarthCoverTypes;
-import net.gegy1000.earth.server.world.cover.LatitudinalZone;
-import net.gegy1000.terrarium.server.world.cover.TerrariumCoverTypes;
+import net.gegy1000.earth.server.world.cover.ClimaticZone;
+import net.gegy1000.earth.server.world.cover.CoverClassification;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
+import net.gegy1000.terrarium.server.world.cover.TerrariumCoverTypes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +34,7 @@ public class DebugMap {
             }
         }
 
-        return new DebugCover(TerrariumCoverTypes.DEBUG, LatitudinalZone.TEMPERATE);
+        return new DebugCover(TerrariumCoverTypes.DEBUG, ClimaticZone.TEMPERATE);
     }
 
     public static String[] getSign(int x, int z) {
@@ -83,12 +83,12 @@ public class DebugMap {
     }
 
     private static DebugCover getGridCover(int gridX, int gridZ) {
-        int effectiveGridX = gridX + EarthCoverTypes.Classification.TYPES.length / 2;
-        int effectiveGridZ = gridZ + LatitudinalZone.ZONES.length / 2;
+        int effectiveGridX = gridX + CoverClassification.TYPES.length / 2;
+        int effectiveGridZ = gridZ + ClimaticZone.ZONES.length / 2;
 
-        if (effectiveGridX >= 0 && effectiveGridX < EarthCoverTypes.Classification.TYPES.length && effectiveGridZ >= 0 && effectiveGridZ < LatitudinalZone.ZONES.length) {
-            CoverType coverType = EarthCoverTypes.Classification.TYPES[effectiveGridX].getCoverType();
-            LatitudinalZone zone = LatitudinalZone.ZONES[effectiveGridZ];
+        if (effectiveGridX >= 0 && effectiveGridX < CoverClassification.TYPES.length && effectiveGridZ >= 0 && effectiveGridZ < ClimaticZone.ZONES.length) {
+            CoverType coverType = CoverClassification.TYPES[effectiveGridX].getCoverType();
+            ClimaticZone zone = ClimaticZone.ZONES[effectiveGridZ];
             return new DebugCover(coverType, zone);
         }
 
@@ -97,9 +97,9 @@ public class DebugMap {
 
     public static class DebugCover {
         private final CoverType coverType;
-        private final LatitudinalZone zone;
+        private final ClimaticZone zone;
 
-        public DebugCover(CoverType coverType, LatitudinalZone zone) {
+        public DebugCover(CoverType coverType, ClimaticZone zone) {
             this.coverType = coverType;
             this.zone = zone;
         }
@@ -108,7 +108,7 @@ public class DebugMap {
             return this.coverType;
         }
 
-        public LatitudinalZone getZone() {
+        public ClimaticZone getZone() {
             return this.zone;
         }
     }

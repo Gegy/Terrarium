@@ -77,7 +77,8 @@ public class IrrigatedCropsCover extends EarthCoverType {
             this.cropSelector.initWorldGenSeed(context.getSeed());
         }
 
-        @Override
+        // TODO: Reimplement
+        /*@Override
         public void populateBlockCover(Random random, int originX, int originZ, IBlockState[] coverBlockBuffer) {
             this.iterateChunk((localX, localZ) -> {
                 int globalX = originX + localX;
@@ -92,7 +93,7 @@ public class IrrigatedCropsCover extends EarthCoverType {
                     coverBlockBuffer[index] = FARMLAND;
                 }
             });
-        }
+        }*/
 
         @Override
         public void decorate(CubicPos chunkPos, ChunkPrimeWriter writer, Random random) {

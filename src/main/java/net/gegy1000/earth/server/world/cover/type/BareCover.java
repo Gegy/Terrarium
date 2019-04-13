@@ -8,25 +8,16 @@ import net.gegy1000.earth.server.world.cover.EarthCoverType;
 import net.gegy1000.earth.server.world.cover.EarthDecorationGenerator;
 import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectWeightedLayer;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.UnsignedByteRaster;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Biomes;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.gen.layer.GenLayer;
-import net.minecraft.world.gen.layer.GenLayerFuzzyZoom;
-import net.minecraft.world.gen.layer.GenLayerVoronoiZoom;
 
 import java.awt.Color;
 import java.util.Random;
 
 public class BareCover extends EarthCoverType {
-    private static final int LAYER_DIRT = 0;
-    private static final int LAYER_GRAVEL = 1;
-    private static final int LAYER_SAND = 2;
-
     public BareCover() {
         super(new Color(0xFFF5D6));
     }
@@ -47,32 +38,8 @@ public class BareCover extends EarthCoverType {
     }
 
     private static class Surface extends EarthSurfaceGenerator {
-        private final GenLayer coverSelector;
-
         private Surface(EarthCoverContext context, CoverType<EarthCoverContext> coverType) {
             super(context, coverType);
-
-            GenLayer layer = new SelectWeightedLayer(1,
-                    new SelectWeightedLayer.Entry(LAYER_GRAVEL, 2),
-                    new SelectWeightedLayer.Entry(LAYER_DIRT, 10),
-                    new SelectWeightedLayer.Entry(LAYER_SAND, 5));
-            layer = new GenLayerVoronoiZoom(1000, layer);
-            layer = new GenLayerFuzzyZoom(2000, layer);
-
-            this.coverSelector = layer;
-            this.coverSelector.initWorldGenSeed(context.getSeed());
-        }
-
-        @Override
-        public void populateBlockCover(Random random, int originX, int originZ, IBlockState[] coverBlockBuffer) {
-            Provider blockProvider = new Provider(this.context.getSlopeRaster());
-            this.coverFromLayer(coverBlockBuffer, originX, originZ, this.coverSelector, blockProvider);
-        }
-
-        @Override
-        public void populateBlockFiller(Random random, int originX, int originZ, IBlockState[] fillerBlockBuffer) {
-            Provider blockProvider = new Provider(this.context.getSlopeRaster());
-            this.coverFromLayer(fillerBlockBuffer, originX, originZ, this.coverSelector, blockProvider);
         }
 
         @Override
@@ -86,27 +53,6 @@ public class BareCover extends EarthCoverType {
                     writer.set(localX, y + 1, localZ, DEAD_BUSH);
                 }
             });
-        }
-
-        private class Provider implements BlockProvider {
-            private final UnsignedByteRaster slopeRaster;
-
-            private Provider(UnsignedByteRaster slopeRaster) {
-                this.slopeRaster = slopeRaster;
-            }
-
-            @Override
-            public IBlockState provideBlock(int sampledValue, int localX, int localZ) {
-                int slope = this.slopeRaster.getByte(localX, localZ);
-                switch (sampledValue) {
-                    case LAYER_GRAVEL:
-                        return slope >= MOUNTAINOUS_SLOPE ? COBBLESTONE : GRAVEL;
-                    case LAYER_SAND:
-                        return slope >= MOUNTAINOUS_SLOPE ? SANDSTONE : SAND;
-                    default:
-                        return slope >= MOUNTAINOUS_SLOPE ? HARDENED_CLAY : SAND;
-                }
-            }
         }
     }
 

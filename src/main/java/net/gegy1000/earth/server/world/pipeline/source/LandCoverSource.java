@@ -1,6 +1,7 @@
 package net.gegy1000.earth.server.world.pipeline.source;
 
 import net.gegy1000.earth.TerrariumEarth;
+import net.gegy1000.earth.server.world.cover.CoverClassification;
 import net.gegy1000.earth.server.world.cover.EarthCoverTypes;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
@@ -97,7 +98,7 @@ public class LandCoverSource extends TiledDataSource<CoverRaster> {
             for (int y = 0; y < TILE_SIZE; y++) {
                 for (int x = 0; x < TILE_SIZE; x++) {
                     byte id = buffer[x + y * TILE_SIZE];
-                    cover[x + y * TILE_SIZE] = EarthCoverTypes.Classification.get(id).getCoverType();
+                    cover[x + y * TILE_SIZE] = CoverClassification.get(id).getCoverType();
                 }
             }
 

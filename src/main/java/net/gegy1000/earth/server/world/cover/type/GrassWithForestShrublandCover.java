@@ -3,18 +3,15 @@ package net.gegy1000.earth.server.world.cover.type;
 import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
 import net.gegy1000.cubicglue.api.ChunkPrimeWriter;
 import net.gegy1000.cubicglue.util.CubicPos;
+import net.gegy1000.earth.server.world.cover.ClimaticZone;
 import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthCoverType;
 import net.gegy1000.earth.server.world.cover.EarthDecorationGenerator;
 import net.gegy1000.earth.server.world.cover.EarthSurfaceGenerator;
-import net.gegy1000.earth.server.world.cover.LatitudinalZone;
 import net.gegy1000.terrarium.server.world.cover.CoverBiomeSelectors;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.cover.generator.layer.ReplaceRandomLayer;
-import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectWeightedLayer;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectionSeedLayer;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.layer.GenLayer;
@@ -25,10 +22,6 @@ import java.awt.Color;
 import java.util.Random;
 
 public class GrassWithForestShrublandCover extends EarthCoverType {
-    private static final int LAYER_GRASS = 0;
-    private static final int LAYER_DIRT = 1;
-    private static final int LAYER_PODZOL = 2;
-
     public GrassWithForestShrublandCover() {
         super(new Color(0xBD9500));
     }
@@ -49,21 +42,10 @@ public class GrassWithForestShrublandCover extends EarthCoverType {
     }
 
     private static class Surface extends EarthSurfaceGenerator {
-        private final GenLayer coverSelector;
         private final GenLayer grassSelector;
 
         private Surface(EarthCoverContext context, CoverType<EarthCoverContext> coverType) {
             super(context, coverType);
-
-            GenLayer cover = new SelectWeightedLayer(1,
-                    new SelectWeightedLayer.Entry(LAYER_GRASS, 2),
-                    new SelectWeightedLayer.Entry(LAYER_DIRT, 8));
-            cover = new GenLayerVoronoiZoom(1000, cover);
-            cover = new ReplaceRandomLayer(LAYER_DIRT, LAYER_PODZOL, 4, 2000, cover);
-            cover = new GenLayerFuzzyZoom(3000, cover);
-
-            this.coverSelector = cover;
-            this.coverSelector.initWorldGenSeed(context.getSeed());
 
             GenLayer grass = new SelectionSeedLayer(2, 3000);
             grass = new GenLayerVoronoiZoom(1000, grass);
@@ -87,20 +69,6 @@ public class GrassWithForestShrublandCover extends EarthCoverType {
                 }
             });
         }
-
-        @Override
-        public void populateBlockCover(Random random, int originX, int originZ, IBlockState[] coverBlockBuffer) {
-            this.coverFromLayer(coverBlockBuffer, originX, originZ, this.coverSelector, (sampledValue, localX, localZ) -> {
-                switch (sampledValue) {
-                    case LAYER_GRASS:
-                        return GRASS;
-                    case LAYER_DIRT:
-                        return COARSE_DIRT;
-                    default:
-                        return PODZOL;
-                }
-            });
-        }
     }
 
     private static class Decoration extends EarthDecorationGenerator {
@@ -111,7 +79,7 @@ public class GrassWithForestShrublandCover extends EarthCoverType {
         @Override
         public void decorate(CubicPos chunkPos, ChunkPopulationWriter writer, Random random) {
             World world = this.context.getWorld();
-            LatitudinalZone zone = this.context.getZone(chunkPos);
+            ClimaticZone zone = this.context.getZone(chunkPos);
 
             this.preventIntersection(2);
 
@@ -121,7 +89,7 @@ public class GrassWithForestShrublandCover extends EarthCoverType {
             this.stopIntersectionPrevention();
         }
 
-        private int getOakShrubCount(Random random, LatitudinalZone zone) {
+        private int getOakShrubCount(Random random, ClimaticZone zone) {
             switch (zone) {
                 case TROPICS:
                 case SUBTROPICS:
@@ -131,7 +99,7 @@ public class GrassWithForestShrublandCover extends EarthCoverType {
             }
         }
 
-        private int getJungleShrubCount(Random random, LatitudinalZone zone) {
+        private int getJungleShrubCount(Random random, ClimaticZone zone) {
             switch (zone) {
                 case TROPICS:
                 case SUBTROPICS:

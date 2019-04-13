@@ -4,7 +4,7 @@ import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
 import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthDecorationGenerator;
-import net.gegy1000.earth.server.world.cover.LatitudinalZone;
+import net.gegy1000.earth.server.world.cover.ClimaticZone;
 import net.gegy1000.terrarium.server.world.cover.CoverBiomeSelectors;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.feature.tree.GenerousTreeGenerator;
@@ -37,7 +37,7 @@ public class OpenBroadleafDeciduousCover extends ForestCover {
         @Override
         public void decorate(CubicPos chunkPos, ChunkPopulationWriter writer, Random random) {
             World world = this.context.getWorld();
-            LatitudinalZone zone = this.context.getZone(chunkPos);
+            ClimaticZone zone = this.context.getZone(chunkPos);
             
             this.preventIntersection(1);
 
@@ -82,7 +82,7 @@ public class OpenBroadleafDeciduousCover extends ForestCover {
             return 4;
         }
 
-        private int getOakCount(Random random, LatitudinalZone zone) {
+        private int getOakCount(Random random, ClimaticZone zone) {
             switch (zone) {
                 case SUBTROPICS:
                     return this.range(random, 1, 3);
@@ -95,7 +95,7 @@ public class OpenBroadleafDeciduousCover extends ForestCover {
             }
         }
 
-        private int getBirchCount(Random random, LatitudinalZone zone) {
+        private int getBirchCount(Random random, ClimaticZone zone) {
             switch (zone) {
                 case TEMPERATE:
                     return this.range(random, 1, 3);
@@ -106,7 +106,7 @@ public class OpenBroadleafDeciduousCover extends ForestCover {
             }
         }
 
-        private int getJungleCount(Random random, LatitudinalZone zone) {
+        private int getJungleCount(Random random, ClimaticZone zone) {
             switch (zone) {
                 case SUBTROPICS:
                     return this.range(random, 1, 3);

@@ -9,7 +9,6 @@ import net.gegy1000.terrarium.server.world.cover.CoverDecorationGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectionSeedLayer;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Biomes;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.layer.GenLayer;
@@ -20,9 +19,6 @@ import java.awt.Color;
 import java.util.Random;
 
 public class FlowerFieldCover extends EarthCoverType {
-    private static final int LAYER_GRASS = 0;
-    private static final int LAYER_DIRT = 1;
-
     public FlowerFieldCover() {
         super(new Color(0xAAC700));
     }
@@ -43,18 +39,10 @@ public class FlowerFieldCover extends EarthCoverType {
     }
 
     private static class Surface extends EarthSurfaceGenerator {
-        private final GenLayer coverSelector;
         private final GenLayer plantSelector;
 
         private Surface(EarthCoverContext context, CoverType<EarthCoverContext> coverType) {
             super(context, coverType);
-
-            GenLayer cover = new SelectionSeedLayer(2, 1);
-            cover = new GenLayerVoronoiZoom(1000, cover);
-            cover = new GenLayerFuzzyZoom(3000, cover);
-
-            this.coverSelector = cover;
-            this.coverSelector.initWorldGenSeed(context.getSeed());
 
             GenLayer plant = new SelectionSeedLayer(2, 3000);
             plant = new GenLayerVoronoiZoom(1000, plant);
@@ -62,19 +50,6 @@ public class FlowerFieldCover extends EarthCoverType {
 
             this.plantSelector = plant;
             this.plantSelector.initWorldGenSeed(context.getSeed());
-        }
-
-        @Override
-        public void populateBlockCover(Random random, int originX, int originZ, IBlockState[] coverBlockBuffer) {
-            this.coverFromLayer(coverBlockBuffer, originX, originZ, this.coverSelector, (sampledValue, localX, localZ) -> {
-                switch (sampledValue) {
-                    case LAYER_GRASS:
-                        return GRASS;
-                    case LAYER_DIRT:
-                    default:
-                        return COARSE_DIRT;
-                }
-            });
         }
 
         @Override

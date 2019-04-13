@@ -23,7 +23,7 @@ import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentTyp
 import net.gegy1000.terrarium.server.world.pipeline.composer.biome.CoverBiomeComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.CoverDecorationComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.BedrockSurfaceComposer;
-import net.gegy1000.terrarium.server.world.pipeline.composer.surface.CoverSurfaceComposer;
+import net.gegy1000.terrarium.server.world.pipeline.composer.surface.CoverSurfaceDecorationComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.HeightmapSurfaceComposer;
 import net.gegy1000.terrarium.server.world.pipeline.data.function.ConstantRasterProducer;
 import net.minecraft.init.Blocks;
@@ -89,7 +89,7 @@ public class CoverDebugWorldType extends TerrariumWorldType {
             List<ConstructedCover<?>> coverTypes = this.buildCoverTypes(zoneGeoCoordinates);
             return BasicTerrariumGenerator.builder()
                     .withSurfaceComposer(new HeightmapSurfaceComposer(RegionComponentType.HEIGHT, Blocks.QUARTZ_BLOCK.getDefaultState()))
-                    .withSurfaceComposer(new CoverSurfaceComposer(this.world, RegionComponentType.HEIGHT, RegionComponentType.COVER, coverTypes, true, Blocks.QUARTZ_BLOCK.getDefaultState()))
+                    .withSurfaceComposer(new CoverSurfaceDecorationComposer(this.world, RegionComponentType.COVER, coverTypes))
                     .withSurfaceComposer(new BedrockSurfaceComposer(this.world, Blocks.BEDROCK.getDefaultState(), 0))
                     .withDecorationComposer(new CoverDecorationComposer(this.world, RegionComponentType.COVER, coverTypes))
                     .withDecorationComposer(new DebugSignDecorationComposer(RegionComponentType.HEIGHT))

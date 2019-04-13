@@ -9,7 +9,6 @@ import net.gegy1000.terrarium.server.world.cover.CoverBiomeSelectors;
 import net.gegy1000.terrarium.server.world.cover.CoverDecorationGenerator;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.OutlineEdgeLayer;
-import net.gegy1000.terrarium.server.world.cover.generator.layer.ReplaceRandomLayer;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectionSeedLayer;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.minecraft.block.BlockDoublePlant;
@@ -25,10 +24,6 @@ import java.awt.Color;
 import java.util.Random;
 
 public class FloodedGrasslandCover extends EarthCoverType {
-    private static final int LAYER_GRASS = 0;
-    private static final int LAYER_DIRT = 1;
-    private static final int LAYER_PODZOL = 2;
-
     public FloodedGrasslandCover() {
         super(new Color(0x00DC83));
     }
@@ -49,22 +44,13 @@ public class FloodedGrasslandCover extends EarthCoverType {
     }
 
     private static class Surface extends EarthSurfaceGenerator {
-        private final GenLayer coverSelector;
         private final GenLayer waterSelector;
         private final GenLayer grassSelector;
 
         private Surface(EarthCoverContext context, CoverType<EarthCoverContext> coverType) {
             super(context, coverType);
 
-            GenLayer cover = new SelectionSeedLayer(2, 1);
-            cover = new ReplaceRandomLayer(LAYER_GRASS, LAYER_DIRT, 2, 6000, cover);
-            cover = new GenLayerVoronoiZoom(7000, cover);
-            cover = new ReplaceRandomLayer(LAYER_DIRT, LAYER_PODZOL, 3, 8000, cover);
-            cover = new GenLayerFuzzyZoom(9000, cover);
-
-            this.coverSelector = cover;
-            this.coverSelector.initWorldGenSeed(context.getSeed());
-
+            // TODO: Reimplement
             GenLayer water = new SelectionSeedLayer(2, 2);
             water = new GenLayerFuzzyZoom(11000, water);
             water = new GenLayerVoronoiZoom(12000, water);
@@ -80,35 +66,6 @@ public class FloodedGrasslandCover extends EarthCoverType {
 
             this.grassSelector = grass;
             this.grassSelector.initWorldGenSeed(context.getSeed());
-        }
-
-        @Override
-        public void populateBlockCover(Random random, int originX, int originZ, IBlockState[] coverBlockBuffer) {
-            int[] cover = this.sampleChunk(this.coverSelector, originX, originZ);
-            int[] water = this.sampleChunk(this.waterSelector, originX, originZ);
-            this.iterateChunk((localX, localZ) -> {
-                int index = localX + localZ * 16;
-                if (water[index] == 3) {
-                    coverBlockBuffer[index] = WATER;
-                } else {
-                    switch (cover[index]) {
-                        case LAYER_GRASS:
-                            coverBlockBuffer[index] = GRASS;
-                            break;
-                        case LAYER_PODZOL:
-                            coverBlockBuffer[index] = PODZOL;
-                            break;
-                        default:
-                            coverBlockBuffer[index] = COARSE_DIRT;
-                            break;
-                    }
-                }
-            });
-        }
-
-        @Override
-        public void populateBlockFiller(Random random, int originX, int originZ, IBlockState[] fillerBlockBuffer) {
-            this.coverBlock(fillerBlockBuffer, COARSE_DIRT);
         }
 
         @Override

@@ -26,6 +26,15 @@ import java.lang.reflect.Modifier;
 public class LoadingScreenOverlay {
     private static final Minecraft MC = Minecraft.getMinecraft();
 
+    private static final String[] ATTRIBUTION = new String[] {
+            TextFormatting.GRAY + "NASA SRTM,",
+            TextFormatting.GRAY + "ESA LandCover,",
+            TextFormatting.GRAY + "Google APIs,",
+            TextFormatting.GRAY + "WorldClim,",
+            TextFormatting.GRAY + "ISRIC World Soil Info,",
+            TextFormatting.GRAY + "\u00a9 OpenStreetMap Contributors"
+    };
+
     private static Field framebufferField;
 
     public static void onRender() {
@@ -33,14 +42,14 @@ public class LoadingScreenOverlay {
             ScaledResolution resolution = new ScaledResolution(MC);
 
             int x = resolution.getScaledWidth() / 2;
-            int y = resolution.getScaledHeight() - 38 - 11;
+            int y = resolution.getScaledHeight() - 13 - ATTRIBUTION.length * 9;
 
             String header = TextFormatting.YELLOW.toString() + TextFormatting.BOLD + I18n.format("gui.earth.credits");
             GuiRenderUtils.drawCenteredString(header, x, y, 0xFFFFFF);
-            GuiRenderUtils.drawCenteredString(TextFormatting.GRAY + "NASA SRTM,", x, y + 11, 0xFFFFFF);
-            GuiRenderUtils.drawCenteredString(TextFormatting.GRAY + "ESA LandCover,", x, y + 20, 0xFFFFFF);
-            GuiRenderUtils.drawCenteredString(TextFormatting.GRAY + "Google APIs,", x, y + 29, 0xFFFFFF);
-            GuiRenderUtils.drawCenteredString(TextFormatting.GRAY + "\u00a9 OpenStreetMap Contributors", x, y + 38, 0xFFFFFF);
+
+            for (int i = 0; i < ATTRIBUTION.length; i++) {
+                GuiRenderUtils.drawCenteredString(ATTRIBUTION[i], x, y + 11 + i * 9, 0xFFFFFF);
+            }
         }
     }
 

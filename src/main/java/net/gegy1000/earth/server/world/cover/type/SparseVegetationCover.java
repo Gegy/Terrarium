@@ -22,9 +22,6 @@ import java.awt.Color;
 import java.util.Random;
 
 public class SparseVegetationCover extends EarthCoverType {
-    private static final int LAYER_GRASS = 0;
-    private static final int LAYER_DIRT = 1;
-
     public SparseVegetationCover() {
         super(new Color(0xFFEBAE));
     }
@@ -45,18 +42,10 @@ public class SparseVegetationCover extends EarthCoverType {
     }
 
     private static class Surface extends EarthSurfaceGenerator {
-        private final GenLayer coverSelector;
         private final GenLayer grassSelector;
 
         private Surface(EarthCoverContext context, CoverType<EarthCoverContext> coverType) {
             super(context, coverType);
-
-            GenLayer cover = new SelectionSeedLayer(2, 1);
-            cover = new GenLayerVoronoiZoom(1000, cover);
-            cover = new GenLayerFuzzyZoom(3000, cover);
-
-            this.coverSelector = cover;
-            this.coverSelector.initWorldGenSeed(context.getSeed());
 
             GenLayer grass = new SelectionSeedLayer(3, 3000);
             grass = new GenLayerVoronoiZoom(1000, grass);
@@ -67,37 +56,21 @@ public class SparseVegetationCover extends EarthCoverType {
         }
 
         @Override
-        public void populateBlockCover(Random random, int originX, int originZ, IBlockState[] coverBlockBuffer) {
-            this.coverFromLayer(coverBlockBuffer, originX, originZ, this.coverSelector, (sampledValue, localX, localZ) -> {
-                switch (sampledValue) {
-                    case LAYER_GRASS:
-                        return GRASS;
-                    case LAYER_DIRT:
-                        return COARSE_DIRT;
-                    default:
-                        return GRASS;
-                }
-            });
-        }
-
-        @Override
         public void decorate(CubicPos chunkPos, ChunkPrimeWriter writer, Random random) {
             ShortRaster heightRaster = this.context.getHeightRaster();
             int[] grassLayer = this.sampleChunk(this.grassSelector, chunkPos);
 
             this.iterateChunk((localX, localZ) -> {
                 int y = heightRaster.getShort(localX, localZ);
-                switch (grassLayer[localX + localZ * 16]) {
-                    case 0:
-                        if (random.nextInt(8) == 0) {
-                            IBlockState ground = writer.get(localX, y, localZ);
-                            if (ground == COARSE_DIRT) {
-                                writer.set(localX, y + 1, localZ, TALL_GRASS);
-                            } else if (random.nextInt(6) == 0) {
-                                writer.set(localX, y + 1, localZ, DEAD_BUSH);
-                            }
+                if (grassLayer[localX + localZ * 16] == 0) {
+                    if (random.nextInt(8) == 0) {
+                        IBlockState ground = writer.get(localX, y, localZ);
+                        if (ground == COARSE_DIRT) {
+                            writer.set(localX, y + 1, localZ, TALL_GRASS);
+                        } else if (random.nextInt(6) == 0) {
+                            writer.set(localX, y + 1, localZ, DEAD_BUSH);
                         }
-                        break;
+                    }
                 }
             });
         }

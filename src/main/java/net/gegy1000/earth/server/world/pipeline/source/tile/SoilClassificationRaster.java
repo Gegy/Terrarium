@@ -1,7 +1,6 @@
 package net.gegy1000.earth.server.world.pipeline.source.tile;
 
-import net.gegy1000.earth.server.world.soil.SoilConfig;
-import net.gegy1000.earth.server.world.soil.SoilConfigs;
+import net.gegy1000.earth.server.world.soil.SoilClassification;
 import net.gegy1000.terrarium.server.util.ArrayUtils;
 import net.gegy1000.terrarium.server.world.pipeline.data.Data;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataView;
@@ -9,12 +8,12 @@ import net.gegy1000.terrarium.server.world.pipeline.data.raster.RasterData;
 
 import java.util.Arrays;
 
-public class SoilRaster implements RasterData<SoilConfig>, Data {
-    private final SoilConfig[] soil;
+public class SoilClassificationRaster implements RasterData<SoilClassification>, Data {
+    private final SoilClassification[] soil;
     private final int width;
     private final int height;
 
-    public SoilRaster(SoilConfig[] soil, int width, int height) {
+    public SoilClassificationRaster(SoilClassification[] soil, int width, int height) {
         if (soil.length != width * height) {
             throw new IllegalArgumentException("Given width and height do not match soil length!");
         }
@@ -23,14 +22,14 @@ public class SoilRaster implements RasterData<SoilConfig>, Data {
         this.height = height;
     }
 
-    public SoilRaster(DataView view) {
-        this.soil = new SoilConfig[view.getWidth() * view.getHeight()];
+    public SoilClassificationRaster(DataView view) {
+        this.soil = new SoilClassification[view.getWidth() * view.getHeight()];
         this.width = view.getWidth();
         this.height = view.getHeight();
     }
 
-    public SoilRaster(int width, int height) {
-        this(ArrayUtils.defaulted(new SoilConfig[width * height], SoilConfigs.NORMAL_SOIL), width, height);
+    public SoilClassificationRaster(int width, int height) {
+        this(ArrayUtils.defaulted(new SoilClassification[width * height], SoilClassification.NOT_SOIL), width, height);
     }
 
     @Override
@@ -44,17 +43,17 @@ public class SoilRaster implements RasterData<SoilConfig>, Data {
     }
 
     @Override
-    public void set(int x, int z, SoilConfig value) {
+    public void set(int x, int z, SoilClassification value) {
         this.soil[x + z * this.width] = value;
     }
 
     @Override
-    public SoilConfig get(int x, int z) {
+    public SoilClassification get(int x, int z) {
         return this.soil[x + z * this.width];
     }
 
     @Override
-    public SoilConfig[] getData() {
+    public SoilClassification[] getData() {
         return this.soil;
     }
 
@@ -64,7 +63,7 @@ public class SoilRaster implements RasterData<SoilConfig>, Data {
     }
 
     @Override
-    public SoilRaster copy() {
-        return new SoilRaster(Arrays.copyOf(this.soil, this.soil.length), this.width, this.height);
+    public SoilClassificationRaster copy() {
+        return new SoilClassificationRaster(Arrays.copyOf(this.soil, this.soil.length), this.width, this.height);
     }
 }

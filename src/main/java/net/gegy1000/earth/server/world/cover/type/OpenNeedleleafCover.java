@@ -4,7 +4,7 @@ import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
 import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthDecorationGenerator;
-import net.gegy1000.earth.server.world.cover.LatitudinalZone;
+import net.gegy1000.earth.server.world.cover.ClimaticZone;
 import net.gegy1000.terrarium.server.world.cover.CoverBiomeSelectors;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.feature.tree.GenerousTreeGenerator;
@@ -37,7 +37,7 @@ public class OpenNeedleleafCover extends ForestCover {
         @Override
         public void decorate(CubicPos chunkPos, ChunkPopulationWriter writer, Random random) {
             World world = this.context.getWorld();
-            LatitudinalZone zone = this.context.getZone(chunkPos);
+            ClimaticZone zone = this.context.getZone(chunkPos);
 
             this.preventIntersection(1);
 
@@ -71,7 +71,7 @@ public class OpenNeedleleafCover extends ForestCover {
             this.decorateScatter(random, chunkPos, writer, birchCount, (pos, localX, localZ) -> BIRCH_SMALL_SHRUB.generate(world, random, pos));
         }
 
-        private int getSpruceCount(Random random, LatitudinalZone zone) {
+        private int getSpruceCount(Random random, ClimaticZone zone) {
             switch (zone) {
                 case TEMPERATE:
                     return this.range(random, 8, 10);
@@ -80,7 +80,7 @@ public class OpenNeedleleafCover extends ForestCover {
             }
         }
 
-        private int getBirchCount(Random random, LatitudinalZone zone) {
+        private int getBirchCount(Random random, ClimaticZone zone) {
             switch (zone) {
                 case FRIGID:
                     return this.range(random, 4, 6);

@@ -16,10 +16,12 @@ import net.gegy1000.earth.server.world.pipeline.adapter.WaterCarveAdapter;
 import net.gegy1000.earth.server.world.pipeline.adapter.WaterLevelingAdapter;
 import net.gegy1000.earth.server.world.pipeline.adapter.WorldEdgeAdapter;
 import net.gegy1000.earth.server.world.pipeline.composer.BoulderDecorationComposer;
+import net.gegy1000.earth.server.world.pipeline.composer.SoilSurfaceComposer;
 import net.gegy1000.earth.server.world.pipeline.composer.WaterFillSurfaceComposer;
 import net.gegy1000.earth.server.world.pipeline.data.ClimateSampler;
 import net.gegy1000.earth.server.world.pipeline.data.OsmSampler;
 import net.gegy1000.earth.server.world.pipeline.data.OsmWaterProcessor;
+import net.gegy1000.earth.server.world.pipeline.data.SoilProducer;
 import net.gegy1000.earth.server.world.pipeline.data.WaterProducer;
 import net.gegy1000.earth.server.world.pipeline.source.LandCoverSource;
 import net.gegy1000.earth.server.world.pipeline.source.SoilCoverSource;
@@ -27,6 +29,7 @@ import net.gegy1000.earth.server.world.pipeline.source.SrtmHeightSource;
 import net.gegy1000.earth.server.world.pipeline.source.WorldClimateDataset;
 import net.gegy1000.earth.server.world.pipeline.source.osm.OverpassSource;
 import net.gegy1000.earth.server.world.pipeline.source.tile.OsmData;
+import net.gegy1000.earth.server.world.pipeline.source.tile.SoilClassificationRaster;
 import net.gegy1000.earth.server.world.pipeline.source.tile.SoilRaster;
 import net.gegy1000.earth.server.world.pipeline.source.tile.WaterRaster;
 import net.gegy1000.terrarium.client.gui.customization.TerrariumCustomizationGui;
@@ -61,7 +64,7 @@ import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.VanillaE
 import net.gegy1000.terrarium.server.world.pipeline.composer.structure.VanillaStructureComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.BedrockSurfaceComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.CaveSurfaceComposer;
-import net.gegy1000.terrarium.server.world.pipeline.composer.surface.CoverSurfaceComposer;
+import net.gegy1000.terrarium.server.world.pipeline.composer.surface.CoverSurfaceDecorationComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.HeightmapSurfaceComposer;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataFuture;
 import net.gegy1000.terrarium.server.world.pipeline.data.function.DataMerger;
@@ -69,6 +72,7 @@ import net.gegy1000.terrarium.server.world.pipeline.data.function.InterpolationS
 import net.gegy1000.terrarium.server.world.pipeline.data.function.RasterSourceSampler;
 import net.gegy1000.terrarium.server.world.pipeline.data.function.SlopeProducer;
 import net.gegy1000.terrarium.server.world.pipeline.data.function.VoronoiScaler;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.ByteRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.CoverRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.FloatRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
@@ -223,9 +227,13 @@ public class EarthWorldType extends TerrariumWorldType {
             BasicTerrariumGenerator.Builder builder = BasicTerrariumGenerator.builder()
                     .withSurfaceComposer(new HeightmapSurfaceComposer(RegionComponentType.HEIGHT, Blocks.STONE.getDefaultState()))
                     .withSurfaceComposer(new WaterFillSurfaceComposer(RegionComponentType.HEIGHT, EarthComponentTypes.WATER, Blocks.WATER.getDefaultState()))
-                    .withSurfaceComposer(new CoverSurfaceComposer(this.world, RegionComponentType.HEIGHT, RegionComponentType.COVER, coverTypes, !preview && this.settings.getBoolean(ENABLE_DECORATION), Blocks.STONE.getDefaultState()))
+                    .withSurfaceComposer(new SoilSurfaceComposer(this.world, RegionComponentType.HEIGHT, EarthComponentTypes.SOIL, Blocks.STONE.getDefaultState()))
                     .withBiomeComposer(new CoverBiomeComposer(RegionComponentType.COVER, coverTypes))
                     .withSpawnPosition(new Coordinate(this.earthCoordinates, this.settings.getDouble(SPAWN_LATITUDE), this.settings.getDouble(SPAWN_LONGITUDE)));
+
+            if (!preview && this.settings.getBoolean(ENABLE_DECORATION)) {
+                builder.withSurfaceComposer(new CoverSurfaceDecorationComposer(this.world, RegionComponentType.COVER, coverTypes));
+            }
 
             if (!CubicGlue.isCubic(this.world)) {
                 builder.withSurfaceComposer(new BedrockSurfaceComposer(this.world, Blocks.BEDROCK.getDefaultState(), Math.min(heightOrigin - 1, 5)));
@@ -277,16 +285,18 @@ public class EarthWorldType extends TerrariumWorldType {
             slope = InterpolationScaler.LINEAR.scaleFrom(slope, this.srtmRaster, UnsignedByteRaster::new);
 
             LandCoverSource landCoverSource = new LandCoverSource(this.landcoverRaster, "landcover");
-            DataFuture<CoverRaster> cover = RasterSourceSampler.sample(landCoverSource, CoverRaster::new);
-            cover = VoronoiScaler.scaleFrom(cover, this.landcoverRaster, CoverRaster::new);
+            DataFuture<CoverRaster> coverClassification = RasterSourceSampler.sample(landCoverSource, CoverRaster::new);
+            coverClassification = VoronoiScaler.scaleFrom(coverClassification, this.landcoverRaster, CoverRaster::new);
 
             SoilCoverSource soilSource = new SoilCoverSource(this.soilRaster, "soil");
-            DataFuture<SoilRaster> soil = RasterSourceSampler.sample(soilSource, SoilRaster::new);
-            soil = VoronoiScaler.scaleFrom(soil, this.soilRaster, SoilRaster::new);
+            DataFuture<SoilClassificationRaster> soilClassification = RasterSourceSampler.sample(soilSource, SoilClassificationRaster::new);
+            soilClassification = VoronoiScaler.scaleFrom(soilClassification, this.soilRaster, SoilClassificationRaster::new);
+
+            DataFuture<SoilRaster> soil = SoilProducer.produce(coverClassification, soilClassification);
 
             DataFuture<OsmData> osm = this.createOsmProducer();
 
-            DataFuture<ShortRaster> waterBank = WaterProducer.produceBanks(heights, cover);
+            DataFuture<ShortRaster> waterBank = WaterProducer.produceBanks(heights, coverClassification);
             waterBank = OsmWaterProcessor.mergeOsmCoastlines(waterBank, osm, this.earthCoordinates);
 //            waterBankLayer = new OsmWaterBodyLayer(waterBankLayer, osmProducer, this.earthCoordinates);
 
@@ -308,7 +318,7 @@ public class EarthWorldType extends TerrariumWorldType {
             return TerrariumDataProvider.builder()
                     .withComponent(RegionComponentType.HEIGHT, heights)
                     .withComponent(RegionComponentType.SLOPE, slope)
-                    .withComponent(RegionComponentType.COVER, cover)
+                    .withComponent(RegionComponentType.COVER, coverClassification)
                     .withComponent(EarthComponentTypes.OSM, osm)
                     .withComponent(EarthComponentTypes.WATER, waterProducer)
                     .withComponent(EarthComponentTypes.AVERAGE_TEMPERATURE, averageTemperature)

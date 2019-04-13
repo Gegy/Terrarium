@@ -11,19 +11,14 @@ import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.cover.generator.layer.SelectWeightedLayer;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.minecraft.block.BlockDoublePlant;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.layer.GenLayer;
 import net.minecraft.world.gen.layer.GenLayerFuzzyZoom;
-import net.minecraft.world.gen.layer.GenLayerVoronoiZoom;
 
 import java.awt.Color;
 import java.util.Random;
 
 public class RainfedCropsCover extends EarthCoverType {
-    protected static final int LAYER_GRASS = 0;
-    protected static final int LAYER_PODZOL = 1;
-
     private static final int LAYER_SHORT_GRASS = 0;
     private static final int LAYER_TALL_GRASS = 1;
 
@@ -47,20 +42,10 @@ public class RainfedCropsCover extends EarthCoverType {
     }
 
     private static class Surface extends EarthSurfaceGenerator {
-        private final GenLayer coverSelector;
         private final GenLayer grassSelector;
 
         private Surface(EarthCoverContext context, CoverType<EarthCoverContext> coverType) {
             super(context, coverType);
-
-            GenLayer cover = new SelectWeightedLayer(10,
-                    new SelectWeightedLayer.Entry(LAYER_GRASS, 10),
-                    new SelectWeightedLayer.Entry(LAYER_PODZOL, 4));
-            cover = new GenLayerVoronoiZoom(2000, cover);
-            cover = new GenLayerFuzzyZoom(3000, cover);
-
-            this.coverSelector = cover;
-            this.coverSelector.initWorldGenSeed(context.getSeed());
 
             GenLayer grass = new SelectWeightedLayer(50,
                     new SelectWeightedLayer.Entry(LAYER_SHORT_GRASS, 10),
@@ -70,18 +55,6 @@ public class RainfedCropsCover extends EarthCoverType {
 
             this.grassSelector = grass;
             this.grassSelector.initWorldGenSeed(context.getSeed());
-        }
-
-        @Override
-        public void populateBlockCover(Random random, int originX, int originZ, IBlockState[] coverBlockBuffer) {
-            this.coverFromLayer(coverBlockBuffer, originX, originZ, this.coverSelector, (sampledValue, localX, localZ) -> {
-                switch (sampledValue) {
-                    case LAYER_GRASS:
-                        return GRASS;
-                    default:
-                        return PODZOL;
-                }
-            });
         }
 
         @Override

@@ -40,7 +40,7 @@ public class SalineFloodedForestCover extends FloodedForestCover {
 
     private static class Surface extends FloodedForestCover.Surface {
         private Surface(EarthCoverContext context, CoverType<EarthCoverContext> coverType) {
-            super(context, coverType, SAND, false);
+            super(context, coverType);
         }
 
         @Override

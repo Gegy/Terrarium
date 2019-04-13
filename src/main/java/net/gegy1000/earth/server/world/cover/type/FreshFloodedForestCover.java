@@ -4,11 +4,10 @@ import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
 import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.earth.server.world.cover.EarthCoverContext;
 import net.gegy1000.earth.server.world.cover.EarthDecorationGenerator;
-import net.gegy1000.earth.server.world.cover.LatitudinalZone;
+import net.gegy1000.earth.server.world.cover.ClimaticZone;
 import net.gegy1000.terrarium.server.world.cover.CoverBiomeSelectors;
 import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.feature.tree.GenerousTreeGenerator;
-import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 
@@ -22,7 +21,7 @@ public class FreshFloodedForestCover extends FloodedForestCover {
 
     @Override
     public Surface createSurfaceGenerator(EarthCoverContext context) {
-        return new Surface(context, this, Blocks.GRASS.getDefaultState(), true);
+        return new Surface(context, this);
     }
 
     @Override
@@ -44,7 +43,7 @@ public class FreshFloodedForestCover extends FloodedForestCover {
         public void decorate(CubicPos chunkPos, ChunkPopulationWriter writer, Random random) {
             World world = this.context.getWorld();
 
-            LatitudinalZone zone = this.context.getZone(chunkPos);
+            ClimaticZone zone = this.context.getZone(chunkPos);
 
             this.preventIntersection(1);
 
@@ -55,7 +54,7 @@ public class FreshFloodedForestCover extends FloodedForestCover {
                 int index = localX + localZ * 16;
                 if (clearingLayer[index] == 0) {
                     int height = this.range(random, 5, 8) + this.sampleHeightOffset(heightOffsetLayer, localX, localZ);
-                    if (zone == LatitudinalZone.TROPICS || zone == LatitudinalZone.SUBTROPICS) {
+                    if (zone == ClimaticZone.TROPICS || zone == ClimaticZone.SUBTROPICS) {
                         if (random.nextInt(3) == 0) {
                             new GenerousTreeGenerator(false, height, OAK_LOG, OAK_LEAF, true, false).generate(world, random, pos);
                         } else {

@@ -1,13 +1,13 @@
 package net.gegy1000.terrarium.server.world.cover;
 
-import net.gegy1000.earth.server.world.cover.LatitudinalZone;
+import net.gegy1000.earth.server.world.cover.ClimaticZone;
 import net.minecraft.init.Biomes;
 import net.minecraft.world.biome.Biome;
 
 import java.util.function.Function;
 
 public class CoverBiomeSelectors {
-    public static final Function<LatitudinalZone, Biome> BROADLEAF_FOREST_SELECTOR = zone -> {
+    public static final Function<ClimaticZone, Biome> BROADLEAF_FOREST_SELECTOR = zone -> {
         switch (zone) {
             case FRIGID:
                 return Biomes.COLD_TAIGA;
@@ -20,7 +20,7 @@ public class CoverBiomeSelectors {
         return Biomes.FOREST;
     };
 
-    public static final Function<LatitudinalZone, Biome> NEEDLELEAF_FOREST_SELECTOR = zone -> {
+    public static final Function<ClimaticZone, Biome> NEEDLELEAF_FOREST_SELECTOR = zone -> {
         switch (zone) {
             case FRIGID:
                 return Biomes.COLD_TAIGA;
@@ -33,7 +33,7 @@ public class CoverBiomeSelectors {
         return Biomes.TAIGA;
     };
 
-    public static final Function<LatitudinalZone, Biome> FLOODED_SELECTOR = zone -> {
+    public static final Function<ClimaticZone, Biome> FLOODED_SELECTOR = zone -> {
         switch (zone) {
             case FRIGID:
                 return Biomes.TAIGA;
@@ -46,7 +46,7 @@ public class CoverBiomeSelectors {
         return Biomes.SWAMPLAND;
     };
 
-    public static final Function<LatitudinalZone, Biome> SALINE_FLOODED_SELECTOR = zone -> {
+    public static final Function<ClimaticZone, Biome> SALINE_FLOODED_SELECTOR = zone -> {
         switch (zone) {
             case FRIGID:
                 return Biomes.TAIGA;
@@ -59,7 +59,7 @@ public class CoverBiomeSelectors {
         return Biomes.SWAMPLAND;
     };
 
-    public static final Function<LatitudinalZone, Biome> FOREST_SHRUBLAND_SELECTOR = zone -> {
+    public static final Function<ClimaticZone, Biome> FOREST_SHRUBLAND_SELECTOR = zone -> {
         switch (zone) {
             case FRIGID:
                 return Biomes.ICE_PLAINS;
@@ -72,7 +72,7 @@ public class CoverBiomeSelectors {
         return Biomes.PLAINS;
     };
 
-    public static final Function<LatitudinalZone, Biome> SHRUBLAND_SELECTOR = zone -> {
+    public static final Function<ClimaticZone, Biome> SHRUBLAND_SELECTOR = zone -> {
         switch (zone) {
             case FRIGID:
             case TEMPERATE:
@@ -84,7 +84,7 @@ public class CoverBiomeSelectors {
         return Biomes.SAVANNA;
     };
 
-    public static final Function<LatitudinalZone, Biome> GRASSLAND_SELECTOR = zone -> {
+    public static final Function<ClimaticZone, Biome> GRASSLAND_SELECTOR = zone -> {
         switch (zone) {
             case FRIGID:
             case TEMPERATE:

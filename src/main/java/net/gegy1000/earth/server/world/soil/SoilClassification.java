@@ -1,9 +1,9 @@
-package net.gegy1000.earth.server.world.cover;
+package net.gegy1000.earth.server.world.soil;
 
 public enum SoilClassification {
     NOT_SOIL(0),
     ACRISOLS(1),
-    ALEBLUVISOLS(2),
+    ALBELUVISOLS(2),
     ALISOLS(3),
     ANDOSOLS(4),
     ARENOSOLS(5),

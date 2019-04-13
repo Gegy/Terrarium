@@ -77,17 +77,17 @@ public class EarthCoverContext implements CoverGenerationContext {
         return this.slopeTile;
     }
 
-    public LatitudinalZone getZone(int globalX, int globalZ) {
+    public ClimaticZone getZone(int globalX, int globalZ) {
         this.zoneScatterMap.initPosSeed(globalX, globalZ);
 
         int offsetX = this.scatterZone ? this.zoneScatterMap.nextInt(128) - this.zoneScatterMap.nextInt(128) : 0;
         int offsetZ = this.scatterZone ? this.zoneScatterMap.nextInt(128) - this.zoneScatterMap.nextInt(128) : 0;
 
         double latitude = this.latLngCoordinate.getX(globalX + offsetX, globalZ + offsetZ);
-        return LatitudinalZone.get(latitude);
+        return ClimaticZone.get(latitude);
     }
 
-    public LatitudinalZone getZone(CubicPos pos) {
+    public ClimaticZone getZone(CubicPos pos) {
         return this.getZone(pos.getMinX() + 16, pos.getMinZ() + 16);
     }
 

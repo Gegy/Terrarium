@@ -23,10 +23,6 @@ import java.util.Random;
 public abstract class ForestCover extends EarthCoverType {
     private static final int HEIGHT_STEP = 2;
 
-    protected static final int LAYER_PRIMARY = 0;
-    protected static final int LAYER_DIRT = 1;
-    protected static final int LAYER_PODZOL = 2;
-
     public ForestCover(Color approximateColor) {
         super(approximateColor);
     }
@@ -79,35 +75,8 @@ public abstract class ForestCover extends EarthCoverType {
     }
 
     protected static class Surface extends EarthSurfaceGenerator {
-        protected final GenLayer coverSelector;
-
         protected Surface(EarthCoverContext context, CoverType<EarthCoverContext> coverType) {
             super(context, coverType);
-
-            this.coverSelector = this.createCoverSelector();
-            this.coverSelector.initWorldGenSeed(this.context.getSeed());
-        }
-
-        protected GenLayer createCoverSelector() {
-            GenLayer cover = new SelectionSeedLayer(2, 1);
-            cover = new GenLayerVoronoiZoom(1000, cover);
-            cover = new ReplaceRandomLayer(ForestCover.LAYER_DIRT, ForestCover.LAYER_PODZOL, 4, 2000, cover);
-            cover = new GenLayerFuzzyZoom(3000, cover);
-            return cover;
-        }
-
-        @Override
-        public void populateBlockCover(Random random, int originX, int originZ, IBlockState[] coverBlockBuffer) {
-            this.coverFromLayer(coverBlockBuffer, originX, originZ, this.coverSelector, (sampledValue, localX, localZ) -> {
-                switch (sampledValue) {
-                    case LAYER_PRIMARY:
-                        return GRASS;
-                    case LAYER_DIRT:
-                        return COARSE_DIRT;
-                    default:
-                        return PODZOL;
-                }
-            });
         }
 
         @Override

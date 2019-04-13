@@ -1,8 +1,8 @@
 package net.gegy1000.earth.server.world.pipeline.source;
 
 import net.gegy1000.earth.TerrariumEarth;
-import net.gegy1000.earth.server.world.cover.SoilClassification;
-import net.gegy1000.earth.server.world.pipeline.source.tile.SoilRaster;
+import net.gegy1000.earth.server.world.pipeline.source.tile.SoilClassificationRaster;
+import net.gegy1000.earth.server.world.soil.SoilClassification;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
@@ -19,7 +19,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Arrays;
 
-public class SoilCoverSource extends TiledDataSource<SoilRaster> {
+public class SoilCoverSource extends TiledDataSource<SoilClassificationRaster> {
     public static final int TILE_SIZE = 1800;
     public static final int GLOBAL_WIDTH = 172800;
     public static final int GLOBAL_HEIGHT = 86400;
@@ -30,7 +30,7 @@ public class SoilCoverSource extends TiledDataSource<SoilRaster> {
     private static final int TILE_OFFSET_X = TILE_COUNT_X / 2;
     private static final int TILE_OFFSET_Y = TILE_COUNT_Y / 2;
 
-    private static final SoilRaster DEFAULT_TILE = new SoilRaster(TILE_SIZE, TILE_SIZE);
+    private static final SoilClassificationRaster DEFAULT_TILE = new SoilClassificationRaster(TILE_SIZE, TILE_SIZE);
 
     public SoilCoverSource(CoordinateState coordinateState, String cacheRoot) {
         super(new ResourceLocation(TerrariumEarth.MODID, "soil"), new File(GLOBAL_CACHE_ROOT, cacheRoot), new Coordinate(coordinateState, TILE_SIZE, TILE_SIZE));
@@ -63,13 +63,13 @@ public class SoilCoverSource extends TiledDataSource<SoilRaster> {
     }
 
     @Override
-    public SoilRaster getDefaultTile() {
+    public SoilClassificationRaster getDefaultTile() {
         return DEFAULT_TILE;
     }
 
     @Nullable
     @Override
-    public SoilRaster getForcedTile(DataTilePos pos) {
+    public SoilClassificationRaster getForcedTile(DataTilePos pos) {
         DataTilePos loadTilePos = this.getLoadTilePos(pos);
         int x = loadTilePos.getTileX();
         int y = loadTilePos.getTileZ();
@@ -80,7 +80,7 @@ public class SoilCoverSource extends TiledDataSource<SoilRaster> {
     }
 
     @Override
-    public SourceResult<SoilRaster> parseStream(DataTilePos pos, InputStream stream) throws IOException {
+    public SourceResult<SoilClassificationRaster> parseStream(DataTilePos pos, InputStream stream) throws IOException {
         try (DataInputStream input = new DataInputStream(stream)) {
             byte[] buffer = new byte[TILE_SIZE * TILE_SIZE];
             input.readFully(buffer);
@@ -95,7 +95,7 @@ public class SoilCoverSource extends TiledDataSource<SoilRaster> {
                 }
             }
 
-            return SourceResult.success(new SoilRaster(soil, TILE_SIZE, TILE_SIZE));
+            return SourceResult.success(new SoilClassificationRaster(soil, TILE_SIZE, TILE_SIZE));
         }
     }
 }
