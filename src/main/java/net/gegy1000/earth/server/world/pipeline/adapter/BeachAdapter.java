@@ -1,11 +1,11 @@
+/*
 package net.gegy1000.earth.server.world.pipeline.adapter;
 
-import net.gegy1000.earth.server.world.cover.type.BeachyCover;
+import net.gegy1000.earth.server.world.cover.CoverClassification;
 import net.gegy1000.earth.server.world.pipeline.source.tile.WaterRaster;
-import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.RegionAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.CoverRaster;
+import net.gegy1000.earth.server.world.pipeline.source.tile.CoverRaster;
 import net.gegy1000.terrarium.server.world.region.GenerationRegion;
 import net.gegy1000.terrarium.server.world.region.RegionData;
 import net.minecraft.world.World;
@@ -21,12 +21,12 @@ public class BeachAdapter implements RegionAdapter {
     private final RegionComponentType<WaterRaster> waterComponent;
     private final int beachSize;
 
-    private final CoverType beachCover;
+    private final CoverClassification beachCover;
 
     private final NoiseGeneratorImproved beachNoise;
     private final double[] beachWeight = new double[GenerationRegion.BUFFERED_SIZE * GenerationRegion.BUFFERED_SIZE];
 
-    public BeachAdapter(World world, RegionComponentType<CoverRaster> coverComponent, RegionComponentType<WaterRaster> waterComponent, int beachSize, CoverType beachCover) {
+    public BeachAdapter(World world, RegionComponentType<CoverRaster> coverComponent, RegionComponentType<WaterRaster> waterComponent, int beachSize, CoverClassification beachCover) {
         this.coverComponent = coverComponent;
         this.waterComponent = waterComponent;
         this.beachSize = beachSize;
@@ -129,3 +129,4 @@ public class BeachAdapter implements RegionAdapter {
         }
     }
 }
+*/

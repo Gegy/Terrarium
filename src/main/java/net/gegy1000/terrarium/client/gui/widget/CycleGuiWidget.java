@@ -6,9 +6,9 @@ import net.gegy1000.terrarium.server.world.generator.customization.property.Cycl
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyValue;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.fml.client.config.GuiButtonExt;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SideOnly(Side.CLIENT)
-public class CycleGuiWidget<T extends Enum & CycleEnumProperty> extends GuiButton implements TooltipRenderer {
+public class CycleGuiWidget<T extends Enum & CycleEnumProperty> extends GuiButtonExt implements TooltipRenderer {
     private final PropertyKey<T> propertyKey;
     private final PropertyValue<T> property;
 

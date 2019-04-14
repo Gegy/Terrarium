@@ -53,7 +53,7 @@ public final class BiomeClassification {
         }
     }
 
-    void include(BiomeDictionary.Type type) {
+    public void include(BiomeDictionary.Type type) {
         for (Biome biome : BiomeDictionary.getBiomes(type)) {
             if (this.exclude.contains(biome)) {
                 continue;
@@ -66,7 +66,7 @@ public final class BiomeClassification {
         }
     }
 
-    void exclude(BiomeDictionary.Type type) {
+    public void exclude(BiomeDictionary.Type type) {
         for (Biome biome : BiomeDictionary.getBiomes(type)) {
             int frequency = this.frequencies.removeInt(biome);
             if (frequency >= this.matchedFrequency) {

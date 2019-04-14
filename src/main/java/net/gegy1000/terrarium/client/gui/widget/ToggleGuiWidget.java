@@ -5,9 +5,9 @@ import net.gegy1000.terrarium.client.gui.GuiRenderUtils;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyValue;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.fml.client.config.GuiButtonExt;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SideOnly(Side.CLIENT)
-public class ToggleGuiWidget extends GuiButton implements TooltipRenderer {
+public class ToggleGuiWidget extends GuiButtonExt implements TooltipRenderer {
     private final PropertyKey<Boolean> propertyKey;
     private final PropertyValue<Boolean> property;
 

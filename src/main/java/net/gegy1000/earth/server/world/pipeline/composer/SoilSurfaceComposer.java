@@ -55,8 +55,8 @@ public class SoilSurfaceComposer implements SurfaceComposer {
         int globalY = pos.getMinY();
         int globalZ = pos.getMinZ();
 
-        ShortRaster heightRaster = regionHandler.getCachedChunkRaster(this.heightComponent);
-        SoilRaster soilRaster = regionHandler.getCachedChunkRaster(this.soilComponent);
+        ShortRaster heightRaster = regionHandler.getChunkRaster(this.heightComponent);
+        SoilRaster soilRaster = regionHandler.getChunkRaster(this.soilComponent);
 
         this.depthBuffer = this.depthNoise.getRegion(this.depthBuffer, globalX, globalZ, 16, 16, 0.0625, 0.0625, 1.0);
 

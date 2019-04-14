@@ -20,7 +20,7 @@ public class OceanFillSurfaceComposer implements SurfaceComposer {
 
     @Override
     public void composeSurface(RegionGenerationHandler regionHandler, CubicPos pos, ChunkPrimeWriter writer) {
-        ShortRaster heightRaster = regionHandler.getCachedChunkRaster(this.heightComponent);
+        ShortRaster heightRaster = regionHandler.getChunkRaster(this.heightComponent);
 
         int minY = pos.getMinY();
         int maxY = pos.getMaxY();

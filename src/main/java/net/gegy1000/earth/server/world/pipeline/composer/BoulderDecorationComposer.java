@@ -3,7 +3,6 @@ package net.gegy1000.earth.server.world.pipeline.composer;
 import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
 import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.cubicglue.util.PseudoRandomMap;
-import net.gegy1000.terrarium.server.world.cover.CoverGenerator;
 import net.gegy1000.terrarium.server.world.feature.BoulderGenerator;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
@@ -20,6 +19,8 @@ public class BoulderDecorationComposer implements DecorationComposer {
     private static final long DECORATION_SEED = 8167086971552496758L;
 
     private static final BoulderGenerator BOULDER_GENERATOR = new BoulderGenerator(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.ANDESITE), 0);
+
+    private static final int MIN_SLOPE = 40;
 
     private final RegionComponentType<UnsignedByteRaster> slopeComponent;
 
@@ -42,7 +43,7 @@ public class BoulderDecorationComposer implements DecorationComposer {
         this.decorationMap.initPosSeed(globalX, globalY, globalZ);
         this.random.setSeed(this.decorationMap.next());
 
-        UnsignedByteRaster slopeRaster = regionHandler.getCachedChunkRaster(this.slopeComponent);
+        UnsignedByteRaster slopeRaster = regionHandler.getChunkRaster(this.slopeComponent);
 
         BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
         for (int i = 0; i < 2; i++) {
@@ -50,7 +51,7 @@ public class BoulderDecorationComposer implements DecorationComposer {
             int localZ = this.random.nextInt(16);
 
             if (this.random.nextInt(16) == 0) {
-                if (slopeRaster.getByte(localX, localZ) >= CoverGenerator.MOUNTAINOUS_SLOPE || this.random.nextInt(30) == 0) {
+                if (slopeRaster.getByte(localX, localZ) >= MIN_SLOPE || this.random.nextInt(30) == 0) {
                     int spawnX = localX + globalX + 8;
                     int spawnZ = localZ + globalZ + 8;
 

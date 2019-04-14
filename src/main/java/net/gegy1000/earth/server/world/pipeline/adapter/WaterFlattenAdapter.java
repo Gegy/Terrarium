@@ -1,11 +1,10 @@
 package net.gegy1000.earth.server.world.pipeline.adapter;
 
+import net.gegy1000.earth.server.world.cover.CoverClassification;
 import net.gegy1000.terrarium.server.util.FloodFill;
-import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.cover.TerrariumCoverTypes;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.RegionAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.CoverRaster;
+import net.gegy1000.earth.server.world.pipeline.source.tile.CoverRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.region.RegionData;
 import net.minecraft.util.math.MathHelper;
@@ -20,9 +19,9 @@ public class WaterFlattenAdapter implements RegionAdapter {
     private final RegionComponentType<CoverRaster> coverComponent;
     private final int flattenRange;
 
-    private final CoverType waterCoverType;
+    private final CoverClassification waterCoverType;
 
-    public WaterFlattenAdapter(RegionComponentType<ShortRaster> heightComponent, RegionComponentType<CoverRaster> coverComponent, int flattenRange, CoverType waterCoverType) {
+    public WaterFlattenAdapter(RegionComponentType<ShortRaster> heightComponent, RegionComponentType<CoverRaster> coverComponent, int flattenRange, CoverClassification waterCoverType) {
         this.heightComponent = heightComponent;
         this.coverComponent = coverComponent;
         this.flattenRange = flattenRange;
@@ -35,7 +34,7 @@ public class WaterFlattenAdapter implements RegionAdapter {
         CoverRaster coverTile = data.getOrExcept(this.coverComponent);
 
         short[] heightBuffer = heightTile.getShortData();
-        CoverType[] coverBuffer = coverTile.getData();
+        CoverClassification[] coverBuffer = coverTile.getData();
 
         for (int localZ = 0; localZ < height; localZ++) {
             for (int localX = 0; localX < width; localX++) {
@@ -53,13 +52,13 @@ public class WaterFlattenAdapter implements RegionAdapter {
         }
 
         for (int i = 0; i < coverBuffer.length; i++) {
-            if (coverBuffer[i] == TerrariumCoverTypes.PLACEHOLDER) {
+            if (coverBuffer[i] == CoverClassification.NO_DATA) {
                 coverBuffer[i] = this.waterCoverType;
             }
         }
     }
 
-    private void flattenArea(List<FloodFill.Point> waterPoints, short targetHeight, short[] heightBuffer, CoverType[] coverBuffer, int width, int height) {
+    private void flattenArea(List<FloodFill.Point> waterPoints, short targetHeight, short[] heightBuffer, CoverClassification[] coverBuffer, int width, int height) {
         Set<FloodFill.Point> sourcePoints = new HashSet<>();
 
         for (FloodFill.Point point : waterPoints) {
@@ -94,15 +93,15 @@ public class WaterFlattenAdapter implements RegionAdapter {
                 && (z >= height - 1 || Math.abs(heightBuffer[index + width] - targetHeight) > 0);
     }
 
-    private boolean hasNeighbouringLand(int x, int z, CoverType[] coverBuffer, int width, int height) {
+    private boolean hasNeighbouringLand(int x, int z, CoverClassification[] coverBuffer, int width, int height) {
         int index = x + z * width;
-        return (x > 0 && coverBuffer[index - 1] != TerrariumCoverTypes.PLACEHOLDER)
-                || (x < width - 1 && coverBuffer[index + 1] != TerrariumCoverTypes.PLACEHOLDER)
-                || (z > 0 && coverBuffer[index - width] != TerrariumCoverTypes.PLACEHOLDER)
-                || (z < height - 1 && coverBuffer[index + width] != TerrariumCoverTypes.PLACEHOLDER);
+        return (x > 0 && coverBuffer[index - 1] != CoverClassification.NO_DATA)
+                || (x < width - 1 && coverBuffer[index + 1] != CoverClassification.NO_DATA)
+                || (z > 0 && coverBuffer[index - width] != CoverClassification.NO_DATA)
+                || (z < height - 1 && coverBuffer[index + width] != CoverClassification.NO_DATA);
     }
 
-    private class AverageCoverHeightVisitor implements FloodFill.Visitor<CoverType> {
+    private class AverageCoverHeightVisitor implements FloodFill.Visitor<CoverClassification> {
         private final short[] heightBuffer;
         private final int width;
 
@@ -116,14 +115,14 @@ public class WaterFlattenAdapter implements RegionAdapter {
         }
 
         @Override
-        public CoverType visit(FloodFill.Point point, CoverType sampled) {
+        public CoverClassification visit(FloodFill.Point point, CoverClassification sampled) {
             this.totalHeight += this.heightBuffer[point.getX() + point.getY() * this.width];
             this.visitedPoints.add(point);
-            return TerrariumCoverTypes.PLACEHOLDER;
+            return CoverClassification.NO_DATA;
         }
 
         @Override
-        public boolean canVisit(FloodFill.Point point, CoverType sampled) {
+        public boolean canVisit(FloodFill.Point point, CoverClassification sampled) {
             return sampled == WaterFlattenAdapter.this.waterCoverType;
         }
 

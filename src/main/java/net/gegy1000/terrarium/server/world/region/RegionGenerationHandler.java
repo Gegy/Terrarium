@@ -10,7 +10,7 @@ import net.gegy1000.terrarium.server.world.chunk.tracker.ColumnTrackerAccess;
 import net.gegy1000.terrarium.server.world.chunk.tracker.CubeTrackerAccess;
 import net.gegy1000.terrarium.server.world.chunk.tracker.FallbackTrackerAccess;
 import net.gegy1000.terrarium.server.world.chunk.tracker.TrackedColumn;
-import net.gegy1000.terrarium.server.world.pipeline.ChunkRasterHandler;
+import net.gegy1000.terrarium.server.world.pipeline.ChunkRasters;
 import net.gegy1000.terrarium.server.world.pipeline.TerrariumDataProvider;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.RasterData;
@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 
 public class RegionGenerationHandler {
     private final TerrariumDataProvider dataProvider;
-    private final ChunkRasterHandler chunkRasterHandler;
+    private final ChunkRasters chunkRasters;
 
     private final Map<RegionTilePos, GenerationRegion> regionCache = new HashMap<>();
     private final RegionGenerationDispatcher dispatcher = new OffThreadGenerationDispatcher(this::generate);
@@ -38,7 +38,7 @@ public class RegionGenerationHandler {
 
     public RegionGenerationHandler(World world, TerrariumDataProvider dataProvider) {
         this.dataProvider = dataProvider;
-        this.chunkRasterHandler = new ChunkRasterHandler(this, dataProvider);
+        this.chunkRasters = new ChunkRasters(this, dataProvider);
 
         this.chunkTrackerAccess = createTrackerAccess(world);
     }
@@ -228,15 +228,19 @@ public class RegionGenerationHandler {
     }
 
     public void prepareChunk(int originX, int originZ) {
-        this.chunkRasterHandler.fillRasters(originX, originZ);
+        this.chunkRasters.fillRasters(originX, originZ);
     }
 
     public void prepareChunkPartial(int originX, int originZ, Collection<RegionComponentType<?>> components) {
-        this.chunkRasterHandler.fillRastersPartial(originX, originZ, components);
+        this.chunkRasters.fillRastersPartial(originX, originZ, components);
     }
 
-    public <T extends RasterData<V>, V> T getCachedChunkRaster(RegionComponentType<T> componentType) {
-        return this.chunkRasterHandler.getChunkRaster(componentType);
+    public <T extends RasterData<V>, V> T getChunkRaster(RegionComponentType<T> componentType) {
+        return this.chunkRasters.get(componentType);
+    }
+
+    public ChunkRasters getChunkRasters() {
+        return this.chunkRasters;
     }
 
     public void close() {

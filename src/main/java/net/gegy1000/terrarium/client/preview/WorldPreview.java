@@ -9,9 +9,8 @@ import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.pipeline.GenerationCancelledException;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.source.DataSourceHandler;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.CoverRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
+import net.gegy1000.terrarium.server.world.pipeline.source.DataSourceHandler;
 import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -99,9 +98,8 @@ public class WorldPreview implements IBlockAccess {
             int originZ = (spawnChunkZ - VIEW_RANGE) << 4;
 
             ShortRaster heightTile = this.generateHeightTile(originX, originZ, viewSizeBlocks);
-            CoverRaster coverTile = this.generateCoverTile(originX, originZ, viewSizeBlocks);
 
-            this.heightMesh = new PreviewHeightMesh(heightTile, coverTile);
+            this.heightMesh = new PreviewHeightMesh(heightTile);
             this.heightMesh.submitTo(this.executor, 5);
 
             short averageHeight = this.computeAverageHeight(heightTile);
@@ -179,15 +177,6 @@ public class WorldPreview implements IBlockAccess {
 
         RegionGenerationHandler regionHandler = this.worldData.getRegionHandler();
         regionHandler.fillRaster(RegionComponentType.HEIGHT, tile, originX, originZ);
-
-        return tile;
-    }
-
-    private CoverRaster generateCoverTile(int originX, int originZ, int size) {
-        CoverRaster tile = new CoverRaster(size, size);
-
-        RegionGenerationHandler regionHandler = this.worldData.getRegionHandler();
-        regionHandler.fillRaster(RegionComponentType.COVER, tile, originX, originZ);
 
         return tile;
     }

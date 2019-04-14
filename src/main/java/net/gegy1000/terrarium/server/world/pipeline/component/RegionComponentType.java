@@ -1,12 +1,8 @@
 package net.gegy1000.terrarium.server.world.pipeline.component;
 
 import net.gegy1000.terrarium.Terrarium;
-import net.gegy1000.terrarium.server.util.ArrayUtils;
-import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.cover.TerrariumCoverTypes;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.CoverRaster;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.Data;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.UnsignedByteRaster;
 import net.minecraft.util.ResourceLocation;
 
@@ -24,14 +20,6 @@ public abstract class RegionComponentType<T extends Data> {
         public UnsignedByteRaster createDefaultData(int width, int height) {
             byte[] data = new byte[width * height];
             return new UnsignedByteRaster(data, width, height);
-        }
-    };
-
-    public static final RegionComponentType<CoverRaster> COVER = new RegionComponentType<CoverRaster>(new ResourceLocation(Terrarium.MODID, "cover"), CoverRaster.class) {
-        @Override
-        public CoverRaster createDefaultData(int width, int height) {
-            CoverType[] data = ArrayUtils.defaulted(new CoverType[width * height], TerrariumCoverTypes.PLACEHOLDER);
-            return new CoverRaster(data, width, height);
         }
     };
 

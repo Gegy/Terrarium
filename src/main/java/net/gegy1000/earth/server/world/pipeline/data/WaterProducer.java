@@ -1,11 +1,10 @@
 package net.gegy1000.earth.server.world.pipeline.data;
 
-import net.gegy1000.earth.server.world.cover.EarthCoverTypes;
+import net.gegy1000.earth.server.world.cover.CoverClassification;
 import net.gegy1000.earth.server.world.pipeline.source.tile.WaterRaster;
-import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.debug.DebugImageWriter;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataFuture;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.CoverRaster;
+import net.gegy1000.earth.server.world.pipeline.source.tile.CoverRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 
 import java.util.concurrent.CompletableFuture;
@@ -60,8 +59,8 @@ public final class WaterProducer {
 
                         for (int localY = 0; localY < view.getHeight(); localY++) {
                             for (int localX = 0; localX < view.getWidth(); localX++) {
-                                CoverType sampledCover = coverRaster.get(localX, localY);
-                                if (sampledCover == EarthCoverTypes.WATER) {
+                                CoverClassification sampledCover = coverRaster.get(localX, localY);
+                                if (sampledCover == CoverClassification.WATER) {
                                     short sampledHeight = heightRaster.getShort(localX, localY);
                                     int bankType = sampledHeight <= 1 ? OCEAN : RIVER;
                                     result.setShort(localX, localY, (short) bankType);

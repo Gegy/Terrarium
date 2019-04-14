@@ -9,7 +9,6 @@ import net.gegy1000.earth.server.command.GeoToolCommand;
 import net.gegy1000.earth.server.config.TerrariumEarthConfig;
 import net.gegy1000.earth.server.message.EarthMapGuiMessage;
 import net.gegy1000.earth.server.message.EarthPanoramaMessage;
-import net.gegy1000.earth.server.world.CoverDebugWorldType;
 import net.gegy1000.earth.server.world.EarthWorldType;
 import net.gegy1000.earth.server.world.pipeline.source.EarthRemoteData;
 import net.gegy1000.earth.server.world.pipeline.source.GoogleGeocoder;
@@ -56,7 +55,6 @@ public class TerrariumEarth {
     public static ServerProxy PROXY;
 
     public static final WorldType EARTH_TYPE = new EarthWorldType().create();
-    public static final WorldType COVER_DEBUG_TYPE = new CoverDebugWorldType().create();
 
     private static WorldClimateDataset climateDataset;
 

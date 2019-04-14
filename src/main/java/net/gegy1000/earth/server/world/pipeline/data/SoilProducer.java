@@ -1,14 +1,13 @@
 package net.gegy1000.earth.server.world.pipeline.data;
 
-import net.gegy1000.earth.server.world.cover.EarthCoverTypes;
+import net.gegy1000.earth.server.world.cover.CoverClassification;
+import net.gegy1000.earth.server.world.pipeline.source.tile.CoverRaster;
 import net.gegy1000.earth.server.world.pipeline.source.tile.SoilClassificationRaster;
 import net.gegy1000.earth.server.world.pipeline.source.tile.SoilRaster;
 import net.gegy1000.earth.server.world.soil.SoilClassification;
 import net.gegy1000.earth.server.world.soil.SoilConfig;
 import net.gegy1000.earth.server.world.soil.SoilConfigs;
-import net.gegy1000.terrarium.server.world.cover.CoverType;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataFuture;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.CoverRaster;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -25,7 +24,7 @@ public final class SoilProducer {
                         SoilRaster result = new SoilRaster(view);
                         for (int y = 0; y < view.getHeight(); y++) {
                             for (int x = 0; x < view.getWidth(); x++) {
-                                CoverType<?> sampledCover = cover.get(x, y);
+                                CoverClassification sampledCover = cover.get(x, y);
                                 SoilClassification sampledSoil = soil.get(x, y);
                                 result.set(x, y, produceSoilConfig(sampledCover, sampledSoil));
                             }
@@ -36,9 +35,11 @@ public final class SoilProducer {
         });
     }
 
-    private static SoilConfig produceSoilConfig(CoverType<?> cover, SoilClassification soil) {
-        if (cover == EarthCoverTypes.SNOW) {
+    private static SoilConfig produceSoilConfig(CoverClassification cover, SoilClassification soil) {
+        if (cover == CoverClassification.PERMANENT_SNOW) {
             return SoilConfigs.PERMANENT_SNOW;
+        } else if (cover == CoverClassification.WATER) {
+            return SoilConfigs.UNDER_WATER;
         }
 
         switch (soil) {

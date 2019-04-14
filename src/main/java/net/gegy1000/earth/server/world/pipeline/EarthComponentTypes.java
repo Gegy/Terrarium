@@ -1,6 +1,7 @@
 package net.gegy1000.earth.server.world.pipeline;
 
 import net.gegy1000.earth.TerrariumEarth;
+import net.gegy1000.earth.server.world.pipeline.source.tile.CoverRaster;
 import net.gegy1000.earth.server.world.pipeline.source.tile.OsmData;
 import net.gegy1000.earth.server.world.pipeline.source.tile.SoilRaster;
 import net.gegy1000.earth.server.world.pipeline.source.tile.WaterRaster;
@@ -10,6 +11,13 @@ import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.minecraft.util.ResourceLocation;
 
 public class EarthComponentTypes {
+    public static final RegionComponentType<CoverRaster> COVER = new RegionComponentType<CoverRaster>(new ResourceLocation(TerrariumEarth.MODID, "cover"), CoverRaster.class) {
+        @Override
+        public CoverRaster createDefaultData(int width, int height) {
+            return new CoverRaster(width, height);
+        }
+    };
+
     public static final RegionComponentType<OsmData> OSM = new RegionComponentType<OsmData>(new ResourceLocation(TerrariumEarth.MODID, "osm"), OsmData.class) {
         @Override
         public OsmData createDefaultData(int width, int height) {

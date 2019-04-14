@@ -12,22 +12,33 @@ public final class BinaryPatchedHorizonConfig implements SoilHorizonConfig {
     private final IBlockState first;
     private final IBlockState second;
 
-    private BinaryPatchedHorizonConfig(IBlockState first, IBlockState second) {
+    private final double threshold;
+
+    private BinaryPatchedHorizonConfig(IBlockState first, IBlockState second, double threshold) {
         this.first = first;
         this.second = second;
+        this.threshold = threshold;
+    }
+
+    public static SoilHorizonConfig of(IBlockState first, IBlockState second, double threshold) {
+        return new BinaryPatchedHorizonConfig(first, second, threshold);
     }
 
     public static SoilHorizonConfig of(IBlockState first, IBlockState second) {
-        return new BinaryPatchedHorizonConfig(first, second);
+        return new BinaryPatchedHorizonConfig(first, second, 0.0);
+    }
+
+    public static SoilHorizonConfig of(Block first, Block second, double threshold) {
+        return new BinaryPatchedHorizonConfig(first.getDefaultState(), second.getDefaultState(), threshold);
     }
 
     public static SoilHorizonConfig of(Block first, Block second) {
-        return new BinaryPatchedHorizonConfig(first.getDefaultState(), second.getDefaultState());
+        return new BinaryPatchedHorizonConfig(first.getDefaultState(), second.getDefaultState(), 0.0);
     }
 
     @Override
     public IBlockState getState(int x, int z, int depth, Random random) {
-        double value = NOISE.getValue(x * 0.125, z * 0.125);
-        return value > 0.0 ? this.first : this.second;
+        double value = NOISE.getValue(x * 0.25, z * 0.25);
+        return value > this.threshold ? this.first : this.second;
     }
 }

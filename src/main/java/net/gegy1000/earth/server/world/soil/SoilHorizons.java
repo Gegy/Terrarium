@@ -38,7 +38,7 @@ public class SoilHorizons {
             ));
 
     public static final SoilHorizonConfig SILTY_DIRT_HORIZON = BoPCompat.siltyDirt().map(SimpleHorizonConfig::of)
-            .orElseGet(() -> BinaryPatchedHorizonConfig.of(Blocks.DIRT, Blocks.CLAY));
+            .orElseGet(() -> BinaryPatchedHorizonConfig.of(Blocks.DIRT, Blocks.CLAY, -0.5));
 
     public static final SoilHorizonConfig LOAMY_GRASS_HORIZON = SimpleHorizonConfig.of(
             BoPCompat.loamyGrass().orElse(Blocks.GRASS.getDefaultState())
@@ -57,7 +57,7 @@ public class SoilHorizons {
             ));
 
     public static final SoilHorizonConfig SILTY_GRASS_HORIZON = BoPCompat.siltyGrass().map(SimpleHorizonConfig::of)
-            .orElseGet(() -> BinaryPatchedHorizonConfig.of(Blocks.GRASS, Blocks.CLAY));
+            .orElseGet(() -> BinaryPatchedHorizonConfig.of(Blocks.GRASS, Blocks.CLAY, -0.5));
 
     public static final SoilHorizonConfig PODZOL_HORIZON = SimpleHorizonConfig.of(
             Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.PODZOL)

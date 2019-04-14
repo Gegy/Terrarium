@@ -18,7 +18,7 @@ public class HeightmapSurfaceComposer implements SurfaceComposer {
 
     @Override
     public void composeSurface(RegionGenerationHandler regionHandler, CubicPos pos, ChunkPrimeWriter writer) {
-        ShortRaster chunkRaster = regionHandler.getCachedChunkRaster(this.heightComponent);
+        ShortRaster chunkRaster = regionHandler.getChunkRaster(this.heightComponent);
 
         int minY = pos.getMinY();
         int maxY = pos.getMaxY();

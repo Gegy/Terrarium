@@ -2,15 +2,14 @@ package net.gegy1000.earth.server.world.pipeline.adapter;
 
 import com.vividsolutions.jts.geom.MultiPolygon;
 import de.topobyte.osm4j.core.model.iface.OsmEntity;
-import net.gegy1000.earth.server.world.cover.EarthCoverTypes;
+import net.gegy1000.earth.server.world.cover.CoverClassification;
 import net.gegy1000.earth.server.world.pipeline.source.osm.OsmDataParser;
+import net.gegy1000.earth.server.world.pipeline.source.tile.CoverRaster;
 import net.gegy1000.earth.server.world.pipeline.source.tile.OsmData;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
-import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.pipeline.data.DataView;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.RegionAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.CoverRaster;
+import net.gegy1000.terrarium.server.world.pipeline.data.DataView;
 import net.gegy1000.terrarium.server.world.rasterization.OsmShapeProducer;
 import net.gegy1000.terrarium.server.world.rasterization.RasterCanvas;
 import net.gegy1000.terrarium.server.world.region.RegionData;
@@ -28,23 +27,23 @@ public class OsmAreaCoverAdapter implements RegionAdapter {
     private final RegionComponentType<CoverRaster> coverComponent;
 
     private final List<Type> polygonTypes = new ArrayList<>();
-    private final List<CoverType<?>> coverTypes = new ArrayList<>();
+    private final List<CoverClassification> coverTypes = new ArrayList<>();
 
     public OsmAreaCoverAdapter(CoordinateState geoCoordinateState, RegionComponentType<OsmData> osmComponent, RegionComponentType<CoverRaster> coverComponent) {
         this.geoCoordinateState = geoCoordinateState;
         this.osmComponent = osmComponent;
         this.coverComponent = coverComponent;
 
-        this.addCoverType(EarthCoverTypes.OPEN_BROADLEAF_DECIDUOUS, this::isWoodedArea);
-        this.addCoverType(EarthCoverTypes.SHRUBLAND, this::isScrubArea);
-        this.addCoverType(EarthCoverTypes.SCREE, this::isScree);
-        this.addCoverType(EarthCoverTypes.FLOODED_GRASSLAND, this::isWetlandArea);
-        this.addCoverType(EarthCoverTypes.IRRIGATED_CROPS, this::isFarmlandArea);
-        this.addCoverType(EarthCoverTypes.FLOWER_FIELD, this::isFlowerField);
-        this.addCoverType(EarthCoverTypes.SNOW, this::isGlacierArea);
+        this.addCoverType(CoverClassification.BROADLEAF_DECIDUOUS_OPEN, this::isWoodedArea);
+        this.addCoverType(CoverClassification.SHRUBLAND, this::isScrubArea);
+//        this.addCoverType(CoverClassification.SCREE, this::isScree);
+        this.addCoverType(CoverClassification.FLOODED_VEGETATION, this::isWetlandArea);
+        this.addCoverType(CoverClassification.IRRIGATED_CROPLAND, this::isFarmlandArea);
+//        this.addCoverType(CoverClassification.FLOWER_FIELD, this::isFlowerField);
+        this.addCoverType(CoverClassification.PERMANENT_SNOW, this::isGlacierArea);
     }
 
-    private void addCoverType(CoverType<?> coverType, Predicate<OsmEntity> filter) {
+    private void addCoverType(CoverClassification coverType, Predicate<OsmEntity> filter) {
         this.polygonTypes.add(new Type(this.polygonTypes.size(), filter));
         this.coverTypes.add(coverType);
     }
@@ -111,7 +110,7 @@ public class OsmAreaCoverAdapter implements RegionAdapter {
                 for (int localX = 0; localX < width; localX++) {
                     int value = canvas.getData(localX, localZ);
                     if (value != 0) {
-                        CoverType<?> coverType = this.coverTypes.get(value - 1);
+                        CoverClassification coverType = this.coverTypes.get(value - 1);
                         coverTile.set(localX, localZ, coverType);
                     }
                 }

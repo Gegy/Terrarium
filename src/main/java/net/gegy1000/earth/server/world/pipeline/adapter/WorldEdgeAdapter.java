@@ -1,17 +1,16 @@
 package net.gegy1000.earth.server.world.pipeline.adapter;
 
-import net.gegy1000.earth.server.world.cover.EarthCoverTypes;
-import net.gegy1000.terrarium.server.world.cover.CoverType;
+import net.gegy1000.earth.server.world.cover.CoverClassification;
+import net.gegy1000.earth.server.world.pipeline.source.tile.CoverRaster;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.RegionAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.CoverRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.region.RegionData;
 import net.minecraft.util.math.BlockPos;
 
 // The Earth *IS* flat!
 public class WorldEdgeAdapter implements RegionAdapter {
-    private static final CoverType<?> EDGE_COVER = EarthCoverTypes.SNOW;
+    private static final CoverClassification EDGE_COVER = CoverClassification.PERMANENT_SNOW;
     private static final int EDGE_HEIGHT = 70;
 
     private final RegionComponentType<ShortRaster> heightComponent;

@@ -2,8 +2,6 @@ package net.gegy1000.terrarium.client.preview;
 
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.client.render.TerrariumVertexFormats;
-import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.CoverRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GLAllocation;
@@ -21,14 +19,12 @@ public class PreviewHeightMesh {
     private static final Vector3f NORMAL_STORE = new Vector3f();
 
     private final ShortRaster heightTile;
-    private final CoverRaster coverTile;
 
     private Future<BufferBuilder> heightMeshResult;
     private int heightMeshDisplayList = -1;
 
-    public PreviewHeightMesh(ShortRaster heightTile, CoverRaster coverTile) {
+    public PreviewHeightMesh(ShortRaster heightTile) {
         this.heightTile = heightTile;
-        this.coverTile = coverTile;
     }
 
     public void render() {
@@ -70,7 +66,6 @@ public class PreviewHeightMesh {
         int width = this.heightTile.getWidth();
         int height = this.heightTile.getHeight();
         short[] heightBuffer = this.heightTile.getShortData();
-        CoverType<?>[] coverBuffer = this.coverTile.getData();
 
         int strideX = granularity;
         int strideY = width * granularity;
@@ -84,7 +79,7 @@ public class PreviewHeightMesh {
                 int bottomLeft = heightBuffer[index + strideY];
                 int bottomRight = heightBuffer[index + strideX + strideY];
 
-                Color color = coverBuffer[index].getApproximateColor();
+                Color color = Color.WHITE; // TODO
                 int red = color.getRed();
                 int green = color.getGreen();
                 int blue = color.getBlue();

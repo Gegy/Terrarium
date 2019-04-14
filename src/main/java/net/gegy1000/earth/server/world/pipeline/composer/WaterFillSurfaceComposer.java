@@ -22,8 +22,8 @@ public class WaterFillSurfaceComposer implements SurfaceComposer {
 
     @Override
     public void composeSurface(RegionGenerationHandler regionHandler, CubicPos pos, ChunkPrimeWriter writer) {
-        ShortRaster heightRaster = regionHandler.getCachedChunkRaster(this.heightComponent);
-        WaterRaster waterRaster = regionHandler.getCachedChunkRaster(this.waterComponent);
+        ShortRaster heightRaster = regionHandler.getChunkRaster(this.heightComponent);
+        WaterRaster waterRaster = regionHandler.getChunkRaster(this.waterComponent);
 
         int minY = pos.getMinY();
         int maxY = pos.getMaxY();

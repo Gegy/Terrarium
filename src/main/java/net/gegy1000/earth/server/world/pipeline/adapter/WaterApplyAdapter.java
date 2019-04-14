@@ -1,14 +1,12 @@
 package net.gegy1000.earth.server.world.pipeline.adapter;
 
-import net.gegy1000.earth.server.world.cover.EarthCoverTypes;
+import net.gegy1000.earth.server.world.cover.CoverClassification;
 import net.gegy1000.earth.server.world.pipeline.source.tile.WaterRaster;
 import net.gegy1000.terrarium.server.util.FloodFill;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
-import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.cover.TerrariumCoverTypes;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.RegionAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.CoverRaster;
+import net.gegy1000.earth.server.world.pipeline.source.tile.CoverRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.region.RegionData;
 
@@ -31,7 +29,7 @@ public class WaterApplyAdapter implements RegionAdapter {
     @Override
     public void adapt(RegionData data, int x, int z, int width, int height) {
         short[] heightBuffer = data.getOrExcept(this.heightComponent).getShortData();
-        CoverType[] coverBuffer = data.getOrExcept(this.coverComponent).getData();
+        CoverClassification[] coverBuffer = data.getOrExcept(this.coverComponent).getData();
         WaterRaster waterTile = data.getOrExcept(this.waterComponent);
 
         List<FloodFill.Point> unselectedPoints = new LinkedList<>();
@@ -40,11 +38,11 @@ public class WaterApplyAdapter implements RegionAdapter {
                 int index = localX + localY * width;
                 int sampleType = waterTile.getWaterType(localX, localY);
                 if (WaterRaster.isWater(sampleType)) {
-                    coverBuffer[index] = EarthCoverTypes.WATER;
+                    coverBuffer[index] = CoverClassification.WATER;
                 } else {
-                    CoverType<?> currentCover = coverBuffer[index];
-                    if (currentCover == EarthCoverTypes.WATER) {
-                        coverBuffer[index] = TerrariumCoverTypes.PLACEHOLDER;
+                    CoverClassification currentCover = coverBuffer[index];
+                    if (currentCover == CoverClassification.WATER) {
+                        coverBuffer[index] = CoverClassification.NO_DATA;
                         unselectedPoints.add(new FloodFill.Point(localX, localY));
                         heightBuffer[index] = (short) Math.max(1, heightBuffer[index]);
                     }
@@ -59,12 +57,12 @@ public class WaterApplyAdapter implements RegionAdapter {
         }
     }
 
-    protected class CoverSelectVisitor implements FloodFill.Visitor<CoverType> {
-        protected CoverType result = null;
+    protected class CoverSelectVisitor implements FloodFill.Visitor<CoverClassification> {
+        protected CoverClassification result = null;
 
         @Override
-        public CoverType visit(FloodFill.Point point, CoverType sampled) {
-            if (sampled != TerrariumCoverTypes.PLACEHOLDER) {
+        public CoverClassification visit(FloodFill.Point point, CoverClassification sampled) {
+            if (sampled != CoverClassification.NO_DATA) {
                 this.result = sampled;
                 return null;
             }
@@ -72,13 +70,13 @@ public class WaterApplyAdapter implements RegionAdapter {
         }
 
         @Override
-        public boolean canVisit(FloodFill.Point point, CoverType sampled) {
-            return sampled != EarthCoverTypes.WATER;
+        public boolean canVisit(FloodFill.Point point, CoverClassification sampled) {
+            return sampled != CoverClassification.WATER;
         }
 
-        public CoverType getResult() {
+        public CoverClassification getResult() {
             if (this.result == null) {
-                return EarthCoverTypes.RAINFED_CROPS;
+                return CoverClassification.URBAN;
             }
             return this.result;
         }

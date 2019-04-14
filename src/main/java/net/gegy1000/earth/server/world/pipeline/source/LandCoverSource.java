@@ -2,11 +2,9 @@ package net.gegy1000.earth.server.world.pipeline.source;
 
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.world.cover.CoverClassification;
-import net.gegy1000.earth.server.world.cover.EarthCoverTypes;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
-import net.gegy1000.terrarium.server.world.cover.CoverType;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.CoverRaster;
+import net.gegy1000.earth.server.world.pipeline.source.tile.CoverRaster;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
 import net.gegy1000.terrarium.server.world.pipeline.source.SourceResult;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
@@ -35,8 +33,8 @@ public class LandCoverSource extends TiledDataSource<CoverRaster> {
     private static final CoverRaster DEFAULT_TILE = new CoverRaster(TILE_SIZE, TILE_SIZE);
 
     static {
-        CoverType[] data = DEFAULT_TILE.getData();
-        Arrays.fill(data, EarthCoverTypes.SNOW);
+        CoverClassification[] data = DEFAULT_TILE.getData();
+        Arrays.fill(data, CoverClassification.PERMANENT_SNOW);
     }
 
     public LandCoverSource(CoordinateState coordinateState, String cacheRoot) {
@@ -92,13 +90,13 @@ public class LandCoverSource extends TiledDataSource<CoverRaster> {
             byte[] buffer = new byte[TILE_SIZE * TILE_SIZE];
             input.readFully(buffer);
 
-            CoverType[] cover = new CoverType[buffer.length];
-            Arrays.fill(cover, EarthCoverTypes.SNOW);
+            CoverClassification[] cover = new CoverClassification[buffer.length];
+            Arrays.fill(cover, CoverClassification.PERMANENT_SNOW);
 
             for (int y = 0; y < TILE_SIZE; y++) {
                 for (int x = 0; x < TILE_SIZE; x++) {
                     byte id = buffer[x + y * TILE_SIZE];
-                    cover[x + y * TILE_SIZE] = CoverClassification.get(id).getCoverType();
+                    cover[x + y * TILE_SIZE] = CoverClassification.get(id);
                 }
             }
 

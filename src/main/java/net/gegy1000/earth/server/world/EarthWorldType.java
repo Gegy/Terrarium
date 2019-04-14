@@ -5,10 +5,7 @@ import net.gegy1000.cubicglue.CubicGlue;
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.client.gui.EarthCustomizationGui;
 import net.gegy1000.earth.server.capability.EarthCapability;
-import net.gegy1000.earth.server.world.cover.EarthCoverContext;
-import net.gegy1000.earth.server.world.cover.EarthCoverTypes;
 import net.gegy1000.earth.server.world.pipeline.EarthComponentTypes;
-import net.gegy1000.earth.server.world.pipeline.adapter.BeachAdapter;
 import net.gegy1000.earth.server.world.pipeline.adapter.HeightNoiseAdapter;
 import net.gegy1000.earth.server.world.pipeline.adapter.SlopeNoiseAdapter;
 import net.gegy1000.earth.server.world.pipeline.adapter.WaterApplyAdapter;
@@ -17,6 +14,8 @@ import net.gegy1000.earth.server.world.pipeline.adapter.WaterLevelingAdapter;
 import net.gegy1000.earth.server.world.pipeline.adapter.WorldEdgeAdapter;
 import net.gegy1000.earth.server.world.pipeline.composer.BoulderDecorationComposer;
 import net.gegy1000.earth.server.world.pipeline.composer.EarthBiomeComposer;
+import net.gegy1000.earth.server.world.pipeline.composer.EarthCarvingComposer;
+import net.gegy1000.earth.server.world.pipeline.composer.EarthDecorationComposer;
 import net.gegy1000.earth.server.world.pipeline.composer.SoilSurfaceComposer;
 import net.gegy1000.earth.server.world.pipeline.composer.WaterFillSurfaceComposer;
 import net.gegy1000.earth.server.world.pipeline.data.ClimateSampler;
@@ -29,6 +28,7 @@ import net.gegy1000.earth.server.world.pipeline.source.SoilCoverSource;
 import net.gegy1000.earth.server.world.pipeline.source.SrtmHeightSource;
 import net.gegy1000.earth.server.world.pipeline.source.WorldClimateDataset;
 import net.gegy1000.earth.server.world.pipeline.source.osm.OverpassSource;
+import net.gegy1000.earth.server.world.pipeline.source.tile.CoverRaster;
 import net.gegy1000.earth.server.world.pipeline.source.tile.OsmData;
 import net.gegy1000.earth.server.world.pipeline.source.tile.SoilClassificationRaster;
 import net.gegy1000.earth.server.world.pipeline.source.tile.SoilRaster;
@@ -41,9 +41,6 @@ import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.coordinate.LatLngCoordinateState;
 import net.gegy1000.terrarium.server.world.coordinate.ScaledCoordinateState;
-import net.gegy1000.terrarium.server.world.cover.ConstructedCover;
-import net.gegy1000.terrarium.server.world.cover.CoverGenerationContext;
-import net.gegy1000.terrarium.server.world.cover.TerrariumCoverTypes;
 import net.gegy1000.terrarium.server.world.generator.BasicTerrariumGenerator;
 import net.gegy1000.terrarium.server.world.generator.TerrariumGenerator;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
@@ -59,12 +56,10 @@ import net.gegy1000.terrarium.server.world.generator.customization.widget.Toggle
 import net.gegy1000.terrarium.server.world.pipeline.TerrariumDataProvider;
 import net.gegy1000.terrarium.server.world.pipeline.adapter.HeightTransformAdapter;
 import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.CoverDecorationComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.VanillaEntitySpawnComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.structure.VanillaStructureComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.BedrockSurfaceComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.CaveSurfaceComposer;
-import net.gegy1000.terrarium.server.world.pipeline.composer.surface.CoverSurfaceDecorationComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.HeightmapSurfaceComposer;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataFuture;
 import net.gegy1000.terrarium.server.world.pipeline.data.function.DataMerger;
@@ -72,7 +67,6 @@ import net.gegy1000.terrarium.server.world.pipeline.data.function.InterpolationS
 import net.gegy1000.terrarium.server.world.pipeline.data.function.RasterSourceSampler;
 import net.gegy1000.terrarium.server.world.pipeline.data.function.SlopeProducer;
 import net.gegy1000.terrarium.server.world.pipeline.data.function.VoronoiScaler;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.CoverRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.FloatRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.UnsignedByteRaster;
@@ -222,16 +216,15 @@ public class EarthWorldType extends TerrariumWorldType {
         @Override
         public TerrariumGenerator buildGenerator(boolean preview) {
             int heightOrigin = this.settings.getInteger(HEIGHT_ORIGIN);
-            List<ConstructedCover<?>> coverTypes = this.constructCoverTypes();
             BasicTerrariumGenerator.Builder builder = BasicTerrariumGenerator.builder()
                     .withSurfaceComposer(new HeightmapSurfaceComposer(RegionComponentType.HEIGHT, Blocks.STONE.getDefaultState()))
                     .withSurfaceComposer(new WaterFillSurfaceComposer(RegionComponentType.HEIGHT, EarthComponentTypes.WATER, Blocks.WATER.getDefaultState()))
                     .withSurfaceComposer(new SoilSurfaceComposer(this.world, RegionComponentType.HEIGHT, EarthComponentTypes.SOIL, Blocks.STONE.getDefaultState()))
-                    .withBiomeComposer(new EarthBiomeComposer(this.world, EarthComponentTypes.AVERAGE_TEMPERATURE, EarthComponentTypes.ANNUAL_RAINFALL))
+                    .withBiomeComposer(new EarthBiomeComposer(this.world, EarthComponentTypes.COVER, EarthComponentTypes.AVERAGE_TEMPERATURE, EarthComponentTypes.ANNUAL_RAINFALL))
                     .withSpawnPosition(new Coordinate(this.earthCoordinates, this.settings.getDouble(SPAWN_LATITUDE), this.settings.getDouble(SPAWN_LONGITUDE)));
 
             if (!preview && this.settings.getBoolean(ENABLE_DECORATION)) {
-                builder.withSurfaceComposer(new CoverSurfaceDecorationComposer(this.world, RegionComponentType.COVER, coverTypes));
+                builder.withSurfaceComposer(new EarthCarvingComposer(EarthComponentTypes.COVER));
             }
 
             if (!CubicGlue.isCubic(this.world)) {
@@ -239,7 +232,7 @@ public class EarthWorldType extends TerrariumWorldType {
             }
 
             if (this.settings.getBoolean(ENABLE_DECORATION)) {
-                builder.withDecorationComposer(new CoverDecorationComposer(this.world, RegionComponentType.COVER, coverTypes));
+                builder.withDecorationComposer(new EarthDecorationComposer(this.world, EarthComponentTypes.COVER));
                 builder.withDecorationComposer(new BoulderDecorationComposer(this.world, RegionComponentType.SLOPE));
             }
 
@@ -258,16 +251,6 @@ public class EarthWorldType extends TerrariumWorldType {
             }
 
             builder.withDecorationComposer(new VanillaEntitySpawnComposer(this.world));
-        }
-
-        private List<ConstructedCover<?>> constructCoverTypes() {
-            List<ConstructedCover<?>> coverTypes = new ArrayList<>();
-            CoverGenerationContext.Default context = new CoverGenerationContext.Default(this.world, RegionComponentType.HEIGHT, RegionComponentType.COVER);
-            EarthCoverContext earthContext = new EarthCoverContext(this.world, RegionComponentType.HEIGHT, RegionComponentType.COVER, RegionComponentType.SLOPE, this.earthCoordinates, true);
-            coverTypes.add(new ConstructedCover<>(TerrariumCoverTypes.DEBUG, context));
-            coverTypes.add(new ConstructedCover<>(TerrariumCoverTypes.PLACEHOLDER, context));
-            coverTypes.addAll(EarthCoverTypes.COVER_TYPES.stream().map(type -> new ConstructedCover<>(type, earthContext)).collect(Collectors.toList()));
-            return coverTypes;
         }
 
         @Override
@@ -317,22 +300,22 @@ public class EarthWorldType extends TerrariumWorldType {
             return TerrariumDataProvider.builder()
                     .withComponent(RegionComponentType.HEIGHT, heights)
                     .withComponent(RegionComponentType.SLOPE, slope)
-                    .withComponent(RegionComponentType.COVER, coverClassification)
+                    .withComponent(EarthComponentTypes.COVER, coverClassification)
                     .withComponent(EarthComponentTypes.OSM, osm)
                     .withComponent(EarthComponentTypes.WATER, waterProducer)
                     .withComponent(EarthComponentTypes.AVERAGE_TEMPERATURE, averageTemperature)
                     .withComponent(EarthComponentTypes.ANNUAL_RAINFALL, annualRainfall)
                     .withComponent(EarthComponentTypes.SOIL, soil)
 //                    .withAdapter(new OsmAreaCoverAdapter(this.earthCoordinates, EarthComponentTypes.OSM, RegionComponentType.COVER))
-                    .withAdapter(new WaterApplyAdapter(this.earthCoordinates, EarthComponentTypes.WATER, RegionComponentType.HEIGHT, RegionComponentType.COVER))
+                    .withAdapter(new WaterApplyAdapter(this.earthCoordinates, EarthComponentTypes.WATER, RegionComponentType.HEIGHT, EarthComponentTypes.COVER))
                     .withAdapter(new HeightNoiseAdapter(this.world, RegionComponentType.HEIGHT, EarthComponentTypes.WATER, 2, 0.04, this.settings.getDouble(NOISE_SCALE)))
                     .withAdapter(new HeightTransformAdapter(RegionComponentType.HEIGHT, this.settings.getDouble(HEIGHT_SCALE) * this.worldScale, heightOrigin))
                     .withAdapter(new WaterLevelingAdapter(EarthComponentTypes.WATER, RegionComponentType.HEIGHT, heightOrigin + 1))
                     .withAdapter(new WaterCarveAdapter(EarthComponentTypes.WATER, RegionComponentType.HEIGHT, this.settings.getInteger(OCEAN_DEPTH)))
                     .withAdapter(new SlopeNoiseAdapter(this.world, RegionComponentType.SLOPE, this.settings.getDouble(NOISE_SCALE)))
 //                    .withAdapter(new OceanDepthCorrectionAdapter(RegionComponentType.HEIGHT, this.properties.getInteger(OCEAN_DEPTH)))
-                    .withAdapter(new BeachAdapter(this.world, RegionComponentType.COVER, EarthComponentTypes.WATER, this.settings.getInteger(BEACH_SIZE), EarthCoverTypes.BEACH))
-                    .withAdapter(new WorldEdgeAdapter(RegionComponentType.HEIGHT, RegionComponentType.COVER, this.settings.getInteger(HEIGHT_ORIGIN), minPos, maxPos))
+//                    .withAdapter(new BeachAdapter(this.world, EarthComponentTypes.COVER, EarthComponentTypes.WATER, this.settings.getInteger(BEACH_SIZE), EarthCoverTypes.BEACH))
+                    .withAdapter(new WorldEdgeAdapter(RegionComponentType.HEIGHT, EarthComponentTypes.COVER, this.settings.getInteger(HEIGHT_ORIGIN), minPos, maxPos))
 //                    .withAdapter(new WaterFlattenAdapter(RegionComponentType.HEIGHT, RegionComponentType.COVER, 15, EarthCoverTypes.WATER))
                     .build();
         }
