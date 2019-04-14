@@ -1,9 +1,9 @@
 package net.gegy1000.terrarium.client.gui.widget;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiButton;
+import net.minecraftforge.fml.client.config.GuiButtonExt;
 
-public abstract class ActionButtonWidget extends GuiButton {
+public abstract class ActionButtonWidget extends GuiButtonExt {
     public ActionButtonWidget(int buttonId, int x, int y, String buttonText) {
         super(buttonId, x, y, buttonText);
     }
