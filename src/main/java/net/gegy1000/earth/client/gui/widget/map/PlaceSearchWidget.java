@@ -110,7 +110,7 @@ public class PlaceSearchWidget extends GuiTextField {
                         drawRect(suggestionX, suggestionY, suggestionX + this.width, suggestionY + SUGGESTION_HEIGHT, 0xFF5078A0);
                     }
 
-                    fontRenderer.drawStringWithShadow(suggestion, suggestionX + 4, suggestionY + (SUGGESTION_HEIGHT - fontRenderer.FONT_HEIGHT) / 2, 0xFFFFFFFF);
+                    fontRenderer.drawStringWithShadow(suggestion, suggestionX + 4, suggestionY + (SUGGESTION_HEIGHT - fontRenderer.FONT_HEIGHT) / 2.0F, 0xFFFFFFFF);
                 }
             }
         }

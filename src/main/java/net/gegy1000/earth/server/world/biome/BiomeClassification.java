@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class BiomeClassification {
-    private static Set<Biome> EXCLUDED_BIOMES = Stream.of(
+    private static final Set<Biome> EXCLUDED_BIOMES = Stream.of(
             BiomeDictionary.Type.END,
             BiomeDictionary.Type.NETHER,
             BiomeDictionary.Type.MAGICAL,

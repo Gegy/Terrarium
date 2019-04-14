@@ -15,6 +15,7 @@ public class FutureUtil {
                 );
     }
 
+    @SafeVarargs
     public static <T> CompletableFuture<Collection<T>> joinAll(CompletableFuture<T>... array) {
         return CompletableFuture.allOf(array)
                 .thenApply(v -> Arrays.stream(array)

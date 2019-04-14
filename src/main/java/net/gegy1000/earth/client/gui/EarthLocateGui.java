@@ -48,10 +48,8 @@ public class EarthLocateGui extends GuiScreen {
     protected void actionPerformed(GuiButton button) throws IOException {
         super.actionPerformed(button);
         if (button.visible) {
-            switch (button.id) {
-                case 0:
-                    this.mc.displayGuiScreen(null);
-                    break;
+            if (button.id == 0) {
+                this.mc.displayGuiScreen(null);
             }
         }
     }

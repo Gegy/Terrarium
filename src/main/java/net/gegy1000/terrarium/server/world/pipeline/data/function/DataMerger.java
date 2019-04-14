@@ -11,6 +11,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public final class DataMerger {
+    @SafeVarargs
     public static <T extends MergableData<T>> DataFuture<T> merge(DataFuture<T>... futures) {
         return merge(Arrays.asList(futures));
     }

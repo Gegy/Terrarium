@@ -110,7 +110,7 @@ public class OffThreadGenerationDispatcher implements RegionGenerationDispatcher
 
     private class RegionFuture {
         private final RegionTilePos pos;
-        private boolean tracked;
+        private final boolean tracked;
 
         private Future<GenerationRegion> future;
 

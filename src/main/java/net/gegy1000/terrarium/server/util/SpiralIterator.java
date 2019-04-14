@@ -8,7 +8,7 @@ public class SpiralIterator implements Iterator<Point2i> {
 
     private int segment;
     private int layer = 1;
-    private Point2i point = new Point2i(0, 0);
+    private final Point2i point = new Point2i(0, 0);
 
     public SpiralIterator(int range) {
         this.range = range;

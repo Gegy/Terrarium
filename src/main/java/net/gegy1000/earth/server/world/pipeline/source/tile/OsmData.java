@@ -166,7 +166,7 @@ public class OsmData implements OsmEntityProvider, MergableData<OsmData> {
             }
         }
 
-        return true;
+        return false;
     }
 
     private boolean isWayInBounds(OsmWay way, double minLatitude, double minLongitude, double maxLatitude, double maxLongitude) {

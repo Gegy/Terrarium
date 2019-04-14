@@ -25,11 +25,9 @@ public class EarthCustomizationGui extends TerrariumCustomizationGui {
     @Override
     protected void actionPerformed(GuiButton button) {
         if (button.enabled && button.visible) {
-            switch (button.id) {
-                case SPAWNPOINT_BUTTON:
-                    this.freeze = true;
-                    this.mc.displayGuiScreen(new SelectEarthSpawnpointGui(this));
-                    break;
+            if (button.id == SPAWNPOINT_BUTTON) {
+                this.freeze = true;
+                this.mc.displayGuiScreen(new SelectEarthSpawnpointGui(this));
             }
         }
         super.actionPerformed(button);
