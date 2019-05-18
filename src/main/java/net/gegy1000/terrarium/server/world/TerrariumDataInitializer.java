@@ -1,7 +1,7 @@
 package net.gegy1000.terrarium.server.world;
 
-import net.gegy1000.terrarium.server.world.pipeline.data.DataEngine;
+import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataGenerator;
 
 public interface TerrariumDataInitializer {
-    DataEngine buildDataEngine();
+    ColumnDataGenerator buildDataGenerator();
 }

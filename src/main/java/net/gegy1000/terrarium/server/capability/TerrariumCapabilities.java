@@ -1,7 +1,6 @@
 package net.gegy1000.terrarium.server.capability;
 
 import net.gegy1000.terrarium.Terrarium;
-import net.gegy1000.terrarium.server.world.chunk.tracker.ChunkTrackerHooks;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
@@ -20,13 +19,9 @@ public class TerrariumCapabilities {
     @CapabilityInject(TerrariumExternalCapProvider.class)
     public static Capability<TerrariumExternalCapProvider> externalProviderCapability;
 
-    @CapabilityInject(ChunkTrackerHooks.class)
-    public static Capability<ChunkTrackerHooks> chunkHooksCapability;
-
     public static void onPreInit() {
         CapabilityManager.INSTANCE.register(TerrariumWorldData.class, new VoidStorage<>(), unsupported());
         CapabilityManager.INSTANCE.register(TerrariumExternalCapProvider.class, new VoidStorage<>(), TerrariumExternalCapProvider.Implementation::new);
-        CapabilityManager.INSTANCE.register(ChunkTrackerHooks.class, new VoidStorage<>(), unsupported());
     }
 
     private static <T> Callable<T> unsupported() {

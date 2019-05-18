@@ -13,7 +13,7 @@ public class TrackedColumn {
     }
 
     public TrackedColumn(PlayerChunkMapEntry entry) {
-        this(entry.getPos(), entry.getChunk() == null || entry.getChunk() instanceof HookedChunkMarker);
+        this(entry.getPos(), entry.getChunk() == null);
     }
 
     public ChunkPos getPos() {

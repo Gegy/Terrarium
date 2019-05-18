@@ -57,7 +57,7 @@ public class CubeTrackerAccess implements ChunkTrackerAccess {
                 ColumnState state = columnStates.get(columnPos);
 
                 double distance = getClosestPlayerDistance(watcher);
-                boolean queued = watcher.getCube() == null || watcher.getCube() instanceof HookedChunkMarker;
+                boolean queued = watcher.getCube() == null;
 
                 if (state == null) {
                     columnStates.put(columnPos, new ColumnState(distance, queued));

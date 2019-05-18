@@ -10,7 +10,7 @@ import net.gegy1000.earth.server.world.pipeline.composer.SoilSurfaceComposer;
 import net.gegy1000.earth.server.world.pipeline.composer.WaterFillSurfaceComposer;
 import net.gegy1000.terrarium.server.world.TerrariumGeneratorInitializer;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
-import net.gegy1000.terrarium.server.world.generator.BasicTerrariumGenerator;
+import net.gegy1000.terrarium.server.world.generator.CompositeTerrariumGenerator;
 import net.gegy1000.terrarium.server.world.generator.TerrariumGenerator;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.VanillaEntitySpawnComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.structure.VanillaStructureComposer;
@@ -30,7 +30,7 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
 
     @Override
     public TerrariumGenerator buildGenerator(boolean preview) {
-        BasicTerrariumGenerator.Builder builder = BasicTerrariumGenerator.builder();
+        CompositeTerrariumGenerator.Builder builder = CompositeTerrariumGenerator.builder();
 
         this.addSurfaceComposers(builder, preview);
         this.addDecorationComposers(preview, builder);
@@ -41,7 +41,7 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
         return builder.build();
     }
 
-    private void addSurfaceComposers(BasicTerrariumGenerator.Builder builder, boolean preview) {
+    private void addSurfaceComposers(CompositeTerrariumGenerator.Builder builder, boolean preview) {
         int heightOrigin = this.ctx.settings.getInteger(HEIGHT_ORIGIN);
 
         builder.addSurfaceComposer(new HeightmapSurfaceComposer(EarthDataKeys.HEIGHT, Blocks.STONE.getDefaultState()));
@@ -61,7 +61,7 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
         }
     }
 
-    private void addDecorationComposers(boolean preview, BasicTerrariumGenerator.Builder builder) {
+    private void addDecorationComposers(boolean preview, CompositeTerrariumGenerator.Builder builder) {
         if (this.ctx.settings.getBoolean(ENABLE_DECORATION)) {
             builder.addDecorationComposer(new EarthDecorationComposer(this.ctx.world, EarthDataKeys.COVER));
             builder.addDecorationComposer(new BoulderDecorationComposer(this.ctx.world, EarthDataKeys.SLOPE));

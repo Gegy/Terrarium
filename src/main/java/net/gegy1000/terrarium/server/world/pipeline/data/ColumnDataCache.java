@@ -4,9 +4,7 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import net.gegy1000.cubicglue.CubicGlue;
 import net.gegy1000.cubicglue.util.CubicPos;
-import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.world.chunk.tracker.ChunkTrackerAccess;
-import net.gegy1000.terrarium.server.world.chunk.tracker.ChunkTrackerHooks;
 import net.gegy1000.terrarium.server.world.chunk.tracker.ColumnTrackerAccess;
 import net.gegy1000.terrarium.server.world.chunk.tracker.CubeTrackerAccess;
 import net.gegy1000.terrarium.server.world.chunk.tracker.FallbackTrackerAccess;
@@ -34,13 +32,15 @@ public class ColumnDataCache implements AutoCloseable {
     private final Map<ChunkPos, ColumnDataEntry> entries = new HashMap<>();
 
     private final ColumnDataGenerator generator;
+    private final ColumnDataLoader loader;
 
     private final ChunkTrackerAccess chunkTrackerAccess;
     private final Object2BooleanMap<ChunkPos> chunkStateMap = new Object2BooleanOpenHashMap<>();
 
     public ColumnDataCache(World world, ColumnDataGenerator generator) {
-        this.chunkTrackerAccess = createTrackerAccess(world);
         this.generator = generator;
+        this.loader = new DistributedColumnLoader(this.generator::generate);
+        this.chunkTrackerAccess = createTrackerAccess(world);
     }
 
     private static ChunkTrackerAccess createTrackerAccess(World world) {
@@ -69,14 +69,8 @@ public class ColumnDataCache implements AutoCloseable {
 
     public void trackColumns(WorldServer world) {
         Collection<TrackedColumn> columnEntries = this.chunkTrackerAccess.getSortedTrackedColumns();
-        ChunkTrackerHooks chunkHooks = world.getCapability(TerrariumCapabilities.chunkHooksCapability, null);
 
         Collection<ChunkPos> requiredColumns = this.collectRequiredColumns(world, columnEntries);
-
-        if (chunkHooks != null) {
-            this.pauseChunks(chunkHooks, requiredColumns);
-            this.unpauseChunks(chunkHooks);
-        }
 
         this.setTrackedColumns(requiredColumns);
     }
@@ -88,19 +82,6 @@ public class ColumnDataCache implements AutoCloseable {
                 .collect(Collectors.toList());
 
         droppedColumns.forEach(this.entries::remove);
-    }
-
-    private void pauseChunks(ChunkTrackerHooks chunkHooks, Collection<ChunkPos> requiredColumns) {
-        Stream<ChunkPos> paused = requiredColumns.stream()
-                .filter(pos -> !this.entries.containsKey(pos));
-        paused.forEach(chunkHooks::pauseChunk);
-    }
-
-    private void unpauseChunks(ChunkTrackerHooks chunkHooks) {
-        Collection<ChunkPos> unpaused = chunkHooks.getPausedChunks().stream()
-                .filter(this.entries::containsKey)
-                .collect(Collectors.toList());
-        unpaused.forEach(chunkHooks::unpauseChunk);
     }
 
     private Collection<ChunkPos> collectRequiredColumns(WorldServer world, Collection<TrackedColumn> chunkEntries) {
@@ -135,11 +116,11 @@ public class ColumnDataCache implements AutoCloseable {
     }
 
     private ColumnDataEntry getEntry(ChunkPos columnPos) {
-        return this.entries.computeIfAbsent(columnPos, pos -> new ColumnDataEntry(pos, this.generator));
+        return this.entries.computeIfAbsent(columnPos, pos -> new ColumnDataEntry(pos, this.loader));
     }
 
     @Override
     public void close() {
-        this.generator.close();
+        this.loader.close();
     }
 }

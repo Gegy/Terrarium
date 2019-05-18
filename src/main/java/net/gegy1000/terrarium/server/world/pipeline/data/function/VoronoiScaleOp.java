@@ -10,7 +10,7 @@ import net.minecraft.util.math.MathHelper;
 
 import java.util.function.Function;
 
-public final class VoronoiScaler {
+public final class VoronoiScaleOp {
     public static <V, T extends Raster<V[]>> DataOp<T> scaleFrom(DataOp<T> data, CoordinateState src, Function<DataView, T> function) {
         Voronoi voronoi = new Voronoi(Voronoi.DistanceFunc.EUCLIDEAN, 0.9, 4, 1000);
         return DataOp.of((engine, view) -> {

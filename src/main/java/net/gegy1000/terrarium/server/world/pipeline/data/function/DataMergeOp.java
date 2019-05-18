@@ -10,7 +10,7 @@ import java.util.Iterator;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-public final class DataMerger {
+public final class DataMergeOp {
     @SafeVarargs
     public static <T extends MergableData<T>> DataOp<T> merge(DataOp<T>... futures) {
         return merge(Arrays.asList(futures));

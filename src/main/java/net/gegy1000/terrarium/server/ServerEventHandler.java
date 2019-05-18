@@ -7,7 +7,6 @@ import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumExternalCapProvider;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
-import net.gegy1000.terrarium.server.world.chunk.tracker.ChunkTrackerHooks;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataSourceHandler;
@@ -75,13 +74,6 @@ public class ServerEventHandler {
             }
 
             event.addCapability(TerrariumCapabilities.EXTERNAL_DATA_ID, external);
-
-            if (world instanceof WorldServer) {
-                ChunkTrackerHooks trackerHooks = ChunkTrackerHooks.createHooks((WorldServer) world);
-                if (trackerHooks != null) {
-                    event.addCapability(TerrariumCapabilities.TRACKER_HOOKS_ID, trackerHooks);
-                }
-            }
         }
     }
 

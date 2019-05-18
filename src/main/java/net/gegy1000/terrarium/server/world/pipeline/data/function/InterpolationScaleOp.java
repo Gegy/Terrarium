@@ -12,7 +12,7 @@ import net.minecraft.util.math.MathHelper;
 
 import java.util.function.Function;
 
-public enum InterpolationScaler {
+public enum InterpolationScaleOp {
     LINEAR(Interpolation.Function.LINEAR),
     COSINE(Interpolation.Function.COSINE),
     CUBIC(Interpolation.Function.CUBIC);
@@ -22,7 +22,7 @@ public enum InterpolationScaler {
     private final int lowerSampleBuffer;
     private final int upperSampleBuffer;
 
-    InterpolationScaler(Interpolation.Function function) {
+    InterpolationScaleOp(Interpolation.Function function) {
         this.function = function;
 
         int pointCount = function.getPointCount();
@@ -50,13 +50,13 @@ public enum InterpolationScaler {
             double scaleFactorX = Math.abs(src.getX(blockSizeX, blockSizeZ) / blockSizeX);
             double scaleFactorZ = Math.abs(src.getZ(blockSizeX, blockSizeZ) / blockSizeZ);
 
-            Coordinate minRegionCoordinateBlock = view.getMinCoordinate().to(src);
-            Coordinate maxRegionCoordinateBlock = view.getMaxCoordinate().to(src);
+            Coordinate minBlockCoordinate = view.getMinCoordinate().to(src);
+            Coordinate maxBlockCoordinate = view.getMaxCoordinate().to(src);
 
-            Coordinate minRegionCoordinate = Coordinate.min(minRegionCoordinateBlock, maxRegionCoordinateBlock);
+            Coordinate minCoordinate = Coordinate.min(minBlockCoordinate, maxBlockCoordinate);
 
-            double originOffsetX = minRegionCoordinate.getX() - srcView.getX();
-            double originOffsetZ = minRegionCoordinate.getZ() - srcView.getY();
+            double originOffsetX = minCoordinate.getX() - srcView.getX();
+            double originOffsetZ = minCoordinate.getZ() - srcView.getY();
 
             return engine.load(data, srcView).thenApply(source -> {
                 T result = function.apply(view);
@@ -92,17 +92,17 @@ public enum InterpolationScaler {
     }
 
     private DataView getSourceView(DataView view, CoordinateState src) {
-        Coordinate minRegionCoordinateBlock = view.getMinCoordinate().to(src);
-        Coordinate maxRegionCoordinateBlock = view.getMaxCoordinate().to(src);
+        Coordinate minBlockCoordinate = view.getMinCoordinate().to(src);
+        Coordinate maxBlockCoordinate = view.getMaxCoordinate().to(src);
 
-        Coordinate minRegionCoordinate = Coordinate.min(minRegionCoordinateBlock, maxRegionCoordinateBlock);
-        Coordinate maxRegionCoordinate = Coordinate.max(minRegionCoordinateBlock, maxRegionCoordinateBlock);
+        Coordinate minCoordinate = Coordinate.min(minBlockCoordinate, maxBlockCoordinate);
+        Coordinate maxCoordinate = Coordinate.max(minBlockCoordinate, maxBlockCoordinate);
 
-        int minSampleX = MathHelper.floor(minRegionCoordinate.getX()) - this.lowerSampleBuffer;
-        int minSampleY = MathHelper.floor(minRegionCoordinate.getZ()) - this.lowerSampleBuffer;
+        int minSampleX = MathHelper.floor(minCoordinate.getX()) - this.lowerSampleBuffer;
+        int minSampleY = MathHelper.floor(minCoordinate.getZ()) - this.lowerSampleBuffer;
 
-        int maxSampleX = MathHelper.ceil(maxRegionCoordinate.getX()) + this.upperSampleBuffer;
-        int maxSampleY = MathHelper.ceil(maxRegionCoordinate.getZ()) + this.upperSampleBuffer;
+        int maxSampleX = MathHelper.ceil(maxCoordinate.getX()) + this.upperSampleBuffer;
+        int maxSampleY = MathHelper.ceil(maxCoordinate.getZ()) + this.upperSampleBuffer;
 
         return DataView.rect(minSampleX, minSampleY, maxSampleX - minSampleX + 1, maxSampleY - minSampleY + 1);
     }

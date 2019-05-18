@@ -4,13 +4,14 @@ import net.gegy1000.terrarium.server.world.TerrariumDataInitializer;
 import net.gegy1000.terrarium.server.world.TerrariumGeneratorInitializer;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
-import net.gegy1000.terrarium.server.world.generator.ChunkCompositionProcedure;
 import net.gegy1000.terrarium.server.world.generator.TerrariumGenerator;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
+import net.gegy1000.terrarium.server.world.pipeline.composer.biome.BiomeComposer;
+import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
+import net.gegy1000.terrarium.server.world.pipeline.composer.structure.StructureComposer;
+import net.gegy1000.terrarium.server.world.pipeline.composer.surface.SurfaceComposer;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataGenerator;
-import net.gegy1000.terrarium.server.world.pipeline.data.DataEngine;
-import net.gegy1000.terrarium.server.world.pipeline.data.OffThreadDataGenerator;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
@@ -30,7 +31,13 @@ public interface TerrariumWorldData extends ICapabilityProvider {
 
     ColumnDataCache getDataCache();
 
-    ChunkCompositionProcedure getCompositionProcedure();
+    SurfaceComposer getSurfaceComposer();
+
+    DecorationComposer getDecorationComposer();
+
+    StructureComposer getStructureComposer();
+
+    BiomeComposer getBiomeComposer();
 
     Coordinate getSpawnPosition();
 
@@ -46,9 +53,8 @@ public interface TerrariumWorldData extends ICapabilityProvider {
             TerrariumDataInitializer dataInitializer = worldType.createDataInitializer(world, this.settings);
 
             this.generator = generatorInitializer.buildGenerator(PREVIEW_WORLD.get());
-            DataEngine engine = dataInitializer.buildDataEngine();
 
-            ColumnDataGenerator dataGenerator = new OffThreadDataGenerator(engine);
+            ColumnDataGenerator dataGenerator = dataInitializer.buildDataGenerator();
             this.dataCache = new ColumnDataCache(world, dataGenerator);
         }
 
@@ -63,8 +69,23 @@ public interface TerrariumWorldData extends ICapabilityProvider {
         }
 
         @Override
-        public ChunkCompositionProcedure getCompositionProcedure() {
-            return this.generator.getCompositionProcedure();
+        public SurfaceComposer getSurfaceComposer() {
+            return this.generator.getSurfaceComposer();
+        }
+
+        @Override
+        public DecorationComposer getDecorationComposer() {
+            return this.generator.getDecorationComposer();
+        }
+
+        @Override
+        public StructureComposer getStructureComposer() {
+            return this.generator.getStructureComposer();
+        }
+
+        @Override
+        public BiomeComposer getBiomeComposer() {
+            return this.generator.getBiomeComposer();
         }
 
         @Override

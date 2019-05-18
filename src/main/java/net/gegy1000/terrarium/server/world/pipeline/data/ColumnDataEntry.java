@@ -10,7 +10,7 @@ public final class ColumnDataEntry {
     private static final long LEAK_TIME_THRESHOLD = 60 * 1000;
 
     private final ChunkPos columnPos;
-    private final ColumnDataGenerator generator;
+    private final ColumnDataLoader loader;
 
     private int acquireCount;
     private boolean tracked;
@@ -22,27 +22,30 @@ public final class ColumnDataEntry {
 
     private long lastAccessTime = System.currentTimeMillis();
 
-    public ColumnDataEntry(ChunkPos columnPos, ColumnDataGenerator generator) {
+    ColumnDataEntry(ChunkPos columnPos, ColumnDataLoader loader) {
         this.columnPos = columnPos;
-        this.generator = generator;
+        this.loader = loader;
+    }
+
+    private CompletableFuture<ColumnData> enqueue() {
+        return this.loader.getAsync(this.columnPos);
     }
 
     void track() {
-        this.tracked = true;
+        if (!this.tracked) {
+            this.tracked = true;
+            this.enqueue();
+        }
     }
 
     void untrack() {
         this.tracked = false;
     }
 
-    private CompletableFuture<ColumnData> createFuture() {
-        return this.generator.get(this.columnPos);
-    }
-
     public Handle acquire() {
         this.acquireCount++;
         if (this.future == null) {
-            this.future = this.createFuture();
+            this.future = this.enqueue();
         }
         return new Handle();
     }
@@ -52,18 +55,29 @@ public final class ColumnDataEntry {
     }
 
     CompletableFuture<ColumnData> future() {
-        if (this.dropped) throw new IllegalStateException("Cannot get data from dropped entry");
-
-        this.recordAccess();
-
+        this.touch();
         if (this.future == null) {
-            this.future = this.createFuture();
+            this.future = this.enqueue();
         }
 
         return this.future;
     }
 
-    void recordAccess() {
+    ColumnData join() {
+        this.touch();
+        if (this.future != null && this.future.isDone()) {
+            return this.future.join();
+        }
+
+        ColumnData data = this.loader.get(this.columnPos);
+        this.future = CompletableFuture.completedFuture(data);
+
+        return data;
+    }
+
+    void touch() {
+        if (this.dropped) throw new IllegalStateException("Cannot access dropped entry");
+
         this.lastAccessTime = System.currentTimeMillis();
     }
 
@@ -108,7 +122,7 @@ public final class ColumnDataEntry {
         }
 
         public ColumnData join() {
-            return ColumnDataEntry.this.future().join();
+            return ColumnDataEntry.this.join();
         }
 
         public void release() {

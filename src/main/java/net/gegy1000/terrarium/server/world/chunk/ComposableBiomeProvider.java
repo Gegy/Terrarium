@@ -3,7 +3,7 @@ package net.gegy1000.terrarium.server.world.chunk;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.util.Lazy;
-import net.gegy1000.terrarium.server.world.generator.ChunkCompositionProcedure;
+import net.gegy1000.terrarium.server.world.pipeline.composer.biome.BiomeComposer;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnData;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataEntry;
@@ -25,7 +25,7 @@ public class ComposableBiomeProvider extends BiomeProvider {
     private final World world;
 
     private final Lazy<ColumnDataCache> dataCache;
-    private final Lazy<ChunkCompositionProcedure> compositionProcedure;
+    private final Lazy<BiomeComposer> biomeComposer;
 
     private final BiomeCache biomeCache = new BiomeCache(this);
 
@@ -40,7 +40,7 @@ public class ComposableBiomeProvider extends BiomeProvider {
             throw new IllegalStateException("Tried to load ColumnDataCache before it was present");
         });
 
-        this.compositionProcedure = new Lazy.WorldCap<>(world, TerrariumWorldData::getCompositionProcedure);
+        this.biomeComposer = new Lazy.WorldCap<>(world, TerrariumWorldData::getBiomeComposer);
     }
 
     @Override
@@ -109,13 +109,13 @@ public class ComposableBiomeProvider extends BiomeProvider {
     private void populateArea(Biome[] resultBiomes, int x, int z, int width, int height) {
         ColumnDataCache dataCache = this.dataCache.get();
 
-        ChunkCompositionProcedure compositionProcedure = this.compositionProcedure.get();
+        BiomeComposer biomeComposer = this.biomeComposer.get();
 
         if (this.isChunk(x, z, width, height)) {
             ChunkPos columnPos = new ChunkPos(x >> 4, z >> 4);
             try (ColumnDataEntry.Handle handle = dataCache.acquireEntry(columnPos)) {
                 ColumnData data = handle.join();
-                Biome[] biomeBuffer = compositionProcedure.composeBiomes(data, columnPos);
+                Biome[] biomeBuffer = biomeComposer.composeBiomes(data, columnPos);
                 System.arraycopy(biomeBuffer, 0, resultBiomes, 0, biomeBuffer.length);
             }
             return;
@@ -137,7 +137,7 @@ public class ComposableBiomeProvider extends BiomeProvider {
             for (ColumnDataEntry.Handle handle : columnHandles) {
                 ColumnData data = handle.join();
                 ChunkPos columnPos = handle.getColumnPos();
-                Biome[] biomeBuffer = compositionProcedure.composeBiomes(data, columnPos);
+                Biome[] biomeBuffer = biomeComposer.composeBiomes(data, columnPos);
 
                 int minColumnX = columnPos.getXStart();
                 int minColumnZ = columnPos.getZStart();

@@ -6,7 +6,7 @@ import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.UnsignedByteRaster;
 import net.minecraft.util.math.MathHelper;
 
-public final class SlopeProducer {
+public final class ProduceSlopeOp {
     public static DataOp<UnsignedByteRaster> produce(DataOp<ShortRaster> heights) {
         return DataOp.of((engine, view) -> {
             DataView sourceView = view.grow(1, 1, 1, 1);

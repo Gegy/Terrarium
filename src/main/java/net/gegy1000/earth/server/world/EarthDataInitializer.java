@@ -18,13 +18,13 @@ import net.gegy1000.earth.server.world.pipeline.source.tile.WaterRaster;
 import net.gegy1000.earth.server.world.soil.SoilConfig;
 import net.gegy1000.terrarium.server.world.TerrariumDataInitializer;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
-import net.gegy1000.terrarium.server.world.pipeline.data.DataEngine;
+import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataGenerator;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataOp;
-import net.gegy1000.terrarium.server.world.pipeline.data.function.DataMerger;
-import net.gegy1000.terrarium.server.world.pipeline.data.function.InterpolationScaler;
+import net.gegy1000.terrarium.server.world.pipeline.data.function.DataMergeOp;
+import net.gegy1000.terrarium.server.world.pipeline.data.function.InterpolationScaleOp;
 import net.gegy1000.terrarium.server.world.pipeline.data.function.RasterSourceSampler;
-import net.gegy1000.terrarium.server.world.pipeline.data.function.SlopeProducer;
-import net.gegy1000.terrarium.server.world.pipeline.data.function.VoronoiScaler;
+import net.gegy1000.terrarium.server.world.pipeline.data.function.ProduceSlopeOp;
+import net.gegy1000.terrarium.server.world.pipeline.data.function.VoronoiScaleOp;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.FloatRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ObjRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
@@ -46,21 +46,21 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
     }
 
     @Override
-    public DataEngine buildDataEngine() {
+    public ColumnDataGenerator buildDataGenerator() {
         int heightOrigin = this.ctx.settings.getInteger(HEIGHT_ORIGIN);
-        InterpolationScaler heightScaler = this.selectScaler(this.ctx.settings);
+        InterpolationScaleOp heightScaleOp = this.selectScaleOp(this.ctx.settings);
 
         SrtmHeightSource heightSource = new SrtmHeightSource(this.ctx.srtmRaster, "srtm_heights");
 
         DataOp<ShortRaster> heightSampler = RasterSourceSampler.sampleShort(heightSource);
-        DataOp<ShortRaster> heights = heightScaler.scaleShortsFrom(heightSampler, this.ctx.srtmRaster);
+        DataOp<ShortRaster> heights = heightScaleOp.scaleShortsFrom(heightSampler, this.ctx.srtmRaster);
 
-        DataOp<UnsignedByteRaster> slope = SlopeProducer.produce(heightSampler);
-        slope = InterpolationScaler.LINEAR.scaleFrom(slope, this.ctx.srtmRaster, UnsignedByteRaster::create);
+        DataOp<UnsignedByteRaster> slope = ProduceSlopeOp.produce(heightSampler);
+        slope = InterpolationScaleOp.LINEAR.scaleFrom(slope, this.ctx.srtmRaster, UnsignedByteRaster::create);
 
         LandCoverSource landCoverSource = new LandCoverSource(this.ctx.landcoverRaster, "landcover");
         DataOp<ObjRaster<Cover>> coverClassification = RasterSourceSampler.sampleObj(landCoverSource, Cover.NO_DATA);
-        coverClassification = VoronoiScaler.scaleFrom(coverClassification, this.ctx.landcoverRaster, view -> ObjRaster.create(Cover.NO_DATA, view));
+        coverClassification = VoronoiScaleOp.scaleFrom(coverClassification, this.ctx.landcoverRaster, view -> ObjRaster.create(Cover.NO_DATA, view));
 
         DataOp<ObjRaster<SoilConfig>> soil = SoilProducer.produce(coverClassification);
 
@@ -84,12 +84,12 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
         ClimateSampler climateSampler = new ClimateSampler(TerrariumEarth.getClimateDataset());
 
         DataOp<ShortRaster> annualRainfall = climateSampler.annualRainfall();
-        annualRainfall = InterpolationScaler.LINEAR.scaleShortsFrom(annualRainfall, this.ctx.climateRaster);
+        annualRainfall = InterpolationScaleOp.LINEAR.scaleShortsFrom(annualRainfall, this.ctx.climateRaster);
 
         DataOp<FloatRaster> averageTemperature = climateSampler.averageTemperature();
-        averageTemperature = InterpolationScaler.LINEAR.scaleFloatsFrom(averageTemperature, this.ctx.climateRaster);
+        averageTemperature = InterpolationScaleOp.LINEAR.scaleFloatsFrom(averageTemperature, this.ctx.climateRaster);
 
-        return DataEngine.builder()
+        return ColumnDataGenerator.builder()
                 .with(EarthDataKeys.HEIGHT, heights)
                 .with(EarthDataKeys.SLOPE, slope)
                 .with(EarthDataKeys.COVER, coverClassification)
@@ -146,20 +146,20 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
                 .collect(Collectors.toList());
 
         if (!samplers.isEmpty()) {
-            return DataMerger.merge(samplers);
+            return DataMergeOp.merge(samplers);
         } else {
             return DataOp.completed(new OsmData());
         }
     }
 
-    private InterpolationScaler selectScaler(GenerationSettings properties) {
+    private InterpolationScaleOp selectScaleOp(GenerationSettings properties) {
         double scale = 1.0 / properties.getDouble(WORLD_SCALE);
         if (scale >= 45.0) {
-            return InterpolationScaler.LINEAR;
+            return InterpolationScaleOp.LINEAR;
         } else if (scale >= 20.0) {
-            return InterpolationScaler.COSINE;
+            return InterpolationScaleOp.COSINE;
         } else {
-            return InterpolationScaler.CUBIC;
+            return InterpolationScaleOp.CUBIC;
         }
     }
 }

@@ -5,10 +5,10 @@ import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
 import net.gegy1000.cubicglue.api.ChunkPrimeWriter;
 import net.gegy1000.cubicglue.api.CubicChunkGenerator;
 import net.gegy1000.cubicglue.util.CubicPos;
-import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.util.Lazy;
-import net.gegy1000.terrarium.server.world.generator.ChunkCompositionProcedure;
+import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
+import net.gegy1000.terrarium.server.world.pipeline.composer.surface.SurfaceComposer;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnData;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataEntry;
@@ -26,7 +26,9 @@ import java.util.List;
 public class ComposableCubeGenerator implements CubicChunkGenerator {
     private final World world;
 
-    private final Lazy<ChunkCompositionProcedure> compositionProcedure;
+    private final Lazy<SurfaceComposer> surfaceComposer;
+    private final Lazy<DecorationComposer> decorationComposer;
+
     private final Lazy<ColumnDataCache> dataCache;
 
     private final ColumnDataEntry.Handle[] populationHandles = new ColumnDataEntry.Handle[4];
@@ -34,14 +36,10 @@ public class ComposableCubeGenerator implements CubicChunkGenerator {
     public ComposableCubeGenerator(World world) {
         this.world = world;
 
-        this.compositionProcedure = new Lazy.WorldCap<>(world, TerrariumWorldData::getCompositionProcedure);
-        this.dataCache = new Lazy<>(() -> {
-            TerrariumWorldData capability = this.world.getCapability(TerrariumCapabilities.worldDataCapability, null);
-            if (capability != null) {
-                return capability.getDataCache();
-            }
-            throw new IllegalStateException("Tried to load ColumnDataCache before it was present");
-        });
+        this.surfaceComposer = new Lazy.WorldCap<>(world, TerrariumWorldData::getSurfaceComposer);
+        this.decorationComposer = new Lazy.WorldCap<>(world, TerrariumWorldData::getDecorationComposer);
+
+        this.dataCache = new Lazy.WorldCap<>(world, TerrariumWorldData::getDataCache);
     }
 
     @Override
@@ -50,9 +48,8 @@ public class ComposableCubeGenerator implements CubicChunkGenerator {
 
         ChunkPos columnPos = new ChunkPos(pos.getX(), pos.getZ());
         try (ColumnDataEntry.Handle handle = dataCache.acquireEntry(columnPos)) {
-            ColumnData data = handle.future().join();
-            ChunkCompositionProcedure compositionProcedure = this.compositionProcedure.get();
-            compositionProcedure.composeSurface(data, pos, writer);
+            ColumnData data = handle.join();
+            this.surfaceComposer.get().composeSurface(data, pos, writer);
         }
     }
 
@@ -63,8 +60,8 @@ public class ComposableCubeGenerator implements CubicChunkGenerator {
         // TODO: can we make a limited data cache interface, and create an impl that just takes these handles?
         ColumnDataEntry.Handle[] handles = this.acquirePopulationHandles(pos, dataCache);
 
-        ChunkCompositionProcedure compositionProcedure = this.compositionProcedure.get();
-        compositionProcedure.composeDecoration(dataCache, pos, writer);
+        DecorationComposer decorationComposer = this.decorationComposer.get();
+        decorationComposer.composeDecoration(dataCache, pos, writer);
 
         for (ColumnDataEntry.Handle handle : handles) {
             handle.release();
