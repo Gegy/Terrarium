@@ -1,34 +1,35 @@
+/*
 package net.gegy1000.earth.server.world.pipeline.adapter;
 
 import net.gegy1000.earth.server.world.pipeline.source.tile.WaterRaster;
 import net.gegy1000.terrarium.server.util.SpiralIterator;
-import net.gegy1000.terrarium.server.world.pipeline.adapter.RegionAdapter;
-import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
+import net.gegy1000.terrarium.server.world.pipeline.adapter.ColumnAdapter;
+import net.gegy1000.terrarium.server.world.pipeline.data.ColumnData;
+import net.gegy1000.terrarium.server.world.pipeline.data.DataKey;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
-import net.gegy1000.terrarium.server.world.region.GenerationRegion;
-import net.gegy1000.terrarium.server.world.region.RegionData;
 
 import javax.annotation.Nullable;
 import javax.vecmath.Point2i;
 
-public class WaterLevelingAdapter implements RegionAdapter {
+// TODO
+public class WaterLevelingAdapter implements ColumnAdapter {
     private static final int CENTER_RANGE = GenerationRegion.BUFFER;
     private static final float CENTER_RANGE_SQUARED = (CENTER_RANGE * CENTER_RANGE) * 2.0F;
 
-    private final RegionComponentType<WaterRaster> waterComponent;
-    private final RegionComponentType<ShortRaster> heightComponent;
+    private final DataKey<WaterRaster> waterComponent;
+    private final DataKey<ShortRaster> heightComponent;
     private final int oceanLevel;
 
-    public WaterLevelingAdapter(RegionComponentType<WaterRaster> waterComponent, RegionComponentType<ShortRaster> heightComponent, int oceanLevel) {
+    public WaterLevelingAdapter(DataKey<WaterRaster> waterComponent, DataKey<ShortRaster> heightComponent, int oceanLevel) {
         this.waterComponent = waterComponent;
         this.heightComponent = heightComponent;
         this.oceanLevel = oceanLevel;
     }
 
     @Override
-    public void adapt(RegionData data, int x, int z, int width, int height) {
-        WaterRaster waterTile = data.getOrExcept(this.waterComponent);
-        ShortRaster heightTile = data.getOrExcept(this.heightComponent);
+    public void apply(ColumnData data, int x, int z, int width, int height) {
+        WaterRaster waterTile = data.get(this.waterComponent);
+        ShortRaster heightTile = data.get(this.heightComponent);
 
         for (int localZ = 0; localZ < height; localZ++) {
             for (int localX = 0; localX < width; localX++) {
@@ -36,7 +37,7 @@ public class WaterLevelingAdapter implements RegionAdapter {
                 if (waterType == WaterRaster.OCEAN) {
                     waterTile.setWaterLevel(localX, localZ, this.oceanLevel);
                 } else if (waterType == WaterRaster.RIVER_CENTER) {
-                    int levelHeight = Math.max(heightTile.getShort(localX, localZ), this.oceanLevel);
+                    int levelHeight = Math.max(heightTile.get(localX, localZ), this.oceanLevel);
                     waterTile.setWaterLevel(localX, localZ, levelHeight);
                 } else if (waterType == WaterRaster.RIVER) {
                     int riverLevel = this.getRiverLevel(waterTile, heightTile, localX, localZ, width, height);
@@ -49,8 +50,8 @@ public class WaterLevelingAdapter implements RegionAdapter {
     private int getRiverLevel(WaterRaster waterTile, ShortRaster heightTile, int localX, int localZ, int width, int height) {
         Point2i riverCenter = getRiverCenter(waterTile, localX, localZ, width, height);
         if (riverCenter != null) {
-            int levelHeight = Math.max(heightTile.getShort(localX, localZ), this.oceanLevel);
-            int centerHeight = Math.max(heightTile.getShort(riverCenter.x, riverCenter.y), this.oceanLevel);
+            int levelHeight = Math.max(heightTile.get(localX, localZ), this.oceanLevel);
+            int centerHeight = Math.max(heightTile.get(riverCenter.x, riverCenter.y), this.oceanLevel);
             if (centerHeight == levelHeight) {
                 return centerHeight;
             }
@@ -71,7 +72,7 @@ public class WaterLevelingAdapter implements RegionAdapter {
                 int globalX = localX + offsetX;
                 int globalZ = localZ + offsetZ;
                 if (globalX >= 0 && globalZ >= 0 && globalX < width && globalZ < height) {
-                    totalValue += heightTile.getShort(globalX, globalZ);
+                    totalValue += heightTile.get(globalX, globalZ);
                     count++;
                 }
             }
@@ -94,3 +95,4 @@ public class WaterLevelingAdapter implements RegionAdapter {
         return null;
     }
 }
+*/

@@ -1,31 +1,26 @@
 package net.gegy1000.terrarium.server.world.generator;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Sets;
 import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
 import net.gegy1000.cubicglue.api.ChunkPrimeWriter;
 import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.terrarium.server.util.ArrayUtils;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
-import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.pipeline.composer.ChunkComposer;
+import net.gegy1000.terrarium.server.world.pipeline.data.ColumnData;
+import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.pipeline.composer.biome.BiomeComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.structure.StructureComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.SurfaceComposer;
-import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.init.Biomes;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.gen.IChunkGenerator;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 public class BasicTerrariumGenerator implements TerrariumGenerator {
     private final ChunkCompositionProcedure compositionProcedure;
@@ -62,27 +57,27 @@ public class BasicTerrariumGenerator implements TerrariumGenerator {
         private Builder() {
         }
 
-        public Builder withSurfaceComposer(SurfaceComposer composer) {
+        public Builder addSurfaceComposer(SurfaceComposer composer) {
             this.surfaceComposers.add(composer);
             return this;
         }
 
-        public Builder withStructureComposer(StructureComposer composer) {
+        public Builder addStructureComposer(StructureComposer composer) {
             this.structureComposers.add(composer);
             return this;
         }
 
-        public Builder withDecorationComposer(DecorationComposer composer) {
+        public Builder addDecorationComposer(DecorationComposer composer) {
             this.decorationComposers.add(composer);
             return this;
         }
 
-        public Builder withBiomeComposer(BiomeComposer composer) {
+        public Builder setBiomeComposer(BiomeComposer composer) {
             this.biomeComposer = composer;
             return this;
         }
 
-        public Builder withSpawnPosition(Coordinate coordinate) {
+        public Builder setSpawnPosition(Coordinate coordinate) {
             this.spawnPosition = coordinate;
             return this;
         }
@@ -108,38 +103,38 @@ public class BasicTerrariumGenerator implements TerrariumGenerator {
         }
 
         @Override
-        public void composeSurface(RegionGenerationHandler regionHandler, CubicPos pos, ChunkPrimeWriter writer) {
+        public void composeSurface(ColumnData data, CubicPos pos, ChunkPrimeWriter writer) {
             for (SurfaceComposer composer : this.surfaceComposers) {
-                composer.composeSurface(regionHandler, pos, writer);
+                composer.composeSurface(data, pos, writer);
             }
         }
 
         @Override
-        public void composeDecoration(RegionGenerationHandler regionHandler, CubicPos pos, ChunkPopulationWriter writer) {
+        public void composeDecoration(ColumnDataCache dataCache, CubicPos pos, ChunkPopulationWriter writer) {
             for (DecorationComposer composer : this.decorationComposers) {
-                composer.composeDecoration(regionHandler, pos, writer);
+                composer.composeDecoration(dataCache, pos, writer);
             }
         }
 
         @Override
-        public Biome[] composeBiomes(RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
+        public Biome[] composeBiomes(ColumnData data, ChunkPos columnPos) {
             if (this.biomeComposer == null) {
-                return ArrayUtils.defaulted(new Biome[16 * 16], Biomes.DEFAULT);
+                return ArrayUtils.fill(new Biome[16 * 16], Biomes.DEFAULT);
             }
-            return this.biomeComposer.composeBiomes(regionHandler, chunkX, chunkZ);
+            return this.biomeComposer.composeBiomes(data, columnPos);
         }
 
         @Override
-        public void composeStructures(IChunkGenerator generator, ChunkPrimer primer, RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
+        public void composeStructures(IChunkGenerator generator, ChunkPrimer primer, ColumnDataCache dataCache, int chunkX, int chunkZ) {
             for (StructureComposer composer : this.structureComposers) {
-                composer.composeStructures(generator, primer, regionHandler, chunkX, chunkZ);
+                composer.composeStructures(generator, primer, dataCache, chunkX, chunkZ);
             }
         }
 
         @Override
-        public void populateStructures(World world, RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
+        public void populateStructures(World world, ColumnDataCache dataCache, int chunkX, int chunkZ) {
             for (StructureComposer composer : this.structureComposers) {
-                composer.populateStructures(world, regionHandler, chunkX, chunkZ);
+                composer.populateStructures(world, dataCache, chunkX, chunkZ);
             }
         }
 
@@ -164,37 +159,6 @@ public class BasicTerrariumGenerator implements TerrariumGenerator {
                 }
             }
             return null;
-        }
-
-        @Override
-        public Set<RegionComponentType<?>> getSurfaceDependencies() {
-            return this.getDependencies(this.surfaceComposers);
-        }
-
-        @Override
-        public Set<RegionComponentType<?>> getStructureDependencies() {
-            return this.getDependencies(this.structureComposers);
-        }
-
-        @Override
-        public Set<RegionComponentType<?>> getDecorationDependencies() {
-            return this.getDependencies(this.decorationComposers);
-        }
-
-        @Override
-        public Set<RegionComponentType<?>> getBiomeDependencies() {
-            if (this.biomeComposer == null) {
-                return Collections.emptySet();
-            }
-            return Sets.newHashSet(this.biomeComposer.getDependencies());
-        }
-
-        private Set<RegionComponentType<?>> getDependencies(Collection<? extends ChunkComposer> composers) {
-            Set<RegionComponentType<?>> dependencies = new HashSet<>();
-            for (ChunkComposer composer : composers) {
-                Collections.addAll(dependencies, composer.getDependencies());
-            }
-            return dependencies;
         }
     }
 }

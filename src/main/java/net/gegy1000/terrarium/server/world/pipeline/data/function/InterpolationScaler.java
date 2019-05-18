@@ -4,43 +4,44 @@ import net.gegy1000.terrarium.server.util.Interpolation;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataView;
-import net.gegy1000.terrarium.server.world.pipeline.data.DataFuture;
-import net.gegy1000.terrarium.server.world.pipeline.data.RasterConstructor;
+import net.gegy1000.terrarium.server.world.pipeline.data.DataOp;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.FloatRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.NumberRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.minecraft.util.math.MathHelper;
 
-public enum InterpolationScaler {
-    LINEAR(Interpolation.Method.LINEAR),
-    COSINE(Interpolation.Method.COSINE),
-    CUBIC(Interpolation.Method.CUBIC);
+import java.util.function.Function;
 
-    private final Interpolation.Method method;
+public enum InterpolationScaler {
+    LINEAR(Interpolation.Function.LINEAR),
+    COSINE(Interpolation.Function.COSINE),
+    CUBIC(Interpolation.Function.CUBIC);
+
+    private final Interpolation.Function function;
     private final double[][] sampleBuffer;
     private final int lowerSampleBuffer;
     private final int upperSampleBuffer;
 
-    InterpolationScaler(Interpolation.Method method) {
-        this.method = method;
+    InterpolationScaler(Interpolation.Function function) {
+        this.function = function;
 
-        int pointCount = method.getPointCount();
+        int pointCount = function.getPointCount();
         this.sampleBuffer = new double[pointCount][pointCount];
 
-        this.lowerSampleBuffer = this.method.getBackward();
-        this.upperSampleBuffer = this.method.getForward();
+        this.lowerSampleBuffer = this.function.getBackward();
+        this.upperSampleBuffer = this.function.getForward();
     }
 
-    public DataFuture<ShortRaster> scaleShortFrom(DataFuture<ShortRaster> data, CoordinateState src) {
-        return this.scaleFrom(data, src, ShortRaster::new);
+    public DataOp<ShortRaster> scaleShortsFrom(DataOp<ShortRaster> data, CoordinateState src) {
+        return this.scaleFrom(data, src, ShortRaster::create);
     }
 
-    public DataFuture<FloatRaster> scaleFloatFrom(DataFuture<FloatRaster> data, CoordinateState src) {
-        return this.scaleFrom(data, src, FloatRaster::new);
+    public DataOp<FloatRaster> scaleFloatsFrom(DataOp<FloatRaster> data, CoordinateState src) {
+        return this.scaleFrom(data, src, FloatRaster::create);
     }
 
-    public <T extends NumberRaster<?>> DataFuture<T> scaleFrom(DataFuture<T> data, CoordinateState src, RasterConstructor<T> constructor) {
-        return DataFuture.of((engine, view) -> {
+    public <T extends NumberRaster<?>> DataOp<T> scaleFrom(DataOp<T> data, CoordinateState src, Function<DataView, T> function) {
+        return DataOp.of((engine, view) -> {
             DataView srcView = this.getSourceView(view, src);
 
             double blockSizeX = view.getWidth();
@@ -58,7 +59,7 @@ public enum InterpolationScaler {
             double originOffsetZ = minRegionCoordinate.getZ() - srcView.getY();
 
             return engine.load(data, srcView).thenApply(source -> {
-                T result = constructor.construct(view);
+                T result = function.apply(view);
                 this.lerpRaster(source, result, originOffsetX, originOffsetZ, scaleFactorX, scaleFactorZ);
                 return result;
             });
@@ -103,12 +104,12 @@ public enum InterpolationScaler {
         int maxSampleX = MathHelper.ceil(maxRegionCoordinate.getX()) + this.upperSampleBuffer;
         int maxSampleY = MathHelper.ceil(maxRegionCoordinate.getZ()) + this.upperSampleBuffer;
 
-        return new DataView(minSampleX, minSampleY, maxSampleX - minSampleX + 1, maxSampleY - minSampleY + 1);
+        return DataView.rect(minSampleX, minSampleY, maxSampleX - minSampleX + 1, maxSampleY - minSampleY + 1);
     }
 
     private <T extends NumberRaster<?>> double lerp(T source, int originX, int originZ, double intermediateX, double intermediateZ) {
-        int backward = this.method.getBackward();
-        int pointCount = this.method.getPointCount();
+        int backward = this.function.getBackward();
+        int pointCount = this.function.getPointCount();
         for (int sampleZ = 0; sampleZ < pointCount; sampleZ++) {
             int globalZ = originZ + sampleZ - backward;
             for (int sampleX = 0; sampleX < pointCount; sampleX++) {
@@ -117,6 +118,6 @@ public enum InterpolationScaler {
             }
         }
 
-        return this.method.lerp2d(this.sampleBuffer, intermediateX, intermediateZ);
+        return this.function.lerp2d(this.sampleBuffer, intermediateX, intermediateZ);
     }
 }

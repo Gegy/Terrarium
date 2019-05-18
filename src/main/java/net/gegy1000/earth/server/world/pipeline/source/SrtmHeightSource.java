@@ -3,10 +3,10 @@ package net.gegy1000.earth.server.world.pipeline.source;
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
 import net.gegy1000.terrarium.server.world.pipeline.source.SourceResult;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.minecraft.util.ResourceLocation;
 import org.tukaani.xz.SingleXZInputStream;
 
@@ -23,7 +23,7 @@ import java.util.zip.GZIPInputStream;
 
 public class SrtmHeightSource extends TiledDataSource<ShortRaster> {
     public static final int TILE_SIZE = 1200;
-    private static final ShortRaster DEFAULT_TILE = new ShortRaster(new short[TILE_SIZE * TILE_SIZE], TILE_SIZE, TILE_SIZE);
+    private static final ShortRaster DEFAULT_TILE = ShortRaster.createSquare(TILE_SIZE);
 
     private static final Set<DataTilePos> VALID_TILES = new HashSet<>();
 
@@ -105,18 +105,33 @@ public class SrtmHeightSource extends TiledDataSource<ShortRaster> {
     @Override
     public SourceResult<ShortRaster> parseStream(DataTilePos pos, InputStream stream) throws IOException {
         try (DataInputStream input = new DataInputStream(stream)) {
-            short[] heightmap = new short[TILE_SIZE * TILE_SIZE];
+            ShortRaster heightmap = ShortRaster.createSquare(TILE_SIZE);
+
             short origin = input.readShort();
             if (origin == -1) {
-                for (int i = 0; i < heightmap.length; i++) {
-                    heightmap[i] = input.readShort();
-                }
+                this.parseAbsolute(input, heightmap);
             } else {
-                for (int i = 0; i < heightmap.length; i++) {
-                    heightmap[i] = (short) ((input.readByte() & 0xFF) + origin);
-                }
+                this.parseRelative(input, heightmap, origin);
             }
-            return SourceResult.success(new ShortRaster(heightmap, TILE_SIZE, TILE_SIZE));
+
+            return SourceResult.success(heightmap);
+        }
+    }
+
+    private void parseRelative(DataInputStream input, ShortRaster heightmap, short origin) throws IOException {
+        for (int y = 0; y < TILE_SIZE; y++) {
+            for (int x = 0; x < TILE_SIZE; x++) {
+                short height = (short) ((input.readByte() & 0xFF) + origin);
+                heightmap.set(x, y, height);
+            }
+        }
+    }
+
+    private void parseAbsolute(DataInputStream input, ShortRaster heightmap) throws IOException {
+        for (int y = 0; y < TILE_SIZE; y++) {
+            for (int x = 0; x < TILE_SIZE; x++) {
+                heightmap.set(x, y, input.readShort());
+            }
         }
     }
 }

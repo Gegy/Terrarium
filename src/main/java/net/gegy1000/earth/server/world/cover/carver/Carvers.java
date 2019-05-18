@@ -2,7 +2,7 @@ package net.gegy1000.earth.server.world.cover.carver;
 
 import net.gegy1000.terrarium.server.world.layer.OutlineEdgeLayer;
 import net.gegy1000.terrarium.server.world.layer.SelectionSeedLayer;
-import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
+import net.gegy1000.terrarium.server.world.pipeline.data.DataKey;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -14,7 +14,7 @@ import net.minecraft.world.gen.layer.GenLayerZoom;
 public final class Carvers {
     private static final IBlockState WATER = Blocks.WATER.getDefaultState();
 
-    public static CoverCarver flooded(RegionComponentType<ShortRaster> heightComponent) {
+    public static CoverCarver flooded(DataKey<ShortRaster> heightKey) {
         GenLayer water = new SelectionSeedLayer(2, 2);
         water = new GenLayerFuzzyZoom(11000, water);
         water = new GenLayerVoronoiZoom(12000, water);
@@ -25,18 +25,16 @@ public final class Carvers {
         waterLayer.initWorldGenSeed(0);
 
         return (cubicPos, writer, rasters) -> {
-            int[] sampledWater = CoverCarver.sampleChunk(cubicPos, waterLayer);
-            ShortRaster heightRaster = rasters.get(heightComponent);
+            rasters.get(heightKey).ifPresent(heightRaster -> {
+                int[] sampledWater = CoverCarver.sampleChunk(cubicPos, waterLayer);
 
-            for (int localZ = 0; localZ < 16; localZ++) {
-                for (int localX = 0; localX < 16; localX++) {
-                    int waterValue = sampledWater[localX + localZ * 16];
+                heightRaster.iterate((value, x, z) -> {
+                    int waterValue = sampledWater[x + z * 16];
                     if (waterValue == 3) {
-                        short height = heightRaster.getShort(localX, localZ);
-                        writer.set(localX, height, localZ, WATER);
+                        writer.set(x, value, z, WATER);
                     }
-                }
-            }
+                });
+            });
         };
     }
 }

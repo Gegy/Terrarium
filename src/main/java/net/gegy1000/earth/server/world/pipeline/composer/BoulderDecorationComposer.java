@@ -4,10 +4,11 @@ import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
 import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.cubicglue.util.PseudoRandomMap;
 import net.gegy1000.terrarium.server.world.feature.BoulderGenerator;
-import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
+import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataCache;
+import net.gegy1000.terrarium.server.world.pipeline.data.DataKey;
+import net.gegy1000.terrarium.server.world.pipeline.data.DataView;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.UnsignedByteRaster;
-import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.block.BlockStone;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
@@ -22,39 +23,41 @@ public class BoulderDecorationComposer implements DecorationComposer {
 
     private static final int MIN_SLOPE = 40;
 
-    private final RegionComponentType<UnsignedByteRaster> slopeComponent;
+    private final UnsignedByteRaster.Sampler slopeSampler;
 
     private final PseudoRandomMap decorationMap;
     private final Random random;
 
-    public BoulderDecorationComposer(World world, RegionComponentType<UnsignedByteRaster> slopeComponent) {
-        this.slopeComponent = slopeComponent;
+    public BoulderDecorationComposer(World world, DataKey<UnsignedByteRaster> slopeKey) {
+        this.slopeSampler = UnsignedByteRaster.sampler(slopeKey);
 
         this.decorationMap = new PseudoRandomMap(world, DECORATION_SEED);
         this.random = new Random(0);
     }
 
     @Override
-    public void composeDecoration(RegionGenerationHandler regionHandler, CubicPos pos, ChunkPopulationWriter writer) {
-        int globalX = pos.getMinX();
-        int globalY = pos.getMinY();
-        int globalZ = pos.getMinZ();
+    public void composeDecoration(ColumnDataCache dataCache, CubicPos pos, ChunkPopulationWriter writer) {
+        int globalX = pos.getCenterX();
+        int globalY = pos.getCenterY();
+        int globalZ = pos.getCenterZ();
 
         this.decorationMap.initPosSeed(globalX, globalY, globalZ);
         this.random.setSeed(this.decorationMap.next());
 
-        UnsignedByteRaster slopeRaster = regionHandler.getChunkRaster(this.slopeComponent);
+        DataView view = DataView.square(globalX, globalZ, 16);
+        UnsignedByteRaster slopeRaster = this.slopeSampler.sample(dataCache, view);
 
         BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
         for (int i = 0; i < 2; i++) {
-            int localX = this.random.nextInt(16);
-            int localZ = this.random.nextInt(16);
-
             if (this.random.nextInt(16) == 0) {
-                if (slopeRaster.getByte(localX, localZ) >= MIN_SLOPE || this.random.nextInt(30) == 0) {
-                    int spawnX = localX + globalX + 8;
-                    int spawnZ = localZ + globalZ + 8;
+                int localX = this.random.nextInt(16);
+                int localZ = this.random.nextInt(16);
 
+                int spawnX = localX + globalX;
+                int spawnZ = localZ + globalZ;
+
+                int slope = slopeRaster.get(localX, localZ);
+                if (slope >= MIN_SLOPE || this.random.nextInt(30) == 0) {
                     mutablePos.setPos(spawnX, 0, spawnZ);
                     BlockPos surface = writer.getSurface(mutablePos);
                     if (surface != null) {
@@ -63,10 +66,5 @@ public class BoulderDecorationComposer implements DecorationComposer {
                 }
             }
         }
-    }
-
-    @Override
-    public RegionComponentType<?>[] getDependencies() {
-        return new RegionComponentType[] { this.slopeComponent };
     }
 }

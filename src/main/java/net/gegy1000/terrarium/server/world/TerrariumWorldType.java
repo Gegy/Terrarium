@@ -43,7 +43,9 @@ public abstract class TerrariumWorldType implements CubicWorldType {
         this.customization = this.buildCustomization();
     }
 
-    public abstract TerrariumGeneratorInitializer createInitializer(World world, GenerationSettings settings);
+    public abstract TerrariumGeneratorInitializer createGeneratorInitializer(World world, GenerationSettings settings);
+
+    public abstract TerrariumDataInitializer createDataInitializer(World world, GenerationSettings settings);
 
     public abstract Collection<ICapabilityProvider> createCapabilities(World world, GenerationSettings settings);
 

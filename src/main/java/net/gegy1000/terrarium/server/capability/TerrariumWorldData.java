@@ -1,12 +1,16 @@
 package net.gegy1000.terrarium.server.capability;
 
+import net.gegy1000.terrarium.server.world.TerrariumDataInitializer;
 import net.gegy1000.terrarium.server.world.TerrariumGeneratorInitializer;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.generator.ChunkCompositionProcedure;
 import net.gegy1000.terrarium.server.world.generator.TerrariumGenerator;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
-import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
+import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataCache;
+import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataGenerator;
+import net.gegy1000.terrarium.server.world.pipeline.data.DataEngine;
+import net.gegy1000.terrarium.server.world.pipeline.data.OffThreadDataGenerator;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
@@ -24,7 +28,7 @@ public interface TerrariumWorldData extends ICapabilityProvider {
 
     GenerationSettings getSettings();
 
-    RegionGenerationHandler getRegionHandler();
+    ColumnDataCache getDataCache();
 
     ChunkCompositionProcedure getCompositionProcedure();
 
@@ -33,14 +37,19 @@ public interface TerrariumWorldData extends ICapabilityProvider {
     class Implementation implements TerrariumWorldData {
         private final GenerationSettings settings;
         private final TerrariumGenerator generator;
-        private final RegionGenerationHandler regionHandler;
+        private final ColumnDataCache dataCache;
 
         public Implementation(World world, TerrariumWorldType worldType) {
             this.settings = GenerationSettings.parse(world);
 
-            TerrariumGeneratorInitializer initializer = worldType.createInitializer(world, this.settings);
-            this.generator = initializer.buildGenerator(PREVIEW_WORLD.get());
-            this.regionHandler = new RegionGenerationHandler(world, initializer.buildDataProvider());
+            TerrariumGeneratorInitializer generatorInitializer = worldType.createGeneratorInitializer(world, this.settings);
+            TerrariumDataInitializer dataInitializer = worldType.createDataInitializer(world, this.settings);
+
+            this.generator = generatorInitializer.buildGenerator(PREVIEW_WORLD.get());
+            DataEngine engine = dataInitializer.buildDataEngine();
+
+            ColumnDataGenerator dataGenerator = new OffThreadDataGenerator(engine);
+            this.dataCache = new ColumnDataCache(world, dataGenerator);
         }
 
         @Override
@@ -49,8 +58,8 @@ public interface TerrariumWorldData extends ICapabilityProvider {
         }
 
         @Override
-        public RegionGenerationHandler getRegionHandler() {
-            return this.regionHandler;
+        public ColumnDataCache getDataCache() {
+            return this.dataCache;
         }
 
         @Override

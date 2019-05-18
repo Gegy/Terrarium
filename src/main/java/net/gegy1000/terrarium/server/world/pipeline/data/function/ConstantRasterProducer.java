@@ -1,9 +1,8 @@
 package net.gegy1000.terrarium.server.world.pipeline.data.function;
 
-import net.gegy1000.terrarium.server.world.pipeline.data.DataFuture;
-import net.gegy1000.terrarium.server.world.pipeline.data.RasterConstructor;
+import net.gegy1000.terrarium.server.world.pipeline.data.DataOp;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ByteRaster;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.RasterData;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.ObjRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.UnsignedByteRaster;
 
@@ -11,34 +10,33 @@ import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
 public class ConstantRasterProducer {
-    public static DataFuture<ByteRaster> byteRaster(byte value) {
-        return DataFuture.of((engine, view) -> {
-            ByteRaster result = new ByteRaster(view);
-            Arrays.fill(result.getByteData(), value);
-            return CompletableFuture.completedFuture(result);
-        });
-    }
-
-    public static DataFuture<UnsignedByteRaster> unsignedByteRaster(int value) {
-        return DataFuture.of((engine, view) -> {
-            UnsignedByteRaster result = new UnsignedByteRaster(view);
-            Arrays.fill(result.getByteData(), (byte) (value & 0xFF));
-            return CompletableFuture.completedFuture(result);
-        });
-    }
-
-    public static DataFuture<ShortRaster> shortRaster(short value) {
-        return DataFuture.of((engine, view) -> {
-            ShortRaster result = new ShortRaster(view);
-            Arrays.fill(result.getShortData(), value);
-            return CompletableFuture.completedFuture(result);
-        });
-    }
-
-    public static <T extends RasterData<V>, V> DataFuture<T> objectRaster(RasterConstructor<T> constructor, V value) {
-        return DataFuture.of((engine, view) -> {
-            T result = constructor.construct(view);
+    public static DataOp<ByteRaster> bytes(byte value) {
+        return DataOp.of((engine, view) -> {
+            ByteRaster result = ByteRaster.create(view);
             Arrays.fill(result.getData(), value);
+            return CompletableFuture.completedFuture(result);
+        });
+    }
+
+    public static DataOp<UnsignedByteRaster> unsignedBytes(int value) {
+        return DataOp.of((engine, view) -> {
+            UnsignedByteRaster result = UnsignedByteRaster.create(view);
+            Arrays.fill(result.getData(), (byte) (value & 0xFF));
+            return CompletableFuture.completedFuture(result);
+        });
+    }
+
+    public static DataOp<ShortRaster> shorts(short value) {
+        return DataOp.of((engine, view) -> {
+            ShortRaster result = ShortRaster.create(view);
+            Arrays.fill(result.getData(), value);
+            return CompletableFuture.completedFuture(result);
+        });
+    }
+
+    public static <T> DataOp<ObjRaster<T>> objects(T value) {
+        return DataOp.of((engine, view) -> {
+            ObjRaster<T> result = ObjRaster.create(value, view);
             return CompletableFuture.completedFuture(result);
         });
     }

@@ -1,6 +1,6 @@
 package net.gegy1000.earth.server.world.cover;
 
-public enum CoverClassification {
+public enum Cover {
     NO_DATA(0, CoverConfigurators.NONE),
     RAINFED_CROPLAND(10, CoverConfigurators.NONE), // TODO
     HERBACEOUS_COVER(11, CoverConfigurators.NONE), // TODO
@@ -40,13 +40,13 @@ public enum CoverClassification {
     WATER(210, CoverConfigurators.WATER),
     PERMANENT_SNOW(220, CoverConfigurators.SNOWY);
 
-    public static final CoverClassification[] TYPES = CoverClassification.values();
-    public static final CoverClassification[] CLASSIFICATION_IDS = new CoverClassification[256];
+    public static final Cover[] TYPES = Cover.values();
+    public static final Cover[] CLASSIFICATION_IDS = new Cover[256];
 
     private final byte id;
     private final CoverConfig config;
 
-    CoverClassification(int id, CoverConfigurator configurator) {
+    Cover(int id, CoverConfigurator configurator) {
         this.id = (byte) (id & 0xFF);
 
         this.config = new CoverConfig();
@@ -61,8 +61,8 @@ public enum CoverClassification {
         return this.config;
     }
 
-    public static CoverClassification get(int id) {
-        CoverClassification classification = CLASSIFICATION_IDS[id & 0xFF];
+    public static Cover get(int id) {
+        Cover classification = CLASSIFICATION_IDS[id & 0xFF];
         if (classification == null) {
             return NO_DATA;
         }
@@ -70,7 +70,7 @@ public enum CoverClassification {
     }
 
     static {
-        for (CoverClassification classification : TYPES) {
+        for (Cover classification : TYPES) {
             CLASSIFICATION_IDS[classification.id & 0xFF] = classification;
         }
     }

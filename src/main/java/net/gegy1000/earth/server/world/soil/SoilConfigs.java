@@ -19,7 +19,6 @@ public class SoilConfigs {
     public static final SoilConfig GRAVEL = new UnarySoilConfig(GRAVEL_HORIZON);
 
     public static final SoilConfig LEPTOSOL = new BinarySoilConfig(GRAVEL_HORIZON, STONE_HORIZON);
-    public static final SoilConfig ALBELUVISOL = new TernarySoilConfig(LOAMY_GRASS_HORIZON, CLAY_HORIZON, SILTY_DIRT_HORIZON);
     public static final SoilConfig PLINTHOSOL = new BinarySoilConfig(GRASS_HORIZON, PLINTHOSOL_SUBSOIL);
     public static final SoilConfig PODZOL = new BinarySoilConfig(PODZOL_HORIZON, DIRT_HORIZON);
     public static final SoilConfig REGOSOL = new TernarySoilConfig(SANDY_GRASS_HORIZON, SANDY_DIRT_HORIZON, STONE_HORIZON);

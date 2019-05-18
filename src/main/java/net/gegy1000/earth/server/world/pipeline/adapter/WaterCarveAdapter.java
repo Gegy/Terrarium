@@ -1,28 +1,30 @@
+/*
 package net.gegy1000.earth.server.world.pipeline.adapter;
 
 import net.gegy1000.earth.server.world.pipeline.source.tile.WaterRaster;
-import net.gegy1000.terrarium.server.world.pipeline.adapter.RegionAdapter;
-import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
+import net.gegy1000.terrarium.server.world.pipeline.adapter.ColumnAdapter;
+import net.gegy1000.terrarium.server.world.pipeline.data.ColumnData;
+import net.gegy1000.terrarium.server.world.pipeline.data.DataKey;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
-import net.gegy1000.terrarium.server.world.region.RegionData;
 
-public class WaterCarveAdapter implements RegionAdapter {
+// TODO
+public class WaterCarveAdapter implements ColumnAdapter {
     private static final int SMOOTH_RANGE = 5;
 
-    private final RegionComponentType<WaterRaster> waterComponent;
-    private final RegionComponentType<ShortRaster> heightComponent;
+    private final DataKey<WaterRaster> waterComponent;
+    private final DataKey<ShortRaster> heightComponent;
     private final int oceanDepth;
 
-    public WaterCarveAdapter(RegionComponentType<WaterRaster> waterComponent, RegionComponentType<ShortRaster> heightComponent, int oceanDepth) {
+    public WaterCarveAdapter(DataKey<WaterRaster> waterComponent, DataKey<ShortRaster> heightComponent, int oceanDepth) {
         this.waterComponent = waterComponent;
         this.heightComponent = heightComponent;
         this.oceanDepth = oceanDepth;
     }
 
     @Override
-    public void adapt(RegionData data, int x, int z, int width, int height) {
-        WaterRaster waterTile = data.getOrExcept(this.waterComponent);
-        ShortRaster heightTile = data.getOrExcept(this.heightComponent);
+    public void apply(ColumnData data, int x, int z, int width, int height) {
+        WaterRaster waterTile = data.get(this.waterComponent);
+        ShortRaster heightTile = data.get(this.heightComponent);
 
         for (int localZ = 0; localZ < height; localZ++) {
             for (int localX = 0; localX < width; localX++) {
@@ -33,7 +35,7 @@ public class WaterCarveAdapter implements RegionAdapter {
                     double depthScale = this.computeDepthScale(waterTile, width, height, localZ, localX);
 
                     double carvedHeight = waterLevel - depth * depthScale;
-                    heightTile.setShort(localX, localZ, (short) Math.round(carvedHeight));
+                    heightTile.set(localX, localZ, (short) Math.round(carvedHeight));
                 }
             }
         }
@@ -68,3 +70,4 @@ public class WaterCarveAdapter implements RegionAdapter {
         return SMOOTH_RANGE;
     }
 }
+*/

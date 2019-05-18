@@ -5,7 +5,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.util.FutureUtil;
-import net.gegy1000.terrarium.server.world.pipeline.DataTileKey;
 import net.gegy1000.terrarium.server.world.pipeline.data.Data;
 import org.apache.commons.io.IOUtils;
 
@@ -27,11 +26,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public enum DataSourceHandler {
     INSTANCE;
 
-    private final ExecutorService loadService = Executors.newFixedThreadPool(2, new ThreadFactoryBuilder().setNameFormat("terrarium-data-loader-%s").setDaemon(true).build());
+    private final ExecutorService loadService = Executors.newFixedThreadPool(3, new ThreadFactoryBuilder().setNameFormat("terrarium-data-loader-%s").setDaemon(true).build());
     private final ExecutorService cacheService = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("terrarium-cache-service").setDaemon(true).build());
 
     private final Cache<DataTileKey<?>, Data> tileCache = CacheBuilder.newBuilder()
@@ -93,17 +93,25 @@ public enum DataSourceHandler {
             DataTilePos min,
             DataTilePos max
     ) {
-        Collection<CompletableFuture<DataTileEntry<T>>> tiles = new ArrayList<>();
-
+        Collection<DataTilePos> tiles = new ArrayList<>();
         for (int tileZ = min.getTileZ(); tileZ <= max.getTileZ(); tileZ++) {
             for (int tileX = min.getTileX(); tileX <= max.getTileX(); tileX++) {
-                DataTilePos pos = new DataTilePos(tileX, tileZ);
-                CompletableFuture<T> tile = this.getTile(source, pos);
-                tiles.add(tile.thenApply(t -> new DataTileEntry<>(pos, t)));
+                tiles.add(new DataTilePos(tileX, tileZ));
             }
         }
 
-        return FutureUtil.joinAll(tiles);
+        return this.getTiles(source, tiles);
+    }
+
+    public <T extends Data> CompletableFuture<Collection<DataTileEntry<T>>> getTiles(TiledDataSource<T> source, Collection<DataTilePos> tilePositions) {
+        Collection<CompletableFuture<DataTileEntry<T>>> tiles = tilePositions.stream()
+                .map(pos -> {
+                    CompletableFuture<T> future = this.getTile(source, pos);
+                    return future.thenApply(t -> new DataTileEntry<>(pos, t));
+                })
+                .collect(Collectors.toList());
+
+        return FutureUtil.allOf(tiles);
     }
 
     private <T extends Data> void handleResult(DataTileKey<T> key, T result) {

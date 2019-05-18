@@ -1,18 +1,19 @@
 package net.gegy1000.earth.server.world.ecology;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 
 public final class Vegetation {
-    private final Habitat habitat;
+    private final GrowthIndicator growthIndicator;
     private final VegetationGenerator generator;
 
-    private Vegetation(Habitat habitat, VegetationGenerator generator) {
-        this.habitat = habitat;
+    private Vegetation(GrowthIndicator growthIndicator, VegetationGenerator generator) {
+        this.growthIndicator = growthIndicator;
         this.generator = generator;
     }
 
-    public Habitat getHabitat() {
-        return this.habitat;
+    public GrowthIndicator getGrowthIndicator() {
+        return this.growthIndicator;
     }
 
     public VegetationGenerator getGenerator() {
@@ -24,14 +25,14 @@ public final class Vegetation {
     }
 
     public static class Builder {
-        private Habitat habitat;
+        private final ImmutableList.Builder<GrowthIndicator> growthIndicators = ImmutableList.builder();
         private VegetationGenerator generator;
 
         Builder() {
         }
 
-        public Builder withHabitat(Habitat habitat) {
-            this.habitat = habitat;
+        public Builder withGrowthIndicator(GrowthIndicator indicator) {
+            this.growthIndicators.add(indicator);
             return this;
         }
 
@@ -41,10 +42,21 @@ public final class Vegetation {
         }
 
         public Vegetation build() {
-            Preconditions.checkNotNull(this.habitat, "predicate cannot be null");
             Preconditions.checkNotNull(this.generator, "generator cannot be null");
+            ImmutableList<GrowthIndicator> growthIndicators = this.growthIndicators.build();
 
-            return new Vegetation(this.habitat, this.generator);
+            GrowthIndicator indicator = GrowthIndicator.anywhere();
+            if (!growthIndicators.isEmpty()) {
+                indicator = abiotic -> {
+                    double value = 1.0;
+                    for (GrowthIndicator i : growthIndicators) {
+                        value *= i.test(abiotic);
+                    }
+                    return value;
+                };
+            }
+
+            return new Vegetation(indicator, this.generator);
         }
     }
 }

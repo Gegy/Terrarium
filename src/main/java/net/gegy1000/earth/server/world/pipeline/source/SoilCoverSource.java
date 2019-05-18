@@ -1,10 +1,18 @@
 package net.gegy1000.earth.server.world.pipeline.source;
 
+// TODO
+public class SoilCoverSource {
+    public static final int GLOBAL_WIDTH = 172800;
+    public static final int GLOBAL_HEIGHT = 86400;
+}
+
+/*
+package net.gegy1000.earth.server.world.pipeline.source;
+
 import net.gegy1000.earth.TerrariumEarth;
-import net.gegy1000.earth.server.world.pipeline.source.tile.SoilClassificationRaster;
-import net.gegy1000.earth.server.world.soil.SoilClassification;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.ObjRaster;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
 import net.gegy1000.terrarium.server.world.pipeline.source.SourceResult;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
@@ -19,7 +27,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Arrays;
 
-public class SoilCoverSource extends TiledDataSource<SoilClassificationRaster> {
+public class SoilCoverSource extends TiledDataSource<ObjRaster<SoilClassification>> {
     public static final int TILE_SIZE = 1800;
     public static final int GLOBAL_WIDTH = 172800;
     public static final int GLOBAL_HEIGHT = 86400;
@@ -30,7 +38,7 @@ public class SoilCoverSource extends TiledDataSource<SoilClassificationRaster> {
     private static final int TILE_OFFSET_X = TILE_COUNT_X / 2;
     private static final int TILE_OFFSET_Y = TILE_COUNT_Y / 2;
 
-    private static final SoilClassificationRaster DEFAULT_TILE = new SoilClassificationRaster(TILE_SIZE, TILE_SIZE);
+    private static final ObjRaster<SoilClassification> DEFAULT_TILE = ObjRaster.create(SoilClassifcation, TILE_SIZE, TILE_SIZE);
 
     public SoilCoverSource(CoordinateState coordinateState, String cacheRoot) {
         super(new ResourceLocation(TerrariumEarth.MODID, "soil"), new File(GLOBAL_CACHE_ROOT, cacheRoot), new Coordinate(coordinateState, TILE_SIZE, TILE_SIZE));
@@ -99,3 +107,4 @@ public class SoilCoverSource extends TiledDataSource<SoilClassificationRaster> {
         }
     }
 }
+*/

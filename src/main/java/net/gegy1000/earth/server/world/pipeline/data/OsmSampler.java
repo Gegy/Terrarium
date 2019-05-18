@@ -5,15 +5,15 @@ import net.gegy1000.earth.server.world.pipeline.source.tile.OsmData;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataView;
-import net.gegy1000.terrarium.server.world.pipeline.data.DataFuture;
+import net.gegy1000.terrarium.server.world.pipeline.data.DataOp;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataSourceHandler;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTileEntry;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
 import net.minecraft.util.math.MathHelper;
 
 public final class OsmSampler {
-    public static DataFuture<OsmData> sample(OverpassSource source, CoordinateState coordState) {
-        return DataFuture.of((engine, view) -> {
+    public static DataOp<OsmData> sample(OverpassSource source, CoordinateState coordState) {
+        return DataOp.of((engine, view) -> {
             DataSourceHandler sourceHandler = engine.getSourceHandler();
 
             DataView bufferView = view.grow(8, 8, 8, 8);

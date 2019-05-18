@@ -1,13 +1,12 @@
 package net.gegy1000.earth.server.capability;
 
 import net.gegy1000.earth.TerrariumEarth;
+import net.gegy1000.earth.server.world.pipeline.EarthDataKeys;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
-import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
+import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.pipeline.source.Geocoder;
-import net.gegy1000.terrarium.server.world.region.GenerationRegion;
-import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -132,15 +131,12 @@ public interface EarthCapability extends ICapabilityProvider {
                 return null;
             }
 
-            RegionGenerationHandler regionHandler = worldData.getRegionHandler();
-            GenerationRegion region = regionHandler.get(blockX, blockZ);
-            ShortRaster heightRaster = region.getData().get(RegionComponentType.HEIGHT);
-            if (heightRaster == null) {
-                return null;
-            }
+            ColumnDataCache dataCache = worldData.getDataCache();
 
-            int height = heightRaster.getShort(blockX - region.getMinX(), blockZ - region.getMinZ()) + 1;
-            return new BlockPos(blockX, height, blockZ);
+            ShortRaster.Sampler sampler = ShortRaster.sampler(EarthDataKeys.HEIGHT);
+
+            short height = sampler.sample(dataCache, blockX, blockZ);
+            return new BlockPos(blockX, height + 1, blockZ);
         }
     }
 }

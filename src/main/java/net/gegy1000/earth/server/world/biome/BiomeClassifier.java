@@ -2,6 +2,7 @@ package net.gegy1000.earth.server.world.biome;
 
 import net.minecraftforge.common.BiomeDictionary;
 
+// TODO: Classify as sandy with soil type
 public final class BiomeClassifier {
     public static void classifyRainfall(BiomeClassification classification, short rainfall) {
         if (rainfall < 250) {

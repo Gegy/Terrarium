@@ -2,6 +2,7 @@ package net.gegy1000.earth.server.world.cover.decorator;
 
 import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
 import net.gegy1000.cubicglue.util.CubicPos;
+import net.gegy1000.earth.server.world.ecology.AbioticProperties;
 import net.gegy1000.earth.server.world.ecology.Vegetation;
 import net.gegy1000.terrarium.server.util.WeightedPool;
 import net.minecraft.util.math.BlockPos;
@@ -16,6 +17,8 @@ public final class VegetationDecorator implements CoverDecorator {
     private final WeightedPool<Vegetation> pool;
     private final int minCount;
     private final int maxCount;
+
+    private final AbioticProperties abiotic = new AbioticProperties();
 
     private VegetationDecorator(WeightedPool<Vegetation> pool, float minDensity, float maxDensity) {
         this.pool = pool;
@@ -53,17 +56,14 @@ public final class VegetationDecorator implements CoverDecorator {
     private WeightedPool<Vegetation> buildTweakedPool() {
         WeightedPool.Builder<Vegetation> poolBuilder = WeightedPool.builder();
 
-        // TODO: temperature and rainfall
-        float temperature = 0.0F;
-        short rainfall = (short) 0;
-
         for (WeightedPool.Entry<Vegetation> entry : this.pool) {
             Vegetation vegetation = entry.getValue();
             float weight = entry.getWeight();
 
-            double suitability = vegetation.getHabitat().getSuitability(temperature, rainfall);
+            // TODO: set abiotic values
+            double growth = vegetation.getGrowthIndicator().test(this.abiotic);
 
-            float tweakedWeight = (float) (weight * suitability);
+            float tweakedWeight = (float) (weight * growth);
             if (tweakedWeight > 0.0F) {
                 poolBuilder = poolBuilder.with(vegetation, tweakedWeight);
             }
@@ -75,7 +75,7 @@ public final class VegetationDecorator implements CoverDecorator {
     public static class Builder {
         private final WeightedPool.Builder<Vegetation> vegetation = WeightedPool.builder();
 
-        private float scaleFactor = 1.0F;
+        private float radius = 1.0F;
 
         private float minDensity = 0.3F;
         private float maxDensity = 0.5F;
@@ -95,8 +95,8 @@ public final class VegetationDecorator implements CoverDecorator {
             return this;
         }
 
-        public Builder withScaleFactor(float scaleFactor) {
-            this.scaleFactor = scaleFactor;
+        public Builder withRadius(float radius) {
+            this.radius = radius;
             return this;
         }
 
@@ -107,8 +107,10 @@ public final class VegetationDecorator implements CoverDecorator {
         }
 
         public VegetationDecorator build() {
-            float minDensity = this.minDensity * this.scaleFactor;
-            float maxDensity = this.maxDensity * this.scaleFactor;
+            float diameter = this.radius * 2.0F;
+            float scaleFactor = 1.0F / (diameter * diameter);
+            float minDensity = this.minDensity * scaleFactor;
+            float maxDensity = this.maxDensity * scaleFactor;
             return new VegetationDecorator(this.vegetation.build(), minDensity, maxDensity);
         }
     }

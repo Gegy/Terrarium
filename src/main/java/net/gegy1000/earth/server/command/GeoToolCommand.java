@@ -5,21 +5,25 @@ import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.capability.EarthCapability;
 import net.gegy1000.earth.server.message.EarthMapGuiMessage;
 import net.gegy1000.earth.server.message.EarthPanoramaMessage;
-import net.gegy1000.earth.server.world.pipeline.EarthComponentTypes;
+import net.gegy1000.earth.server.world.pipeline.EarthDataKeys;
 import net.gegy1000.terrarium.server.TerrariumHandshakeTracker;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
-import net.gegy1000.terrarium.server.world.region.GenerationRegion;
-import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
+import net.gegy1000.terrarium.server.world.pipeline.data.ColumnData;
+import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataCache;
+import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataEntry;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
+
+import java.util.concurrent.CompletableFuture;
 
 public class GeoToolCommand extends CommandBase {
     @Override
@@ -94,14 +98,35 @@ public class GeoToolCommand extends CommandBase {
         TerrariumWorldData worldData = TerrariumWorldData.get(player.world);
         Preconditions.checkNotNull(worldData, "terrarium world data was null");
 
-        RegionGenerationHandler regionHandler = worldData.getRegionHandler();
-        GenerationRegion region = regionHandler.get(blockX, blockZ);
+        ChunkPos columnPos = new ChunkPos(blockX >> 4, blockZ >> 4);
 
-        float temperature = region.sample(EarthComponentTypes.AVERAGE_TEMPERATURE, blockX, blockZ);
-        short rainfall = region.sample(EarthComponentTypes.ANNUAL_RAINFALL, blockX, blockZ);
+        ColumnDataCache dataCache = worldData.getDataCache();
 
-        player.sendMessage(new TextComponentString(TextFormatting.BOLD + String.format("Debug Info at %.4f, %.4f", latitude, longitude)));
-        player.sendMessage(new TextComponentString(TextFormatting.AQUA + String.format("Mean Temperature: %s%.2f°C", TextFormatting.RESET, temperature)));
-        player.sendMessage(new TextComponentString(TextFormatting.AQUA + String.format("Yearly Rainfall: %s%smm", TextFormatting.RESET, rainfall)));
+        ColumnDataEntry.Handle handle = dataCache.acquireEntry(columnPos);
+        CompletableFuture<ColumnData> future = handle.future();
+
+        future.whenComplete((columnData, throwable) -> {
+            handle.release();
+
+            if (throwable != null) {
+                TerrariumEarth.LOGGER.error("Failed to load debug info", throwable);
+                return;
+            }
+
+            int localX = blockX - columnPos.getXStart();
+            int localZ = blockZ - columnPos.getZStart();
+
+            player.sendMessage(new TextComponentString(TextFormatting.BOLD + String.format("Debug Info at %.4f, %.4f", latitude, longitude)));
+
+            columnData.get(EarthDataKeys.AVERAGE_TEMPERATURE).ifPresent(rainfallRaster -> {
+                float temperature = rainfallRaster.get(localX, localZ);
+                player.sendMessage(new TextComponentString(TextFormatting.AQUA + String.format("Mean Temperature: %s%.2f°C", TextFormatting.RESET, temperature)));
+            });
+
+            columnData.get(EarthDataKeys.ANNUAL_RAINFALL).ifPresent(rainfallRaster -> {
+                short rainfall = rainfallRaster.get(localX, localZ);
+                player.sendMessage(new TextComponentString(TextFormatting.AQUA + String.format("Yearly Rainfall: %s%smm", TextFormatting.RESET, rainfall)));
+            });
+        });
     }
 }

@@ -19,7 +19,7 @@ public final class WeightedPool<T> implements Iterable<WeightedPool.Entry<T>> {
 
         float position = random.nextFloat() * this.totalWeight;
 
-        int w = 0;
+        float w = 0;
         for (Entry<T> entry : this.entries) {
             w += entry.weight;
             if (w > position) {
@@ -27,11 +27,16 @@ public final class WeightedPool<T> implements Iterable<WeightedPool.Entry<T>> {
             }
         }
 
-        throw new IllegalStateException();
+        throw new IllegalStateException("Unable to sample from pool " + this + " at " + position);
     }
 
     public boolean isEmpty() {
         return this.entries.isEmpty();
+    }
+
+    @Override
+    public String toString() {
+        return String.format("WeightedPool{entries=%d, totalWeight=%s}", this.entries.size(), this.totalWeight);
     }
 
     public static <T> Builder<T> builder() {

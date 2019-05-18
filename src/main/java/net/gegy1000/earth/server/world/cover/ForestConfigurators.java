@@ -27,10 +27,11 @@ public final class ForestConfigurators {
     @SafeVarargs
     private static CoverConfigurator forest(float minDensity, float maxDensity, WeightedPool<Vegetation>... pools) {
         return config -> {
-            FOREST.configure(config);
+            ForestConfigurators.FOREST.configure(config);
+            CoverConfigurators.DENSELY_HERBACEOUS.configure(config);
 
             VegetationDecorator.Builder builder = VegetationDecorator.builder()
-                    .withScaleFactor(Trees.SCALE_FACTOR)
+                    .withRadius(Trees.RADIUS)
                     .withDensity(minDensity, maxDensity);
 
             for (WeightedPool<Vegetation> pool : pools) {

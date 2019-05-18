@@ -1,7 +1,5 @@
-package net.gegy1000.terrarium.server.world.pipeline;
+package net.gegy1000.terrarium.server.world.pipeline.source;
 
-import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
-import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
 import net.gegy1000.terrarium.server.world.pipeline.data.Data;
 
 public class DataTileKey<T extends Data> {

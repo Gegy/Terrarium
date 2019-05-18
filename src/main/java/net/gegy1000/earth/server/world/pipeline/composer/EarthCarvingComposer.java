@@ -2,31 +2,27 @@ package net.gegy1000.earth.server.world.pipeline.composer;
 
 import net.gegy1000.cubicglue.api.ChunkPrimeWriter;
 import net.gegy1000.cubicglue.util.CubicPos;
-import net.gegy1000.earth.server.world.cover.CoverClassification;
+import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.cover.CoverConfig;
-import net.gegy1000.earth.server.world.pipeline.source.tile.CoverRaster;
-import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.SurfaceComposer;
-import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
+import net.gegy1000.terrarium.server.world.pipeline.data.ColumnData;
+import net.gegy1000.terrarium.server.world.pipeline.data.DataKey;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.ObjRaster;
 
 public class EarthCarvingComposer implements SurfaceComposer {
-    private final RegionComponentType<CoverRaster> coverComponent;
+    private final DataKey<ObjRaster<Cover>> coverKey;
 
-    public EarthCarvingComposer(RegionComponentType<CoverRaster> coverComponent) {
-        this.coverComponent = coverComponent;
+    public EarthCarvingComposer(DataKey<ObjRaster<Cover>> coverKey) {
+        this.coverKey = coverKey;
     }
 
     @Override
-    public void composeSurface(RegionGenerationHandler regionHandler, CubicPos pos, ChunkPrimeWriter writer) {
-        CoverRaster coverRaster = regionHandler.getChunkRaster(this.coverComponent);
-        CoverClassification focus = coverRaster.get(15, 15);
+    public void composeSurface(ColumnData data, CubicPos pos, ChunkPrimeWriter writer) {
+        data.get(this.coverKey).ifPresent(coverRaster -> {
+            Cover focus = coverRaster.get(15, 15);
 
-        CoverConfig config = focus.getConfig();
-        config.carvers().forEach(carver -> carver.carve(pos, writer, regionHandler.getChunkRasters()));
-    }
-
-    @Override
-    public RegionComponentType<?>[] getDependencies() {
-        return new RegionComponentType[] { this.coverComponent };
+            CoverConfig config = focus.getConfig();
+            config.carvers().forEach(carver -> carver.carve(pos, writer, data));
+        });
     }
 }

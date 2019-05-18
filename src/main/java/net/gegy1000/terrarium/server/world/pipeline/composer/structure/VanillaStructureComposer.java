@@ -2,8 +2,7 @@ package net.gegy1000.terrarium.server.world.pipeline.composer.structure;
 
 import net.gegy1000.cubicglue.util.PseudoRandomMap;
 import net.gegy1000.cubicglue.util.wrapper.OverworldGeneratorWrapper;
-import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
+import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataCache;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
@@ -52,7 +51,7 @@ public class VanillaStructureComposer implements StructureComposer {
     }
 
     @Override
-    public void composeStructures(IChunkGenerator generator, ChunkPrimer primer, RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
+    public void composeStructures(IChunkGenerator generator, ChunkPrimer primer, ColumnDataCache dataCache, int chunkX, int chunkZ) {
         this.mineshaftGenerator.generate(this.world, chunkX, chunkZ, primer);
         this.villageGenerator.generate(this.world, chunkX, chunkZ, primer);
         this.strongholdGenerator.generate(this.world, chunkX, chunkZ, primer);
@@ -62,7 +61,7 @@ public class VanillaStructureComposer implements StructureComposer {
     }
 
     @Override
-    public void populateStructures(World world, RegionGenerationHandler regionHandler, int chunkX, int chunkZ) {
+    public void populateStructures(World world, ColumnDataCache dataCache, int chunkX, int chunkZ) {
         this.randomMap.initPosSeed(chunkX << 4, chunkZ << 4);
         this.random.setSeed(this.randomMap.next());
 
@@ -105,10 +104,5 @@ public class VanillaStructureComposer implements StructureComposer {
                 return this.templeGenerator;
         }
         return null;
-    }
-
-    @Override
-    public RegionComponentType<?>[] getDependencies() {
-        return new RegionComponentType[0];
     }
 }

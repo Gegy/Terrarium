@@ -8,23 +8,23 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-public final class DataFuture<T extends Data> {
+public final class DataOp<T extends Data> {
     private final DataFunction<T> function;
     private final Cache<DataView, CompletableFuture<T>> cache = CacheBuilder.newBuilder()
             .maximumSize(4)
             .expireAfterAccess(5, TimeUnit.SECONDS)
             .build();
 
-    private DataFuture(DataFunction<T> function) {
+    private DataOp(DataFunction<T> function) {
         this.function = function;
     }
 
-    public static <T extends Data> DataFuture<T> of(DataFunction<T> function) {
-        return new DataFuture<>(function);
+    public static <T extends Data> DataOp<T> of(DataFunction<T> function) {
+        return new DataOp<>(function);
     }
 
-    public static <T extends Data> DataFuture<T> completed(T value) {
-        return new DataFuture<>((engine, view) -> CompletableFuture.completedFuture(value));
+    public static <T extends Data> DataOp<T> completed(T value) {
+        return new DataOp<>((engine, view) -> CompletableFuture.completedFuture(value));
     }
 
     CompletableFuture<T> apply(DataEngine engine, DataView view) {

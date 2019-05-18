@@ -65,7 +65,7 @@ public class PreviewHeightMesh {
 
         int width = this.heightTile.getWidth();
         int height = this.heightTile.getHeight();
-        short[] heightBuffer = this.heightTile.getShortData();
+        short[] heightBuffer = this.heightTile.getData();
 
         int strideX = granularity;
         int strideY = width * granularity;

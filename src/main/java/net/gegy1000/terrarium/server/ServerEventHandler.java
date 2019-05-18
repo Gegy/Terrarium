@@ -9,6 +9,7 @@ import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.chunk.tracker.ChunkTrackerHooks;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
+import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataSourceHandler;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
@@ -48,7 +49,7 @@ public class ServerEventHandler {
         if (!world.isRemote && ServerEventHandler.shouldHandle(world)) {
             TerrariumWorldData worldData = TerrariumWorldData.get(world);
             if (worldData != null) {
-                worldData.getRegionHandler().close();
+                worldData.getDataCache().close();
                 DataSourceHandler.INSTANCE.clear();
             }
         }
@@ -93,8 +94,12 @@ public class ServerEventHandler {
                 TerrariumWorldData worldData = TerrariumWorldData.get(world);
                 if (worldData != null) {
                     WorldServer worldServer = (WorldServer) world;
-                    worldData.getRegionHandler().trackRegions(worldServer);
+
+                    ColumnDataCache dataCache = worldData.getDataCache();
+                    dataCache.dropColumns();
+                    dataCache.trackColumns(worldServer);
                 }
+
                 lastRegionTrackTime = time;
             }
         }

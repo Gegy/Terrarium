@@ -1,6 +1,7 @@
 package net.gegy1000.terrarium.server.world.pipeline.data;
 
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
+import net.minecraft.util.math.ChunkPos;
 
 public class DataView {
     private final int x;
@@ -8,11 +9,23 @@ public class DataView {
     private final int width;
     private final int height;
 
-    public DataView(int x, int y, int width, int height) {
+    private DataView(int x, int y, int width, int height) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
+    }
+
+    public static DataView rect(int x, int y, int width, int height) {
+        return new DataView(x, y, width, height);
+    }
+
+    public static DataView square(int x, int y, int size) {
+        return new DataView(x, y, size, size);
+    }
+
+    public static DataView of(ChunkPos columnPos) {
+        return new DataView(columnPos.getXStart(), columnPos.getZStart(), 16, 16);
     }
 
     public int getX() {
@@ -20,6 +33,14 @@ public class DataView {
     }
 
     public int getY() {
+        return this.y;
+    }
+
+    public int getMinX() {
+        return this.x;
+    }
+
+    public int getMinY() {
         return this.y;
     }
 

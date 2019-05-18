@@ -6,7 +6,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class FutureUtil {
-    public static <T> CompletableFuture<Collection<T>> joinAll(Collection<CompletableFuture<T>> collection) {
+    public static <T> CompletableFuture<Collection<T>> allOf(Collection<CompletableFuture<T>> collection) {
         CompletableFuture[] array = collection.toArray(new CompletableFuture[0]);
         return CompletableFuture.allOf(array)
                 .thenApply(v -> collection.stream()
@@ -16,11 +16,16 @@ public class FutureUtil {
     }
 
     @SafeVarargs
-    public static <T> CompletableFuture<Collection<T>> joinAll(CompletableFuture<T>... array) {
+    public static <T> CompletableFuture<Collection<T>> allOf(CompletableFuture<T>... array) {
         return CompletableFuture.allOf(array)
                 .thenApply(v -> Arrays.stream(array)
                         .map(CompletableFuture::join)
                         .collect(Collectors.toList())
                 );
+    }
+
+    public static void joinAll(Collection<? extends CompletableFuture<?>> futures) {
+        CompletableFuture[] array = futures.toArray(new CompletableFuture[0]);
+        CompletableFuture.allOf(array).join();
     }
 }

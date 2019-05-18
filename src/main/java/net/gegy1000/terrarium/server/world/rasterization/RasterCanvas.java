@@ -1,5 +1,7 @@
 package net.gegy1000.terrarium.server.world.rasterization;
 
+import net.gegy1000.terrarium.server.world.pipeline.data.DataView;
+
 import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -44,6 +46,12 @@ public class RasterCanvas {
     public void setOrigin(int originX, int originY) {
         this.originX = originX;
         this.originY = originY;
+    }
+
+    public static RasterCanvas of(DataView view) {
+        RasterCanvas canvas = new RasterCanvas(view.getWidth(), view.getHeight());
+        canvas.setOrigin(view.getX(), view.getY());
+        return canvas;
     }
 
     public void setColor(int color) {

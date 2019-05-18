@@ -11,9 +11,8 @@ import net.gegy1000.terrarium.server.util.FloodFill;
 import net.gegy1000.terrarium.server.util.Interpolation;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
+import net.gegy1000.terrarium.server.world.pipeline.data.DataOp;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataView;
-import net.gegy1000.terrarium.server.world.pipeline.adapter.debug.DebugImageWriter;
-import net.gegy1000.terrarium.server.world.pipeline.data.DataFuture;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.minecraft.util.math.MathHelper;
 
@@ -25,9 +24,10 @@ import java.util.stream.Collectors;
 
 import static net.gegy1000.earth.server.world.pipeline.data.WaterProducer.*;
 
+// TODO: This is problematic
 public final class OsmWaterProcessor {
-    public static DataFuture<ShortRaster> mergeOsmCoastlines(DataFuture<ShortRaster> water, DataFuture<OsmData> osm, CoordinateState geoCoordinates) {
-        return DataFuture.of((engine, view) -> {
+    public static DataOp<ShortRaster> mergeOsmCoastlines(DataOp<ShortRaster> water, DataOp<OsmData> osm, CoordinateState geoCoordinates) {
+        return DataOp.of((engine, view) -> {
             CompletableFuture<ShortRaster> waterFuture = engine.load(water, view);
             CompletableFuture<OsmData> osmFuture = engine.load(osm, view);
 
@@ -42,7 +42,7 @@ public final class OsmWaterProcessor {
 
                         if (!coastlines.isEmpty()) {
                             ShortRaster result = waterRaster.copy();
-                            short[] bankMap = result.getShortData();
+                            short[] bankMap = result.getData();
 
                             for (OsmWay coastline : coastlines) {
                                 List<Point> linePoints = collectLinePoints(OsmDataParser.createLines(osmData, coastline));
@@ -51,10 +51,7 @@ public final class OsmWaterProcessor {
 
                             reduceProblematicPoints(view, bankMap);
 
-                            DebugImageWriter.write("coast_" + view.getX() + "_" + view.getY(), bankMap, BANK_DEBUG, view.getWidth(), view.getHeight());
-
                             floodCoastMap(view, result);
-                            DebugImageWriter.write("coast_" + view.getX() + "_" + view.getY() + "_b", bankMap, BANK_DEBUG, view.getWidth(), view.getHeight());
 
                             return result;
                         }
@@ -115,11 +112,11 @@ public final class OsmWaterProcessor {
             int localX = point.x - view.getX();
             int localY = point.y - view.getY();
             if (localX >= 0 && localY >= 0 && localX < view.getWidth() && localY < view.getHeight()) {
-                short currentBankType = resultTile.getShort(localX, localY);
+                short currentBankType = resultTile.get(localX, localY);
                 if ((currentBankType & TYPE_MASK) != BANK) {
-                    resultTile.setShort(localX, localY, (short) bankType);
+                    resultTile.set(localX, localY, (short) bankType);
                 } else {
-                    resultTile.setShort(localX, localY, (short) (currentBankType | (bankType & ~TYPE_MASK)));
+                    resultTile.set(localX, localY, (short) (currentBankType | (bankType & ~TYPE_MASK)));
                 }
                 freeNeighbors(view, resultTile, localX, localY);
             }
@@ -133,9 +130,9 @@ public final class OsmWaterProcessor {
                     int globalX = localX + neighbourX;
                     int globalY = localY + neighbourY;
                     if (globalX >= 0 && globalY >= 0 && globalX < view.getWidth() && globalY < view.getHeight()) {
-                        int sample = resultTile.getShort(globalX, globalY);
+                        int sample = resultTile.get(globalX, globalY);
                         if ((sample & TYPE_MASK) != BANK) {
-                            resultTile.setShort(globalX, globalY, (short) (sample | FREE_FLOOD_FLAG));
+                            resultTile.set(globalX, globalY, (short) (sample | FREE_FLOOD_FLAG));
                         }
                     }
                 }
@@ -180,11 +177,11 @@ public final class OsmWaterProcessor {
         for (Map.Entry<FloodFill.Point, Short> entry : floodSources.entrySet()) {
             FloodFill.Point point = entry.getKey();
             int floodType = entry.getValue();
-            short sampled = resultTile.getShort(point.getX(), point.getY());
+            short sampled = resultTile.get(point.getX(), point.getY());
             if ((sampled & TYPE_MASK) != BANK) {
                 FillVisitor visitor = new FillVisitor((short) floodType);
                 if (visitor.canVisit(point, sampled)) {
-                    FloodFill.floodVisit(resultTile.getShortData(), view.getWidth(), view.getHeight(), point, visitor);
+                    FloodFill.floodVisit(resultTile.getData(), view.getWidth(), view.getHeight(), point, visitor);
                 }
             }
         }
@@ -195,7 +192,7 @@ public final class OsmWaterProcessor {
 
         for (int localY = 0; localY < view.getHeight(); localY++) {
             for (int localX = 0; localX < view.getWidth(); localX++) {
-                int sampled = resultTile.getShort(localX, localY);
+                int sampled = resultTile.get(localX, localY);
                 if (isFillingBankType(sampled)) {
                     if (localX > 0) {
                         short left = (sampled & BANK_UP_FLAG) != 0 ? LAND : OCEAN;

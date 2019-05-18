@@ -3,18 +3,19 @@ package net.gegy1000.earth.server.world.pipeline.composer;
 import net.gegy1000.cubicglue.api.ChunkPrimeWriter;
 import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.cubicglue.util.PseudoRandomMap;
-import net.gegy1000.earth.server.world.pipeline.source.tile.SoilRaster;
 import net.gegy1000.earth.server.world.soil.SoilConfig;
 import net.gegy1000.earth.server.world.soil.horizon.SoilHorizonConfig;
-import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.SurfaceComposer;
+import net.gegy1000.terrarium.server.world.pipeline.data.ColumnData;
+import net.gegy1000.terrarium.server.world.pipeline.data.DataKey;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.ObjRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
-import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
 
+import java.util.Optional;
 import java.util.Random;
 
 public class SoilSurfaceComposer implements SurfaceComposer {
@@ -28,41 +29,48 @@ public class SoilSurfaceComposer implements SurfaceComposer {
     private final Random random;
     private final PseudoRandomMap coverMap;
 
-    private final RegionComponentType<ShortRaster> heightComponent;
-    private final RegionComponentType<SoilRaster> soilComponent;
+    private final DataKey<ShortRaster> heightKey;
+    private final DataKey<ObjRaster<SoilConfig>> soilKey;
 
     private final IBlockState replaceBlock;
 
     public SoilSurfaceComposer(
             World world,
-            RegionComponentType<ShortRaster> heightComponent,
-            RegionComponentType<SoilRaster> soilComponent,
+            DataKey<ShortRaster> heightKey,
+            DataKey<ObjRaster<SoilConfig>> soilKey,
             IBlockState replaceBlock
     ) {
         this.random = new Random(world.getWorldInfo().getSeed() ^ SEED);
         this.depthNoise = new NoiseGeneratorPerlin(this.random, 4);
         this.coverMap = new PseudoRandomMap(world.getWorldInfo().getSeed(), this.random.nextLong());
 
-        this.heightComponent = heightComponent;
-        this.soilComponent = soilComponent;
+        this.heightKey = heightKey;
+        this.soilKey = soilKey;
 
         this.replaceBlock = replaceBlock;
     }
 
     @Override
-    public void composeSurface(RegionGenerationHandler regionHandler, CubicPos pos, ChunkPrimeWriter writer) {
+    public void composeSurface(ColumnData data, CubicPos pos, ChunkPrimeWriter writer) {
         int globalX = pos.getMinX();
         int globalY = pos.getMinY();
         int globalZ = pos.getMinZ();
 
-        ShortRaster heightRaster = regionHandler.getChunkRaster(this.heightComponent);
-        SoilRaster soilRaster = regionHandler.getChunkRaster(this.soilComponent);
+        Optional<ShortRaster> heightOption = data.get(this.heightKey);
+        Optional<ObjRaster<SoilConfig>> soilOption = data.get(this.soilKey);
+
+        if (!heightOption.isPresent() || !soilOption.isPresent()) {
+            return;
+        }
+
+        ShortRaster heightRaster = heightOption.get();
+        ObjRaster<SoilConfig> soilRaster = soilOption.get();
 
         this.depthBuffer = this.depthNoise.getRegion(this.depthBuffer, globalX, globalZ, 16, 16, 0.0625, 0.0625, 1.0);
 
         for (int localZ = 0; localZ < 16; localZ++) {
             for (int localX = 0; localX < 16; localX++) {
-                int height = heightRaster.getShort(localX, localZ);
+                int height = heightRaster.get(localX, localZ);
                 if (pos.getMinY() <= height) {
                     this.coverMap.initPosSeed(localX + globalX, globalY, localZ + globalZ);
                     this.random.setSeed(this.coverMap.next());
@@ -106,10 +114,5 @@ public class SoilSurfaceComposer implements SurfaceComposer {
                 }
             }
         }
-    }
-
-    @Override
-    public RegionComponentType<?>[] getDependencies() {
-        return new RegionComponentType[] { this.heightComponent, this.soilComponent };
     }
 }

@@ -3,8 +3,7 @@ package net.gegy1000.terrarium.server.world.pipeline.composer.surface;
 import net.gegy1000.cubicglue.api.ChunkPrimeWriter;
 import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.cubicglue.util.PseudoRandomMap;
-import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
+import net.gegy1000.terrarium.server.world.pipeline.data.ColumnData;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.World;
 
@@ -24,7 +23,7 @@ public class BedrockSurfaceComposer implements SurfaceComposer {
     }
 
     @Override
-    public void composeSurface(RegionGenerationHandler regionHandler, CubicPos pos, ChunkPrimeWriter writer) {
+    public void composeSurface(ColumnData data, CubicPos pos, ChunkPrimeWriter writer) {
         int minY = pos.getMinY();
         int maxY = pos.getMaxY();
         if (minY >= this.scatterRange || maxY < 0) {
@@ -44,10 +43,5 @@ public class BedrockSurfaceComposer implements SurfaceComposer {
                 }
             }
         }
-    }
-
-    @Override
-    public RegionComponentType<?>[] getDependencies() {
-        return new RegionComponentType[0];
     }
 }

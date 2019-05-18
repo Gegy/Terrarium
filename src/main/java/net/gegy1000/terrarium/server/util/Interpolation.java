@@ -57,7 +57,7 @@ public class Interpolation {
         }
     }
 
-    public enum Method {
+    public enum Function {
         LINEAR(2, 1, 0) {
             @Override
             protected double[] getBuffer() {
@@ -100,7 +100,7 @@ public class Interpolation {
         private final int forward;
         private final int backward;
 
-        Method(int pointCount, int forward, int backward) {
+        Function(int pointCount, int forward, int backward) {
             this.pointCount = pointCount;
             this.forward = forward;
             this.backward = backward;

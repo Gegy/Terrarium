@@ -4,14 +4,15 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.gegy1000.cubicglue.util.CubicPos;
+import net.gegy1000.earth.server.world.pipeline.EarthDataKeys;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.pipeline.GenerationCancelledException;
-import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
+import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataCache;
+import net.gegy1000.terrarium.server.world.pipeline.data.DataView;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataSourceHandler;
-import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -97,12 +98,12 @@ public class WorldPreview implements IBlockAccess {
             int originX = (spawnChunkX - VIEW_RANGE) << 4;
             int originZ = (spawnChunkZ - VIEW_RANGE) << 4;
 
-            ShortRaster heightTile = this.generateHeightTile(originX, originZ, viewSizeBlocks);
+            ShortRaster heightRaster = this.sampleHeightRaster(originX, originZ, viewSizeBlocks);
 
-            this.heightMesh = new PreviewHeightMesh(heightTile);
+            this.heightMesh = new PreviewHeightMesh(heightRaster);
             this.heightMesh.submitTo(this.executor, 5);
 
-            short averageHeight = this.computeAverageHeight(heightTile);
+            short averageHeight = this.computeAverageHeight(heightRaster);
 
             BlockPos centerChunkPos = new BlockPos(spawnChunkX, averageHeight >> 4, spawnChunkZ);
             this.centerBlockPos = new BlockPos((centerChunkPos.getX() << 4) + 8, averageHeight, (centerChunkPos.getZ() << 4) + 8);
@@ -172,20 +173,18 @@ public class WorldPreview implements IBlockAccess {
                 && pos.getX() <= VIEW_RANGE && pos.getY() <= VIEW_RANGE && pos.getZ() <= VIEW_RANGE;
     }
 
-    private ShortRaster generateHeightTile(int originX, int originZ, int size) {
-        ShortRaster tile = new ShortRaster(size, size);
+    private ShortRaster sampleHeightRaster(int originX, int originZ, int size) {
+        ColumnDataCache dataCache = this.worldData.getDataCache();
 
-        RegionGenerationHandler regionHandler = this.worldData.getRegionHandler();
-        regionHandler.fillRaster(RegionComponentType.HEIGHT, tile, originX, originZ);
-
-        return tile;
+        DataView view = DataView.square(originX, originZ, size);
+        return ShortRaster.sampler(EarthDataKeys.HEIGHT).sample(dataCache, view);
     }
 
     private short computeAverageHeight(ShortRaster heightTile) {
         long total = 0;
         long maxHeight = 0;
 
-        short[] shortData = heightTile.getShortData();
+        short[] shortData = heightTile.getData();
         for (short value : shortData) {
             if (value > maxHeight) {
                 maxHeight = value;
@@ -254,7 +253,7 @@ public class WorldPreview implements IBlockAccess {
 
         this.executor.shutdownNow();
 
-        this.worldData.getRegionHandler().close();
+        this.worldData.getDataCache().close();
         DataSourceHandler.INSTANCE.cancelLoading();
     }
 

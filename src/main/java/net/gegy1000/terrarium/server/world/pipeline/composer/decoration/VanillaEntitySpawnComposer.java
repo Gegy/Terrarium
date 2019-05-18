@@ -4,8 +4,7 @@ import net.gegy1000.cubicglue.CubicGlue;
 import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
 import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.cubicglue.util.PseudoRandomMap;
-import net.gegy1000.terrarium.server.world.pipeline.component.RegionComponentType;
-import net.gegy1000.terrarium.server.world.region.RegionGenerationHandler;
+import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataCache;
 import net.minecraft.world.World;
 
 import java.util.Random;
@@ -21,15 +20,10 @@ public class VanillaEntitySpawnComposer implements DecorationComposer {
     }
 
     @Override
-    public void composeDecoration(RegionGenerationHandler regionHandler, CubicPos pos, ChunkPopulationWriter writer) {
+    public void composeDecoration(ColumnDataCache dataCache, CubicPos pos, ChunkPopulationWriter writer) {
         this.randomMap.initPosSeed(pos.getMinX(), pos.getMinY(), pos.getMinZ());
         this.random.setSeed(this.randomMap.next());
 
         CubicGlue.proxy(writer.getGlobal()).populateEntities(pos, writer, this.random);
-    }
-
-    @Override
-    public RegionComponentType<?>[] getDependencies() {
-        return new RegionComponentType[0];
     }
 }
