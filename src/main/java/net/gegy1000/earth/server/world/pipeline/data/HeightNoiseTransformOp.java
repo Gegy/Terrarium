@@ -8,7 +8,7 @@ import net.minecraft.world.gen.NoiseGeneratorOctaves;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
-public final class HeightNoiseTransformer {
+public final class HeightNoiseTransformOp {
     private static final long SEED = 2816107316863058893L;
 
     private final NoiseGeneratorOctaves noise;
@@ -16,7 +16,7 @@ public final class HeightNoiseTransformer {
     private final double scaleXZ;
     private final double scaleY;
 
-    public HeightNoiseTransformer(int octaveCount, double scaleXZ, double scaleY) {
+    public HeightNoiseTransformOp(int octaveCount, double scaleXZ, double scaleY) {
         this.noise = new NoiseGeneratorOctaves(new Random(SEED), octaveCount);
 
         double max = 0.0;

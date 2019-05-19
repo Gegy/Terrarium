@@ -6,11 +6,11 @@ import net.minecraft.util.math.MathHelper;
 
 import java.util.concurrent.CompletableFuture;
 
-public final class HeightTransformer {
+public final class HeightTransformOp {
     private final double scale;
     private final int offset;
 
-    public HeightTransformer(double scale, int offset) {
+    public HeightTransformOp(double scale, int offset) {
         this.scale = scale;
         this.offset = offset;
     }

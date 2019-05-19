@@ -8,13 +8,13 @@ import net.minecraft.world.gen.NoiseGeneratorOctaves;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
-public final class SlopeNoiseTransformer {
+public final class TransformSlopeNoiseOp {
     private static final long SEED = 3819791875842730969L;
 
     private final NoiseGeneratorOctaves noise;
     private final double scale;
 
-    public SlopeNoiseTransformer(double scale) {
+    public TransformSlopeNoiseOp(double scale) {
         this.noise = new NoiseGeneratorOctaves(new Random(SEED), 1);
         this.scale = scale;
     }

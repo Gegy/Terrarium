@@ -8,7 +8,7 @@ import net.gegy1000.terrarium.server.world.pipeline.data.raster.ObjRaster;
 
 import java.util.concurrent.CompletableFuture;
 
-public final class SoilProducer {
+public final class ProduceSoilOp {
     public static DataOp<ObjRaster<SoilConfig>> produce(DataOp<ObjRaster<Cover>> coverClassification) {
         return DataOp.of((engine, view) -> {
             CompletableFuture<ObjRaster<Cover>> coverFuture = engine.load(coverClassification, view);

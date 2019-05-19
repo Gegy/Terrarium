@@ -20,13 +20,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-// TODO: PLAN
-//  Get rid of generation regions: populate data at a per-chunk level
-//  For adapters that need wider context, we follow a system such as population in MC
-//  Not sure how this API should be structured. Possibly we replace all adapters that don't need this with the
-//  "data layer" system. Then adapters operate when enough neighbours are loaded
-//  -
-//  **NOTE**: with this, we'll need to load chunk data an extra chunk out than what MC needs. so consider how to do this
 public class ColumnDataCache implements AutoCloseable {
     private final Map<ChunkPos, ColumnDataEntry> entries = new HashMap<>();
 

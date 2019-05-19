@@ -8,7 +8,7 @@ import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 
 import java.util.concurrent.CompletableFuture;
 
-public final class WaterProducer {
+public final class ProduceWaterOp {
     public static final int TYPE_MASK = 0x3;
     public static final short LAND = 0;
     public static final short OCEAN = 1;
@@ -71,7 +71,7 @@ public final class WaterProducer {
                                 }
                                 break;
                             case OCEAN:
-                                result.setWaterType(localX, localZ, WaterRaster.OCEAN);
+                                result.setWaterType(localX, localZ, WaterRaster.SEA);
                                 break;
                         }
                     }

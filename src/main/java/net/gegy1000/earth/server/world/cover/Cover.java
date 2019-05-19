@@ -1,5 +1,6 @@
 package net.gegy1000.earth.server.world.cover;
 
+// TODO: separate into cover and vegetation
 public enum Cover {
     NO_DATA(0, CoverConfigurators.NONE),
     RAINFED_CROPLAND(10, CoverConfigurators.NONE), // TODO

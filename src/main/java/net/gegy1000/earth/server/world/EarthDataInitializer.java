@@ -4,12 +4,14 @@ import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.pipeline.EarthDataKeys;
 import net.gegy1000.earth.server.world.pipeline.data.ClimateSampler;
-import net.gegy1000.earth.server.world.pipeline.data.HeightNoiseTransformer;
-import net.gegy1000.earth.server.world.pipeline.data.HeightTransformer;
+import net.gegy1000.earth.server.world.pipeline.data.HeightNoiseTransformOp;
+import net.gegy1000.earth.server.world.pipeline.data.HeightTransformOp;
 import net.gegy1000.earth.server.world.pipeline.data.OsmSampler;
-import net.gegy1000.earth.server.world.pipeline.data.SlopeNoiseTransformer;
-import net.gegy1000.earth.server.world.pipeline.data.SoilProducer;
-import net.gegy1000.earth.server.world.pipeline.data.WaterProducer;
+import net.gegy1000.earth.server.world.pipeline.data.OsmWaterProcessOps;
+import net.gegy1000.earth.server.world.pipeline.data.ProduceSoilOp;
+import net.gegy1000.earth.server.world.pipeline.data.ProduceWaterOp;
+import net.gegy1000.earth.server.world.pipeline.data.TransformSlopeNoiseOp;
+import net.gegy1000.earth.server.world.pipeline.data.WaterOps;
 import net.gegy1000.earth.server.world.pipeline.source.LandCoverSource;
 import net.gegy1000.earth.server.world.pipeline.source.SrtmHeightSource;
 import net.gegy1000.earth.server.world.pipeline.source.osm.OverpassSource;
@@ -22,8 +24,8 @@ import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataGenerator;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataOp;
 import net.gegy1000.terrarium.server.world.pipeline.data.op.DataMergeOp;
 import net.gegy1000.terrarium.server.world.pipeline.data.op.InterpolationScaleOp;
-import net.gegy1000.terrarium.server.world.pipeline.data.op.RasterSourceSampler;
 import net.gegy1000.terrarium.server.world.pipeline.data.op.ProduceSlopeOp;
+import net.gegy1000.terrarium.server.world.pipeline.data.op.RasterSourceSampler;
 import net.gegy1000.terrarium.server.world.pipeline.data.op.VoronoiScaleOp;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.FloatRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ObjRaster;
@@ -57,29 +59,34 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
 
         DataOp<UnsignedByteRaster> slope = ProduceSlopeOp.produce(heightSampler);
         slope = InterpolationScaleOp.LINEAR.scaleFrom(slope, this.ctx.srtmRaster, UnsignedByteRaster::create);
+        slope = new TransformSlopeNoiseOp(0.5).apply(slope);
 
         LandCoverSource landCoverSource = new LandCoverSource(this.ctx.landcoverRaster, "landcover");
-        DataOp<ObjRaster<Cover>> coverClassification = RasterSourceSampler.sampleObj(landCoverSource, Cover.NO_DATA);
-        coverClassification = VoronoiScaleOp.scaleFrom(coverClassification, this.ctx.landcoverRaster, view -> ObjRaster.create(Cover.NO_DATA, view));
+        DataOp<ObjRaster<Cover>> cover = RasterSourceSampler.sampleObj(landCoverSource, Cover.NO_DATA);
+        cover = VoronoiScaleOp.scaleFrom(cover, this.ctx.landcoverRaster, view -> ObjRaster.create(Cover.NO_DATA, view));
 
-        DataOp<ObjRaster<SoilConfig>> soil = SoilProducer.produce(coverClassification);
+        DataOp<ObjRaster<SoilConfig>> soil = ProduceSoilOp.produce(cover);
 
         DataOp<OsmData> osm = this.createOsmProducer();
 
-        DataOp<ShortRaster> waterBank = WaterProducer.produceBanks(heights, coverClassification);
-//        waterBank = OsmWaterProcessor.mergeOsmCoastlines(waterBank, osm, this.ctx.earthCoordinates); TODO
+        DataOp<ShortRaster> waterBank = ProduceWaterOp.produceBanks(heights, cover);
+        waterBank = OsmWaterProcessOps.mergeOsmCoastlines(waterBank, osm, this.ctx.earthCoordinates);
 
 //            waterBankLayer = new OsmWaterBodyLayer(waterBankLayer, osmProducer, this.context.earthCoordinates);
 
-        DataOp<WaterRaster> water = WaterProducer.produceWater(waterBank);
+        DataOp<WaterRaster> water = ProduceWaterOp.produceWater(waterBank);
 
-        heights = new HeightNoiseTransformer(2, 0.04, this.ctx.settings.getDouble(NOISE_SCALE))
+        heights = new HeightNoiseTransformOp(2, 0.04, this.ctx.settings.getDouble(NOISE_SCALE))
                 .apply(heights, water);
 
-        heights = new HeightTransformer(this.ctx.settings.getDouble(HEIGHT_SCALE) * this.ctx.worldScale, heightOrigin)
+        heights = new HeightTransformOp(this.ctx.settings.getDouble(HEIGHT_SCALE) * this.ctx.worldScale, heightOrigin)
                 .apply(heights);
 
-        slope = new SlopeNoiseTransformer(0.5).apply(slope);
+        int seaLevel = heightOrigin + 1;
+
+        water = WaterOps.levelWater(water, seaLevel);
+        cover = WaterOps.applyToCover(cover, water);
+        heights = WaterOps.applyToHeight(heights, water, this.ctx.settings.getInteger(OCEAN_DEPTH));
 
         ClimateSampler climateSampler = new ClimateSampler(TerrariumEarth.getClimateDataset());
 
@@ -92,7 +99,7 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
         return ColumnDataGenerator.builder()
                 .with(EarthDataKeys.HEIGHT, heights)
                 .with(EarthDataKeys.SLOPE, slope)
-                .with(EarthDataKeys.COVER, coverClassification)
+                .with(EarthDataKeys.COVER, cover)
                 .with(EarthDataKeys.OSM, osm)
                 .with(EarthDataKeys.WATER, water)
                 .with(EarthDataKeys.AVERAGE_TEMPERATURE, averageTemperature)

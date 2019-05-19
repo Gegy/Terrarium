@@ -22,10 +22,10 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import static net.gegy1000.earth.server.world.pipeline.data.WaterProducer.*;
+import static net.gegy1000.earth.server.world.pipeline.data.ProduceWaterOp.*;
 
 // TODO: This is problematic
-public final class OsmWaterProcessor {
+public final class OsmWaterProcessOps {
     public static DataOp<ShortRaster> mergeOsmCoastlines(DataOp<ShortRaster> water, DataOp<OsmData> osm, CoordinateState geoCoordinates) {
         return DataOp.of((engine, view) -> {
             CompletableFuture<ShortRaster> waterFuture = engine.load(water, view);

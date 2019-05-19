@@ -57,7 +57,6 @@ public class ComposableCubeGenerator implements CubicChunkGenerator {
     public void populate(CubicPos pos, ChunkPopulationWriter writer) {
         ColumnDataCache dataCache = this.dataCache.get();
 
-        // TODO: can we make a limited data cache interface, and create an impl that just takes these handles?
         ColumnDataEntry.Handle[] handles = this.acquirePopulationHandles(pos, dataCache);
 
         DecorationComposer decorationComposer = this.decorationComposer.get();

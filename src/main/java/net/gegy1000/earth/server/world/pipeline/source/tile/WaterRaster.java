@@ -10,7 +10,7 @@ public final class WaterRaster extends AbstractRaster<short[]> {
     public static final int WATER_LEVEL_MASK = 0x3FFC;
 
     public static final int LAND = 0;
-    public static final int OCEAN = 1;
+    public static final int SEA = 1;
     public static final int RIVER = 2;
     public static final int RIVER_CENTER = 3;
 
@@ -64,6 +64,6 @@ public final class WaterRaster extends AbstractRaster<short[]> {
 
     public static boolean isWater(int value) {
         int type = value & WATER_TYPE_MASK;
-        return type == OCEAN || type == RIVER || type == RIVER_CENTER;
+        return type == SEA || type == RIVER || type == RIVER_CENTER;
     }
 }
