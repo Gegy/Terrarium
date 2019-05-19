@@ -2,7 +2,7 @@ package net.gegy1000.terrarium.server.world.pipeline.data;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import net.gegy1000.terrarium.server.world.pipeline.data.function.DataFunction;
+import net.gegy1000.terrarium.server.world.pipeline.data.op.DataFunction;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;

@@ -25,8 +25,8 @@ import java.util.Collection;
 
 @Mod.EventBusSubscriber(modid = Terrarium.MODID)
 public class ServerEventHandler {
-    private static final long REGION_TRACK_INTERVAL = 2000;
-    private static long lastRegionTrackTime;
+    private static final long DATA_TRACK_INTERVAL = 2000;
+    private static long lastDataTrackTime;
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onWorldLoad(WorldEvent.Load event) {
@@ -82,17 +82,15 @@ public class ServerEventHandler {
         World world = event.world;
         if (event.phase == TickEvent.Phase.START && ServerEventHandler.shouldHandle(world) && world instanceof WorldServer) {
             long time = System.currentTimeMillis();
-            if (time - lastRegionTrackTime > REGION_TRACK_INTERVAL) {
+            if (time - lastDataTrackTime > DATA_TRACK_INTERVAL) {
                 TerrariumWorldData worldData = TerrariumWorldData.get(world);
                 if (worldData != null) {
-                    WorldServer worldServer = (WorldServer) world;
-
                     ColumnDataCache dataCache = worldData.getDataCache();
                     dataCache.dropColumns();
-                    dataCache.trackColumns(worldServer);
+                    dataCache.trackColumns();
                 }
 
-                lastRegionTrackTime = time;
+                lastDataTrackTime = time;
             }
         }
     }

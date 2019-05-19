@@ -1,7 +1,5 @@
 package net.gegy1000.terrarium.server.world.pipeline.data;
 
-import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
-import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import net.gegy1000.cubicglue.CubicGlue;
 import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.terrarium.server.world.chunk.tracker.ChunkTrackerAccess;
@@ -15,6 +13,7 @@ import net.minecraft.world.WorldServer;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,15 +30,12 @@ import java.util.stream.Stream;
 public class ColumnDataCache implements AutoCloseable {
     private final Map<ChunkPos, ColumnDataEntry> entries = new HashMap<>();
 
-    private final ColumnDataGenerator generator;
     private final ColumnDataLoader loader;
 
     private final ChunkTrackerAccess chunkTrackerAccess;
-    private final Object2BooleanMap<ChunkPos> chunkStateMap = new Object2BooleanOpenHashMap<>();
 
     public ColumnDataCache(World world, ColumnDataGenerator generator) {
-        this.generator = generator;
-        this.loader = new DistributedColumnLoader(this.generator::generate);
+        this.loader = new DistributedColumnLoader(generator::generate);
         this.chunkTrackerAccess = createTrackerAccess(world);
     }
 
@@ -67,10 +63,13 @@ public class ColumnDataCache implements AutoCloseable {
         trackedEntries.forEach(ColumnDataEntry::track);
     }
 
-    public void trackColumns(WorldServer world) {
+    public void trackColumns() {
         Collection<TrackedColumn> columnEntries = this.chunkTrackerAccess.getSortedTrackedColumns();
 
-        Collection<ChunkPos> requiredColumns = this.collectRequiredColumns(world, columnEntries);
+        Collection<ChunkPos> requiredColumns = columnEntries.stream()
+                .filter(TrackedColumn::isQueued)
+                .map(TrackedColumn::getPos)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
 
         this.setTrackedColumns(requiredColumns);
     }
@@ -84,22 +83,6 @@ public class ColumnDataCache implements AutoCloseable {
         droppedColumns.forEach(this.entries::remove);
     }
 
-    private Collection<ChunkPos> collectRequiredColumns(WorldServer world, Collection<TrackedColumn> chunkEntries) {
-        return chunkEntries.stream()
-                .filter(column -> column.isQueued() && !this.computeChunkSaved(world, column.getPos()))
-                .map(TrackedColumn::getPos)
-                .collect(Collectors.toList());
-    }
-
-    private boolean computeChunkSaved(WorldServer world, ChunkPos pos) {
-        if (this.chunkStateMap.containsKey(pos)) {
-            return this.chunkStateMap.get(pos);
-        }
-        boolean saved = world.getChunkProvider().chunkLoader.isChunkGeneratedAt(pos.x, pos.z);
-        this.chunkStateMap.put(pos, saved);
-        return saved;
-    }
-
     public ColumnDataEntry.Handle acquireEntry(ChunkPos columnPos) {
         return this.getEntry(columnPos).acquire();
     }
@@ -110,7 +93,7 @@ public class ColumnDataCache implements AutoCloseable {
 
     public <T extends Data> Optional<T> joinData(ChunkPos columnPos, DataKey<T> key) {
         try (ColumnDataEntry.Handle handle = this.acquireEntry(columnPos)) {
-            ColumnData columnData = handle.future().join();
+            ColumnData columnData = handle.join();
             return columnData.get(key);
         }
     }

@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -60,11 +61,13 @@ public class WorldPreview implements IBlockAccess {
     private final Long2ObjectMap<PreviewChunkData> chunkMap = new Long2ObjectOpenHashMap<>(VIEW_SIZE * VIEW_SIZE * VIEW_SIZE);
 
     private final Set<CubicPos> generatedChunks = new HashSet<>();
-    private final List<PreviewChunk> previewChunks = new ArrayList<>(VIEW_SIZE * VIEW_SIZE * VIEW_SIZE);
+    private final LinkedList<PreviewChunk> buildingChunks = new LinkedList<>();
+    private final List<PreviewChunk> renderedChunks = new ArrayList<>(VIEW_SIZE * VIEW_SIZE * VIEW_SIZE);
 
     private PreviewHeightMesh heightMesh;
 
-    private final Object lock = new Object();
+    private final Object buildMutex = new Object();
+    private final Object renderMutex = new Object();
 
     public WorldPreview(WorldType worldType, GenerationSettings settings, BufferBuilder[] builders) {
         this.worldType = worldType;
@@ -153,8 +156,8 @@ public class WorldPreview implements IBlockAccess {
     private void submitChunk(CubicPos pos, PreviewChunkData data, PreviewColumnData columnData) {
         PreviewChunk chunk = new PreviewChunk(data, columnData, pos, this);
         chunk.submitTo(this.executor, this::takeBuilder, this::returnBuilder);
-        synchronized (this.lock) {
-            this.previewChunks.add(chunk);
+        synchronized (this.buildMutex) {
+            this.buildingChunks.add(chunk);
         }
     }
 
@@ -201,50 +204,70 @@ public class WorldPreview implements IBlockAccess {
             return;
         }
 
-        synchronized (this.lock) {
-            int offsetHorizontal = VIEW_RANGE << 4;
-            int offsetVertical = (this.centerBlockPos.getY() >> 4) << 4;
+        int offsetHorizontal = VIEW_RANGE << 4;
+        int offsetVertical = (this.centerBlockPos.getY() >> 4) << 4;
 
-            GlStateManager.pushMatrix();
-            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            GlStateManager.translate(-offsetHorizontal, -offsetVertical, -offsetHorizontal);
-            this.heightMesh.render();
-            GlStateManager.popMatrix();
-        }
+        GlStateManager.pushMatrix();
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.translate(-offsetHorizontal, -offsetVertical, -offsetHorizontal);
+        this.heightMesh.render();
+        GlStateManager.popMatrix();
     }
 
     public void renderChunks() {
-        synchronized (this.lock) {
-            this.performUploads(this.previewChunks);
+        this.performUploads();
 
-            for (PreviewChunk chunk : this.previewChunks) {
-                chunk.render();
-            }
+        synchronized (this.renderMutex) {
+            this.renderedChunks.forEach(PreviewChunk::render);
         }
     }
 
-    private void performUploads(List<PreviewChunk> previewChunks) {
+    private PreviewChunk takeNextReadyChunk() {
+        synchronized (this.buildMutex) {
+            Iterator<PreviewChunk> iterator = this.buildingChunks.iterator();
+            while (iterator.hasNext()) {
+                PreviewChunk chunk = iterator.next();
+                if (chunk.isUploadReady()) {
+                    iterator.remove();
+                    return chunk;
+                }
+            }
+        }
+        return null;
+    }
+
+    private void performUploads() {
         if (this.heightMesh != null) {
             this.heightMesh.performUpload();
         }
 
+        if (this.buildingChunks.isEmpty()) {
+            return;
+        }
+
         long startTime = System.nanoTime();
 
-        Iterator<PreviewChunk> iterator = previewChunks.iterator();
-        while (System.nanoTime() - startTime < 5000000 && iterator.hasNext()) {
-            PreviewChunk chunk = iterator.next();
-            if (chunk.isUploadReady()) {
-                this.returnBuilder(chunk.performUpload());
+        while (System.nanoTime() - startTime < 10000000) {
+            PreviewChunk chunk = this.takeNextReadyChunk();
+            if (chunk == null) {
+                break;
+            }
+
+            this.returnBuilder(chunk.performUpload());
+
+            synchronized (this.renderMutex) {
+                this.renderedChunks.add(chunk);
             }
         }
     }
 
     public void delete() {
-        synchronized (this.lock) {
-            for (PreviewChunk chunk : this.previewChunks) {
+        synchronized (this.buildMutex) {
+            for (PreviewChunk chunk : this.buildingChunks) {
                 chunk.cancelGeneration();
                 chunk.delete();
             }
+            this.buildingChunks.clear();
         }
 
         if (this.generator != null) {
@@ -267,9 +290,6 @@ public class WorldPreview implements IBlockAccess {
 
     public void returnBuilder(BufferBuilder builder) {
         if (builder != null) {
-            if (this.builderQueue.contains(builder)) {
-                throw new IllegalArgumentException("Cannot return already returned builder!");
-            }
             this.builderQueue.add(builder);
         }
     }

@@ -34,7 +34,7 @@ public final class ColumnDataEntry {
     void track() {
         if (!this.tracked) {
             this.tracked = true;
-            this.enqueue();
+            this.future = this.enqueue();
         }
     }
 

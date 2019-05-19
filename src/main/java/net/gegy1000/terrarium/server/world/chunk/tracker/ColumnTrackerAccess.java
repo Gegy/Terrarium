@@ -3,6 +3,7 @@ package net.gegy1000.terrarium.server.world.chunk.tracker;
 import net.gegy1000.terrarium.Terrarium;
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerChunkMapEntry;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
@@ -33,7 +34,14 @@ public class ColumnTrackerAccess implements ChunkTrackerAccess {
     @Override
     public List<TrackedColumn> getSortedTrackedColumns() {
         List<PlayerChunkMapEntry> entries = getSortedChunkEntries(this.world.getPlayerChunkMap());
-        return entries.stream().map(TrackedColumn::new).collect(Collectors.toList());
+
+        return entries.stream()
+                .map(entry -> new TrackedColumn(entry.getPos(), this.shouldQueue(entry)))
+                .collect(Collectors.toList());
+    }
+
+    private boolean shouldQueue(PlayerChunkMapEntry entry) {
+        return entry.getChunk() == null && !this.isColumnSaved(entry.getPos());
     }
 
     @SuppressWarnings("unchecked")
@@ -57,5 +65,9 @@ public class ColumnTrackerAccess implements ChunkTrackerAccess {
         sortedEntries.sort(Comparator.comparingDouble(PlayerChunkMapEntry::getClosestPlayerDistance));
 
         return sortedEntries;
+    }
+
+    private boolean isColumnSaved(ChunkPos columnPos) {
+        return this.world.getChunkProvider().chunkLoader.isChunkGeneratedAt(columnPos.x, columnPos.z);
     }
 }

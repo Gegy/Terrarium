@@ -47,7 +47,6 @@ public class CubeTrackerAccess implements ChunkTrackerAccess {
     @Override
     public Collection<TrackedColumn> getSortedTrackedColumns() {
         PlayerChunkMap chunkTracker = this.world.getPlayerChunkMap();
-
         if (chunkTracker instanceof PlayerCubeMap) {
             XYZMap<CubeWatcher> watchers = getWatchers((PlayerCubeMap) chunkTracker);
 
@@ -58,6 +57,9 @@ public class CubeTrackerAccess implements ChunkTrackerAccess {
 
                 double distance = getClosestPlayerDistance(watcher);
                 boolean queued = watcher.getCube() == null;
+                if (queued) {
+                    queued = !this.isCubeSaved(watcher.getX(), watcher.getY(), watcher.getZ());
+                }
 
                 if (state == null) {
                     columnStates.put(columnPos, new ColumnState(distance, queued));
@@ -98,6 +100,16 @@ public class CubeTrackerAccess implements ChunkTrackerAccess {
             Terrarium.LOGGER.error("Failed to get closest player distance", e);
         }
         return 0.0;
+    }
+
+    private boolean isCubeSaved(int x, int y, int z) {
+        // TODO
+//        ChunkProviderServer provider = this.world.getChunkProvider();
+//        if (provider instanceof CubeProviderServer) {
+//            ICubeIO io = ((CubeProviderServer) provider).getCubeIO();
+//            return io.cubeExists(x, y, z);
+//        }
+        return false;
     }
 
     private static class ColumnState {

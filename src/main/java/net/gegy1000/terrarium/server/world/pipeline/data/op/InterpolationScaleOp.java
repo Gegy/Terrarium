@@ -1,4 +1,4 @@
-package net.gegy1000.terrarium.server.world.pipeline.data.function;
+package net.gegy1000.terrarium.server.world.pipeline.data.op;
 
 import net.gegy1000.terrarium.server.util.Interpolation;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
@@ -18,7 +18,7 @@ public enum InterpolationScaleOp {
     CUBIC(Interpolation.Function.CUBIC);
 
     private final Interpolation.Function function;
-    private final double[][] sampleBuffer;
+    private final ThreadLocal<double[][]> sampleBuffer;
     private final int lowerSampleBuffer;
     private final int upperSampleBuffer;
 
@@ -26,7 +26,7 @@ public enum InterpolationScaleOp {
         this.function = function;
 
         int pointCount = function.getPointCount();
-        this.sampleBuffer = new double[pointCount][pointCount];
+        this.sampleBuffer = ThreadLocal.withInitial(() -> new double[pointCount][pointCount]);
 
         this.lowerSampleBuffer = this.function.getBackward();
         this.upperSampleBuffer = this.function.getForward();
@@ -58,15 +58,17 @@ public enum InterpolationScaleOp {
             double originOffsetX = minCoordinate.getX() - srcView.getX();
             double originOffsetZ = minCoordinate.getZ() - srcView.getY();
 
+            double[][] sampleBuffer = this.sampleBuffer.get();
+
             return engine.load(data, srcView).thenApply(source -> {
                 T result = function.apply(view);
-                this.lerpRaster(source, result, originOffsetX, originOffsetZ, scaleFactorX, scaleFactorZ);
+                this.lerpRaster(sampleBuffer, source, result, originOffsetX, originOffsetZ, scaleFactorX, scaleFactorZ);
                 return result;
             });
         });
     }
 
-    private <T extends NumberRaster<?>> void lerpRaster(T source, T result, double offsetX, double offsetZ, double scaleFactorX, double scaleFactorZ) {
+    private <T extends NumberRaster<?>> void lerpRaster(double[][] sampleBuffer, T source, T result, double offsetX, double offsetZ, double scaleFactorX, double scaleFactorZ) {
         int startX = 0;
         int startZ = 0;
         int endX = result.getWidth();
@@ -85,7 +87,7 @@ public enum InterpolationScaleOp {
                 int originX = MathHelper.floor(sampleX);
                 double intermediateX = sampleX - originX;
 
-                double interpolatedValue = this.lerp(source, originX, originZ, intermediateX, intermediateZ);
+                double interpolatedValue = this.lerp(sampleBuffer, source, originX, originZ, intermediateX, intermediateZ);
                 result.setDouble(scaledX, scaledZ, interpolatedValue);
             }
         }
@@ -107,17 +109,17 @@ public enum InterpolationScaleOp {
         return DataView.rect(minSampleX, minSampleY, maxSampleX - minSampleX + 1, maxSampleY - minSampleY + 1);
     }
 
-    private <T extends NumberRaster<?>> double lerp(T source, int originX, int originZ, double intermediateX, double intermediateZ) {
+    private <T extends NumberRaster<?>> double lerp(double[][] sampleBuffer, T source, int originX, int originZ, double intermediateX, double intermediateZ) {
         int backward = this.function.getBackward();
         int pointCount = this.function.getPointCount();
         for (int sampleZ = 0; sampleZ < pointCount; sampleZ++) {
             int globalZ = originZ + sampleZ - backward;
             for (int sampleX = 0; sampleX < pointCount; sampleX++) {
                 int globalX = originX + sampleX - backward;
-                this.sampleBuffer[sampleX][sampleZ] = source.getDouble(globalX, globalZ);
+                sampleBuffer[sampleX][sampleZ] = source.getDouble(globalX, globalZ);
             }
         }
 
-        return this.function.lerp2d(this.sampleBuffer, intermediateX, intermediateZ);
+        return this.function.lerp2d(sampleBuffer, intermediateX, intermediateZ);
     }
 }

@@ -1,4 +1,4 @@
-package net.gegy1000.terrarium.server.world.pipeline.data.function;
+package net.gegy1000.terrarium.server.world.pipeline.data.op;
 
 import net.gegy1000.terrarium.server.util.Voronoi;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;

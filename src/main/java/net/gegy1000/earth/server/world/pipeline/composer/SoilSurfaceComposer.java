@@ -20,6 +20,7 @@ import java.util.Random;
 
 public class SoilSurfaceComposer implements SurfaceComposer {
     private static final long SEED = 6035435416693430887L;
+    private static final int MAX_SOIL_DEPTH = 6;
 
     private static final IBlockState AIR = Blocks.AIR.getDefaultState();
 
@@ -66,6 +67,10 @@ public class SoilSurfaceComposer implements SurfaceComposer {
         ShortRaster heightRaster = heightOption.get();
         ObjRaster<SoilConfig> soilRaster = soilOption.get();
 
+        if (!this.containsSurface(pos, heightRaster)) {
+            return;
+        }
+
         this.depthBuffer = this.depthNoise.getRegion(this.depthBuffer, globalX, globalZ, 16, 16, 0.0625, 0.0625, 1.0);
 
         for (int localZ = 0; localZ < 16; localZ++) {
@@ -80,6 +85,20 @@ public class SoilSurfaceComposer implements SurfaceComposer {
                 }
             }
         }
+    }
+
+    private boolean containsSurface(CubicPos cubePos, ShortRaster heightRaster) {
+        int minY = cubePos.getMinY();
+        int maxY = cubePos.getMaxY() + MAX_SOIL_DEPTH;
+        for (int localZ = 0; localZ < heightRaster.getHeight(); localZ++) {
+            for (int localX = 0; localX < heightRaster.getWidth(); localX++) {
+                short height = heightRaster.get(localX, localZ);
+                if (height >= minY && height <= maxY) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private void coverColumn(SoilConfig config, CubicPos pos, ChunkPrimeWriter writer, int localX, int localZ, int height, double depthNoise) {

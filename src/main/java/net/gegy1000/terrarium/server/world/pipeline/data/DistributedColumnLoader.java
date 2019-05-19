@@ -1,8 +1,8 @@
 package net.gegy1000.terrarium.server.world.pipeline.data;
 
-import com.google.common.collect.Maps;
 import net.minecraft.util.math.ChunkPos;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -18,7 +18,8 @@ public final class DistributedColumnLoader implements ColumnDataLoader {
     private final Worker[] workers = new Worker[WORKER_COUNT];
 
     private final LinkedBlockingQueue<Work> workQueue = new LinkedBlockingQueue<>();
-    private final Map<ChunkPos, Work> unseenWorkMap = Maps.newConcurrentMap();
+    private final Map<ChunkPos, Work> unseenWorkMap = new HashMap<>();
+    private final Object unseenWorkMutex = new Object();
 
     private boolean active = true;
 
@@ -39,20 +40,24 @@ public final class DistributedColumnLoader implements ColumnDataLoader {
 
         Work work = new Work(columnPos, future);
         this.workQueue.add(work);
-        this.unseenWorkMap.put(columnPos, work);
+        synchronized (this.unseenWorkMutex) {
+            this.unseenWorkMap.put(columnPos, work);
+        }
 
         return future;
     }
 
     @Override
     public ColumnData get(ChunkPos columnPos) {
-        Work unseenWork = this.unseenWorkMap.get(columnPos);
-        if (unseenWork != null) {
-            this.cancelWork(unseenWork);
-            return this.generate(columnPos);
+        Work unseenWork;
+        synchronized (this.unseenWorkMutex) {
+            unseenWork = this.unseenWorkMap.remove(columnPos);
+            if (unseenWork != null) {
+                unseenWork.cancel();
+            }
         }
 
-        return this.getAsync(columnPos).join();
+        return this.generate(columnPos);
     }
 
     @Override
@@ -67,16 +72,13 @@ public final class DistributedColumnLoader implements ColumnDataLoader {
         return this.generator.apply(columnPos);
     }
 
-    void cancelWork(Work work) {
-        work.cancel();
-        this.unseenWorkMap.remove(work.columnPos);
-    }
-
     void processWork(Consumer<Work> worker) throws InterruptedException {
         Work work;
         do {
             work = this.workQueue.take();
-            this.unseenWorkMap.remove(work.columnPos);
+            synchronized (this.unseenWorkMutex) {
+                this.unseenWorkMap.remove(work.columnPos);
+            }
         } while (work.isCancelled());
 
         worker.accept(work);

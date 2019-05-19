@@ -1,6 +1,5 @@
 package net.gegy1000.terrarium.server.world.chunk.tracker;
 
-import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.util.math.ChunkPos;
 
 public class TrackedColumn {
@@ -10,10 +9,6 @@ public class TrackedColumn {
     public TrackedColumn(ChunkPos pos, boolean queued) {
         this.pos = pos;
         this.queued = queued;
-    }
-
-    public TrackedColumn(PlayerChunkMapEntry entry) {
-        this(entry.getPos(), entry.getChunk() == null);
     }
 
     public ChunkPos getPos() {
