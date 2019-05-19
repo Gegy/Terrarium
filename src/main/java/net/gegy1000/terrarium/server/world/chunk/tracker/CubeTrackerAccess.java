@@ -1,5 +1,6 @@
 package net.gegy1000.terrarium.server.world.chunk.tracker;
 
+import io.github.opencubicchunks.cubicchunks.api.util.CubePos;
 import io.github.opencubicchunks.cubicchunks.api.util.XYZMap;
 import io.github.opencubicchunks.cubicchunks.core.server.CubeWatcher;
 import io.github.opencubicchunks.cubicchunks.core.server.PlayerCubeMap;
@@ -58,7 +59,8 @@ public class CubeTrackerAccess implements ChunkTrackerAccess {
                 double distance = getClosestPlayerDistance(watcher);
                 boolean queued = watcher.getCube() == null;
                 if (queued) {
-                    queued = !this.isCubeSaved(watcher.getX(), watcher.getY(), watcher.getZ());
+                    CubePos cubePos = new CubePos(watcher.getX(), watcher.getY(), watcher.getZ());
+                    queued = !SavedCubeTracker.isSaved(this.world, cubePos);
                 }
 
                 if (state == null) {
@@ -100,16 +102,6 @@ public class CubeTrackerAccess implements ChunkTrackerAccess {
             Terrarium.LOGGER.error("Failed to get closest player distance", e);
         }
         return 0.0;
-    }
-
-    private boolean isCubeSaved(int x, int y, int z) {
-        // TODO
-//        ChunkProviderServer provider = this.world.getChunkProvider();
-//        if (provider instanceof CubeProviderServer) {
-//            ICubeIO io = ((CubeProviderServer) provider).getCubeIO();
-//            return io.cubeExists(x, y, z);
-//        }
-        return false;
     }
 
     private static class ColumnState {

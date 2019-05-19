@@ -5,8 +5,12 @@ import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.message.DataFailWarningMessage;
 import net.gegy1000.terrarium.server.message.LoadingStateMessage;
 import net.gegy1000.terrarium.server.message.TerrariumHandshakeMessage;
+import net.gegy1000.terrarium.server.world.chunk.tracker.SavedColumnTracker;
+import net.gegy1000.terrarium.server.world.chunk.tracker.SavedCubeTracker;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPresetRegistry;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -52,6 +56,16 @@ public class Terrarium {
         NETWORK.registerMessage(TerrariumHandshakeMessage.Handler.class, TerrariumHandshakeMessage.class, 1, Side.CLIENT);
         NETWORK.registerMessage(LoadingStateMessage.Handler.class, LoadingStateMessage.class, 2, Side.CLIENT);
         NETWORK.registerMessage(DataFailWarningMessage.Handler.class, DataFailWarningMessage.class, 3, Side.CLIENT);
+
+        MinecraftForge.EVENT_BUS.register(SavedColumnTracker.class);
+
+        if (Loader.isModLoaded("cubicchunks")) {
+            registerCubicChunksEvents();
+        }
+    }
+
+    private static void registerCubicChunksEvents() {
+        MinecraftForge.EVENT_BUS.register(SavedCubeTracker.class);
     }
 
     @Mod.EventHandler

@@ -9,7 +9,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-// TODO: It might be valid to replace this with a direct on-thread loader
 public final class DistributedColumnLoader implements ColumnDataLoader {
     private static final int WORKER_COUNT = 1;
 
