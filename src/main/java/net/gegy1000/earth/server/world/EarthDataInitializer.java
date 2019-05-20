@@ -2,41 +2,33 @@ package net.gegy1000.earth.server.world;
 
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.world.cover.Cover;
+import net.gegy1000.earth.server.world.cover.CoverId;
+import net.gegy1000.earth.server.world.geography.Landform;
 import net.gegy1000.earth.server.world.pipeline.EarthDataKeys;
 import net.gegy1000.earth.server.world.pipeline.data.ClimateSampler;
 import net.gegy1000.earth.server.world.pipeline.data.HeightNoiseTransformOp;
 import net.gegy1000.earth.server.world.pipeline.data.HeightTransformOp;
-import net.gegy1000.earth.server.world.pipeline.data.OsmSampler;
-import net.gegy1000.earth.server.world.pipeline.data.OsmWaterProcessOps;
+import net.gegy1000.earth.server.world.pipeline.data.ProduceCoverOp;
+import net.gegy1000.earth.server.world.pipeline.data.ProduceLandformsOp;
 import net.gegy1000.earth.server.world.pipeline.data.ProduceSoilOp;
-import net.gegy1000.earth.server.world.pipeline.data.ProduceWaterOp;
 import net.gegy1000.earth.server.world.pipeline.data.TransformSlopeNoiseOp;
 import net.gegy1000.earth.server.world.pipeline.data.WaterOps;
 import net.gegy1000.earth.server.world.pipeline.source.LandCoverSource;
 import net.gegy1000.earth.server.world.pipeline.source.SrtmHeightSource;
-import net.gegy1000.earth.server.world.pipeline.source.osm.OverpassSource;
-import net.gegy1000.earth.server.world.pipeline.source.tile.OsmData;
-import net.gegy1000.earth.server.world.pipeline.source.tile.WaterRaster;
 import net.gegy1000.earth.server.world.soil.SoilConfig;
 import net.gegy1000.terrarium.server.world.TerrariumDataInitializer;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataGenerator;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataOp;
-import net.gegy1000.terrarium.server.world.pipeline.data.op.DataMergeOp;
 import net.gegy1000.terrarium.server.world.pipeline.data.op.InterpolationScaleOp;
 import net.gegy1000.terrarium.server.world.pipeline.data.op.ProduceSlopeOp;
 import net.gegy1000.terrarium.server.world.pipeline.data.op.RasterSourceSampler;
 import net.gegy1000.terrarium.server.world.pipeline.data.op.VoronoiScaleOp;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.FloatRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ObjRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.UnsignedByteRaster;
-import net.minecraft.util.ResourceLocation;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static net.gegy1000.earth.server.world.EarthWorldType.*;
 
@@ -62,31 +54,28 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
         slope = new TransformSlopeNoiseOp(0.5).apply(slope);
 
         LandCoverSource landCoverSource = new LandCoverSource(this.ctx.landcoverRaster, "landcover");
-        DataOp<ObjRaster<Cover>> cover = RasterSourceSampler.sampleObj(landCoverSource, Cover.NO_DATA);
-        cover = VoronoiScaleOp.scaleFrom(cover, this.ctx.landcoverRaster, view -> ObjRaster.create(Cover.NO_DATA, view));
+        DataOp<EnumRaster<CoverId>> coverId = RasterSourceSampler.sampleEnum(landCoverSource, CoverId.NO_DATA);
+        coverId = VoronoiScaleOp.scaleFrom(coverId, this.ctx.landcoverRaster, view -> EnumRaster.create(CoverId.NO_DATA, view));
 
-        DataOp<ObjRaster<SoilConfig>> soil = ProduceSoilOp.produce(cover);
+        DataOp<EnumRaster<Landform>> landforms = ProduceLandformsOp.produce(heights, coverId);
 
-        DataOp<OsmData> osm = this.createOsmProducer();
+        DataOp<EnumRaster<Cover>> cover = ProduceCoverOp.produce(coverId);
 
-        DataOp<ShortRaster> waterBank = ProduceWaterOp.produceBanks(heights, cover);
-        waterBank = OsmWaterProcessOps.mergeOsmCoastlines(waterBank, osm, this.ctx.earthCoordinates);
-
-//            waterBankLayer = new OsmWaterBodyLayer(waterBankLayer, osmProducer, this.context.earthCoordinates);
-
-        DataOp<WaterRaster> water = ProduceWaterOp.produceWater(waterBank);
+        DataOp<ObjRaster<SoilConfig>> soil = ProduceSoilOp.produce(coverId);
 
         heights = new HeightNoiseTransformOp(2, 0.04, this.ctx.settings.getDouble(NOISE_SCALE))
-                .apply(heights, water);
+                .apply(heights, landforms);
 
         heights = new HeightTransformOp(this.ctx.settings.getDouble(HEIGHT_SCALE) * this.ctx.worldScale, heightOrigin)
                 .apply(heights);
 
         int seaLevel = heightOrigin + 1;
+        int seaDepth = this.ctx.settings.getInteger(SEA_DEPTH);
 
-        water = WaterOps.levelWater(water, seaLevel);
-        cover = WaterOps.applyToCover(cover, water);
-        heights = WaterOps.applyToHeight(heights, water, this.ctx.settings.getInteger(OCEAN_DEPTH));
+        DataOp<ShortRaster> waterLevel = WaterOps.produceWaterLevel(landforms, seaLevel);
+
+        cover = WaterOps.applyToCover(cover, landforms);
+        heights = WaterOps.applyToHeight(heights, landforms, waterLevel, seaDepth);
 
         ClimateSampler climateSampler = new ClimateSampler(TerrariumEarth.getClimateDataset());
 
@@ -100,63 +89,12 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
                 .with(EarthDataKeys.HEIGHT, heights)
                 .with(EarthDataKeys.SLOPE, slope)
                 .with(EarthDataKeys.COVER, cover)
-                .with(EarthDataKeys.OSM, osm)
-                .with(EarthDataKeys.WATER, water)
+                .with(EarthDataKeys.LANDFORM, landforms)
+                .with(EarthDataKeys.WATER_LEVEL, waterLevel)
                 .with(EarthDataKeys.AVERAGE_TEMPERATURE, averageTemperature)
                 .with(EarthDataKeys.ANNUAL_RAINFALL, annualRainfall)
                 .with(EarthDataKeys.SOIL, soil)
                 .build();
-    }
-
-    private DataOp<OsmData> createOsmProducer() {
-        List<OverpassSource> sources = new ArrayList<>();
-
-        sources.add(new OverpassSource(
-                this.ctx.earthCoordinates,
-                0.3,
-                "osm/coastline",
-                new ResourceLocation(TerrariumEarth.MODID, "query/coastline_overpass_query.oql"),
-                1
-        ));
-            /*sources.add(new OverpassSource(
-                    this.context.earthCoordinates,
-                    0.3,
-                    "osm/outline",
-                    new ResourceLocation(TerrariumEarth.MODID, "query/outline_overpass_query.oql"),
-                    12
-            ));
-            sources.add(new OverpassSource(
-                    this.context.earthCoordinates,
-                    0.15,
-                    "osm/natural",
-                    new ResourceLocation(TerrariumEarth.MODID, "query/natural_overpass_query.oql"),
-                    1
-            ));
-            sources.add(new OverpassSource(
-                    this.context.earthCoordinates,
-                    0.1,
-                    "osm/general",
-                    new ResourceLocation(TerrariumEarth.MODID, "query/general_overpass_query.oql"),
-                    6
-            ));
-            sources.add(new OverpassSource(
-                    this.context.earthCoordinates,
-                    0.05,
-                    "osm/detailed",
-                    new ResourceLocation(TerrariumEarth.MODID, "query/detail_overpass_query.oql"),
-                    4
-            ));*/
-
-        Collection<DataOp<OsmData>> samplers = sources.stream()
-                .filter(OverpassSource::shouldSample)
-                .map(source -> OsmSampler.sample(source, this.ctx.earthCoordinates))
-                .collect(Collectors.toList());
-
-        if (!samplers.isEmpty()) {
-            return DataMergeOp.merge(samplers);
-        } else {
-            return DataOp.completed(new OsmData());
-        }
     }
 
     private InterpolationScaleOp selectScaleOp(GenerationSettings properties) {

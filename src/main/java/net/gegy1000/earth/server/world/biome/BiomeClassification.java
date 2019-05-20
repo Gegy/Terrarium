@@ -53,6 +53,7 @@ public final class BiomeClassification {
         }
     }
 
+    // TODO: Custom classification system
     public void include(BiomeDictionary.Type type) {
         for (Biome biome : BiomeDictionary.getBiomes(type)) {
             if (this.exclude.contains(biome)) {

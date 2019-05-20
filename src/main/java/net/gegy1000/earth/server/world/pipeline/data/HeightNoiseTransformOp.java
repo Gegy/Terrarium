@@ -1,7 +1,8 @@
 package net.gegy1000.earth.server.world.pipeline.data;
 
-import net.gegy1000.earth.server.world.pipeline.source.tile.WaterRaster;
+import net.gegy1000.earth.server.world.geography.Landform;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataOp;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.minecraft.world.gen.NoiseGeneratorOctaves;
 
@@ -31,31 +32,31 @@ public final class HeightNoiseTransformOp {
         this.scaleY = scaleY;
     }
 
-    public DataOp<ShortRaster> apply(DataOp<ShortRaster> heights, DataOp<WaterRaster> water) {
+    public DataOp<ShortRaster> apply(DataOp<ShortRaster> heights, DataOp<EnumRaster<Landform>> landforms) {
         if (this.scaleY > -1e-3 && this.scaleY < 1e-3) {
             return heights;
         }
 
         return DataOp.of((engine, view) -> {
             CompletableFuture<ShortRaster> heightFuture = engine.load(heights, view);
-            CompletableFuture<WaterRaster> waterFuture = engine.load(water, view);
+            CompletableFuture<EnumRaster<Landform>> landformFuture = engine.load(landforms, view);
 
-            return CompletableFuture.allOf(heightFuture, waterFuture)
+            return CompletableFuture.allOf(heightFuture, landformFuture)
                     .thenApply(v -> {
                         ShortRaster heightRaster = heightFuture.join();
-                        WaterRaster waterRaster = waterFuture.join();
+                        EnumRaster<Landform> landformRaster = landformFuture.join();
 
                         double[] noise = new double[view.getWidth() * view.getHeight()];
                         this.noise.generateNoiseOctaves(noise, view.getY(), view.getX(), view.getWidth(), view.getHeight(), this.scaleXZ, this.scaleXZ, 0.0);
 
-                        short[] heightBuffer = heightRaster.getData();
-                        short[] waterBuffer = waterRaster.getData();
-
-                        for (int i = 0; i < noise.length; i++) {
-                            if (WaterRaster.isLand(waterBuffer[i])) {
-                                heightBuffer[i] += (noise[i] + this.max) / (this.max * 2.0) * this.scaleY * 35.0;
+                        heightRaster.transform((source, x, y) -> {
+                            if (landformRaster.get(x, y) == Landform.LAND) {
+                                int index = x + y * view.getWidth();
+                                double offset = (noise[index] + this.max) / (this.max * 2.0) * this.scaleY * 35.0;
+                                return (short) (source + offset);
                             }
-                        }
+                            return source;
+                        });
 
                         return heightRaster;
                     });

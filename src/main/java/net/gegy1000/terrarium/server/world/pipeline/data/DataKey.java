@@ -20,6 +20,9 @@ public final class DataKey<T extends Data> {
 
     @Override
     public final boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
         return obj instanceof DataKey && ((DataKey) obj).getIdentifier().equals(this.identifier);
     }
 }

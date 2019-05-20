@@ -7,12 +7,12 @@ import net.gegy1000.earth.server.world.cover.CoverConfig;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.SurfaceComposer;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnData;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataKey;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.ObjRaster;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.EnumRaster;
 
 public class EarthCarvingComposer implements SurfaceComposer {
-    private final DataKey<ObjRaster<Cover>> coverKey;
+    private final DataKey<EnumRaster<Cover>> coverKey;
 
-    public EarthCarvingComposer(DataKey<ObjRaster<Cover>> coverKey) {
+    public EarthCarvingComposer(DataKey<EnumRaster<Cover>> coverKey) {
         this.coverKey = coverKey;
     }
 

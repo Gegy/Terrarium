@@ -45,7 +45,7 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
         int heightOrigin = this.ctx.settings.getInteger(HEIGHT_ORIGIN);
 
         builder.addSurfaceComposer(new HeightmapSurfaceComposer(EarthDataKeys.HEIGHT, Blocks.STONE.getDefaultState()));
-        builder.addSurfaceComposer(new WaterFillSurfaceComposer(EarthDataKeys.HEIGHT, EarthDataKeys.WATER, Blocks.WATER.getDefaultState()));
+        builder.addSurfaceComposer(new WaterFillSurfaceComposer(EarthDataKeys.HEIGHT, EarthDataKeys.LANDFORM, EarthDataKeys.WATER_LEVEL, Blocks.WATER.getDefaultState()));
         builder.addSurfaceComposer(new SoilSurfaceComposer(this.ctx.world, EarthDataKeys.HEIGHT, EarthDataKeys.SOIL, Blocks.STONE.getDefaultState()));
 
         if (!preview && this.ctx.settings.getBoolean(ENABLE_DECORATION)) {

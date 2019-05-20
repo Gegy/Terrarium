@@ -4,8 +4,6 @@ import net.gegy1000.terrarium.server.world.pipeline.data.DataOp;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.minecraft.util.math.MathHelper;
 
-import java.util.concurrent.CompletableFuture;
-
 public final class HeightTransformOp {
     private final double scale;
     private final int offset;
@@ -16,13 +14,9 @@ public final class HeightTransformOp {
     }
 
     public DataOp<ShortRaster> apply(DataOp<ShortRaster> heights) {
-        return DataOp.of((engine, view) -> {
-            CompletableFuture<ShortRaster> heightFuture = engine.load(heights, view);
-
-            return heightFuture.thenApply(heightRaster -> {
-                heightRaster.transform(this::transform);
-                return heightRaster;
-            });
+        return heights.map((heightRaster, engine, view) -> {
+            heightRaster.transform(this::transform);
+            return heightRaster;
         });
     }
 

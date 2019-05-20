@@ -1,7 +1,8 @@
-package net.gegy1000.earth.server.world.ecology;
+package net.gegy1000.earth.server.world.ecology.vegetation;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import net.gegy1000.earth.server.world.ecology.GrowthIndicator;
 
 public final class Vegetation {
     private final GrowthIndicator growthIndicator;

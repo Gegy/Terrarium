@@ -1,49 +1,48 @@
 package net.gegy1000.earth.server.world.pipeline.data;
 
 import net.gegy1000.earth.server.world.cover.Cover;
-import net.gegy1000.earth.server.world.pipeline.source.tile.WaterRaster;
+import net.gegy1000.earth.server.world.geography.Landform;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataOp;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.ObjRaster;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 
 import java.util.concurrent.CompletableFuture;
 
 public final class WaterOps {
-    public static DataOp<WaterRaster> levelWater(DataOp<WaterRaster> water, int seaLevel) {
-        return DataOp.of((engine, view) -> {
-            CompletableFuture<WaterRaster> waterFuture = engine.load(water, view);
+    public static DataOp<ShortRaster> produceWaterLevel(DataOp<EnumRaster<Landform>> landforms, int seaLevel) {
+        return landforms.map((landformRaster, engine, view) -> {
+            ShortRaster waterLevelRaster = ShortRaster.create(view);
 
-            return waterFuture.thenApply(waterRaster -> {
-                for (int localZ = 0; localZ < waterRaster.getHeight(); localZ++) {
-                    for (int localX = 0; localX < waterRaster.getWidth(); localX++) {
-                        int waterType = waterRaster.getWaterType(localX, localZ);
-                        if (waterType == WaterRaster.SEA) {
-                            waterRaster.setWaterLevel(localX, localZ, seaLevel);
-                        }
-                    }
+            landformRaster.iterate((landform, x, y) -> {
+                if (landform == Landform.SEA) {
+                    waterLevelRaster.set(x, y, (short) seaLevel);
+                } else {
+                    waterLevelRaster.set(x, y, Short.MIN_VALUE);
                 }
-
-                return waterRaster;
             });
+
+            return waterLevelRaster;
         });
     }
 
     // TODO: Carve smoothed edges
-    public static DataOp<ShortRaster> applyToHeight(DataOp<ShortRaster> height, DataOp<WaterRaster> water, int seaDepth) {
+    public static DataOp<ShortRaster> applyToHeight(DataOp<ShortRaster> height, DataOp<EnumRaster<Landform>> landforms, DataOp<ShortRaster> waterLevel, int seaDepth) {
         return DataOp.of((engine, view) -> {
             CompletableFuture<ShortRaster> heightFuture = engine.load(height, view);
-            CompletableFuture<WaterRaster> waterFuture = engine.load(water, view);
+            CompletableFuture<EnumRaster<Landform>> landformFuture = engine.load(landforms, view);
+            CompletableFuture<ShortRaster> waterLevelFuture = engine.load(waterLevel, view);
 
-            return CompletableFuture.allOf(heightFuture, waterFuture)
+            return CompletableFuture.allOf(heightFuture, landformFuture, waterLevelFuture)
                     .thenApply(v -> {
                         ShortRaster heightRaster = heightFuture.join();
-                        WaterRaster waterRaster = waterFuture.join();
+                        EnumRaster<Landform> landformRaster = landformFuture.join();
+                        ShortRaster waterLevelRaster = waterLevelFuture.join();
 
                         heightRaster.transform((source, x, y) -> {
-                            int waterType = waterRaster.getWaterType(x, y);
-                            if (waterType == WaterRaster.SEA) {
-                                int waterLevel = waterRaster.getWaterLevel(x, y);
-                                double carvedHeight = waterLevel - seaDepth;
+                            Landform landform = landformRaster.get(x, y);
+                            if (landform == Landform.SEA) {
+                                int level = waterLevelRaster.get(x, y);
+                                double carvedHeight = level - seaDepth;
                                 return (short) Math.round(carvedHeight);
                             }
 
@@ -56,22 +55,22 @@ public final class WaterOps {
     }
 
     // TODO: Properly select cover type for filled in space!
-    public static DataOp<ObjRaster<Cover>> applyToCover(DataOp<ObjRaster<Cover>> cover, DataOp<WaterRaster> water) {
+    public static DataOp<EnumRaster<Cover>> applyToCover(DataOp<EnumRaster<Cover>> cover, DataOp<EnumRaster<Landform>> landforms) {
         return DataOp.of((engine, view) -> {
-            CompletableFuture<ObjRaster<Cover>> coverFuture = engine.load(cover, view);
-            CompletableFuture<WaterRaster> waterFuture = engine.load(water, view);
+            CompletableFuture<EnumRaster<Cover>> coverFuture = engine.load(cover, view);
+            CompletableFuture<EnumRaster<Landform>> landformFuture = engine.load(landforms, view);
 
-            return CompletableFuture.allOf(coverFuture, waterFuture)
+            return CompletableFuture.allOf(coverFuture, landformFuture)
                     .thenApply(v -> {
-                        ObjRaster<Cover> coverRaster = coverFuture.join();
-                        WaterRaster waterRaster = waterFuture.join();
+                        EnumRaster<Cover> coverRaster = coverFuture.join();
+                        EnumRaster<Landform> landformRaster = landformFuture.join();
 
                         coverRaster.transform((source, x, y) -> {
-                            int sampleType = waterRaster.getWaterType(x, y);
-                            if (WaterRaster.isWater(sampleType)) {
+                            Landform landform = landformRaster.get(x, y);
+                            if (landform.isWater()) {
                                 return Cover.WATER;
                             } else if (source == Cover.WATER) {
-                                return Cover.NO_DATA;
+                                return Cover.NONE;
                             }
                             return source;
                         });

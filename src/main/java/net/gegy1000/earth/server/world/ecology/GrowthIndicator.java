@@ -5,5 +5,5 @@ public interface GrowthIndicator {
         return abiotic -> 1.0;
     }
 
-    double test(AbioticProperties abiotic);
+    double test(AbioticComponents abiotic);
 }

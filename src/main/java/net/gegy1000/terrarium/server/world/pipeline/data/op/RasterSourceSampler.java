@@ -4,6 +4,7 @@ import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataView;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataOp;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ByteRaster;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ObjRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.Raster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
@@ -26,6 +27,10 @@ public final class RasterSourceSampler {
 
     public static <T> DataOp<ObjRaster<T>> sampleObj(TiledDataSource<ObjRaster<T>> source, T value) {
         return sample(source, view -> ObjRaster.create(value, view));
+    }
+
+    public static <T extends Enum<T>> DataOp<EnumRaster<T>> sampleEnum(TiledDataSource<EnumRaster<T>> source, T value) {
+        return sample(source, view -> EnumRaster.create(value, view));
     }
 
     public static <T extends Raster<?>> DataOp<T> sample(TiledDataSource<T> source, Function<DataView, T> function) {

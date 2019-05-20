@@ -1,11 +1,11 @@
 package net.gegy1000.earth.server.world.ecology;
 
-import net.gegy1000.earth.server.world.soil.EdaphicProperties;
+import net.gegy1000.earth.server.world.soil.EdaphicComponents;
 
 // TODO: Debug utils to display view components in-world
-public final class AbioticProperties {
+public final class AbioticComponents {
     // TODO: simulate water drainage
-    private EdaphicProperties edaphic;
+    private EdaphicComponents edaphic;
 
     private float temperature;
 
@@ -26,7 +26,7 @@ public final class AbioticProperties {
         this.temperature = temperature;
     }
 
-    public EdaphicProperties getEdaphic() {
+    public EdaphicComponents getEdaphic() {
         return this.edaphic;
     }
 

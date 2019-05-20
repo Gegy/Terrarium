@@ -1,5 +1,6 @@
-package net.gegy1000.earth.server.world.ecology;
+package net.gegy1000.earth.server.world.ecology.vegetation;
 
+import net.gegy1000.earth.server.world.ecology.GrowthIndicator;
 import net.gegy1000.terrarium.server.util.WeightedPool;
 import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockOldLeaf;

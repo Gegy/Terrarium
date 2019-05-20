@@ -9,8 +9,8 @@ import net.gegy1000.terrarium.server.util.ArrayUtils;
 import net.gegy1000.terrarium.server.world.pipeline.composer.biome.BiomeComposer;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnData;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataKey;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.FloatRaster;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.ObjRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.minecraft.init.Biomes;
 import net.minecraft.util.math.ChunkPos;
@@ -23,7 +23,7 @@ public final class EarthBiomeComposer implements BiomeComposer {
     private static final long TEMPERATURE_SEED = 6947193999621861488L;
     private static final long RAINFALL_SEED = 3723149413174831639L;
 
-    private final DataKey<ObjRaster<Cover>> coverKey;
+    private final DataKey<EnumRaster<Cover>> coverKey;
     private final DataKey<FloatRaster> temperatureKey;
     private final DataKey<ShortRaster> rainfallKey;
 
@@ -34,7 +34,7 @@ public final class EarthBiomeComposer implements BiomeComposer {
 
     public EarthBiomeComposer(
             World world,
-            DataKey<ObjRaster<Cover>> coverKey,
+            DataKey<EnumRaster<Cover>> coverKey,
             DataKey<FloatRaster> temperatureKey,
             DataKey<ShortRaster> rainfallKey
     ) {
@@ -49,7 +49,7 @@ public final class EarthBiomeComposer implements BiomeComposer {
 
     @Override
     public Biome[] composeBiomes(ColumnData data, ChunkPos columnPos) {
-        Optional<ObjRaster<Cover>> coverOption = data.get(this.coverKey);
+        Optional<EnumRaster<Cover>> coverOption = data.get(this.coverKey);
         Optional<FloatRaster> temperatureOption = data.get(this.temperatureKey);
         Optional<ShortRaster> rainfallOption = data.get(this.rainfallKey);
 
@@ -57,7 +57,7 @@ public final class EarthBiomeComposer implements BiomeComposer {
             return ArrayUtils.fill(this.biomeBuffer, Biomes.DEFAULT);
         }
 
-        ObjRaster<Cover> coverRaster = coverOption.get();
+        EnumRaster<Cover> coverRaster = coverOption.get();
         FloatRaster temperatureRaster = temperatureOption.get();
         ShortRaster rainfallRaster = rainfallOption.get();
 

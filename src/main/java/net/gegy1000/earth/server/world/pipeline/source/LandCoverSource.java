@@ -1,10 +1,10 @@
 package net.gegy1000.earth.server.world.pipeline.source;
 
 import net.gegy1000.earth.TerrariumEarth;
-import net.gegy1000.earth.server.world.cover.Cover;
+import net.gegy1000.earth.server.world.cover.CoverId;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.ObjRaster;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
 import net.gegy1000.terrarium.server.world.pipeline.source.SourceResult;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-public class LandCoverSource extends TiledDataSource<ObjRaster<Cover>> {
+public class LandCoverSource extends TiledDataSource<EnumRaster<CoverId>> {
     public static final int TILE_SIZE = 1800;
     public static final int GLOBAL_WIDTH = 129600;
     public static final int GLOBAL_HEIGHT = 64800;
@@ -29,7 +29,7 @@ public class LandCoverSource extends TiledDataSource<ObjRaster<Cover>> {
     private static final int TILE_OFFSET_X = TILE_COUNT_X / 2;
     private static final int TILE_OFFSET_Y = TILE_COUNT_Y / 2;
 
-    private static final ObjRaster<Cover> DEFAULT_TILE = ObjRaster.createSquare(Cover.PERMANENT_SNOW, TILE_SIZE);
+    private static final EnumRaster<CoverId> DEFAULT_TILE = EnumRaster.createSquare(CoverId.NO_DATA, TILE_SIZE);
 
     public LandCoverSource(CoordinateState coordinateState, String cacheRoot) {
         super(new ResourceLocation(TerrariumEarth.MODID, "landcover"), new File(GLOBAL_CACHE_ROOT, cacheRoot), new Coordinate(coordinateState, TILE_SIZE, TILE_SIZE));
@@ -62,13 +62,13 @@ public class LandCoverSource extends TiledDataSource<ObjRaster<Cover>> {
     }
 
     @Override
-    public ObjRaster<Cover> getDefaultTile() {
+    public EnumRaster<CoverId> getDefaultTile() {
         return DEFAULT_TILE;
     }
 
     @Nullable
     @Override
-    public ObjRaster<Cover> getForcedTile(DataTilePos pos) {
+    public EnumRaster<CoverId> getForcedTile(DataTilePos pos) {
         DataTilePos loadTilePos = this.getLoadTilePos(pos);
         int x = loadTilePos.getTileX();
         int y = loadTilePos.getTileZ();
@@ -79,16 +79,16 @@ public class LandCoverSource extends TiledDataSource<ObjRaster<Cover>> {
     }
 
     @Override
-    public SourceResult<ObjRaster<Cover>> parseStream(DataTilePos pos, InputStream stream) throws IOException {
+    public SourceResult<EnumRaster<CoverId>> parseStream(DataTilePos pos, InputStream stream) throws IOException {
         try (DataInputStream input = new DataInputStream(stream)) {
             byte[] buffer = new byte[TILE_SIZE * TILE_SIZE];
             input.readFully(buffer);
 
-            ObjRaster<Cover> raster = ObjRaster.createSquare(Cover.PERMANENT_SNOW, TILE_SIZE);
+            EnumRaster<CoverId> raster = EnumRaster.createSquare(CoverId.PERMANENT_SNOW, TILE_SIZE);
             for (int y = 0; y < TILE_SIZE; y++) {
                 for (int x = 0; x < TILE_SIZE; x++) {
                     byte id = buffer[x + y * TILE_SIZE];
-                    raster.set(x, y, Cover.get(id));
+                    raster.set(x, y, CoverId.get(id));
                 }
             }
 

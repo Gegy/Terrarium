@@ -34,5 +34,16 @@ public final class DataOp<T extends Data> {
             throw new RuntimeException(e);
         }
     }
+
+    public <U extends Data> DataOp<U> map(Mapper<T, U> mapper) {
+        return DataOp.of((engine, view) -> {
+            CompletableFuture<T> future = engine.load(this, view);
+            return future.thenApply(data -> mapper.map(data, engine, view));
+        });
+    }
+
+    public interface Mapper<T extends Data, U extends Data> {
+        U map(T data, DataEngine engine, DataView view);
+    }
 }
 

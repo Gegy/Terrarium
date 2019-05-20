@@ -6,7 +6,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.gen.NoiseGeneratorOctaves;
 
 import java.util.Random;
-import java.util.concurrent.CompletableFuture;
 
 public final class TransformSlopeNoiseOp {
     private static final long SEED = 3819791875842730969L;
@@ -24,21 +23,17 @@ public final class TransformSlopeNoiseOp {
             return slope;
         }
 
-        return DataOp.of((engine, view) -> {
-            CompletableFuture<UnsignedByteRaster> slopeFuture = engine.load(slope, view);
+        return slope.map((slopeRaster, engine, view) -> {
+            double[] noise = new double[view.getWidth() * view.getHeight()];
+            double frequency = (1.0 / this.scale) * 0.7;
+            this.noise.generateNoiseOctaves(noise, view.getY(), view.getX(), view.getWidth(), view.getHeight(), frequency, frequency, 0.0);
 
-            return slopeFuture.thenApply(slopeRaster -> {
-                double[] noise = new double[view.getWidth() * view.getHeight()];
-                double frequency = (1.0 / this.scale) * 0.7;
-                this.noise.generateNoiseOctaves(noise, view.getY(), view.getX(), view.getWidth(), view.getHeight(), frequency, frequency, 0.0);
-
-                slopeRaster.transform((value, x, z) -> {
-                    int slopeNoise = MathHelper.floor(noise[x + z * view.getWidth()] * 35.0);
-                    return MathHelper.clamp(value + slopeNoise, 0, 255);
-                });
-
-                return slopeRaster;
+            slopeRaster.transform((value, x, z) -> {
+                int slopeNoise = MathHelper.floor(noise[x + z * view.getWidth()] * 35.0);
+                return MathHelper.clamp(value + slopeNoise, 0, 255);
             });
+
+            return slopeRaster;
         });
     }
 }

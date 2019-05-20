@@ -2,8 +2,8 @@ package net.gegy1000.earth.server.world.cover.decorator;
 
 import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
 import net.gegy1000.cubicglue.util.CubicPos;
-import net.gegy1000.earth.server.world.ecology.AbioticProperties;
-import net.gegy1000.earth.server.world.ecology.Vegetation;
+import net.gegy1000.earth.server.world.ecology.AbioticComponents;
+import net.gegy1000.earth.server.world.ecology.vegetation.Vegetation;
 import net.gegy1000.terrarium.server.util.WeightedPool;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -18,7 +18,7 @@ public final class VegetationDecorator implements CoverDecorator {
     private final int minCount;
     private final int maxCount;
 
-    private final AbioticProperties abiotic = new AbioticProperties();
+    private final AbioticComponents abiotic = new AbioticComponents();
 
     private VegetationDecorator(WeightedPool<Vegetation> pool, float minDensity, float maxDensity) {
         this.pool = pool;

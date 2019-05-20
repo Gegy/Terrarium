@@ -1,5 +1,6 @@
-package net.gegy1000.earth.server.world.ecology;
+package net.gegy1000.earth.server.world.ecology.vegetation;
 
+import net.gegy1000.earth.server.world.ecology.GrowthIndicator;
 import net.minecraft.block.BlockDoublePlant;
 import net.minecraft.block.BlockTallGrass;
 import net.minecraft.world.gen.feature.WorldGenDoublePlant;

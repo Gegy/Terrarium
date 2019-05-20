@@ -59,7 +59,7 @@ public class EarthWorldType extends TerrariumWorldType {
     public static final PropertyKey<Number> HEIGHT_SCALE = new NumberKey("height_scale");
     public static final PropertyKey<Number> NOISE_SCALE = new NumberKey("noise_scale");
     public static final PropertyKey<Number> HEIGHT_ORIGIN = new NumberKey("height_origin");
-    public static final PropertyKey<Number> OCEAN_DEPTH = new NumberKey("ocean_depth");
+    public static final PropertyKey<Number> SEA_DEPTH = new NumberKey("ocean_depth");
     public static final PropertyKey<Number> BEACH_SIZE = new NumberKey("beach_size");
     public static final PropertyKey<Boolean> ENABLE_BUILDINGS = new BooleanKey("enable_buildings");
     public static final PropertyKey<Boolean> ENABLE_STREETS = new BooleanKey("enable_streets");
@@ -92,7 +92,7 @@ public class EarthWorldType extends TerrariumWorldType {
         return PropertyPrototype.builder()
                 .withProperties(SPAWN_LATITUDE, SPAWN_LONGITUDE)
                 .withProperties(WORLD_SCALE, HEIGHT_SCALE, NOISE_SCALE)
-                .withProperties(OCEAN_DEPTH, HEIGHT_ORIGIN)
+                .withProperties(SEA_DEPTH, HEIGHT_ORIGIN)
                 .withProperties(BEACH_SIZE)
                 .withProperties(ENABLE_DECORATION, ENABLE_BUILDINGS, ENABLE_STREETS)
                 .withProperties(CAVE_GENERATION)
@@ -106,7 +106,7 @@ public class EarthWorldType extends TerrariumWorldType {
                         new SliderWidget(WORLD_SCALE, 1.0, 200.0, 5.0, 1.0, new InversePropertyConverter()),
                         new SliderWidget(HEIGHT_SCALE, 0.0, 10.0, 0.5, 0.1),
                         new SliderWidget(NOISE_SCALE, 0.0, 3.0, 0.5, 0.1),
-                        new SliderWidget(OCEAN_DEPTH, 0, 32, 1, 1),
+                        new SliderWidget(SEA_DEPTH, 0, 32, 1, 1),
                         new SliderWidget(HEIGHT_ORIGIN, -63, 128, 1, 1),
                         new SliderWidget(BEACH_SIZE, 0, 8, 1, 1)
                 )

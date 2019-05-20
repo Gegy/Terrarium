@@ -1,8 +1,8 @@
 package net.gegy1000.earth.server.world.cover;
 
 import net.gegy1000.earth.server.world.cover.decorator.VegetationDecorator;
-import net.gegy1000.earth.server.world.ecology.Trees;
-import net.gegy1000.earth.server.world.ecology.Vegetation;
+import net.gegy1000.earth.server.world.ecology.vegetation.Trees;
+import net.gegy1000.earth.server.world.ecology.vegetation.Vegetation;
 import net.gegy1000.terrarium.server.util.WeightedPool;
 import net.minecraftforge.common.BiomeDictionary;
 

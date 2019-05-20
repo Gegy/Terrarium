@@ -21,7 +21,7 @@ public class Voronoi {
         this.random = new PseudoRandomMap(seed, DISPLACEMENT_SEED);
     }
 
-    public <T> void scale(T[] input, T[] output, DataView sourceView, DataView scaledView,
+    public <T> void scale(T input, T output, DataView sourceView, DataView scaledView,
                           double scaleFactorX, double scaleFactorY, double originOffsetX, double originOffsetY
     ) {
         double scaledOffsetX = originOffsetX / scaleFactorX;
@@ -38,17 +38,19 @@ public class Voronoi {
                 double sampleX = scaledX * scaleFactorX + originOffsetY;
                 int originX = MathHelper.floor(sampleX);
 
-                T cellValue = this.getCellValue(input, sourceView, originX, originY, scaledX + scaledOffsetX, scaledY + scaledOffsetY, scaleFactorX, scaleFactorY);
-                output[scaledX + scaledY * scaledWidth] = cellValue;
+                int srcIndex = this.getCellIndex(sourceView, originX, originY, scaledX + scaledOffsetX, scaledY + scaledOffsetY, scaleFactorX, scaleFactorY);
+                int destIndex = scaledX + scaledY * scaledWidth;
+
+                System.arraycopy(input, srcIndex, output, destIndex, 1);
             }
         }
     }
 
-    private <T> T getCellValue(T[] input, DataView sourceView,
-                               int originX, int originY, double scaledX, double scaledY,
-                               double scaleFactorX, double scaleFactorY
+    private int getCellIndex(DataView sourceView,
+                             int originX, int originY, double scaledX, double scaledY,
+                             double scaleFactorX, double scaleFactorY
     ) {
-        T cellValue = null;
+        int cellIndex = 0;
         double selectionDistance = Double.MAX_VALUE;
         for (int neighbourY = originY - 1; neighbourY <= originY + 1; neighbourY++) {
             for (int neighbourX = originX - 1; neighbourX <= originX + 1; neighbourX++) {
@@ -58,25 +60,17 @@ public class Voronoi {
                 double distance = this.distanceFunc.get(scaledX, scaledY, fuzzedX, fuzzedY);
                 if (distance < selectionDistance) {
                     selectionDistance = distance;
-                    cellValue = this.getClamped(input, sourceView.getWidth(), sourceView.getHeight(), neighbourX, neighbourY);
+                    cellIndex = this.getClampedIndex(sourceView.getWidth(), sourceView.getHeight(), neighbourX, neighbourY);
                 }
             }
         }
-        return cellValue;
+        return cellIndex;
     }
 
-    private <T> T getClamped(T[] input, int width, int height, int x, int y) {
-        if (x < 0) {
-            x = 0;
-        } else if (x >= width) {
-            x = width - 1;
-        }
-        if (y < 0) {
-            y = 0;
-        } else if (y >= height) {
-            y = height - 1;
-        }
-        return input[x + y * width];
+    private int getClampedIndex(int width, int height, int x, int y) {
+        x = MathHelper.clamp(x, 0, width - 1);
+        y = MathHelper.clamp(y, 0, height - 1);
+        return x + y * width;
     }
 
     private double fuzzPoint(double point) {

@@ -28,8 +28,8 @@ public final class ObjRaster<T> extends AbstractRaster<T[]> {
         return create(value, view.getWidth(), view.getHeight());
     }
 
-    public static <T> Sampler<T> sampler(DataKey<ObjRaster<T>> key) {
-        return new Sampler<>(key);
+    public static <T> Sampler<T> sampler(DataKey<ObjRaster<T>> key, T defaultValue) {
+        return new Sampler<>(key, defaultValue);
     }
 
     public void set(int x, int y, T value) {
@@ -72,15 +72,11 @@ public final class ObjRaster<T> extends AbstractRaster<T[]> {
 
     public static class Sampler<T> {
         private final DataKey<ObjRaster<T>> key;
-        private T defaultValue;
+        private final T defaultValue;
 
-        Sampler(DataKey<ObjRaster<T>> key) {
+        Sampler(DataKey<ObjRaster<T>> key, T defaultValue) {
             this.key = key;
-        }
-
-        public Sampler setDefaultValue(T value) {
-            this.defaultValue = value;
-            return this;
+            this.defaultValue = defaultValue;
         }
 
         public T sample(ColumnDataCache dataCache, int x, int z) {

@@ -1,4 +1,4 @@
-package net.gegy1000.earth.server.world.ecology;
+package net.gegy1000.earth.server.world.ecology.vegetation;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;

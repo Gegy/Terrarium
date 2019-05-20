@@ -2,7 +2,7 @@ package net.gegy1000.earth.server.world.cover;
 
 import net.gegy1000.earth.server.world.cover.carver.Carvers;
 import net.gegy1000.earth.server.world.cover.decorator.VegetationDecorator;
-import net.gegy1000.earth.server.world.ecology.Grasses;
+import net.gegy1000.earth.server.world.ecology.vegetation.Grasses;
 import net.gegy1000.earth.server.world.pipeline.EarthDataKeys;
 import net.minecraftforge.common.BiomeDictionary;
 
