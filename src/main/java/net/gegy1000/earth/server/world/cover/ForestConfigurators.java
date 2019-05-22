@@ -1,13 +1,13 @@
 package net.gegy1000.earth.server.world.cover;
 
+import net.gegy1000.earth.server.world.biome.CoverMarker;
 import net.gegy1000.earth.server.world.cover.decorator.VegetationDecorator;
 import net.gegy1000.earth.server.world.ecology.vegetation.Trees;
 import net.gegy1000.earth.server.world.ecology.vegetation.Vegetation;
 import net.gegy1000.terrarium.server.util.WeightedPool;
-import net.minecraftforge.common.BiomeDictionary;
 
 public final class ForestConfigurators {
-    private static final CoverConfigurator FOREST = config -> config.classify(BiomeDictionary.Type.FOREST);
+    private static final CoverConfigurator FOREST = config -> config.mark(CoverMarker.FORESTED);
 
     public static final CoverConfigurator BROADLEAF_EVERGREEN = forest(0.15F, 0.6F, Trees.BROADLEAVED_EVERGREEN);
     public static final CoverConfigurator BROADLEAF_DECIDUOUS = forest(0.15F, 0.6F, Trees.BROADLEAVED_DECIDUOUS);

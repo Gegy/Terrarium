@@ -35,7 +35,7 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
         this.addSurfaceComposers(builder, preview);
         this.addDecorationComposers(preview, builder);
 
-        builder.setBiomeComposer(new EarthBiomeComposer(this.ctx.world, EarthDataKeys.COVER, EarthDataKeys.AVERAGE_TEMPERATURE, EarthDataKeys.ANNUAL_RAINFALL));
+        builder.setBiomeComposer(new EarthBiomeComposer(EarthDataKeys.COVER, EarthDataKeys.LANDFORM, EarthDataKeys.AVERAGE_TEMPERATURE, EarthDataKeys.ANNUAL_RAINFALL));
         builder.setSpawnPosition(new Coordinate(this.ctx.earthCoordinates, this.ctx.settings.getDouble(SPAWN_LATITUDE), this.ctx.settings.getDouble(SPAWN_LONGITUDE)));
 
         return builder.build();

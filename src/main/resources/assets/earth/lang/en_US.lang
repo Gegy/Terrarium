@@ -67,16 +67,6 @@ property.terrarium.lake_generation.tooltip=If enabled, water lakes will be gener
 property.terrarium.lava_generation.tooltip=If enabled, lava lakes will be generated randomly above and below ground
 property.terrarium.enable_mod_generation.tooltip=If enabled, modded generators will run. This can include both ores and structures
 
-# Property Variants
-
-property.earth.feature_generation_none.name=None
-property.earth.feature_generation_vanilla.name=Vanilla
-property.earth.feature_generation_custom.name=Custom
-
-property.earth.feature_generation_none.desc=This feature will be disabled
-property.earth.feature_generation_vanilla.desc=This feature will be generated with the vanilla generator (mod compatibility; bad integration)
-property.earth.feature_generation_custom.desc=This feature will be generated with a custom generator (less mod compatibility; full integration)
-
 # Presets
 
 preset.earth_default.name=Earth: Default

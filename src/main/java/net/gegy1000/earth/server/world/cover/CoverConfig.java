@@ -1,21 +1,23 @@
 package net.gegy1000.earth.server.world.cover;
 
+import net.gegy1000.earth.server.world.biome.CoverMarker;
 import net.gegy1000.earth.server.world.cover.carver.CoverCarver;
 import net.gegy1000.earth.server.world.cover.decorator.CoverDecorator;
-import net.minecraftforge.common.BiomeDictionary;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
+import java.util.Set;
 import java.util.stream.Stream;
 
 public final class CoverConfig {
-    private final Collection<BiomeDictionary.Type> classifications = new ArrayList<>();
+    private final EnumSet<CoverMarker> markers = EnumSet.noneOf(CoverMarker.class);
     private final Collection<CoverCarver> carvers = new ArrayList<>();
     private final Collection<CoverDecorator> decorators = new ArrayList<>();
 
-    public void classify(BiomeDictionary.Type... types) {
-        Collections.addAll(this.classifications, types);
+    public void mark(CoverMarker... markers) {
+        Collections.addAll(this.markers, markers);
     }
 
     public void carve(CoverCarver carver) {
@@ -26,8 +28,8 @@ public final class CoverConfig {
         this.decorators.add(decorator);
     }
 
-    public Stream<BiomeDictionary.Type> classifications() {
-        return this.classifications.stream();
+    public Set<CoverMarker> markers() {
+        return this.markers;
     }
 
     public Stream<CoverCarver> carvers() {

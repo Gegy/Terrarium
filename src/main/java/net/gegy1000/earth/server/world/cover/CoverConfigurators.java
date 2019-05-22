@@ -1,26 +1,25 @@
 package net.gegy1000.earth.server.world.cover;
 
+import net.gegy1000.earth.server.world.biome.CoverMarker;
 import net.gegy1000.earth.server.world.cover.carver.Carvers;
 import net.gegy1000.earth.server.world.cover.decorator.VegetationDecorator;
 import net.gegy1000.earth.server.world.ecology.vegetation.Grasses;
 import net.gegy1000.earth.server.world.pipeline.EarthDataKeys;
-import net.minecraftforge.common.BiomeDictionary;
 
 // TODO: I believe we might want a sort of registry system for different vegetation pools, which can be extended externally
 public final class CoverConfigurators {
     public static final CoverConfigurator NONE = config -> {};
 
     public static final CoverConfigurator WATER = config -> {
-        config.classify(BiomeDictionary.Type.WET);
-        config.classify(BiomeDictionary.Type.OCEAN);
+        config.mark(CoverMarker.WATER);
     };
 
     public static final CoverConfigurator SNOWY = config -> {
-        config.classify(BiomeDictionary.Type.SNOWY);
+        config.mark(CoverMarker.FROZEN);
     };
 
     public static final CoverConfigurator FLOODED = config -> {
-        config.classify(BiomeDictionary.Type.WET, BiomeDictionary.Type.SWAMP);
+        config.mark(CoverMarker.FLOODED);
         config.carve(Carvers.flooded(EarthDataKeys.HEIGHT));
     };
 
