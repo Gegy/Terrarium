@@ -1,13 +1,11 @@
 package net.gegy1000.earth.server.world.pipeline.source;
 
-import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
 import net.gegy1000.terrarium.server.world.pipeline.source.SourceResult;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
-import net.minecraft.util.ResourceLocation;
 import org.tukaani.xz.SingleXZInputStream;
 
 import javax.annotation.Nullable;
@@ -28,7 +26,7 @@ public class SrtmHeightSource extends TiledDataSource<ShortRaster> {
     private static final Set<DataTilePos> VALID_TILES = new HashSet<>();
 
     public SrtmHeightSource(CoordinateState coordinateState, String cacheRoot) {
-        super(new ResourceLocation(TerrariumEarth.MODID, "srtm"), new File(GLOBAL_CACHE_ROOT, cacheRoot), new Coordinate(coordinateState, TILE_SIZE, TILE_SIZE));
+        super(new File(GLOBAL_CACHE_ROOT, cacheRoot), new Coordinate(coordinateState, TILE_SIZE, TILE_SIZE));
     }
 
     public static void loadValidTiles() throws IOException {
@@ -44,11 +42,6 @@ public class SrtmHeightSource extends TiledDataSource<ShortRaster> {
 
     private static URL getTilesURL() throws IOException {
         return new URL(String.format("%s/%s/%s", EarthRemoteData.info.getBaseURL(), EarthRemoteData.info.getHeightsEndpoint(), EarthRemoteData.info.getHeightTiles()));
-    }
-
-    @Override
-    public File getCacheRoot() {
-        return this.cacheRoot;
     }
 
     @Override
@@ -84,7 +77,7 @@ public class SrtmHeightSource extends TiledDataSource<ShortRaster> {
     }
 
     @Override
-    public ShortRaster getDefaultTile() {
+    public ShortRaster getDefaultResult() {
         return DEFAULT_TILE;
     }
 

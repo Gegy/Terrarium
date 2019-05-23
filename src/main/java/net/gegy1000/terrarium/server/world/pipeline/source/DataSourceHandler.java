@@ -28,6 +28,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+// TODO: Have a unified index of lookup from tile location to file which we download on first selecting Terrarium world type
 public enum DataSourceHandler {
     INSTANCE;
 
@@ -81,11 +82,11 @@ public enum DataSourceHandler {
                 return (CompletableFuture<T>) this.queuedTiles.computeIfAbsent(key, this::enqueueTile);
             }
         } catch (Exception e) {
-            Terrarium.LOGGER.warn("Unexpected exception occurred at {} from {}", pos, source.getIdentifier(), e);
+            Terrarium.LOGGER.warn("Unexpected exception occurred at {} from {}", pos, source.getClass().getSimpleName(), e);
             LoadingStateHandler.recordFailure();
         }
 
-        return CompletableFuture.completedFuture(source.getDefaultTile());
+        return CompletableFuture.completedFuture(source.getDefaultResult());
     }
 
     public <T extends Data> CompletableFuture<Collection<DataTileEntry<T>>> getTiles(
@@ -123,13 +124,13 @@ public enum DataSourceHandler {
 
     private <T extends Data> T parseResult(DataTileKey<T> key, SourceResult<T> result) {
         if (result.isError()) {
-            Terrarium.LOGGER.warn("Loading tile at {} from {} gave error {}: {}", key.toPos(), key.getSource().getIdentifier(), result.getError(), result.getErrorCause());
+            Terrarium.LOGGER.warn("Loading tile at {} from {} gave error {}: {}", key.toPos(), key.getSource().getClass().getSimpleName(), result.getError(), result.getErrorCause());
             LoadingStateHandler.recordFailure();
-            return key.getSource().getDefaultTile();
+            return key.getSource().getDefaultResult();
         }
         T value = result.getValue();
         if (value == null) {
-            return key.getSource().getDefaultTile();
+            return key.getSource().getDefaultResult();
         }
         return value;
     }

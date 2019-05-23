@@ -5,15 +5,21 @@ import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.cover.CoverId;
 import net.gegy1000.earth.server.world.geography.Landform;
 import net.gegy1000.earth.server.world.pipeline.EarthDataKeys;
+import net.gegy1000.earth.server.world.pipeline.data.AreaData;
 import net.gegy1000.earth.server.world.pipeline.data.ClimateSampler;
 import net.gegy1000.earth.server.world.pipeline.data.HeightNoiseTransformOp;
 import net.gegy1000.earth.server.world.pipeline.data.HeightTransformOp;
+import net.gegy1000.earth.server.world.pipeline.data.PolygonData;
+import net.gegy1000.earth.server.world.pipeline.data.PolygonSampler;
+import net.gegy1000.earth.server.world.pipeline.data.PolygonToAreaOp;
 import net.gegy1000.earth.server.world.pipeline.data.ProduceCoverOp;
 import net.gegy1000.earth.server.world.pipeline.data.ProduceLandformsOp;
 import net.gegy1000.earth.server.world.pipeline.data.ProduceSoilOp;
+import net.gegy1000.earth.server.world.pipeline.data.RasterizeAreaOp;
 import net.gegy1000.earth.server.world.pipeline.data.TransformSlopeNoiseOp;
 import net.gegy1000.earth.server.world.pipeline.data.WaterOps;
 import net.gegy1000.earth.server.world.pipeline.source.LandCoverSource;
+import net.gegy1000.earth.server.world.pipeline.source.OceanPolygonSource;
 import net.gegy1000.earth.server.world.pipeline.source.SrtmHeightSource;
 import net.gegy1000.earth.server.world.soil.SoilConfig;
 import net.gegy1000.terrarium.server.world.TerrariumDataInitializer;
@@ -24,6 +30,7 @@ import net.gegy1000.terrarium.server.world.pipeline.data.op.InterpolationScaleOp
 import net.gegy1000.terrarium.server.world.pipeline.data.op.ProduceSlopeOp;
 import net.gegy1000.terrarium.server.world.pipeline.data.op.RasterSourceSampler;
 import net.gegy1000.terrarium.server.world.pipeline.data.op.VoronoiScaleOp;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.BitRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.FloatRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ObjRaster;
@@ -57,7 +64,14 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
         DataOp<EnumRaster<CoverId>> coverId = RasterSourceSampler.sampleEnum(landCoverSource, CoverId.NO_DATA);
         coverId = VoronoiScaleOp.scaleFrom(coverId, this.ctx.landcoverRaster, view -> EnumRaster.create(CoverId.NO_DATA, view));
 
+        OceanPolygonSource oceanPolygonSource = new OceanPolygonSource(this.ctx.lngLatCoordinates, "ocean");
+
+        DataOp<PolygonData> oceanPolygons = PolygonSampler.sample(oceanPolygonSource, this.ctx.lngLatCoordinates);
+        DataOp<AreaData> oceanArea = PolygonToAreaOp.apply(oceanPolygons, this.ctx.lngLatCoordinates);
+        DataOp<BitRaster> oceanMask = RasterizeAreaOp.apply(oceanArea);
+
         DataOp<EnumRaster<Landform>> landforms = ProduceLandformsOp.produce(heights, coverId);
+        landforms = WaterOps.applyWaterMask(landforms, oceanMask);
 
         DataOp<EnumRaster<Cover>> cover = ProduceCoverOp.produce(coverId);
 

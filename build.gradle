@@ -51,21 +51,7 @@ dependencies {
   deobfCompile 'io.github.opencubicchunks:cubicchunks-api:1.12.2-0.0-SNAPSHOT'
   deobfCompile 'io.github.opencubicchunks:cubicchunks:1.12.2-0.0-SNAPSHOT'
   embed 'net.gegy1000:cubic-glue:0.3.0-SNAPSHOT'
-  embed('de.topobyte:osm4j-core-mc:0.1.0') {
-    exclude group: 'it.unimi.dsi', module: 'fastutil'
-    exclude group: 'org.apache.commons'
-    exclude group: 'org.apache.logging.log4j'
-  }
-  embed('de.topobyte:osm4j-utils-mc:0.1.2') {
-    exclude group: 'it.unimi.dsi', module: 'fastutil'
-    exclude group: 'org.apache.commons'
-    exclude group: 'commons-cli'
-    exclude group: 'com.google.protobuf'
-    exclude group: 'com.google.guava'
-    exclude group: 'org.apache.logging.log4j'
-    exclude group: 'org.slf4j'
-    exclude group: 'net.sf.trove4j'
-  }
+  embed 'com.vividsolutions:jts:1.13'
   embed 'org.tukaani:xz-fork:1.8'
 }
 

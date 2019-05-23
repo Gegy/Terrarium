@@ -70,6 +70,10 @@ public class EarthRemoteData {
         private String soilEndpoint = "";
         @SerializedName("soil_query")
         private String soilQuery = "%s_%s.sc";
+        @SerializedName("ocean_endpoint")
+        private String oceanEndpoint = "";
+        @SerializedName("ocean_query")
+        private String oceanQuery = "%s_%s.water";
         @SerializedName("heights_endpoint")
         private String heightsEndpoint = "";
         @SerializedName("heights_query")
@@ -105,6 +109,14 @@ public class EarthRemoteData {
 
         public String getSoilQuery() {
             return this.soilQuery;
+        }
+
+        public String getOceanEndpoint() {
+            return this.oceanEndpoint;
+        }
+
+        public String getOceanQuery() {
+            return this.oceanQuery;
         }
 
         public String getHeightsEndpoint() {

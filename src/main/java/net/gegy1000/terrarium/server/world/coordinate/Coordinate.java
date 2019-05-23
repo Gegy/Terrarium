@@ -94,4 +94,9 @@ public class Coordinate {
         }
         return new Coordinate(left.state, Math.max(left.getX(), right.getX()), Math.max(left.getZ(), right.getZ()));
     }
+
+    @Override
+    public String toString() {
+        return String.format("(%.4f; %.4f)", this.x, this.z);
+    }
 }

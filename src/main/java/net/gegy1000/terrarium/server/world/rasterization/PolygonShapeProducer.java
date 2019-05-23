@@ -10,7 +10,7 @@ import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 
-public class OsmShapeProducer {
+public class PolygonShapeProducer {
     public static Area toShape(MultiPolygon polygon, CoordinateState state) {
         Area area = new Area();
         for (int i = 0; i < polygon.getNumGeometries(); i++) {

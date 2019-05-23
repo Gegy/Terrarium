@@ -3,12 +3,37 @@ package net.gegy1000.earth.server.world.pipeline.data;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.geography.Landform;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataOp;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.BitRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 
 import java.util.concurrent.CompletableFuture;
 
 public final class WaterOps {
+    public static DataOp<EnumRaster<Landform>> applyWaterMask(DataOp<EnumRaster<Landform>> landforms, DataOp<BitRaster> ocean) {
+        return DataOp.of((engine, view) -> {
+            CompletableFuture<EnumRaster<Landform>> landformFuture = engine.load(landforms, view);
+            CompletableFuture<BitRaster> oceanFuture = engine.load(ocean, view);
+
+            return CompletableFuture.allOf(landformFuture, oceanFuture)
+                    .thenApply(v -> {
+                        EnumRaster<Landform> landformRaster = landformFuture.join();
+                        BitRaster oceanRaster = oceanFuture.join();
+
+                        landformRaster.transform((source, x, y) -> {
+                            if (oceanRaster.get(x, y)) {
+                                return Landform.SEA;
+                            } else if (source.isWater()) {
+                                return Landform.LAND;
+                            }
+                            return source;
+                        });
+
+                        return landformRaster;
+                    });
+        });
+    }
+
     public static DataOp<ShortRaster> produceWaterLevel(DataOp<EnumRaster<Landform>> landforms, int seaLevel) {
         return landforms.map((landformRaster, engine, view) -> {
             ShortRaster waterLevelRaster = ShortRaster.create(view);

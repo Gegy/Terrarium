@@ -1,6 +1,5 @@
 package net.gegy1000.earth.server.world.pipeline.source;
 
-import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.world.cover.CoverId;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
@@ -8,7 +7,6 @@ import net.gegy1000.terrarium.server.world.pipeline.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
 import net.gegy1000.terrarium.server.world.pipeline.source.SourceResult;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
-import net.minecraft.util.ResourceLocation;
 import org.tukaani.xz.SingleXZInputStream;
 
 import javax.annotation.Nullable;
@@ -32,12 +30,7 @@ public class LandCoverSource extends TiledDataSource<EnumRaster<CoverId>> {
     private static final EnumRaster<CoverId> DEFAULT_TILE = EnumRaster.createSquare(CoverId.NO_DATA, TILE_SIZE);
 
     public LandCoverSource(CoordinateState coordinateState, String cacheRoot) {
-        super(new ResourceLocation(TerrariumEarth.MODID, "landcover"), new File(GLOBAL_CACHE_ROOT, cacheRoot), new Coordinate(coordinateState, TILE_SIZE, TILE_SIZE));
-    }
-
-    @Override
-    public File getCacheRoot() {
-        return this.cacheRoot;
+        super(new File(GLOBAL_CACHE_ROOT, cacheRoot), new Coordinate(coordinateState, TILE_SIZE, TILE_SIZE));
     }
 
     @Override
@@ -62,7 +55,7 @@ public class LandCoverSource extends TiledDataSource<EnumRaster<CoverId>> {
     }
 
     @Override
-    public EnumRaster<CoverId> getDefaultTile() {
+    public EnumRaster<CoverId> getDefaultResult() {
         return DEFAULT_TILE;
     }
 

@@ -2,6 +2,7 @@ package net.gegy1000.earth.server.world;
 
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.coordinate.LatLngCoordinateState;
+import net.gegy1000.terrarium.server.world.coordinate.LngLatCoordinateState;
 import net.gegy1000.terrarium.server.world.coordinate.ScaledCoordinateState;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.minecraft.world.World;
@@ -14,7 +15,8 @@ public final class EarthInitContext {
 
     public final double worldScale;
 
-    public final CoordinateState earthCoordinates;
+    public final CoordinateState latLngCoordinates;
+    public final CoordinateState lngLatCoordinates;
     public final CoordinateState srtmRaster;
     public final CoordinateState landcoverRaster;
     public final CoordinateState soilRaster;
@@ -25,7 +27,8 @@ public final class EarthInitContext {
         this.settings = settings;
 
         this.worldScale = settings.getDouble(WORLD_SCALE);
-        this.earthCoordinates = new LatLngCoordinateState(this.worldScale * SRTM_SCALE * 1200.0);
+        this.latLngCoordinates = new LatLngCoordinateState(this.worldScale * SRTM_SCALE * 1200.0);
+        this.lngLatCoordinates = new LngLatCoordinateState(this.worldScale * SRTM_SCALE * 1200.0);
         this.srtmRaster = new ScaledCoordinateState(this.worldScale * SRTM_SCALE);
         this.landcoverRaster = new ScaledCoordinateState(this.worldScale * LANDCOVER_SCALE);
         this.soilRaster = new ScaledCoordinateState(this.worldScale * SOIL_SCALE);

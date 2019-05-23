@@ -2,7 +2,6 @@ package net.gegy1000.terrarium.server.world.pipeline.source;
 
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.pipeline.data.Data;
-import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -12,21 +11,15 @@ import java.io.InputStream;
 public abstract class TiledDataSource<T extends Data> {
     public static final File GLOBAL_CACHE_ROOT = new File(".", "mods/terrarium/cache/");
 
-    protected final ResourceLocation identifier;
     protected final File cacheRoot;
     protected final Coordinate tileSize;
 
-    protected TiledDataSource(ResourceLocation identifier, File cacheRoot, Coordinate tileSize) {
-        this.identifier = identifier;
+    protected TiledDataSource(File cacheRoot, Coordinate tileSize) {
         this.cacheRoot = cacheRoot;
         this.tileSize = tileSize;
         if (!cacheRoot.exists()) {
             cacheRoot.mkdirs();
         }
-    }
-
-    public ResourceLocation getIdentifier() {
-        return this.identifier;
     }
 
     public File getCacheRoot() {
@@ -43,7 +36,7 @@ public abstract class TiledDataSource<T extends Data> {
 
     public abstract String getCachedName(DataTilePos key);
 
-    public abstract T getDefaultTile();
+    public abstract T getDefaultResult();
 
     public abstract SourceResult<T> parseStream(DataTilePos pos, InputStream stream) throws IOException;
 
@@ -61,10 +54,5 @@ public abstract class TiledDataSource<T extends Data> {
 
     public boolean shouldLoadCache(DataTilePos key, File file) {
         return file.exists();
-    }
-
-    @Override
-    public String toString() {
-        return "TiledDataSource{identifier=" + this.identifier + "}";
     }
 }

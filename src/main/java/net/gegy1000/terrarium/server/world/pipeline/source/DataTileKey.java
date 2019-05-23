@@ -37,10 +37,7 @@ public class DataTileKey<T extends Data> {
 
     @Override
     public int hashCode() {
-        int result = this.source.getIdentifier().hashCode();
-        result = 31 * result + this.tileX;
-        result = 31 * result + this.tileZ;
-        return result;
+        return 31 * this.tileX + this.tileZ;
     }
 
     @Override
