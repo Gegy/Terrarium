@@ -1,13 +1,12 @@
 package net.gegy1000.earth.server.world;
 
 import net.gegy1000.cubicglue.CubicGlue;
-import net.gegy1000.earth.server.world.pipeline.EarthDataKeys;
-import net.gegy1000.earth.server.world.pipeline.composer.BoulderDecorationComposer;
-import net.gegy1000.earth.server.world.pipeline.composer.EarthBiomeComposer;
-import net.gegy1000.earth.server.world.pipeline.composer.EarthCarvingComposer;
-import net.gegy1000.earth.server.world.pipeline.composer.EarthDecorationComposer;
-import net.gegy1000.earth.server.world.pipeline.composer.SoilSurfaceComposer;
-import net.gegy1000.earth.server.world.pipeline.composer.WaterFillSurfaceComposer;
+import net.gegy1000.earth.server.world.composer.BoulderDecorationComposer;
+import net.gegy1000.earth.server.world.composer.EarthBiomeComposer;
+import net.gegy1000.earth.server.world.composer.EarthCarvingComposer;
+import net.gegy1000.earth.server.world.composer.EarthDecorationComposer;
+import net.gegy1000.earth.server.world.composer.SoilSurfaceComposer;
+import net.gegy1000.earth.server.world.composer.WaterFillSurfaceComposer;
 import net.gegy1000.terrarium.server.world.TerrariumGeneratorInitializer;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.generator.CompositeTerrariumGenerator;

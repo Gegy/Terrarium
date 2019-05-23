@@ -5,7 +5,7 @@ import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.capability.EarthCapability;
 import net.gegy1000.earth.server.message.EarthMapGuiMessage;
 import net.gegy1000.earth.server.message.EarthPanoramaMessage;
-import net.gegy1000.earth.server.world.pipeline.EarthDataKeys;
+import net.gegy1000.earth.server.world.EarthDataKeys;
 import net.gegy1000.terrarium.server.TerrariumHandshakeTracker;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnData;

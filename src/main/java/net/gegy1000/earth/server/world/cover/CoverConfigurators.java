@@ -4,7 +4,7 @@ import net.gegy1000.earth.server.world.biome.CoverMarker;
 import net.gegy1000.earth.server.world.cover.carver.Carvers;
 import net.gegy1000.earth.server.world.cover.decorator.VegetationDecorator;
 import net.gegy1000.earth.server.world.ecology.vegetation.Grasses;
-import net.gegy1000.earth.server.world.pipeline.EarthDataKeys;
+import net.gegy1000.earth.server.world.EarthDataKeys;
 
 // TODO: I believe we might want a sort of registry system for different vegetation pools, which can be extended externally
 public final class CoverConfigurators {

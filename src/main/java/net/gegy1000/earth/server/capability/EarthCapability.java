@@ -1,7 +1,7 @@
 package net.gegy1000.earth.server.capability;
 
 import net.gegy1000.earth.TerrariumEarth;
-import net.gegy1000.earth.server.world.pipeline.EarthDataKeys;
+import net.gegy1000.earth.server.world.EarthDataKeys;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataCache;
