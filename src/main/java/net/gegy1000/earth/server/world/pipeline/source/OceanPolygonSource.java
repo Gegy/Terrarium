@@ -4,44 +4,58 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
+import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.world.pipeline.data.PolygonData;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
-import net.gegy1000.terrarium.server.world.pipeline.source.SourceResult;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
 import org.tukaani.xz.SingleXZInputStream;
 
+import java.io.BufferedInputStream;
 import java.io.DataInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 
 public class OceanPolygonSource extends TiledDataSource<PolygonData> {
     private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
     private static final double TILE_SIZE = 1.0;
 
-    public OceanPolygonSource(CoordinateState latLngCoordinateState, String cacheRoot) {
-        super(new File(GLOBAL_CACHE_ROOT, cacheRoot), new Coordinate(latLngCoordinateState, TILE_SIZE, TILE_SIZE));
+    private static final Path CACHE_ROOT = GLOBAL_CACHE_ROOT.resolve("ocean");
+
+    private static final CachingInput<DataTilePos> CACHING_INPUT = CachingInput.<DataTilePos>create()
+            .cachesTo(OceanPolygonSource::resolveCachePath);
+
+    public OceanPolygonSource(CoordinateState coordinateState) {
+        super(new Coordinate(coordinateState, TILE_SIZE, TILE_SIZE));
+    }
+
+    private static Path resolveCachePath(DataTilePos pos) {
+        return CACHE_ROOT.resolve(pos.getTileX() + "_" + pos.getTileZ() + ".water");
     }
 
     @Override
-    public InputStream getRemoteStream(DataTilePos key) throws IOException {
-        URL url = new URL(String.format("%s/%s/%s", EarthRemoteData.info.getBaseURL(), EarthRemoteData.info.getOceanEndpoint(), this.getCachedName(key)));
-        return url.openStream();
-    }
+    public Optional<PolygonData> load(DataTilePos pos) throws IOException {
+        String url = EarthRemoteIndex.get().oceans.getUrlFor(pos);
+        if (url == null) {
+            return Optional.empty();
+        }
 
-    @Override
-    public InputStream getWrappedStream(InputStream stream) throws IOException {
-        return new SingleXZInputStream(stream);
-    }
+        InputStream sourceInput = CACHING_INPUT.getInputStream(pos, p -> {
+            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+            connection.setRequestProperty("User-Agent", TerrariumEarth.USER_AGENT);
+            return connection.getInputStream();
+        });
 
-    @Override
-    public String getCachedName(DataTilePos key) {
-        return String.format(EarthRemoteData.info.getOceanQuery(), key.getTileX(), key.getTileZ());
+        try (InputStream input = new SingleXZInputStream(new BufferedInputStream(sourceInput))) {
+            return Optional.of(this.parseStream(input));
+        }
     }
 
     @Override
@@ -49,18 +63,17 @@ public class OceanPolygonSource extends TiledDataSource<PolygonData> {
         return PolygonData.EMPTY;
     }
 
-    @Override
-    public SourceResult<PolygonData> parseStream(DataTilePos pos, InputStream stream) throws IOException {
-        try (DataInputStream input = new DataInputStream(stream)) {
-            int polygonCount = input.readInt();
+    private PolygonData parseStream(InputStream input) throws IOException {
+        DataInputStream data = new DataInputStream(input);
 
-            Collection<MultiPolygon> polygons = new ArrayList<>(polygonCount);
-            for (int i = 0; i < polygonCount; i++) {
-                polygons.add(readMultiPolygon(input));
-            }
+        int polygonCount = data.readInt();
 
-            return SourceResult.success(new PolygonData(polygons));
+        Collection<MultiPolygon> polygons = new ArrayList<>(polygonCount);
+        for (int i = 0; i < polygonCount; i++) {
+            polygons.add(readMultiPolygon(data));
         }
+
+        return new PolygonData(polygons);
     }
 
     private static MultiPolygon readMultiPolygon(DataInputStream input) throws IOException {
@@ -117,7 +130,7 @@ public class OceanPolygonSource extends TiledDataSource<PolygonData> {
             coordinates[i] = new com.vividsolutions.jts.geom.Coordinate(x, y);
         }
 
-        // precision is lost through delta-encoding, causing an exception to be thrown
+        // precision is lost through delta-encoding, causing an error to be thrown
         coordinates[coordinates.length - 1] = coordinates[0];
 
         return GEOMETRY_FACTORY.createLinearRing(coordinates);

@@ -14,14 +14,6 @@ gui.terrarium.select_preset.name=Select World Preset
 options.terrarium.customize_world_title.name=Customize World Generation
 options.terrarium.preview_world_title.name=Preview World Generation
 
-state.terrarium.cached.name=Retrieving Cached Data
-state.terrarium.online.name=Retrieving Online Data
-state.terrarium.no_connection.name=No Connection
-
-state.terrarium.cached.tooltip=Loading geographical data from local cache
-state.terrarium.online.tooltip=Loading geographical data from online source
-state.terrarium.no_connection.tooltip=Unable to load geographical data. Check your internet connection!
-
 property.terrarium.slider_range.name=Range: [%.2f-%.2f]
 property.terrarium.slider_fine.name=Hold SHIFT to fine tune
 property.terrarium.locked.name=Coming in a future version!

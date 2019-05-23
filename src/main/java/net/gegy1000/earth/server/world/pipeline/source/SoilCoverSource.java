@@ -51,7 +51,7 @@ public class SoilCoverSource extends TiledDataSource<ObjRaster<SoilClassificatio
 
     @Override
     public InputStream getRemoteStream(DataTilePos key) throws IOException {
-        URL url = new URL(String.format("%s/%s/%s", EarthRemoteData.info.getBaseURL(), EarthRemoteData.info.getSoilEndpoint(), this.getCachedName(key)));
+        URL url = new URL(String.format("%s/%s/%s", EarthRemoteData.info.getBaseURL(), EarthRemoteData.info.getSoilEndpoint(), this.getCachePath(key)));
         return url.openStream();
     }
 
@@ -61,7 +61,7 @@ public class SoilCoverSource extends TiledDataSource<ObjRaster<SoilClassificatio
     }
 
     @Override
-    public String getCachedName(DataTilePos key) {
+    public String getCachePath(DataTilePos key) {
         return String.format(EarthRemoteData.info.getSoilQuery(), key.getTileX(), key.getTileZ());
     }
 
@@ -103,7 +103,7 @@ public class SoilCoverSource extends TiledDataSource<ObjRaster<SoilClassificatio
                 }
             }
 
-            return SourceResult.success(new SoilClassificationRaster(soil, TILE_SIZE, TILE_SIZE));
+            return SourceResult.ok(new SoilClassificationRaster(soil, TILE_SIZE, TILE_SIZE));
         }
     }
 }

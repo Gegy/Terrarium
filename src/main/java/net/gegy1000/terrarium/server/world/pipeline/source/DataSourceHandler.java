@@ -6,23 +6,13 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.util.FutureUtil;
 import net.gegy1000.terrarium.server.world.pipeline.data.Data;
-import org.apache.commons.io.IOUtils;
 
-import java.io.BufferedInputStream;
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -33,7 +23,6 @@ public enum DataSourceHandler {
     INSTANCE;
 
     private final ExecutorService loadService = Executors.newFixedThreadPool(3, new ThreadFactoryBuilder().setNameFormat("terrarium-data-loader-%s").setDaemon(true).build());
-    private final ExecutorService cacheService = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("terrarium-cache-service").setDaemon(true).build());
 
     private final Cache<DataTileKey<?>, Data> tileCache = CacheBuilder.newBuilder()
             .maximumSize(32)
@@ -57,11 +46,14 @@ public enum DataSourceHandler {
     }
 
     private <T extends Data> CompletableFuture<T> enqueueTile(DataTileKey<T> key) {
-        CompletableFuture<T> future = CompletableFuture.supplyAsync(() -> this.loadTileRobustly(key), this.loadService)
+        CompletableFuture<T> future = CompletableFuture.supplyAsync(() -> this.loadTile(key), this.loadService)
                 .handle((result, throwable) -> {
-                    T parsedResult = this.parseResult(key, throwable == null ? result : SourceResult.exception(throwable));
-                    this.handleResult(key, parsedResult);
-                    return parsedResult;
+                    if (throwable != null) {
+                        this.logError(key, throwable);
+                        return key.getSource().getDefaultResult();
+                    }
+                    this.handleResult(key, result);
+                    return result;
                 });
 
         this.queuedTiles.put(key, future);
@@ -82,8 +74,8 @@ public enum DataSourceHandler {
                 return (CompletableFuture<T>) this.queuedTiles.computeIfAbsent(key, this::enqueueTile);
             }
         } catch (Exception e) {
-            Terrarium.LOGGER.warn("Unexpected exception occurred at {} from {}", pos, source.getClass().getSimpleName(), e);
-            LoadingStateHandler.recordFailure();
+            Terrarium.LOGGER.warn("Unexpected error occurred at {} from {}", pos, source.getClass().getSimpleName(), e);
+            ErrorBroadcastHandler.recordFailure();
         }
 
         return CompletableFuture.completedFuture(source.getDefaultResult());
@@ -122,100 +114,20 @@ public enum DataSourceHandler {
         }
     }
 
-    private <T extends Data> T parseResult(DataTileKey<T> key, SourceResult<T> result) {
-        if (result.isError()) {
-            Terrarium.LOGGER.warn("Loading tile at {} from {} gave error {}: {}", key.toPos(), key.getSource().getClass().getSimpleName(), result.getError(), result.getErrorCause());
-            LoadingStateHandler.recordFailure();
-            return key.getSource().getDefaultResult();
-        }
-        T value = result.getValue();
-        if (value == null) {
-            return key.getSource().getDefaultResult();
-        }
-        return value;
-    }
-
-    private <T extends Data> SourceResult<T> loadTileRobustly(DataTileKey<T> key) {
-        SourceResult<T> result = this.loadTile(key);
-        if (result.isError() && result.getError() == SourceResult.Error.MALFORMED) {
-            TiledDataSource<T> source = key.getSource();
-            File cachedFile = new File(source.getCacheRoot(), source.getCachedName(key.toPos()));
-            if (cachedFile.delete()) {
-                return this.loadTile(key);
-            }
-        }
-        return result;
-    }
-
-    private <T extends Data> SourceResult<T> loadTile(DataTileKey<T> key) {
+    private <T extends Data> T loadTile(DataTileKey<T> key) {
         TiledDataSource<T> source = key.getSource();
-        T forcedTile = source.getForcedTile(key.toPos());
-        if (forcedTile != null) {
-            return SourceResult.success(forcedTile);
-        }
-
-        DataTilePos loadPos = source.getLoadTilePos(key.toPos());
-        File cachedFile = new File(source.getCacheRoot(), source.getCachedName(loadPos));
-        if (!source.shouldLoadCache(loadPos, cachedFile)) {
-            return this.loadRemoteTile(source, loadPos, cachedFile);
-        } else {
-            return this.loadCachedTile(source, loadPos, cachedFile);
-        }
-    }
-
-    private <T extends Data> SourceResult<T> loadRemoteTile(TiledDataSource<T> source, DataTilePos pos, File cachedFile) {
-        LoadingStateHandler.pushState(LoadingState.LOADING_REMOTE);
-        try (InputStream remoteStream = source.getRemoteStream(pos)) {
-            InputStream cachingStream = this.getCachingStream(remoteStream, cachedFile);
-            source.cacheMetadata(pos);
-            return source.parseStream(pos, source.getWrappedStream(cachingStream));
-        } catch (EOFException e) {
-            return SourceResult.malformed("Reached end of file before expected");
-        } catch (IOException e) {
-            return SourceResult.exception(e);
-        } finally {
-            LoadingStateHandler.popState();
-        }
-    }
-
-    private <T extends Data> SourceResult<T> loadCachedTile(TiledDataSource<T> source, DataTilePos pos, File cachedFile) {
-        LoadingStateHandler.pushState(LoadingState.LOADING_CACHED);
         try {
-            return source.parseStream(pos, source.getWrappedStream(new BufferedInputStream(new FileInputStream(cachedFile))));
-        } catch (EOFException e) {
-            return SourceResult.malformed("Reached end of file before expected");
-        } catch (IOException e) {
-            return SourceResult.exception(e);
-        } finally {
-            LoadingStateHandler.popState();
+            return source.load(key.toPos())
+                    .orElseGet(source::getDefaultResult);
+        } catch (Throwable e) {
+            throw new CompletionException(e);
         }
     }
 
-    private InputStream getCachingStream(InputStream source, File cacheFile) throws IOException {
-        PipedOutputStream sink = new PipedOutputStream();
-        InputStream input = new PipedInputStream(sink);
-        this.cacheService.submit(() -> {
-            try (OutputStream file = new FileOutputStream(cacheFile)) {
-                byte[] buffer = new byte[4096];
-                int count;
-                while ((count = source.read(buffer)) != IOUtils.EOF) {
-                    file.write(buffer, 0, count);
-                    sink.write(buffer, 0, count);
-                }
-            } catch (IOException e) {
-                Terrarium.LOGGER.error("Failed to read or cache remote data", e);
-                if (cacheFile.exists()) {
-                    cacheFile.delete();
-                }
-            } finally {
-                IOUtils.closeQuietly(sink);
-            }
-        });
-        return input;
-    }
-
-    public void close() {
-        this.loadService.shutdown();
-        this.cacheService.shutdown();
+    private <T extends Data> void logError(DataTileKey<T> key, Throwable throwable) {
+        TiledDataSource<T> source = key.getSource();
+        String sourceName = source.getClass().getSimpleName();
+        Terrarium.LOGGER.warn("[{}] Loading tile at {} rose error", sourceName, key.toPos(), throwable);
+        ErrorBroadcastHandler.recordFailure();
     }
 }

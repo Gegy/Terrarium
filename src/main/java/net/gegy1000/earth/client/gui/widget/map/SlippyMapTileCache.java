@@ -17,14 +17,13 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -32,7 +31,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 @SideOnly(Side.CLIENT)
 public class SlippyMapTileCache {
-    private static final File CACHE_ROOT = new File(TiledDataSource.GLOBAL_CACHE_ROOT, "carto");
+    private static final Path CACHE_ROOT = TiledDataSource.GLOBAL_CACHE_ROOT.resolve("carto");
     private static final int CACHE_SIZE = 256;
 
     private final ExecutorService loadingService = Executors.newFixedThreadPool(2, new ThreadFactoryBuilder()
@@ -96,9 +95,9 @@ public class SlippyMapTileCache {
     }
 
     private InputStream getStream(SlippyMapTilePos pos) throws IOException {
-        File cacheFile = new File(CACHE_ROOT, pos.getCacheName());
-        if (cacheFile.exists()) {
-            return new BufferedInputStream(new FileInputStream(cacheFile));
+        Path cachePath = CACHE_ROOT.resolve(pos.getCacheName());
+        if (Files.exists(cachePath)) {
+            return new BufferedInputStream(Files.newInputStream(cachePath));
         }
         String query = String.format(EarthRemoteData.info.getRasterMapQuery(), pos.getZoom(), pos.getX(), pos.getY());
         URL url = new URL(EarthRemoteData.info.getRasterMapEndpoint() + "/" + query);
@@ -110,17 +109,20 @@ public class SlippyMapTileCache {
         this.loadingStreams.add(stream);
         try (InputStream input = new BufferedInputStream(stream)) {
             byte[] data = IOUtils.toByteArray(input);
-            this.cacheData(cacheFile, data);
+            this.cacheData(cachePath, data);
             this.loadingStreams.remove(stream);
             return new ByteArrayInputStream(data);
         }
     }
 
-    private void cacheData(File cacheFile, byte[] data) {
-        if (!CACHE_ROOT.exists()) {
-            CACHE_ROOT.mkdirs();
+    private void cacheData(Path cachePath, byte[] data) {
+        try {
+            Files.createDirectories(CACHE_ROOT);
+        } catch (IOException e) {
+            Terrarium.LOGGER.error("Failed to create cache root");
         }
-        try (OutputStream output = new FileOutputStream(cacheFile)) {
+
+        try (OutputStream output = Files.newOutputStream(cachePath)) {
             output.write(data);
         } catch (IOException e) {
             Terrarium.LOGGER.error("Failed to cache map raster tile", e);

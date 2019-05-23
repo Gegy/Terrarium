@@ -1,114 +1,93 @@
 package net.gegy1000.earth.server.world.pipeline.source;
 
+import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
-import net.gegy1000.terrarium.server.world.pipeline.source.SourceResult;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
 import org.tukaani.xz.SingleXZInputStream;
 
-import javax.annotation.Nullable;
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.zip.GZIPInputStream;
+import java.nio.file.Path;
+import java.util.Optional;
 
 public class SrtmHeightSource extends TiledDataSource<ShortRaster> {
-    public static final int TILE_SIZE = 1200;
-    private static final ShortRaster DEFAULT_TILE = ShortRaster.createSquare(TILE_SIZE);
+    private static final int TILE_SIZE = 1200;
+    private static final ShortRaster DEFAULT_RESULT = ShortRaster.createSquare(TILE_SIZE);
 
-    private static final Set<DataTilePos> VALID_TILES = new HashSet<>();
+    private static final Path CACHE_ROOT = GLOBAL_CACHE_ROOT.resolve("srtm_heights");
 
-    public SrtmHeightSource(CoordinateState coordinateState, String cacheRoot) {
-        super(new File(GLOBAL_CACHE_ROOT, cacheRoot), new Coordinate(coordinateState, TILE_SIZE, TILE_SIZE));
+    private static final CachingInput<DataTilePos> CACHING_INPUT = CachingInput.<DataTilePos>create()
+            .cachesTo(SrtmHeightSource::resolveCachePath);
+
+    public SrtmHeightSource(CoordinateState coordinateState) {
+        super(new Coordinate(coordinateState, TILE_SIZE, TILE_SIZE));
     }
 
-    public static void loadValidTiles() throws IOException {
-        try (DataInputStream input = new DataInputStream(new BufferedInputStream(new GZIPInputStream(SrtmHeightSource.getTilesURL().openStream())))) {
-            int count = input.readInt();
-            for (int i = 0; i < count; i++) {
-                int latitude = -input.readShort();
-                int longitude = input.readShort();
-                VALID_TILES.add(new DataTilePos(longitude, latitude));
-            }
-        }
-    }
+    private static Path resolveCachePath(DataTilePos pos) {
+        int tileX = pos.getTileX();
+        int tileZ = pos.getTileZ() + 1;
 
-    private static URL getTilesURL() throws IOException {
-        return new URL(String.format("%s/%s/%s", EarthRemoteData.info.getBaseURL(), EarthRemoteData.info.getHeightsEndpoint(), EarthRemoteData.info.getHeightTiles()));
-    }
+        String latitudePrefix = -tileZ >= 0 ? "N" : "S";
+        String longitudePrefix = tileX >= 0 ? "E" : "W";
 
-    @Override
-    public InputStream getRemoteStream(DataTilePos key) throws IOException {
-        String cachedName = this.getCachedName(key);
-        URL url = new URL(String.format("%s/%s/%s", EarthRemoteData.info.getBaseURL(), EarthRemoteData.info.getHeightsEndpoint(), cachedName));
-        return url.openStream();
-    }
-
-    @Override
-    public InputStream getWrappedStream(InputStream stream) throws IOException {
-        return new SingleXZInputStream(stream);
-    }
-
-    @Override
-    public String getCachedName(DataTilePos key) {
-        String latitudePrefix = -key.getTileZ() >= 0 ? "N" : "S";
-        String longitudePrefix = key.getTileX() >= 0 ? "E" : "W";
-
-        StringBuilder latitudeString = new StringBuilder(String.valueOf(Math.abs(key.getTileZ())));
+        StringBuilder latitudeString = new StringBuilder(String.valueOf(Math.abs(tileZ)));
         while (latitudeString.length() < 2) {
             latitudeString.insert(0, "0");
         }
         latitudeString.insert(0, latitudePrefix);
 
-        StringBuilder longitudeString = new StringBuilder(String.valueOf(Math.abs(key.getTileX())));
+        StringBuilder longitudeString = new StringBuilder(String.valueOf(Math.abs(tileX)));
         while (longitudeString.length() < 3) {
             longitudeString.insert(0, "0");
         }
         longitudeString.insert(0, longitudePrefix);
 
-        return String.format(EarthRemoteData.info.getHeightsQuery(), latitudeString.toString(), longitudeString.toString());
+        return CACHE_ROOT.resolve(latitudeString.toString() + longitudeString.toString() + ".ht2");
+    }
+
+    @Override
+    public Optional<ShortRaster> load(DataTilePos pos) throws IOException {
+        String url = EarthRemoteIndex.get().srtm.getUrlFor(pos);
+        if (url == null) {
+            return Optional.empty();
+        }
+
+        InputStream sourceInput = CACHING_INPUT.getInputStream(pos, p -> {
+            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+            connection.setRequestProperty("User-Agent", TerrariumEarth.USER_AGENT);
+            return connection.getInputStream();
+        });
+
+        try (InputStream input = new SingleXZInputStream(new BufferedInputStream(sourceInput))) {
+            return Optional.of(this.parseStream(input));
+        }
     }
 
     @Override
     public ShortRaster getDefaultResult() {
-        return DEFAULT_TILE;
+        return DEFAULT_RESULT;
     }
 
-    @Override
-    public DataTilePos getLoadTilePos(DataTilePos pos) {
-        return new DataTilePos(pos.getTileX(), pos.getTileZ() + 1);
-    }
+    private ShortRaster parseStream(InputStream input) throws IOException {
+        DataInputStream data = new DataInputStream(input);
 
-    @Nullable
-    @Override
-    public ShortRaster getForcedTile(DataTilePos pos) {
-        if (!VALID_TILES.isEmpty() && !VALID_TILES.contains(pos)) {
-            return DEFAULT_TILE;
+        ShortRaster heightmap = ShortRaster.createSquare(TILE_SIZE);
+
+        short origin = data.readShort();
+        if (origin == -1) {
+            this.parseAbsolute(data, heightmap);
+        } else {
+            this.parseRelative(data, heightmap, origin);
         }
-        return null;
-    }
 
-    @Override
-    public SourceResult<ShortRaster> parseStream(DataTilePos pos, InputStream stream) throws IOException {
-        try (DataInputStream input = new DataInputStream(stream)) {
-            ShortRaster heightmap = ShortRaster.createSquare(TILE_SIZE);
-
-            short origin = input.readShort();
-            if (origin == -1) {
-                this.parseAbsolute(input, heightmap);
-            } else {
-                this.parseRelative(input, heightmap, origin);
-            }
-
-            return SourceResult.success(heightmap);
-        }
+        return heightmap;
     }
 
     private void parseRelative(DataInputStream input, ShortRaster heightmap, short origin) throws IOException {

@@ -3,7 +3,6 @@ package net.gegy1000.terrarium;
 import net.gegy1000.terrarium.server.ServerProxy;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.message.DataFailWarningMessage;
-import net.gegy1000.terrarium.server.message.LoadingStateMessage;
 import net.gegy1000.terrarium.server.message.TerrariumHandshakeMessage;
 import net.gegy1000.terrarium.server.world.chunk.tracker.SavedColumnTracker;
 import net.gegy1000.terrarium.server.world.chunk.tracker.SavedCubeTracker;
@@ -23,6 +22,8 @@ import net.minecraftforge.fml.relauncher.Side;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Map;
 
 @Mod(modid = Terrarium.MODID, name = "Terrarium", version = Terrarium.VERSION, acceptedMinecraftVersions = "[1.12]", dependencies = "after:cubicchunks")
@@ -46,15 +47,16 @@ public class Terrarium {
     public static void onPreInit(FMLPreInitializationEvent event) {
         PROXY.onPreInit();
 
-        if (!TiledDataSource.GLOBAL_CACHE_ROOT.exists()) {
-            TiledDataSource.GLOBAL_CACHE_ROOT.mkdirs();
+        try {
+            Files.createDirectories(TiledDataSource.GLOBAL_CACHE_ROOT);
+        } catch (IOException e) {
+            Terrarium.LOGGER.warn("Failed to create cache directories", e);
         }
 
         TerrariumCapabilities.onPreInit();
 
         NETWORK.registerMessage(TerrariumHandshakeMessage.Handler.class, TerrariumHandshakeMessage.class, 0, Side.SERVER);
         NETWORK.registerMessage(TerrariumHandshakeMessage.Handler.class, TerrariumHandshakeMessage.class, 1, Side.CLIENT);
-        NETWORK.registerMessage(LoadingStateMessage.Handler.class, LoadingStateMessage.class, 2, Side.CLIENT);
         NETWORK.registerMessage(DataFailWarningMessage.Handler.class, DataFailWarningMessage.class, 3, Side.CLIENT);
 
         MinecraftForge.EVENT_BUS.register(SavedColumnTracker.class);

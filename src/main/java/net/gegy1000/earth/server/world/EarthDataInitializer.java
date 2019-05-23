@@ -51,7 +51,7 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
         int heightOrigin = this.ctx.settings.getInteger(HEIGHT_ORIGIN);
         InterpolationScaleOp heightScaleOp = this.selectScaleOp(this.ctx.settings);
 
-        SrtmHeightSource heightSource = new SrtmHeightSource(this.ctx.srtmRaster, "srtm_heights");
+        SrtmHeightSource heightSource = new SrtmHeightSource(this.ctx.srtmRaster);
 
         DataOp<ShortRaster> heightSampler = RasterSourceSampler.sampleShort(heightSource);
         DataOp<ShortRaster> heights = heightScaleOp.scaleShortsFrom(heightSampler, this.ctx.srtmRaster);
@@ -60,11 +60,11 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
         slope = InterpolationScaleOp.LINEAR.scaleFrom(slope, this.ctx.srtmRaster, UnsignedByteRaster::create);
         slope = new TransformSlopeNoiseOp(0.5).apply(slope);
 
-        LandCoverSource landCoverSource = new LandCoverSource(this.ctx.landcoverRaster, "landcover");
+        LandCoverSource landCoverSource = new LandCoverSource(this.ctx.landcoverRaster);
         DataOp<EnumRaster<CoverId>> coverId = RasterSourceSampler.sampleEnum(landCoverSource, CoverId.NO_DATA);
         coverId = VoronoiScaleOp.scaleFrom(coverId, this.ctx.landcoverRaster, view -> EnumRaster.create(CoverId.NO_DATA, view));
 
-        OceanPolygonSource oceanPolygonSource = new OceanPolygonSource(this.ctx.lngLatCoordinates, "ocean");
+        OceanPolygonSource oceanPolygonSource = new OceanPolygonSource(this.ctx.lngLatCoordinates);
 
         DataOp<PolygonData> oceanPolygons = PolygonSampler.sample(oceanPolygonSource, this.ctx.lngLatCoordinates);
         DataOp<AreaData> oceanArea = PolygonToAreaOp.apply(oceanPolygons, this.ctx.lngLatCoordinates);

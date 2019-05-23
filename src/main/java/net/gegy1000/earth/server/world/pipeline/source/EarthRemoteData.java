@@ -7,14 +7,13 @@ import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
 
 import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Base64;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -24,11 +23,11 @@ public class EarthRemoteData {
 
     private final static Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    private static final File INFO_CACHE = new File(TiledDataSource.GLOBAL_CACHE_ROOT, "terrarium_info.json.gz");
+    private static final Path INFO_CACHE = TiledDataSource.GLOBAL_CACHE_ROOT.resolve("terrarium_info.json.gz");
 
     public static EarthRemoteData.Info info = new EarthRemoteData.Info();
 
-    public static void loadInfo() throws IOException {
+    public static void load() throws IOException {
         try {
             URL url = new URL(INFO_JSON);
             info = EarthRemoteData.loadInfo(url.openStream());
@@ -40,7 +39,7 @@ public class EarthRemoteData {
     }
 
     private static void loadCachedInfo() throws IOException {
-        try (InputStream input = new GZIPInputStream(new FileInputStream(INFO_CACHE))) {
+        try (InputStream input = new GZIPInputStream(Files.newInputStream(INFO_CACHE))) {
             info = loadInfo(input);
         }
     }
@@ -52,7 +51,7 @@ public class EarthRemoteData {
     }
 
     private static void cacheInfo(EarthRemoteData.Info info) {
-        try (PrintWriter output = new PrintWriter(new GZIPOutputStream(new FileOutputStream(INFO_CACHE)))) {
+        try (PrintWriter output = new PrintWriter(new GZIPOutputStream(Files.newOutputStream(INFO_CACHE)))) {
             output.write(GSON.toJson(info));
         } catch (IOException e) {
             TerrariumEarth.LOGGER.error("Failed to cache Terrarium Earth info", e);
@@ -60,26 +59,6 @@ public class EarthRemoteData {
     }
 
     public static class Info {
-        @SerializedName("base_url")
-        private String baseURL = "";
-        @SerializedName("landcover_endpoint")
-        private String landcoverEndpoint = "";
-        @SerializedName("landcover_query")
-        private String landcoverQuery = "%s_%s.lc";
-        @SerializedName("soil_endpoint")
-        private String soilEndpoint = "";
-        @SerializedName("soil_query")
-        private String soilQuery = "%s_%s.sc";
-        @SerializedName("ocean_endpoint")
-        private String oceanEndpoint = "";
-        @SerializedName("ocean_query")
-        private String oceanQuery = "%s_%s.water";
-        @SerializedName("heights_endpoint")
-        private String heightsEndpoint = "";
-        @SerializedName("heights_query")
-        private String heightsQuery = "%s_%s.ht2";
-        @SerializedName("height_tiles")
-        private String heightTiles = "";
         @SerializedName("raster_map_endpoint")
         private String rasterMapEndpoint = "http://tile.openstreetmap.org";
         @SerializedName("raster_map_query")
@@ -90,46 +69,6 @@ public class EarthRemoteData {
         private String autocompleteKey = "";
         @SerializedName("streetview_key")
         private String streetviewKey = "";
-
-        public String getBaseURL() {
-            return this.baseURL;
-        }
-
-        public String getLandcoverEndpoint() {
-            return this.landcoverEndpoint;
-        }
-
-        public String getLandcoverQuery() {
-            return this.landcoverQuery;
-        }
-
-        public String getSoilEndpoint() {
-            return this.soilEndpoint;
-        }
-
-        public String getSoilQuery() {
-            return this.soilQuery;
-        }
-
-        public String getOceanEndpoint() {
-            return this.oceanEndpoint;
-        }
-
-        public String getOceanQuery() {
-            return this.oceanQuery;
-        }
-
-        public String getHeightsEndpoint() {
-            return this.heightsEndpoint;
-        }
-
-        public String getHeightsQuery() {
-            return this.heightsQuery;
-        }
-
-        public String getHeightTiles() {
-            return this.heightTiles;
-        }
 
         public String getRasterMapEndpoint() {
             return this.rasterMapEndpoint;

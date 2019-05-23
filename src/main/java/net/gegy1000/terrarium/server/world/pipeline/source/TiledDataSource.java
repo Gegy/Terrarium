@@ -3,56 +3,25 @@ package net.gegy1000.terrarium.server.world.pipeline.source;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.pipeline.data.Data;
 
-import javax.annotation.Nullable;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Optional;
 
 public abstract class TiledDataSource<T extends Data> {
-    public static final File GLOBAL_CACHE_ROOT = new File(".", "mods/terrarium/cache/");
+    public static final Path GLOBAL_CACHE_ROOT = Paths.get(".", "mods/terrarium/cache/");
 
-    protected final File cacheRoot;
     protected final Coordinate tileSize;
 
-    protected TiledDataSource(File cacheRoot, Coordinate tileSize) {
-        this.cacheRoot = cacheRoot;
+    protected TiledDataSource(Coordinate tileSize) {
         this.tileSize = tileSize;
-        if (!cacheRoot.exists()) {
-            cacheRoot.mkdirs();
-        }
-    }
-
-    public File getCacheRoot() {
-        return this.cacheRoot;
     }
 
     public Coordinate getTileSize() {
         return this.tileSize;
     }
 
-    public abstract InputStream getRemoteStream(DataTilePos key) throws IOException;
-
-    public abstract InputStream getWrappedStream(InputStream stream) throws IOException;
-
-    public abstract String getCachedName(DataTilePos key);
+    public abstract Optional<T> load(DataTilePos pos) throws IOException;
 
     public abstract T getDefaultResult();
-
-    public abstract SourceResult<T> parseStream(DataTilePos pos, InputStream stream) throws IOException;
-
-    @Nullable
-    public T getForcedTile(DataTilePos pos) {
-        return null;
-    }
-
-    public DataTilePos getLoadTilePos(DataTilePos pos) {
-        return pos;
-    }
-
-    public void cacheMetadata(DataTilePos key) {
-    }
-
-    public boolean shouldLoadCache(DataTilePos key, File file) {
-        return file.exists();
-    }
 }

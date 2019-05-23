@@ -11,9 +11,9 @@ import net.gegy1000.earth.server.message.EarthMapGuiMessage;
 import net.gegy1000.earth.server.message.EarthPanoramaMessage;
 import net.gegy1000.earth.server.world.EarthWorldType;
 import net.gegy1000.earth.server.world.pipeline.source.EarthRemoteData;
+import net.gegy1000.earth.server.world.pipeline.source.EarthRemoteIndex;
 import net.gegy1000.earth.server.world.pipeline.source.GoogleGeocoder;
 import net.gegy1000.earth.server.world.pipeline.source.NominatimGeocoder;
-import net.gegy1000.earth.server.world.pipeline.source.SrtmHeightSource;
 import net.gegy1000.earth.server.world.pipeline.source.WorldClimateDataset;
 import net.gegy1000.terrarium.server.capability.VoidStorage;
 import net.gegy1000.terrarium.server.world.pipeline.source.Geocoder;
@@ -46,6 +46,8 @@ public class TerrariumEarth {
     public static final String MODID = "earth";
     public static final String VERSION = "1.1.0";
 
+    public static final String USER_AGENT = "terrarium-earth";
+
     public static final String CLIENT_PROXY = "net.gegy1000.earth.client.ClientProxy";
     public static final String SERVER_PROXY = "net.gegy1000.earth.server.ServerProxy";
 
@@ -74,10 +76,12 @@ public class TerrariumEarth {
 
         Thread thread = new Thread(() -> {
             try {
-                EarthRemoteData.loadInfo();
-                SrtmHeightSource.loadValidTiles();
+                EarthRemoteData.load();
+                EarthRemoteIndex.load();
+            } catch (IOException e) {
+                LOGGER.warn("Failed to load remote Earth data {}", e.toString());
             } catch (Throwable t) {
-                LOGGER.warn("Failed to load remote Earth data {}", t.toString());
+                LOGGER.error("An unexpected exception occurred while loading remote data", t);
             }
         }, "Terrarium Remote Load");
         thread.setDaemon(true);
