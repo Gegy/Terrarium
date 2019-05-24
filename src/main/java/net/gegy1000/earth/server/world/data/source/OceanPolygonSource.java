@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
 import net.gegy1000.earth.TerrariumEarth;
+import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.earth.server.world.data.PolygonData;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
@@ -42,7 +43,13 @@ public class OceanPolygonSource extends TiledDataSource<PolygonData> {
 
     @Override
     public Optional<PolygonData> load(DataTilePos pos) throws IOException {
-        String url = EarthRemoteIndex.get().oceans.getUrlFor(pos);
+        SharedEarthData sharedData = SharedEarthData.instance();
+        EarthRemoteIndex remoteIndex = sharedData.get(SharedEarthData.REMOTE_INDEX);
+        if (remoteIndex == null) {
+            return Optional.empty();
+        }
+
+        String url = remoteIndex.oceans.getUrlFor(pos);
         if (url == null) {
             return Optional.empty();
         }

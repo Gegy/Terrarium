@@ -3,10 +3,12 @@ package net.gegy1000.earth.server.world;
 import com.google.common.collect.Lists;
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.client.gui.EarthCustomizationGui;
+import net.gegy1000.earth.client.gui.SharedInitializingGui;
 import net.gegy1000.earth.server.capability.EarthCapability;
+import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.earth.server.world.data.source.LandCoverSource;
 import net.gegy1000.earth.server.world.data.source.SoilCoverSource;
-import net.gegy1000.earth.server.world.data.source.WorldClimateDataset;
+import net.gegy1000.earth.server.world.data.source.WorldClimateRaster;
 import net.gegy1000.terrarium.client.gui.customization.TerrariumCustomizationGui;
 import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
 import net.gegy1000.terrarium.server.world.TerrariumDataInitializer;
@@ -24,6 +26,7 @@ import net.gegy1000.terrarium.server.world.generator.customization.property.Prop
 import net.gegy1000.terrarium.server.world.generator.customization.widget.InversePropertyConverter;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.SliderWidget;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.ToggleWidget;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiCreateWorld;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
@@ -45,7 +48,7 @@ public class EarthWorldType extends TerrariumWorldType {
     public static final double SRTM_SCALE = EARTH_CIRCUMFERENCE / SRTM_WIDTH;
     public static final double LANDCOVER_SCALE = EARTH_CIRCUMFERENCE / LandCoverSource.GLOBAL_WIDTH;
     public static final double SOIL_SCALE = EARTH_CIRCUMFERENCE / SoilCoverSource.GLOBAL_WIDTH;
-    public static final double CLIMATE_SCALE = EARTH_CIRCUMFERENCE / WorldClimateDataset.WIDTH;
+    public static final double CLIMATE_SCALE = EARTH_CIRCUMFERENCE / WorldClimateRaster.WIDTH;
 
     public static final int HIGHEST_POINT_METERS = 8900;
 
@@ -119,6 +122,17 @@ public class EarthWorldType extends TerrariumWorldType {
                         new ToggleWidget(CAVE_GENERATION)
                 )
                 .build();
+    }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void onCustomize(Minecraft client, WorldType worldType, GuiCreateWorld parent) {
+        if (!SharedEarthData.isInitialized()) {
+            client.displayGuiScreen(new SharedInitializingGui(() -> super.onCustomize(client, worldType, parent)));
+            return;
+        }
+
+        super.onCustomize(client, worldType, parent);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package net.gegy1000.earth.server.world.data.source;
 
 import net.gegy1000.earth.TerrariumEarth;
+import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
@@ -54,7 +55,13 @@ public class SrtmHeightSource extends TiledDataSource<ShortRaster> {
 
     @Override
     public Optional<ShortRaster> load(DataTilePos pos) throws IOException {
-        String url = EarthRemoteIndex.get().srtm.getUrlFor(pos);
+        SharedEarthData sharedData = SharedEarthData.instance();
+        EarthRemoteIndex remoteIndex = sharedData.get(SharedEarthData.REMOTE_INDEX);
+        if (remoteIndex == null) {
+            return Optional.empty();
+        }
+
+        String url = remoteIndex.srtm.getUrlFor(pos);
         if (url == null) {
             return Optional.empty();
         }

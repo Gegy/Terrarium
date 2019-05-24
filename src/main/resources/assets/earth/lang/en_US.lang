@@ -17,6 +17,10 @@ gui.button.earth.teleport=Teleport
 
 gui.copy_box.copied.name=Copied to clipboard!
 
+gui.earth.preparing=Please Wait
+gui.earth.preparing.desc.1=Preparing Terrarium for use...
+gui.earth.preparing.desc.2=This may take a moment!
+
 # Customization Categories
 
 category.terrarium.world.name=World Properties
@@ -100,3 +104,8 @@ config.earth.street_view_zoom.tooltip=The zoom level to load street view images 
 
 config.earth.osm_geocoder=Use OpenStreetMap Geocoder
 config.earth.osm_geocoder.tooltip=If true, the Nominatim OpenStreetMap Geocoder will be used instead of Google's
+
+# Initializers
+
+initializer.terrarium.climate_rasters=Loading climate rasters...
+initializer.terrarium.remote_index=Loading remote index...

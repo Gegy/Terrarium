@@ -1,6 +1,6 @@
 package net.gegy1000.terrarium.server.world.pipeline.data.op;
 
-import net.gegy1000.terrarium.server.util.Interpolation;
+import net.gegy1000.terrarium.server.util.InterpolationFunction;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataView;
@@ -13,16 +13,16 @@ import net.minecraft.util.math.MathHelper;
 import java.util.function.Function;
 
 public enum InterpolationScaleOp {
-    LINEAR(Interpolation.Function.LINEAR),
-    COSINE(Interpolation.Function.COSINE),
-    CUBIC(Interpolation.Function.CUBIC);
+    LINEAR(InterpolationFunction.LINEAR),
+    COSINE(InterpolationFunction.COSINE),
+    CUBIC(InterpolationFunction.CUBIC);
 
-    private final Interpolation.Function function;
+    private final InterpolationFunction function;
     private final ThreadLocal<double[][]> sampleBuffer;
     private final int lowerSampleBuffer;
     private final int upperSampleBuffer;
 
-    InterpolationScaleOp(Interpolation.Function function) {
+    InterpolationScaleOp(InterpolationFunction function) {
         this.function = function;
 
         int pointCount = function.getPointCount();

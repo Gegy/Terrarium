@@ -1,14 +1,13 @@
 package net.gegy1000.earth.server.world;
 
-import net.gegy1000.earth.TerrariumEarth;
+import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.cover.CoverId;
-import net.gegy1000.earth.server.world.geography.Landform;
 import net.gegy1000.earth.server.world.data.AreaData;
+import net.gegy1000.earth.server.world.data.PolygonData;
 import net.gegy1000.earth.server.world.data.op.ClimateSampler;
 import net.gegy1000.earth.server.world.data.op.HeightNoiseTransformOp;
 import net.gegy1000.earth.server.world.data.op.HeightTransformOp;
-import net.gegy1000.earth.server.world.data.PolygonData;
 import net.gegy1000.earth.server.world.data.op.PolygonSampler;
 import net.gegy1000.earth.server.world.data.op.PolygonToAreaOp;
 import net.gegy1000.earth.server.world.data.op.ProduceCoverOp;
@@ -20,6 +19,7 @@ import net.gegy1000.earth.server.world.data.op.WaterOps;
 import net.gegy1000.earth.server.world.data.source.LandCoverSource;
 import net.gegy1000.earth.server.world.data.source.OceanPolygonSource;
 import net.gegy1000.earth.server.world.data.source.SrtmHeightSource;
+import net.gegy1000.earth.server.world.geography.Landform;
 import net.gegy1000.earth.server.world.soil.SoilConfig;
 import net.gegy1000.terrarium.server.world.TerrariumDataInitializer;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
@@ -47,6 +47,8 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
 
     @Override
     public ColumnDataGenerator buildDataGenerator() {
+        SharedEarthData sharedEarthData = SharedEarthData.instance();
+
         int heightOrigin = this.ctx.settings.getInteger(HEIGHT_ORIGIN);
         InterpolationScaleOp heightScaleOp = this.selectScaleOp(this.ctx.settings);
 
@@ -90,7 +92,7 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
         cover = WaterOps.applyToCover(cover, landforms);
         heights = WaterOps.applyToHeight(heights, landforms, waterLevel, seaDepth);
 
-        ClimateSampler climateSampler = new ClimateSampler(TerrariumEarth.getClimateDataset());
+        ClimateSampler climateSampler = new ClimateSampler(sharedEarthData.get(SharedEarthData.JANUARY_CLIMATE));
 
         DataOp<ShortRaster> annualRainfall = climateSampler.annualRainfall();
         annualRainfall = InterpolationScaleOp.LINEAR.scaleShortsFrom(annualRainfall, this.ctx.climateRaster);

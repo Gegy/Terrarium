@@ -166,7 +166,7 @@ public class TerrariumCustomizationGui extends GuiScreen {
                     break;
                 case PRESET_BUTTON:
                     this.freeze = true;
-                    this.mc.displayGuiScreen(new SelectPresetGui(this, this.terrariumType));
+                    this.mc.displayGuiScreen(new SelectPresetGui(this, this, this.terrariumType));
                     break;
             }
         }

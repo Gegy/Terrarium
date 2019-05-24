@@ -73,7 +73,7 @@ public abstract class TerrariumWorldType implements CubicWorldType {
 
     @Override
     @SideOnly(Side.CLIENT)
-    public final void onCustomize(Minecraft client, WorldType worldType, GuiCreateWorld parent) {
+    public void onCustomize(Minecraft client, WorldType worldType, GuiCreateWorld parent) {
         TerrariumPreset preset = this.getPreset();
         if (preset == null) {
             Terrarium.LOGGER.warn("Found no preset with id {} for world type {}", this.presetIdentifier, this.getName());
@@ -82,7 +82,7 @@ public abstract class TerrariumWorldType implements CubicWorldType {
 
         TerrariumCustomizationGui customizationGui = this.createCustomizationGui(parent, worldType, preset);
         if (Strings.isNullOrEmpty(parent.chunkProviderSettingsJson)) {
-            client.displayGuiScreen(new SelectPresetGui(customizationGui, this));
+            client.displayGuiScreen(new SelectPresetGui(customizationGui, parent, this));
         } else {
             client.displayGuiScreen(customizationGui);
         }

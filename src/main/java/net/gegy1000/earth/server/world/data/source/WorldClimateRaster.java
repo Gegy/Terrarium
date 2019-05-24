@@ -6,12 +6,12 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public final class WorldClimateDataset {
+public final class WorldClimateRaster {
     public static final int WIDTH = 4320;
     public static final int HEIGHT = 2160;
 
-    private static final int OFFSET_X = WorldClimateDataset.WIDTH / 2;
-    private static final int OFFSET_Y = WorldClimateDataset.HEIGHT / 2;
+    private static final int OFFSET_X = WorldClimateRaster.WIDTH / 2;
+    private static final int OFFSET_Y = WorldClimateRaster.HEIGHT / 2;
 
     private static final int NO_DATA = 0;
 
@@ -33,7 +33,7 @@ public final class WorldClimateDataset {
     private final byte[] temperature;
     private final byte[] rainfall;
 
-    private WorldClimateDataset(
+    private WorldClimateRaster(
             float tempMin, float tempMax, float tempCurve,
             float rainMin, float rainMax, float rainCurve,
             byte[] temperature, byte[] rainfall
@@ -48,32 +48,32 @@ public final class WorldClimateDataset {
         this.rainfall = rainfall;
     }
 
-    public static WorldClimateDataset parse(InputStream in) throws IOException {
+    public static WorldClimateRaster parse(InputStream in) throws IOException {
         if (in == null) {
             throw new IOException("Climate Dataset stream was null");
         }
 
-        try (DataInputStream data = new DataInputStream(new SingleXZInputStream(in))) {
-            float tempMin = data.readFloat();
-            float tempMax = data.readFloat();
-            float tempCurve = data.readFloat();
+        DataInputStream data = new DataInputStream(new SingleXZInputStream(in));
 
-            byte[] temperature = new byte[WIDTH * HEIGHT];
-            data.readFully(temperature);
+        float tempMin = data.readFloat();
+        float tempMax = data.readFloat();
+        float tempCurve = data.readFloat();
 
-            float rainMin = data.readFloat();
-            float rainMax = data.readFloat();
-            float rainCurve = data.readFloat();
+        byte[] temperature = new byte[WIDTH * HEIGHT];
+        data.readFully(temperature);
 
-            byte[] rainfall = new byte[WIDTH * HEIGHT];
-            data.readFully(rainfall);
+        float rainMin = data.readFloat();
+        float rainMax = data.readFloat();
+        float rainCurve = data.readFloat();
 
-            return new WorldClimateDataset(
-                    tempMin, tempMax, tempCurve,
-                    rainMin, rainMax, rainCurve,
-                    temperature, rainfall
-            );
-        }
+        byte[] rainfall = new byte[WIDTH * HEIGHT];
+        data.readFully(rainfall);
+
+        return new WorldClimateRaster(
+                tempMin, tempMax, tempCurve,
+                rainMin, rainMax, rainCurve,
+                temperature, rainfall
+        );
     }
 
     public float getAverageTemperature(int x, int y) {

@@ -1,6 +1,7 @@
 package net.gegy1000.earth.server.world.data.source;
 
 import net.gegy1000.earth.TerrariumEarth;
+import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.earth.server.world.cover.CoverId;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
@@ -23,12 +24,6 @@ public class LandCoverSource extends TiledDataSource<EnumRaster<CoverId>> {
     public static final int GLOBAL_WIDTH = 129600;
     public static final int GLOBAL_HEIGHT = 64800;
 
-    private static final int TILE_COUNT_X = GLOBAL_WIDTH / TILE_SIZE;
-    private static final int TILE_COUNT_Y = GLOBAL_HEIGHT / TILE_SIZE;
-
-    private static final int TILE_OFFSET_X = TILE_COUNT_X / 2;
-    private static final int TILE_OFFSET_Y = TILE_COUNT_Y / 2;
-
     private static final EnumRaster<CoverId> DEFAULT_RESULT = EnumRaster.createSquare(CoverId.NO_DATA, TILE_SIZE);
 
     private static final Path CACHE_ROOT = GLOBAL_CACHE_ROOT.resolve("landcover");
@@ -46,7 +41,13 @@ public class LandCoverSource extends TiledDataSource<EnumRaster<CoverId>> {
 
     @Override
     public Optional<EnumRaster<CoverId>> load(DataTilePos pos) throws IOException {
-        String url = EarthRemoteIndex.get().landcover.getUrlFor(pos);
+        SharedEarthData sharedData = SharedEarthData.instance();
+        EarthRemoteIndex remoteIndex = sharedData.get(SharedEarthData.REMOTE_INDEX);
+        if (remoteIndex == null) {
+            return Optional.empty();
+        }
+
+        String url = remoteIndex.landcover.getUrlFor(pos);
         if (url == null) {
             return Optional.empty();
         }

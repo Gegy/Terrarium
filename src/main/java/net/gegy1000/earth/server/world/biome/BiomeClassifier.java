@@ -48,7 +48,7 @@ public final class BiomeClassifier {
 
         public boolean isFrozen() {
             // TODO: Use mean min temperature rather?
-            return this.averageTemperature < 10.0F || this.is(CoverMarker.FROZEN);
+            return this.averageTemperature < 5.0F || this.is(CoverMarker.FROZEN);
         }
 
         public boolean is(CoverMarker marker) {

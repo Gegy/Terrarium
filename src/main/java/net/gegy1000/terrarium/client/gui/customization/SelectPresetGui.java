@@ -13,7 +13,8 @@ public class SelectPresetGui extends GuiScreen {
     private static final int SELECT_BUTTON = 0;
     private static final int CANCEL_BUTTON = 1;
 
-    private final TerrariumCustomizationGui parent;
+    private final TerrariumCustomizationGui forward;
+    private final GuiScreen backward;
     private final TerrariumWorldType worldType;
 
     private GuiButton selectButton;
@@ -21,8 +22,9 @@ public class SelectPresetGui extends GuiScreen {
     private PresetList presetList;
     private TerrariumPreset selectedPreset;
 
-    public SelectPresetGui(TerrariumCustomizationGui parent, TerrariumWorldType worldType) {
-        this.parent = parent;
+    public SelectPresetGui(TerrariumCustomizationGui forward, GuiScreen backward, TerrariumWorldType worldType) {
+        this.forward = forward;
+        this.backward = backward;
         this.worldType = worldType;
     }
 
@@ -48,7 +50,7 @@ public class SelectPresetGui extends GuiScreen {
             if (button.id == SELECT_BUTTON) {
                 this.applyPreset();
             } else {
-                this.mc.displayGuiScreen(this.parent);
+                this.mc.displayGuiScreen(this.backward);
             }
         }
     }
@@ -80,8 +82,10 @@ public class SelectPresetGui extends GuiScreen {
 
     public void applyPreset() {
         if (this.selectedPreset != null) {
-            this.parent.applyPreset(this.selectedPreset);
+            this.forward.applyPreset(this.selectedPreset);
+            this.mc.displayGuiScreen(this.forward);
+        } else {
+            this.mc.displayGuiScreen(this.backward);
         }
-        this.mc.displayGuiScreen(this.parent);
     }
 }

@@ -1,6 +1,6 @@
 package net.gegy1000.earth.server.world.data.op;
 
-import net.gegy1000.earth.server.world.data.source.WorldClimateDataset;
+import net.gegy1000.earth.server.world.data.source.WorldClimateRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataOp;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.FloatRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
@@ -8,9 +8,9 @@ import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import java.util.concurrent.CompletableFuture;
 
 public final class ClimateSampler {
-    private final WorldClimateDataset source;
+    private final WorldClimateRaster source;
 
-    public ClimateSampler(WorldClimateDataset source) {
+    public ClimateSampler(WorldClimateRaster source) {
         this.source = source;
     }
 

@@ -28,18 +28,10 @@ minecraft {
 repositories {
   mavenCentral()
   jcenter()
-  maven {
-    url = "http://mvn.topobyte.de"
-  }
-  maven {
-    url = "https://maven.gegy1000.net"
-  }
-  maven {
-    url = "https://oss.sonatype.org/content/repositories/public/"
-  }
-  maven {
-    url = "https://repo.spongepowered.org/maven/"
-  }
+  maven { url = "http://mvn.topobyte.de" }
+  maven { url = "https://maven.gegy1000.net" }
+  maven { url = "https://oss.sonatype.org/content/repositories/public/" }
+  maven { url = "https://repo.spongepowered.org/maven/" }
 }
 
 configurations {
@@ -61,6 +53,7 @@ jar {
     it.isDirectory() ? it : zipTree(it)
   }
   manifest {
+    attributes "FMLAT": "terrarium_at.cfg"
     attributes "Maven-Artifact": "${project.group}:${project.archivesBaseName}:${project.version}"
     attributes "Timestamp": System.currentTimeMillis()
   }
