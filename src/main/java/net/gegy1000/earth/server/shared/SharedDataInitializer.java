@@ -1,9 +1,7 @@
 package net.gegy1000.earth.server.shared;
 
-import net.gegy1000.earth.server.util.OpProgressWatcher;
+import net.gegy1000.earth.server.util.ProcessTracker;
 
 public interface SharedDataInitializer {
-    void initialize(SharedEarthData data, OpProgressWatcher progress) throws SharedInitException;
-
-    String getDescription();
+    void initialize(SharedEarthData data, ProcessTracker processTracker);
 }

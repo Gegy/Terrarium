@@ -1,7 +1,8 @@
 package net.gegy1000.earth.server.shared;
 
-import net.gegy1000.earth.server.util.OpProgressWatcher;
-import net.gegy1000.earth.server.util.WatchedInputStream;
+import net.gegy1000.earth.server.util.ProcessTracker;
+import net.gegy1000.earth.server.util.ProgressTracker;
+import net.gegy1000.earth.server.util.TrackedInputStream;
 import net.gegy1000.earth.server.world.data.source.WorldClimateRaster;
 import net.minecraft.client.resources.I18n;
 
@@ -9,24 +10,35 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public final class ClimateRasterInitializer implements SharedDataInitializer {
-    @Override
-    public void initialize(SharedEarthData data, OpProgressWatcher progress) throws SharedInitException {
-        try (
-                InputStream januaryInput = WorldClimateRaster.class.getResourceAsStream("/data/earth/january_climate.xz");
-                InputStream julyInput = WorldClimateRaster.class.getResourceAsStream("/data/earth/july_climate.xz")
-        ) {
-            WorldClimateRaster januaryClimate = WorldClimateRaster.parse(new WatchedInputStream(januaryInput, progress.map(p -> p / 2.0)));
-            data.put(SharedEarthData.JANUARY_CLIMATE, januaryClimate);
+    private static final String JANUARY_PATH = "/data/earth/january_climate.xz";
+    private static final String JANUARY_DESC = "initializer.terrarium.climate_rasters.january";
 
-            WorldClimateRaster julyClimate = WorldClimateRaster.parse(new WatchedInputStream(julyInput, progress.map(p -> 0.5 + p / 2.0)));
-            data.put(SharedEarthData.JULY_CLIMATE, julyClimate);
-        } catch (IOException e) {
-            throw new SharedInitException(e);
-        }
+    private static final String JULY_PATH = "/data/earth/july_climate.xz";
+    private static final String JULY_DESC = "initializer.terrarium.climate_rasters.july";
+
+    @Override
+    public void initialize(SharedEarthData data, ProcessTracker processTracker) {
+        ProgressTracker master = processTracker.push(I18n.format("initializer.terrarium.climate_rasters"), 2);
+
+        master.use(() -> {
+            WorldClimateRaster january = this.loadRaster(JANUARY_PATH, I18n.format(JANUARY_DESC), processTracker);
+            data.put(SharedEarthData.JANUARY_CLIMATE, january);
+
+            master.step(1);
+
+            WorldClimateRaster july = this.loadRaster(JULY_PATH, I18n.format(JULY_DESC), processTracker);
+            data.put(SharedEarthData.JULY_CLIMATE, july);
+
+            master.step(1);
+        });
     }
 
-    @Override
-    public String getDescription() {
-        return I18n.format("initializer.terrarium.climate_rasters");
+    private WorldClimateRaster loadRaster(String path, String description, ProcessTracker processTracker) throws IOException {
+        try (
+                InputStream input = new TrackedInputStream(WorldClimateRaster.class.getResourceAsStream(path))
+                        .submitTo(description, processTracker)
+        ) {
+            return WorldClimateRaster.parse(input);
+        }
     }
 }

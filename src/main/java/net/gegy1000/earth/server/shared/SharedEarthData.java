@@ -1,13 +1,12 @@
 package net.gegy1000.earth.server.shared;
 
-import net.gegy1000.earth.server.util.ProcedureProgressWatcher;
+import net.gegy1000.earth.server.util.ProcessTracker;
 import net.gegy1000.earth.server.world.data.source.EarthRemoteIndex;
 import net.gegy1000.earth.server.world.data.source.WorldClimateRaster;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 public final class SharedEarthData {
     public static final Key<WorldClimateRaster> JANUARY_CLIMATE = Key.create();
@@ -21,16 +20,16 @@ public final class SharedEarthData {
     SharedEarthData() {
     }
 
-    public static CompletableFuture<SharedEarthData> initialize(ProcedureProgressWatcher watcher) {
-        return SharedDataInitializers.initialize(watcher).thenApply(data -> {
-            loaded = data;
-            return data;
-        });
+    public static void supply(SharedEarthData data) {
+        if (loaded != null) {
+            throw new IllegalStateException("Already initialized");
+        }
+        loaded = data;
     }
 
     public static SharedEarthData instance() {
         if (loaded == null) {
-            loaded = SharedDataInitializers.initialize(ProcedureProgressWatcher.VOID).join();
+            loaded = SharedDataInitializers.initialize(new ProcessTracker()).join();
         }
         return loaded;
     }

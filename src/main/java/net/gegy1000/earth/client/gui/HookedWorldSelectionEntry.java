@@ -24,7 +24,7 @@ public class HookedWorldSelectionEntry extends GuiListWorldSelectionEntry {
             if (worldInfo != null) {
                 CubicWorldType worldType = CubicWorldType.unwrap(worldInfo.getTerrainType());
                 if (worldType instanceof TerrariumWorldType) {
-                    CLIENT.displayGuiScreen(new SharedInitializingGui(super::joinWorld));
+                    CLIENT.displayGuiScreen(new SharedInitializingGui(CLIENT.currentScreen, super::joinWorld));
                     return;
                 }
             }

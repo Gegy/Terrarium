@@ -18,7 +18,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-// TODO: Have a unified index of lookup from tile location to file which we download on first selecting Terrarium world type
 public enum DataSourceHandler {
     INSTANCE;
 

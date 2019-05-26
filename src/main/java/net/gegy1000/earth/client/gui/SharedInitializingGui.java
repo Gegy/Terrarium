@@ -1,9 +1,10 @@
 package net.gegy1000.earth.client.gui;
 
 import net.gegy1000.earth.TerrariumEarth;
+import net.gegy1000.earth.server.shared.SharedDataInitializers;
 import net.gegy1000.earth.server.shared.SharedEarthData;
-import net.gegy1000.earth.server.util.OpProgressWatcher;
-import net.gegy1000.earth.server.util.ProcedureProgressWatcher;
+import net.gegy1000.earth.server.util.ProcessTracker;
+import net.gegy1000.earth.server.util.ProgressTracker;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiCreateWorld;
@@ -19,28 +20,32 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import org.lwjgl.input.Keyboard;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
 @SideOnly(Side.CLIENT)
 @Mod.EventBusSubscriber(modid = TerrariumEarth.MODID, value = Side.CLIENT)
-public class SharedInitializingGui extends GuiScreen implements ProcedureProgressWatcher {
+public class SharedInitializingGui extends GuiScreen {
+    private static final int RETRY_BUTTON = 0;
+    private static final int CANCEL_BUTTON = 1;
+
     private static final int BAR_HEIGHT = 14;
 
     private static final int BAR_BACKGROUND_COLOR = 0xFF000000;
-    private static final int BAR_FILL_COLOR = 0xFF336622;
+    private static final int BAR_WORKING_COLOR = 0xFF336622;
+    private static final int BAR_ERRORED_COLOR = 0xFF662222;
 
     private static Method actionPerformedMethod;
 
+    private final GuiScreen parent;
     private final Runnable onComplete;
 
-    private final ProgressBar overallProgress = new ProgressBar("Progress");
-    private ProgressBar opProgress;
+    private ProcessTracker process;
 
-    private boolean complete;
+    private boolean errored;
     private int completeTicks;
 
     static {
@@ -51,9 +56,22 @@ public class SharedInitializingGui extends GuiScreen implements ProcedureProgres
         }
     }
 
-    public SharedInitializingGui(Runnable onComplete) {
+    public SharedInitializingGui(GuiScreen parent, Runnable onComplete) {
+        this.parent = parent;
         this.onComplete = onComplete;
-        SharedEarthData.initialize(this);
+
+        this.startProcess();
+    }
+
+    private void startProcess() {
+        this.completeTicks = 0;
+        this.errored = false;
+
+        this.process = new ProcessTracker();
+        SharedDataInitializers.initialize(this.process).thenApply(data -> {
+            SharedEarthData.supply(data);
+            return data;
+        });
     }
 
     @SubscribeEvent
@@ -89,7 +107,7 @@ public class SharedInitializingGui extends GuiScreen implements ProcedureProgres
     }
 
     private static void onCreateWorldPressed(GuiButton button, GuiScreen gui) {
-        gui.mc.displayGuiScreen(new SharedInitializingGui(() -> {
+        gui.mc.displayGuiScreen(new SharedInitializingGui(gui, () -> {
             gui.mc.displayGuiScreen(gui);
             if (actionPerformedMethod != null) {
                 try {
@@ -104,23 +122,51 @@ public class SharedInitializingGui extends GuiScreen implements ProcedureProgres
     @Override
     public void initGui() {
         super.initGui();
+
+        this.buttonList.clear();
+
+        if (this.errored) {
+            this.addButton(new GuiButton(RETRY_BUTTON, this.width / 2 - 154, this.height - 28, 150, 20, I18n.format("gui.earth.retry")));
+            this.addButton(new GuiButton(CANCEL_BUTTON, this.width / 2 + 4, this.height - 28, 150, 20, I18n.format("gui.cancel")));
+        }
     }
 
     @Override
-    protected void actionPerformed(GuiButton button) throws IOException {
-        super.actionPerformed(button);
+    protected void actionPerformed(GuiButton button) {
+        if (!button.enabled) {
+            return;
+        }
+        switch (button.id) {
+            case RETRY_BUTTON:
+                this.startProcess();
+                this.initGui();
+                break;
+            case CANCEL_BUTTON:
+                this.mc.displayGuiScreen(this.parent);
+                break;
+        }
+    }
+
+    @Override
+    protected void keyTyped(char typedChar, int keyCode) {
+        if (keyCode == Keyboard.KEY_ESCAPE) {
+            this.mc.displayGuiScreen(this.parent);
+        }
     }
 
     @Override
     public void updateScreen() {
         super.updateScreen();
 
-        if (this.complete) {
+        if (this.process.isComplete()) {
             if (this.completeTicks++ > 10) {
-                this.complete = false;
-                this.opProgress = null;
                 this.onComplete.run();
             }
+        } else if (this.process.isErrored() && !this.errored) {
+            this.errored = true;
+            TerrariumEarth.LOGGER.warn("Failed to prepare Terrarium for use", this.process.getException());
+
+            this.initGui();
         }
     }
 
@@ -131,13 +177,24 @@ public class SharedInitializingGui extends GuiScreen implements ProcedureProgres
         int centerX = this.width / 2;
         int centerY = this.height / 2;
 
-        String title = I18n.format("gui.earth.preparing");
-        this.drawCenteredString(this.fontRenderer, title, centerX, 20, 0xFFFFFF);
+        String title;
+        String[] description;
 
-        String[] description = new String[] {
-                I18n.format("gui.earth.preparing.desc.1"),
-                I18n.format("gui.earth.preparing.desc.2")
-        };
+        if (!this.process.isErrored()) {
+            title = I18n.format("gui.earth.preparing");
+            description = new String[] {
+                    I18n.format("gui.earth.preparing.desc.1"),
+                    I18n.format("gui.earth.preparing.desc.2")
+            };
+        } else {
+            title = I18n.format("gui.earth.preparing.errored");
+            description = new String[] {
+                    I18n.format("gui.earth.preparing.errored.desc.1"),
+                    I18n.format("gui.earth.preparing.errored.desc.2")
+            };
+        }
+
+        this.drawCenteredString(this.fontRenderer, title, centerX, 20, 0xFFFFFF);
 
         int descriptionY = 50;
         int descriptionLineSpacing = this.fontRenderer.FONT_HEIGHT + 2;
@@ -148,16 +205,15 @@ public class SharedInitializingGui extends GuiScreen implements ProcedureProgres
             this.drawCenteredString(this.fontRenderer, line, centerX, lineY, 0xA0A0A0);
         }
 
-        this.drawProgressBar(this.overallProgress, centerY);
-
-        if (this.opProgress != null) {
-            this.drawProgressBar(this.opProgress, centerY + 34);
-        }
+        this.process.forEach((tracker, index) -> this.drawProgressBar(tracker, centerY + index * 34));
 
         super.drawScreen(mouseX, mouseY, partialTicks);
     }
 
-    private void drawProgressBar(ProgressBar bar, int y) {
+    private void drawProgressBar(ProgressTracker tracker, int y) {
+        double progress = tracker.getProgress();
+        String description = tracker.getDescription();
+
         int barWidth = MathHelper.ceil(this.width * 0.75);
 
         int minX = (this.width - barWidth) / 2;
@@ -168,9 +224,11 @@ public class SharedInitializingGui extends GuiScreen implements ProcedureProgres
 
         Gui.drawRect(minX, minY, maxX, maxY, BAR_BACKGROUND_COLOR);
 
-        if (bar.progress > 0.0) {
-            int progressX = MathHelper.floor(minX + (maxX - minX) * bar.progress);
-            Gui.drawRect(minX + 1, minY + 1, progressX - 1, maxY - 1, BAR_FILL_COLOR);
+        if (progress > 0.0) {
+            int color = tracker.isErrored() ? BAR_ERRORED_COLOR : BAR_WORKING_COLOR;
+
+            int progressX = MathHelper.floor(minX + (maxX - minX) * progress);
+            Gui.drawRect(minX + 1, minY + 1, progressX - 1, maxY - 1, color);
         }
 
         int centerX = (minX + maxX) / 2;
@@ -178,50 +236,9 @@ public class SharedInitializingGui extends GuiScreen implements ProcedureProgres
         int titleY = minY - this.fontRenderer.FONT_HEIGHT - 2;
         int centerY = (minY + maxY - this.fontRenderer.FONT_HEIGHT) / 2 + 1;
 
-        String percentageString = String.format("%.0f%%", bar.progress * 100.0);
+        String percentageString = String.format("%.0f%%", progress * 100.0);
         this.drawCenteredString(this.fontRenderer, percentageString, centerX, centerY, 0xA0A0A0);
 
-        this.drawCenteredString(this.fontRenderer, bar.description, centerX, titleY, 0xA0A0A0);
-    }
-
-    @Override
-    public OpProgressWatcher startOp(String description) {
-        this.opProgress = new ProgressBar(description);
-        return this.opProgress;
-    }
-
-    @Override
-    public void notifyProgress(double percentage) {
-        this.overallProgress.progress = percentage;
-    }
-
-    @Override
-    public void notifyComplete() {
-        this.complete = true;
-        this.overallProgress.progress = 1.0;
-    }
-
-    private static class ProgressBar implements OpProgressWatcher {
-        final String description;
-        double progress;
-
-        ProgressBar(String description) {
-            this.description = description;
-        }
-
-        @Override
-        public void notifyProgress(double percentage) {
-            this.progress = percentage;
-        }
-
-        @Override
-        public void notifyComplete() {
-            this.progress = 1.0;
-        }
-
-        @Override
-        public void notifyException(Exception e) {
-            // TODO
-        }
+        this.drawCenteredString(this.fontRenderer, description, centerX, titleY, 0xA0A0A0);
     }
 }

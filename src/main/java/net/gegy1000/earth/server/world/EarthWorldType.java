@@ -128,7 +128,7 @@ public class EarthWorldType extends TerrariumWorldType {
     @SideOnly(Side.CLIENT)
     public void onCustomize(Minecraft client, WorldType worldType, GuiCreateWorld parent) {
         if (!SharedEarthData.isInitialized()) {
-            client.displayGuiScreen(new SharedInitializingGui(() -> super.onCustomize(client, worldType, parent)));
+            client.displayGuiScreen(new SharedInitializingGui(parent, () -> super.onCustomize(client, worldType, parent)));
             return;
         }
 

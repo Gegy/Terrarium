@@ -1,13 +1,14 @@
 package net.gegy1000.earth.server.shared;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import net.gegy1000.earth.server.util.OpProgressWatcher;
-import net.gegy1000.earth.server.util.ProcedureProgressWatcher;
+import net.gegy1000.earth.server.util.ProcessTracker;
+import net.gegy1000.earth.server.util.ProgressTracker;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -25,25 +26,23 @@ public final class SharedDataInitializers {
         Collections.addAll(INITIALIZERS, initializers);
     }
 
-    static CompletableFuture<SharedEarthData> initialize(ProcedureProgressWatcher watcher) {
+    public static CompletableFuture<SharedEarthData> initialize(ProcessTracker tracker) {
+        ProgressTracker master = tracker.push("Initializing", INITIALIZERS.size());
+
         return CompletableFuture.supplyAsync(() -> {
             SharedEarthData data = new SharedEarthData();
 
-            for (int index = 0; index < INITIALIZERS.size(); index++) {
-                SharedDataInitializer initializer = INITIALIZERS.get(index);
+            for (SharedDataInitializer initializer : INITIALIZERS) {
+                initializer.initialize(data, tracker);
+                master.step(1);
 
-                OpProgressWatcher opWatcher = watcher.startOp(initializer.getDescription());
-                try {
-                    initializer.initialize(data, opWatcher);
-                    opWatcher.notifyComplete();
-                } catch (SharedInitException e) {
-                    opWatcher.notifyException(e);
+                if (tracker.isErrored()) {
+                    throw new CompletionException(tracker.getException());
                 }
-
-                watcher.notifyProgress((index + 1.0) / INITIALIZERS.size());
             }
 
-            watcher.notifyComplete();
+            master.markComplete();
+            tracker.markComplete();
 
             return data;
         }, EXECUTOR);

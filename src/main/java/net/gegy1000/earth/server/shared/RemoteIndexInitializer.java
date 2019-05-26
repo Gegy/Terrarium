@@ -3,8 +3,9 @@ package net.gegy1000.earth.server.shared;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import net.gegy1000.earth.TerrariumEarth;
-import net.gegy1000.earth.server.util.OpProgressWatcher;
-import net.gegy1000.earth.server.util.WatchedInputStream;
+import net.gegy1000.earth.server.util.ProcessTracker;
+import net.gegy1000.earth.server.util.ProgressTracker;
+import net.gegy1000.earth.server.util.TrackedInputStream;
 import net.gegy1000.earth.server.world.data.source.EarthRemoteIndex;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
 import net.minecraft.client.resources.I18n;
@@ -32,15 +33,16 @@ public final class RemoteIndexInitializer implements SharedDataInitializer {
     private final static JsonParser JSON_PARSER = new JsonParser();
 
     @Override
-    public void initialize(SharedEarthData data, OpProgressWatcher progress) throws SharedInitException {
-        try {
-            data.put(SharedEarthData.REMOTE_INDEX, this.loadIndex(progress));
-        } catch (IOException e) {
-            throw new SharedInitException(e);
-        }
+    public void initialize(SharedEarthData data, ProcessTracker processTracker) {
+        ProgressTracker master = processTracker.push(I18n.format("initializer.terrarium.remote_index"), 1);
+
+        master.use(() -> {
+            EarthRemoteIndex index = this.loadIndex(processTracker);
+            data.put(SharedEarthData.REMOTE_INDEX, index);
+        });
     }
 
-    private EarthRemoteIndex loadIndex(OpProgressWatcher progress) throws IOException {
+    private EarthRemoteIndex loadIndex(ProcessTracker processTracker) throws IOException {
         if (Files.exists(CACHE_PATH)) {
             byte[] cachedBytes = Files.readAllBytes(CACHE_PATH);
             if (this.isCacheUpToDate(cachedBytes)) {
@@ -53,7 +55,10 @@ public final class RemoteIndexInitializer implements SharedDataInitializer {
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestProperty("User-Agent", TerrariumEarth.USER_AGENT);
 
-        try (InputStream input = new WatchedInputStream(connection.getInputStream(), progress)) {
+        try (
+                InputStream input = new TrackedInputStream(connection.getInputStream())
+                        .submitTo(I18n.format("initializer.terrarium.remote_index.downloading"), processTracker)
+        ) {
             byte[] bytes = IOUtils.toByteArray(input);
 
             try (OutputStream output = Files.newOutputStream(CACHE_PATH)) {
@@ -94,10 +99,5 @@ public final class RemoteIndexInitializer implements SharedDataInitializer {
         try (InputStream input = connection.getInputStream()) {
             return IOUtils.toByteArray(input);
         }
-    }
-
-    @Override
-    public String getDescription() {
-        return I18n.format("initializer.terrarium.remote_index");
     }
 }

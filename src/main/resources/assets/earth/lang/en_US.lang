@@ -13,6 +13,8 @@ gui.earth.spawnpoint=Set Spawn
 gui.earth.locate=Locate Player
 gui.earth.teleport=Teleport Player
 
+gui.earth.retry=Retry
+
 gui.button.earth.teleport=Teleport
 
 gui.copy_box.copied.name=Copied to clipboard!
@@ -20,6 +22,10 @@ gui.copy_box.copied.name=Copied to clipboard!
 gui.earth.preparing=Please Wait
 gui.earth.preparing.desc.1=Preparing Terrarium for use...
 gui.earth.preparing.desc.2=This may take a moment!
+
+gui.earth.preparing.errored=An error occurred
+gui.earth.preparing.errored.desc.1=Failed to prepare Terrarium for use!
+gui.earth.preparing.errored.desc.2=Please check your internet connection and try again
 
 # Customization Categories
 
@@ -108,4 +114,8 @@ config.earth.osm_geocoder.tooltip=If true, the Nominatim OpenStreetMap Geocoder 
 # Initializers
 
 initializer.terrarium.climate_rasters=Loading climate rasters...
+initializer.terrarium.climate_rasters.january=January
+initializer.terrarium.climate_rasters.july=July
+
 initializer.terrarium.remote_index=Loading remote index...
+initializer.terrarium.remote_index.downloading=Downloading
