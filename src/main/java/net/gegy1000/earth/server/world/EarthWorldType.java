@@ -21,8 +21,10 @@ import net.gegy1000.terrarium.server.world.generator.customization.PropertyProto
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumCustomization;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPreset;
 import net.gegy1000.terrarium.server.world.generator.customization.property.BooleanKey;
+import net.gegy1000.terrarium.server.world.generator.customization.property.EnumKey;
 import net.gegy1000.terrarium.server.world.generator.customization.property.NumberKey;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
+import net.gegy1000.terrarium.server.world.generator.customization.widget.CycleWidget;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.InversePropertyConverter;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.SliderWidget;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.ToggleWidget;
@@ -68,6 +70,7 @@ public class EarthWorldType extends TerrariumWorldType {
     public static final PropertyKey<Boolean> ENABLE_STREETS = new BooleanKey("enable_streets");
 
     public static final PropertyKey<Boolean> CAVE_GENERATION = new BooleanKey("cave_generation");
+    public static final PropertyKey<Season> SEASON = new EnumKey<>("season", Season.class);
 
     public EarthWorldType() {
         super("earth", IDENTIFIER, PRESET);
@@ -99,6 +102,7 @@ public class EarthWorldType extends TerrariumWorldType {
                 .withProperties(BEACH_SIZE)
                 .withProperties(ENABLE_DECORATION, ENABLE_BUILDINGS, ENABLE_STREETS)
                 .withProperties(CAVE_GENERATION)
+                .withProperties(SEASON)
                 .build();
     }
 
@@ -112,6 +116,9 @@ public class EarthWorldType extends TerrariumWorldType {
                         new SliderWidget(SEA_DEPTH, 0, 32, 1, 1),
                         new SliderWidget(HEIGHT_ORIGIN, -63, 128, 1, 1),
                         new SliderWidget(BEACH_SIZE, 0, 8, 1, 1)
+                )
+                .withCategory("natural",
+                        new CycleWidget<>(SEASON)
                 )
                 .withCategory("features",
                         new ToggleWidget(ENABLE_DECORATION),

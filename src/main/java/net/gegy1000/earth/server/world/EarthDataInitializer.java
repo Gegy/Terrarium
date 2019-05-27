@@ -92,10 +92,11 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
         cover = WaterOps.applyToCover(cover, landforms);
         heights = WaterOps.applyToHeight(heights, landforms, waterLevel, seaDepth);
 
-        ClimateSampler climateSampler = new ClimateSampler(sharedEarthData.get(SharedEarthData.JANUARY_CLIMATE));
+        Season season = this.ctx.settings.get(SEASON);
+        ClimateSampler climateSampler = new ClimateSampler(season.getClimateRaster());
 
-        DataOp<ShortRaster> annualRainfall = climateSampler.annualRainfall();
-        annualRainfall = InterpolationScaleOp.LINEAR.scaleShortsFrom(annualRainfall, this.ctx.climateRaster);
+        DataOp<ShortRaster> monthlyRainfall = climateSampler.monthlyRainfall();
+        monthlyRainfall = InterpolationScaleOp.LINEAR.scaleShortsFrom(monthlyRainfall, this.ctx.climateRaster);
 
         DataOp<FloatRaster> averageTemperature = climateSampler.averageTemperature();
         averageTemperature = InterpolationScaleOp.LINEAR.scaleFloatsFrom(averageTemperature, this.ctx.climateRaster);
@@ -107,7 +108,7 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
                 .with(EarthDataKeys.LANDFORM, landforms)
                 .with(EarthDataKeys.WATER_LEVEL, waterLevel)
                 .with(EarthDataKeys.AVERAGE_TEMPERATURE, averageTemperature)
-                .with(EarthDataKeys.ANNUAL_RAINFALL, annualRainfall)
+                .with(EarthDataKeys.MONTHLY_RAINFALL, monthlyRainfall)
                 .with(EarthDataKeys.SOIL, soil)
                 .build();
     }

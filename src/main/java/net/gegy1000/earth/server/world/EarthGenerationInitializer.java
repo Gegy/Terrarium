@@ -5,6 +5,7 @@ import net.gegy1000.earth.server.world.composer.BoulderDecorationComposer;
 import net.gegy1000.earth.server.world.composer.EarthBiomeComposer;
 import net.gegy1000.earth.server.world.composer.EarthCarvingComposer;
 import net.gegy1000.earth.server.world.composer.EarthDecorationComposer;
+import net.gegy1000.earth.server.world.composer.IceCoverComposer;
 import net.gegy1000.earth.server.world.composer.SoilSurfaceComposer;
 import net.gegy1000.earth.server.world.composer.WaterFillSurfaceComposer;
 import net.gegy1000.terrarium.server.world.TerrariumGeneratorInitializer;
@@ -34,7 +35,7 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
         this.addSurfaceComposers(builder, preview);
         this.addDecorationComposers(preview, builder);
 
-        builder.setBiomeComposer(new EarthBiomeComposer(EarthDataKeys.COVER, EarthDataKeys.LANDFORM, EarthDataKeys.AVERAGE_TEMPERATURE, EarthDataKeys.ANNUAL_RAINFALL));
+        builder.setBiomeComposer(new EarthBiomeComposer(EarthDataKeys.COVER, EarthDataKeys.LANDFORM, EarthDataKeys.AVERAGE_TEMPERATURE, EarthDataKeys.MONTHLY_RAINFALL));
         builder.setSpawnPosition(new Coordinate(this.ctx.latLngCoordinates, this.ctx.settings.getDouble(SPAWN_LATITUDE), this.ctx.settings.getDouble(SPAWN_LONGITUDE)));
 
         return builder.build();
@@ -66,6 +67,7 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
             builder.addDecorationComposer(new BoulderDecorationComposer(this.ctx.world, EarthDataKeys.SLOPE));
         }
 
+        builder.addDecorationComposer(new IceCoverComposer());
         builder.addDecorationComposer(new VanillaEntitySpawnComposer(this.ctx.world));
 
         if (!preview) {

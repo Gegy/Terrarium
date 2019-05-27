@@ -58,7 +58,7 @@ public final class CachingInput<T> {
         }
     }
 
-    private static InputStream getCachingStream(InputStream source, Path cachePath) throws IOException {
+    public static InputStream getCachingStream(InputStream source, Path cachePath) throws IOException {
         PipedOutputStream sink = new PipedOutputStream();
         InputStream input = new PipedInputStream(sink);
         CACHE_SERVICE.submit(() -> {
@@ -76,6 +76,7 @@ public final class CachingInput<T> {
                 Terrarium.LOGGER.error("Failed to read or cache remote data", e);
                 deleteQuietly(cachePath);
             } finally {
+                IOUtils.closeQuietly(source);
                 IOUtils.closeQuietly(sink);
             }
         });

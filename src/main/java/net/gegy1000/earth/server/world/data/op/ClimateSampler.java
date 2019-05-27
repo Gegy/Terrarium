@@ -14,12 +14,12 @@ public final class ClimateSampler {
         this.source = source;
     }
 
-    public DataOp<ShortRaster> annualRainfall() {
+    public DataOp<ShortRaster> monthlyRainfall() {
         return DataOp.of((engine, view) -> {
             ShortRaster rainfallRaster = ShortRaster.create(view);
             for (int y = 0; y < view.getHeight(); y++) {
                 for (int x = 0; x < view.getWidth(); x++) {
-                    rainfallRaster.set(x, y, this.source.getAnnualRainfall(view.getX() + x, view.getY() + y));
+                    rainfallRaster.set(x, y, this.source.getMonthlyRainfall(view.getX() + x, view.getY() + y));
                 }
             }
 

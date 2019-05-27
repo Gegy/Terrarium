@@ -6,6 +6,7 @@ import net.gegy1000.cubicglue.api.CubicWorldType;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.client.gui.customization.SelectPresetGui;
 import net.gegy1000.terrarium.client.gui.customization.TerrariumCustomizationGui;
+import net.gegy1000.terrarium.client.preview.PreviewDummyWorld;
 import net.gegy1000.terrarium.server.world.chunk.ComposableBiomeProvider;
 import net.gegy1000.terrarium.server.world.chunk.ComposableCubeGenerator;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
@@ -65,7 +66,7 @@ public abstract class TerrariumWorldType implements CubicWorldType {
 
     @Override
     public BiomeProvider createBiomeProvider(World world) {
-        if (!world.isRemote) {
+        if (!world.isRemote || world instanceof PreviewDummyWorld) {
             return new ComposableBiomeProvider(world);
         }
         return new BiomeProviderSingle(Biomes.DEFAULT);

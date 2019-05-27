@@ -1,5 +1,7 @@
 package net.gegy1000.earth.server.util;
 
+import net.minecraft.util.text.ITextComponent;
+
 import javax.annotation.Nullable;
 import java.util.LinkedList;
 
@@ -9,7 +11,7 @@ public final class ProcessTracker {
     private boolean complete;
     private Exception error;
 
-    public synchronized ProgressTracker push(String description, int totalSteps) {
+    public synchronized ProgressTracker push(ITextComponent description, int totalSteps) {
         ProgressTracker tracker = new ProgressTracker(this, description, totalSteps);
         if (this.isFrozen()) {
             return tracker;
@@ -26,6 +28,7 @@ public final class ProcessTracker {
         if (tracker != popped) {
             throw new IllegalArgumentException("Can only pop from top of stack!");
         }
+        tracker.closed = true;
     }
 
     public void raiseException(Exception exception) {

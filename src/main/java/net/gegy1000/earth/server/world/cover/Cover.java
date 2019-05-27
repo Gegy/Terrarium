@@ -33,10 +33,10 @@ public enum Cover {
     FRESH_FLOODED_FOREST(CoverConfigurators.FLOODED), // TODO
     SALINE_FLOODED_FOREST(CoverConfigurators.FLOODED), // TODO
     FLOODED_VEGETATION(CoverConfigurators.FLOODED), // TODO
-    URBAN(CoverConfigurators.NONE),
-    BARE(CoverConfigurators.NONE), // TODO
-    BARE_CONSOLIDATED(CoverConfigurators.NONE), // TODO
-    BARE_UNCONSOLIDATED(CoverConfigurators.NONE), // TODO
+    URBAN(CoverConfigurators.BARREN),
+    BARE(CoverConfigurators.BARREN), // TODO
+    BARE_CONSOLIDATED(CoverConfigurators.BARREN), // TODO
+    BARE_UNCONSOLIDATED(CoverConfigurators.BARREN), // TODO
     WATER(CoverConfigurators.WATER),
     PERMANENT_SNOW(CoverConfigurators.SNOWY);
 

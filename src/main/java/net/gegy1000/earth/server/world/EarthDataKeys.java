@@ -21,7 +21,7 @@ public class EarthDataKeys {
     public static final DataKey<ShortRaster> WATER_LEVEL = create("water");
     public static final DataKey<ObjRaster<SoilConfig>> SOIL = create("soil");
     public static final DataKey<FloatRaster> AVERAGE_TEMPERATURE = create("temperature");
-    public static final DataKey<ShortRaster> ANNUAL_RAINFALL = create("rainfall");
+    public static final DataKey<ShortRaster> MONTHLY_RAINFALL = create("rainfall");
 
     private static <T extends Data> DataKey<T> create(String name) {
         return new DataKey<>(new ResourceLocation(TerrariumEarth.MODID, name));

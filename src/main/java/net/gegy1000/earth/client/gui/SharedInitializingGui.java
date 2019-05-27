@@ -212,7 +212,7 @@ public class SharedInitializingGui extends GuiScreen {
 
     private void drawProgressBar(ProgressTracker tracker, int y) {
         double progress = tracker.getProgress();
-        String description = tracker.getDescription();
+        String description = tracker.getDescription().getFormattedText();
 
         int barWidth = MathHelper.ceil(this.width * 0.75);
 

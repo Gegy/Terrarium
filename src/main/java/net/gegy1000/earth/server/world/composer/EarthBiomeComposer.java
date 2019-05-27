@@ -28,7 +28,8 @@ public final class EarthBiomeComposer implements BiomeComposer {
 
     public EarthBiomeComposer(
             DataKey<EnumRaster<Cover>> coverKey,
-            DataKey<EnumRaster<Landform>> landformKey, DataKey<FloatRaster> temperatureKey,
+            DataKey<EnumRaster<Landform>> landformKey,
+            DataKey<FloatRaster> temperatureKey,
             DataKey<ShortRaster> rainfallKey
     ) {
         this.coverKey = coverKey;
@@ -55,7 +56,7 @@ public final class EarthBiomeComposer implements BiomeComposer {
 
         for (int localZ = 0; localZ < 16; localZ++) {
             for (int localX = 0; localX < 16; localX++) {
-                this.context.annualRainfall = rainfallRaster.get(localX, localZ);
+                this.context.monthlyRainfall = rainfallRaster.get(localX, localZ);
                 this.context.averageTemperature = temperatureRaster.get(localX, localZ);
                 this.context.cover = coverRaster.get(localX, localZ);
                 this.context.landform = landformRaster.get(localX, localZ);

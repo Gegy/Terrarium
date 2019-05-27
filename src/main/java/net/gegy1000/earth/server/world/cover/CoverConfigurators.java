@@ -18,6 +18,10 @@ public final class CoverConfigurators {
         config.mark(CoverMarker.FROZEN);
     };
 
+    public static final CoverConfigurator BARREN = config -> {
+        config.mark(CoverMarker.BARREN);
+    };
+
     public static final CoverConfigurator FLOODED = config -> {
         config.mark(CoverMarker.FLOODED);
         config.carve(Carvers.flooded(EarthDataKeys.HEIGHT));

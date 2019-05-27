@@ -8,7 +8,7 @@ import net.gegy1000.earth.server.util.ProgressTracker;
 import net.gegy1000.earth.server.util.TrackedInputStream;
 import net.gegy1000.earth.server.world.data.source.EarthRemoteIndex;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
-import net.minecraft.client.resources.I18n;
+import net.minecraft.util.text.TextComponentTranslation;
 import org.apache.commons.io.IOUtils;
 import org.tukaani.xz.SingleXZInputStream;
 
@@ -34,7 +34,7 @@ public final class RemoteIndexInitializer implements SharedDataInitializer {
 
     @Override
     public void initialize(SharedEarthData data, ProcessTracker processTracker) {
-        ProgressTracker master = processTracker.push(I18n.format("initializer.terrarium.remote_index"), 1);
+        ProgressTracker master = processTracker.push(new TextComponentTranslation("initializer.terrarium.remote_index"), 1);
 
         master.use(() -> {
             EarthRemoteIndex index = this.loadIndex(processTracker);
@@ -57,7 +57,7 @@ public final class RemoteIndexInitializer implements SharedDataInitializer {
 
         try (
                 InputStream input = new TrackedInputStream(connection.getInputStream())
-                        .submitTo(I18n.format("initializer.terrarium.remote_index.downloading"), processTracker)
+                        .submitTo(new TextComponentTranslation("initializer.terrarium.remote_index.downloading"), processTracker)
         ) {
             byte[] bytes = IOUtils.toByteArray(input);
 

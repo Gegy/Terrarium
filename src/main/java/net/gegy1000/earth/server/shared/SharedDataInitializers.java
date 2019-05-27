@@ -3,6 +3,7 @@ package net.gegy1000.earth.server.shared;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.gegy1000.earth.server.util.ProcessTracker;
 import net.gegy1000.earth.server.util.ProgressTracker;
+import net.minecraft.util.text.TextComponentString;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,24 +28,29 @@ public final class SharedDataInitializers {
     }
 
     public static CompletableFuture<SharedEarthData> initialize(ProcessTracker tracker) {
-        ProgressTracker master = tracker.push("Initializing", INITIALIZERS.size());
+        ProgressTracker master = tracker.push(new TextComponentString("Initializing"), INITIALIZERS.size());
 
         return CompletableFuture.supplyAsync(() -> {
-            SharedEarthData data = new SharedEarthData();
+            try {
+                SharedEarthData data = new SharedEarthData();
 
-            for (SharedDataInitializer initializer : INITIALIZERS) {
-                initializer.initialize(data, tracker);
-                master.step(1);
+                for (SharedDataInitializer initializer : INITIALIZERS) {
+                    initializer.initialize(data, tracker);
+                    master.step(1);
 
-                if (tracker.isErrored()) {
-                    throw new CompletionException(tracker.getException());
+                    if (tracker.isErrored()) {
+                        throw new CompletionException(tracker.getException());
+                    }
                 }
+
+                master.markComplete();
+                tracker.markComplete();
+
+                return data;
+            } catch (Throwable t) {
+                t.printStackTrace();
+                throw t;
             }
-
-            master.markComplete();
-            tracker.markComplete();
-
-            return data;
         }, EXECUTOR);
     }
 }

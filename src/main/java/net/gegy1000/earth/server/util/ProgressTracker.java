@@ -1,17 +1,20 @@
 package net.gegy1000.earth.server.util;
 
+import net.minecraft.util.text.ITextComponent;
+
 import java.util.concurrent.atomic.AtomicInteger;
 
 public final class ProgressTracker implements AutoCloseable {
     private final ProcessTracker process;
 
-    private final String description;
+    private final ITextComponent description;
     private final int totalSteps;
     private final AtomicInteger steps = new AtomicInteger();
 
+    boolean closed;
     boolean errored;
 
-    ProgressTracker(ProcessTracker process, String description, int totalSteps) {
+    ProgressTracker(ProcessTracker process, ITextComponent description, int totalSteps) {
         this.process = process;
         this.description = description;
         this.totalSteps = totalSteps;
@@ -27,7 +30,7 @@ public final class ProgressTracker implements AutoCloseable {
         }
     }
 
-    public String getDescription() {
+    public ITextComponent getDescription() {
         return this.description;
     }
 
@@ -55,6 +58,9 @@ public final class ProgressTracker implements AutoCloseable {
 
     @Override
     public void close() {
+        if (this.closed) return;
+        this.closed = true;
+
         this.markComplete();
         this.process.pop(this);
     }

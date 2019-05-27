@@ -14,6 +14,7 @@
     "beach_size": 4,
     "enable_buildings": false,
     "enable_streets": false,
-    "cave_generation": true
+    "cave_generation": true,
+    "season": "january"
   }
 }

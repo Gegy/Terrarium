@@ -19,7 +19,7 @@ public class EarthCarvingComposer implements SurfaceComposer {
     @Override
     public void composeSurface(ColumnData data, CubicPos pos, ChunkPrimeWriter writer) {
         data.get(this.coverKey).ifPresent(coverRaster -> {
-            Cover focus = coverRaster.get(15, 15);
+            Cover focus = coverRaster.get(8, 8);
 
             CoverConfig config = focus.getConfig();
             config.carvers().forEach(carver -> carver.carve(pos, writer, data));

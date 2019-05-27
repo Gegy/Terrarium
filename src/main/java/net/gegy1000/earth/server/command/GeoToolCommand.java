@@ -123,9 +123,9 @@ public class GeoToolCommand extends CommandBase {
                 player.sendMessage(new TextComponentString(TextFormatting.AQUA + String.format("Mean Temperature: %s%.2f°C", TextFormatting.RESET, temperature)));
             });
 
-            columnData.get(EarthDataKeys.ANNUAL_RAINFALL).ifPresent(rainfallRaster -> {
+            columnData.get(EarthDataKeys.MONTHLY_RAINFALL).ifPresent(rainfallRaster -> {
                 short rainfall = rainfallRaster.get(localX, localZ);
-                player.sendMessage(new TextComponentString(TextFormatting.AQUA + String.format("Yearly Rainfall: %s%smm", TextFormatting.RESET, rainfall)));
+                player.sendMessage(new TextComponentString(TextFormatting.AQUA + String.format("Monthly Rainfall: %s%smm", TextFormatting.RESET, rainfall)));
             });
         });
     }

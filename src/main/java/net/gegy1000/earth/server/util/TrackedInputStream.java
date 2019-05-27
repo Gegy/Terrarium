@@ -1,5 +1,7 @@
 package net.gegy1000.earth.server.util;
 
+import net.minecraft.util.text.ITextComponent;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -11,7 +13,7 @@ public class TrackedInputStream extends InputStream {
         this.input = input;
     }
 
-    public TrackedInputStream submitTo(String description, ProcessTracker processTracker) throws IOException {
+    public TrackedInputStream submitTo(ITextComponent description, ProcessTracker processTracker) throws IOException {
         this.tracker = processTracker.push(description, this.input.available());
         return this;
     }

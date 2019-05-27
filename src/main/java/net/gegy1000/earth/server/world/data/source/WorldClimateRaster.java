@@ -13,14 +13,10 @@ public final class WorldClimateRaster {
     private static final int OFFSET_X = WorldClimateRaster.WIDTH / 2;
     private static final int OFFSET_Y = WorldClimateRaster.HEIGHT / 2;
 
-    private static final int NO_DATA = 0;
-
     private static final float STANDARD_TEMPERATURE = 14.0F;
-    private static final short STANDARD_RAINFALL = 990;
+    private static final short STANDARD_RAINFALL = 50;
 
-    private static final int PACK_MIN = 1;
-    private static final int PACK_MAX = 255;
-    private static final int PACK_RANGE = PACK_MAX - PACK_MIN;
+    private static final int PACK_RANGE = 255;
 
     private final float tempMin;
     private final float tempRange;
@@ -82,34 +78,26 @@ public final class WorldClimateRaster {
         }
 
         byte packed = this.temperature[index(x, y)];
-        if (packed == NO_DATA) {
-            return STANDARD_TEMPERATURE;
-        }
-
         return this.unpackTemperature(packed);
     }
 
-    public short getAnnualRainfall(int x, int y) {
+    public short getMonthlyRainfall(int x, int y) {
         if (outOfBounds(x, y)) {
             return STANDARD_RAINFALL;
         }
 
         byte packed = this.rainfall[index(x, y)];
-        if (packed == NO_DATA) {
-            return STANDARD_RAINFALL;
-        }
-
         return this.unpackRainfall(packed);
     }
 
     private float unpackTemperature(byte packed) {
-        float shifted = (float) ((packed & 0xFF) - PACK_MIN);
+        float shifted = (float) (packed & 0xFF);
         double unpacked = this.tempRange * Math.pow(shifted / PACK_RANGE, this.tempCurve);
         return (float) (this.tempMin + unpacked);
     }
 
     private short unpackRainfall(byte packed) {
-        float shifted = (float) ((packed & 0xFF) - PACK_MIN);
+        float shifted = (float) (packed & 0xFF);
         double unpacked = this.rainRange * Math.pow(shifted / PACK_RANGE, this.rainCurve);
         return (short) (this.rainMin + unpacked);
     }
