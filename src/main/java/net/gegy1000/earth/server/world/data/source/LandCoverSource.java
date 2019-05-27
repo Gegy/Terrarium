@@ -2,10 +2,9 @@ package net.gegy1000.earth.server.world.data.source;
 
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.shared.SharedEarthData;
-import net.gegy1000.earth.server.world.cover.CoverId;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.EnumRaster;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.UnsignedByteRaster;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
 import org.apache.commons.io.IOUtils;
@@ -19,12 +18,12 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.Optional;
 
-public class LandCoverSource extends TiledDataSource<EnumRaster<CoverId>> {
+public class LandCoverSource extends TiledDataSource<UnsignedByteRaster> {
     public static final int TILE_SIZE = 1800;
     public static final int GLOBAL_WIDTH = 129600;
     public static final int GLOBAL_HEIGHT = 64800;
 
-    private static final EnumRaster<CoverId> DEFAULT_RESULT = EnumRaster.createSquare(CoverId.NO_DATA, TILE_SIZE);
+    private static final UnsignedByteRaster DEFAULT_RESULT = UnsignedByteRaster.create(TILE_SIZE, TILE_SIZE);
 
     private static final Path CACHE_ROOT = GLOBAL_CACHE_ROOT.resolve("landcover");
 
@@ -40,7 +39,7 @@ public class LandCoverSource extends TiledDataSource<EnumRaster<CoverId>> {
     }
 
     @Override
-    public Optional<EnumRaster<CoverId>> load(DataTilePos pos) throws IOException {
+    public Optional<UnsignedByteRaster> load(DataTilePos pos) throws IOException {
         SharedEarthData sharedData = SharedEarthData.instance();
         EarthRemoteIndex remoteIndex = sharedData.get(SharedEarthData.REMOTE_INDEX);
         if (remoteIndex == null) {
@@ -64,18 +63,18 @@ public class LandCoverSource extends TiledDataSource<EnumRaster<CoverId>> {
     }
 
     @Override
-    public EnumRaster<CoverId> getDefaultResult() {
+    public UnsignedByteRaster getDefaultResult() {
         return DEFAULT_RESULT;
     }
 
-    private EnumRaster<CoverId> parseStream(InputStream input) throws IOException {
+    private UnsignedByteRaster parseStream(InputStream input) throws IOException {
         byte[] bytes = IOUtils.readFully(input, TILE_SIZE * TILE_SIZE);
 
-        EnumRaster<CoverId> raster = EnumRaster.createSquare(CoverId.PERMANENT_SNOW, TILE_SIZE);
+        UnsignedByteRaster raster = UnsignedByteRaster.create(TILE_SIZE, TILE_SIZE);
         for (int y = 0; y < TILE_SIZE; y++) {
             for (int x = 0; x < TILE_SIZE; x++) {
                 byte id = bytes[x + y * TILE_SIZE];
-                raster.set(x, y, CoverId.get(id));
+                raster.set(x, y, id);
             }
         }
 

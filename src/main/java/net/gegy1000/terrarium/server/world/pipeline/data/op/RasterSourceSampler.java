@@ -8,6 +8,7 @@ import net.gegy1000.terrarium.server.world.pipeline.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ObjRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.Raster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.UnsignedByteRaster;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataSourceHandler;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTileEntry;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
@@ -23,6 +24,10 @@ public final class RasterSourceSampler {
 
     public static DataOp<ByteRaster> sampleByte(TiledDataSource<ByteRaster> source) {
         return sample(source, ByteRaster::create);
+    }
+
+    public static DataOp<UnsignedByteRaster> sampleUnsignedByte(TiledDataSource<UnsignedByteRaster> source) {
+        return sample(source, UnsignedByteRaster::create);
     }
 
     public static <T> DataOp<ObjRaster<T>> sampleObj(TiledDataSource<ObjRaster<T>> source, T value) {

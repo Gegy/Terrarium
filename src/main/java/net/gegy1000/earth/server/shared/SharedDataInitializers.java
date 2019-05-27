@@ -31,26 +31,21 @@ public final class SharedDataInitializers {
         ProgressTracker master = tracker.push(new TextComponentString("Initializing"), INITIALIZERS.size());
 
         return CompletableFuture.supplyAsync(() -> {
-            try {
-                SharedEarthData data = new SharedEarthData();
+            SharedEarthData data = new SharedEarthData();
 
-                for (SharedDataInitializer initializer : INITIALIZERS) {
-                    initializer.initialize(data, tracker);
-                    master.step(1);
+            for (SharedDataInitializer initializer : INITIALIZERS) {
+                initializer.initialize(data, tracker);
+                master.step(1);
 
-                    if (tracker.isErrored()) {
-                        throw new CompletionException(tracker.getException());
-                    }
+                if (tracker.isErrored()) {
+                    throw new CompletionException(tracker.getException());
                 }
-
-                master.markComplete();
-                tracker.markComplete();
-
-                return data;
-            } catch (Throwable t) {
-                t.printStackTrace();
-                throw t;
             }
+
+            master.markComplete();
+            tracker.markComplete();
+
+            return data;
         }, EXECUTOR);
     }
 }

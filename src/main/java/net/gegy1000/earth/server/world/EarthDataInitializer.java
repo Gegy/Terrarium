@@ -2,7 +2,6 @@ package net.gegy1000.earth.server.world;
 
 import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.earth.server.world.cover.Cover;
-import net.gegy1000.earth.server.world.cover.CoverId;
 import net.gegy1000.earth.server.world.data.AreaData;
 import net.gegy1000.earth.server.world.data.PolygonData;
 import net.gegy1000.earth.server.world.data.op.ClimateSampler;
@@ -62,8 +61,8 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
         slope = new TransformSlopeNoiseOp(0.5).apply(slope);
 
         LandCoverSource landCoverSource = new LandCoverSource(this.ctx.landcoverRaster);
-        DataOp<EnumRaster<CoverId>> coverId = RasterSourceSampler.sampleEnum(landCoverSource, CoverId.NO_DATA);
-        coverId = VoronoiScaleOp.scaleFrom(coverId, this.ctx.landcoverRaster, view -> EnumRaster.create(CoverId.NO_DATA, view));
+        DataOp<UnsignedByteRaster> coverId = RasterSourceSampler.sampleUnsignedByte(landCoverSource);
+        coverId = VoronoiScaleOp.scaleFrom(coverId, this.ctx.landcoverRaster, UnsignedByteRaster::create);
 
         OceanPolygonSource oceanPolygonSource = new OceanPolygonSource(this.ctx.lngLatCoordinates);
 
