@@ -49,7 +49,6 @@ dependencies {
 
 jar {
   from configurations.embed.collect {
-    exclude 'META-INF/'
     it.isDirectory() ? it : zipTree(it)
   }
   manifest {
@@ -73,18 +72,14 @@ processResources {
   }
 }
 
-String getModFile(String fq_name) {
-  return "src/main/java/${fq_name.replace('.', '/')}.java"
+File getModFile(String fq_name) {
+  return file("src/main/java/${fq_name.replace('.', '/')}.java")
 }
 
-String getModField(String type, String mod_file) {
-  if (mod_file.length() == 0) {
-    return ""
-  }
+String getModField(String type, File mod_file) {
   String field = ""
   String prefix = "public static final String $type = \""
-  File file = file(mod_file)
-  file.eachLine { String s ->
+  mod_file.eachLine { String s ->
     s = s.trim()
     if (s.startsWith(prefix)) {
       s = s.substring(prefix.length(), s.length() - 2)
