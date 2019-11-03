@@ -30,8 +30,8 @@ public class OceanFillSurfaceComposer implements SurfaceComposer {
                     if (height <= maxY && height < this.oceanLevel) {
                         int minOceanY = Math.max(height + 1, minY);
                         int maxOceanY = Math.min(this.oceanLevel, maxY);
-                        for (int localY = minOceanY; localY <= maxOceanY; localY++) {
-                            writer.set(localX, localY, localZ, this.block);
+                        for (int y = minOceanY; y <= maxOceanY; y++) {
+                            writer.set(localX, y, localZ, this.block);
                         }
                     }
                 }

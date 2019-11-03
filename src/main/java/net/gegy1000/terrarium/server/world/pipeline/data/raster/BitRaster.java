@@ -36,27 +36,27 @@ public final class BitRaster extends AbstractRaster<char[]> {
     }
 
     public void set(int x, int y, boolean value) {
-        int index = this.index(x, y);
-        int wordIndex = this.wordIndex(index);
-        int bitIndex = index & BIT_MASK;
+        if (value) this.put(x, y);
+        else this.remove(x, y);
+    }
 
-        int bit = 1 << bitIndex;
-        if (value) {
-            this.data[wordIndex] |= bit;
-        } else {
-            this.data[wordIndex] &= ~bit;
-        }
+    public void put(int x, int y) {
+        int index = this.index(x, y);
+        int bitIndex = index & BIT_MASK;
+        this.data[wordIndex(index)] |= (1 << bitIndex);
+    }
+
+    public void remove(int x, int y) {
+        int index = this.index(x, y);
+        int bitIndex = index & BIT_MASK;
+        this.data[wordIndex(index)] &= ~(1 << bitIndex);
     }
 
     public boolean get(int x, int y) {
         int index = this.index(x, y);
         int bitIndex = index & BIT_MASK;
-        char word = this.data[this.wordIndex(index)];
+        char word = this.data[wordIndex(index)];
         return (word >> bitIndex & 1) != 0;
-    }
-
-    private int wordIndex(int index) {
-        return index / WORD_SIZE_BITS;
     }
 
     public void transform(Transformer transformer) {
@@ -88,6 +88,10 @@ public final class BitRaster extends AbstractRaster<char[]> {
 
     public interface Iterator {
         void accept(boolean value, int x, int y);
+    }
+
+    private static int wordIndex(int index) {
+        return index / WORD_SIZE_BITS;
     }
 
     public static class Sampler {

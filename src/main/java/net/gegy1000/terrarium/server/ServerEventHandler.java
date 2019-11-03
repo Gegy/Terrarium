@@ -5,7 +5,7 @@ import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.client.preview.PreviewDummyWorld;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumExternalCapProvider;
-import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
+import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataCache;
@@ -32,7 +32,7 @@ public class ServerEventHandler {
     public static void onWorldLoad(WorldEvent.Load event) {
         World world = event.getWorld();
         if (!world.isRemote && ServerEventHandler.shouldHandle(world)) {
-            TerrariumWorldData worldData = TerrariumWorldData.get(world);
+            TerrariumWorld worldData = TerrariumWorld.get(world);
             if (worldData != null) {
                 Coordinate spawnPosition = worldData.getSpawnPosition();
                 if (spawnPosition != null) {
@@ -46,7 +46,7 @@ public class ServerEventHandler {
     public static void onWorldUnload(WorldEvent.Unload event) {
         World world = event.getWorld();
         if (!world.isRemote && ServerEventHandler.shouldHandle(world)) {
-            TerrariumWorldData worldData = TerrariumWorldData.get(world);
+            TerrariumWorld worldData = TerrariumWorld.get(world);
             if (worldData != null) {
                 worldData.getDataCache().close();
                 DataSourceHandler.INSTANCE.clear();
@@ -63,7 +63,7 @@ public class ServerEventHandler {
             TerrariumExternalCapProvider external = new TerrariumExternalCapProvider.Implementation();
 
             if (!world.isRemote || world instanceof PreviewDummyWorld) {
-                TerrariumWorldData worldData = new TerrariumWorldData.Implementation(world, worldType);
+                TerrariumWorld worldData = new TerrariumWorld.Impl(world, worldType);
 
                 Collection<ICapabilityProvider> capabilities = worldType.createCapabilities(world, worldData.getSettings());
                 for (ICapabilityProvider provider : capabilities) {
@@ -83,7 +83,7 @@ public class ServerEventHandler {
         if (event.phase == TickEvent.Phase.START && ServerEventHandler.shouldHandle(world) && world instanceof WorldServer) {
             long time = System.currentTimeMillis();
             if (time - lastDataTrackTime > DATA_TRACK_INTERVAL) {
-                TerrariumWorldData worldData = TerrariumWorldData.get(world);
+                TerrariumWorld worldData = TerrariumWorld.get(world);
                 if (worldData != null) {
                     ColumnDataCache dataCache = worldData.getDataCache();
                     dataCache.dropColumns();

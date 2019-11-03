@@ -66,7 +66,7 @@ public class GenerationSettings {
 
             PropertyValue<?> value = key.parseValue(propertyElement);
             if (value == null) {
-                Terrarium.LOGGER.error("Failed to parse invalid property with key '{}'");
+                Terrarium.LOGGER.error("Failed to parse invalid property with key '{}'", identifier);
                 continue;
             }
 

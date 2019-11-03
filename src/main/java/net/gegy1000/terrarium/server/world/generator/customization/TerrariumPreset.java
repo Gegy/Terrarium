@@ -31,12 +31,12 @@ public class TerrariumPreset {
 
     @SideOnly(Side.CLIENT)
     public String getLocalizedName() {
-        return I18n.format("preset." + this.name + ".name");
+        return I18n.format("preset.terrarium." + this.worldType.getPath() + "." + this.name + ".name");
     }
 
     @SideOnly(Side.CLIENT)
     public String getLocalizedDescription() {
-        return I18n.format("preset." + this.name + ".desc");
+        return I18n.format("preset.terrarium." + this.worldType.getPath() + "." + this.name + ".desc");
     }
 
     public ResourceLocation getIcon() {

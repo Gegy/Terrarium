@@ -30,7 +30,7 @@ public final class PolygonSampler {
 
             return sourceHandler.getTiles(source, minTilePos, maxTilePos)
                     .thenApply(tiles -> {
-                        PolygonClipper clipper = new PolygonClipper(min.getX(), min.getZ(), max.getX(), max.getZ());
+                        PolygonClipper clipper = PolygonClipper.rect(min.getX(), min.getZ(), max.getX(), max.getZ());
 
                         Collection<MultiPolygon> polygons = new ArrayList<>();
 

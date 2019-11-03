@@ -23,18 +23,10 @@ public final class CachingInput<T> {
                     .build()
     );
 
-    private Function<T, Path> pathFunction;
+    private final Function<T, Path> pathFunction;
 
-    private CachingInput() {
-    }
-
-    public static <T> CachingInput<T> create() {
-        return new CachingInput<>();
-    }
-
-    public CachingInput<T> cachesTo(Function<T, Path> pathFunction) {
+    public CachingInput(Function<T, Path> pathFunction) {
         this.pathFunction = pathFunction;
-        return this;
     }
 
     private Path getCachePath(T key) {

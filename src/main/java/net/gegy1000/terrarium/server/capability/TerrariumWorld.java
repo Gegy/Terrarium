@@ -19,11 +19,11 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 
 import javax.annotation.Nullable;
 
-public interface TerrariumWorldData extends ICapabilityProvider {
+public interface TerrariumWorld extends ICapabilityProvider {
     ThreadLocal<Boolean> PREVIEW_WORLD = ThreadLocal.withInitial(() -> false);
 
     @Nullable
-    static TerrariumWorldData get(World world) {
+    static TerrariumWorld get(World world) {
         return world.getCapability(TerrariumCapabilities.worldDataCapability, null);
     }
 
@@ -41,12 +41,12 @@ public interface TerrariumWorldData extends ICapabilityProvider {
 
     Coordinate getSpawnPosition();
 
-    class Implementation implements TerrariumWorldData {
+    class Impl implements TerrariumWorld {
         private final GenerationSettings settings;
         private final TerrariumGenerator generator;
         private final ColumnDataCache dataCache;
 
-        public Implementation(World world, TerrariumWorldType worldType) {
+        public Impl(World world, TerrariumWorldType worldType) {
             this.settings = GenerationSettings.parse(world);
 
             TerrariumGeneratorInitializer generatorInitializer = worldType.createGeneratorInitializer(world, this.settings);

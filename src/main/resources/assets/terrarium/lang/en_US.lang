@@ -25,7 +25,5 @@ toast.terrarium.data_failure.desc=Failed to load %s data tiles
 
 # Config
 
-config.terrarium.enable_data_status_icon=Enable Data Status Icon
-config.terrarium.enable_data_status_icon.tooltip=If true, the current status for data streaming will be displayed in the top left corner of the screen
 config.terrarium.accept_remote_data=Accepted Remote Data Warning
 config.terrarium.accept_remote_data.tooltip=If true, you will no longer be warned about remote data usage. (Automatically set through GUI)

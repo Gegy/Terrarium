@@ -1,20 +1,19 @@
 {
-  "world_type": "earth:earth_generator",
-  "name": "earth_survival",
+  "world_type": "earth:earth",
+  "name": "global_default",
   "icon": "earth:earth_default",
   "properties": {
     "spawn_latitude": 27.988350,
     "spawn_longitude": 86.923641,
     "enable_decoration": true,
-    "world_scale": 0.015384,
-    "height_scale": 1.5,
-    "noise_scale": 0.0,
-    "height_origin": 62,
-    "ocean_depth": 12,
+    "world_scale": 40.0,
+    "height_scale": 1.0,
+    "height_origin": 35,
+    "ocean_depth": 8,
     "beach_size": 4,
     "enable_buildings": false,
     "enable_streets": false,
-    "cave_generation": true,
+    "cave_generation": false,
     "season": "january"
   }
 }

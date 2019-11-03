@@ -7,7 +7,7 @@ import net.gegy1000.earth.server.message.EarthMapGuiMessage;
 import net.gegy1000.earth.server.message.EarthPanoramaMessage;
 import net.gegy1000.earth.server.world.EarthDataKeys;
 import net.gegy1000.terrarium.server.TerrariumHandshakeTracker;
-import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
+import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnData;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataEntry;
@@ -95,7 +95,7 @@ public class GeoToolCommand extends CommandBase {
         int blockX = MathHelper.floor(player.posX);
         int blockZ = MathHelper.floor(player.posZ);
 
-        TerrariumWorldData worldData = TerrariumWorldData.get(player.world);
+        TerrariumWorld worldData = TerrariumWorld.get(player.world);
         Preconditions.checkNotNull(worldData, "terrarium world data was null");
 
         ChunkPos columnPos = new ChunkPos(blockX >> 4, blockZ >> 4);
@@ -118,6 +118,7 @@ public class GeoToolCommand extends CommandBase {
 
             player.sendMessage(new TextComponentString(TextFormatting.BOLD + String.format("Debug Info at %.4f, %.4f", latitude, longitude)));
 
+            // TODO: Extract all predictor values
             columnData.get(EarthDataKeys.AVERAGE_TEMPERATURE).ifPresent(rainfallRaster -> {
                 float temperature = rainfallRaster.get(localX, localZ);
                 player.sendMessage(new TextComponentString(TextFormatting.AQUA + String.format("Mean Temperature: %s%.2f°C", TextFormatting.RESET, temperature)));

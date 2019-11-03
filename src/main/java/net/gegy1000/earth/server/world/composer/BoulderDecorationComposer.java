@@ -21,7 +21,7 @@ public class BoulderDecorationComposer implements DecorationComposer {
 
     private static final BoulderGenerator BOULDER_GENERATOR = new BoulderGenerator(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.ANDESITE), 0);
 
-    private static final int MIN_SLOPE = 40;
+    private static final int MIN_SLOPE = 45;
 
     private final UnsignedByteRaster.Sampler slopeSampler;
 

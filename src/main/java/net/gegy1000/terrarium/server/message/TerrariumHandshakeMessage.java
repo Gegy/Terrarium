@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.TerrariumHandshakeTracker;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
-import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
+import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
@@ -47,7 +47,7 @@ public class TerrariumHandshakeMessage implements IMessage {
                 if (server == null) {
                     return null;
                 }
-                TerrariumWorldData worldData = server.getWorld(0).getCapability(TerrariumCapabilities.worldDataCapability, null);
+                TerrariumWorld worldData = server.getWorld(0).getCapability(TerrariumCapabilities.worldDataCapability, null);
                 if (worldData != null) {
                     Terrarium.PROXY.scheduleTask(ctx, () -> TerrariumHandshakeTracker.markPlayerFriendly(player));
                     return new TerrariumHandshakeMessage(worldData.getSettings());

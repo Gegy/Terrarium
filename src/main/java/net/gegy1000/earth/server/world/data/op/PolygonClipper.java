@@ -17,13 +17,17 @@ public final class PolygonClipper {
 
     private final Segment[] clipEdges;
 
-    public PolygonClipper(double minX, double minY, double maxX, double maxY) {
-        this.clipEdges = new Segment[] {
-                new Segment(new Coordinate(minX, minY), new Coordinate(maxX, minY)),
-                new Segment(new Coordinate(maxX, minY), new Coordinate(maxX, maxY)),
-                new Segment(new Coordinate(maxX, maxY), new Coordinate(minX, maxY)),
-                new Segment(new Coordinate(minX, maxY), new Coordinate(minX, minY))
-        };
+    private PolygonClipper(Segment[] clipEdges) {
+        this.clipEdges = clipEdges;
+    }
+
+    public static PolygonClipper rect(double minX, double minY, double maxX, double maxY) {
+        return new PolygonClipper(new Segment[] {
+                new Segment(minX, minY, maxX, minY),
+                new Segment(maxX, minY, maxX, maxY),
+                new Segment(maxX, maxY, minX, maxY),
+                new Segment(minX, maxY, minX, minY)
+        });
     }
 
     @Nullable
@@ -89,15 +93,15 @@ public final class PolygonClipper {
     }
 
     private boolean isInside(Coordinate p, Segment clip) {
-        return (clip.end.x - clip.start.x) * (p.y - clip.start.y) > (clip.end.y - clip.start.y) * (p.x - clip.start.x);
+        return (clip.endX - clip.startX) * (p.y - clip.startY) > (clip.endY - clip.startY) * (p.x - clip.startX);
     }
 
     private Coordinate intersection(Segment clipEdge, Coordinate start, Coordinate end) {
-        double deltaClipX = clipEdge.start.x - clipEdge.end.x;
-        double deltaClipY = clipEdge.start.y - clipEdge.end.y;
+        double deltaClipX = clipEdge.startX - clipEdge.endX;
+        double deltaClipY = clipEdge.startY - clipEdge.endY;
         double deltaLineX = start.x - end.x;
         double deltaLineY = start.y - end.y;
-        double clipDet = clipEdge.start.x * clipEdge.end.y - clipEdge.start.y * clipEdge.end.x;
+        double clipDet = clipEdge.startX * clipEdge.endY - clipEdge.startY * clipEdge.endX;
         double lineDet = start.x * end.y - start.y * end.x;
         double det = deltaClipX * deltaLineY - deltaClipY * deltaLineX;
         return new Coordinate(
@@ -130,12 +134,16 @@ public final class PolygonClipper {
     }
 
     private static class Segment {
-        Coordinate start;
-        Coordinate end;
+        double startX;
+        double startY;
+        double endX;
+        double endY;
 
-        Segment(Coordinate start, Coordinate end) {
-            this.start = start;
-            this.end = end;
+        Segment(double startX, double startY, double endX, double endY) {
+            this.startX = startX;
+            this.startY = startY;
+            this.endX = endX;
+            this.endY = endY;
         }
     }
 }

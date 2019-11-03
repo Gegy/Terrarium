@@ -46,7 +46,7 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
 
         builder.addSurfaceComposer(new HeightmapSurfaceComposer(EarthDataKeys.HEIGHT, Blocks.STONE.getDefaultState()));
         builder.addSurfaceComposer(new WaterFillSurfaceComposer(EarthDataKeys.HEIGHT, EarthDataKeys.LANDFORM, EarthDataKeys.WATER_LEVEL, Blocks.WATER.getDefaultState()));
-        builder.addSurfaceComposer(new SoilSurfaceComposer(this.ctx.world, EarthDataKeys.HEIGHT, EarthDataKeys.SOIL, Blocks.STONE.getDefaultState()));
+        builder.addSurfaceComposer(new SoilSurfaceComposer(this.ctx.world, EarthDataKeys.HEIGHT, EarthDataKeys.SLOPE, Blocks.STONE.getDefaultState()));
 
         if (!preview && this.ctx.settings.getBoolean(ENABLE_DECORATION)) {
             builder.addSurfaceComposer(new EarthCarvingComposer(EarthDataKeys.COVER));
@@ -64,6 +64,8 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
     private void addDecorationComposers(boolean preview, CompositeTerrariumGenerator.Builder builder) {
         if (this.ctx.settings.getBoolean(ENABLE_DECORATION)) {
             builder.addDecorationComposer(new EarthDecorationComposer(this.ctx.world, EarthDataKeys.COVER));
+
+            // TODO: More decorators such as this
             builder.addDecorationComposer(new BoulderDecorationComposer(this.ctx.world, EarthDataKeys.SLOPE));
         }
 

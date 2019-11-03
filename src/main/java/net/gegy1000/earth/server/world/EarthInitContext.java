@@ -26,7 +26,7 @@ public final class EarthInitContext {
         this.world = world;
         this.settings = settings;
 
-        this.worldScale = settings.getDouble(WORLD_SCALE);
+        this.worldScale = 1.0 / settings.getDouble(WORLD_SCALE);
         this.latLngCoordinates = new LatLngCoordinateState(this.worldScale * SRTM_SCALE * 1200.0);
         this.lngLatCoordinates = new LngLatCoordinateState(this.worldScale * SRTM_SCALE * 1200.0);
         this.srtmRaster = new ScaledCoordinateState(this.worldScale * SRTM_SCALE);

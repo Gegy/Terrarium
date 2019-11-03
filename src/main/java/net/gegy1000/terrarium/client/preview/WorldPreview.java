@@ -6,7 +6,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.gegy1000.cubicglue.util.CubicPos;
 import net.gegy1000.earth.server.world.EarthDataKeys;
 import net.gegy1000.terrarium.Terrarium;
-import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
+import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.pipeline.GenerationCancelledException;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataCache;
@@ -40,6 +40,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+// TODO: use bigger chunks for render
 @SideOnly(Side.CLIENT)
 public class WorldPreview implements IBlockAccess {
     private static final int VIEW_RANGE = 12;
@@ -49,7 +50,7 @@ public class WorldPreview implements IBlockAccess {
 
     private final WorldType worldType;
     private final PreviewDummyWorld world;
-    private final TerrariumWorldData worldData;
+    private final TerrariumWorld worldData;
 
     private final BlockingQueue<BufferBuilder> builderQueue;
 
@@ -75,15 +76,15 @@ public class WorldPreview implements IBlockAccess {
         this.builderQueue = new ArrayBlockingQueue<>(builders.length);
         Collections.addAll(this.builderQueue, builders);
 
-        TerrariumWorldData.PREVIEW_WORLD.set(true);
+        TerrariumWorld.PREVIEW_WORLD.set(true);
         try {
             this.world = new PreviewDummyWorld(this.worldType, settings);
-            this.worldData = TerrariumWorldData.get(this.world);
+            this.worldData = TerrariumWorld.get(this.world);
             if (this.worldData == null) {
                 throw new IllegalStateException("Terrarium World Capability not present on preview world");
             }
         } finally {
-            TerrariumWorldData.PREVIEW_WORLD.set(false);
+            TerrariumWorld.PREVIEW_WORLD.set(false);
         }
 
         this.executor.submit(this::initiateGeneration);

@@ -17,7 +17,7 @@ public final class RasterizeAreaOp {
             for (int localY = 0; localY < view.getHeight(); localY++) {
                 for (int localX = 0; localX < view.getWidth(); localX++) {
                     if (canvas.getData(localX, localY) == 1) {
-                        raster.set(localX, localY, true);
+                        raster.put(localX, localY);
                     }
                 }
             }

@@ -13,14 +13,14 @@ public class TerrariumCapabilities {
     public static final ResourceLocation EXTERNAL_DATA_ID = new ResourceLocation(Terrarium.MODID, "external_data");
     public static final ResourceLocation TRACKER_HOOKS_ID = new ResourceLocation(Terrarium.MODID, "tracker_hooks");
 
-    @CapabilityInject(TerrariumWorldData.class)
-    public static Capability<TerrariumWorldData> worldDataCapability;
+    @CapabilityInject(TerrariumWorld.class)
+    public static Capability<TerrariumWorld> worldDataCapability;
 
     @CapabilityInject(TerrariumExternalCapProvider.class)
     public static Capability<TerrariumExternalCapProvider> externalProviderCapability;
 
     public static void onPreInit() {
-        CapabilityManager.INSTANCE.register(TerrariumWorldData.class, new VoidStorage<>(), unsupported());
+        CapabilityManager.INSTANCE.register(TerrariumWorld.class, new VoidStorage<>(), unsupported());
         CapabilityManager.INSTANCE.register(TerrariumExternalCapProvider.class, new VoidStorage<>(), TerrariumExternalCapProvider.Implementation::new);
     }
 

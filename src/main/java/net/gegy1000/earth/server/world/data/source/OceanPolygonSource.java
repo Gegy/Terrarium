@@ -30,8 +30,7 @@ public class OceanPolygonSource extends TiledDataSource<PolygonData> {
 
     private static final Path CACHE_ROOT = GLOBAL_CACHE_ROOT.resolve("ocean");
 
-    private static final CachingInput<DataTilePos> CACHING_INPUT = CachingInput.<DataTilePos>create()
-            .cachesTo(OceanPolygonSource::resolveCachePath);
+    private static final CachingInput<DataTilePos> CACHING_INPUT = new CachingInput<>(OceanPolygonSource::resolveCachePath);
 
     public OceanPolygonSource(CoordinateState coordinateState) {
         super(new Coordinate(coordinateState, TILE_SIZE, TILE_SIZE));

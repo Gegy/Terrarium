@@ -5,7 +5,7 @@ import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
 import net.gegy1000.cubicglue.api.ChunkPrimeWriter;
 import net.gegy1000.cubicglue.api.CubicChunkGenerator;
 import net.gegy1000.cubicglue.util.CubicPos;
-import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
+import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.util.Lazy;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.SurfaceComposer;
@@ -36,10 +36,10 @@ public class ComposableCubeGenerator implements CubicChunkGenerator {
     public ComposableCubeGenerator(World world) {
         this.world = world;
 
-        this.surfaceComposer = new Lazy.WorldCap<>(world, TerrariumWorldData::getSurfaceComposer);
-        this.decorationComposer = new Lazy.WorldCap<>(world, TerrariumWorldData::getDecorationComposer);
+        this.surfaceComposer = Lazy.worldCap(world, TerrariumWorld::getSurfaceComposer);
+        this.decorationComposer = Lazy.worldCap(world, TerrariumWorld::getDecorationComposer);
 
-        this.dataCache = new Lazy.WorldCap<>(world, TerrariumWorldData::getDataCache);
+        this.dataCache = Lazy.worldCap(world, TerrariumWorld::getDataCache);
     }
 
     @Override

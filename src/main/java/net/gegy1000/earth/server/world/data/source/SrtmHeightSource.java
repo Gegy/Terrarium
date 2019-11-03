@@ -24,8 +24,7 @@ public class SrtmHeightSource extends TiledDataSource<ShortRaster> {
 
     private static final Path CACHE_ROOT = GLOBAL_CACHE_ROOT.resolve("srtm_heights");
 
-    private static final CachingInput<DataTilePos> CACHING_INPUT = CachingInput.<DataTilePos>create()
-            .cachesTo(SrtmHeightSource::resolveCachePath);
+    private static final CachingInput<DataTilePos> CACHING_INPUT = new CachingInput<>(SrtmHeightSource::resolveCachePath);
 
     public SrtmHeightSource(CoordinateState coordinateState) {
         super(new Coordinate(coordinateState, TILE_SIZE, TILE_SIZE));

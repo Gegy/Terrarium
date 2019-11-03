@@ -87,8 +87,10 @@ public class SlippyMapWidget extends Gui {
         }
 
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+
+        SlippyMapPoint mouse = this.getPointUnderMouse(resolution, mouseX, mouseY);
         for (MapComponent component : this.components) {
-            component.onDrawMap(this.map, resolution, mouseX - this.x, mouseY - this.y);
+            component.onDrawMap(this.map, resolution, mouse);
         }
 
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
@@ -150,6 +152,12 @@ public class SlippyMapWidget extends Gui {
 
         if (this.isSelected(mouseX, mouseY)) {
             this.mouseDown = true;
+
+            ScaledResolution resolution = new ScaledResolution(MC);
+            SlippyMapPoint mouse = this.getPointUnderMouse(resolution, mouseX, mouseY);
+            for (MapComponent component : this.components) {
+                component.onMouseClicked(this.map, mouse);
+            }
         }
     }
 
@@ -170,9 +178,9 @@ public class SlippyMapWidget extends Gui {
     public void mouseReleased(int mouseX, int mouseY) {
         if (this.mouseDown && !this.mouseDragged && this.isSelected(mouseX, mouseY)) {
             ScaledResolution resolution = new ScaledResolution(MC);
-
+            SlippyMapPoint mouse = this.getPointUnderMouse(resolution, mouseX, mouseY);
             for (MapComponent component : this.components) {
-                component.onMapClicked(this.map, resolution, mouseX - this.x, mouseY - this.y);
+                component.onMouseReleased(this.map, mouse);
             }
         }
 
@@ -182,6 +190,13 @@ public class SlippyMapWidget extends Gui {
 
     public void close() {
         this.map.shutdown();
+    }
+
+    private SlippyMapPoint getPointUnderMouse(ScaledResolution resolution, int mouseX, int mouseY) {
+        int scale = resolution.getScaleFactor();
+        int mapX = (mouseX - this.x) * scale + this.map.getCameraX();
+        int mapY = (mouseY - this.y) * scale + this.map.getCameraY();
+        return new SlippyMapPoint(mapX, mapY, this.map.getCameraZoom());
     }
 
     private boolean isSelected(int mouseX, int mouseY) {

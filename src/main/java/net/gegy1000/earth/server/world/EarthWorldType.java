@@ -10,7 +10,7 @@ import net.gegy1000.earth.server.world.data.source.LandCoverSource;
 import net.gegy1000.earth.server.world.data.source.SoilCoverSource;
 import net.gegy1000.earth.server.world.data.source.WorldClimateRaster;
 import net.gegy1000.terrarium.client.gui.customization.TerrariumCustomizationGui;
-import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
+import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.TerrariumDataInitializer;
 import net.gegy1000.terrarium.server.world.TerrariumGeneratorInitializer;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
@@ -19,13 +19,11 @@ import net.gegy1000.terrarium.server.world.coordinate.LatLngCoordinateState;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.generator.customization.PropertyPrototype;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumCustomization;
-import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPreset;
 import net.gegy1000.terrarium.server.world.generator.customization.property.BooleanKey;
 import net.gegy1000.terrarium.server.world.generator.customization.property.EnumKey;
 import net.gegy1000.terrarium.server.world.generator.customization.property.NumberKey;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.CycleWidget;
-import net.gegy1000.terrarium.server.world.generator.customization.widget.InversePropertyConverter;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.SliderWidget;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.ToggleWidget;
 import net.minecraft.client.Minecraft;
@@ -42,6 +40,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import java.util.Collection;
 import java.util.Random;
 
+// TODO: Code to update old terrarium world configs to new format
 public class EarthWorldType extends TerrariumWorldType {
     public static final double EARTH_CIRCUMFERENCE = 40075000.0;
 
@@ -54,15 +53,14 @@ public class EarthWorldType extends TerrariumWorldType {
 
     public static final int HIGHEST_POINT_METERS = 8900;
 
-    private static final ResourceLocation IDENTIFIER = new ResourceLocation(TerrariumEarth.MODID, "earth_generator");
-    private static final ResourceLocation PRESET = new ResourceLocation(TerrariumEarth.MODID, "earth_default");
+    private static final ResourceLocation IDENTIFIER = new ResourceLocation(TerrariumEarth.MODID, "earth");
+    private static final ResourceLocation PRESET = new ResourceLocation(TerrariumEarth.MODID, "global_default");
 
     public static final PropertyKey<Number> SPAWN_LATITUDE = new NumberKey("spawn_latitude");
     public static final PropertyKey<Number> SPAWN_LONGITUDE = new NumberKey("spawn_longitude");
     public static final PropertyKey<Boolean> ENABLE_DECORATION = new BooleanKey("enable_decoration");
     public static final PropertyKey<Number> WORLD_SCALE = new NumberKey("world_scale");
     public static final PropertyKey<Number> HEIGHT_SCALE = new NumberKey("height_scale");
-    public static final PropertyKey<Number> NOISE_SCALE = new NumberKey("noise_scale");
     public static final PropertyKey<Number> HEIGHT_ORIGIN = new NumberKey("height_origin");
     public static final PropertyKey<Number> SEA_DEPTH = new NumberKey("ocean_depth");
     public static final PropertyKey<Number> BEACH_SIZE = new NumberKey("beach_size");
@@ -89,7 +87,7 @@ public class EarthWorldType extends TerrariumWorldType {
 
     @Override
     public Collection<ICapabilityProvider> createCapabilities(World world, GenerationSettings settings) {
-        CoordinateState earthCoordinates = new LatLngCoordinateState(settings.getDouble(WORLD_SCALE) * SRTM_SCALE * 1200.0);
+        CoordinateState earthCoordinates = new LatLngCoordinateState((SRTM_SCALE * 1200.0) / settings.getDouble(WORLD_SCALE));
         return Lists.newArrayList(new EarthCapability.Impl(earthCoordinates));
     }
 
@@ -97,7 +95,7 @@ public class EarthWorldType extends TerrariumWorldType {
     public PropertyPrototype buildPropertyPrototype() {
         return PropertyPrototype.builder()
                 .withProperties(SPAWN_LATITUDE, SPAWN_LONGITUDE)
-                .withProperties(WORLD_SCALE, HEIGHT_SCALE, NOISE_SCALE)
+                .withProperties(WORLD_SCALE, HEIGHT_SCALE)
                 .withProperties(SEA_DEPTH, HEIGHT_ORIGIN)
                 .withProperties(BEACH_SIZE)
                 .withProperties(ENABLE_DECORATION, ENABLE_BUILDINGS, ENABLE_STREETS)
@@ -110,12 +108,11 @@ public class EarthWorldType extends TerrariumWorldType {
     public TerrariumCustomization buildCustomization() {
         return TerrariumCustomization.builder()
                 .withCategory("world",
-                        new SliderWidget(WORLD_SCALE, 1.0, 200.0, 5.0, 1.0, new InversePropertyConverter()),
-                        new SliderWidget(HEIGHT_SCALE, 0.0, 10.0, 0.5, 0.1),
-                        new SliderWidget(NOISE_SCALE, 0.0, 3.0, 0.5, 0.1),
-                        new SliderWidget(SEA_DEPTH, 0, 32, 1, 1),
-                        new SliderWidget(HEIGHT_ORIGIN, -63, 128, 1, 1),
-                        new SliderWidget(BEACH_SIZE, 0, 8, 1, 1)
+                        new SliderWidget(WORLD_SCALE, 1.0, 250.0, 5.0, 1.0, value -> String.format("1:%.0f", value)),
+                        new SliderWidget(HEIGHT_SCALE, 0.0, 10.0, 0.5, 0.1, value -> String.format("%.1fx", value)),
+                        new SliderWidget(SEA_DEPTH, 0, 32, 1, 1, value -> String.format("%.0f blocks", value)),
+                        new SliderWidget(HEIGHT_ORIGIN, -63, 128, 1, 1, value -> String.format("%.0f blocks", value)),
+                        new SliderWidget(BEACH_SIZE, 0, 8, 1, 1, value -> String.format("%.0f blocks", value))
                 )
                 .withCategory("natural",
                         new CycleWidget<>(SEASON)
@@ -144,13 +141,13 @@ public class EarthWorldType extends TerrariumWorldType {
 
     @Override
     @SideOnly(Side.CLIENT)
-    protected TerrariumCustomizationGui createCustomizationGui(GuiCreateWorld parent, WorldType worldType, TerrariumPreset preset) {
-        return new EarthCustomizationGui(parent, worldType, this, preset);
+    protected TerrariumCustomizationGui createCustomizationGui(GuiCreateWorld parent, WorldType worldType) {
+        return new EarthCustomizationGui(parent, worldType, this);
     }
 
     @Override
     public boolean shouldReduceSlimes(World world, Random random) {
-        TerrariumWorldData worldData = TerrariumWorldData.get(world);
+        TerrariumWorld worldData = TerrariumWorld.get(world);
         if (worldData == null) {
             return false;
         }
@@ -159,7 +156,7 @@ public class EarthWorldType extends TerrariumWorldType {
 
     @Override
     protected int calculateMaxGenerationHeight(WorldServer world, GenerationSettings settings) {
-        double globalScale = settings.getDouble(HEIGHT_SCALE) * settings.getDouble(WORLD_SCALE);
+        double globalScale = settings.getDouble(HEIGHT_SCALE) / settings.getDouble(WORLD_SCALE);
         double highestPointBlocks = HIGHEST_POINT_METERS * globalScale;
         return MathHelper.ceil(highestPointBlocks + settings.getDouble(HEIGHT_ORIGIN) + 1);
     }

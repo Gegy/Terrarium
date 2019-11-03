@@ -1,7 +1,6 @@
 package net.gegy1000.earth.server.world.ecology.vegetation;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import net.gegy1000.earth.server.world.ecology.GrowthIndicator;
 
 public final class Vegetation {
@@ -26,38 +25,25 @@ public final class Vegetation {
     }
 
     public static class Builder {
-        private final ImmutableList.Builder<GrowthIndicator> growthIndicators = ImmutableList.builder();
+        private GrowthIndicator growthIndicator = GrowthIndicator.relaxed();
         private VegetationGenerator generator;
 
         Builder() {
         }
 
-        public Builder withGrowthIndicator(GrowthIndicator indicator) {
-            this.growthIndicators.add(indicator);
+        public Builder growthIndicator(GrowthIndicator indicator) {
+            this.growthIndicator = indicator;
             return this;
         }
 
-        public Builder withGenerator(VegetationGenerator generator) {
+        public Builder generator(VegetationGenerator generator) {
             this.generator = generator;
             return this;
         }
 
         public Vegetation build() {
             Preconditions.checkNotNull(this.generator, "generator cannot be null");
-            ImmutableList<GrowthIndicator> growthIndicators = this.growthIndicators.build();
-
-            GrowthIndicator indicator = GrowthIndicator.anywhere();
-            if (!growthIndicators.isEmpty()) {
-                indicator = abiotic -> {
-                    double value = 1.0;
-                    for (GrowthIndicator i : growthIndicators) {
-                        value *= i.test(abiotic);
-                    }
-                    return value;
-                };
-            }
-
-            return new Vegetation(indicator, this.generator);
+            return new Vegetation(this.growthIndicator, this.generator);
         }
     }
 }

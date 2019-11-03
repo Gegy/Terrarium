@@ -21,22 +21,22 @@ public final class Grasses {
     }
 
     public static final Vegetation GRASS = Vegetation.builder()
-            .withGrowthIndicator(GrowthIndicator.anywhere())
-            .withGenerator(GRASS_GENERATOR::generate)
+            .growthIndicator(GrowthIndicator.relaxed())
+            .generator(GRASS_GENERATOR::generate)
             .build();
 
     public static final Vegetation TALL_GRASS = Vegetation.builder()
-            .withGrowthIndicator(GrowthIndicator.anywhere())
-            .withGenerator(TALL_GRASS_GENERATOR::generate)
+            .growthIndicator(GrowthIndicator.relaxed())
+            .generator(TALL_GRASS_GENERATOR::generate)
             .build();
 
     public static final Vegetation FERN = Vegetation.builder()
-            .withGrowthIndicator(GrowthIndicator.anywhere())
-            .withGenerator(FERN_GENERATOR::generate)
+            .growthIndicator(GrowthIndicator.relaxed())
+            .generator(FERN_GENERATOR::generate)
             .build();
 
     public static final Vegetation TALL_FERN = Vegetation.builder()
-            .withGrowthIndicator(GrowthIndicator.anywhere())
-            .withGenerator(TALL_FERN_GENERATOR::generate)
+            .growthIndicator(GrowthIndicator.relaxed())
+            .generator(TALL_FERN_GENERATOR::generate)
             .build();
 }

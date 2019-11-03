@@ -47,8 +47,8 @@ public class WaterFillSurfaceComposer implements SurfaceComposer {
                 int height = Math.max(heightRaster.get(localX, localZ), minY);
                 int waterLevel = Math.min(waterLevelRaster.get(localX, localZ), maxY);
                 if (height < waterLevel) {
-                    for (int localY = height + 1; localY <= waterLevel; localY++) {
-                        writer.set(localX, localY, localZ, this.block);
+                    for (int y = height + 1; y <= waterLevel; y++) {
+                        writer.set(localX, y, localZ, this.block);
                     }
                 }
             }

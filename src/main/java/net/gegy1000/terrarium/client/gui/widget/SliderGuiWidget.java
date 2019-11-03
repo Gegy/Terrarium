@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import net.gegy1000.terrarium.client.gui.GuiRenderUtils;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyValue;
-import net.gegy1000.terrarium.server.world.generator.customization.widget.WidgetPropertyConverter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
@@ -17,13 +16,14 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.DoubleFunction;
 
 @SideOnly(Side.CLIENT)
 public class SliderGuiWidget extends GuiButtonExt implements TooltipRenderer {
     private final PropertyKey<Number> propertyKey;
     private final PropertyValue<Number> property;
 
-    private final WidgetPropertyConverter converter;
+    private final DoubleFunction<String> display;
 
     private final List<Runnable> listeners = new ArrayList<>();
 
@@ -39,11 +39,11 @@ public class SliderGuiWidget extends GuiButtonExt implements TooltipRenderer {
 
     private float hoverTime;
 
-    public SliderGuiWidget(int widgetId, int x, int y, PropertyKey<Number> propertyKey, PropertyValue<Number> property, double min, double max, double step, double fineStep, WidgetPropertyConverter converter) {
+    public SliderGuiWidget(int widgetId, int x, int y, PropertyKey<Number> propertyKey, PropertyValue<Number> property, double min, double max, double step, double fineStep, DoubleFunction<String> display) {
         super(widgetId, x, y, 150, 20, "");
         this.propertyKey = propertyKey;
         this.property = property;
-        this.converter = converter;
+        this.display = display;
 
         this.min = min;
         this.max = max;
@@ -63,12 +63,11 @@ public class SliderGuiWidget extends GuiButtonExt implements TooltipRenderer {
 
     public void setSliderPosition(double position) {
         double value = this.toValue(position);
-        if (this.converter != null) {
-            value = this.converter.toUser(value);
-        }
 
         this.position = position;
-        this.displayString = String.format("%s: %.2f", this.propertyKey.getLocalizedName(), value);
+
+        String valueString = this.display != null ? this.display.apply(value) : String.format("%.2f", value);
+        this.displayString = String.format("%s: %s", this.propertyKey.getLocalizedName(), valueString);
     }
 
     @Override
@@ -153,26 +152,16 @@ public class SliderGuiWidget extends GuiButtonExt implements TooltipRenderer {
         double value = this.min + (this.max - this.min) * position;
         double clamped = MathHelper.clamp(value, this.min, this.max);
         double stepped = clamped - (clamped % step);
-        if (this.converter != null) {
-            stepped = this.converter.fromUser(stepped);
-        }
         return this.toPosition(stepped);
     }
 
     private double toPosition(double value) {
-        if (this.converter != null) {
-            value = this.converter.toUser(value);
-        }
         double clampedValue = MathHelper.clamp(value, this.min, this.max);
         return (clampedValue - this.min) / (this.max - this.min);
     }
 
     private double toValue(double position) {
         double value = this.min + (this.max - this.min) * position;
-        double clamped = MathHelper.clamp(value, this.min, this.max);
-        if (this.converter != null) {
-            return this.converter.fromUser(clamped);
-        }
-        return clamped;
+        return MathHelper.clamp(value, this.min, this.max);
     }
 }

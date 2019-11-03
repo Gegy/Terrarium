@@ -13,6 +13,7 @@ import net.minecraft.world.gen.feature.WorldGenCanopyTree;
 import net.minecraft.world.gen.feature.WorldGenMegaJungle;
 import net.minecraft.world.gen.feature.WorldGenMegaPineTree;
 import net.minecraft.world.gen.feature.WorldGenSavannaTree;
+import net.minecraft.world.gen.feature.WorldGenSwamp;
 import net.minecraft.world.gen.feature.WorldGenTaiga1;
 import net.minecraft.world.gen.feature.WorldGenTaiga2;
 import net.minecraft.world.gen.feature.WorldGenTrees;
@@ -42,84 +43,83 @@ public final class Trees {
     private static final WorldGenerator SPRUCE_GENERATOR = new WorldGenTaiga2(false);
     private static final WorldGenerator REDWOOD_GENERATOR = new WorldGenMegaPineTree(false, false);
     private static final WorldGenerator DARK_OAK_GENERATOR = new WorldGenCanopyTree(false);
-    private static final WorldGenerator WILLOW_TREE_GENERATOR = new WorldGenTrees(false, 4, OAK_LOG, OAK_LEAF, true);
+    private static final WorldGenerator WILLOW_TREE_GENERATOR = new WorldGenSwamp();
 
-    // TODO: GrowthIndicator
     public static final Vegetation OAK = Vegetation.builder()
-            .withGrowthIndicator(GrowthIndicator.anywhere())
-            .withGenerator(OAK_GENERATOR::generate)
+            .growthIndicator(GrowthIndicator.relaxed())
+            .generator(OAK_GENERATOR::generate)
             .build();
 
     public static final Vegetation BIRCH = Vegetation.builder()
-            .withGrowthIndicator(GrowthIndicator.anywhere())
-            .withGenerator(BIRCH_GENERATOR::generate)
+            .growthIndicator(GrowthIndicator.relaxed())
+            .generator(BIRCH_GENERATOR::generate)
             .build();
 
     public static final Vegetation ACACIA = Vegetation.builder()
-            .withGrowthIndicator(GrowthIndicator.anywhere())
-            .withGenerator(ACACIA_GENERATOR::generate)
+            .growthIndicator(GrowthIndicator.relaxed())
+            .generator(ACACIA_GENERATOR::generate)
             .build();
 
     public static final Vegetation PINE = Vegetation.builder()
-            .withGrowthIndicator(GrowthIndicator.anywhere())
-            .withGenerator(PINE_GENERATOR::generate)
+            .growthIndicator(GrowthIndicator.relaxed())
+            .generator(PINE_GENERATOR::generate)
             .build();
 
     public static final Vegetation SPRUCE = Vegetation.builder()
-            .withGrowthIndicator(GrowthIndicator.anywhere())
-            .withGenerator(SPRUCE_GENERATOR::generate)
+            .growthIndicator(GrowthIndicator.relaxed())
+            .generator(SPRUCE_GENERATOR::generate)
             .build();
 
     public static final Vegetation REDWOOD = Vegetation.builder()
-            .withGrowthIndicator(GrowthIndicator.anywhere())
-            .withGenerator(REDWOOD_GENERATOR::generate)
+            .growthIndicator(GrowthIndicator.relaxed())
+            .generator(REDWOOD_GENERATOR::generate)
             .build();
 
     public static final Vegetation DARK_OAK = Vegetation.builder()
-            .withGrowthIndicator(GrowthIndicator.anywhere())
-            .withGenerator(DARK_OAK_GENERATOR::generate)
+            .growthIndicator(GrowthIndicator.relaxed())
+            .generator(DARK_OAK_GENERATOR::generate)
             .build();
 
     public static final Vegetation THIN_JUNGLE = Vegetation.builder()
-            .withGrowthIndicator(GrowthIndicator.anywhere())
-            .withGenerator((world, random, pos) -> {
+            .growthIndicator(GrowthIndicator.relaxed())
+            .generator((world, random, pos) -> {
                 WorldGenTrees generator = new WorldGenTrees(false, 4 + random.nextInt(7), JUNGLE_LOG, JUNGLE_LEAF, true);
                 generator.generate(world, random, pos);
             })
             .build();
 
     public static final Vegetation THICK_JUNGLE = Vegetation.builder()
-            .withGrowthIndicator(GrowthIndicator.anywhere())
-            .withGenerator((world, random, pos) -> {
+            .growthIndicator(GrowthIndicator.relaxed())
+            .generator((world, random, pos) -> {
                 WorldGenMegaJungle generator = new WorldGenMegaJungle(false, 10, 20, JUNGLE_LOG, JUNGLE_LEAF);
                 generator.generate(world, random, pos);
             })
             .build();
 
     public static final Vegetation WILLOW = Vegetation.builder()
-            .withGrowthIndicator(GrowthIndicator.anywhere())
-            .withGenerator(WILLOW_TREE_GENERATOR::generate)
+            .growthIndicator(GrowthIndicator.relaxed())
+            .generator(WILLOW_TREE_GENERATOR::generate)
             .build();
 
     // TODO: Palm, dark oak, willow & redwood
 
     public static final WeightedPool<Vegetation> BROADLEAVED_DECIDUOUS = WeightedPool.<Vegetation>builder()
-            .with(OAK, 10.0F)
-            .with(ACACIA, 5.0F)
+            .add(OAK, 10.0F)
+            .add(ACACIA, 5.0F)
             .build();
 
     public static final WeightedPool<Vegetation> BROADLEAVED_EVERGREEN = WeightedPool.<Vegetation>builder()
-            .with(THIN_JUNGLE, 10.0F)
-            .with(THICK_JUNGLE, 5.0F)
+            .add(THIN_JUNGLE, 10.0F)
+            .add(THICK_JUNGLE, 5.0F)
             .build();
 
     public static final WeightedPool<Vegetation> NEEDLELEAVED_DECIDUOUS = WeightedPool.<Vegetation>builder()
-            .with(BIRCH, 10.0F)
-            .with(ACACIA, 5.0F)
+            .add(BIRCH, 10.0F)
+            .add(ACACIA, 5.0F)
             .build();
 
     public static final WeightedPool<Vegetation> NEEDLELEAVED_EVERGREEN = WeightedPool.<Vegetation>builder()
-            .with(PINE, 5.0F)
-            .with(SPRUCE, 10.0F)
+            .add(PINE, 5.0F)
+            .add(SPRUCE, 10.0F)
             .build();
 }

@@ -28,10 +28,15 @@ public final class Carvers {
             rasters.get(heightKey).ifPresent(heightRaster -> {
                 int[] sampledWater = CoverCarver.sampleChunk(cubicPos, waterLayer);
 
-                heightRaster.iterate((value, x, z) -> {
-                    int waterValue = sampledWater[x + z * 16];
-                    if (waterValue == 3) {
-                        writer.set(x, value, z, WATER);
+                int minY = cubicPos.getMinY();
+                int maxY = cubicPos.getMaxY();
+
+                heightRaster.iterate((height, x, z) -> {
+                    if (height >= minY && height <= maxY) {
+                        int waterValue = sampledWater[x + z * 16];
+                        if (waterValue == 3) {
+                            writer.set(x, height & 0xF, z, WATER);
+                        }
                     }
                 });
             });

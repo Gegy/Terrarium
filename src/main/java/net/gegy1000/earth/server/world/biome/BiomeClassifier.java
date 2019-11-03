@@ -8,41 +8,40 @@ import net.minecraft.world.biome.Biome;
 public final class BiomeClassifier {
     private static final float SNOW_TEMPERATURE = 5.0F;
 
-    private static final ClassificationTree<Biome, Context> TREE = ClassificationTree.<Biome, Context>create()
-            .when(Context::isSea).then(ocean -> ocean
-                    .when(Context::isFrozen).thenYield(Biomes.FROZEN_OCEAN)
-                    .otherwise().thenYield(Biomes.OCEAN)
-            )
-            .when(Context::isRiverOrLake).then(river -> river
-                    .when(Context::isFrozen).thenYield(Biomes.FROZEN_RIVER)
-                    .otherwise().thenYield(Biomes.RIVER)
-            )
-            .otherwise().then(land -> land
-                    .when(Context::isFrozen).then(frozen -> frozen
-                            .when(Context::isForested).thenYield(Biomes.TAIGA)
-                            .otherwise().thenYield(Biomes.ICE_PLAINS)
-                    )
-                    .when(Context::isFlooded).then(flooded -> flooded
-                            .yield(Biomes.SWAMPLAND)
-                    )
-                    .otherwise().then(warm -> warm
-                            .when(Context::isWet).then(wet -> wet
-                                    .when(Context::isForested).thenYield(Biomes.JUNGLE)
-                                    .otherwise().thenYield(Biomes.JUNGLE_EDGE)
-                            )
-                            .when(Context::isDry).then(dry -> dry
-                                    .when(Context::isBarren).thenYield(Biomes.DESERT)
-                                    .otherwise().thenYield(Biomes.SAVANNA)
-                            )
-                            .otherwise().then(normal -> normal
-                                    .when(Context::isForested).thenYield(Biomes.FOREST)
-                                    .otherwise().thenYield(Biomes.PLAINS)
-                            )
-                    )
-            );
-
     public static Biome classify(Context context) {
-        return TREE.classify(context);
+        if (context.isLand()) {
+            return classifyLand(context);
+        } else {
+            return classifyWater(context);
+        }
+    }
+
+    private static Biome classifyLand(Context context) {
+        if (context.isFrozen()) {
+            return context.isForested() ? Biomes.TAIGA : Biomes.ICE_PLAINS;
+        }
+
+        if (context.isFlooded()) {
+            return Biomes.SWAMPLAND;
+        }
+
+        if (context.isWet()) {
+            return context.isForested() ? Biomes.JUNGLE : Biomes.JUNGLE_EDGE;
+        }
+
+        if (context.isDry()) {
+            return context.isBarren() ? Biomes.DESERT : Biomes.SAVANNA;
+        }
+
+        return context.isForested() ? Biomes.FOREST : Biomes.PLAINS;
+    }
+
+    private static Biome classifyWater(Context context) {
+        if (context.isSea()) {
+            return context.isFrozen() ? Biomes.FROZEN_OCEAN : Biomes.OCEAN;
+        }
+
+        return context.isFrozen() ? Biomes.FROZEN_RIVER : Biomes.RIVER;
     }
 
     public static class Context {

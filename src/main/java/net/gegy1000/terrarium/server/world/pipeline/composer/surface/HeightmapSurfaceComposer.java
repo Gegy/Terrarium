@@ -25,8 +25,8 @@ public class HeightmapSurfaceComposer implements SurfaceComposer {
             for (int localZ = 0; localZ < 16; localZ++) {
                 for (int localX = 0; localX < 16; localX++) {
                     int height = Math.min(chunkRaster.get(localX, localZ), maxY);
-                    for (int localY = minY; localY <= height; localY++) {
-                        writer.set(localX, localY, localZ, this.block);
+                    for (int y = minY; y <= height; y++) {
+                        writer.set(localX, y, localZ, this.block);
                     }
                 }
             }

@@ -27,8 +27,7 @@ public class LandCoverSource extends TiledDataSource<UnsignedByteRaster> {
 
     private static final Path CACHE_ROOT = GLOBAL_CACHE_ROOT.resolve("landcover");
 
-    private static final CachingInput<DataTilePos> CACHING_INPUT = CachingInput.<DataTilePos>create()
-            .cachesTo(LandCoverSource::resolveCachePath);
+    private static final CachingInput<DataTilePos> CACHING_INPUT = new CachingInput<>(LandCoverSource::resolveCachePath);
 
     public LandCoverSource(CoordinateState coordinateState) {
         super(new Coordinate(coordinateState, TILE_SIZE, TILE_SIZE));

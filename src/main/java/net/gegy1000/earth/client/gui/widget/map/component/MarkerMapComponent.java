@@ -31,7 +31,7 @@ public class MarkerMapComponent implements MapComponent {
     }
 
     @Override
-    public void onDrawMap(SlippyMap map, ScaledResolution resolution, int mouseX, int mouseY) {
+    public void onDrawMap(SlippyMap map, ScaledResolution resolution, SlippyMapPoint mouse) {
         if (this.marker != null) {
             int scale = resolution.getScaleFactor();
 
@@ -44,10 +44,9 @@ public class MarkerMapComponent implements MapComponent {
     }
 
     @Override
-    public void onMapClicked(SlippyMap map, ScaledResolution resolution, int mouseX, int mouseY) {
+    public void onMouseReleased(SlippyMap map, SlippyMapPoint mouse) {
         if (this.canMove) {
-            int scale = resolution.getScaleFactor();
-            this.marker = new SlippyMapPoint(mouseX * scale + map.getCameraX(), mouseY * scale + map.getCameraY(), map.getCameraZoom());
+            this.marker = mouse;
         }
     }
 

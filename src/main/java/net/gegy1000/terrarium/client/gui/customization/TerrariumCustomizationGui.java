@@ -61,20 +61,14 @@ public class TerrariumCustomizationGui extends GuiScreen {
 
     protected boolean freeze;
 
-    public TerrariumCustomizationGui(GuiCreateWorld parent, WorldType worldType, TerrariumWorldType terrariumType, TerrariumPreset defaultPreset) {
+    public TerrariumCustomizationGui(GuiCreateWorld parent, WorldType worldType, TerrariumWorldType terrariumType) {
         this.parent = parent;
         this.worldType = worldType;
         this.terrariumType = terrariumType;
 
-        if (!defaultPreset.getWorldType().equals(terrariumType.getIdentifier())) {
-            throw new IllegalArgumentException("Cannot customize world with preset of wrong world type");
-        }
-
         PropertyPrototype prototype = terrariumType.buildPropertyPrototype();
         String settingsString = parent.chunkProviderSettingsJson;
-        if (Strings.isNullOrEmpty(settingsString)) {
-            this.setSettings(defaultPreset.createProperties(prototype));
-        } else {
+        if (!Strings.isNullOrEmpty(settingsString)) {
             try {
                 this.setSettings(GenerationSettings.parse(prototype, settingsString));
             } catch (JsonSyntaxException e) {

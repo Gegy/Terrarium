@@ -2,7 +2,7 @@ package net.gegy1000.earth.server.world.cover.decorator;
 
 import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
 import net.gegy1000.cubicglue.util.CubicPos;
-import net.gegy1000.earth.server.world.ecology.AbioticComponents;
+import net.gegy1000.earth.server.world.ecology.GrowthPredictors;
 import net.gegy1000.earth.server.world.ecology.vegetation.Vegetation;
 import net.gegy1000.terrarium.server.util.WeightedPool;
 import net.minecraft.util.math.BlockPos;
@@ -18,7 +18,7 @@ public final class VegetationDecorator implements CoverDecorator {
     private final int minCount;
     private final int maxCount;
 
-    private final AbioticComponents abiotic = new AbioticComponents();
+    private final GrowthPredictors predictors = new GrowthPredictors();
 
     private VegetationDecorator(WeightedPool<Vegetation> pool, float minDensity, float maxDensity) {
         this.pool = pool;
@@ -60,12 +60,12 @@ public final class VegetationDecorator implements CoverDecorator {
             Vegetation vegetation = entry.getValue();
             float weight = entry.getWeight();
 
-            // TODO: set abiotic values
-            double growth = vegetation.getGrowthIndicator().test(this.abiotic);
+            // TODO: set predictors
+            double density = vegetation.getGrowthIndicator().evaluate(this.predictors);
 
-            float tweakedWeight = (float) (weight * growth);
+            float tweakedWeight = (float) (weight * density);
             if (tweakedWeight > 0.0F) {
-                poolBuilder = poolBuilder.with(vegetation, tweakedWeight);
+                poolBuilder = poolBuilder.add(vegetation, tweakedWeight);
             }
         }
 
@@ -83,34 +83,33 @@ public final class VegetationDecorator implements CoverDecorator {
         private Builder() {
         }
 
-        public Builder withVegetation(Vegetation vegetation, float weight) {
-            this.vegetation.with(vegetation, weight);
+        public Builder add(Vegetation vegetation, float weight) {
+            this.vegetation.add(vegetation, weight);
             return this;
         }
 
-        public Builder withVegetation(WeightedPool<Vegetation> pool) {
+        public Builder add(WeightedPool<Vegetation> pool) {
             for (WeightedPool.Entry<Vegetation> entry : pool) {
-                this.vegetation.with(entry.getValue(), entry.getWeight());
+                this.vegetation.add(entry.getValue(), entry.getWeight());
             }
             return this;
         }
 
-        public Builder withRadius(float radius) {
+        public Builder radius(float radius) {
             this.radius = radius;
             return this;
         }
 
-        public Builder withDensity(float minDensity, float maxDensity) {
+        public Builder density(float minDensity, float maxDensity) {
             this.minDensity = minDensity;
             this.maxDensity = maxDensity;
             return this;
         }
 
         public VegetationDecorator build() {
-            float diameter = this.radius * 2.0F;
-            float scaleFactor = 1.0F / (diameter * diameter);
-            float minDensity = this.minDensity * scaleFactor;
-            float maxDensity = this.maxDensity * scaleFactor;
+            float area = (float) (Math.PI * this.radius * this.radius);
+            float minDensity = this.minDensity / area;
+            float maxDensity = this.maxDensity / area;
             return new VegetationDecorator(this.vegetation.build(), minDensity, maxDensity);
         }
     }

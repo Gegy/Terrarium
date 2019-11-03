@@ -1,37 +1,32 @@
 package net.gegy1000.earth.server.world;
 
-import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.data.AreaData;
 import net.gegy1000.earth.server.world.data.PolygonData;
 import net.gegy1000.earth.server.world.data.op.ClimateSampler;
-import net.gegy1000.earth.server.world.data.op.HeightNoiseTransformOp;
-import net.gegy1000.earth.server.world.data.op.HeightTransformOp;
+import net.gegy1000.earth.server.world.data.op.OffsetValueOp;
 import net.gegy1000.earth.server.world.data.op.PolygonSampler;
 import net.gegy1000.earth.server.world.data.op.PolygonToAreaOp;
 import net.gegy1000.earth.server.world.data.op.ProduceCoverOp;
 import net.gegy1000.earth.server.world.data.op.ProduceLandformsOp;
-import net.gegy1000.earth.server.world.data.op.ProduceSoilOp;
 import net.gegy1000.earth.server.world.data.op.RasterizeAreaOp;
-import net.gegy1000.earth.server.world.data.op.TransformSlopeNoiseOp;
+import net.gegy1000.earth.server.world.data.op.ScaleValueOp;
 import net.gegy1000.earth.server.world.data.op.WaterOps;
 import net.gegy1000.earth.server.world.data.source.LandCoverSource;
 import net.gegy1000.earth.server.world.data.source.OceanPolygonSource;
 import net.gegy1000.earth.server.world.data.source.SrtmHeightSource;
 import net.gegy1000.earth.server.world.geography.Landform;
-import net.gegy1000.earth.server.world.soil.SoilConfig;
 import net.gegy1000.terrarium.server.world.TerrariumDataInitializer;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataGenerator;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataOp;
 import net.gegy1000.terrarium.server.world.pipeline.data.op.InterpolationScaleOp;
-import net.gegy1000.terrarium.server.world.pipeline.data.op.ProduceSlopeOp;
 import net.gegy1000.terrarium.server.world.pipeline.data.op.RasterSourceSampler;
+import net.gegy1000.terrarium.server.world.pipeline.data.op.SlopeOp;
 import net.gegy1000.terrarium.server.world.pipeline.data.op.VoronoiScaleOp;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.BitRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.FloatRaster;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.ObjRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.UnsignedByteRaster;
 
@@ -46,9 +41,8 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
 
     @Override
     public ColumnDataGenerator buildDataGenerator() {
-        SharedEarthData sharedEarthData = SharedEarthData.instance();
-
         int heightOrigin = this.ctx.settings.getInteger(HEIGHT_ORIGIN);
+
         InterpolationScaleOp heightScaleOp = this.selectScaleOp(this.ctx.settings);
 
         SrtmHeightSource heightSource = new SrtmHeightSource(this.ctx.srtmRaster);
@@ -56,9 +50,7 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
         DataOp<ShortRaster> heightSampler = RasterSourceSampler.sampleShort(heightSource);
         DataOp<ShortRaster> heights = heightScaleOp.scaleShortsFrom(heightSampler, this.ctx.srtmRaster);
 
-        DataOp<UnsignedByteRaster> slope = ProduceSlopeOp.produce(heightSampler);
-        slope = InterpolationScaleOp.LINEAR.scaleFrom(slope, this.ctx.srtmRaster, UnsignedByteRaster::create);
-        slope = new TransformSlopeNoiseOp(0.5).apply(slope);
+        DataOp<UnsignedByteRaster> slope = SlopeOp.from(heights, (float) this.ctx.worldScale);
 
         LandCoverSource landCoverSource = new LandCoverSource(this.ctx.landcoverRaster);
         DataOp<UnsignedByteRaster> coverId = RasterSourceSampler.sampleUnsignedByte(landCoverSource);
@@ -75,13 +67,8 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
 
         DataOp<EnumRaster<Cover>> cover = ProduceCoverOp.produce(coverId);
 
-        DataOp<ObjRaster<SoilConfig>> soil = ProduceSoilOp.produce(coverId);
-
-        heights = new HeightNoiseTransformOp(2, 0.04, this.ctx.settings.getDouble(NOISE_SCALE))
-                .apply(heights, landforms);
-
-        heights = new HeightTransformOp(this.ctx.settings.getDouble(HEIGHT_SCALE) * this.ctx.worldScale, heightOrigin)
-                .apply(heights);
+        heights = new ScaleValueOp(this.ctx.settings.getDouble(HEIGHT_SCALE) * this.ctx.worldScale).applyShort(heights);
+        heights = new OffsetValueOp(heightOrigin).apply(heights);
 
         int seaLevel = heightOrigin + 1;
         int seaDepth = this.ctx.settings.getInteger(SEA_DEPTH);
@@ -108,15 +95,14 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
                 .with(EarthDataKeys.WATER_LEVEL, waterLevel)
                 .with(EarthDataKeys.AVERAGE_TEMPERATURE, averageTemperature)
                 .with(EarthDataKeys.MONTHLY_RAINFALL, monthlyRainfall)
-                .with(EarthDataKeys.SOIL, soil)
                 .build();
     }
 
     private InterpolationScaleOp selectScaleOp(GenerationSettings properties) {
-        double scale = 1.0 / properties.getDouble(WORLD_SCALE);
+        double scale = properties.getDouble(WORLD_SCALE);
         if (scale >= 45.0) {
             return InterpolationScaleOp.LINEAR;
-        } else if (scale >= 20.0) {
+        } else if (scale >= 25.0) {
             return InterpolationScaleOp.COSINE;
         } else {
             return InterpolationScaleOp.CUBIC;

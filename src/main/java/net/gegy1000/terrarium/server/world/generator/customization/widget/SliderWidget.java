@@ -8,6 +8,8 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.util.function.DoubleFunction;
+
 public class SliderWidget implements CustomizationWidget {
     private final PropertyKey<Number> propertyKey;
 
@@ -16,9 +18,9 @@ public class SliderWidget implements CustomizationWidget {
     private final double step;
     private final double fineStep;
 
-    private final WidgetPropertyConverter converter;
+    private final DoubleFunction<String> display;
 
-    public SliderWidget(PropertyKey<Number> propertyKey, double minimum, double maximum, double step, double fineStep, WidgetPropertyConverter converter) {
+    public SliderWidget(PropertyKey<Number> propertyKey, double minimum, double maximum, double step, double fineStep, DoubleFunction<String> display) {
         this.propertyKey = propertyKey;
 
         this.minimum = Math.min(minimum, maximum);
@@ -26,7 +28,7 @@ public class SliderWidget implements CustomizationWidget {
         this.step = step;
         this.fineStep = fineStep;
 
-        this.converter = converter;
+        this.display = display;
     }
 
     public SliderWidget(PropertyKey<Number> propertyKey, double minimum, double maximum, double step, double fineStep) {
@@ -37,14 +39,14 @@ public class SliderWidget implements CustomizationWidget {
         this.step = step;
         this.fineStep = fineStep;
 
-        this.converter = null;
+        this.display = null;
     }
 
     @Override
     @SideOnly(Side.CLIENT)
     public GuiButton createWidget(GenerationSettings settings, int id, int x, int y, Runnable onPropertyChange) {
         PropertyValue<Number> value = settings.getValue(this.propertyKey);
-        SliderGuiWidget widget = new SliderGuiWidget(id, x, y, this.propertyKey, value, this.minimum, this.maximum, this.step, this.fineStep, this.converter);
+        SliderGuiWidget widget = new SliderGuiWidget(id, x, y, this.propertyKey, value, this.minimum, this.maximum, this.step, this.fineStep, this.display);
         widget.addListener(onPropertyChange);
         return widget;
     }

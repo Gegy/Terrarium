@@ -55,7 +55,7 @@ public final class WeightedPool<T> implements Iterable<WeightedPool.Entry<T>> {
         private Builder() {
         }
 
-        public Builder<T> with(T value, float weight) {
+        public Builder<T> add(T value, float weight) {
             if (weight <= 0) {
                 throw new IllegalArgumentException("Weight must be >0");
             }

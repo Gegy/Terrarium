@@ -1,7 +1,7 @@
 package net.gegy1000.terrarium.server.world.chunk;
 
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
-import net.gegy1000.terrarium.server.capability.TerrariumWorldData;
+import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.util.Lazy;
 import net.gegy1000.terrarium.server.world.pipeline.composer.biome.BiomeComposer;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnData;
@@ -32,15 +32,15 @@ public class ComposableBiomeProvider extends BiomeProvider {
     public ComposableBiomeProvider(World world) {
         this.world = world;
 
-        this.dataCache = new Lazy<>(() -> {
-            TerrariumWorldData capability = this.world.getCapability(TerrariumCapabilities.worldDataCapability, null);
+        this.dataCache = Lazy.of(() -> {
+            TerrariumWorld capability = this.world.getCapability(TerrariumCapabilities.worldDataCapability, null);
             if (capability != null) {
                 return capability.getDataCache();
             }
             throw new IllegalStateException("Tried to load ColumnDataCache before it was present");
         });
 
-        this.biomeComposer = new Lazy.WorldCap<>(world, TerrariumWorldData::getBiomeComposer);
+        this.biomeComposer = Lazy.worldCap(world, TerrariumWorld::getBiomeComposer);
     }
 
     @Override

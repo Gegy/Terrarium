@@ -31,11 +31,11 @@ public final class ForestConfigurators {
             CoverConfigurators.DENSELY_HERBACEOUS.configure(config);
 
             VegetationDecorator.Builder builder = VegetationDecorator.builder()
-                    .withRadius(Trees.RADIUS)
-                    .withDensity(minDensity, maxDensity);
+                    .radius(Trees.RADIUS)
+                    .density(minDensity, maxDensity);
 
             for (WeightedPool<Vegetation> pool : pools) {
-                builder = builder.withVegetation(pool);
+                builder = builder.add(pool);
             }
 
             config.decorate(builder.build());
