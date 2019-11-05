@@ -10,13 +10,13 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 @Mod.EventBusSubscriber(modid = Terrarium.MODID)
 public class TerrariumPresetRegistry {
-    private static final Map<ResourceLocation, TerrariumPreset> PRESETS = new HashMap<>();
+    private static final Map<ResourceLocation, TerrariumPreset> PRESETS = new LinkedHashMap<>();
 
     private static final JsonDiscoverer<TerrariumPreset> DISCOVERER = new JsonDiscoverer<>(TerrariumPreset::parse);
 

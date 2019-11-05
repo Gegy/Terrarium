@@ -4,7 +4,7 @@ import net.minecraft.util.math.BlockPos;
 
 import java.util.Objects;
 
-public class Coordinate {
+public final class Coordinate {
     private final CoordinateState state;
 
     private final double x;
