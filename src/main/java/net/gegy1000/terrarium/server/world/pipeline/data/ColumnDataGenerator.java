@@ -8,7 +8,6 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public final class ColumnDataGenerator {
-    private final DataEngine engine = new DataEngine();
     private final ImmutableMap<DataKey<?>, DataOp<?>> attachedData;
 
     public ColumnDataGenerator(ImmutableMap<DataKey<?>, DataOp<?>> attachedData) {
@@ -26,7 +25,7 @@ public final class ColumnDataGenerator {
 
         this.attachedData.forEach((key, op) -> {
             try {
-                CompletableFuture<? extends Data> future = this.engine.load(op, view);
+                CompletableFuture<? extends Data> future = op.apply(view);
                 result.put(key, Optional.of(future.join()));
             } catch (Exception e) {
                 Terrarium.LOGGER.error("Failed to load DataOp result", e);

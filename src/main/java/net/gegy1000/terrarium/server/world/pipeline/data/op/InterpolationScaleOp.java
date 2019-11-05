@@ -41,7 +41,7 @@ public enum InterpolationScaleOp {
     }
 
     public <T extends NumberRaster<?>> DataOp<T> scaleFrom(DataOp<T> data, CoordinateState src, Function<DataView, T> function) {
-        return DataOp.of((engine, view) -> {
+        return DataOp.of(view -> {
             DataView srcView = this.getSourceView(view, src);
 
             double blockSizeX = view.getWidth();
@@ -60,7 +60,7 @@ public enum InterpolationScaleOp {
 
             double[][] sampleBuffer = this.sampleBuffer.get();
 
-            return engine.load(data, srcView).thenApply(source -> {
+            return data.apply(srcView).thenApply(source -> {
                 T result = function.apply(view);
                 this.lerpRaster(sampleBuffer, source, result, originOffsetX, originOffsetZ, scaleFactorX, scaleFactorZ);
                 return result;

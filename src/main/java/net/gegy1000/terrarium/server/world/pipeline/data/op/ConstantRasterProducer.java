@@ -11,7 +11,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class ConstantRasterProducer {
     public static DataOp<ByteRaster> bytes(byte value) {
-        return DataOp.of((engine, view) -> {
+        return DataOp.of(view -> {
             ByteRaster result = ByteRaster.create(view);
             Arrays.fill(result.getData(), value);
             return CompletableFuture.completedFuture(result);
@@ -19,7 +19,7 @@ public class ConstantRasterProducer {
     }
 
     public static DataOp<UnsignedByteRaster> unsignedBytes(int value) {
-        return DataOp.of((engine, view) -> {
+        return DataOp.of(view -> {
             UnsignedByteRaster result = UnsignedByteRaster.create(view);
             Arrays.fill(result.getData(), (byte) (value & 0xFF));
             return CompletableFuture.completedFuture(result);
@@ -27,7 +27,7 @@ public class ConstantRasterProducer {
     }
 
     public static DataOp<ShortRaster> shorts(short value) {
-        return DataOp.of((engine, view) -> {
+        return DataOp.of(view -> {
             ShortRaster result = ShortRaster.create(view);
             Arrays.fill(result.getData(), value);
             return CompletableFuture.completedFuture(result);
@@ -35,7 +35,7 @@ public class ConstantRasterProducer {
     }
 
     public static <T> DataOp<ObjRaster<T>> objects(T value) {
-        return DataOp.of((engine, view) -> {
+        return DataOp.of(view -> {
             ObjRaster<T> result = ObjRaster.create(value, view);
             return CompletableFuture.completedFuture(result);
         });

@@ -11,9 +11,9 @@ import java.util.concurrent.CompletableFuture;
 
 public final class ProduceLandformsOp {
     public static DataOp<EnumRaster<Landform>> produce(DataOp<ShortRaster> height, DataOp<UnsignedByteRaster> coverId) {
-        return DataOp.of((engine, view) -> {
-            CompletableFuture<ShortRaster> heightFuture = engine.load(height, view);
-            CompletableFuture<UnsignedByteRaster> coverIdFuture = engine.load(coverId, view);
+        return DataOp.of(view -> {
+            CompletableFuture<ShortRaster> heightFuture = height.apply(view);
+            CompletableFuture<UnsignedByteRaster> coverIdFuture = coverId.apply(view);
 
             return CompletableFuture.allOf(heightFuture, coverIdFuture)
                     .thenApply(v -> {

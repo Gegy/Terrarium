@@ -13,7 +13,7 @@ import java.awt.geom.Area;
 
 public final class PolygonToAreaOp {
     public static DataOp<AreaData> apply(DataOp<PolygonData> polygons, CoordinateState coordinateState) {
-        return polygons.map((polygonData, engine, view) -> {
+        return polygons.map((polygonData, view) -> {
             Area area = new Area();
 
             for (MultiPolygon polygon : polygonData.getPolygons()) {

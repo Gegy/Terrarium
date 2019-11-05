@@ -24,26 +24,26 @@ public final class DataOp<T extends Data> {
     }
 
     public static <T extends Data> DataOp<T> completed(T value) {
-        return new DataOp<>((engine, view) -> CompletableFuture.completedFuture(value));
+        return new DataOp<>(view -> CompletableFuture.completedFuture(value));
     }
 
-    CompletableFuture<T> apply(DataEngine engine, DataView view) {
+    public CompletableFuture<T> apply(DataView view) {
         try {
-            return this.cache.get(view, () -> this.function.apply(engine, view));
+            return this.cache.get(view, () -> this.function.apply(view));
         } catch (ExecutionException e) {
             throw new RuntimeException(e);
         }
     }
 
     public <U extends Data> DataOp<U> map(Mapper<T, U> mapper) {
-        return DataOp.of((engine, view) -> {
-            CompletableFuture<T> future = engine.load(this, view);
-            return future.thenApply(data -> mapper.map(data, engine, view));
+        return DataOp.of(view -> {
+            CompletableFuture<T> future = this.apply(view);
+            return future.thenApply(data -> mapper.map(data, view));
         });
     }
 
     public interface Mapper<T extends Data, U extends Data> {
-        U map(T data, DataEngine engine, DataView view);
+        U map(T data, DataView view);
     }
 }
 

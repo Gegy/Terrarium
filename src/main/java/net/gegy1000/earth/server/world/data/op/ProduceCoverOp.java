@@ -8,7 +8,7 @@ import net.gegy1000.terrarium.server.world.pipeline.data.raster.UnsignedByteRast
 
 public final class ProduceCoverOp {
     public static DataOp<EnumRaster<Cover>> produce(DataOp<UnsignedByteRaster> coverId) {
-        return coverId.map((coverIdRaster, engine, view) -> {
+        return coverId.map((coverIdRaster, view) -> {
             EnumRaster<Cover> coverRaster = EnumRaster.create(Cover.NONE, view);
             coverIdRaster.iterate((id, x, y) -> coverRaster.set(x, y, CoverIds.get(id)));
 

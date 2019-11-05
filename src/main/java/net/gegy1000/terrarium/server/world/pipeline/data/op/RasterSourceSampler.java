@@ -43,9 +43,7 @@ public final class RasterSourceSampler {
         int tileWidth = MathHelper.floor(tileSize.getX());
         int tileHeight = MathHelper.floor(tileSize.getZ());
 
-        return DataOp.of((engine, view) -> {
-            DataSourceHandler sourceHandler = engine.getSourceHandler();
-
+        return DataOp.of(view -> {
             int minTileX = Math.floorDiv(view.getX(), tileWidth);
             int maxTileX = Math.floorDiv((view.getX() + view.getWidth()), tileWidth);
             int minTileY = Math.floorDiv(view.getY(), tileHeight);
@@ -54,7 +52,7 @@ public final class RasterSourceSampler {
             DataTilePos minTile = new DataTilePos(minTileX, minTileY);
             DataTilePos maxTile = new DataTilePos(maxTileX, maxTileY);
 
-            return sourceHandler.getTiles(source, minTile, maxTile).thenApply(tiles -> {
+            return DataSourceHandler.INSTANCE.getTiles(source, minTile, maxTile).thenApply(tiles -> {
                 T result = function.apply(view);
                 for (DataTileEntry<T> tileEntry : tiles) {
                     sampleFromTile(tileEntry.getData(), tileEntry.getPos(), result, view);

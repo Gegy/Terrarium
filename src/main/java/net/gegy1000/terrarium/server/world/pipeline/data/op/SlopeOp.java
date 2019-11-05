@@ -21,9 +21,9 @@ public final class SlopeOp {
     }
 
     public static DataOp<UnsignedByteRaster> from(DataOp<ShortRaster> heights, float heightScale) {
-        return DataOp.of((engine, view) -> {
+        return DataOp.of(view -> {
             DataView sourceView = view.grow(1, 1, 1, 1);
-            return engine.load(heights, sourceView)
+            return heights.apply(sourceView)
                     .thenApply(source -> {
                         UnsignedByteRaster result = UnsignedByteRaster.create(view);
                         for (int localY = 0; localY < view.getHeight(); localY++) {

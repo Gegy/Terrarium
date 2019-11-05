@@ -12,14 +12,14 @@ public final class ScaleValueOp {
     }
 
     public DataOp<FloatRaster> applyFloat(DataOp<FloatRaster> source) {
-        return source.map((raster, engine, view) -> {
+        return source.map((raster, view) -> {
             raster.transform((sourceValue, x, y) -> (float) (sourceValue * this.scale));
             return raster;
         });
     }
 
     public DataOp<ShortRaster> applyShort(DataOp<ShortRaster> source) {
-        return source.map((raster, engine, view) -> {
+        return source.map((raster, view) -> {
             raster.transform((sourceValue, x, y) -> (short) Math.round(sourceValue * this.scale));
             return raster;
         });

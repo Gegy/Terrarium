@@ -15,7 +15,7 @@ public final class ClimateSampler {
     }
 
     public DataOp<ShortRaster> monthlyRainfall() {
-        return DataOp.of((engine, view) -> {
+        return DataOp.of(view -> {
             ShortRaster rainfallRaster = ShortRaster.create(view);
             for (int y = 0; y < view.getHeight(); y++) {
                 for (int x = 0; x < view.getWidth(); x++) {
@@ -29,7 +29,7 @@ public final class ClimateSampler {
 
     // TODO: Can probably make a byte raster
     public DataOp<FloatRaster> averageTemperature() {
-        return DataOp.of((engine, view) -> {
+        return DataOp.of(view -> {
             FloatRaster temperatureRaster = FloatRaster.create(view);
             for (int y = 0; y < view.getHeight(); y++) {
                 for (int x = 0; x < view.getWidth(); x++) {

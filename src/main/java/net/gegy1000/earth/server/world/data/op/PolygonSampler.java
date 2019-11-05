@@ -16,9 +16,7 @@ import java.util.Collection;
 
 public final class PolygonSampler {
     public static DataOp<PolygonData> sample(TiledDataSource<PolygonData> source, CoordinateState coordinateState) {
-        return DataOp.of((engine, view) -> {
-            DataSourceHandler sourceHandler = engine.getSourceHandler();
-
+        return DataOp.of(view -> {
             Coordinate blockMin = view.getMinCoordinate().to(coordinateState);
             Coordinate blockMax = view.getMaxCoordinate().to(coordinateState);
 
@@ -28,7 +26,7 @@ public final class PolygonSampler {
             DataTilePos minTilePos = getTilePos(source, min);
             DataTilePos maxTilePos = getTilePos(source, max);
 
-            return sourceHandler.getTiles(source, minTilePos, maxTilePos)
+            return DataSourceHandler.INSTANCE.getTiles(source, minTilePos, maxTilePos)
                     .thenApply(tiles -> {
                         PolygonClipper clipper = PolygonClipper.rect(min.getX(), min.getZ(), max.getX(), max.getZ());
 

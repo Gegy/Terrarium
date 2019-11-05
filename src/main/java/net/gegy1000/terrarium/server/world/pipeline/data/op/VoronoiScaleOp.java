@@ -13,7 +13,7 @@ import java.util.function.Function;
 public final class VoronoiScaleOp {
     public static <T extends Raster<?>> DataOp<T> scaleFrom(DataOp<T> data, CoordinateState src, Function<DataView, T> function) {
         Voronoi voronoi = new Voronoi(Voronoi.DistanceFunc.EUCLIDEAN, 0.9, 4, 1000);
-        return DataOp.of((engine, view) -> {
+        return DataOp.of(view -> {
             DataView srcView = getSourceView(view, src);
 
             double blockSizeX = view.getWidth();
@@ -30,7 +30,7 @@ public final class VoronoiScaleOp {
             double originOffsetX = minRegionCoordinate.getX() - srcView.getX();
             double originOffsetZ = minRegionCoordinate.getZ() - srcView.getY();
 
-            return engine.load(data, srcView).thenApply(source -> {
+            return data.apply(srcView).thenApply(source -> {
                 T result = function.apply(view);
                 voronoi.scale(source.getData(), result.getData(), srcView, view, scaleFactorX, scaleFactorZ, originOffsetX, originOffsetZ);
                 return result;

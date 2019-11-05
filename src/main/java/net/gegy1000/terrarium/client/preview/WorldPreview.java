@@ -50,7 +50,7 @@ public class WorldPreview implements IBlockAccess {
 
     private final WorldType worldType;
     private final PreviewDummyWorld world;
-    private final TerrariumWorld worldData;
+    private final TerrariumWorld terrarium;
 
     private final BlockingQueue<BufferBuilder> builderQueue;
 
@@ -79,8 +79,8 @@ public class WorldPreview implements IBlockAccess {
         TerrariumWorld.PREVIEW_WORLD.set(true);
         try {
             this.world = new PreviewDummyWorld(this.worldType, settings);
-            this.worldData = TerrariumWorld.get(this.world);
-            if (this.worldData == null) {
+            this.terrarium = TerrariumWorld.get(this.world);
+            if (this.terrarium == null) {
                 throw new IllegalStateException("Terrarium World Capability not present on preview world");
             }
         } finally {
@@ -91,7 +91,7 @@ public class WorldPreview implements IBlockAccess {
     }
 
     private void initiateGeneration() {
-        BlockPos spawnPosition = this.worldData.getSpawnPosition().toBlockPos();
+        BlockPos spawnPosition = this.terrarium.getSpawnPosition().toBlockPos();
 
         int spawnChunkX = spawnPosition.getX() >> 4;
         int spawnChunkZ = spawnPosition.getZ() >> 4;
@@ -178,7 +178,7 @@ public class WorldPreview implements IBlockAccess {
     }
 
     private ShortRaster sampleHeightRaster(int originX, int originZ, int size) {
-        ColumnDataCache dataCache = this.worldData.getDataCache();
+        ColumnDataCache dataCache = this.terrarium.getDataCache();
 
         DataView view = DataView.square(originX, originZ, size);
         return ShortRaster.sampler(EarthDataKeys.HEIGHT).sample(dataCache, view);
@@ -277,7 +277,7 @@ public class WorldPreview implements IBlockAccess {
 
         this.executor.shutdownNow();
 
-        this.worldData.getDataCache().close();
+        this.terrarium.getDataCache().close();
         DataSourceHandler.INSTANCE.cancelLoading();
     }
 

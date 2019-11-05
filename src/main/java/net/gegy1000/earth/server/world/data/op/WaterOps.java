@@ -11,9 +11,9 @@ import java.util.concurrent.CompletableFuture;
 
 public final class WaterOps {
     public static DataOp<EnumRaster<Landform>> applyWaterMask(DataOp<EnumRaster<Landform>> landforms, DataOp<BitRaster> ocean) {
-        return DataOp.of((engine, view) -> {
-            CompletableFuture<EnumRaster<Landform>> landformFuture = engine.load(landforms, view);
-            CompletableFuture<BitRaster> oceanFuture = engine.load(ocean, view);
+        return DataOp.of(view -> {
+            CompletableFuture<EnumRaster<Landform>> landformFuture = landforms.apply(view);
+            CompletableFuture<BitRaster> oceanFuture = ocean.apply(view);
 
             return CompletableFuture.allOf(landformFuture, oceanFuture)
                     .thenApply(v -> {
@@ -35,7 +35,7 @@ public final class WaterOps {
     }
 
     public static DataOp<ShortRaster> produceWaterLevel(DataOp<EnumRaster<Landform>> landforms, int seaLevel) {
-        return landforms.map((landformRaster, engine, view) -> {
+        return landforms.map((landformRaster, view) -> {
             ShortRaster waterLevelRaster = ShortRaster.create(view);
 
             landformRaster.iterate((landform, x, y) -> {
@@ -52,10 +52,10 @@ public final class WaterOps {
 
     // TODO: Carve smoothed edges
     public static DataOp<ShortRaster> applyToHeight(DataOp<ShortRaster> height, DataOp<EnumRaster<Landform>> landforms, DataOp<ShortRaster> waterLevel, int seaDepth) {
-        return DataOp.of((engine, view) -> {
-            CompletableFuture<ShortRaster> heightFuture = engine.load(height, view);
-            CompletableFuture<EnumRaster<Landform>> landformFuture = engine.load(landforms, view);
-            CompletableFuture<ShortRaster> waterLevelFuture = engine.load(waterLevel, view);
+        return DataOp.of(view -> {
+            CompletableFuture<ShortRaster> heightFuture = height.apply(view);
+            CompletableFuture<EnumRaster<Landform>> landformFuture = landforms.apply(view);
+            CompletableFuture<ShortRaster> waterLevelFuture = waterLevel.apply(view);
 
             return CompletableFuture.allOf(heightFuture, landformFuture, waterLevelFuture)
                     .thenApply(v -> {
@@ -81,9 +81,9 @@ public final class WaterOps {
 
     // TODO: Properly select cover type for filled in space!
     public static DataOp<EnumRaster<Cover>> applyToCover(DataOp<EnumRaster<Cover>> cover, DataOp<EnumRaster<Landform>> landforms) {
-        return DataOp.of((engine, view) -> {
-            CompletableFuture<EnumRaster<Cover>> coverFuture = engine.load(cover, view);
-            CompletableFuture<EnumRaster<Landform>> landformFuture = engine.load(landforms, view);
+        return DataOp.of(view -> {
+            CompletableFuture<EnumRaster<Cover>> coverFuture = cover.apply(view);
+            CompletableFuture<EnumRaster<Landform>> landformFuture = landforms.apply(view);
 
             return CompletableFuture.allOf(coverFuture, landformFuture)
                     .thenApply(v -> {

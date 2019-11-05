@@ -11,7 +11,7 @@ public final class OffsetValueOp {
     }
 
     public DataOp<ShortRaster> apply(DataOp<ShortRaster> heights) {
-        return heights.map((heightRaster, engine, view) -> {
+        return heights.map((heightRaster, view) -> {
             heightRaster.transform((source, x, y) -> (short) Math.round(source + this.offset));
             return heightRaster;
         });
