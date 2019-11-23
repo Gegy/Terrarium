@@ -94,4 +94,9 @@ public class DataView {
         result = 31 * result + this.height;
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "DataView{" + "x=" + this.x + ", y=" + this.y + ", width=" + this.width + ", height=" + this.height + '}';
+    }
 }

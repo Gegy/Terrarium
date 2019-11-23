@@ -80,11 +80,11 @@ public class ColumnDataCache implements AutoCloseable {
         return this.getEntry(columnPos).acquire();
     }
 
-    public <T extends Data> Optional<T> joinData(CubicPos cubicPos, DataKey<T> key) {
+    public <T> Optional<T> joinData(CubicPos cubicPos, DataKey<T> key) {
         return this.joinData(new ChunkPos(cubicPos.getX(), cubicPos.getZ()), key);
     }
 
-    public <T extends Data> Optional<T> joinData(ChunkPos columnPos, DataKey<T> key) {
+    public <T> Optional<T> joinData(ChunkPos columnPos, DataKey<T> key) {
         try (ColumnDataEntry.Handle handle = this.acquireEntry(columnPos)) {
             ColumnData columnData = handle.join();
             return columnData.get(key);

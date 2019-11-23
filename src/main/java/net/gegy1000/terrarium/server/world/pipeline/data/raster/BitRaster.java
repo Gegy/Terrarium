@@ -77,7 +77,6 @@ public final class BitRaster extends AbstractRaster<char[]> {
         }
     }
 
-    @Override
     public BitRaster copy() {
         return new BitRaster(Arrays.copyOf(this.data, this.data.length), this.width, this.height);
     }

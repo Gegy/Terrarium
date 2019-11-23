@@ -5,7 +5,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.util.FutureUtil;
-import net.gegy1000.terrarium.server.world.pipeline.data.Data;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,7 +22,7 @@ public enum DataSourceHandler {
 
     private final ExecutorService loadService = Executors.newFixedThreadPool(3, new ThreadFactoryBuilder().setNameFormat("terrarium-data-loader-%s").setDaemon(true).build());
 
-    private final Cache<DataTileKey<?>, Data> tileCache = CacheBuilder.newBuilder()
+    private final Cache<DataTileKey<?>, Object> tileCache = CacheBuilder.newBuilder()
             .maximumSize(32)
             .expireAfterAccess(30, TimeUnit.SECONDS)
             .build();
@@ -44,7 +43,7 @@ public enum DataSourceHandler {
         this.queuedTiles.clear();
     }
 
-    private <T extends Data> CompletableFuture<T> enqueueTile(DataTileKey<T> key) {
+    private <T> CompletableFuture<T> enqueueTile(DataTileKey<T> key) {
         CompletableFuture<T> future = CompletableFuture.supplyAsync(() -> this.loadTile(key), this.loadService)
                 .handle((result, throwable) -> {
                     if (throwable != null) {
@@ -61,7 +60,7 @@ public enum DataSourceHandler {
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends Data> CompletableFuture<T> getTile(TiledDataSource<T> source, DataTilePos pos) {
+    public <T> CompletableFuture<T> getTile(TiledDataSource<T> source, DataTilePos pos) {
         DataTileKey<T> key = new DataTileKey<>(source, pos.getTileX(), pos.getTileZ());
         try {
             T result = (T) this.tileCache.getIfPresent(key);
@@ -80,7 +79,7 @@ public enum DataSourceHandler {
         return CompletableFuture.completedFuture(source.getDefaultResult());
     }
 
-    public <T extends Data> CompletableFuture<Collection<DataTileEntry<T>>> getTiles(
+    public <T> CompletableFuture<Collection<DataTileEntry<T>>> getTiles(
             TiledDataSource<T> source,
             DataTilePos min,
             DataTilePos max
@@ -95,7 +94,7 @@ public enum DataSourceHandler {
         return this.getTiles(source, tiles);
     }
 
-    public <T extends Data> CompletableFuture<Collection<DataTileEntry<T>>> getTiles(TiledDataSource<T> source, Collection<DataTilePos> tilePositions) {
+    public <T> CompletableFuture<Collection<DataTileEntry<T>>> getTiles(TiledDataSource<T> source, Collection<DataTilePos> tilePositions) {
         Collection<CompletableFuture<DataTileEntry<T>>> tiles = tilePositions.stream()
                 .map(pos -> {
                     CompletableFuture<T> future = this.getTile(source, pos);
@@ -106,14 +105,14 @@ public enum DataSourceHandler {
         return FutureUtil.allOf(tiles);
     }
 
-    private <T extends Data> void handleResult(DataTileKey<T> key, T result) {
+    private <T> void handleResult(DataTileKey<T> key, T result) {
         synchronized (this.lock) {
             this.tileCache.put(key, result);
             this.queuedTiles.remove(key);
         }
     }
 
-    private <T extends Data> T loadTile(DataTileKey<T> key) {
+    private <T> T loadTile(DataTileKey<T> key) {
         TiledDataSource<T> source = key.getSource();
         try {
             return source.load(key.toPos())
@@ -123,7 +122,7 @@ public enum DataSourceHandler {
         }
     }
 
-    private <T extends Data> void logError(DataTileKey<T> key, Throwable throwable) {
+    private <T> void logError(DataTileKey<T> key, Throwable throwable) {
         TiledDataSource<T> source = key.getSource();
         String sourceName = source.getClass().getSimpleName();
         Terrarium.LOGGER.warn("[{}] Loading tile at {} rose error", sourceName, key.toPos(), throwable);

@@ -1,14 +1,13 @@
 package net.gegy1000.terrarium.server.world.pipeline.source;
 
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
-import net.gegy1000.terrarium.server.world.pipeline.data.Data;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
-public abstract class TiledDataSource<T extends Data> {
+public abstract class TiledDataSource<T> {
     public static final Path GLOBAL_CACHE_ROOT = Paths.get(".", "mods/terrarium/cache/");
 
     protected final Coordinate tileSize;

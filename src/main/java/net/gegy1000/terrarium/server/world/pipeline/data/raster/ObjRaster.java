@@ -57,7 +57,6 @@ public final class ObjRaster<T> extends AbstractRaster<T[]> {
         }
     }
 
-    @Override
     public ObjRaster<T> copy() {
         return new ObjRaster<>(Arrays.copyOf(this.data, this.data.length), this.width, this.height);
     }

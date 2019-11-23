@@ -69,7 +69,6 @@ public final class EnumRaster<T extends Enum<T>> extends AbstractRaster<byte[]> 
         }
     }
 
-    @Override
     public EnumRaster<T> copy() {
         return new EnumRaster<>(Arrays.copyOf(this.data, this.data.length), this.width, this.height, this.type);
     }

@@ -2,6 +2,7 @@ package net.gegy1000.terrarium.server.world.pipeline.data.op;
 
 import net.gegy1000.terrarium.server.world.pipeline.data.DataOp;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ByteRaster;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ObjRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.UnsignedByteRaster;
@@ -37,6 +38,13 @@ public class ConstantRasterProducer {
     public static <T> DataOp<ObjRaster<T>> objects(T value) {
         return DataOp.of(view -> {
             ObjRaster<T> result = ObjRaster.create(value, view);
+            return CompletableFuture.completedFuture(result);
+        });
+    }
+
+    public static <T extends Enum<T>> DataOp<EnumRaster<T>> enumVariants(T variant) {
+        return DataOp.of(view -> {
+            EnumRaster<T> result = EnumRaster.create(variant, view);
             return CompletableFuture.completedFuture(result);
         });
     }

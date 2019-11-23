@@ -48,13 +48,13 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
         SrtmHeightSource heightSource = new SrtmHeightSource(this.ctx.srtmRaster);
 
         DataOp<ShortRaster> heightSampler = RasterSourceSampler.sampleShort(heightSource);
-        DataOp<ShortRaster> heights = heightScaleOp.scaleShortsFrom(heightSampler, this.ctx.srtmRaster);
+        DataOp<ShortRaster> heights = heightScaleOp.scaleShortsFrom(heightSampler, this.ctx.srtmRaster).cached(ShortRaster::copy);
 
         DataOp<UnsignedByteRaster> slope = SlopeOp.from(heights, (float) this.ctx.worldScale);
 
         LandCoverSource landCoverSource = new LandCoverSource(this.ctx.landcoverRaster);
         DataOp<UnsignedByteRaster> coverId = RasterSourceSampler.sampleUnsignedByte(landCoverSource);
-        coverId = VoronoiScaleOp.scaleFrom(coverId, this.ctx.landcoverRaster, UnsignedByteRaster::create);
+        coverId = VoronoiScaleOp.scaleFrom(coverId, this.ctx.landcoverRaster, UnsignedByteRaster::create).cached(UnsignedByteRaster::copy);
 
         OceanPolygonSource oceanPolygonSource = new OceanPolygonSource(this.ctx.lngLatCoordinates);
 
@@ -63,7 +63,7 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
         DataOp<BitRaster> oceanMask = RasterizeAreaOp.apply(oceanArea);
 
         DataOp<EnumRaster<Landform>> landforms = ProduceLandformsOp.produce(heights, coverId);
-        landforms = WaterOps.applyWaterMask(landforms, oceanMask);
+        landforms = WaterOps.applyWaterMask(landforms, oceanMask).cached(EnumRaster::copy);
 
         DataOp<EnumRaster<Cover>> cover = ProduceCoverOp.produce(coverId);
 
@@ -73,7 +73,7 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
         int seaLevel = heightOrigin + 1;
         int seaDepth = this.ctx.settings.getInteger(SEA_DEPTH);
 
-        DataOp<ShortRaster> waterLevel = WaterOps.produceWaterLevel(landforms, seaLevel);
+        DataOp<ShortRaster> waterLevel = WaterOps.produceWaterLevel(landforms, seaLevel).cached(ShortRaster::copy);
 
         cover = WaterOps.applyToCover(cover, landforms);
         heights = WaterOps.applyToHeight(heights, landforms, waterLevel, seaDepth);

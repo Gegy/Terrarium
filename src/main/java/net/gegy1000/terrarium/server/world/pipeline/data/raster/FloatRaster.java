@@ -61,7 +61,6 @@ public final class FloatRaster extends AbstractRaster<float[]> implements Number
         return this.get(x, y);
     }
 
-    @Override
     public FloatRaster copy() {
         return new FloatRaster(Arrays.copyOf(this.data, this.data.length), this.width, this.height);
     }

@@ -2,7 +2,7 @@ package net.gegy1000.terrarium.server.world.pipeline.data;
 
 import net.minecraft.util.ResourceLocation;
 
-public final class DataKey<T extends Data> {
+public final class DataKey<T> {
     private final ResourceLocation identifier;
 
     public DataKey(ResourceLocation identifier) {

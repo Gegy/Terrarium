@@ -65,7 +65,6 @@ public final class UnsignedByteRaster extends AbstractRaster<byte[]> implements 
         return this.get(x, y);
     }
 
-    @Override
     public UnsignedByteRaster copy() {
         return new UnsignedByteRaster(Arrays.copyOf(this.data, this.data.length), this.width, this.height);
     }

@@ -5,15 +5,15 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Optional;
 
 public class ColumnData {
-    private final ImmutableMap<DataKey<?>, Optional<? extends Data>> store;
+    private final ImmutableMap<DataKey<?>, Optional<?>> store;
 
-    ColumnData(ImmutableMap<DataKey<?>, Optional<? extends Data>> store) {
+    ColumnData(ImmutableMap<DataKey<?>, Optional<?>> store) {
         this.store = store;
     }
 
     @SuppressWarnings({ "unchecked", "OptionalAssignedToNull" })
-    public <T extends Data> Optional<T> get(DataKey<T> key) throws IllegalArgumentException {
-        Optional<? extends Data> data = this.store.get(key);
+    public <T> Optional<T> get(DataKey<T> key) throws IllegalArgumentException {
+        Optional<?> data = this.store.get(key);
         if (data == null) {
             throw new IllegalArgumentException("Data with key " + key.getIdentifier() + " not found!");
         }

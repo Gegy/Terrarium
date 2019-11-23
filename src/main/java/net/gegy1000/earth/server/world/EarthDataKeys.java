@@ -3,7 +3,6 @@ package net.gegy1000.earth.server.world;
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.geography.Landform;
-import net.gegy1000.terrarium.server.world.pipeline.data.Data;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataKey;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.FloatRaster;
@@ -20,7 +19,7 @@ public class EarthDataKeys {
     public static final DataKey<FloatRaster> AVERAGE_TEMPERATURE = create("temperature");
     public static final DataKey<ShortRaster> MONTHLY_RAINFALL = create("rainfall");
 
-    private static <T extends Data> DataKey<T> create(String name) {
+    private static <T> DataKey<T> create(String name) {
         return new DataKey<>(new ResourceLocation(TerrariumEarth.MODID, name));
     }
 }

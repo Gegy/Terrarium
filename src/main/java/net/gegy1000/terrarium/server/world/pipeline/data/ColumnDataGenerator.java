@@ -21,11 +21,11 @@ public final class ColumnDataGenerator {
     public ColumnData generate(ChunkPos columnPos) {
         DataView view = DataView.of(columnPos);
 
-        ImmutableMap.Builder<DataKey<?>, Optional<? extends Data>> result = ImmutableMap.builder();
+        ImmutableMap.Builder<DataKey<?>, Optional<?>> result = ImmutableMap.builder();
 
         this.attachedData.forEach((key, op) -> {
             try {
-                CompletableFuture<? extends Data> future = op.apply(view);
+                CompletableFuture<?> future = op.apply(view);
                 result.put(key, Optional.of(future.join()));
             } catch (Exception e) {
                 Terrarium.LOGGER.error("Failed to load DataOp result", e);
@@ -42,7 +42,7 @@ public final class ColumnDataGenerator {
         private Builder() {
         }
 
-        public <T extends Data> Builder with(DataKey<T> key, DataOp<T> data) {
+        public <T> Builder with(DataKey<T> key, DataOp<T> data) {
             this.attachedData.put(key, data);
             return this;
         }

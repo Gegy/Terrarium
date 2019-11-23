@@ -1,8 +1,6 @@
 package net.gegy1000.terrarium.server.world.pipeline.data.raster;
 
-import net.gegy1000.terrarium.server.world.pipeline.data.Data;
-
-public interface Raster<T> extends Data {
+public interface Raster<T> {
     int getWidth();
 
     int getHeight();
@@ -12,7 +10,4 @@ public interface Raster<T> extends Data {
     default int index(int x, int y) {
         return x + y * this.getWidth();
     }
-
-    @Override
-    Raster<T> copy();
 }

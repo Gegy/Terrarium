@@ -1,8 +1,6 @@
 package net.gegy1000.terrarium.server.world.pipeline.source;
 
-import net.gegy1000.terrarium.server.world.pipeline.data.Data;
-
-public final class DataTileEntry<T extends Data> {
+public final class DataTileEntry<T> {
     private final DataTilePos pos;
     private final T data;
 

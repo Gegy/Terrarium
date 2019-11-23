@@ -65,7 +65,6 @@ public final class ShortRaster extends AbstractRaster<short[]> implements Number
         return this.get(x, y);
     }
 
-    @Override
     public ShortRaster copy() {
         return new ShortRaster(Arrays.copyOf(this.data, this.data.length), this.width, this.height);
     }

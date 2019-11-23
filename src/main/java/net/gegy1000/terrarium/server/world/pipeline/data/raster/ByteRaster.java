@@ -67,7 +67,6 @@ public final class ByteRaster extends AbstractRaster<byte[]> implements NumberRa
         return this.get(x, y);
     }
 
-    @Override
     public ByteRaster copy() {
         return new ByteRaster(Arrays.copyOf(this.data, this.data.length), this.width, this.height);
     }

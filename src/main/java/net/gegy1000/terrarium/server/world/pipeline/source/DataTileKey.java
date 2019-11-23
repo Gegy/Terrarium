@@ -1,8 +1,6 @@
 package net.gegy1000.terrarium.server.world.pipeline.source;
 
-import net.gegy1000.terrarium.server.world.pipeline.data.Data;
-
-public class DataTileKey<T extends Data> {
+public class DataTileKey<T> {
     private final TiledDataSource<T> source;
     private final int tileX;
     private final int tileZ;

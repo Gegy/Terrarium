@@ -11,7 +11,6 @@ import java.util.concurrent.Callable;
 public class TerrariumCapabilities {
     public static final ResourceLocation WORLD_DATA_ID = new ResourceLocation(Terrarium.MODID, "world_data");
     public static final ResourceLocation EXTERNAL_DATA_ID = new ResourceLocation(Terrarium.MODID, "external_data");
-    public static final ResourceLocation TRACKER_HOOKS_ID = new ResourceLocation(Terrarium.MODID, "tracker_hooks");
 
     @CapabilityInject(TerrariumWorld.class)
     public static Capability<TerrariumWorld> worldDataCapability;
