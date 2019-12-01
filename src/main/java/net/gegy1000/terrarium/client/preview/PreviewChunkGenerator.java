@@ -1,7 +1,7 @@
 package net.gegy1000.terrarium.client.preview;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import net.gegy1000.cubicglue.util.CubicPos;
+import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.terrarium.server.world.chunk.ComposableCubeGenerator;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;

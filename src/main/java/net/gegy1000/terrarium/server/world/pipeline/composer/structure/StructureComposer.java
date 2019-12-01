@@ -1,20 +1,22 @@
 package net.gegy1000.terrarium.server.world.pipeline.composer.structure;
 
-import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataCache;
+import net.gegy1000.gengen.api.ChunkPopulationWriter;
+import net.gegy1000.gengen.api.ChunkPrimeWriter;
+import net.gegy1000.gengen.api.CubicPos;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.chunk.ChunkPrimer;
-import net.minecraft.world.gen.IChunkGenerator;
 
 import javax.annotation.Nullable;
 
 public interface StructureComposer {
-    void composeStructures(IChunkGenerator generator, ChunkPrimer primer, ColumnDataCache dataCache, int chunkX, int chunkZ);
+    void prepareStructures(CubicPos pos);
 
-    void populateStructures(World world, ColumnDataCache dataCache, int chunkX, int chunkZ);
+    void primeStructures(CubicPos pos, ChunkPrimeWriter writer);
 
-    boolean isInsideStructure(World world, String structureName, BlockPos pos);
+    void populateStructures(CubicPos pos, ChunkPopulationWriter writer);
+
+    boolean isInsideStructure(World world, String name, BlockPos pos);
 
     @Nullable
-    BlockPos getNearestStructure(World world, String structureName, BlockPos pos, boolean findUnexplored);
+    BlockPos getClosestStructure(World world, String name, BlockPos pos, boolean findUnexplored);
 }

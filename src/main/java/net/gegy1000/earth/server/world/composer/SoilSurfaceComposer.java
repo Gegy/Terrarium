@@ -1,8 +1,8 @@
 package net.gegy1000.earth.server.world.composer;
 
-import net.gegy1000.cubicglue.api.ChunkPrimeWriter;
-import net.gegy1000.cubicglue.util.CubicPos;
-import net.gegy1000.cubicglue.util.PseudoRandomMap;
+import net.gegy1000.gengen.api.ChunkPrimeWriter;
+import net.gegy1000.gengen.api.CubicPos;
+import net.gegy1000.gengen.util.SpatialRandom;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.SurfaceComposer;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnData;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataKey;
@@ -29,7 +29,7 @@ public class SoilSurfaceComposer implements SurfaceComposer {
     private double[] depthBuffer = new double[16 * 16];
 
     private final Random random;
-    private final PseudoRandomMap coverMap;
+    private final SpatialRandom coverMap;
 
     private final DataKey<ShortRaster> heightKey;
     private final DataKey<UnsignedByteRaster> slopeKey;
@@ -44,7 +44,7 @@ public class SoilSurfaceComposer implements SurfaceComposer {
     ) {
         this.random = new Random(world.getWorldInfo().getSeed() ^ SEED);
         this.depthNoise = new NoiseGeneratorPerlin(this.random, 4);
-        this.coverMap = new PseudoRandomMap(world.getWorldInfo().getSeed(), this.random.nextLong());
+        this.coverMap = new SpatialRandom(world.getWorldInfo().getSeed(), this.random.nextLong());
 
         this.heightKey = heightKey;
         this.slopeKey = slopeKey;

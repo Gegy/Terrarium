@@ -3,8 +3,9 @@ package net.gegy1000.terrarium.client.preview;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import net.gegy1000.cubicglue.util.CubicPos;
+import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.earth.server.world.EarthDataKeys;
+import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
@@ -247,8 +248,7 @@ public class WorldPreview implements IBlockAccess {
         }
 
         long startTime = System.nanoTime();
-
-        while (System.nanoTime() - startTime < 10000000) {
+        while (System.nanoTime() - startTime < (1000 / 30) * 1000000) {
             PreviewChunk chunk = this.takeNextReadyChunk();
             if (chunk == null) {
                 break;

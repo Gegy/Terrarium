@@ -1,10 +1,10 @@
 package net.gegy1000.earth.server.world.composer;
 
-import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
-import net.gegy1000.cubicglue.util.CubicPos;
-import net.gegy1000.cubicglue.util.PseudoRandomMap;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.cover.CoverConfig;
+import net.gegy1000.gengen.api.ChunkPopulationWriter;
+import net.gegy1000.gengen.api.CubicPos;
+import net.gegy1000.gengen.util.SpatialRandom;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataKey;
@@ -17,7 +17,7 @@ public class EarthDecorationComposer implements DecorationComposer {
     private static final long DECORATION_SEED = 2492037454623254033L;
 
     private final Random random;
-    private final PseudoRandomMap coverMap;
+    private final SpatialRandom coverMap;
 
     private final EnumRaster.Sampler<Cover> coverSampler;
 
@@ -25,7 +25,7 @@ public class EarthDecorationComposer implements DecorationComposer {
         long seed = world.getWorldInfo().getSeed();
 
         this.random = new Random(seed ^ DECORATION_SEED);
-        this.coverMap = new PseudoRandomMap(seed, this.random.nextLong());
+        this.coverMap = new SpatialRandom(seed, this.random.nextLong());
 
         this.coverSampler = EnumRaster.sampler(coverKey, Cover.NONE);
     }

@@ -1,7 +1,7 @@
 package net.gegy1000.terrarium.server.world.pipeline.data;
 
-import net.gegy1000.cubicglue.CubicGlue;
-import net.gegy1000.cubicglue.util.CubicPos;
+import net.gegy1000.gengen.api.CubicPos;
+import net.gegy1000.gengen.core.GenGen;
 import net.gegy1000.terrarium.server.world.chunk.tracker.ChunkTrackerAccess;
 import net.gegy1000.terrarium.server.world.chunk.tracker.ColumnTrackerAccess;
 import net.gegy1000.terrarium.server.world.chunk.tracker.CubeTrackerAccess;
@@ -36,7 +36,7 @@ public class ColumnDataCache implements AutoCloseable {
         if (!(world instanceof WorldServer)) {
             return FallbackTrackerAccess.INSTANCE;
         }
-        if (CubicGlue.isCubic(world)) {
+        if (GenGen.isCubic(world)) {
             return createCubeTracker((WorldServer) world);
         }
         return new ColumnTrackerAccess((WorldServer) world);

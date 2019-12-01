@@ -56,7 +56,6 @@ public class ColumnTrackerAccess implements ChunkTrackerAccess {
         return Collections.emptyList();
     }
 
-    @SuppressWarnings("unchecked")
     private static List<PlayerChunkMapEntry> getSortedChunkEntries(PlayerChunkMap chunkTracker) {
         List<PlayerChunkMapEntry> entries = getEntries(chunkTracker);
 

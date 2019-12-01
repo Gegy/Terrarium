@@ -1,13 +1,13 @@
 package net.gegy1000.terrarium.server.util;
 
-import net.gegy1000.cubicglue.util.PseudoRandomMap;
+import net.gegy1000.gengen.util.SpatialRandom;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataView;
 import net.minecraft.util.math.MathHelper;
 
 public class Voronoi {
     private static final long DISPLACEMENT_SEED = 2016969737595986194L;
 
-    private final PseudoRandomMap random;
+    private final SpatialRandom random;
 
     private final DistanceFunc distanceFunc;
     private final double fuzzRange;
@@ -18,7 +18,7 @@ public class Voronoi {
         this.fuzzRange = fuzzRange;
         this.gridSize = gridSize;
 
-        this.random = new PseudoRandomMap(seed, DISPLACEMENT_SEED);
+        this.random = new SpatialRandom(seed, DISPLACEMENT_SEED);
     }
 
     public <T> void scale(T input, T output, DataView sourceView, DataView scaledView,

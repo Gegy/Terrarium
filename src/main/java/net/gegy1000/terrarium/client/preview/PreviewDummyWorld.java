@@ -1,6 +1,6 @@
 package net.gegy1000.terrarium.client.preview;
 
-import net.gegy1000.cubicglue.GluedColumnGenerator;
+import net.gegy1000.gengen.core.impl.vanilla.ColumnGeneratorImpl;
 import net.gegy1000.terrarium.server.world.chunk.ComposableCubeGenerator;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.minecraft.nbt.NBTTagCompound;
@@ -51,7 +51,7 @@ public class PreviewDummyWorld extends World {
 
     @Override
     protected IChunkProvider createChunkProvider() {
-        return new ChunkCache(new GluedColumnGenerator(this, this.generator));
+        return new ChunkCache(new ColumnGeneratorImpl(this, this.generator));
     }
 
     @Override

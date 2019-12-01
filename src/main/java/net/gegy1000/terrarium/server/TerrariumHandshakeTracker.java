@@ -1,6 +1,6 @@
 package net.gegy1000.terrarium.server;
 
-import net.gegy1000.cubicglue.api.CubicWorldType;
+import net.gegy1000.gengen.api.GenericWorldType;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumExternalCapProvider;
@@ -34,7 +34,7 @@ public class TerrariumHandshakeTracker {
             return;
         }
 
-        CubicWorldType worldType = CubicWorldType.unwrap(world.getWorldType());
+        GenericWorldType worldType = GenericWorldType.unwrap(world.getWorldType());
         if (!(worldType instanceof TerrariumWorldType)) {
             return;
         }

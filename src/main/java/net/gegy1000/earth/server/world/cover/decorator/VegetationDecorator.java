@@ -1,7 +1,7 @@
 package net.gegy1000.earth.server.world.cover.decorator;
 
-import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
-import net.gegy1000.cubicglue.util.CubicPos;
+import net.gegy1000.gengen.api.ChunkPopulationWriter;
+import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.earth.server.world.ecology.GrowthPredictors;
 import net.gegy1000.earth.server.world.ecology.vegetation.Vegetation;
 import net.gegy1000.terrarium.server.util.WeightedPool;

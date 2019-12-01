@@ -1,8 +1,8 @@
 package net.gegy1000.terrarium.server.world;
 
 import com.google.common.base.Strings;
-import net.gegy1000.cubicglue.api.CubicChunkGenerator;
-import net.gegy1000.cubicglue.api.CubicWorldType;
+import net.gegy1000.gengen.api.GenericChunkGenerator;
+import net.gegy1000.gengen.api.GenericWorldType;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.client.gui.customization.SelectPresetGui;
 import net.gegy1000.terrarium.client.gui.customization.TerrariumCustomizationGui;
@@ -30,7 +30,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.Collection;
 
-public abstract class TerrariumWorldType implements CubicWorldType {
+public abstract class TerrariumWorldType implements GenericWorldType {
     private final String name;
     private final ResourceLocation identifier;
     private final ResourceLocation presetIdentifier;
@@ -60,7 +60,7 @@ public abstract class TerrariumWorldType implements CubicWorldType {
     }
 
     @Override
-    public CubicChunkGenerator createGenerator(World world) {
+    public GenericChunkGenerator createGenerator(World world) {
         return new ComposableCubeGenerator(world);
     }
 

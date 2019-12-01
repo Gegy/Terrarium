@@ -1,8 +1,8 @@
 package net.gegy1000.terrarium.server.world.pipeline.composer.surface;
 
-import net.gegy1000.cubicglue.api.ChunkPrimeWriter;
-import net.gegy1000.cubicglue.util.CubicPos;
-import net.gegy1000.cubicglue.util.PseudoRandomMap;
+import net.gegy1000.gengen.api.ChunkPrimeWriter;
+import net.gegy1000.gengen.api.CubicPos;
+import net.gegy1000.gengen.util.SpatialRandom;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnData;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.World;
@@ -10,13 +10,13 @@ import net.minecraft.world.World;
 public class BedrockSurfaceComposer implements SurfaceComposer {
     private static final long BEDROCK_SCATTER_SEED = 5654549466233716589L;
 
-    private final PseudoRandomMap scatterMap;
+    private final SpatialRandom scatterMap;
 
     private final IBlockState block;
     private final int scatterRange;
 
     public BedrockSurfaceComposer(World world, IBlockState block, int scatterRange) {
-        this.scatterMap = new PseudoRandomMap(world, BEDROCK_SCATTER_SEED);
+        this.scatterMap = new SpatialRandom(world, BEDROCK_SCATTER_SEED);
 
         this.block = block;
         this.scatterRange = scatterRange;

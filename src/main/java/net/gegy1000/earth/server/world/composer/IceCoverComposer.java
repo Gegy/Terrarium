@@ -1,7 +1,7 @@
 package net.gegy1000.earth.server.world.composer;
 
-import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
-import net.gegy1000.cubicglue.util.CubicPos;
+import net.gegy1000.gengen.api.ChunkPopulationWriter;
+import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataCache;
 import net.minecraft.block.Block;

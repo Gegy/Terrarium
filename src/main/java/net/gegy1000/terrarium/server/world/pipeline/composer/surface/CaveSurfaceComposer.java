@@ -1,20 +1,20 @@
 package net.gegy1000.terrarium.server.world.pipeline.composer.surface;
 
-import net.gegy1000.cubicglue.api.ChunkPrimeWriter;
-import net.gegy1000.cubicglue.api.CubicChunkPrimer;
-import net.gegy1000.cubicglue.util.CubicPos;
-import net.gegy1000.cubicglue.util.primer.CubicCavePrimer;
-import net.gegy1000.cubicglue.util.primer.CubicRavinePrimer;
+import net.gegy1000.gengen.api.ChunkPrimeWriter;
+import net.gegy1000.gengen.api.CubicPos;
+import net.gegy1000.gengen.api.GenericChunkPrimer;
+import net.gegy1000.gengen.util.primer.GenericCavePrimer;
+import net.gegy1000.gengen.util.primer.GenericRavinePrimer;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnData;
 import net.minecraft.world.World;
 
 public class CaveSurfaceComposer implements SurfaceComposer {
-    private final CubicChunkPrimer caveGenerator;
-    private final CubicChunkPrimer ravineGenerator;
+    private final GenericChunkPrimer caveGenerator;
+    private final GenericChunkPrimer ravineGenerator;
 
     public CaveSurfaceComposer(World world) {
-        this.caveGenerator = new CubicCavePrimer(world);
-        this.ravineGenerator = new CubicRavinePrimer(world, world.getSeaLevel());
+        this.caveGenerator = new GenericCavePrimer(world);
+        this.ravineGenerator = new GenericRavinePrimer(world, world.getSeaLevel());
     }
 
     @Override

@@ -1,7 +1,7 @@
 package net.gegy1000.earth.client.gui;
 
-import net.gegy1000.cubicglue.api.CubicWorldType;
 import net.gegy1000.earth.server.shared.SharedEarthData;
+import net.gegy1000.gengen.api.GenericWorldType;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiListWorldSelection;
@@ -22,7 +22,7 @@ public class HookedWorldSelectionEntry extends GuiListWorldSelectionEntry {
         if (!SharedEarthData.isInitialized()) {
             WorldInfo worldInfo = SAVE_FORMAT.getWorldInfo(this.worldSummary.getFileName());
             if (worldInfo != null) {
-                CubicWorldType worldType = CubicWorldType.unwrap(worldInfo.getTerrainType());
+                GenericWorldType worldType = GenericWorldType.unwrap(worldInfo.getTerrainType());
                 if (worldType instanceof TerrariumWorldType) {
                     CLIENT.displayGuiScreen(new SharedInitializingGui(CLIENT.currentScreen, super::joinWorld));
                     return;

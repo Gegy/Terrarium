@@ -1,6 +1,5 @@
 package net.gegy1000.earth.server.world;
 
-import net.gegy1000.cubicglue.CubicGlue;
 import net.gegy1000.earth.server.world.composer.BoulderDecorationComposer;
 import net.gegy1000.earth.server.world.composer.EarthBiomeComposer;
 import net.gegy1000.earth.server.world.composer.EarthCarvingComposer;
@@ -8,6 +7,7 @@ import net.gegy1000.earth.server.world.composer.EarthDecorationComposer;
 import net.gegy1000.earth.server.world.composer.IceCoverComposer;
 import net.gegy1000.earth.server.world.composer.SoilSurfaceComposer;
 import net.gegy1000.earth.server.world.composer.WaterFillSurfaceComposer;
+import net.gegy1000.gengen.core.GenGen;
 import net.gegy1000.terrarium.server.world.TerrariumGeneratorInitializer;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.generator.CompositeTerrariumGenerator;
@@ -56,7 +56,7 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
             builder.addSurfaceComposer(new CaveSurfaceComposer(this.ctx.world));
         }
 
-        if (!CubicGlue.isCubic(this.ctx.world)) {
+        if (!GenGen.isCubic(this.ctx.world)) {
             builder.addSurfaceComposer(new BedrockSurfaceComposer(this.ctx.world, Blocks.BEDROCK.getDefaultState(), Math.min(heightOrigin - 1, 5)));
         }
     }

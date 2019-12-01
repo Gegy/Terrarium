@@ -1,6 +1,6 @@
 package net.gegy1000.terrarium.client.preview;
 
-import net.gegy1000.cubicglue.util.CubicPos;
+import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.client.render.TerrariumVertexFormats;
 import net.minecraft.block.BlockGrass;

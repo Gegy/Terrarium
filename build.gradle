@@ -42,7 +42,7 @@ configurations {
 dependencies {
   deobfCompile 'io.github.opencubicchunks:cubicchunks-api:1.12.2-0.0-SNAPSHOT'
   deobfCompile 'io.github.opencubicchunks:cubicchunks:1.12.2-0.0-SNAPSHOT'
-  embed 'net.gegy1000:cubic-glue:0.3.0-SNAPSHOT'
+  embed 'net.gegy1000:gengen:0.1.0-SNAPSHOT'
   embed 'com.vividsolutions:jts:1.13'
   embed 'org.tukaani:xz-fork:1.8'
 }

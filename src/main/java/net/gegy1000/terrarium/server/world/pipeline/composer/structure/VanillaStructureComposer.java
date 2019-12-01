@@ -1,14 +1,13 @@
 package net.gegy1000.terrarium.server.world.pipeline.composer.structure;
 
-import net.gegy1000.cubicglue.util.PseudoRandomMap;
-import net.gegy1000.cubicglue.util.wrapper.OverworldGeneratorWrapper;
-import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataCache;
+import net.gegy1000.gengen.api.ChunkPopulationWriter;
+import net.gegy1000.gengen.api.ChunkPrimeWriter;
+import net.gegy1000.gengen.api.CubicPos;
+import net.gegy1000.gengen.util.SpatialRandom;
+import net.gegy1000.gengen.util.wrapper.OverworldGeneratorWrapper;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
-import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.gen.ChunkGeneratorOverworld;
-import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.gen.structure.MapGenMineshaft;
 import net.minecraft.world.gen.structure.MapGenScatteredFeature;
 import net.minecraft.world.gen.structure.MapGenStronghold;
@@ -22,12 +21,13 @@ import net.minecraftforge.event.terraingen.TerrainGen;
 import javax.annotation.Nullable;
 import java.util.Random;
 
+// TODO: implement
 public class VanillaStructureComposer implements StructureComposer {
     private static final long STRUCTURE_SEED = 4826762579208967777L;
 
     private final World world;
     private final Random random = new Random(0);
-    private final PseudoRandomMap randomMap;
+    private final SpatialRandom spatialRandom;
 
     private final MapGenStructure strongholdGenerator;
     private final MapGenStructure villageGenerator;
@@ -38,7 +38,7 @@ public class VanillaStructureComposer implements StructureComposer {
 
     public VanillaStructureComposer(World world) {
         this.world = world;
-        this.randomMap = new PseudoRandomMap(world, STRUCTURE_SEED);
+        this.spatialRandom = new SpatialRandom(world, STRUCTURE_SEED);
 
         ChunkGeneratorOverworld overworldWrapper = OverworldGeneratorWrapper.from(world);
 
@@ -51,40 +51,56 @@ public class VanillaStructureComposer implements StructureComposer {
     }
 
     @Override
-    public void composeStructures(IChunkGenerator generator, ChunkPrimer primer, ColumnDataCache dataCache, int chunkX, int chunkZ) {
+    public void prepareStructures(CubicPos pos) {
+        /*int chunkX = pos.getX();
+        int chunkZ = pos.getZ();
+
+        this.mineshaftGenerator.generate(this.world, chunkX, chunkZ, null);
+        this.villageGenerator.generate(this.world, chunkX, chunkZ, null);
+        this.strongholdGenerator.generate(this.world, chunkX, chunkZ, null);
+        this.templeGenerator.generate(this.world, chunkX, chunkZ, null);
+        this.oceanMonumentGenerator.generate(this.world, chunkX, chunkZ, null);
+        this.woodlandMansionGenerator.generate(this.world, chunkX, chunkZ, null);*/
+    }
+
+    @Override
+    public void primeStructures(CubicPos pos, ChunkPrimeWriter writer) {
+        /*int chunkX = pos.getX();
+        int chunkZ = pos.getZ();
+
         this.mineshaftGenerator.generate(this.world, chunkX, chunkZ, primer);
         this.villageGenerator.generate(this.world, chunkX, chunkZ, primer);
         this.strongholdGenerator.generate(this.world, chunkX, chunkZ, primer);
         this.templeGenerator.generate(this.world, chunkX, chunkZ, primer);
         this.oceanMonumentGenerator.generate(this.world, chunkX, chunkZ, primer);
-        this.woodlandMansionGenerator.generate(this.world, chunkX, chunkZ, primer);
+        this.woodlandMansionGenerator.generate(this.world, chunkX, chunkZ, primer);*/
     }
 
     @Override
-    public void populateStructures(World world, ColumnDataCache dataCache, int chunkX, int chunkZ) {
-        this.randomMap.initPosSeed(chunkX << 4, chunkZ << 4);
+    public void populateStructures(CubicPos pos, ChunkPopulationWriter writer) {
+        /*this.randomMap.initPosSeed(pos.getMinX(), pos.getMinZ());
         this.random.setSeed(this.randomMap.next());
 
-        ChunkPos chunkPos = new ChunkPos(chunkX, chunkZ);
+        ChunkPos chunkPos = new ChunkPos(pos.getX(), pos.getZ());
 
-        this.mineshaftGenerator.generateStructure(world, this.random, chunkPos);
-        this.villageGenerator.generateStructure(world, this.random, chunkPos);
-        this.strongholdGenerator.generateStructure(world, this.random, chunkPos);
-        this.templeGenerator.generateStructure(world, this.random, chunkPos);
-        this.oceanMonumentGenerator.generateStructure(world, this.random, chunkPos);
-        this.woodlandMansionGenerator.generateStructure(world, this.random, chunkPos);
+        this.mineshaftGenerator.generateStructure(this.world, this.random, chunkPos);
+        this.villageGenerator.generateStructure(this.world, this.random, chunkPos);
+        this.strongholdGenerator.generateStructure(this.world, this.random, chunkPos);
+        this.templeGenerator.generateStructure(this.world, this.random, chunkPos);
+        this.oceanMonumentGenerator.generateStructure(this.world, this.random, chunkPos);
+        this.woodlandMansionGenerator.generateStructure(this.world, this.random, chunkPos);*/
     }
 
     @Override
-    public boolean isInsideStructure(World world, String structureName, BlockPos pos) {
-        MapGenStructure structure = this.getStructureGenerator(structureName);
+    public boolean isInsideStructure(World world, String name, BlockPos pos) {
+        MapGenStructure structure = this.getStructureGenerator(name);
         return structure != null && structure.isInsideStructure(pos);
     }
 
     @Nullable
     @Override
-    public BlockPos getNearestStructure(World world, String structureName, BlockPos pos, boolean findUnexplored) {
-        MapGenStructure structure = this.getStructureGenerator(structureName);
+    public BlockPos getClosestStructure(World world, String name, BlockPos pos, boolean findUnexplored) {
+        MapGenStructure structure = this.getStructureGenerator(name);
         return structure != null ? structure.getNearestStructurePos(world, pos, findUnexplored) : null;
     }
 

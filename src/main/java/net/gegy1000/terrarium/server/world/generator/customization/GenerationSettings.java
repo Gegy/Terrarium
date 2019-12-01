@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.gegy1000.cubicglue.api.CubicWorldType;
+import net.gegy1000.gengen.api.GenericWorldType;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
@@ -27,7 +27,7 @@ public class GenerationSettings {
     public static GenerationSettings parse(World world) {
         String generatorOptions = world.getWorldInfo().getGeneratorOptions();
 
-        CubicWorldType worldType = CubicWorldType.unwrap(world.getWorldType());
+        GenericWorldType worldType = GenericWorldType.unwrap(world.getWorldType());
 
         if (worldType instanceof TerrariumWorldType) {
             TerrariumWorldType terrariumWorldType = (TerrariumWorldType) worldType;

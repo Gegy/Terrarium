@@ -1,6 +1,6 @@
 package net.gegy1000.terrarium.client;
 
-import net.gegy1000.cubicglue.api.CubicWorldType;
+import net.gegy1000.gengen.api.GenericWorldType;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.client.gui.RemoteDataWarningGui;
 import net.gegy1000.terrarium.server.config.TerrariumConfig;
@@ -56,7 +56,7 @@ public class ClientEventHandler {
     public static void onJoinWorld(WorldEvent.Load event) {
         World world = event.getWorld();
         if (world.isRemote) {
-            CubicWorldType worldType = CubicWorldType.unwrap(world.getWorldType());
+            GenericWorldType worldType = GenericWorldType.unwrap(world.getWorldType());
             if (worldType instanceof TerrariumWorldType && MC.isIntegratedServerRunning()) {
                 awaitingLoad = true;
             }
@@ -81,7 +81,7 @@ public class ClientEventHandler {
         if (currentScreen instanceof GuiCreateWorld) {
             GuiButton structuresButton = event.getButtonList().get(STRUCTURES_BUTTON_ID);
             int selectedWorldIndex = ClientProxy.getSelectedWorldType((GuiCreateWorld) currentScreen);
-            CubicWorldType worldType = CubicWorldType.unwrap(WorldType.WORLD_TYPES[selectedWorldIndex]);
+            GenericWorldType worldType = GenericWorldType.unwrap(WorldType.WORLD_TYPES[selectedWorldIndex]);
             if (worldType instanceof TerrariumWorldType) {
                 structuresButton.visible = false;
             }
@@ -94,7 +94,7 @@ public class ClientEventHandler {
         if (currentScreen instanceof GuiCreateWorld && event.getButton().id == 5) {
             GuiButton structuresButton = event.getButtonList().get(STRUCTURES_BUTTON_ID);
             int selectedWorldIndex = ClientProxy.getSelectedWorldType((GuiCreateWorld) currentScreen);
-            CubicWorldType worldType = CubicWorldType.unwrap(WorldType.WORLD_TYPES[selectedWorldIndex]);
+            GenericWorldType worldType = GenericWorldType.unwrap(WorldType.WORLD_TYPES[selectedWorldIndex]);
             if (worldType instanceof TerrariumWorldType) {
                 TerrariumWorldType terrariumWorldType = (TerrariumWorldType) worldType;
                 if (terrariumWorldType.isHidden() && !GuiScreen.isShiftKeyDown()) {

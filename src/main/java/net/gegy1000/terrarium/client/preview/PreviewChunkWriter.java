@@ -1,8 +1,8 @@
 package net.gegy1000.terrarium.client.preview;
 
 import mcp.MethodsReturnNonnullByDefault;
-import net.gegy1000.cubicglue.api.ChunkPrimeWriter;
-import net.gegy1000.cubicglue.util.CubicPos;
+import net.gegy1000.gengen.api.ChunkPrimeWriter;
+import net.gegy1000.gengen.api.CubicPos;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;

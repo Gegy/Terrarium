@@ -1,8 +1,8 @@
 package net.gegy1000.earth.server.world.composer;
 
-import net.gegy1000.cubicglue.api.ChunkPopulationWriter;
-import net.gegy1000.cubicglue.util.CubicPos;
-import net.gegy1000.cubicglue.util.PseudoRandomMap;
+import net.gegy1000.gengen.api.ChunkPopulationWriter;
+import net.gegy1000.gengen.api.CubicPos;
+import net.gegy1000.gengen.util.SpatialRandom;
 import net.gegy1000.terrarium.server.world.feature.BoulderGenerator;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataCache;
@@ -25,13 +25,13 @@ public class BoulderDecorationComposer implements DecorationComposer {
 
     private final UnsignedByteRaster.Sampler slopeSampler;
 
-    private final PseudoRandomMap decorationMap;
+    private final SpatialRandom decorationMap;
     private final Random random;
 
     public BoulderDecorationComposer(World world, DataKey<UnsignedByteRaster> slopeKey) {
         this.slopeSampler = UnsignedByteRaster.sampler(slopeKey);
 
-        this.decorationMap = new PseudoRandomMap(world, DECORATION_SEED);
+        this.decorationMap = new SpatialRandom(world, DECORATION_SEED);
         this.random = new Random(0);
     }
 
