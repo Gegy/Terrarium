@@ -98,12 +98,12 @@ public class ComposableCubeGenerator implements GenericChunkGenerator {
 
     @Nullable
     @Override
-    public BlockPos getClosestStructure(String s, BlockPos blockPos, boolean b) {
-        return null;
+    public BlockPos getClosestStructure(String name, BlockPos pos, boolean findUnexplored) {
+        return this.structureComposer.get().getClosestStructure(this.world, name, pos, findUnexplored);
     }
 
     @Override
-    public boolean isInsideStructure(String s, BlockPos blockPos) {
-        return false;
+    public boolean isInsideStructure(String name, BlockPos pos) {
+        return this.structureComposer.get().isInsideStructure(this.world, name, pos);
     }
 }
