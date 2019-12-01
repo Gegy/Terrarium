@@ -1,6 +1,17 @@
 package net.gegy1000.terrarium.server.util;
 
 public enum InterpolationFunction {
+    NEAREST(1, 0, 0) {
+        @Override
+        protected double[] getBuffer() {
+            return BUFFER_1.get();
+        }
+
+        @Override
+        protected double calculateLerp(double[] b, double i) {
+            return b[0];
+        }
+    },
     LINEAR(2, 1, 0) {
         @Override
         protected double[] getBuffer() {
@@ -36,6 +47,7 @@ public enum InterpolationFunction {
         }
     };
 
+    private static final ThreadLocal<double[]> BUFFER_1 = ThreadLocal.withInitial(() -> new double[1]);
     private static final ThreadLocal<double[]> BUFFER_2 = ThreadLocal.withInitial(() -> new double[2]);
     private static final ThreadLocal<double[]> BUFFER_4 = ThreadLocal.withInitial(() -> new double[4]);
 
@@ -65,34 +77,34 @@ public enum InterpolationFunction {
 
     protected abstract double calculateLerp(double[] b, double i);
 
-    public double lerp(double[] buffer, double intermediate) {
+    public double sample(double[] buffer, double intermediate) {
         if (this.pointCount != buffer.length) {
             throw new IllegalStateException("This method cannot interpolate with " + buffer.length + " points");
         }
         return this.calculateLerp(buffer, intermediate);
     }
 
-    public double lerp(double origin, double target, double intermediate) {
+    public double sample(double origin, double target, double intermediate) {
         double[] buffer = BUFFER_2.get();
         buffer[0] = origin;
         buffer[1] = target;
-        return this.lerp(buffer, intermediate);
+        return this.sample(buffer, intermediate);
     }
 
-    public double lerp(double p1, double p2, double p3, double p4, double intermediate) {
+    public double sample(double p1, double p2, double p3, double p4, double intermediate) {
         double[] buffer = BUFFER_4.get();
         buffer[0] = p1;
         buffer[1] = p2;
         buffer[2] = p3;
         buffer[3] = p4;
-        return this.lerp(buffer, intermediate);
+        return this.sample(buffer, intermediate);
     }
 
     public double lerp2d(double[][] buffer, double intermediateX, double intermediateY) {
         double[] verticalSampleBuffer = this.getBuffer();
         for (int sampleX = 0; sampleX < this.pointCount; sampleX++) {
-            verticalSampleBuffer[sampleX] = this.lerp(buffer[sampleX], intermediateY);
+            verticalSampleBuffer[sampleX] = this.sample(buffer[sampleX], intermediateY);
         }
-        return this.lerp(verticalSampleBuffer, intermediateX);
+        return this.sample(verticalSampleBuffer, intermediateX);
     }
 }

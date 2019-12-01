@@ -11,14 +11,14 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 @Mod.EventBusSubscriber(modid = TerrariumEarth.MODID)
 public class ErrorBroadcastHandler {
-    private static final Object LOCK = new Object();
-
     private static final long FAIL_NOTIFICATION_INTERVAL = 8000;
     private static final int FAIL_NOTIFICATION_THRESHOLD = 5;
 
-    private static int failCount;
+    private static final AtomicInteger FAIL_COUNT = new AtomicInteger();
     private static long lastFailNotificationTime;
 
     @SubscribeEvent
@@ -31,9 +31,10 @@ public class ErrorBroadcastHandler {
         long time = System.currentTimeMillis();
 
         if (time - lastFailNotificationTime > FAIL_NOTIFICATION_INTERVAL) {
+            int failCount = FAIL_COUNT.get();
             if (failCount > FAIL_NOTIFICATION_THRESHOLD) {
                 broadcastFailNotification(failCount);
-                failCount = 0;
+                FAIL_COUNT.set(0);
             }
             lastFailNotificationTime = time;
         }
@@ -47,8 +48,6 @@ public class ErrorBroadcastHandler {
     }
 
     public static void recordFailure() {
-        synchronized (LOCK) {
-            failCount++;
-        }
+        FAIL_COUNT.getAndIncrement();
     }
 }

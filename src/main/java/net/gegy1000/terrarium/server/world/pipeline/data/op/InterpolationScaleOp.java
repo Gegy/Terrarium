@@ -13,6 +13,7 @@ import net.minecraft.util.math.MathHelper;
 import java.util.function.Function;
 
 public enum InterpolationScaleOp {
+    NEAREST(InterpolationFunction.NEAREST),
     LINEAR(InterpolationFunction.LINEAR),
     COSINE(InterpolationFunction.COSINE),
     CUBIC(InterpolationFunction.CUBIC);

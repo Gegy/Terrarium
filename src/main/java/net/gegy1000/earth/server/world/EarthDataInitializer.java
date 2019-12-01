@@ -43,7 +43,7 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
     public ColumnDataGenerator buildDataGenerator() {
         int heightOrigin = this.ctx.settings.getInteger(HEIGHT_ORIGIN);
 
-        InterpolationScaleOp heightScaleOp = this.selectScaleOp(this.ctx.settings);
+        InterpolationScaleOp heightScaleOp = this.selectSrtmScaleOp(this.ctx.settings);
 
         SrtmHeightSource heightSource = new SrtmHeightSource(this.ctx.srtmRaster);
 
@@ -98,9 +98,11 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
                 .build();
     }
 
-    private InterpolationScaleOp selectScaleOp(GenerationSettings properties) {
+    private InterpolationScaleOp selectSrtmScaleOp(GenerationSettings properties) {
         double scale = properties.getDouble(WORLD_SCALE);
-        if (scale >= 45.0) {
+        if (scale >= 90.0) {
+            return InterpolationScaleOp.NEAREST;
+        } else if (scale >= 45.0) {
             return InterpolationScaleOp.LINEAR;
         } else if (scale >= 25.0) {
             return InterpolationScaleOp.COSINE;
