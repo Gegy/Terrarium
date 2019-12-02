@@ -7,7 +7,6 @@ import net.gegy1000.earth.client.gui.SharedInitializingGui;
 import net.gegy1000.earth.server.capability.EarthCapability;
 import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.earth.server.world.data.source.LandCoverSource;
-import net.gegy1000.earth.server.world.data.source.SoilCoverSource;
 import net.gegy1000.earth.server.world.data.source.WorldClimateRaster;
 import net.gegy1000.terrarium.client.gui.customization.TerrariumCustomizationGui;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
@@ -48,7 +47,6 @@ public class EarthWorldType extends TerrariumWorldType {
 
     public static final double SRTM_SCALE = EARTH_CIRCUMFERENCE / SRTM_WIDTH;
     public static final double LANDCOVER_SCALE = EARTH_CIRCUMFERENCE / LandCoverSource.GLOBAL_WIDTH;
-    public static final double SOIL_SCALE = EARTH_CIRCUMFERENCE / SoilCoverSource.GLOBAL_WIDTH;
     public static final double CLIMATE_SCALE = EARTH_CIRCUMFERENCE / WorldClimateRaster.WIDTH;
 
     public static final int HIGHEST_POINT_METERS = 8900;

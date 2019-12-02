@@ -1,7 +1,7 @@
 package net.gegy1000.earth.server.world.cover.carver;
 
-import net.gegy1000.gengen.api.ChunkPrimeWriter;
 import net.gegy1000.gengen.api.CubicPos;
+import net.gegy1000.gengen.api.writer.ChunkPrimeWriter;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnData;
 import net.minecraft.world.gen.layer.GenLayer;
 import net.minecraft.world.gen.layer.IntCache;

@@ -1,14 +1,14 @@
 package net.gegy1000.terrarium.server.world;
 
 import com.google.common.base.Strings;
-import net.gegy1000.gengen.api.GenericChunkGenerator;
 import net.gegy1000.gengen.api.GenericWorldType;
+import net.gegy1000.gengen.api.generator.GenericChunkGenerator;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.client.gui.customization.SelectPresetGui;
 import net.gegy1000.terrarium.client.gui.customization.TerrariumCustomizationGui;
 import net.gegy1000.terrarium.client.preview.PreviewDummyWorld;
 import net.gegy1000.terrarium.server.world.chunk.ComposableBiomeProvider;
-import net.gegy1000.terrarium.server.world.chunk.ComposableCubeGenerator;
+import net.gegy1000.terrarium.server.world.chunk.ComposableChunkGenerator;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.generator.customization.PropertyPrototype;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumCustomization;
@@ -61,7 +61,7 @@ public abstract class TerrariumWorldType implements GenericWorldType {
 
     @Override
     public GenericChunkGenerator createGenerator(World world) {
-        return new ComposableCubeGenerator(world);
+        return new ComposableChunkGenerator(world);
     }
 
     @Override

@@ -1,7 +1,7 @@
 package net.gegy1000.earth.server.command;
 
 import net.gegy1000.earth.TerrariumEarth;
-import net.gegy1000.terrarium.server.TerrariumHandshakeTracker;
+import net.gegy1000.terrarium.server.TerrariumUserTracker;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayer;
@@ -29,7 +29,7 @@ public class DeferredTranslator {
     public static ITextComponent translate(ICommandSender sender, ITextComponent component) {
         if (component instanceof TextComponentTranslation && sender instanceof EntityPlayer) {
             TextComponentTranslation translation = (TextComponentTranslation) component;
-            if (!TerrariumHandshakeTracker.isFriendly((EntityPlayer) sender)) {
+            if (!TerrariumUserTracker.usesTerrarium((EntityPlayer) sender)) {
                 String key = translation.getKey();
                 return new TextComponentString(String.format(LANGUAGE_MAP.getOrDefault(key, key), translation.getFormatArgs()));
             }
@@ -38,14 +38,14 @@ public class DeferredTranslator {
     }
 
     public static WrongUsageException createException(ICommandSender sender, String key, Object... objects) {
-        if (sender instanceof EntityPlayer && TerrariumHandshakeTracker.isFriendly((EntityPlayer) sender)) {
+        if (sender instanceof EntityPlayer && TerrariumUserTracker.usesTerrarium((EntityPlayer) sender)) {
             return new WrongUsageException(key, objects);
         }
         return new WrongUsageException(LANGUAGE_MAP.getOrDefault(key, key), objects);
     }
 
     public static String translateString(ICommandSender sender, String translationKey) {
-        if (sender instanceof EntityPlayer && TerrariumHandshakeTracker.isFriendly((EntityPlayer) sender)) {
+        if (sender instanceof EntityPlayer && TerrariumUserTracker.usesTerrarium((EntityPlayer) sender)) {
             return translationKey;
         }
         return LANGUAGE_MAP.getOrDefault(translationKey, translationKey);

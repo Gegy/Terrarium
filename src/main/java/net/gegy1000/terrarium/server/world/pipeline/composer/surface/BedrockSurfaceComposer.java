@@ -1,7 +1,7 @@
 package net.gegy1000.terrarium.server.world.pipeline.composer.surface;
 
-import net.gegy1000.gengen.api.ChunkPrimeWriter;
 import net.gegy1000.gengen.api.CubicPos;
+import net.gegy1000.gengen.api.writer.ChunkPrimeWriter;
 import net.gegy1000.gengen.util.SpatialRandom;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnData;
 import net.minecraft.block.state.IBlockState;
@@ -35,7 +35,7 @@ public class BedrockSurfaceComposer implements SurfaceComposer {
 
         for (int localZ = 0; localZ < 16; localZ++) {
             for (int localX = 0; localX < 16; localX++) {
-                this.scatterMap.initPosSeed(globalX + localX, globalZ + localZ);
+                this.scatterMap.setSeed(globalX + localX, globalZ + localZ);
                 for (int localY = minY; localY < this.scatterRange; localY++) {
                     if (localY == 0 || localY <= this.scatterMap.nextInt(this.scatterRange)) {
                         writer.set(localX, localY, localZ, this.block);

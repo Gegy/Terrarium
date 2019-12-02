@@ -5,7 +5,6 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.earth.server.world.EarthDataKeys;
-import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
@@ -113,7 +112,7 @@ public class WorldPreview implements IBlockAccess {
             BlockPos centerChunkPos = new BlockPos(spawnChunkX, averageHeight >> 4, spawnChunkZ);
             this.centerBlockPos = new BlockPos((centerChunkPos.getX() << 4) + 8, averageHeight, (centerChunkPos.getZ() << 4) + 8);
 
-            this.generator = new PreviewChunkGenerator(centerChunkPos, this.world.getCubeGenerator(), VIEW_RANGE);
+            this.generator = new PreviewChunkGenerator(centerChunkPos, this.world.getCubeGenerator(), this.world.getBiomeProvider(), VIEW_RANGE);
             this.generator.setCubeHandler(this::handleGeneratedCube);
             this.generator.setColumnHandler(this::handleGeneratedColumn);
 

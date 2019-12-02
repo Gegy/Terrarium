@@ -2,7 +2,7 @@ package net.gegy1000.terrarium.server.message;
 
 import io.netty.buffer.ByteBuf;
 import net.gegy1000.terrarium.Terrarium;
-import net.gegy1000.terrarium.server.TerrariumHandshakeTracker;
+import net.gegy1000.terrarium.server.TerrariumUserTracker;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
@@ -49,11 +49,11 @@ public class TerrariumHandshakeMessage implements IMessage {
                 }
                 TerrariumWorld worldData = server.getWorld(0).getCapability(TerrariumCapabilities.worldDataCapability, null);
                 if (worldData != null) {
-                    Terrarium.PROXY.scheduleTask(ctx, () -> TerrariumHandshakeTracker.markPlayerFriendly(player));
+                    Terrarium.PROXY.scheduleTask(ctx, () -> TerrariumUserTracker.markPlayerUsingTerrarium(player));
                     return new TerrariumHandshakeMessage(worldData.getSettings());
                 }
             } else {
-                Terrarium.PROXY.scheduleTask(ctx, () -> TerrariumHandshakeTracker.provideSettings(Terrarium.PROXY.getWorld(ctx), message.settings));
+                Terrarium.PROXY.scheduleTask(ctx, () -> TerrariumUserTracker.provideSettings(Terrarium.PROXY.getWorld(ctx), message.settings));
             }
             return null;
         }

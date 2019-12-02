@@ -1,10 +1,10 @@
 package net.gegy1000.terrarium.server.world.chunk;
 
 import mcp.MethodsReturnNonnullByDefault;
-import net.gegy1000.gengen.api.ChunkPopulationWriter;
-import net.gegy1000.gengen.api.ChunkPrimeWriter;
 import net.gegy1000.gengen.api.CubicPos;
-import net.gegy1000.gengen.api.GenericChunkGenerator;
+import net.gegy1000.gengen.api.generator.GenericChunkGenerator;
+import net.gegy1000.gengen.api.writer.ChunkPopulationWriter;
+import net.gegy1000.gengen.api.writer.ChunkPrimeWriter;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.util.Lazy;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
@@ -25,7 +25,7 @@ import java.util.List;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-public class ComposableCubeGenerator implements GenericChunkGenerator {
+public class ComposableChunkGenerator implements GenericChunkGenerator {
     private final World world;
 
     private final Lazy<SurfaceComposer> surfaceComposer;
@@ -36,7 +36,7 @@ public class ComposableCubeGenerator implements GenericChunkGenerator {
 
     private final ColumnDataEntry.Handle[] populationHandles = new ColumnDataEntry.Handle[4];
 
-    public ComposableCubeGenerator(World world) {
+    public ComposableChunkGenerator(World world) {
         this.world = world;
 
         this.surfaceComposer = Lazy.worldCap(world, TerrariumWorld::getSurfaceComposer);
@@ -47,7 +47,7 @@ public class ComposableCubeGenerator implements GenericChunkGenerator {
     }
 
     @Override
-    public void prime(CubicPos pos, ChunkPrimeWriter writer) {
+    public void primeChunk(CubicPos pos, ChunkPrimeWriter writer) {
         ColumnDataCache dataCache = this.dataCache.get();
 
         ChunkPos columnPos = new ChunkPos(pos.getX(), pos.getZ());
@@ -60,7 +60,7 @@ public class ComposableCubeGenerator implements GenericChunkGenerator {
     }
 
     @Override
-    public void populate(CubicPos pos, ChunkPopulationWriter writer) {
+    public void populateChunk(CubicPos pos, ChunkPopulationWriter writer) {
         ColumnDataCache dataCache = this.dataCache.get();
 
         ColumnDataEntry.Handle[] handles = this.acquirePopulationHandles(pos, dataCache);
@@ -82,17 +82,12 @@ public class ComposableCubeGenerator implements GenericChunkGenerator {
     }
 
     @Override
-    public Biome[] populateBiomes(ChunkPos pos, Biome[] buffer) {
-        return this.world.getBiomeProvider().getBiomes(buffer, pos.x << 4, pos.z << 4, 16, 16);
-    }
-
-    @Override
     public List<Biome.SpawnListEntry> getPossibleCreatures(EnumCreatureType type, BlockPos pos) {
         return this.world.getBiome(pos).getSpawnableList(type);
     }
 
     @Override
-    public void recreateStructures(CubicPos pos) {
+    public void prepareStructures(CubicPos pos) {
         this.structureComposer.get().prepareStructures(pos);
     }
 

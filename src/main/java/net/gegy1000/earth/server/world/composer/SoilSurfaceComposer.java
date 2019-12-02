@@ -1,7 +1,7 @@
 package net.gegy1000.earth.server.world.composer;
 
-import net.gegy1000.gengen.api.ChunkPrimeWriter;
 import net.gegy1000.gengen.api.CubicPos;
+import net.gegy1000.gengen.api.writer.ChunkPrimeWriter;
 import net.gegy1000.gengen.util.SpatialRandom;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.SurfaceComposer;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnData;
@@ -14,7 +14,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
 
 import java.util.Optional;
-import java.util.Random;
 
 public class SoilSurfaceComposer implements SurfaceComposer {
     private static final long SEED = 6035435416693430887L;
@@ -28,8 +27,7 @@ public class SoilSurfaceComposer implements SurfaceComposer {
     private final NoiseGeneratorPerlin depthNoise;
     private double[] depthBuffer = new double[16 * 16];
 
-    private final Random random;
-    private final SpatialRandom coverMap;
+    private final SpatialRandom random;
 
     private final DataKey<ShortRaster> heightKey;
     private final DataKey<UnsignedByteRaster> slopeKey;
@@ -42,9 +40,8 @@ public class SoilSurfaceComposer implements SurfaceComposer {
             DataKey<UnsignedByteRaster> slopeKey,
             IBlockState replaceBlock
     ) {
-        this.random = new Random(world.getWorldInfo().getSeed() ^ SEED);
+        this.random = new SpatialRandom(world.getWorldInfo().getSeed(), SEED);
         this.depthNoise = new NoiseGeneratorPerlin(this.random, 4);
-        this.coverMap = new SpatialRandom(world.getWorldInfo().getSeed(), this.random.nextLong());
 
         this.heightKey = heightKey;
         this.slopeKey = slopeKey;
@@ -75,8 +72,7 @@ public class SoilSurfaceComposer implements SurfaceComposer {
             for (int localX = 0; localX < 16; localX++) {
                 int height = heightRaster.get(localX, localZ);
                 if (pos.getMinY() <= height) {
-                    this.coverMap.initPosSeed(localX + globalX, globalY, localZ + globalZ);
-                    this.random.setSeed(this.coverMap.next());
+                    this.random.setSeed(localX + globalX, globalY, localZ + globalZ);
 
                     double depthNoise = this.depthBuffer[localX + localZ * 16];
                     this.coverColumn(pos, writer, localX, localZ, height, depthNoise);
@@ -104,7 +100,7 @@ public class SoilSurfaceComposer implements SurfaceComposer {
         int maxY = Math.min(pos.getMaxY(), height);
 
         int depth = -1;
-        int soilDepth = Math.max((int) (depthNoise / 3.0 + 3.0 + this.coverMap.nextDouble() * 0.25), 1);
+        int soilDepth = Math.max((int) (depthNoise / 3.0 + 3.0 + this.random.nextDouble() * 0.25), 1);
         soilDepth = maxY - (height - soilDepth);
         if (soilDepth <= 0) {
             return;

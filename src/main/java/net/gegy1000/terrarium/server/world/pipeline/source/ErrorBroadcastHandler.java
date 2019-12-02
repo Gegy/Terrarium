@@ -2,7 +2,7 @@ package net.gegy1000.terrarium.server.world.pipeline.source;
 
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.terrarium.Terrarium;
-import net.gegy1000.terrarium.server.TerrariumHandshakeTracker;
+import net.gegy1000.terrarium.server.TerrariumUserTracker;
 import net.gegy1000.terrarium.server.message.DataFailWarningMessage;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -42,7 +42,7 @@ public class ErrorBroadcastHandler {
 
     private static void broadcastFailNotification(int failCount) {
         DataFailWarningMessage message = new DataFailWarningMessage(failCount);
-        for (EntityPlayer player : TerrariumHandshakeTracker.getFriends()) {
+        for (EntityPlayer player : TerrariumUserTracker.getTerrariumUsers()) {
             Terrarium.NETWORK.sendTo(message, (EntityPlayerMP) player);
         }
     }

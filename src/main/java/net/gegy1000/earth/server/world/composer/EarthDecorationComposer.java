@@ -2,8 +2,8 @@ package net.gegy1000.earth.server.world.composer;
 
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.cover.CoverConfig;
-import net.gegy1000.gengen.api.ChunkPopulationWriter;
 import net.gegy1000.gengen.api.CubicPos;
+import net.gegy1000.gengen.api.writer.ChunkPopulationWriter;
 import net.gegy1000.gengen.util.SpatialRandom;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataCache;
@@ -11,29 +11,23 @@ import net.gegy1000.terrarium.server.world.pipeline.data.DataKey;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.EnumRaster;
 import net.minecraft.world.World;
 
-import java.util.Random;
-
 public class EarthDecorationComposer implements DecorationComposer {
     private static final long DECORATION_SEED = 2492037454623254033L;
 
-    private final Random random;
-    private final SpatialRandom coverMap;
+    private final SpatialRandom random;
 
     private final EnumRaster.Sampler<Cover> coverSampler;
 
     public EarthDecorationComposer(World world, DataKey<EnumRaster<Cover>> coverKey) {
         long seed = world.getWorldInfo().getSeed();
-
-        this.random = new Random(seed ^ DECORATION_SEED);
-        this.coverMap = new SpatialRandom(seed, this.random.nextLong());
+        this.random = new SpatialRandom(seed, DECORATION_SEED);
 
         this.coverSampler = EnumRaster.sampler(coverKey, Cover.NONE);
     }
 
     @Override
     public void composeDecoration(ColumnDataCache dataCache, CubicPos pos, ChunkPopulationWriter writer) {
-        this.coverMap.initPosSeed(pos.getCenterX(), pos.getCenterY(), pos.getCenterZ());
-        this.random.setSeed(this.coverMap.next());
+        this.random.setSeed(pos.getCenterX(), pos.getCenterY(), pos.getCenterZ());
 
         Cover focus = this.coverSampler.sample(dataCache, pos.getMaxX(), pos.getMaxZ());
 

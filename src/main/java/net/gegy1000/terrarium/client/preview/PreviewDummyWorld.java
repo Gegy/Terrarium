@@ -1,7 +1,7 @@
 package net.gegy1000.terrarium.client.preview;
 
 import net.gegy1000.gengen.core.impl.vanilla.ColumnGeneratorImpl;
-import net.gegy1000.terrarium.server.world.chunk.ComposableCubeGenerator;
+import net.gegy1000.terrarium.server.world.chunk.ComposableChunkGenerator;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.profiler.Profiler;
@@ -24,7 +24,7 @@ import net.minecraft.world.storage.WorldInfo;
 import java.io.File;
 
 public class PreviewDummyWorld extends World {
-    private final ComposableCubeGenerator generator;
+    private final ComposableChunkGenerator generator;
 
     public PreviewDummyWorld(WorldType worldType, GenerationSettings settings) {
         super(new SaveHandler(), new WorldInfo(createSettings(worldType, settings), "terrarium_preview"), new WorldProviderSurface(), new Profiler(), true);
@@ -33,7 +33,7 @@ public class PreviewDummyWorld extends World {
         this.provider.setWorld(this);
         this.provider.setDimension(dimension);
 
-        this.generator = new ComposableCubeGenerator(this);
+        this.generator = new ComposableChunkGenerator(this);
         this.chunkProvider = this.createChunkProvider();
 
         this.initCapabilities();
@@ -45,7 +45,7 @@ public class PreviewDummyWorld extends World {
         return worldSettings;
     }
 
-    public ComposableCubeGenerator getCubeGenerator() {
+    public ComposableChunkGenerator getCubeGenerator() {
         return this.generator;
     }
 

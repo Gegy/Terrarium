@@ -21,12 +21,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Mod.EventBusSubscriber(modid = Terrarium.MODID)
-public class TerrariumHandshakeTracker {
-    private static final Set<EntityPlayer> FRIENDLY_PLAYERS = new HashSet<>();
+public class TerrariumUserTracker {
+    private static final Set<EntityPlayer> TERRARIUM_USERS = new HashSet<>();
     private static GenerationSettings providedSettings;
 
-    public static void markPlayerFriendly(EntityPlayer player) {
-        FRIENDLY_PLAYERS.add(player);
+    public static void markPlayerUsingTerrarium(EntityPlayer player) {
+        TERRARIUM_USERS.add(player);
     }
 
     public static void provideSettings(World world, String settings) {
@@ -53,12 +53,12 @@ public class TerrariumHandshakeTracker {
         }
     }
 
-    public static boolean isFriendly(EntityPlayer player) {
-        return FRIENDLY_PLAYERS.contains(player);
+    public static boolean usesTerrarium(EntityPlayer player) {
+        return TERRARIUM_USERS.contains(player);
     }
 
-    public static Set<EntityPlayer> getFriends() {
-        return new HashSet<>(FRIENDLY_PLAYERS);
+    public static Set<EntityPlayer> getTerrariumUsers() {
+        return new HashSet<>(TERRARIUM_USERS);
     }
 
     @Nullable
@@ -68,11 +68,11 @@ public class TerrariumHandshakeTracker {
 
     @SubscribeEvent
     public static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
-        FRIENDLY_PLAYERS.remove(event.player);
+        TERRARIUM_USERS.remove(event.player);
     }
 
     @SubscribeEvent
     public static void onWorldUnload(WorldEvent.Unload event) {
-        FRIENDLY_PLAYERS.removeAll(event.getWorld().playerEntities);
+        TERRARIUM_USERS.removeAll(event.getWorld().playerEntities);
     }
 }

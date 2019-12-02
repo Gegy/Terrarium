@@ -1,7 +1,7 @@
 package net.gegy1000.terrarium.server.world.pipeline.composer.decoration;
 
-import net.gegy1000.gengen.api.ChunkPopulationWriter;
 import net.gegy1000.gengen.api.CubicPos;
+import net.gegy1000.gengen.api.writer.ChunkPopulationWriter;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataCache;
 
 import java.util.Collection;

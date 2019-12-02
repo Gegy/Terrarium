@@ -6,7 +6,7 @@ import net.gegy1000.earth.server.capability.EarthCapability;
 import net.gegy1000.earth.server.message.EarthMapGuiMessage;
 import net.gegy1000.earth.server.message.EarthPanoramaMessage;
 import net.gegy1000.earth.server.world.EarthDataKeys;
-import net.gegy1000.terrarium.server.TerrariumHandshakeTracker;
+import net.gegy1000.terrarium.server.TerrariumUserTracker;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnData;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataCache;
@@ -51,7 +51,7 @@ public class GeoToolCommand extends CommandBase {
                     .withTitle(DeferredTranslator.translate(player, new TextComponentTranslation("container.earth.geotool.name")))
                     .withElement(Items.COMPASS, TextFormatting.BOLD + "Where am I?", () -> this.handleLocate(player, earthData));
 
-            if (TerrariumHandshakeTracker.isFriendly(player)) {
+            if (TerrariumUserTracker.usesTerrarium(player)) {
                 builder = builder
                         .withElement(Items.ENDER_PEARL, TextFormatting.BOLD + "Go to place", () -> this.handleTeleport(player, earthData))
                         .withElement(Items.PAINTING, TextFormatting.BOLD + "Display Panorama", () -> this.handlePanorama(player));
@@ -71,7 +71,7 @@ public class GeoToolCommand extends CommandBase {
     private void handleLocate(EntityPlayerMP player, EarthCapability earthData) {
         double latitude = earthData.getLatitude(player.posX, player.posZ);
         double longitude = earthData.getLongitude(player.posX, player.posZ);
-        if (TerrariumHandshakeTracker.isFriendly(player)) {
+        if (TerrariumUserTracker.usesTerrarium(player)) {
             TerrariumEarth.NETWORK.sendTo(new EarthMapGuiMessage(latitude, longitude, EarthMapGuiMessage.Type.LOCATE), player);
         } else {
             String location = TextFormatting.BOLD.toString() + TextFormatting.UNDERLINE + String.format("%.5f, %.5f", latitude, longitude);

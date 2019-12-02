@@ -1,8 +1,8 @@
 package net.gegy1000.terrarium.server.world.pipeline.composer.structure;
 
-import net.gegy1000.gengen.api.ChunkPopulationWriter;
-import net.gegy1000.gengen.api.ChunkPrimeWriter;
 import net.gegy1000.gengen.api.CubicPos;
+import net.gegy1000.gengen.api.writer.ChunkPopulationWriter;
+import net.gegy1000.gengen.api.writer.ChunkPrimeWriter;
 import net.gegy1000.gengen.util.SpatialRandom;
 import net.gegy1000.gengen.util.wrapper.OverworldGeneratorWrapper;
 import net.minecraft.util.math.BlockPos;

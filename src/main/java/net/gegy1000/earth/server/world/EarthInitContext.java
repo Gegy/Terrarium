@@ -19,7 +19,6 @@ public final class EarthInitContext {
     public final CoordinateState lngLatCoordinates;
     public final CoordinateState srtmRaster;
     public final CoordinateState landcoverRaster;
-    public final CoordinateState soilRaster;
     public final CoordinateState climateRaster;
 
     private EarthInitContext(World world, GenerationSettings settings) {
@@ -31,7 +30,6 @@ public final class EarthInitContext {
         this.lngLatCoordinates = new LngLatCoordinateState(this.worldScale * SRTM_SCALE * 1200.0);
         this.srtmRaster = new ScaledCoordinateState(this.worldScale * SRTM_SCALE);
         this.landcoverRaster = new ScaledCoordinateState(this.worldScale * LANDCOVER_SCALE);
-        this.soilRaster = new ScaledCoordinateState(this.worldScale * SOIL_SCALE);
         this.climateRaster = new ScaledCoordinateState(this.worldScale * CLIMATE_SCALE);
     }
 

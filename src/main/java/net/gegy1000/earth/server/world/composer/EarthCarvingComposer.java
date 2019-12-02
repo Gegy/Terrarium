@@ -2,8 +2,8 @@ package net.gegy1000.earth.server.world.composer;
 
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.cover.CoverConfig;
-import net.gegy1000.gengen.api.ChunkPrimeWriter;
 import net.gegy1000.gengen.api.CubicPos;
+import net.gegy1000.gengen.api.writer.ChunkPrimeWriter;
 import net.gegy1000.terrarium.server.world.pipeline.composer.surface.SurfaceComposer;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnData;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataKey;

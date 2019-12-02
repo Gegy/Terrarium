@@ -1,8 +1,8 @@
 package net.gegy1000.terrarium.server.world.pipeline.composer.surface;
 
-import net.gegy1000.gengen.api.ChunkPrimeWriter;
 import net.gegy1000.gengen.api.CubicPos;
-import net.gegy1000.gengen.api.GenericChunkPrimer;
+import net.gegy1000.gengen.api.generator.GenericChunkPrimer;
+import net.gegy1000.gengen.api.writer.ChunkPrimeWriter;
 import net.gegy1000.gengen.util.primer.GenericCavePrimer;
 import net.gegy1000.gengen.util.primer.GenericRavinePrimer;
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnData;
@@ -19,7 +19,7 @@ public class CaveSurfaceComposer implements SurfaceComposer {
 
     @Override
     public void composeSurface(ColumnData data, CubicPos pos, ChunkPrimeWriter writer) {
-        this.caveGenerator.prime(pos, writer);
-        this.ravineGenerator.prime(pos, writer);
+        this.caveGenerator.primeChunk(pos, writer);
+        this.ravineGenerator.primeChunk(pos, writer);
     }
 }

@@ -2,10 +2,11 @@ package net.gegy1000.terrarium.client.preview;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.gegy1000.gengen.api.CubicPos;
-import net.gegy1000.terrarium.server.world.chunk.ComposableCubeGenerator;
+import net.gegy1000.terrarium.server.world.chunk.ComposableChunkGenerator;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.BiomeProvider;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -17,15 +18,18 @@ public class PreviewChunkGenerator {
     private final ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setDaemon(true).setNameFormat("preview-gen").build());
 
     private final BlockPos originChunkPos;
-    private final ComposableCubeGenerator cubeGenerator;
+    private final ComposableChunkGenerator chunkGenerator;
+    private final BiomeProvider biomeProvider;
+
     private final int chunkRadius;
 
     private CubeHandler cubeHandler;
     private ColumnHandler columnHandler;
 
-    public PreviewChunkGenerator(BlockPos originChunkPos, ComposableCubeGenerator generator, int chunkRadius) {
+    public PreviewChunkGenerator(BlockPos originChunkPos, ComposableChunkGenerator generator, BiomeProvider biomeProvider, int chunkRadius) {
         this.originChunkPos = originChunkPos;
-        this.cubeGenerator = generator;
+        this.chunkGenerator = generator;
+        this.biomeProvider = biomeProvider;
         this.chunkRadius = chunkRadius;
     }
 
@@ -49,7 +53,7 @@ public class PreviewChunkGenerator {
                 CubicPos cubicPos = new CubicPos(globalChunkX, globalChunkY, globalChunkZ);
 
                 PreviewChunkWriter writer = new PreviewChunkWriter(cubicPos);
-                this.cubeGenerator.prime(cubicPos, writer);
+                this.chunkGenerator.primeChunk(cubicPos, writer);
 
                 CubeHandler cubeHandler = this.cubeHandler;
                 if (cubeHandler != null) {
@@ -82,13 +86,12 @@ public class PreviewChunkGenerator {
 
     private void populateColumns() {
         ColumnHandler columnHandler = this.columnHandler;
-        if (columnHandler == null) {
-            return;
-        }
+        if (columnHandler == null) return;
+
         for (int z = -this.chunkRadius; z <= this.chunkRadius; z++) {
             for (int x = -this.chunkRadius; x <= this.chunkRadius; x++) {
                 ChunkPos columnPos = new ChunkPos(x + this.originChunkPos.getX(), z + this.originChunkPos.getZ());
-                Biome[] biomes = this.cubeGenerator.populateBiomes(columnPos, new Biome[256]);
+                Biome[] biomes = this.biomeProvider.getBiomes(null, columnPos.getXStart(), columnPos.getZStart(), 16, 16);
                 columnHandler.onColumnGenerated(new ChunkPos(x, z), new PreviewColumnData(biomes));
             }
         }

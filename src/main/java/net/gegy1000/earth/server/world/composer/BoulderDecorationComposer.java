@@ -1,7 +1,7 @@
 package net.gegy1000.earth.server.world.composer;
 
-import net.gegy1000.gengen.api.ChunkPopulationWriter;
 import net.gegy1000.gengen.api.CubicPos;
+import net.gegy1000.gengen.api.writer.ChunkPopulationWriter;
 import net.gegy1000.gengen.util.SpatialRandom;
 import net.gegy1000.terrarium.server.world.feature.BoulderGenerator;
 import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
@@ -14,8 +14,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-import java.util.Random;
-
 public class BoulderDecorationComposer implements DecorationComposer {
     private static final long DECORATION_SEED = 8167086971552496758L;
 
@@ -25,14 +23,12 @@ public class BoulderDecorationComposer implements DecorationComposer {
 
     private final UnsignedByteRaster.Sampler slopeSampler;
 
-    private final SpatialRandom decorationMap;
-    private final Random random;
+    private final SpatialRandom random;
 
     public BoulderDecorationComposer(World world, DataKey<UnsignedByteRaster> slopeKey) {
         this.slopeSampler = UnsignedByteRaster.sampler(slopeKey);
 
-        this.decorationMap = new SpatialRandom(world, DECORATION_SEED);
-        this.random = new Random(0);
+        this.random = new SpatialRandom(world, DECORATION_SEED);
     }
 
     @Override
@@ -41,8 +37,7 @@ public class BoulderDecorationComposer implements DecorationComposer {
         int globalY = pos.getCenterY();
         int globalZ = pos.getCenterZ();
 
-        this.decorationMap.initPosSeed(globalX, globalY, globalZ);
-        this.random.setSeed(this.decorationMap.next());
+        this.random.setSeed(globalX, globalY, globalZ);
 
         DataView view = DataView.square(globalX, globalZ, 16);
         UnsignedByteRaster slopeRaster = this.slopeSampler.sample(dataCache, view);

@@ -54,7 +54,7 @@ public class Voronoi {
         double selectionDistance = Double.MAX_VALUE;
         for (int neighbourY = originY - 1; neighbourY <= originY + 1; neighbourY++) {
             for (int neighbourX = originX - 1; neighbourX <= originX + 1; neighbourX++) {
-                this.random.initPosSeed(neighbourX + sourceView.getX(), neighbourY + sourceView.getY());
+                this.random.setSeed(neighbourX + sourceView.getX(), neighbourY + sourceView.getY());
                 double fuzzedX = this.fuzzPoint(neighbourX) / scaleFactorX;
                 double fuzzedY = this.fuzzPoint(neighbourY) / scaleFactorY;
                 double distance = this.distanceFunc.get(scaledX, scaledY, fuzzedX, fuzzedY);
