@@ -1,7 +1,7 @@
 package net.gegy1000.earth.server.shared;
 
 import net.gegy1000.earth.server.util.ProcessTracker;
-import net.gegy1000.earth.server.world.data.source.EarthRemoteIndex;
+import net.gegy1000.earth.server.world.data.EarthRemoteIndex;
 import net.gegy1000.earth.server.world.data.source.WorldClimateRaster;
 
 import javax.annotation.Nullable;

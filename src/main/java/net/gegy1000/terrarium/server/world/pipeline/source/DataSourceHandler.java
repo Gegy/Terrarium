@@ -61,7 +61,7 @@ public enum DataSourceHandler {
 
     @SuppressWarnings("unchecked")
     public <T> CompletableFuture<T> getTile(TiledDataSource<T> source, DataTilePos pos) {
-        DataTileKey<T> key = new DataTileKey<>(source, pos.getTileX(), pos.getTileZ());
+        DataTileKey<T> key = new DataTileKey<>(source, pos.getX(), pos.getZ());
         try {
             T result = (T) this.tileCache.getIfPresent(key);
             if (result != null) {
@@ -85,8 +85,8 @@ public enum DataSourceHandler {
             DataTilePos max
     ) {
         Collection<DataTilePos> tiles = new ArrayList<>();
-        for (int tileZ = min.getTileZ(); tileZ <= max.getTileZ(); tileZ++) {
-            for (int tileX = min.getTileX(); tileX <= max.getTileX(); tileX++) {
+        for (int tileZ = min.getZ(); tileZ <= max.getZ(); tileZ++) {
+            for (int tileX = min.getX(); tileX <= max.getX(); tileX++) {
                 tiles.add(new DataTilePos(tileX, tileZ));
             }
         }

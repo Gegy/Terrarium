@@ -5,13 +5,13 @@ import net.gegy1000.terrarium.server.world.pipeline.data.raster.ByteRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ObjRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.UnsignedByteRaster;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.UByteRaster;
 
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
-public class ConstantRasterProducer {
-    public static DataOp<ByteRaster> bytes(byte value) {
+public class UniformRasterProducer {
+    public static DataOp<ByteRaster> ofBytes(byte value) {
         return DataOp.of(view -> {
             ByteRaster result = ByteRaster.create(view);
             Arrays.fill(result.getData(), value);
@@ -19,15 +19,15 @@ public class ConstantRasterProducer {
         });
     }
 
-    public static DataOp<UnsignedByteRaster> unsignedBytes(int value) {
+    public static DataOp<UByteRaster> ofUBytes(int value) {
         return DataOp.of(view -> {
-            UnsignedByteRaster result = UnsignedByteRaster.create(view);
+            UByteRaster result = UByteRaster.create(view);
             Arrays.fill(result.getData(), (byte) (value & 0xFF));
             return CompletableFuture.completedFuture(result);
         });
     }
 
-    public static DataOp<ShortRaster> shorts(short value) {
+    public static DataOp<ShortRaster> ofShorts(short value) {
         return DataOp.of(view -> {
             ShortRaster result = ShortRaster.create(view);
             Arrays.fill(result.getData(), value);
@@ -35,14 +35,14 @@ public class ConstantRasterProducer {
         });
     }
 
-    public static <T> DataOp<ObjRaster<T>> objects(T value) {
+    public static <T> DataOp<ObjRaster<T>> ofObjects(T value) {
         return DataOp.of(view -> {
             ObjRaster<T> result = ObjRaster.create(value, view);
             return CompletableFuture.completedFuture(result);
         });
     }
 
-    public static <T extends Enum<T>> DataOp<EnumRaster<T>> enumVariants(T variant) {
+    public static <T extends Enum<T>> DataOp<EnumRaster<T>> ofEnumVariants(T variant) {
         return DataOp.of(view -> {
             EnumRaster<T> result = EnumRaster.create(variant, view);
             return CompletableFuture.completedFuture(result);

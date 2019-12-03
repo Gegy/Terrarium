@@ -4,7 +4,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import net.gegy1000.earth.server.world.data.source.EarthRemoteData;
+import net.gegy1000.earth.server.world.data.EarthRemoteData;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
 import net.minecraftforge.fml.relauncher.Side;

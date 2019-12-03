@@ -6,7 +6,7 @@ import net.minecraft.init.Biomes;
 import net.minecraft.world.biome.Biome;
 
 public final class BiomeClassifier {
-    private static final float SNOW_TEMPERATURE = 5.0F;
+    public static final float FREEZE_TEMPERATURE = 5.0F;
 
     public static Biome classify(Context context) {
         if (context.isLand()) {
@@ -64,7 +64,7 @@ public final class BiomeClassifier {
 
         public boolean isFrozen() {
             // TODO: Use mean min temperature rather?
-            return this.averageTemperature < SNOW_TEMPERATURE || this.is(CoverMarker.FROZEN);
+            return this.averageTemperature < FREEZE_TEMPERATURE || this.is(CoverMarker.FROZEN);
         }
 
         public boolean isForested() {

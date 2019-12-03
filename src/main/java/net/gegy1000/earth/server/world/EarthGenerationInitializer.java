@@ -4,7 +4,7 @@ import net.gegy1000.earth.server.world.composer.BoulderDecorationComposer;
 import net.gegy1000.earth.server.world.composer.EarthBiomeComposer;
 import net.gegy1000.earth.server.world.composer.EarthCarvingComposer;
 import net.gegy1000.earth.server.world.composer.EarthDecorationComposer;
-import net.gegy1000.earth.server.world.composer.IceCoverComposer;
+import net.gegy1000.earth.server.world.composer.FreezeSurfaceComposer;
 import net.gegy1000.earth.server.world.composer.SoilSurfaceComposer;
 import net.gegy1000.earth.server.world.composer.WaterFillSurfaceComposer;
 import net.gegy1000.gengen.core.GenGen;
@@ -69,7 +69,7 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
             builder.addDecorationComposer(new BoulderDecorationComposer(this.ctx.world, EarthDataKeys.SLOPE));
         }
 
-        builder.addDecorationComposer(new IceCoverComposer());
+        builder.addDecorationComposer(new FreezeSurfaceComposer(this.ctx.world, EarthDataKeys.SLOPE));
         builder.addDecorationComposer(new VanillaEntitySpawnComposer(this.ctx.world));
 
         if (!preview) {

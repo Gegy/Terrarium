@@ -3,8 +3,8 @@ package net.gegy1000.earth.server.shared;
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.util.ProcessTracker;
 import net.gegy1000.earth.server.util.ProgressTracker;
-import net.gegy1000.earth.server.world.data.source.CachingInput;
 import net.gegy1000.earth.server.world.data.source.WorldClimateRaster;
+import net.gegy1000.earth.server.world.data.source.cache.CachingInput;
 import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
 import net.minecraft.util.text.TextComponentTranslation;
 
@@ -62,7 +62,12 @@ public final class ClimateRasterInitializer implements SharedDataInitializer {
                 return Files.newInputStream(this.path);
             }
 
-            return CachingInput.getCachingStream(this.getRemoteStream(), this.path);
+            return CachingInput.getCachingStream(this.getRemoteStream(), () -> Files.newOutputStream(this.path), e -> {
+                try {
+                    Files.delete(this.path);
+                } catch (IOException ignored) {
+                }
+            });
         }
 
         private InputStream getRemoteStream() throws IOException {

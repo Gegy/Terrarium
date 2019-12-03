@@ -21,16 +21,7 @@ public class ClientProxy extends ServerProxy {
     private static Method actionPerformed;
     private static Field selectedWorldType;
 
-    @Override
-    public void onPreInit() {
-    }
-
-    @Override
-    public void onInit() {
-    }
-
-    @Override
-    public void onPostInit() {
+    static {
         try {
             ClientProxy.selectedWorldType = reflectSelectedWorldType();
         } catch (ReflectiveOperationException e) {
@@ -44,9 +35,24 @@ public class ClientProxy extends ServerProxy {
         }
     }
 
-    @Override
-    public boolean hasServer() {
-        return Minecraft.getMinecraft().isIntegratedServerRunning();
+    private static Field reflectSelectedWorldType() throws ReflectiveOperationException {
+        for (Field field : GuiCreateWorld.class.getDeclaredFields()) {
+            if (field.getType() == int.class) {
+                field.setAccessible(true);
+                return field;
+            }
+        }
+        throw new ReflectiveOperationException("Could not find selected world type field");
+    }
+
+    private static Method reflectActionPerformed() throws ReflectiveOperationException {
+        for (Method method : GuiScreen.class.getDeclaredMethods()) {
+            if (method.getParameterCount() == 1 && method.getParameterTypes()[0] == GuiButton.class && method.getReturnType() == void.class) {
+                method.setAccessible(true);
+                return method;
+            }
+        }
+        throw new ReflectiveOperationException("Could not find action performed method");
     }
 
     @Override
@@ -70,26 +76,6 @@ public class ClientProxy extends ServerProxy {
         } else {
             return super.getWorld(ctx);
         }
-    }
-
-    private static Field reflectSelectedWorldType() throws ReflectiveOperationException {
-        for (Field field : GuiCreateWorld.class.getDeclaredFields()) {
-            if (field.getType() == int.class) {
-                field.setAccessible(true);
-                return field;
-            }
-        }
-        throw new ReflectiveOperationException("Could not find selected world type field");
-    }
-
-    private static Method reflectActionPerformed() throws ReflectiveOperationException {
-        for (Method method : GuiScreen.class.getDeclaredMethods()) {
-            if (method.getParameterCount() == 1 && method.getParameterTypes()[0] == GuiButton.class && method.getReturnType() == void.class) {
-                method.setAccessible(true);
-                return method;
-            }
-        }
-        throw new ReflectiveOperationException("Could not find action performed method");
     }
 
     public static void actionPerformed(GuiScreen gui, GuiButton button) {

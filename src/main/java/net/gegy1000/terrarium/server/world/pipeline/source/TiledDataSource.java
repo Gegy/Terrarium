@@ -8,7 +8,8 @@ import java.nio.file.Paths;
 import java.util.Optional;
 
 public abstract class TiledDataSource<T> {
-    public static final Path GLOBAL_CACHE_ROOT = Paths.get(".", "mods/terrarium/cache/");
+    public static final Path LEGACY_CACHE_ROOT = Paths.get(".", "mods/terrarium/cache");
+    public static final Path GLOBAL_CACHE_ROOT = Paths.get(".", "mods/terrarium/cache2");
 
     protected final Coordinate tileSize;
 

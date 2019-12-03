@@ -1,4 +1,4 @@
-package net.gegy1000.earth.server.world.data.source;
+package net.gegy1000.earth.server.world.data.source.cache;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.gegy1000.terrarium.Terrarium;
@@ -9,11 +9,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Function;
+import java.util.function.Consumer;
 
 public final class CachingInput<T> {
     private static final ExecutorService CACHE_SERVICE = Executors.newSingleThreadExecutor(
@@ -23,50 +21,40 @@ public final class CachingInput<T> {
                     .build()
     );
 
-    private final Function<T, Path> pathFunction;
+    private final TileCache<T> cache;
 
-    public CachingInput(Function<T, Path> pathFunction) {
-        this.pathFunction = pathFunction;
+    public CachingInput(TileCache<T> cache) {
+        this.cache = cache;
     }
 
-    private Path getCachePath(T key) {
-        if (this.pathFunction != null) {
-            return this.pathFunction.apply(key);
-        }
-        return null;
-    }
-
-    public InputStream getInputStream(T key, RemoteFunction<T> remoteFunction) throws IOException {
-        Path cachePath = this.getCachePath(key);
-        if (cachePath != null && Files.exists(cachePath)) {
-            return Files.newInputStream(cachePath);
-        }
+    public InputStream getInputStream(T key, IoFunction<T, InputStream> remoteFunction) throws IOException {
+        InputStream localStream = this.cache.in(key);
+        if (localStream != null) return localStream;
 
         InputStream remoteStream = remoteFunction.apply(key);
-        if (cachePath != null) {
-            return getCachingStream(remoteStream, cachePath);
-        } else {
-            return remoteStream;
-        }
+        OutputStream cacheStream = this.cache.out(key);
+
+        if (cacheStream == null) return remoteStream;
+
+        return getCachingStream(remoteStream, () -> cacheStream, e -> this.deleteQuietly(key));
     }
 
-    public static InputStream getCachingStream(InputStream source, Path cachePath) throws IOException {
+    public static InputStream getCachingStream(InputStream source, IoSupplier<OutputStream> destination, Consumer<IOException> error) throws IOException {
         PipedOutputStream sink = new PipedOutputStream();
         InputStream input = new PipedInputStream(sink);
         CACHE_SERVICE.submit(() -> {
             try {
-                Files.createDirectories(cachePath.getParent());
-                try (OutputStream file = Files.newOutputStream(cachePath)) {
+                try (OutputStream out = destination.get()) {
                     byte[] buffer = new byte[4096];
                     int count;
                     while ((count = source.read(buffer)) != IOUtils.EOF) {
-                        file.write(buffer, 0, count);
+                        out.write(buffer, 0, count);
                         sink.write(buffer, 0, count);
                     }
                 }
             } catch (IOException e) {
                 Terrarium.LOGGER.error("Failed to read or cache remote data", e);
-                deleteQuietly(cachePath);
+                error.accept(e);
             } finally {
                 IOUtils.closeQuietly(source);
                 IOUtils.closeQuietly(sink);
@@ -75,14 +63,18 @@ public final class CachingInput<T> {
         return input;
     }
 
-    private static void deleteQuietly(Path cachePath) {
+    private void deleteQuietly(T key) {
         try {
-            Files.deleteIfExists(cachePath);
+            this.cache.delete(key);
         } catch (IOException ignored) {
         }
     }
 
-    public interface RemoteFunction<T> {
-        InputStream apply(T key) throws IOException;
+    public interface IoFunction<T, R> {
+        R apply(T key) throws IOException;
+    }
+
+    public interface IoSupplier<T> {
+        T get() throws IOException;
     }
 }

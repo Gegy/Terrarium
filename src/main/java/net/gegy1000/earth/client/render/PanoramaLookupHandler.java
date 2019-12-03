@@ -2,7 +2,7 @@ package net.gegy1000.earth.client.render;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.gegy1000.earth.server.world.data.source.EarthRemoteData;
+import net.gegy1000.earth.server.world.data.EarthRemoteData;
 
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;

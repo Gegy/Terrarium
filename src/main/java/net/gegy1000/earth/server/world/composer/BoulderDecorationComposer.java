@@ -8,7 +8,7 @@ import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.Decorati
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataKey;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataView;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.UnsignedByteRaster;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.UByteRaster;
 import net.minecraft.block.BlockStone;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
@@ -21,12 +21,12 @@ public class BoulderDecorationComposer implements DecorationComposer {
 
     private static final int MIN_SLOPE = 45;
 
-    private final UnsignedByteRaster.Sampler slopeSampler;
+    private final UByteRaster.Sampler slopeSampler;
 
     private final SpatialRandom random;
 
-    public BoulderDecorationComposer(World world, DataKey<UnsignedByteRaster> slopeKey) {
-        this.slopeSampler = UnsignedByteRaster.sampler(slopeKey);
+    public BoulderDecorationComposer(World world, DataKey<UByteRaster> slopeKey) {
+        this.slopeSampler = UByteRaster.sampler(slopeKey);
 
         this.random = new SpatialRandom(world, DECORATION_SEED);
     }
@@ -40,7 +40,7 @@ public class BoulderDecorationComposer implements DecorationComposer {
         this.random.setSeed(globalX, globalY, globalZ);
 
         DataView view = DataView.square(globalX, globalZ, 16);
-        UnsignedByteRaster slopeRaster = this.slopeSampler.sample(dataCache, view);
+        UByteRaster slopeRaster = this.slopeSampler.sample(dataCache, view);
 
         BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
         for (int i = 0; i < 2; i++) {

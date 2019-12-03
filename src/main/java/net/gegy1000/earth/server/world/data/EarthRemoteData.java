@@ -1,4 +1,4 @@
-package net.gegy1000.earth.server.world.data.source;
+package net.gegy1000.earth.server.world.data;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

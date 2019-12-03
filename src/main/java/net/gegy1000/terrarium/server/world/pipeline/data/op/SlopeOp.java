@@ -3,7 +3,7 @@ package net.gegy1000.terrarium.server.world.pipeline.data.op;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataOp;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataView;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.UnsignedByteRaster;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.UByteRaster;
 import net.minecraft.util.math.MathHelper;
 
 // TODO: operate on floating-point slopes?
@@ -20,12 +20,12 @@ public final class SlopeOp {
         }
     }
 
-    public static DataOp<UnsignedByteRaster> from(DataOp<ShortRaster> heights, float heightScale) {
+    public static DataOp<UByteRaster> from(DataOp<ShortRaster> heights, float heightScale) {
         return DataOp.of(view -> {
             DataView sourceView = view.grow(1, 1, 1, 1);
             return heights.apply(sourceView)
                     .thenApply(source -> {
-                        UnsignedByteRaster result = UnsignedByteRaster.create(view);
+                        UByteRaster result = UByteRaster.create(view);
                         for (int localY = 0; localY < view.getHeight(); localY++) {
                             for (int localX = 0; localX < view.getWidth(); localX++) {
                                 int slope = computeSlope(source, localX + 1, localY + 1, heightScale);

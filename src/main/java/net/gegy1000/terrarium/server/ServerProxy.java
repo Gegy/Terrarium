@@ -5,19 +5,6 @@ import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class ServerProxy {
-    public void onPreInit() {
-    }
-
-    public void onInit() {
-    }
-
-    public void onPostInit() {
-    }
-
-    public boolean hasServer() {
-        return true;
-    }
-
     public void openWarnToast(int failCount) {
     }
 

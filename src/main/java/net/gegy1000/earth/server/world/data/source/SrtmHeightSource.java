@@ -2,6 +2,10 @@ package net.gegy1000.earth.server.world.data.source;
 
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.shared.SharedEarthData;
+import net.gegy1000.earth.server.world.data.EarthRemoteIndex;
+import net.gegy1000.earth.server.world.data.source.cache.AbstractRegionKey;
+import net.gegy1000.earth.server.world.data.source.cache.CachingInput;
+import net.gegy1000.earth.server.world.data.source.cache.FileTileCache;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
@@ -22,34 +26,19 @@ public class SrtmHeightSource extends TiledDataSource<ShortRaster> {
     private static final int TILE_SIZE = 1200;
     private static final ShortRaster DEFAULT_RESULT = ShortRaster.createSquare(TILE_SIZE);
 
-    private static final Path CACHE_ROOT = GLOBAL_CACHE_ROOT.resolve("srtm_heights");
+//    private static final TileCache<Key> CACHE = RegionTileCache.<Key>builder()
+//            .keyProvider(new KeyProvider())
+//            .inDirectory(GLOBAL_CACHE_ROOT.resolve("elevation"))
+//            .sectorSize(512 * 1024)
+//            .build();
 
-    private static final CachingInput<DataTilePos> CACHING_INPUT = new CachingInput<>(SrtmHeightSource::resolveCachePath);
+    private static final Path CACHE_ROOT = GLOBAL_CACHE_ROOT.resolve("elevation");
+    private static final FileTileCache<DataTilePos> CACHE = new FileTileCache<>(pos -> CACHE_ROOT.resolve("x" + pos.getX() + "y" + pos.getZ()));
+
+    private static final CachingInput<DataTilePos> CACHING_INPUT = new CachingInput<>(CACHE);
 
     public SrtmHeightSource(CoordinateState coordinateState) {
         super(new Coordinate(coordinateState, TILE_SIZE, TILE_SIZE));
-    }
-
-    private static Path resolveCachePath(DataTilePos pos) {
-        int tileX = pos.getTileX();
-        int tileZ = pos.getTileZ() + 1;
-
-        String latitudePrefix = -tileZ >= 0 ? "N" : "S";
-        String longitudePrefix = tileX >= 0 ? "E" : "W";
-
-        StringBuilder latitudeString = new StringBuilder(String.valueOf(Math.abs(tileZ)));
-        while (latitudeString.length() < 2) {
-            latitudeString.insert(0, "0");
-        }
-        latitudeString.insert(0, latitudePrefix);
-
-        StringBuilder longitudeString = new StringBuilder(String.valueOf(Math.abs(tileX)));
-        while (longitudeString.length() < 3) {
-            longitudeString.insert(0, "0");
-        }
-        longitudeString.insert(0, longitudePrefix);
-
-        return CACHE_ROOT.resolve(latitudeString.toString() + longitudeString.toString() + ".ht2");
     }
 
     @Override
@@ -111,5 +100,22 @@ public class SrtmHeightSource extends TiledDataSource<ShortRaster> {
                 heightmap.set(x, y, input.readShort());
             }
         }
+    }
+
+    private static final int LOC_BITS = 3;
+
+    private static class Key extends AbstractRegionKey<Key> {
+        Key(int x, int z) { super(x, z); }
+
+        @Override
+        protected int bits() { return LOC_BITS; }
+    }
+
+    private static class KeyProvider extends AbstractRegionKey.Provider<Key> {
+        @Override
+        protected Key create(int x, int z) { return new Key(x, z); }
+
+        @Override
+        protected int bits() { return LOC_BITS; }
     }
 }

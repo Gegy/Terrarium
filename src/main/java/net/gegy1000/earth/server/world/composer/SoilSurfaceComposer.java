@@ -7,7 +7,7 @@ import net.gegy1000.terrarium.server.world.pipeline.composer.surface.SurfaceComp
 import net.gegy1000.terrarium.server.world.pipeline.data.ColumnData;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataKey;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.UnsignedByteRaster;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.UByteRaster;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
@@ -30,14 +30,14 @@ public class SoilSurfaceComposer implements SurfaceComposer {
     private final SpatialRandom random;
 
     private final DataKey<ShortRaster> heightKey;
-    private final DataKey<UnsignedByteRaster> slopeKey;
+    private final DataKey<UByteRaster> slopeKey;
 
     private final IBlockState replaceBlock;
 
     public SoilSurfaceComposer(
             World world,
             DataKey<ShortRaster> heightKey,
-            DataKey<UnsignedByteRaster> slopeKey,
+            DataKey<UByteRaster> slopeKey,
             IBlockState replaceBlock
     ) {
         this.random = new SpatialRandom(world.getWorldInfo().getSeed(), SEED);
@@ -61,10 +61,10 @@ public class SoilSurfaceComposer implements SurfaceComposer {
         ShortRaster heightRaster = heightOption.get();
         if (!this.containsSurface(pos, heightRaster)) return;
 
-        Optional<UnsignedByteRaster> slopeOption = data.get(this.slopeKey);
+        Optional<UByteRaster> slopeOption = data.get(this.slopeKey);
         if (!slopeOption.isPresent()) return;
 
-        UnsignedByteRaster slopeRaster = slopeOption.get();
+        UByteRaster slopeRaster = slopeOption.get();
 
         this.depthBuffer = this.depthNoise.getRegion(this.depthBuffer, globalX, globalZ, 16, 16, 0.0625, 0.0625, 1.0);
 

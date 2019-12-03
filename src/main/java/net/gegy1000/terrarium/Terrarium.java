@@ -13,7 +13,6 @@ import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.network.NetworkCheckHandler;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
@@ -24,7 +23,10 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.Map;
+import java.util.stream.Stream;
 
 @Mod(modid = Terrarium.MODID, name = "Terrarium", version = Terrarium.VERSION, acceptedMinecraftVersions = "[1.12]", dependencies = "after:cubicchunks")
 public class Terrarium {
@@ -45,13 +47,7 @@ public class Terrarium {
 
     @Mod.EventHandler
     public static void onPreInit(FMLPreInitializationEvent event) {
-        PROXY.onPreInit();
-
-        try {
-            Files.createDirectories(TiledDataSource.GLOBAL_CACHE_ROOT);
-        } catch (IOException e) {
-            Terrarium.LOGGER.warn("Failed to create cache directories", e);
-        }
+        setupCacheDirectory();
 
         TerrariumCapabilities.onPreInit();
 
@@ -72,13 +68,7 @@ public class Terrarium {
 
     @Mod.EventHandler
     public static void onInit(FMLInitializationEvent event) {
-        PROXY.onInit();
         TerrariumPresetRegistry.onInit();
-    }
-
-    @Mod.EventHandler
-    public static void onPostInit(FMLPostInitializationEvent event) {
-        PROXY.onPostInit();
     }
 
     @NetworkCheckHandler
@@ -87,5 +77,28 @@ public class Terrarium {
             serverHasMod = mods.containsKey(Terrarium.MODID);
         }
         return !mods.containsKey(Terrarium.MODID) || mods.get(Terrarium.MODID).equals(VERSION);
+    }
+
+    private static void setupCacheDirectory() {
+        try {
+            if (Files.exists(TiledDataSource.LEGACY_CACHE_ROOT)) {
+                Terrarium.LOGGER.info("Deleting legacy terrarium cache directory");
+
+                try (Stream<Path> walk = Files.walk(TiledDataSource.LEGACY_CACHE_ROOT)) {
+                    Stream<Path> stream = walk.sorted(Comparator.reverseOrder());
+                    for (Path child : (Iterable<Path>) stream::iterator) {
+                        Files.delete(child);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            Terrarium.LOGGER.warn("Failed to delete legacy terrarium cache", e);
+        }
+
+        try {
+            Files.createDirectories(TiledDataSource.GLOBAL_CACHE_ROOT);
+        } catch (IOException e) {
+            Terrarium.LOGGER.warn("Failed to create cache directories", e);
+        }
     }
 }

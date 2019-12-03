@@ -9,21 +9,21 @@ import net.minecraft.util.math.MathHelper;
 import java.util.Arrays;
 import java.util.Optional;
 
-public final class UnsignedByteRaster extends AbstractRaster<byte[]> implements NumberRaster<byte[]> {
-    private UnsignedByteRaster(byte[] data, int width, int height) {
+public final class UByteRaster extends AbstractRaster<byte[]> implements NumberRaster<byte[]> {
+    private UByteRaster(byte[] data, int width, int height) {
         super(data, width, height);
     }
 
-    public static UnsignedByteRaster create(int width, int height) {
+    public static UByteRaster create(int width, int height) {
         byte[] array = new byte[width * height];
-        return new UnsignedByteRaster(array, width, height);
+        return new UByteRaster(array, width, height);
     }
 
-    public static UnsignedByteRaster create(DataView view) {
+    public static UByteRaster create(DataView view) {
         return create(view.getWidth(), view.getHeight());
     }
 
-    public static Sampler sampler(DataKey<UnsignedByteRaster> key) {
+    public static Sampler sampler(DataKey<UByteRaster> key) {
         return new Sampler(key);
     }
 
@@ -65,8 +65,8 @@ public final class UnsignedByteRaster extends AbstractRaster<byte[]> implements 
         return this.get(x, y);
     }
 
-    public UnsignedByteRaster copy() {
-        return new UnsignedByteRaster(Arrays.copyOf(this.data, this.data.length), this.width, this.height);
+    public UByteRaster copy() {
+        return new UByteRaster(Arrays.copyOf(this.data, this.data.length), this.width, this.height);
     }
 
     public interface Transformer {
@@ -78,10 +78,10 @@ public final class UnsignedByteRaster extends AbstractRaster<byte[]> implements 
     }
 
     public static class Sampler {
-        private final DataKey<UnsignedByteRaster> key;
+        private final DataKey<UByteRaster> key;
         private int defaultValue;
 
-        Sampler(DataKey<UnsignedByteRaster> key) {
+        Sampler(DataKey<UByteRaster> key) {
             this.key = key;
         }
 
@@ -92,16 +92,16 @@ public final class UnsignedByteRaster extends AbstractRaster<byte[]> implements 
 
         public int sample(ColumnDataCache dataCache, int x, int z) {
             ChunkPos columnPos = new ChunkPos(x >> 4, z >> 4);
-            Optional<UnsignedByteRaster> optional = dataCache.joinData(columnPos, this.key);
+            Optional<UByteRaster> optional = dataCache.joinData(columnPos, this.key);
             if (optional.isPresent()) {
-                UnsignedByteRaster raster = optional.get();
+                UByteRaster raster = optional.get();
                 return raster.get(x & 0xF, z & 0xF);
             }
             return this.defaultValue;
         }
 
-        public UnsignedByteRaster sample(ColumnDataCache dataCache, DataView view) {
-            UnsignedByteRaster raster = UnsignedByteRaster.create(view);
+        public UByteRaster sample(ColumnDataCache dataCache, DataView view) {
+            UByteRaster raster = UByteRaster.create(view);
             if (this.defaultValue != 0) {
                 Arrays.fill(raster.data, (byte) (this.defaultValue & 0xF));
             }

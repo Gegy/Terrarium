@@ -28,7 +28,7 @@ import net.gegy1000.terrarium.server.world.pipeline.data.raster.BitRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.FloatRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.UnsignedByteRaster;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.UByteRaster;
 
 import static net.gegy1000.earth.server.world.EarthWorldType.*;
 
@@ -50,11 +50,11 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
         DataOp<ShortRaster> heightSampler = RasterSourceSampler.sampleShort(heightSource);
         DataOp<ShortRaster> heights = heightScaleOp.scaleShortsFrom(heightSampler, this.ctx.srtmRaster).cached(ShortRaster::copy);
 
-        DataOp<UnsignedByteRaster> slope = SlopeOp.from(heights, (float) this.ctx.worldScale);
+        DataOp<UByteRaster> slope = SlopeOp.from(heights, (float) this.ctx.worldScale);
 
         LandCoverSource landCoverSource = new LandCoverSource(this.ctx.landcoverRaster);
-        DataOp<UnsignedByteRaster> coverId = RasterSourceSampler.sampleUnsignedByte(landCoverSource);
-        coverId = VoronoiScaleOp.scaleFrom(coverId, this.ctx.landcoverRaster, UnsignedByteRaster::create).cached(UnsignedByteRaster::copy);
+        DataOp<UByteRaster> coverId = RasterSourceSampler.sampleUnsignedByte(landCoverSource);
+        coverId = VoronoiScaleOp.scaleFrom(coverId, this.ctx.landcoverRaster, UByteRaster::create).cached(UByteRaster::copy);
 
         OceanPolygonSource oceanPolygonSource = new OceanPolygonSource(this.ctx.lngLatCoordinates);
 

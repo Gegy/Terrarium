@@ -6,7 +6,11 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.shared.SharedEarthData;
+import net.gegy1000.earth.server.world.data.EarthRemoteIndex;
 import net.gegy1000.earth.server.world.data.PolygonData;
+import net.gegy1000.earth.server.world.data.source.cache.AbstractRegionKey;
+import net.gegy1000.earth.server.world.data.source.cache.CachingInput;
+import net.gegy1000.earth.server.world.data.source.cache.FileTileCache;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
@@ -28,16 +32,19 @@ public class OceanPolygonSource extends TiledDataSource<PolygonData> {
     private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
     private static final double TILE_SIZE = 1.0;
 
-    private static final Path CACHE_ROOT = GLOBAL_CACHE_ROOT.resolve("ocean");
+//    private static final TileCache<Key> CACHE = RegionTileCache.<Key>builder()
+//            .keyProvider(new KeyProvider())
+//            .inDirectory(GLOBAL_CACHE_ROOT.resolve("ocean"))
+//            .sectorSize(2048)
+//            .build();
 
-    private static final CachingInput<DataTilePos> CACHING_INPUT = new CachingInput<>(OceanPolygonSource::resolveCachePath);
+    private static final Path CACHE_ROOT = GLOBAL_CACHE_ROOT.resolve("ocean");
+    private static final FileTileCache<DataTilePos> CACHE = new FileTileCache<>(pos -> CACHE_ROOT.resolve("x" + pos.getX() + "y" + pos.getZ()));
+
+    private static final CachingInput<DataTilePos> CACHING_INPUT = new CachingInput<>(CACHE);
 
     public OceanPolygonSource(CoordinateState coordinateState) {
         super(new Coordinate(coordinateState, TILE_SIZE, TILE_SIZE));
-    }
-
-    private static Path resolveCachePath(DataTilePos pos) {
-        return CACHE_ROOT.resolve(pos.getTileX() + "_" + pos.getTileZ() + ".water");
     }
 
     @Override
@@ -140,5 +147,22 @@ public class OceanPolygonSource extends TiledDataSource<PolygonData> {
         coordinates[coordinates.length - 1] = coordinates[0];
 
         return GEOMETRY_FACTORY.createLinearRing(coordinates);
+    }
+
+    private static final int LOC_BITS = 4;
+
+    private static class Key extends AbstractRegionKey<Key> {
+        Key(int x, int z) { super(x, z); }
+
+        @Override
+        protected int bits() { return LOC_BITS; }
+    }
+
+    private static class KeyProvider extends AbstractRegionKey.Provider<Key> {
+        @Override
+        protected Key create(int x, int z) { return new Key(x, z); }
+
+        @Override
+        protected int bits() { return LOC_BITS; }
     }
 }

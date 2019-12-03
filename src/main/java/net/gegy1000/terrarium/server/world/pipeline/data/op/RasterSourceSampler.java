@@ -8,7 +8,7 @@ import net.gegy1000.terrarium.server.world.pipeline.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ObjRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.Raster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.UnsignedByteRaster;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.UByteRaster;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataSourceHandler;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTileEntry;
 import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
@@ -26,8 +26,8 @@ public final class RasterSourceSampler {
         return sample(source, ByteRaster::create);
     }
 
-    public static DataOp<UnsignedByteRaster> sampleUnsignedByte(TiledDataSource<UnsignedByteRaster> source) {
-        return sample(source, UnsignedByteRaster::create);
+    public static DataOp<UByteRaster> sampleUnsignedByte(TiledDataSource<UByteRaster> source) {
+        return sample(source, UByteRaster::create);
     }
 
     public static <T> DataOp<ObjRaster<T>> sampleObj(TiledDataSource<ObjRaster<T>> source, T value) {
@@ -67,8 +67,8 @@ public final class RasterSourceSampler {
         Object sourceRaw = sourceTile.getData();
         Object resultRaw = result.getData();
 
-        int minTilePosX = pos.getTileX() * sourceTile.getWidth();
-        int minTilePosY = pos.getTileZ() * sourceTile.getHeight();
+        int minTilePosX = pos.getX() * sourceTile.getWidth();
+        int minTilePosY = pos.getZ() * sourceTile.getHeight();
 
         int minSampleX = Math.max(0, view.getX() - minTilePosX);
         int minSampleY = Math.max(0, view.getY() - minTilePosY);

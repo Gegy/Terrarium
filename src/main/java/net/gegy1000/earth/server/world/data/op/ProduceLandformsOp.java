@@ -5,20 +5,20 @@ import net.gegy1000.earth.server.world.geography.Landform;
 import net.gegy1000.terrarium.server.world.pipeline.data.DataOp;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.UnsignedByteRaster;
+import net.gegy1000.terrarium.server.world.pipeline.data.raster.UByteRaster;
 
 import java.util.concurrent.CompletableFuture;
 
 public final class ProduceLandformsOp {
-    public static DataOp<EnumRaster<Landform>> produce(DataOp<ShortRaster> height, DataOp<UnsignedByteRaster> coverId) {
+    public static DataOp<EnumRaster<Landform>> produce(DataOp<ShortRaster> height, DataOp<UByteRaster> coverId) {
         return DataOp.of(view -> {
             CompletableFuture<ShortRaster> heightFuture = height.apply(view);
-            CompletableFuture<UnsignedByteRaster> coverIdFuture = coverId.apply(view);
+            CompletableFuture<UByteRaster> coverIdFuture = coverId.apply(view);
 
             return CompletableFuture.allOf(heightFuture, coverIdFuture)
                     .thenApply(v -> {
                         ShortRaster heightRaster = heightFuture.join();
-                        UnsignedByteRaster coverIdRaster = coverIdFuture.join();
+                        UByteRaster coverIdRaster = coverIdFuture.join();
 
                         EnumRaster<Landform> landformRaster = EnumRaster.create(Landform.LAND, view);
                         coverIdRaster.iterate((id, x, y) -> {

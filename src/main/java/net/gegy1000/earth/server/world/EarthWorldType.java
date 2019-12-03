@@ -145,11 +145,11 @@ public class EarthWorldType extends TerrariumWorldType {
 
     @Override
     public boolean shouldReduceSlimes(World world, Random random) {
-        TerrariumWorld worldData = TerrariumWorld.get(world);
-        if (worldData == null) {
+        TerrariumWorld terrarium = TerrariumWorld.get(world);
+        if (terrarium == null) {
             return false;
         }
-        return worldData.getSettings().getInteger(HEIGHT_ORIGIN) < 40;
+        return terrarium.getSettings().getInteger(HEIGHT_ORIGIN) < 40;
     }
 
     @Override
