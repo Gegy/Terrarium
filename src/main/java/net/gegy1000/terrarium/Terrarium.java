@@ -7,7 +7,7 @@ import net.gegy1000.terrarium.server.message.TerrariumHandshakeMessage;
 import net.gegy1000.terrarium.server.world.chunk.tracker.SavedColumnTracker;
 import net.gegy1000.terrarium.server.world.chunk.tracker.SavedCubeTracker;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPresetRegistry;
-import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
+import net.gegy1000.terrarium.server.world.data.source.TiledDataSource;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;

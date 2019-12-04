@@ -8,9 +8,9 @@ import net.gegy1000.earth.server.world.data.source.cache.CachingInput;
 import net.gegy1000.earth.server.world.data.source.cache.FileTileCache;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.UByteRaster;
-import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
-import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
+import net.gegy1000.terrarium.server.world.data.raster.UByteRaster;
+import net.gegy1000.terrarium.server.world.data.source.DataTilePos;
+import net.gegy1000.terrarium.server.world.data.source.TiledDataSource;
 import org.apache.commons.io.IOUtils;
 import org.tukaani.xz.SingleXZInputStream;
 
@@ -24,6 +24,8 @@ import java.util.Optional;
 
 public class LandCoverSource extends TiledDataSource<UByteRaster> {
     public static final int TILE_SIZE = 1800;
+    public static final int GLOBAL_WIDTH = 129600;
+    public static final int GLOBAL_HEIGHT = 64800;
 
     private static final UByteRaster DEFAULT_RESULT = UByteRaster.create(TILE_SIZE, TILE_SIZE);
 

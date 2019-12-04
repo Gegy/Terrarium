@@ -18,17 +18,17 @@ import net.gegy1000.earth.server.world.data.source.SrtmHeightSource;
 import net.gegy1000.earth.server.world.geography.Landform;
 import net.gegy1000.terrarium.server.world.TerrariumDataInitializer;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
-import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataGenerator;
-import net.gegy1000.terrarium.server.world.pipeline.data.DataOp;
-import net.gegy1000.terrarium.server.world.pipeline.data.op.InterpolationScaleOp;
-import net.gegy1000.terrarium.server.world.pipeline.data.op.RasterSourceSampler;
-import net.gegy1000.terrarium.server.world.pipeline.data.op.SlopeOp;
-import net.gegy1000.terrarium.server.world.pipeline.data.op.VoronoiScaleOp;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.BitRaster;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.EnumRaster;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.FloatRaster;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.UByteRaster;
+import net.gegy1000.terrarium.server.world.data.ColumnDataGenerator;
+import net.gegy1000.terrarium.server.world.data.DataOp;
+import net.gegy1000.terrarium.server.world.data.op.InterpolationScaleOp;
+import net.gegy1000.terrarium.server.world.data.op.RasterSourceSampler;
+import net.gegy1000.terrarium.server.world.data.op.SlopeOp;
+import net.gegy1000.terrarium.server.world.data.op.VoronoiScaleOp;
+import net.gegy1000.terrarium.server.world.data.raster.BitRaster;
+import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
+import net.gegy1000.terrarium.server.world.data.raster.FloatRaster;
+import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
+import net.gegy1000.terrarium.server.world.data.raster.UByteRaster;
 
 import static net.gegy1000.earth.server.world.EarthWorldType.*;
 

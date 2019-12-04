@@ -5,10 +5,10 @@ import net.gegy1000.earth.server.world.cover.CoverConfig;
 import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.gengen.api.writer.ChunkPopulationWriter;
 import net.gegy1000.gengen.util.SpatialRandom;
-import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
-import net.gegy1000.terrarium.server.world.pipeline.data.ColumnDataCache;
-import net.gegy1000.terrarium.server.world.pipeline.data.DataKey;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.EnumRaster;
+import net.gegy1000.terrarium.server.world.composer.decoration.DecorationComposer;
+import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
+import net.gegy1000.terrarium.server.world.data.DataKey;
+import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
 import net.minecraft.world.World;
 
 public class EarthDecorationComposer implements DecorationComposer {

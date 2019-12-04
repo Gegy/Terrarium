@@ -5,7 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.gegy1000.terrarium.Terrarium;
-import net.gegy1000.terrarium.server.world.pipeline.source.Geocoder;
+import net.gegy1000.terrarium.server.world.data.source.Geocoder;
 
 import javax.vecmath.Vector2d;
 import java.io.BufferedInputStream;

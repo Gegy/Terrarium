@@ -1,29 +1,30 @@
 package net.gegy1000.earth.server.world.cover.decorator;
 
-import net.gegy1000.earth.server.world.ecology.GrowthPredictors;
 import net.gegy1000.earth.server.world.ecology.vegetation.Vegetation;
 import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.gengen.api.writer.ChunkPopulationWriter;
 import net.gegy1000.terrarium.server.util.WeightedPool;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import net.minecraft.world.gen.NoiseGeneratorSimplex;
 
 import java.util.Random;
 
 public final class VegetationDecorator implements CoverDecorator {
     private static final int CHUNK_AREA = 16 * 16;
 
-    private final WeightedPool<Vegetation> pool;
-    private final int minCount;
-    private final int maxCount;
+    private static final NoiseGeneratorSimplex DENSITY_NOISE = new NoiseGeneratorSimplex(new Random(1));
 
-    private final GrowthPredictors predictors = new GrowthPredictors();
+    private final WeightedPool<Vegetation> pool;
+    private final float minDensity;
+    private final float maxDensity;
+
+    private final BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
 
     private VegetationDecorator(WeightedPool<Vegetation> pool, float minDensity, float maxDensity) {
         this.pool = pool;
-        this.minCount = MathHelper.floor(CHUNK_AREA * minDensity);
-        this.maxCount = MathHelper.ceil(CHUNK_AREA * maxDensity);
+        this.minDensity = minDensity;
+        this.maxDensity = maxDensity;
     }
 
     public static Builder builder() {
@@ -32,44 +33,25 @@ public final class VegetationDecorator implements CoverDecorator {
 
     @Override
     public void decorate(ChunkPopulationWriter writer, CubicPos cubePos, Random random) {
-        WeightedPool<Vegetation> pool = this.buildTweakedPool();
-        if (pool.isEmpty()) {
-            return;
-        }
-
         World world = writer.getGlobal();
 
-        int count = random.nextInt(this.maxCount - this.minCount + 1) + this.minCount;
+        float noise = (float) (DENSITY_NOISE.getValue(cubePos.getX(), cubePos.getZ()) + 1.0F) / 2.0F;
+        float density = this.minDensity + (this.maxDensity - this.minDensity) * noise;
+
+        int count = Math.round(density * CHUNK_AREA);
+
         for (int i = 0; i < count; i++) {
             Vegetation vegetation = this.pool.sample(random);
 
             int offsetX = random.nextInt(16);
             int offsetZ = random.nextInt(16);
 
-            BlockPos surface = writer.getSurface(cubePos.getCenter().add(offsetX, 0, offsetZ));
-            if (surface == null) continue;
+            this.mutablePos.setPos(cubePos.getCenterX() + offsetX, 0, cubePos.getCenterZ() + offsetZ);
 
-            vegetation.getGenerator().generate(world, random, surface);
+            if (!writer.getSurfaceMut(this.mutablePos)) continue;
+
+            vegetation.getGenerator().generate(world, random, this.mutablePos);
         }
-    }
-
-    private WeightedPool<Vegetation> buildTweakedPool() {
-        WeightedPool.Builder<Vegetation> poolBuilder = WeightedPool.builder();
-
-        for (WeightedPool.Entry<Vegetation> entry : this.pool) {
-            Vegetation vegetation = entry.getValue();
-            float weight = entry.getWeight();
-
-            // TODO: set predictors
-            double density = vegetation.getGrowthIndicator().evaluate(this.predictors);
-
-            float tweakedWeight = (float) (weight * density);
-            if (tweakedWeight > 0.0F) {
-                poolBuilder = poolBuilder.add(vegetation, tweakedWeight);
-            }
-        }
-
-        return poolBuilder.build();
     }
 
     public static class Builder {

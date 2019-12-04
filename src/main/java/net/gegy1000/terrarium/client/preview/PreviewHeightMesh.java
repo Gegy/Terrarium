@@ -2,7 +2,7 @@ package net.gegy1000.terrarium.client.preview;
 
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.client.render.TerrariumVertexFormats;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
+import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.GlStateManager;

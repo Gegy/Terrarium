@@ -14,7 +14,7 @@ import net.gegy1000.terrarium.server.world.generator.customization.PropertyProto
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPreset;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.CustomizationCategory;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.CustomizationWidget;
-import net.gegy1000.terrarium.server.world.pipeline.source.DataSourceHandler;
+import net.gegy1000.terrarium.server.world.data.source.DataSourceHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiCreateWorld;

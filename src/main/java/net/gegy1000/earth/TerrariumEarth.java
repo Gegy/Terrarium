@@ -16,7 +16,7 @@ import net.gegy1000.earth.server.world.data.EarthRemoteData;
 import net.gegy1000.earth.server.world.data.GoogleGeocoder;
 import net.gegy1000.earth.server.world.data.NominatimGeocoder;
 import net.gegy1000.terrarium.server.capability.VoidStorage;
-import net.gegy1000.terrarium.server.world.pipeline.source.Geocoder;
+import net.gegy1000.terrarium.server.world.data.source.Geocoder;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.world.WorldType;
 import net.minecraftforge.common.capabilities.Capability;

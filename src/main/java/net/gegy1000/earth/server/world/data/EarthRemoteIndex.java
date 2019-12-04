@@ -3,7 +3,7 @@ package net.gegy1000.earth.server.world.data;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
+import net.gegy1000.terrarium.server.world.data.source.DataTilePos;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;

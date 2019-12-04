@@ -1,7 +1,7 @@
 package net.gegy1000.earth.client.gui.widget.map;
 
 import net.gegy1000.terrarium.Terrarium;
-import net.gegy1000.terrarium.server.world.pipeline.source.Geocoder;
+import net.gegy1000.terrarium.server.world.data.source.Geocoder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiTextField;

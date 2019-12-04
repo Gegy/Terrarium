@@ -3,11 +3,11 @@ package net.gegy1000.earth.server.world;
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.geography.Landform;
-import net.gegy1000.terrarium.server.world.pipeline.data.DataKey;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.EnumRaster;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.FloatRaster;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.UByteRaster;
+import net.gegy1000.terrarium.server.world.data.DataKey;
+import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
+import net.gegy1000.terrarium.server.world.data.raster.FloatRaster;
+import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
+import net.gegy1000.terrarium.server.world.data.raster.UByteRaster;
 import net.minecraft.util.ResourceLocation;
 
 public class EarthDataKeys {

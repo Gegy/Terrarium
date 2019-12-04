@@ -13,8 +13,8 @@ import net.gegy1000.earth.server.world.data.source.cache.CachingInput;
 import net.gegy1000.earth.server.world.data.source.cache.FileTileCache;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
-import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
-import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
+import net.gegy1000.terrarium.server.world.data.source.DataTilePos;
+import net.gegy1000.terrarium.server.world.data.source.TiledDataSource;
 import org.tukaani.xz.SingleXZInputStream;
 
 import java.io.BufferedInputStream;

@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
 import net.gegy1000.earth.TerrariumEarth;
-import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
+import net.gegy1000.terrarium.server.world.data.source.TiledDataSource;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;

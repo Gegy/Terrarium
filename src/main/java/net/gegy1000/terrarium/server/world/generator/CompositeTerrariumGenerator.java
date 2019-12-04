@@ -2,13 +2,13 @@ package net.gegy1000.terrarium.server.world.generator;
 
 import com.google.common.collect.ImmutableList;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
-import net.gegy1000.terrarium.server.world.pipeline.composer.biome.BiomeComposer;
-import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.CompositeDecorationComposer;
-import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.DecorationComposer;
-import net.gegy1000.terrarium.server.world.pipeline.composer.structure.CompositeStructureComposer;
-import net.gegy1000.terrarium.server.world.pipeline.composer.structure.StructureComposer;
-import net.gegy1000.terrarium.server.world.pipeline.composer.surface.CompositeSurfaceComposer;
-import net.gegy1000.terrarium.server.world.pipeline.composer.surface.SurfaceComposer;
+import net.gegy1000.terrarium.server.world.composer.biome.BiomeComposer;
+import net.gegy1000.terrarium.server.world.composer.decoration.CompositeDecorationComposer;
+import net.gegy1000.terrarium.server.world.composer.decoration.DecorationComposer;
+import net.gegy1000.terrarium.server.world.composer.structure.CompositeStructureComposer;
+import net.gegy1000.terrarium.server.world.composer.structure.StructureComposer;
+import net.gegy1000.terrarium.server.world.composer.surface.CompositeSurfaceComposer;
+import net.gegy1000.terrarium.server.world.composer.surface.SurfaceComposer;
 
 public class CompositeTerrariumGenerator implements TerrariumGenerator {
     private final SurfaceComposer surfaceComposer;

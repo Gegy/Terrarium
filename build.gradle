@@ -1,17 +1,17 @@
 buildscript {
   repositories {
     jcenter()
-    maven {
-      name = "forge"
-      url = "http://files.minecraftforge.net/maven"
-    }
+    maven { url = "http://files.minecraftforge.net/maven" }
+    maven { url "https://plugins.gradle.org/m2/" }
   }
   dependencies {
     classpath "net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT"
+    classpath "com.wynprice.cursemaven:CurseMaven:2.1.1"
   }
 }
 
 apply plugin: "net.minecraftforge.gradle.forge"
+apply plugin: "com.wynprice.cursemaven"
 
 def mod_file = getModFile("net.gegy1000.terrarium.Terrarium")
 version = getModField("VERSION", mod_file)
@@ -40,13 +40,17 @@ configurations {
 }
 
 dependencies {
+  // optional dependencies
   deobfCompile 'io.github.opencubicchunks:cubicchunks-api:1.12.2-0.0-SNAPSHOT'
   deobfCompile 'io.github.opencubicchunks:cubicchunks:1.12.2-0.0-SNAPSHOT'
 
+  deobfCompile 'com.github.glitchfiend.biomesoplenty:BiomesOPlenty:1.12.2-7.0.1.2399:universal'
+  deobfCompile "curse.maven:dynamictrees:2822231"
+
+  // embedded dependencies
   embed 'net.gegy1000:gengen:0.1.0-SNAPSHOT'
   embed 'com.vividsolutions:jts:1.13'
   embed 'org.tukaani:xz-fork:1.8'
-
   embed 'io.github.opencubicchunks:regionlib:0.61.0-SNAPSHOT'
 }
 

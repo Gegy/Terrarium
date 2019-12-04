@@ -12,11 +12,11 @@ import net.gegy1000.terrarium.server.world.TerrariumGeneratorInitializer;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.generator.CompositeTerrariumGenerator;
 import net.gegy1000.terrarium.server.world.generator.TerrariumGenerator;
-import net.gegy1000.terrarium.server.world.pipeline.composer.decoration.VanillaEntitySpawnComposer;
-import net.gegy1000.terrarium.server.world.pipeline.composer.structure.VanillaStructureComposer;
-import net.gegy1000.terrarium.server.world.pipeline.composer.surface.BedrockSurfaceComposer;
-import net.gegy1000.terrarium.server.world.pipeline.composer.surface.CaveSurfaceComposer;
-import net.gegy1000.terrarium.server.world.pipeline.composer.surface.HeightmapSurfaceComposer;
+import net.gegy1000.terrarium.server.world.composer.decoration.VanillaEntitySpawnComposer;
+import net.gegy1000.terrarium.server.world.composer.structure.VanillaStructureComposer;
+import net.gegy1000.terrarium.server.world.composer.surface.BedrockSurfaceComposer;
+import net.gegy1000.terrarium.server.world.composer.surface.CaveSurfaceComposer;
+import net.gegy1000.terrarium.server.world.composer.surface.HeightmapSurfaceComposer;
 import net.minecraft.init.Blocks;
 
 import static net.gegy1000.earth.server.world.EarthWorldType.*;

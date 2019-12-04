@@ -4,11 +4,11 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 import net.gegy1000.earth.server.world.data.PolygonData;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
-import net.gegy1000.terrarium.server.world.pipeline.data.DataOp;
-import net.gegy1000.terrarium.server.world.pipeline.source.DataSourceHandler;
-import net.gegy1000.terrarium.server.world.pipeline.source.DataTileEntry;
-import net.gegy1000.terrarium.server.world.pipeline.source.DataTilePos;
-import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
+import net.gegy1000.terrarium.server.world.data.DataOp;
+import net.gegy1000.terrarium.server.world.data.source.DataSourceHandler;
+import net.gegy1000.terrarium.server.world.data.source.DataTileEntry;
+import net.gegy1000.terrarium.server.world.data.source.DataTilePos;
+import net.gegy1000.terrarium.server.world.data.source.TiledDataSource;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.ArrayList;

@@ -1,8 +1,8 @@
 package net.gegy1000.earth.server.world.data.op;
 
 import net.gegy1000.earth.server.world.data.AreaData;
-import net.gegy1000.terrarium.server.world.pipeline.data.DataOp;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.BitRaster;
+import net.gegy1000.terrarium.server.world.data.DataOp;
+import net.gegy1000.terrarium.server.world.data.raster.BitRaster;
 import net.gegy1000.terrarium.server.world.rasterization.RasterCanvas;
 
 public final class RasterizeAreaOp {

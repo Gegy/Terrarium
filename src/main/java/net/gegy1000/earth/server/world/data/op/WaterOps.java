@@ -2,10 +2,10 @@ package net.gegy1000.earth.server.world.data.op;
 
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.geography.Landform;
-import net.gegy1000.terrarium.server.world.pipeline.data.DataOp;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.BitRaster;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.EnumRaster;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
+import net.gegy1000.terrarium.server.world.data.DataOp;
+import net.gegy1000.terrarium.server.world.data.raster.BitRaster;
+import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
+import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 
 import java.util.concurrent.CompletableFuture;
 

@@ -1,7 +1,7 @@
 package net.gegy1000.earth.server.world.data.op;
 
-import net.gegy1000.terrarium.server.world.pipeline.data.DataOp;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
+import net.gegy1000.terrarium.server.world.data.DataOp;
+import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 
 public final class OffsetValueOp {
     private final double offset;

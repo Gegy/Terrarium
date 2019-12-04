@@ -1,6 +1,6 @@
 package net.gegy1000.terrarium.server.world.rasterization;
 
-import net.gegy1000.terrarium.server.world.pipeline.data.DataView;
+import net.gegy1000.terrarium.server.world.data.DataView;
 
 import java.awt.BasicStroke;
 import java.awt.Graphics2D;

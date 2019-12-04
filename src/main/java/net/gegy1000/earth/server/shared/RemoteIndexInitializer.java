@@ -7,7 +7,7 @@ import net.gegy1000.earth.server.util.ProcessTracker;
 import net.gegy1000.earth.server.util.ProgressTracker;
 import net.gegy1000.earth.server.util.TrackedInputStream;
 import net.gegy1000.earth.server.world.data.EarthRemoteIndex;
-import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
+import net.gegy1000.terrarium.server.world.data.source.TiledDataSource;
 import net.minecraft.util.text.TextComponentTranslation;
 import org.apache.commons.io.IOUtils;
 import org.tukaani.xz.SingleXZInputStream;

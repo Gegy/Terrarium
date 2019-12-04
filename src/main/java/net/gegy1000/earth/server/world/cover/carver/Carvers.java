@@ -2,8 +2,8 @@ package net.gegy1000.earth.server.world.cover.carver;
 
 import net.gegy1000.terrarium.server.world.layer.OutlineEdgeLayer;
 import net.gegy1000.terrarium.server.world.layer.SelectionSeedLayer;
-import net.gegy1000.terrarium.server.world.pipeline.data.DataKey;
-import net.gegy1000.terrarium.server.world.pipeline.data.raster.ShortRaster;
+import net.gegy1000.terrarium.server.world.data.DataKey;
+import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.gen.layer.GenLayer;

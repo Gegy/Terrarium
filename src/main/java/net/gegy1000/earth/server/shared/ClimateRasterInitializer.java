@@ -5,7 +5,7 @@ import net.gegy1000.earth.server.util.ProcessTracker;
 import net.gegy1000.earth.server.util.ProgressTracker;
 import net.gegy1000.earth.server.world.data.source.WorldClimateRaster;
 import net.gegy1000.earth.server.world.data.source.cache.CachingInput;
-import net.gegy1000.terrarium.server.world.pipeline.source.TiledDataSource;
+import net.gegy1000.terrarium.server.world.data.source.TiledDataSource;
 import net.minecraft.util.text.TextComponentTranslation;
 
 import java.io.IOException;

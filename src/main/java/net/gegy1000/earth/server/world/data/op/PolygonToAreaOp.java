@@ -6,7 +6,7 @@ import com.vividsolutions.jts.geom.Polygon;
 import net.gegy1000.earth.server.world.data.AreaData;
 import net.gegy1000.earth.server.world.data.PolygonData;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
-import net.gegy1000.terrarium.server.world.pipeline.data.DataOp;
+import net.gegy1000.terrarium.server.world.data.DataOp;
 import net.gegy1000.terrarium.server.world.rasterization.PolygonShapeProducer;
 
 import java.awt.geom.Area;
