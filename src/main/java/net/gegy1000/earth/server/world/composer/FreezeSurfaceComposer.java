@@ -54,17 +54,16 @@ public class FreezeSurfaceComposer implements DecorationComposer {
                 float temperature = biome.getTemperature(mutablePos);
                 if (temperature >= 0.15F) continue;
 
-                BlockPos surfacePos = writer.getSurface(mutablePos);
-                if (surfacePos == null) continue;
+                if (!writer.getSurfaceMut(mutablePos)) continue;
 
-                BlockPos groundPos = surfacePos.down();
+                BlockPos groundPos = mutablePos.down();
                 if (this.canBeFrozen(world, groundPos)) {
                     writer.set(groundPos, Blocks.ICE.getDefaultState());
                 }
 
                 int slope = slopeRaster.get(localX, localZ);
-                if (slope < MAX_SLOPE && this.canBeSnowedOn(world, surfacePos)) {
-                    writer.set(surfacePos, Blocks.SNOW_LAYER.getDefaultState());
+                if (slope < MAX_SLOPE && this.canBeSnowedOn(world, mutablePos)) {
+                    writer.set(mutablePos, Blocks.SNOW_LAYER.getDefaultState());
                 }
             }
         }

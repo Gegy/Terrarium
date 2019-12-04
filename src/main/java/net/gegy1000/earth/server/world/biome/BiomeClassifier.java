@@ -18,7 +18,7 @@ public final class BiomeClassifier {
 
     private static Biome classifyLand(Context context) {
         if (context.isFrozen()) {
-            return context.isForested() ? Biomes.TAIGA : Biomes.ICE_PLAINS;
+            return context.isForested() ? Biomes.COLD_TAIGA : Biomes.ICE_PLAINS;
         }
 
         if (context.isFlooded()) {
