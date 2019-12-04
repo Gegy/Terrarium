@@ -18,7 +18,7 @@ public final class DistributedColumnLoader implements ColumnDataLoader {
 
     private final LinkedBlockingQueue<Work> workQueue = new LinkedBlockingQueue<>();
     private final Map<ChunkPos, Work> unseenWorkMap = new HashMap<>();
-    private final Object unseenWorkMutex = new Object();
+    private final Map<ChunkPos, Work> activeWorkMap = new HashMap<>();
 
     private boolean active = true;
 
@@ -39,7 +39,7 @@ public final class DistributedColumnLoader implements ColumnDataLoader {
 
         Work work = new Work(columnPos, future);
         this.workQueue.add(work);
-        synchronized (this.unseenWorkMutex) {
+        synchronized (this.unseenWorkMap) {
             this.unseenWorkMap.put(columnPos, work);
         }
 
@@ -47,13 +47,17 @@ public final class DistributedColumnLoader implements ColumnDataLoader {
     }
 
     @Override
-    public ColumnData get(ChunkPos columnPos) {
-        Work unseenWork;
-        synchronized (this.unseenWorkMutex) {
-            unseenWork = this.unseenWorkMap.remove(columnPos);
-            if (unseenWork != null) {
-                unseenWork.cancel();
-            }
+    public ColumnData getNow(ChunkPos columnPos) {
+        // cancel any work that we haven't started processing yet
+        synchronized (this.unseenWorkMap) {
+            Work unseenWork = this.unseenWorkMap.remove(columnPos);
+            if (unseenWork != null) unseenWork.cancel();
+        }
+
+        // if we're already working on this column, wait for it
+        synchronized (this.activeWorkMap) {
+            Work activeWork = this.activeWorkMap.get(columnPos);
+            if (activeWork != null) return activeWork.future.join();
         }
 
         return this.generate(columnPos);
@@ -75,12 +79,27 @@ public final class DistributedColumnLoader implements ColumnDataLoader {
         Work work;
         do {
             work = this.workQueue.take();
-            synchronized (this.unseenWorkMutex) {
+            synchronized (this.unseenWorkMap) {
                 this.unseenWorkMap.remove(work.columnPos);
             }
         } while (work.isCancelled());
 
-        worker.accept(work);
+        try {
+            this.setActive(work, true);
+            worker.accept(work);
+        } finally {
+            this.setActive(work, false);
+        }
+    }
+
+    private void setActive(Work work, boolean active) {
+        synchronized (this.activeWorkMap) {
+            if (active) {
+                this.activeWorkMap.put(work.columnPos, work);
+            } else {
+                this.activeWorkMap.remove(work.columnPos);
+            }
+        }
     }
 
     private static class Work {
