@@ -7,8 +7,9 @@ import net.gegy1000.earth.client.render.LoadingScreenOverlay;
 import net.gegy1000.earth.client.render.PanoramaHandler;
 import net.gegy1000.earth.client.render.PanoramaLookupHandler;
 import net.gegy1000.earth.server.ServerProxy;
-import net.gegy1000.earth.server.capability.EarthCapability;
+import net.gegy1000.earth.server.capability.EarthWorld;
 import net.gegy1000.earth.server.message.EarthMapGuiMessage;
+import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -49,19 +50,20 @@ public class ClientProxy extends ServerProxy {
         Minecraft mc = Minecraft.getMinecraft();
 
         World world = mc.world;
-        EarthCapability earthData = world.getCapability(TerrariumEarth.earthCap, null);
-        if (earthData != null) {
+        EarthWorld earth = world.getCapability(TerrariumEarth.worldCap(), null);
+        if (earth != null) {
             EntityPlayer player = mc.player;
             player.sendStatusMessage(new TextComponentTranslation("status.earth.panorama.searching"), true);
 
-            double latitude = earthData.getLatitude(player.posX, player.posZ);
-            double longitude = earthData.getLongitude(player.posX, player.posZ);
+            Coordinate coordinate = Coordinate.atBlock(player.posX, player.posZ).to(earth.getCrs());
+            double latitude = coordinate.getX();
+            double longitude = coordinate.getZ();
 
             Thread thread = new Thread(() -> {
                 try {
                     PanoramaLookupHandler.Result result = PanoramaLookupHandler.queryPanorama(latitude, longitude);
                     if (result != null) {
-                        Minecraft.getMinecraft().addScheduledTask(() -> this.setPanoramaState(earthData, player, result));
+                        Minecraft.getMinecraft().addScheduledTask(() -> this.setPanoramaState(earth, player, result));
                     } else {
                         player.sendStatusMessage(new TextComponentTranslation("status.earth.panorama.none_found"), true);
                     }
@@ -76,9 +78,11 @@ public class ClientProxy extends ServerProxy {
         }
     }
 
-    private void setPanoramaState(EarthCapability earthData, EntityPlayer player, PanoramaLookupHandler.Result result) {
-        double blockX = earthData.getX(result.getLatitude(), result.getLongitude());
-        double blockZ = earthData.getZ(result.getLatitude(), result.getLongitude());
+    private void setPanoramaState(EarthWorld earth, EntityPlayer player, PanoramaLookupHandler.Result result) {
+        Coordinate coordinate = new Coordinate(earth.getCrs(), result.getLatitude(), result.getLongitude());
+        double blockX = coordinate.getBlockX();
+        double blockZ = coordinate.getBlockZ();
+
         double deltaX = player.posX - blockX;
         double deltaZ = player.posZ - blockZ;
         if (deltaX * deltaX + deltaZ * deltaZ < PanoramaHandler.IMMERSION_MIN_DISTANCE) {

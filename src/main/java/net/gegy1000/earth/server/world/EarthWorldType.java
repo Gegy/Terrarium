@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.client.gui.EarthCustomizationGui;
 import net.gegy1000.earth.client.gui.SharedInitializingGui;
-import net.gegy1000.earth.server.capability.EarthCapability;
+import net.gegy1000.earth.server.capability.EarthWorld;
 import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.earth.server.world.data.source.LandCoverSource;
 import net.gegy1000.earth.server.world.data.source.WorldClimateRaster;
@@ -14,8 +14,8 @@ import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.TerrariumDataInitializer;
 import net.gegy1000.terrarium.server.world.TerrariumGeneratorInitializer;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
-import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
-import net.gegy1000.terrarium.server.world.coordinate.LatLngCoordinateState;
+import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
+import net.gegy1000.terrarium.server.world.coordinate.LatLngCoordRef;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.generator.customization.PropertyPrototype;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumCustomization;
@@ -87,8 +87,8 @@ public class EarthWorldType extends TerrariumWorldType {
 
     @Override
     public Collection<ICapabilityProvider> createCapabilities(World world, GenerationSettings settings) {
-        CoordinateState earthCoordinates = new LatLngCoordinateState((SRTM_SCALE * 1200.0) / settings.getDouble(WORLD_SCALE));
-        return Lists.newArrayList(new EarthCapability.Impl(earthCoordinates));
+        CoordinateReference earthCoordinates = new LatLngCoordRef((SRTM_SCALE * 1200.0) / settings.getDouble(WORLD_SCALE));
+        return Lists.newArrayList(new EarthWorld.Impl(earthCoordinates));
     }
 
     @Override

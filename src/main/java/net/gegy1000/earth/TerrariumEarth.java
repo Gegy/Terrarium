@@ -1,8 +1,9 @@
 package net.gegy1000.earth;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import net.gegy1000.earth.server.ServerProxy;
-import net.gegy1000.earth.server.capability.EarthCapability;
+import net.gegy1000.earth.server.capability.EarthWorld;
 import net.gegy1000.earth.server.command.GeoTeleportCommand;
 import net.gegy1000.earth.server.command.GeoToolCommand;
 import net.gegy1000.earth.server.config.TerrariumEarthConfig;
@@ -57,8 +58,8 @@ public class TerrariumEarth {
 
     public static final SimpleNetworkWrapper NETWORK = NetworkRegistry.INSTANCE.newSimpleChannel(TerrariumEarth.MODID);
 
-    @CapabilityInject(EarthCapability.class)
-    public static Capability<EarthCapability> earthCap;
+    @CapabilityInject(EarthWorld.class)
+    private static Capability<EarthWorld> worldCap;
 
     private static boolean deobfuscatedEnvironment;
 
@@ -66,7 +67,7 @@ public class TerrariumEarth {
     public static void onPreInit(FMLPreInitializationEvent event) {
         deobfuscatedEnvironment = (boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
 
-        CapabilityManager.INSTANCE.register(EarthCapability.class, new VoidStorage<>(), EarthCapability.None::new);
+        CapabilityManager.INSTANCE.register(EarthWorld.class, new VoidStorage<>(), EarthWorld.None::new);
         PROXY.onPreInit();
 
         SharedDataInitializers.add(
@@ -122,5 +123,10 @@ public class TerrariumEarth {
 
     public static boolean isDeobfuscatedEnvironment() {
         return deobfuscatedEnvironment;
+    }
+
+    public static Capability<EarthWorld> worldCap() {
+        Preconditions.checkNotNull(worldCap, "earth world capability not yet initialized");
+        return worldCap;
     }
 }

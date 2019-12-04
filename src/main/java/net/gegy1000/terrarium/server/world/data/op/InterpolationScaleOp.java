@@ -2,7 +2,7 @@ package net.gegy1000.terrarium.server.world.data.op;
 
 import net.gegy1000.terrarium.server.util.InterpolationFunction;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
-import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
+import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.data.DataView;
 import net.gegy1000.terrarium.server.world.data.DataOp;
 import net.gegy1000.terrarium.server.world.data.raster.FloatRaster;
@@ -33,23 +33,23 @@ public enum InterpolationScaleOp {
         this.upperSampleBuffer = this.function.getForward();
     }
 
-    public DataOp<ShortRaster> scaleShortsFrom(DataOp<ShortRaster> data, CoordinateState src) {
+    public DataOp<ShortRaster> scaleShortsFrom(DataOp<ShortRaster> data, CoordinateReference src) {
         return this.scaleFrom(data, src, ShortRaster::create);
     }
 
-    public DataOp<FloatRaster> scaleFloatsFrom(DataOp<FloatRaster> data, CoordinateState src) {
+    public DataOp<FloatRaster> scaleFloatsFrom(DataOp<FloatRaster> data, CoordinateReference src) {
         return this.scaleFrom(data, src, FloatRaster::create);
     }
 
-    public <T extends NumberRaster<?>> DataOp<T> scaleFrom(DataOp<T> data, CoordinateState src, Function<DataView, T> function) {
+    public <T extends NumberRaster<?>> DataOp<T> scaleFrom(DataOp<T> data, CoordinateReference src, Function<DataView, T> function) {
         return DataOp.of(view -> {
             DataView srcView = this.getSourceView(view, src);
 
             double blockSizeX = view.getWidth();
             double blockSizeZ = view.getHeight();
 
-            double scaleFactorX = Math.abs(src.getX(blockSizeX, blockSizeZ) / blockSizeX);
-            double scaleFactorZ = Math.abs(src.getZ(blockSizeX, blockSizeZ) / blockSizeZ);
+            double scaleFactorX = Math.abs(src.x(blockSizeX, blockSizeZ) / blockSizeX);
+            double scaleFactorZ = Math.abs(src.z(blockSizeX, blockSizeZ) / blockSizeZ);
 
             Coordinate minBlockCoordinate = view.getMinCoordinate().to(src);
             Coordinate maxBlockCoordinate = view.getMaxCoordinate().to(src);
@@ -94,7 +94,7 @@ public enum InterpolationScaleOp {
         }
     }
 
-    private DataView getSourceView(DataView view, CoordinateState src) {
+    private DataView getSourceView(DataView view, CoordinateReference src) {
         Coordinate minBlockCoordinate = view.getMinCoordinate().to(src);
         Coordinate maxBlockCoordinate = view.getMaxCoordinate().to(src);
 

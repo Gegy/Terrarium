@@ -7,7 +7,7 @@ import net.gegy1000.earth.server.world.data.source.cache.AbstractRegionKey;
 import net.gegy1000.earth.server.world.data.source.cache.CachingInput;
 import net.gegy1000.earth.server.world.data.source.cache.FileTileCache;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
-import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
+import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.data.raster.UByteRaster;
 import net.gegy1000.terrarium.server.world.data.source.DataTilePos;
 import net.gegy1000.terrarium.server.world.data.source.TiledDataSource;
@@ -40,8 +40,8 @@ public class LandCoverSource extends TiledDataSource<UByteRaster> {
 
     private static final CachingInput<DataTilePos> CACHING_INPUT = new CachingInput<>(CACHE);
 
-    public LandCoverSource(CoordinateState coordinateState) {
-        super(new Coordinate(coordinateState, TILE_SIZE, TILE_SIZE));
+    public LandCoverSource(CoordinateReference coordinateReference) {
+        super(new Coordinate(coordinateReference, TILE_SIZE, TILE_SIZE));
     }
 
     @Override

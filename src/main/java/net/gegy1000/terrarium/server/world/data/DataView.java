@@ -61,11 +61,11 @@ public class DataView {
     }
 
     public Coordinate getMinCoordinate() {
-        return Coordinate.fromBlock(this.x, this.y);
+        return Coordinate.atBlock(this.x, this.y);
     }
 
     public Coordinate getMaxCoordinate() {
-        return Coordinate.fromBlock(this.x + this.width, this.y + this.height);
+        return Coordinate.atBlock(this.x + this.width, this.y + this.height);
     }
 
     public DataView grow(int lowerX, int lowerY, int upperX, int upperY) {

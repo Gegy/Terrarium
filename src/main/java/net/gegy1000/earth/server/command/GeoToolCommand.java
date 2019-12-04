@@ -2,12 +2,13 @@ package net.gegy1000.earth.server.command;
 
 import com.google.common.base.Preconditions;
 import net.gegy1000.earth.TerrariumEarth;
-import net.gegy1000.earth.server.capability.EarthCapability;
+import net.gegy1000.earth.server.capability.EarthWorld;
 import net.gegy1000.earth.server.message.EarthMapGuiMessage;
 import net.gegy1000.earth.server.message.EarthPanoramaMessage;
 import net.gegy1000.earth.server.world.EarthDataKeys;
 import net.gegy1000.terrarium.server.TerrariumUserTracker;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
+import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.data.ColumnData;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.ColumnDataEntry;
@@ -45,20 +46,20 @@ public class GeoToolCommand extends CommandBase {
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         EntityPlayerMP player = CommandBase.getCommandSenderAsPlayer(sender);
 
-        EarthCapability earthData = player.world.getCapability(TerrariumEarth.earthCap, null);
-        if (earthData != null) {
+        EarthWorld earth = player.world.getCapability(TerrariumEarth.worldCap(), null);
+        if (earth != null) {
             ContainerUi.Builder builder = ContainerUi.builder(player)
                     .withTitle(DeferredTranslator.translate(player, new TextComponentTranslation("container.earth.geotool.name")))
-                    .withElement(Items.COMPASS, TextFormatting.BOLD + "Where am I?", () -> this.handleLocate(player, earthData));
+                    .withElement(Items.COMPASS, TextFormatting.BOLD + "Where am I?", () -> this.handleLocate(player, earth));
 
             if (TerrariumUserTracker.usesTerrarium(player)) {
                 builder = builder
-                        .withElement(Items.ENDER_PEARL, TextFormatting.BOLD + "Go to place", () -> this.handleTeleport(player, earthData))
+                        .withElement(Items.ENDER_PEARL, TextFormatting.BOLD + "Go to place", () -> this.handleTeleport(player, earth))
                         .withElement(Items.PAINTING, TextFormatting.BOLD + "Display Panorama", () -> this.handlePanorama(player));
             }
 
             if (TerrariumEarth.isDeobfuscatedEnvironment()) {
-                builder = builder.withElement(Items.REDSTONE, TextFormatting.BOLD + "Debug Info", () -> this.handleDebug(player, earthData));
+                builder = builder.withElement(Items.REDSTONE, TextFormatting.BOLD + "Debug Info", () -> this.handleDebug(player, earth));
             }
 
             ContainerUi ui = builder.build();
@@ -68,9 +69,13 @@ public class GeoToolCommand extends CommandBase {
         }
     }
 
-    private void handleLocate(EntityPlayerMP player, EarthCapability earthData) {
-        double latitude = earthData.getLatitude(player.posX, player.posZ);
-        double longitude = earthData.getLongitude(player.posX, player.posZ);
+    private void handleLocate(EntityPlayerMP player, EarthWorld earth) {
+        Coordinate coordinate = Coordinate.atBlock(player.posX, player.posZ)
+                .to(earth.getCrs());
+
+        double latitude = coordinate.getX();
+        double longitude = coordinate.getZ();
+
         if (TerrariumUserTracker.usesTerrarium(player)) {
             TerrariumEarth.NETWORK.sendTo(new EarthMapGuiMessage(latitude, longitude, EarthMapGuiMessage.Type.LOCATE), player);
         } else {
@@ -79,9 +84,13 @@ public class GeoToolCommand extends CommandBase {
         }
     }
 
-    private void handleTeleport(EntityPlayerMP player, EarthCapability earthData) {
-        double latitude = earthData.getLatitude(player.posX, player.posZ);
-        double longitude = earthData.getLongitude(player.posX, player.posZ);
+    private void handleTeleport(EntityPlayerMP player, EarthWorld earth) {
+        Coordinate coordinate = Coordinate.atBlock(player.posX, player.posZ)
+                .to(earth.getCrs());
+
+        double latitude = coordinate.getX();
+        double longitude = coordinate.getZ();
+
         TerrariumEarth.NETWORK.sendTo(new EarthMapGuiMessage(latitude, longitude, EarthMapGuiMessage.Type.TELEPORT), player);
     }
 
@@ -89,9 +98,13 @@ public class GeoToolCommand extends CommandBase {
         TerrariumEarth.NETWORK.sendTo(new EarthPanoramaMessage(), player);
     }
 
-    private void handleDebug(EntityPlayerMP player, EarthCapability earthData) {
-        double latitude = earthData.getLatitude(player.posX, player.posZ);
-        double longitude = earthData.getLongitude(player.posX, player.posZ);
+    private void handleDebug(EntityPlayerMP player, EarthWorld earth) {
+        Coordinate coordinate = Coordinate.atBlock(player.posX, player.posZ)
+                .to(earth.getCrs());
+
+        double latitude = coordinate.getX();
+        double longitude = coordinate.getZ();
+
         int blockX = MathHelper.floor(player.posX);
         int blockZ = MathHelper.floor(player.posZ);
 

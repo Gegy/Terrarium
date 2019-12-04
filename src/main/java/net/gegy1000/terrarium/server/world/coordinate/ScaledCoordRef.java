@@ -1,35 +1,35 @@
 package net.gegy1000.terrarium.server.world.coordinate;
 
-public class ScaledCoordinateState implements CoordinateState {
+public class ScaledCoordRef implements CoordinateReference {
     private final double scaleX;
     private final double scaleZ;
 
-    public ScaledCoordinateState(double scaleX, double scaleZ) {
+    public ScaledCoordRef(double scaleX, double scaleZ) {
         this.scaleX = scaleX;
         this.scaleZ = scaleZ;
     }
 
-    public ScaledCoordinateState(double scale) {
+    public ScaledCoordRef(double scale) {
         this(scale, scale);
     }
 
     @Override
-    public double getBlockX(double x, double z) {
+    public double blockX(double x, double z) {
         return x * this.scaleX;
     }
 
     @Override
-    public double getBlockZ(double x, double z) {
+    public double blockZ(double x, double z) {
         return z * this.scaleZ;
     }
 
     @Override
-    public double getX(double blockX, double blockZ) {
+    public double x(double blockX, double blockZ) {
         return blockX / this.scaleX;
     }
 
     @Override
-    public double getZ(double blockX, double blockZ) {
+    public double z(double blockX, double blockZ) {
         return blockZ / this.scaleZ;
     }
 }

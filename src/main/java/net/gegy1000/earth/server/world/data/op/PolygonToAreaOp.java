@@ -5,14 +5,14 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
 import net.gegy1000.earth.server.world.data.AreaData;
 import net.gegy1000.earth.server.world.data.PolygonData;
-import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
+import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.data.DataOp;
 import net.gegy1000.terrarium.server.world.rasterization.PolygonShapeProducer;
 
 import java.awt.geom.Area;
 
 public final class PolygonToAreaOp {
-    public static DataOp<AreaData> apply(DataOp<PolygonData> polygons, CoordinateState coordinateState) {
+    public static DataOp<AreaData> apply(DataOp<PolygonData> polygons, CoordinateReference coordinateReference) {
         return polygons.map((polygonData, view) -> {
             Area area = new Area();
 
@@ -20,7 +20,7 @@ public final class PolygonToAreaOp {
                 for (int i = 0; i < polygon.getNumGeometries(); i++) {
                     Geometry geometry = polygon.getGeometryN(i);
                     if (geometry instanceof Polygon) {
-                        area.add(PolygonShapeProducer.toShape((Polygon) geometry, coordinateState));
+                        area.add(PolygonShapeProducer.toShape((Polygon) geometry, coordinateReference));
                     }
                 }
             }

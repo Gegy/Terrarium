@@ -1,9 +1,10 @@
 package net.gegy1000.earth.client.render;
 
 import net.gegy1000.earth.TerrariumEarth;
-import net.gegy1000.earth.server.capability.EarthCapability;
+import net.gegy1000.earth.server.capability.EarthWorld;
 import net.gegy1000.earth.server.config.TerrariumEarthConfig;
 import net.gegy1000.terrarium.server.util.FlipFlopTimer;
+import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
@@ -130,10 +131,11 @@ public class PanoramaHandler {
 
         @Override
         public void renderWorld(Minecraft mc, float partialTicks, float deltaTicks) {
-            EarthCapability earthData = mc.world.getCapability(TerrariumEarth.earthCap, null);
-            if (earthData != null) {
-                double blockX = earthData.getX(this.latitude, this.longitude);
-                double blockZ = earthData.getZ(this.latitude, this.longitude);
+            EarthWorld earth = mc.world.getCapability(TerrariumEarth.worldCap(), null);
+            if (earth != null) {
+                CoordinateReference crs = earth.getCrs();
+                double blockX = crs.x(this.latitude, this.longitude);
+                double blockZ = crs.z(this.latitude, this.longitude);
 
                 double deltaX = blockX - TileEntityRendererDispatcher.staticPlayerX;
                 double deltaZ = blockZ - TileEntityRendererDispatcher.staticPlayerZ;
@@ -153,10 +155,11 @@ public class PanoramaHandler {
         @Nullable
         @Override
         public State update(World world, EntityPlayer player) {
-            EarthCapability earthData = world.getCapability(TerrariumEarth.earthCap, null);
-            if (earthData != null) {
-                double blockX = earthData.getX(this.latitude, this.longitude);
-                double blockZ = earthData.getZ(this.latitude, this.longitude);
+            EarthWorld earth = world.getCapability(TerrariumEarth.worldCap(), null);
+            if (earth != null) {
+                CoordinateReference crs = earth.getCrs();
+                double blockX = crs.x(this.latitude, this.longitude);
+                double blockZ = crs.z(this.latitude, this.longitude);
                 double deltaX = player.posX - blockX;
                 double deltaZ = player.posZ - blockZ;
                 if (deltaX * deltaX + deltaZ * deltaZ < IMMERSION_MIN_DISTANCE) {

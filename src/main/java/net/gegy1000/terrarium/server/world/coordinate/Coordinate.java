@@ -5,18 +5,18 @@ import net.minecraft.util.math.BlockPos;
 import java.util.Objects;
 
 public final class Coordinate {
-    private final CoordinateState state;
+    private final CoordinateReference state;
 
     private final double x;
     private final double z;
 
-    public Coordinate(CoordinateState state, double x, double z) {
+    public Coordinate(CoordinateReference state, double x, double z) {
         this.state = state;
         this.x = x;
         this.z = z;
     }
 
-    public static Coordinate fromBlock(double blockX, double blockZ) {
+    public static Coordinate atBlock(double blockX, double blockZ) {
         return new Coordinate(null, blockX, blockZ);
     }
 
@@ -32,31 +32,31 @@ public final class Coordinate {
         if (this.state == null) {
             return this.x;
         }
-        return this.state.getBlockX(this.x, this.z);
+        return this.state.blockX(this.x, this.z);
     }
 
     public double getBlockZ() {
         if (this.state == null) {
             return this.z;
         }
-        return this.state.getBlockZ(this.x, this.z);
+        return this.state.blockZ(this.x, this.z);
     }
 
-    public Coordinate to(CoordinateState to) {
+    public Coordinate to(CoordinateReference to) {
         if (this.state == to) {
             return this;
         }
 
         double blockX = this.getBlockX();
         double blockZ = this.getBlockZ();
-        return new Coordinate(to, to.getX(blockX, blockZ), to.getZ(blockX, blockZ));
+        return new Coordinate(to, to.x(blockX, blockZ), to.z(blockX, blockZ));
     }
 
     public Coordinate addBlock(double x, double z) {
-        return this.add(Coordinate.fromBlock(x, z));
+        return this.add(Coordinate.atBlock(x, z));
     }
 
-    public Coordinate add(CoordinateState state, double x, double z) {
+    public Coordinate add(CoordinateReference state, double x, double z) {
         return this.add(new Coordinate(state, x, z));
     }
 
@@ -65,11 +65,11 @@ public final class Coordinate {
         double blockZ = coordinate.getBlockZ();
 
         if (this.state == null) {
-            return Coordinate.fromBlock(this.x + blockX, this.z + blockZ);
+            return Coordinate.atBlock(this.x + blockX, this.z + blockZ);
         }
 
-        double offsetX = this.state.getX(blockX, blockZ);
-        double offsetZ = this.state.getZ(blockX, blockZ);
+        double offsetX = this.state.x(blockX, blockZ);
+        double offsetZ = this.state.z(blockX, blockZ);
         return new Coordinate(this.state, this.x + offsetX, this.z + offsetZ);
     }
 
@@ -77,7 +77,7 @@ public final class Coordinate {
         return new BlockPos(this.getBlockX(), 0, this.getBlockZ());
     }
 
-    public boolean is(CoordinateState state) {
+    public boolean is(CoordinateReference state) {
         return Objects.equals(this.state, state);
     }
 

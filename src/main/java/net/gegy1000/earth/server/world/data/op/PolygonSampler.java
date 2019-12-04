@@ -3,7 +3,7 @@ package net.gegy1000.earth.server.world.data.op;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import net.gegy1000.earth.server.world.data.PolygonData;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
-import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
+import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.data.DataOp;
 import net.gegy1000.terrarium.server.world.data.source.DataSourceHandler;
 import net.gegy1000.terrarium.server.world.data.source.DataTileEntry;
@@ -15,10 +15,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public final class PolygonSampler {
-    public static DataOp<PolygonData> sample(TiledDataSource<PolygonData> source, CoordinateState coordinateState) {
+    public static DataOp<PolygonData> sample(TiledDataSource<PolygonData> source, CoordinateReference coordinateReference) {
         return DataOp.of(view -> {
-            Coordinate blockMin = view.getMinCoordinate().to(coordinateState);
-            Coordinate blockMax = view.getMaxCoordinate().to(coordinateState);
+            Coordinate blockMin = view.getMinCoordinate().to(coordinateReference);
+            Coordinate blockMax = view.getMaxCoordinate().to(coordinateReference);
 
             Coordinate min = Coordinate.min(blockMin, blockMax);
             Coordinate max = Coordinate.max(blockMin, blockMax);

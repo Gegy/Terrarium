@@ -2,7 +2,7 @@ package net.gegy1000.earth.server.command;
 
 import com.google.common.base.Strings;
 import net.gegy1000.earth.TerrariumEarth;
-import net.gegy1000.earth.server.capability.EarthCapability;
+import net.gegy1000.earth.server.capability.EarthWorld;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.minecraft.command.CommandBase;
@@ -44,16 +44,16 @@ public class GeoTeleportCommand extends CommandBase {
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         Entity entity = getTeleportedEntity(server, sender, args);
 
-        EarthCapability earthData = entity.world.getCapability(TerrariumEarth.earthCap, null);
-        if (earthData != null) {
+        EarthWorld earth = entity.world.getCapability(TerrariumEarth.worldCap(), null);
+        if (earth != null) {
             String argument = String.join(" ", args).replace(',', ' ');
             String[] locationInput = argument.split("\\s+");
 
             Thread thread = new Thread(() -> {
                 try {
                     CommandLocation location = this.parseLocation(sender, locationInput);
-                    Coordinate coordinate = location.getCoordinate(sender, earthData);
-                    server.addScheduledTask(() -> this.teleport(entity, earthData, coordinate));
+                    Coordinate coordinate = location.getCoordinate(sender, earth);
+                    server.addScheduledTask(() -> this.teleport(entity, earth, coordinate));
                 } catch (CommandException e) {
                     TextComponentTranslation message = new TextComponentTranslation(e.getMessage(), e.getErrorObjects());
                     message.getStyle().setColor(TextFormatting.RED);
@@ -122,7 +122,7 @@ public class GeoTeleportCommand extends CommandBase {
         return null;
     }
 
-    private void teleport(Entity entity, EarthCapability earthData, Coordinate coordinate) {
+    private void teleport(Entity entity, EarthWorld earthData, Coordinate coordinate) {
         int blockX = MathHelper.floor(coordinate.getBlockX());
         int blockZ = MathHelper.floor(coordinate.getBlockZ());
 
@@ -148,7 +148,7 @@ public class GeoTeleportCommand extends CommandBase {
         entity.sendMessage(DeferredTranslator.translate(entity, new TextComponentTranslation("commands.earth.geotp.success", coordinate.getX(), coordinate.getZ())));
     }
 
-    private int getHeight(World world, EarthCapability earthData, int x, int z) {
+    private int getHeight(World world, EarthWorld earthData, int x, int z) {
         BlockPos surface = earthData.estimateSurface(world, x, z);
         if (surface != null) {
             BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos(surface);
@@ -162,7 +162,7 @@ public class GeoTeleportCommand extends CommandBase {
     }
 
     private interface CommandLocation {
-        Coordinate getCoordinate(ICommandSender sender, EarthCapability worldData) throws CommandException;
+        Coordinate getCoordinate(ICommandSender sender, EarthWorld worldData) throws CommandException;
     }
 
     private class CoordinateLocation implements CommandLocation {
@@ -175,8 +175,8 @@ public class GeoTeleportCommand extends CommandBase {
         }
 
         @Override
-        public Coordinate getCoordinate(ICommandSender sender, EarthCapability worldData) {
-            return new Coordinate(worldData.getGeoCoordinate(), this.latitude, this.longitude);
+        public Coordinate getCoordinate(ICommandSender sender, EarthWorld worldData) {
+            return new Coordinate(worldData.getCrs(), this.latitude, this.longitude);
         }
     }
 
@@ -188,14 +188,14 @@ public class GeoTeleportCommand extends CommandBase {
         }
 
         @Override
-        public Coordinate getCoordinate(ICommandSender sender, EarthCapability worldData) throws CommandException {
+        public Coordinate getCoordinate(ICommandSender sender, EarthWorld worldData) throws CommandException {
             try {
                 Vector2d coordinate = worldData.getGeocoder().get(this.place);
                 if (coordinate == null) {
                     throw DeferredTranslator.createException(sender, "commands.earth.geotp.not_found", this.place);
                 }
 
-                return new Coordinate(worldData.getGeoCoordinate(), coordinate.getX(), coordinate.getY());
+                return new Coordinate(worldData.getCrs(), coordinate.getX(), coordinate.getY());
             } catch (IOException e) {
                 Terrarium.LOGGER.error("Failed to get geocode for {}", this.place, e);
                 throw DeferredTranslator.createException(sender, "commands.earth.geotp.error", this.place, e.getClass().getSimpleName(), e.getMessage());

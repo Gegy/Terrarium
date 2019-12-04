@@ -2,7 +2,7 @@ package net.gegy1000.terrarium.server.world.data.op;
 
 import net.gegy1000.terrarium.server.util.Voronoi;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
-import net.gegy1000.terrarium.server.world.coordinate.CoordinateState;
+import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.data.DataView;
 import net.gegy1000.terrarium.server.world.data.DataOp;
 import net.gegy1000.terrarium.server.world.data.raster.Raster;
@@ -11,7 +11,7 @@ import net.minecraft.util.math.MathHelper;
 import java.util.function.Function;
 
 public final class VoronoiScaleOp {
-    public static <T extends Raster<?>> DataOp<T> scaleFrom(DataOp<T> data, CoordinateState src, Function<DataView, T> function) {
+    public static <T extends Raster<?>> DataOp<T> scaleFrom(DataOp<T> data, CoordinateReference src, Function<DataView, T> function) {
         Voronoi voronoi = new Voronoi(Voronoi.DistanceFunc.EUCLIDEAN, 0.9, 4, 1000);
         return DataOp.of(view -> {
             DataView srcView = getSourceView(view, src);
@@ -19,8 +19,8 @@ public final class VoronoiScaleOp {
             double blockSizeX = view.getWidth();
             double blockSizeZ = view.getHeight();
 
-            double scaleFactorX = Math.abs(src.getX(blockSizeX, blockSizeZ) / blockSizeX);
-            double scaleFactorZ = Math.abs(src.getZ(blockSizeX, blockSizeZ) / blockSizeZ);
+            double scaleFactorX = Math.abs(src.x(blockSizeX, blockSizeZ) / blockSizeX);
+            double scaleFactorZ = Math.abs(src.z(blockSizeX, blockSizeZ) / blockSizeZ);
 
             Coordinate minRegionCoordinateBlock = view.getMinCoordinate().to(src);
             Coordinate maxRegionCoordinateBlock = view.getMaxCoordinate().to(src);
@@ -38,7 +38,7 @@ public final class VoronoiScaleOp {
         });
     }
 
-    private static DataView getSourceView(DataView view, CoordinateState src) {
+    private static DataView getSourceView(DataView view, CoordinateReference src) {
         Coordinate minRegionCoordinateBlock = view.getMinCoordinate().to(src);
         Coordinate maxRegionCoordinateBlock = view.getMaxCoordinate().to(src);
 
