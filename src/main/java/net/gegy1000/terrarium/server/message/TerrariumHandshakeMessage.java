@@ -47,10 +47,10 @@ public class TerrariumHandshakeMessage implements IMessage {
                 if (server == null) {
                     return null;
                 }
-                TerrariumWorld worldData = server.getWorld(0).getCapability(TerrariumCapabilities.worldDataCapability, null);
-                if (worldData != null) {
+                TerrariumWorld world = server.getWorld(0).getCapability(TerrariumCapabilities.world(), null);
+                if (world != null) {
                     Terrarium.PROXY.scheduleTask(ctx, () -> TerrariumUserTracker.markPlayerUsingTerrarium(player));
-                    return new TerrariumHandshakeMessage(worldData.getSettings());
+                    return new TerrariumHandshakeMessage(world.getSettings());
                 }
             } else {
                 Terrarium.PROXY.scheduleTask(ctx, () -> TerrariumUserTracker.provideSettings(Terrarium.PROXY.getWorld(ctx), message.settings));

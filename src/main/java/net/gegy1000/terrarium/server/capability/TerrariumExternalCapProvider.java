@@ -20,7 +20,7 @@ public interface TerrariumExternalCapProvider extends ICapabilityProvider {
 
         @Override
         public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
-            if (capability == TerrariumCapabilities.externalProviderCapability) {
+            if (capability == TerrariumCapabilities.external()) {
                 return true;
             }
             return this.capabilities.stream().anyMatch(p -> p.hasCapability(capability, facing));
@@ -28,8 +28,8 @@ public interface TerrariumExternalCapProvider extends ICapabilityProvider {
 
         @Override
         public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
-            if (capability == TerrariumCapabilities.externalProviderCapability) {
-                return TerrariumCapabilities.externalProviderCapability.cast(this);
+            if (capability == TerrariumCapabilities.external()) {
+                return TerrariumCapabilities.external().cast(this);
             }
             for (ICapabilityProvider provider : this.capabilities) {
                 T provided = provider.getCapability(capability, facing);

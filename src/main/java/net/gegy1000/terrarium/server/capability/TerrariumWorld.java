@@ -3,15 +3,15 @@ package net.gegy1000.terrarium.server.capability;
 import net.gegy1000.terrarium.server.world.TerrariumDataInitializer;
 import net.gegy1000.terrarium.server.world.TerrariumGeneratorInitializer;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
-import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
-import net.gegy1000.terrarium.server.world.generator.TerrariumGenerator;
-import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.composer.biome.BiomeComposer;
 import net.gegy1000.terrarium.server.world.composer.decoration.DecorationComposer;
 import net.gegy1000.terrarium.server.world.composer.structure.StructureComposer;
 import net.gegy1000.terrarium.server.world.composer.surface.SurfaceComposer;
+import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.ColumnDataGenerator;
+import net.gegy1000.terrarium.server.world.generator.TerrariumGenerator;
+import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
@@ -24,7 +24,7 @@ public interface TerrariumWorld extends ICapabilityProvider {
 
     @Nullable
     static TerrariumWorld get(World world) {
-        return world.getCapability(TerrariumCapabilities.worldDataCapability, null);
+        return world.getCapability(TerrariumCapabilities.world(), null);
     }
 
     GenerationSettings getSettings();
@@ -40,6 +40,16 @@ public interface TerrariumWorld extends ICapabilityProvider {
     BiomeComposer getBiomeComposer();
 
     Coordinate getSpawnPosition();
+
+    @Override
+    default boolean hasCapability(Capability<?> capability, EnumFacing facing) {
+        return capability == TerrariumCapabilities.world();
+    }
+
+    @Override
+    default <T> T getCapability(Capability<T> capability, EnumFacing facing) {
+        return capability == TerrariumCapabilities.world() ? TerrariumCapabilities.world().cast(this) : null;
+    }
 
     class Impl implements TerrariumWorld {
         private final GenerationSettings settings;
@@ -91,19 +101,6 @@ public interface TerrariumWorld extends ICapabilityProvider {
         @Override
         public Coordinate getSpawnPosition() {
             return this.generator.getSpawnPosition();
-        }
-
-        @Override
-        public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
-            return capability == TerrariumCapabilities.worldDataCapability;
-        }
-
-        @Override
-        public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
-            if (capability == TerrariumCapabilities.worldDataCapability) {
-                return TerrariumCapabilities.worldDataCapability.cast(this);
-            }
-            return null;
         }
     }
 }

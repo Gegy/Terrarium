@@ -42,7 +42,7 @@ public class TerrariumUserTracker {
         PropertyPrototype prototype = ((TerrariumWorldType) worldType).buildPropertyPrototype();
         providedSettings = GenerationSettings.parse(prototype, settings);
 
-        TerrariumExternalCapProvider external = world.getCapability(TerrariumCapabilities.externalProviderCapability, null);
+        TerrariumExternalCapProvider external = world.getCapability(TerrariumCapabilities.external(), null);
         if (external == null) {
             return;
         }

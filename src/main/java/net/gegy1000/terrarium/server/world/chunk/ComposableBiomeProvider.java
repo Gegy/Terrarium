@@ -33,7 +33,7 @@ public class ComposableBiomeProvider extends BiomeProvider {
         this.world = world;
 
         this.dataCache = Lazy.of(() -> {
-            TerrariumWorld capability = this.world.getCapability(TerrariumCapabilities.worldDataCapability, null);
+            TerrariumWorld capability = this.world.getCapability(TerrariumCapabilities.world(), null);
             if (capability != null) {
                 return capability.getDataCache();
             }

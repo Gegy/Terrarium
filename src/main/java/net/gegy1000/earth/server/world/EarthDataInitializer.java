@@ -41,7 +41,7 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
 
     @Override
     public ColumnDataGenerator buildDataGenerator() {
-        int heightOrigin = this.ctx.settings.getInteger(HEIGHT_ORIGIN);
+        int heightOrigin = this.ctx.settings.getInteger(HEIGHT_OFFSET);
 
         InterpolationScaleOp heightScaleOp = this.selectSrtmScaleOp(this.ctx.settings);
 

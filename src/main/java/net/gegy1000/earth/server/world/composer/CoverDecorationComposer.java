@@ -11,17 +11,15 @@ import net.gegy1000.terrarium.server.world.data.DataKey;
 import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
 import net.minecraft.world.World;
 
-public class EarthDecorationComposer implements DecorationComposer {
+public class CoverDecorationComposer implements DecorationComposer {
     private static final long DECORATION_SEED = 2492037454623254033L;
 
     private final SpatialRandom random;
 
     private final EnumRaster.Sampler<Cover> coverSampler;
 
-    public EarthDecorationComposer(World world, DataKey<EnumRaster<Cover>> coverKey) {
-        long seed = world.getWorldInfo().getSeed();
-        this.random = new SpatialRandom(seed, DECORATION_SEED);
-
+    public CoverDecorationComposer(World world, DataKey<EnumRaster<Cover>> coverKey) {
+        this.random = new SpatialRandom(world, DECORATION_SEED);
         this.coverSampler = EnumRaster.sampler(coverKey, Cover.NONE);
     }
 

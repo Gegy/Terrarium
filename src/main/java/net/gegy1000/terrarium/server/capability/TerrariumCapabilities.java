@@ -1,5 +1,6 @@
 package net.gegy1000.terrarium.server.capability;
 
+import com.google.common.base.Preconditions;
 import net.gegy1000.terrarium.Terrarium;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.capabilities.Capability;
@@ -13,10 +14,10 @@ public class TerrariumCapabilities {
     public static final ResourceLocation EXTERNAL_DATA_ID = new ResourceLocation(Terrarium.MODID, "external_data");
 
     @CapabilityInject(TerrariumWorld.class)
-    public static Capability<TerrariumWorld> worldDataCapability;
+    private static Capability<TerrariumWorld> world;
 
     @CapabilityInject(TerrariumExternalCapProvider.class)
-    public static Capability<TerrariumExternalCapProvider> externalProviderCapability;
+    private static Capability<TerrariumExternalCapProvider> external;
 
     public static void onPreInit() {
         CapabilityManager.INSTANCE.register(TerrariumWorld.class, new VoidStorage<>(), unsupported());
@@ -27,5 +28,15 @@ public class TerrariumCapabilities {
         return () -> {
             throw new UnsupportedOperationException();
         };
+    }
+
+    public static Capability<TerrariumWorld> world() {
+        Preconditions.checkNotNull(world, "terrarium world cap not initialized");
+        return world;
+    }
+
+    public static Capability<TerrariumExternalCapProvider> external() {
+        Preconditions.checkNotNull(external, "terrarium external world cap not initialized");
+        return external;
     }
 }

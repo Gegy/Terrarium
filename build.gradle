@@ -20,7 +20,7 @@ archivesBaseName = "terrarium"
 sourceCompatibility = targetCompatibility = "1.8"
 
 minecraft {
-  version = "1.12.2-14.23.4.2729"
+  version = "1.12.2-14.23.5.2768 "
   runDir = "minecraft"
   mappings = "stable_39"
 }

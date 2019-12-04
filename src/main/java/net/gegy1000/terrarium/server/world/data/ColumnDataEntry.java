@@ -69,7 +69,7 @@ public final class ColumnDataEntry {
             return this.future.join();
         }
 
-        ColumnData data = this.loader.get(this.columnPos);
+        ColumnData data = this.loader.getNow(this.columnPos);
         this.future = CompletableFuture.completedFuture(data);
 
         return data;

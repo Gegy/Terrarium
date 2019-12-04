@@ -9,6 +9,7 @@ import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.earth.server.world.data.source.LandCoverSource;
 import net.gegy1000.earth.server.world.data.source.WorldClimateRaster;
 import net.gegy1000.terrarium.client.gui.customization.TerrariumCustomizationGui;
+import net.gegy1000.terrarium.server.TerrariumUserTracker;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.TerrariumDataInitializer;
 import net.gegy1000.terrarium.server.world.TerrariumGeneratorInitializer;
@@ -59,13 +60,14 @@ public class EarthWorldType extends TerrariumWorldType {
     public static final PropertyKey<Boolean> ENABLE_DECORATION = new BooleanKey("enable_decoration");
     public static final PropertyKey<Number> WORLD_SCALE = new NumberKey("world_scale");
     public static final PropertyKey<Number> HEIGHT_SCALE = new NumberKey("height_scale");
-    public static final PropertyKey<Number> HEIGHT_ORIGIN = new NumberKey("height_origin");
+    public static final PropertyKey<Number> HEIGHT_OFFSET = new NumberKey("height_offset");
     public static final PropertyKey<Number> SEA_DEPTH = new NumberKey("ocean_depth");
     public static final PropertyKey<Number> BEACH_SIZE = new NumberKey("beach_size");
     public static final PropertyKey<Boolean> ENABLE_BUILDINGS = new BooleanKey("enable_buildings");
     public static final PropertyKey<Boolean> ENABLE_STREETS = new BooleanKey("enable_streets");
 
     public static final PropertyKey<Boolean> CAVE_GENERATION = new BooleanKey("cave_generation");
+    public static final PropertyKey<Boolean> RAVINE_GENERATION = new BooleanKey("ravine_generation");
     public static final PropertyKey<Season> SEASON = new EnumKey<>("season", Season.class);
 
     public EarthWorldType() {
@@ -74,7 +76,7 @@ public class EarthWorldType extends TerrariumWorldType {
 
     @Override
     public TerrariumGeneratorInitializer createGeneratorInitializer(World world, GenerationSettings settings) {
-        world.setSeaLevel(settings.getInteger(HEIGHT_ORIGIN));
+        world.setSeaLevel(settings.getInteger(HEIGHT_OFFSET));
         return new EarthGenerationInitializer(EarthInitContext.from(world, settings));
     }
 
@@ -94,10 +96,10 @@ public class EarthWorldType extends TerrariumWorldType {
         return PropertyPrototype.builder()
                 .withProperties(SPAWN_LATITUDE, SPAWN_LONGITUDE)
                 .withProperties(WORLD_SCALE, HEIGHT_SCALE)
-                .withProperties(SEA_DEPTH, HEIGHT_ORIGIN)
+                .withProperties(SEA_DEPTH, HEIGHT_OFFSET)
                 .withProperties(BEACH_SIZE)
                 .withProperties(ENABLE_DECORATION, ENABLE_BUILDINGS, ENABLE_STREETS)
-                .withProperties(CAVE_GENERATION)
+                .withProperties(CAVE_GENERATION, RAVINE_GENERATION)
                 .withProperties(SEASON)
                 .build();
     }
@@ -109,7 +111,7 @@ public class EarthWorldType extends TerrariumWorldType {
                         new SliderWidget(WORLD_SCALE, 1.0, 250.0, 5.0, 1.0, value -> String.format("1:%.0f", value)),
                         new SliderWidget(HEIGHT_SCALE, 0.0, 10.0, 0.5, 0.1, value -> String.format("%.1fx", value)),
                         new SliderWidget(SEA_DEPTH, 0, 32, 1, 1, value -> String.format("%.0f blocks", value)),
-                        new SliderWidget(HEIGHT_ORIGIN, -63, 128, 1, 1, value -> String.format("%.0f blocks", value)),
+                        new SliderWidget(HEIGHT_OFFSET, -63, 128, 1, 1, value -> String.format("%.0f blocks", value)),
                         new SliderWidget(BEACH_SIZE, 0, 8, 1, 1, value -> String.format("%.0f blocks", value))
                 )
                 .withCategory("natural",
@@ -121,7 +123,8 @@ public class EarthWorldType extends TerrariumWorldType {
                         new ToggleWidget(ENABLE_STREETS).locked()
                 )
                 .withCategory("procedural_features",
-                        new ToggleWidget(CAVE_GENERATION)
+                        new ToggleWidget(CAVE_GENERATION),
+                        new ToggleWidget(RAVINE_GENERATION)
                 )
                 .build();
     }
@@ -146,16 +149,21 @@ public class EarthWorldType extends TerrariumWorldType {
     @Override
     public boolean shouldReduceSlimes(World world, Random random) {
         TerrariumWorld terrarium = TerrariumWorld.get(world);
-        if (terrarium == null) {
-            return false;
-        }
-        return terrarium.getSettings().getInteger(HEIGHT_ORIGIN) < 40;
+        if (terrarium == null) return false;
+        return terrarium.getSettings().getInteger(HEIGHT_OFFSET) < 40;
+    }
+
+    @Override
+    public double getHorizon(World world) {
+        GenerationSettings settings = TerrariumUserTracker.getProvidedSettings();
+        if (settings == null) return 63.0;
+        return settings.getInteger(HEIGHT_OFFSET);
     }
 
     @Override
     protected int calculateMaxGenerationHeight(WorldServer world, GenerationSettings settings) {
         double globalScale = settings.getDouble(HEIGHT_SCALE) / settings.getDouble(WORLD_SCALE);
         double highestPointBlocks = HIGHEST_POINT_METERS * globalScale;
-        return MathHelper.ceil(highestPointBlocks + settings.getDouble(HEIGHT_ORIGIN) + 1);
+        return MathHelper.ceil(highestPointBlocks + settings.getDouble(HEIGHT_OFFSET) + 1);
     }
 }

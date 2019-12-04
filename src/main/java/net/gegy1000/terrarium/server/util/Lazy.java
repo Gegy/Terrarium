@@ -24,7 +24,7 @@ public final class Lazy<T> {
 
     public static <T> Lazy<T> worldCap(World world, Function<TerrariumWorld, T> function) {
         return new Lazy<>(() -> {
-            TerrariumWorld capability = world.getCapability(TerrariumCapabilities.worldDataCapability, null);
+            TerrariumWorld capability = world.getCapability(TerrariumCapabilities.world(), null);
             if (capability != null) {
                 return function.apply(capability);
             }

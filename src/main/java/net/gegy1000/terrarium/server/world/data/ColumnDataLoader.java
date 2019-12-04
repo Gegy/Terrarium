@@ -7,7 +7,7 @@ import java.util.concurrent.CompletableFuture;
 public interface ColumnDataLoader extends AutoCloseable {
     CompletableFuture<ColumnData> getAsync(ChunkPos columnPos);
 
-    ColumnData get(ChunkPos columnPos);
+    ColumnData getNow(ChunkPos columnPos);
 
     @Override
     default void close() {
