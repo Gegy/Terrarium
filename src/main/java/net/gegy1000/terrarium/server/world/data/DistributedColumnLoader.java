@@ -20,6 +20,8 @@ public final class DistributedColumnLoader implements ColumnDataLoader {
     private final Map<ChunkPos, Work> unseenWorkMap = new HashMap<>();
     private final Map<ChunkPos, Work> activeWorkMap = new HashMap<>();
 
+    private final Object workStateMutex = new Object();
+
     private boolean active = true;
 
     public DistributedColumnLoader(Function<ChunkPos, ColumnData> generator) {
@@ -39,7 +41,7 @@ public final class DistributedColumnLoader implements ColumnDataLoader {
 
         Work work = new Work(columnPos, future);
         this.workQueue.add(work);
-        synchronized (this.unseenWorkMap) {
+        synchronized (this.workStateMutex) {
             this.unseenWorkMap.put(columnPos, work);
         }
 
@@ -48,16 +50,20 @@ public final class DistributedColumnLoader implements ColumnDataLoader {
 
     @Override
     public ColumnData getNow(ChunkPos columnPos) {
-        // cancel any work that we haven't started processing yet
-        synchronized (this.unseenWorkMap) {
+        Work activeWork = null;
+        synchronized (this.workStateMutex) {
+            // cancel any work that we haven't started processing yet
             Work unseenWork = this.unseenWorkMap.remove(columnPos);
-            if (unseenWork != null) unseenWork.cancel();
+            if (unseenWork != null) {
+                unseenWork.cancel();
+            } else {
+                activeWork = this.activeWorkMap.get(columnPos);
+            }
         }
 
         // if we're already working on this column, wait for it
-        synchronized (this.activeWorkMap) {
-            Work activeWork = this.activeWorkMap.get(columnPos);
-            if (activeWork != null) return activeWork.future.join();
+        if (activeWork != null) {
+            return activeWork.future.join();
         }
 
         return this.generate(columnPos);
@@ -79,7 +85,7 @@ public final class DistributedColumnLoader implements ColumnDataLoader {
         Work work;
         do {
             work = this.workQueue.take();
-            synchronized (this.unseenWorkMap) {
+            synchronized (this.workStateMutex) {
                 this.unseenWorkMap.remove(work.columnPos);
             }
         } while (work.isCancelled());
@@ -93,7 +99,7 @@ public final class DistributedColumnLoader implements ColumnDataLoader {
     }
 
     private void setActive(Work work, boolean active) {
-        synchronized (this.activeWorkMap) {
+        synchronized (this.workStateMutex) {
             if (active) {
                 this.activeWorkMap.put(work.columnPos, work);
             } else {

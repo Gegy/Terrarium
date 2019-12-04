@@ -2,7 +2,6 @@ package net.gegy1000.terrarium.server.world;
 
 import com.google.common.base.Strings;
 import net.gegy1000.gengen.api.GenericWorldType;
-import net.gegy1000.gengen.api.generator.GenericChunkGenerator;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.client.gui.customization.SelectPresetGui;
 import net.gegy1000.terrarium.client.gui.customization.TerrariumCustomizationGui;
@@ -60,7 +59,7 @@ public abstract class TerrariumWorldType implements GenericWorldType {
     }
 
     @Override
-    public GenericChunkGenerator createGenerator(World world) {
+    public ComposableChunkGenerator createGenerator(World world) {
         return new ComposableChunkGenerator(world);
     }
 

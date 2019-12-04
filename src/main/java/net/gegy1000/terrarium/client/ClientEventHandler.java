@@ -56,8 +56,8 @@ public class ClientEventHandler {
     public static void onJoinWorld(WorldEvent.Load event) {
         World world = event.getWorld();
         if (world.isRemote) {
-            GenericWorldType worldType = GenericWorldType.unwrap(world.getWorldType());
-            if (worldType instanceof TerrariumWorldType && MC.isIntegratedServerRunning()) {
+            TerrariumWorldType worldType = GenericWorldType.unwrapAs(world.getWorldType(), TerrariumWorldType.class);
+            if (worldType != null && MC.isIntegratedServerRunning()) {
                 awaitingLoad = true;
             }
             if (Terrarium.serverHasMod) {
@@ -94,10 +94,9 @@ public class ClientEventHandler {
         if (currentScreen instanceof GuiCreateWorld && event.getButton().id == 5) {
             GuiButton structuresButton = event.getButtonList().get(STRUCTURES_BUTTON_ID);
             int selectedWorldIndex = ClientProxy.getSelectedWorldType((GuiCreateWorld) currentScreen);
-            GenericWorldType worldType = GenericWorldType.unwrap(WorldType.WORLD_TYPES[selectedWorldIndex]);
-            if (worldType instanceof TerrariumWorldType) {
-                TerrariumWorldType terrariumWorldType = (TerrariumWorldType) worldType;
-                if (terrariumWorldType.isHidden() && !GuiScreen.isShiftKeyDown()) {
+            TerrariumWorldType worldType = GenericWorldType.unwrapAs(WorldType.WORLD_TYPES[selectedWorldIndex], TerrariumWorldType.class);
+            if (worldType != null) {
+                if (worldType.isHidden() && !GuiScreen.isShiftKeyDown()) {
                     ClientProxy.actionPerformed(currentScreen, event.getButton());
                 } else {
                     structuresButton.visible = false;

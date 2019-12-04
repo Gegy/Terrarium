@@ -3,8 +3,8 @@ package net.gegy1000.terrarium.server;
 import net.gegy1000.gengen.api.GenericWorldType;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.client.preview.PreviewDummyWorld;
+import net.gegy1000.terrarium.server.capability.TerrariumAuxCaps;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
-import net.gegy1000.terrarium.server.capability.TerrariumExternalCapProvider;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
@@ -59,21 +59,23 @@ public class ServerEventHandler {
         World world = event.getObject();
 
         if (ServerEventHandler.shouldHandle(world)) {
-            TerrariumWorldType worldType = (TerrariumWorldType) GenericWorldType.unwrap(world.getWorldType());
-            TerrariumExternalCapProvider external = new TerrariumExternalCapProvider.Implementation();
+            TerrariumWorldType worldType = GenericWorldType.unwrapAs(world.getWorldType(), TerrariumWorldType.class);
+            if (worldType == null) return;
+
+            TerrariumAuxCaps aux = new TerrariumAuxCaps.Implementation();
 
             if (!world.isRemote || world instanceof PreviewDummyWorld) {
                 TerrariumWorld worldData = new TerrariumWorld.Impl(world, worldType);
 
                 Collection<ICapabilityProvider> capabilities = worldType.createCapabilities(world, worldData.getSettings());
                 for (ICapabilityProvider provider : capabilities) {
-                    external.addExternal(provider);
+                    aux.addAux(provider);
                 }
 
                 event.addCapability(TerrariumCapabilities.WORLD_DATA_ID, worldData);
             }
 
-            event.addCapability(TerrariumCapabilities.EXTERNAL_DATA_ID, external);
+            event.addCapability(TerrariumCapabilities.AUX_DATA_ID, aux);
         }
     }
 

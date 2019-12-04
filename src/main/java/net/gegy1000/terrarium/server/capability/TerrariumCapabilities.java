@@ -11,17 +11,17 @@ import java.util.concurrent.Callable;
 
 public class TerrariumCapabilities {
     public static final ResourceLocation WORLD_DATA_ID = new ResourceLocation(Terrarium.MODID, "world_data");
-    public static final ResourceLocation EXTERNAL_DATA_ID = new ResourceLocation(Terrarium.MODID, "external_data");
+    public static final ResourceLocation AUX_DATA_ID = new ResourceLocation(Terrarium.MODID, "aux_data");
 
     @CapabilityInject(TerrariumWorld.class)
     private static Capability<TerrariumWorld> world;
 
-    @CapabilityInject(TerrariumExternalCapProvider.class)
-    private static Capability<TerrariumExternalCapProvider> external;
+    @CapabilityInject(TerrariumAuxCaps.class)
+    private static Capability<TerrariumAuxCaps> aux;
 
     public static void onPreInit() {
         CapabilityManager.INSTANCE.register(TerrariumWorld.class, new VoidStorage<>(), unsupported());
-        CapabilityManager.INSTANCE.register(TerrariumExternalCapProvider.class, new VoidStorage<>(), TerrariumExternalCapProvider.Implementation::new);
+        CapabilityManager.INSTANCE.register(TerrariumAuxCaps.class, new VoidStorage<>(), TerrariumAuxCaps.Implementation::new);
     }
 
     private static <T> Callable<T> unsupported() {
@@ -35,8 +35,8 @@ public class TerrariumCapabilities {
         return world;
     }
 
-    public static Capability<TerrariumExternalCapProvider> external() {
-        Preconditions.checkNotNull(external, "terrarium external world cap not initialized");
-        return external;
+    public static Capability<TerrariumAuxCaps> aux() {
+        Preconditions.checkNotNull(aux, "terrarium aux world cap not initialized");
+        return aux;
     }
 }

@@ -27,14 +27,12 @@ public class GenerationSettings {
     public static GenerationSettings parse(World world) {
         String generatorOptions = world.getWorldInfo().getGeneratorOptions();
 
-        GenericWorldType worldType = GenericWorldType.unwrap(world.getWorldType());
-
-        if (worldType instanceof TerrariumWorldType) {
-            TerrariumWorldType terrariumWorldType = (TerrariumWorldType) worldType;
-            PropertyPrototype prototype = terrariumWorldType.buildPropertyPrototype();
+        TerrariumWorldType worldType = GenericWorldType.unwrapAs(world.getWorldType(), TerrariumWorldType.class);
+        if (worldType != null) {
+            PropertyPrototype prototype = worldType.buildPropertyPrototype();
 
             GenerationSettings parsedSettings = GenerationSettings.parse(prototype, generatorOptions);
-            GenerationSettings defaultSettings = terrariumWorldType.getPreset().createProperties(prototype);
+            GenerationSettings defaultSettings = worldType.getPreset().createProperties(prototype);
             return defaultSettings.union(parsedSettings);
         }
 

@@ -1,6 +1,8 @@
 package net.gegy1000.terrarium.client.preview;
 
+import net.gegy1000.gengen.api.GenericWorldType;
 import net.gegy1000.gengen.core.impl.vanilla.ColumnGeneratorImpl;
+import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.chunk.ComposableChunkGenerator;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.minecraft.nbt.NBTTagCompound;
@@ -33,7 +35,13 @@ public class PreviewDummyWorld extends World {
         this.provider.setWorld(this);
         this.provider.setDimension(dimension);
 
-        this.generator = new ComposableChunkGenerator(this);
+        TerrariumWorldType terrariumWorldType = GenericWorldType.unwrapAs(worldType, TerrariumWorldType.class);
+        if (terrariumWorldType != null) {
+            this.generator = terrariumWorldType.createGenerator(this);
+        } else {
+            this.generator = new ComposableChunkGenerator(this);
+        }
+
         this.chunkProvider = this.createChunkProvider();
 
         this.initCapabilities();

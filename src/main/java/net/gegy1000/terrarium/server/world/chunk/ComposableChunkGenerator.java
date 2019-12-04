@@ -26,15 +26,15 @@ import java.util.List;
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class ComposableChunkGenerator implements GenericChunkGenerator {
-    private final World world;
+    protected final World world;
 
-    private final Lazy<SurfaceComposer> surfaceComposer;
-    private final Lazy<DecorationComposer> decorationComposer;
-    private final Lazy<StructureComposer> structureComposer;
+    protected final Lazy<SurfaceComposer> surfaceComposer;
+    protected final Lazy<DecorationComposer> decorationComposer;
+    protected final Lazy<StructureComposer> structureComposer;
 
-    private final Lazy<ColumnDataCache> dataCache;
+    protected final Lazy<ColumnDataCache> dataCache;
 
-    private final ColumnDataEntry.Handle[] populationHandles = new ColumnDataEntry.Handle[4];
+    protected final ColumnDataEntry.Handle[] populationHandles = new ColumnDataEntry.Handle[4];
 
     public ComposableChunkGenerator(World world) {
         this.world = world;

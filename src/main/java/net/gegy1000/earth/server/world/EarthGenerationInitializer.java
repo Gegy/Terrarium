@@ -1,5 +1,6 @@
 package net.gegy1000.earth.server.world;
 
+import net.gegy1000.earth.server.capability.HeightmapStore;
 import net.gegy1000.earth.server.world.composer.BoulderDecorationComposer;
 import net.gegy1000.earth.server.world.composer.CoverDecorationComposer;
 import net.gegy1000.earth.server.world.composer.EarthBiomeComposer;
@@ -7,6 +8,7 @@ import net.gegy1000.earth.server.world.composer.EarthCarvingComposer;
 import net.gegy1000.earth.server.world.composer.FreezeSurfaceComposer;
 import net.gegy1000.earth.server.world.composer.SoilSurfaceComposer;
 import net.gegy1000.earth.server.world.composer.WaterFillSurfaceComposer;
+import net.gegy1000.gengen.api.HeightFunction;
 import net.gegy1000.gengen.core.GenGen;
 import net.gegy1000.gengen.util.primer.GenericCavePrimer;
 import net.gegy1000.gengen.util.primer.GenericRavinePrimer;
@@ -47,6 +49,7 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
     private void addSurfaceComposers(CompositeTerrariumGenerator.Builder builder, boolean preview) {
         World world = this.ctx.world;
         int heightOffset = this.ctx.settings.getInteger(HEIGHT_OFFSET);
+        HeightFunction surfaceFunction = HeightmapStore.global(world, heightOffset);
 
         builder.addSurfaceComposer(new HeightmapSurfaceComposer(EarthDataKeys.HEIGHT, Blocks.STONE.getDefaultState()));
         builder.addSurfaceComposer(new WaterFillSurfaceComposer(EarthDataKeys.HEIGHT, EarthDataKeys.LANDFORM, EarthDataKeys.WATER_LEVEL, Blocks.WATER.getDefaultState()));
@@ -58,12 +61,13 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
             builder.addSurfaceComposer(new EarthCarvingComposer(EarthDataKeys.COVER));
         }
 
+        // TODO: GenGen cave generator is broken
         if (this.ctx.settings.get(CAVE_GENERATION)) {
             builder.addSurfaceComposer(GenericSurfaceComposer.of(new GenericCavePrimer(world)));
         }
 
         if (this.ctx.settings.get(RAVINE_GENERATION)) {
-            builder.addSurfaceComposer(GenericSurfaceComposer.of(new GenericRavinePrimer(world, heightOffset)));
+            builder.addSurfaceComposer(GenericSurfaceComposer.of(new GenericRavinePrimer(world, surfaceFunction)));
         }
 
         if (!GenGen.isCubic(world)) {

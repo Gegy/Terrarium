@@ -14,6 +14,7 @@ import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.TerrariumDataInitializer;
 import net.gegy1000.terrarium.server.world.TerrariumGeneratorInitializer;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
+import net.gegy1000.terrarium.server.world.chunk.ComposableChunkGenerator;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.coordinate.LatLngCoordRef;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
@@ -72,6 +73,11 @@ public class EarthWorldType extends TerrariumWorldType {
 
     public EarthWorldType() {
         super("earth", IDENTIFIER, PRESET);
+    }
+
+    @Override
+    public ComposableChunkGenerator createGenerator(World world) {
+        return new EarthChunkGenerator(world);
     }
 
     @Override

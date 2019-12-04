@@ -2,8 +2,8 @@ package net.gegy1000.terrarium.server;
 
 import net.gegy1000.gengen.api.GenericWorldType;
 import net.gegy1000.terrarium.Terrarium;
+import net.gegy1000.terrarium.server.capability.TerrariumAuxCaps;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
-import net.gegy1000.terrarium.server.capability.TerrariumExternalCapProvider;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.generator.customization.PropertyPrototype;
@@ -30,26 +30,19 @@ public class TerrariumUserTracker {
     }
 
     public static void provideSettings(World world, String settings) {
-        if (world == null) {
-            return;
-        }
+        if (world == null) return;
 
-        GenericWorldType worldType = GenericWorldType.unwrap(world.getWorldType());
-        if (!(worldType instanceof TerrariumWorldType)) {
-            return;
-        }
+        TerrariumWorldType worldType = GenericWorldType.unwrapAs(world.getWorldType(), TerrariumWorldType.class);
 
-        PropertyPrototype prototype = ((TerrariumWorldType) worldType).buildPropertyPrototype();
+        PropertyPrototype prototype = worldType.buildPropertyPrototype();
         providedSettings = GenerationSettings.parse(prototype, settings);
 
-        TerrariumExternalCapProvider external = world.getCapability(TerrariumCapabilities.external(), null);
-        if (external == null) {
-            return;
-        }
+        TerrariumAuxCaps aux = world.getCapability(TerrariumCapabilities.aux(), null);
+        if (aux == null) return;
 
-        Collection<ICapabilityProvider> capabilities = ((TerrariumWorldType) worldType).createCapabilities(world, providedSettings);
+        Collection<ICapabilityProvider> capabilities = worldType.createCapabilities(world, providedSettings);
         for (ICapabilityProvider provider : capabilities) {
-            external.addExternal(provider);
+            aux.addAux(provider);
         }
     }
 

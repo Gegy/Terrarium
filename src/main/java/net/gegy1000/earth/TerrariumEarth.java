@@ -3,6 +3,7 @@ package net.gegy1000.earth;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import net.gegy1000.earth.server.ServerProxy;
+import net.gegy1000.earth.server.capability.HeightmapStore;
 import net.gegy1000.earth.server.capability.EarthWorld;
 import net.gegy1000.earth.server.command.GeoTeleportCommand;
 import net.gegy1000.earth.server.command.GeoToolCommand;
@@ -16,19 +17,24 @@ import net.gegy1000.earth.server.world.EarthWorldType;
 import net.gegy1000.earth.server.world.data.EarthRemoteData;
 import net.gegy1000.earth.server.world.data.GoogleGeocoder;
 import net.gegy1000.earth.server.world.data.NominatimGeocoder;
+import net.gegy1000.terrarium.server.capability.DelegatedStorage;
 import net.gegy1000.terrarium.server.capability.VoidStorage;
 import net.gegy1000.terrarium.server.world.data.source.Geocoder;
 import net.minecraft.launchwrapper.Launch;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.WorldType;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.NetworkCheckHandler;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
@@ -39,6 +45,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.util.Map;
 
+@Mod.EventBusSubscriber
 @Mod(modid = TerrariumEarth.MODID, name = "Terrarium: Earth", version = TerrariumEarth.VERSION, acceptedMinecraftVersions = "[1.12]", dependencies = "required-after:terrarium@[0.1.0,]")
 public class TerrariumEarth {
     public static final String MODID = "earth";
@@ -61,6 +68,9 @@ public class TerrariumEarth {
     @CapabilityInject(EarthWorld.class)
     private static Capability<EarthWorld> worldCap;
 
+    @CapabilityInject(HeightmapStore.class)
+    private static Capability<HeightmapStore> heightmapCap;
+
     private static boolean deobfuscatedEnvironment;
 
     @Mod.EventHandler
@@ -68,6 +78,8 @@ public class TerrariumEarth {
         deobfuscatedEnvironment = (boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
 
         CapabilityManager.INSTANCE.register(EarthWorld.class, new VoidStorage<>(), EarthWorld.None::new);
+        CapabilityManager.INSTANCE.register(HeightmapStore.class, new DelegatedStorage<>(), HeightmapStore::new);
+
         PROXY.onPreInit();
 
         SharedDataInitializers.add(
@@ -113,6 +125,11 @@ public class TerrariumEarth {
         event.registerServerCommand(new GeoToolCommand());
     }
 
+    @SubscribeEvent
+    public static void onAttachChunkCapabilities(AttachCapabilitiesEvent<Chunk> event) {
+        event.addCapability(new ResourceLocation(MODID, "heightmap"), new HeightmapStore());
+    }
+
     public static Geocoder getPreferredGeocoder() {
         if (TerrariumEarthConfig.osmGeocoder || Strings.isNullOrEmpty(EarthRemoteData.info.getGeocoderKey())) {
             return new NominatimGeocoder();
@@ -128,5 +145,10 @@ public class TerrariumEarth {
     public static Capability<EarthWorld> worldCap() {
         Preconditions.checkNotNull(worldCap, "earth world capability not yet initialized");
         return worldCap;
+    }
+
+    public static Capability<HeightmapStore> heightmapCap() {
+        Preconditions.checkNotNull(heightmapCap, "earth column heightmap capability not yet initialized");
+        return heightmapCap;
     }
 }

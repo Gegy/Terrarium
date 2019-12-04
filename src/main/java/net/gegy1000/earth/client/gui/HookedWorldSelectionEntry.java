@@ -22,8 +22,8 @@ public class HookedWorldSelectionEntry extends GuiListWorldSelectionEntry {
         if (!SharedEarthData.isInitialized()) {
             WorldInfo worldInfo = SAVE_FORMAT.getWorldInfo(this.worldSummary.getFileName());
             if (worldInfo != null) {
-                GenericWorldType worldType = GenericWorldType.unwrap(worldInfo.getTerrainType());
-                if (worldType instanceof TerrariumWorldType) {
+                TerrariumWorldType worldType = GenericWorldType.unwrapAs(worldInfo.getTerrainType(), TerrariumWorldType.class);
+                if (worldType != null) {
                     CLIENT.displayGuiScreen(new SharedInitializingGui(CLIENT.currentScreen, super::joinWorld));
                     return;
                 }
