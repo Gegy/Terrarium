@@ -36,8 +36,7 @@ public abstract class AbstractRaster<T> implements Raster<T> {
         return this.height;
     }
 
-    @SuppressWarnings({ "SuspiciousSystemArraycopy" })
-    protected static <T, R extends AbstractRaster<T>> void sampleInto(R resultRaster, ColumnDataCache dataCache, DataView view, DataKey<R> key) {
+    protected static <R extends Raster<?>> void sampleInto(R resultRaster, ColumnDataCache dataCache, DataView view, DataKey<R> key) {
         int chunkMinX = view.getX() >> 4;
         int chunkMinY = view.getY() >> 4;
         int chunkMaxX = view.getMaxX() >> 4;
@@ -58,25 +57,8 @@ public abstract class AbstractRaster<T> implements Raster<T> {
 
                 ColumnData data = handle.join();
                 data.get(key).ifPresent(sourceRaster -> {
-                    int minColumnX = columnPos.getXStart();
-                    int minColumnY = columnPos.getZStart();
-
-                    int minX = Math.max(0, view.getMinX() - minColumnX);
-                    int minY = Math.max(0, view.getMinY() - minColumnY);
-                    int maxX = Math.min(sourceRaster.getWidth(), view.getMaxX() - minColumnX);
-                    int maxY = Math.min(sourceRaster.getHeight(), view.getMaxY() - minColumnY);
-
-                    for (int localY = minY; localY < maxY; localY++) {
-                        int resultY = (localY + minColumnY) - view.getMinY();
-
-                        int localX = minX;
-                        int resultX = (localX + minColumnX) - view.getMinX();
-
-                        int sourceIndex = localX + localY * sourceRaster.getWidth();
-                        int resultIndex = resultX + resultY * resultRaster.getWidth();
-
-                        System.arraycopy(sourceRaster.data, sourceIndex, resultRaster.data, resultIndex, maxX - minX);
-                    }
+                    DataView srcView = DataView.of(columnPos);
+                    Raster.rasterCopy(sourceRaster, srcView, resultRaster, view);
                 });
             }
         } finally {

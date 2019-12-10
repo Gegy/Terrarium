@@ -1,8 +1,8 @@
 package net.gegy1000.terrarium.server.world.data.op;
 
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
-import net.gegy1000.terrarium.server.world.data.DataView;
 import net.gegy1000.terrarium.server.world.data.DataOp;
+import net.gegy1000.terrarium.server.world.data.DataView;
 import net.gegy1000.terrarium.server.world.data.raster.ByteRaster;
 import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.data.raster.ObjRaster;
@@ -53,38 +53,20 @@ public final class RasterSourceSampler {
             DataTilePos maxTile = new DataTilePos(maxTileX, maxTileY);
 
             return DataSourceHandler.INSTANCE.getTiles(source, minTile, maxTile).thenApply(tiles -> {
-                T result = function.apply(view);
+                T resultRaster = function.apply(view);
                 for (DataTileEntry<T> tileEntry : tiles) {
-                    sampleFromTile(tileEntry.getData(), tileEntry.getPos(), result, view);
+                    DataTilePos tilePos = tileEntry.getPos();
+                    DataView sourceView = DataView.rect(
+                            tilePos.getX() * tileWidth, tilePos.getZ() * tileHeight,
+                            tileWidth, tileHeight
+                    );
+
+                    T sourceRaster = tileEntry.getData();
+                    Raster.rasterCopy(sourceRaster, sourceView, resultRaster, view);
                 }
-                return result;
+
+                return resultRaster;
             });
         });
-    }
-
-    @SuppressWarnings("SuspiciousSystemArraycopy")
-    private static <T extends Raster<?>> void sampleFromTile(T sourceTile, DataTilePos pos, T result, DataView view) {
-        Object sourceRaw = sourceTile.getData();
-        Object resultRaw = result.getData();
-
-        int minTilePosX = pos.getX() * sourceTile.getWidth();
-        int minTilePosY = pos.getZ() * sourceTile.getHeight();
-
-        int minSampleX = Math.max(0, view.getX() - minTilePosX);
-        int minSampleY = Math.max(0, view.getY() - minTilePosY);
-        int maxSampleX = Math.min(sourceTile.getWidth(), (view.getX() + view.getWidth()) - minTilePosX);
-        int maxSampleY = Math.min(sourceTile.getHeight(), (view.getY() + view.getHeight()) - minTilePosY);
-
-        for (int localY = minSampleY; localY < maxSampleY; localY++) {
-            int resultY = (localY + minTilePosY) - view.getY();
-
-            int localX = minSampleX;
-            int resultX = (localX + minTilePosX) - view.getX();
-
-            int sourceIndex = localX + localY * sourceTile.getWidth();
-            int resultIndex = resultX + resultY * result.getWidth();
-
-            System.arraycopy(sourceRaw, sourceIndex, resultRaw, resultIndex, maxSampleX - minSampleX);
-        }
     }
 }
