@@ -89,16 +89,16 @@ public enum InterpolationScaleOp {
     }
 
     private <T extends NumberRaster<?>> double lerp(double[][] sampleBuffer, T source, double x, double y) {
-        int originX = MathHelper.floor(x);
-        int originY = MathHelper.floor(y);
+        int originX = MathHelper.floor(x) + this.sampleOffset;
+        int originY = MathHelper.floor(y) + this.sampleOffset;
 
         double intermediateX = x - originX;
         double intermediateY = y - originY;
 
         for (int sampleY = 0; sampleY < this.sampleWidth; sampleY++) {
-            int sourceY = originY + sampleY - this.sampleOffset;
+            int sourceY = originY + (sampleY - this.sampleOffset);
             for (int sampleX = 0; sampleX < this.sampleWidth; sampleX++) {
-                int sourceX = originX + sampleX - this.sampleOffset;
+                int sourceX = originX + (sampleX - this.sampleOffset);
                 sampleBuffer[sampleX][sampleY] = source.getDouble(sourceX, sourceY);
             }
         }
