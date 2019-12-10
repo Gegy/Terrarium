@@ -16,6 +16,10 @@ public class DataView {
         this.height = height;
     }
 
+    public static DataView rect(int width, int height) {
+        return new DataView(0, 0, width, height);
+    }
+
     public static DataView rect(int x, int y, int width, int height) {
         return new DataView(x, y, width, height);
     }
@@ -26,6 +30,10 @@ public class DataView {
 
     public static DataView of(ChunkPos columnPos) {
         return new DataView(columnPos.getXStart(), columnPos.getZStart(), 16, 16);
+    }
+
+    public static DataView fromCorners(int minX, int minY, int maxX, int maxY) {
+        return new DataView(minX, minY, maxX - minX, maxY - minY);
     }
 
     public int getX() {
@@ -70,6 +78,14 @@ public class DataView {
 
     public DataView grow(int lowerX, int lowerY, int upperX, int upperY) {
         return new DataView(this.x - lowerX, this.y - lowerY, this.width + upperX + lowerX, this.height + upperY + lowerY);
+    }
+
+    public DataView grow(int amount) {
+        return new DataView(this.x - amount, this.y - amount, this.width + amount * 2, this.height + amount * 2);
+    }
+
+    public DataView offset(int x, int y) {
+        return new DataView(this.x + x, this.y + y, this.width, this.height);
     }
 
     public boolean contains(DataView view) {

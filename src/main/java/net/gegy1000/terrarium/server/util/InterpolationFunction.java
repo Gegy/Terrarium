@@ -1,7 +1,7 @@
 package net.gegy1000.terrarium.server.util;
 
 public enum InterpolationFunction {
-    NEAREST(1, 0, 0) {
+    NEAREST(1, 0) {
         @Override
         protected double[] getBuffer() {
             return BUFFER_1.get();
@@ -12,7 +12,7 @@ public enum InterpolationFunction {
             return b[0];
         }
     },
-    LINEAR(2, 1, 0) {
+    LINEAR(2, 0) {
         @Override
         protected double[] getBuffer() {
             return BUFFER_2.get();
@@ -23,7 +23,7 @@ public enum InterpolationFunction {
             return b[0] + (b[1] - b[0]) * i;
         }
     },
-    COSINE(2, 1, 0) {
+    COSINE(2, 0) {
         @Override
         protected double[] getBuffer() {
             return BUFFER_2.get();
@@ -35,7 +35,7 @@ public enum InterpolationFunction {
             return b[0] * (1.0 - easedIntermediate) + b[1] * easedIntermediate;
         }
     },
-    CUBIC(4, 2, 1) {
+    CUBIC(4, -1) {
         @Override
         protected double[] getBuffer() {
             return BUFFER_4.get();
@@ -51,26 +51,20 @@ public enum InterpolationFunction {
     private static final ThreadLocal<double[]> BUFFER_2 = ThreadLocal.withInitial(() -> new double[2]);
     private static final ThreadLocal<double[]> BUFFER_4 = ThreadLocal.withInitial(() -> new double[4]);
 
-    private final int pointCount;
-    private final int forward;
-    private final int backward;
+    private final int sampleWidth;
+    private final int sampleOffset;
 
-    InterpolationFunction(int pointCount, int forward, int backward) {
-        this.pointCount = pointCount;
-        this.forward = forward;
-        this.backward = backward;
+    InterpolationFunction(int sampleWidth, int sampleOffset) {
+        this.sampleWidth = sampleWidth;
+        this.sampleOffset = sampleOffset;
     }
 
-    public int getPointCount() {
-        return this.pointCount;
+    public int getSampleWidth() {
+        return this.sampleWidth;
     }
 
-    public int getForward() {
-        return this.forward;
-    }
-
-    public int getBackward() {
-        return this.backward;
+    public int getSampleOffset() {
+        return this.sampleOffset;
     }
 
     protected abstract double[] getBuffer();
@@ -78,7 +72,7 @@ public enum InterpolationFunction {
     protected abstract double calculateLerp(double[] b, double i);
 
     public double sample(double[] buffer, double intermediate) {
-        if (this.pointCount != buffer.length) {
+        if (this.sampleWidth != buffer.length) {
             throw new IllegalStateException("This method cannot interpolate with " + buffer.length + " points");
         }
         return this.calculateLerp(buffer, intermediate);
@@ -102,7 +96,7 @@ public enum InterpolationFunction {
 
     public double lerp2d(double[][] buffer, double intermediateX, double intermediateY) {
         double[] verticalSampleBuffer = this.getBuffer();
-        for (int sampleX = 0; sampleX < this.pointCount; sampleX++) {
+        for (int sampleX = 0; sampleX < this.sampleWidth; sampleX++) {
             verticalSampleBuffer[sampleX] = this.sample(buffer[sampleX], intermediateY);
         }
         return this.sample(verticalSampleBuffer, intermediateX);
