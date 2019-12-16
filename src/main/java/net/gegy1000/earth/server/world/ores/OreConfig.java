@@ -1,14 +1,16 @@
 package net.gegy1000.earth.server.world.ores;
 
 import com.google.common.base.Preconditions;
+import net.gegy1000.earth.server.world.feature.SingleOreGenerator;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.gen.feature.WorldGenMinable;
+import net.minecraft.world.gen.feature.WorldGenerator;
 
 public final class OreConfig {
-    private final WorldGenMinable generator;
+    private final WorldGenerator generator;
     private final OreDistribution distribution;
 
-    private OreConfig(WorldGenMinable generator, OreDistribution distribution) {
+    private OreConfig(WorldGenerator generator, OreDistribution distribution) {
         this.generator = generator;
         this.distribution = distribution;
     }
@@ -17,7 +19,7 @@ public final class OreConfig {
         return new Builder();
     }
 
-    public WorldGenMinable getGenerator() {
+    public WorldGenerator getGenerator() {
         return this.generator;
     }
 
@@ -28,7 +30,7 @@ public final class OreConfig {
     public static class Builder {
         private IBlockState ore;
         private OreDistribution distribution;
-        private int veinSize = 1;
+        private int size = 1;
 
         Builder() {
         }
@@ -43,16 +45,22 @@ public final class OreConfig {
             return this;
         }
 
-        public Builder veinSize(int veinSize) {
-            this.veinSize = veinSize;
+        public Builder size(int size) {
+            this.size = size;
             return this;
         }
 
         public OreConfig build() {
             Preconditions.checkNotNull(this.ore, "ore state not set");
             Preconditions.checkNotNull(this.distribution, "distribution not set");
-            WorldGenMinable generator = new WorldGenMinable(this.ore, this.veinSize);
+
+            WorldGenerator generator = this.buildGenerator();
             return new OreConfig(generator, this.distribution);
+        }
+
+        private WorldGenerator buildGenerator() {
+            if (this.size == 1) return new SingleOreGenerator(this.ore);
+            return new WorldGenMinable(this.ore, this.size);
         }
     }
 }

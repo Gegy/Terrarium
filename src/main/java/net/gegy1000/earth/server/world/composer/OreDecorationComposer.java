@@ -11,7 +11,7 @@ import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.DataKey;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenMinable;
+import net.minecraft.world.gen.feature.WorldGenerator;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,7 +43,7 @@ public class OreDecorationComposer implements DecorationComposer {
         boolean cubic = GenGen.isCubic(world);
 
         for (OreConfig ore : this.ores) {
-            WorldGenMinable generator = ore.getGenerator();
+            WorldGenerator generator = ore.getGenerator();
             OreDistribution distribution = ore.getDistribution();
             distribution.forChunk(cubePos, surfaceHeight, this.random).forEach(pos -> {
                 if (!cubic && pos.getY() <= 1) return;
