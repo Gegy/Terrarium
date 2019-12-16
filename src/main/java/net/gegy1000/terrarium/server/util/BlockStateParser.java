@@ -7,8 +7,8 @@ import net.minecraft.util.ResourceLocation;
 
 import java.util.Optional;
 
-public class BlockStateParser {
-    public static Optional<IBlockState> parseBlockState(String string) {
+public final class BlockStateParser {
+    public static Optional<IBlockState> parse(String string) {
         String[] tokens = string.split("#");
 
         ResourceLocation identifier = new ResourceLocation(tokens[0]);

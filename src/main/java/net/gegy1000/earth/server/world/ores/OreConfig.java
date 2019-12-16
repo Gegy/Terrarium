@@ -1,4 +1,4 @@
-package net.gegy1000.earth.server.world.composer;
+package net.gegy1000.earth.server.world.ores;
 
 import com.google.common.base.Preconditions;
 import net.minecraft.block.state.IBlockState;
@@ -24,7 +24,6 @@ public final class OreConfig {
     public OreDistribution getDistribution() {
         return this.distribution;
     }
-
 
     public static class Builder {
         private IBlockState ore;

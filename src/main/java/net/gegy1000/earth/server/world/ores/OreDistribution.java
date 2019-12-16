@@ -1,4 +1,4 @@
-package net.gegy1000.earth.server.world.composer;
+package net.gegy1000.earth.server.world.ores;
 
 import net.gegy1000.gengen.api.CubicPos;
 import net.minecraft.util.math.BlockPos;

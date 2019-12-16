@@ -1,7 +1,10 @@
 package net.gegy1000.earth.server.world.composer;
 
+import net.gegy1000.earth.server.world.ores.OreConfig;
+import net.gegy1000.earth.server.world.ores.OreDistribution;
 import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.gengen.api.writer.ChunkPopulationWriter;
+import net.gegy1000.gengen.core.GenGen;
 import net.gegy1000.gengen.util.SpatialRandom;
 import net.gegy1000.terrarium.server.world.composer.decoration.DecorationComposer;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
@@ -36,12 +39,15 @@ public class OreDecorationComposer implements DecorationComposer {
 
         int surfaceHeight = this.heightSampler.sample(dataCache, cubePos.getMaxX(), cubePos.getMaxZ());
 
-        // TODO: if not cubic, limit ore Y values
+        World world = writer.getGlobal();
+        boolean cubic = GenGen.isCubic(world);
+
         for (OreConfig ore : this.ores) {
             WorldGenMinable generator = ore.getGenerator();
             OreDistribution distribution = ore.getDistribution();
             distribution.forChunk(cubePos, surfaceHeight, this.random).forEach(pos -> {
-                generator.generate(writer.getGlobal(), this.random, pos);
+                if (!cubic && pos.getY() <= 1) return;
+                generator.generate(world, this.random, pos);
             });
         }
     }
