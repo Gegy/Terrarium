@@ -54,7 +54,7 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
 
         LandCoverSource landCoverSource = new LandCoverSource(this.ctx.landcoverRaster);
         DataOp<UByteRaster> coverId = RasterSourceSampler.sampleUnsignedByte(landCoverSource);
-        coverId = VoronoiScaleOp.scaleFrom(coverId, this.ctx.landcoverRaster, UByteRaster::create).cached(UByteRaster::copy);
+        coverId = VoronoiScaleOp.scaleUBytesFrom(coverId, this.ctx.landcoverRaster, UByteRaster::create).cached(UByteRaster::copy);
 
         OceanPolygonSource oceanPolygonSource = new OceanPolygonSource(this.ctx.lngLatCoordinates);
 

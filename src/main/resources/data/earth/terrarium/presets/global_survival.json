@@ -15,6 +15,7 @@
     "enable_streets": false,
     "cave_generation": true,
     "ravine_generation": true,
+    "ore_generation": true,
     "season": "january"
   }
 }

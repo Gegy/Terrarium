@@ -1,5 +1,6 @@
 package net.gegy1000.terrarium.server.world.data.raster;
 
+import com.google.common.base.Preconditions;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.DataKey;
 import net.gegy1000.terrarium.server.world.data.DataView;
@@ -9,7 +10,7 @@ import net.minecraft.util.math.MathHelper;
 import java.util.Arrays;
 import java.util.Optional;
 
-public final class UByteRaster extends AbstractRaster<byte[]> implements NumberRaster<byte[]> {
+public final class UByteRaster extends AbstractRaster<byte[]> implements IntegerRaster<byte[]> {
     private UByteRaster(byte[] data, int width, int height) {
         super(data, width, height);
     }
@@ -23,8 +24,17 @@ public final class UByteRaster extends AbstractRaster<byte[]> implements NumberR
         return create(view.getWidth(), view.getHeight());
     }
 
+    public static UByteRaster wrap(byte[] data, int width, int height) {
+        Preconditions.checkArgument(data.length == width * height, "invalid buffer size");
+        return new UByteRaster(data, width, height);
+    }
+
     public static Sampler sampler(DataKey<UByteRaster> key) {
         return new Sampler(key);
+    }
+
+    public void fill(int value) {
+        Arrays.fill(this.data, (byte) (value & 0xFF));
     }
 
     public void set(int x, int y, int value) {
@@ -62,6 +72,16 @@ public final class UByteRaster extends AbstractRaster<byte[]> implements NumberR
 
     @Override
     public double getDouble(int x, int y) {
+        return this.get(x, y);
+    }
+
+    @Override
+    public void setInt(int x, int y, int value) {
+        this.set(x, y, value);
+    }
+
+    @Override
+    public int getInt(int x, int y) {
         return this.get(x, y);
     }
 

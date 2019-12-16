@@ -3,36 +3,37 @@ package net.gegy1000.terrarium.server.world.data.op;
 import net.gegy1000.terrarium.server.util.Voronoi;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
-import net.gegy1000.terrarium.server.world.data.DataView;
 import net.gegy1000.terrarium.server.world.data.DataOp;
-import net.gegy1000.terrarium.server.world.data.raster.Raster;
+import net.gegy1000.terrarium.server.world.data.DataView;
+import net.gegy1000.terrarium.server.world.data.raster.UByteRaster;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.function.Function;
 
 public final class VoronoiScaleOp {
-    public static <T extends Raster<?>> DataOp<T> scaleFrom(DataOp<T> data, CoordinateReference src, Function<DataView, T> function) {
-        Voronoi voronoi = new Voronoi(Voronoi.DistanceFunc.EUCLIDEAN, 0.9, 4, 1000);
+    public static <T extends UByteRaster> DataOp<T> scaleUBytesFrom(DataOp<T> data, CoordinateReference src, Function<DataView, T> function) {
+        Voronoi voronoi = new Voronoi(Voronoi.DistanceFunc.EUCLIDEAN, 0.9, 1000);
+
         return DataOp.of(view -> {
             DataView srcView = getSourceView(view, src);
 
-            double blockSizeX = view.getWidth();
-            double blockSizeZ = view.getHeight();
+            double sizeX = view.getWidth();
+            double sizeY = view.getHeight();
 
-            double scaleFactorX = Math.abs(src.x(blockSizeX, blockSizeZ) / blockSizeX);
-            double scaleFactorZ = Math.abs(src.z(blockSizeX, blockSizeZ) / blockSizeZ);
+            double scaleX = Math.abs(src.x(sizeX, sizeY) / sizeX);
+            double scaleY = Math.abs(src.z(sizeX, sizeY) / sizeY);
 
-            Coordinate minRegionCoordinateBlock = view.getMinCoordinate().to(src);
-            Coordinate maxRegionCoordinateBlock = view.getMaxCoordinate().to(src);
+            Coordinate minCoordinate = Coordinate.min(
+                    view.getMinCoordinate().to(src),
+                    view.getMaxCoordinate().to(src)
+            );
 
-            Coordinate minRegionCoordinate = Coordinate.min(minRegionCoordinateBlock, maxRegionCoordinateBlock);
-
-            double originOffsetX = minRegionCoordinate.getX() - srcView.getX();
-            double originOffsetZ = minRegionCoordinate.getZ() - srcView.getY();
+            double offsetX = minCoordinate.getX() - srcView.getX();
+            double offsetY = minCoordinate.getZ() - srcView.getY();
 
             return data.apply(srcView).thenApply(source -> {
                 T result = function.apply(view);
-                voronoi.scale(source.getData(), result.getData(), srcView, view, scaleFactorX, scaleFactorZ, originOffsetX, originOffsetZ);
+                voronoi.scaleBytes(source.getData(), result.getData(), srcView, view, scaleX, scaleY, offsetX, offsetY);
                 return result;
             });
         });
@@ -48,8 +49,8 @@ public final class VoronoiScaleOp {
         int minSampleX = MathHelper.floor(minRegionCoordinate.getX()) - 1;
         int minSampleY = MathHelper.floor(minRegionCoordinate.getZ()) - 1;
 
-        int maxSampleX = MathHelper.ceil(maxRegionCoordinate.getX()) + 2;
-        int maxSampleY = MathHelper.ceil(maxRegionCoordinate.getZ()) + 2;
+        int maxSampleX = MathHelper.floor(maxRegionCoordinate.getX()) + 2;
+        int maxSampleY = MathHelper.floor(maxRegionCoordinate.getZ()) + 2;
 
         return DataView.rect(minSampleX, minSampleY, maxSampleX - minSampleX, maxSampleY - minSampleY);
     }

@@ -69,6 +69,7 @@ public class EarthWorldType extends TerrariumWorldType {
 
     public static final PropertyKey<Boolean> CAVE_GENERATION = new BooleanKey("cave_generation");
     public static final PropertyKey<Boolean> RAVINE_GENERATION = new BooleanKey("ravine_generation");
+    public static final PropertyKey<Boolean> ORE_GENERATION = new BooleanKey("ore_generation");
     public static final PropertyKey<Season> SEASON = new EnumKey<>("season", Season.class);
 
     public EarthWorldType() {
@@ -105,7 +106,7 @@ public class EarthWorldType extends TerrariumWorldType {
                 .withProperties(SEA_DEPTH, HEIGHT_OFFSET)
                 .withProperties(BEACH_SIZE)
                 .withProperties(ENABLE_DECORATION, ENABLE_BUILDINGS, ENABLE_STREETS)
-                .withProperties(CAVE_GENERATION, RAVINE_GENERATION)
+                .withProperties(CAVE_GENERATION, RAVINE_GENERATION, ORE_GENERATION)
                 .withProperties(SEASON)
                 .build();
     }
@@ -130,7 +131,8 @@ public class EarthWorldType extends TerrariumWorldType {
                 )
                 .withCategory("procedural_features",
                         new ToggleWidget(CAVE_GENERATION),
-                        new ToggleWidget(RAVINE_GENERATION)
+                        new ToggleWidget(RAVINE_GENERATION),
+                        new ToggleWidget(ORE_GENERATION)
                 )
                 .build();
     }

@@ -1,5 +1,6 @@
 package net.gegy1000.terrarium.server.world.data.raster;
 
+import com.google.common.base.Preconditions;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.DataKey;
 import net.gegy1000.terrarium.server.world.data.DataView;
@@ -8,7 +9,7 @@ import net.minecraft.util.math.ChunkPos;
 import java.util.Arrays;
 import java.util.Optional;
 
-public final class ShortRaster extends AbstractRaster<short[]> implements NumberRaster<short[]> {
+public final class ShortRaster extends AbstractRaster<short[]> implements IntegerRaster<short[]> {
     private ShortRaster(short[] data, int width, int height) {
         super(data, width, height);
     }
@@ -24,6 +25,11 @@ public final class ShortRaster extends AbstractRaster<short[]> implements Number
 
     public static ShortRaster create(DataView view) {
         return create(view.getWidth(), view.getHeight());
+    }
+
+    public static ShortRaster wrap(short[] data, int width, int height) {
+        Preconditions.checkArgument(data.length == width * height, "invalid buffer size");
+        return new ShortRaster(data, width, height);
     }
 
     public static Sampler sampler(DataKey<ShortRaster> key) {
@@ -62,6 +68,16 @@ public final class ShortRaster extends AbstractRaster<short[]> implements Number
 
     @Override
     public double getDouble(int x, int y) {
+        return this.get(x, y);
+    }
+
+    @Override
+    public void setInt(int x, int y, int value) {
+        this.set(x, y, (short) value);
+    }
+
+    @Override
+    public int getInt(int x, int y) {
         return this.get(x, y);
     }
 

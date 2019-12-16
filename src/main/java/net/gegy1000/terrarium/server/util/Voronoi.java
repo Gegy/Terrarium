@@ -11,71 +11,85 @@ public class Voronoi {
 
     private final DistanceFunc distanceFunc;
     private final double fuzzRange;
-    private final int gridSize;
 
-    public Voronoi(DistanceFunc distanceFunc, double fuzzRange, int gridSize, long seed) {
+    public Voronoi(DistanceFunc distanceFunc, double fuzzRange, long seed) {
         this.distanceFunc = distanceFunc;
         this.fuzzRange = fuzzRange;
-        this.gridSize = gridSize;
 
         this.random = new SpatialRandom(seed, DISPLACEMENT_SEED);
     }
 
-    public <T> void scale(T input, T output, DataView sourceView, DataView scaledView,
-                          double scaleFactorX, double scaleFactorY, double originOffsetX, double originOffsetY
+    public <T> void scale(T src, T dest, DataView srcView, DataView destView,
+                          double scaleX, double scaleY, double offsetX, double offsetY
     ) {
-        double scaledOffsetX = originOffsetX / scaleFactorX;
-        double scaledOffsetY = originOffsetY / scaleFactorY;
+        int width = destView.getWidth();
+        int height = destView.getHeight();
 
-        int scaledWidth = scaledView.getWidth();
-        int scaledHeight = scaledView.getHeight();
+        for (int y = 0; y < height; y++) {
+            double srcY = y * scaleY + offsetX;
 
-        for (int scaledY = 0; scaledY < scaledHeight; scaledY++) {
-            double sampleY = scaledY * scaleFactorY + originOffsetX;
-            int originY = MathHelper.floor(sampleY);
+            for (int x = 0; x < width; x++) {
+                double srcX = x * scaleX + offsetY;
 
-            for (int scaledX = 0; scaledX < scaledWidth; scaledX++) {
-                double sampleX = scaledX * scaleFactorX + originOffsetY;
-                int originX = MathHelper.floor(sampleX);
+                int srcIndex = this.getCellIndex(srcView, srcX, srcY);
+                int destIndex = x + y * width;
 
-                int srcIndex = this.getCellIndex(sourceView, originX, originY, scaledX + scaledOffsetX, scaledY + scaledOffsetY, scaleFactorX, scaleFactorY);
-                int destIndex = scaledX + scaledY * scaledWidth;
-
-                System.arraycopy(input, srcIndex, output, destIndex, 1);
+                System.arraycopy(src, srcIndex, dest, destIndex, 1);
             }
         }
     }
 
-    private int getCellIndex(DataView sourceView,
-                             int originX, int originY, double scaledX, double scaledY,
-                             double scaleFactorX, double scaleFactorY
+    public void scaleBytes(byte[] src, byte[] dest, DataView srcView, DataView destView,
+                           double scaleX, double scaleY, double offsetX, double offsetY
     ) {
+        int width = destView.getWidth();
+        int height = destView.getHeight();
+
+        for (int y = 0; y < height; y++) {
+            double srcY = y * scaleY + offsetX;
+
+            for (int x = 0; x < width; x++) {
+                double srcX = x * scaleX + offsetY;
+
+                int srcIndex = this.getCellIndex(srcView, srcX, srcY);
+                int destIndex = x + y * width;
+
+                dest[destIndex] = src[srcIndex];
+            }
+        }
+    }
+
+    private int getCellIndex(DataView srcView, double x, double y) {
+        int originX = MathHelper.floor(x);
+        int originY = MathHelper.floor(y);
+
+        int srcWidth = srcView.getWidth();
+        int srcHeight = srcView.getHeight();
+
         int cellIndex = 0;
         double selectionDistance = Double.MAX_VALUE;
-        for (int neighbourY = originY - 1; neighbourY <= originY + 1; neighbourY++) {
-            for (int neighbourX = originX - 1; neighbourX <= originX + 1; neighbourX++) {
-                this.random.setSeed(neighbourX + sourceView.getX(), neighbourY + sourceView.getY());
-                double fuzzedX = this.fuzzPoint(neighbourX) / scaleFactorX;
-                double fuzzedY = this.fuzzPoint(neighbourY) / scaleFactorY;
-                double distance = this.distanceFunc.get(scaledX, scaledY, fuzzedX, fuzzedY);
+
+        for (int srcY = originY - 1; srcY <= originY + 1; srcY++) {
+            for (int srcX = originX - 1; srcX <= originX + 1; srcX++) {
+                if (srcX < 0 || srcY < 0 || srcX >= srcWidth || srcY >= srcHeight) {
+                    continue;
+                }
+
+                this.random.setSeed(srcX + srcView.getX(), srcY + srcView.getY());
+                double distance = this.distanceFunc.get(x, y, this.fuzz(srcX), this.fuzz(srcY));
                 if (distance < selectionDistance) {
                     selectionDistance = distance;
-                    cellIndex = this.getClampedIndex(sourceView.getWidth(), sourceView.getHeight(), neighbourX, neighbourY);
+                    cellIndex = srcX + srcY * srcWidth;
                 }
             }
         }
+
         return cellIndex;
     }
 
-    private int getClampedIndex(int width, int height, int x, int y) {
-        x = MathHelper.clamp(x, 0, width - 1);
-        y = MathHelper.clamp(y, 0, height - 1);
-        return x + y * width;
-    }
-
-    private double fuzzPoint(double point) {
-        double offset = (double) this.random.nextInt(this.gridSize) / this.gridSize;
-        return point + 0.5 + (offset - 0.5) * this.fuzzRange;
+    private double fuzz(double x) {
+        double offset = this.random.nextInt(4) / 4.0 - 0.5;
+        return (x + 0.5) + (offset * this.fuzzRange);
     }
 
     public enum DistanceFunc {

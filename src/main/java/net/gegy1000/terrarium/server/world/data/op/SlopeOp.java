@@ -22,7 +22,7 @@ public final class SlopeOp {
 
     public static DataOp<UByteRaster> from(DataOp<ShortRaster> heights, float heightScale) {
         return DataOp.of(view -> {
-            DataView sourceView = view.grow(1, 1, 1, 1);
+            DataView sourceView = view.grow(1);
             return heights.apply(sourceView)
                     .thenApply(source -> {
                         UByteRaster result = UByteRaster.create(view);

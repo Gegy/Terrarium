@@ -6,6 +6,9 @@ import net.gegy1000.earth.server.world.composer.CoverDecorationComposer;
 import net.gegy1000.earth.server.world.composer.EarthBiomeComposer;
 import net.gegy1000.earth.server.world.composer.EarthCarvingComposer;
 import net.gegy1000.earth.server.world.composer.FreezeSurfaceComposer;
+import net.gegy1000.earth.server.world.composer.OreConfig;
+import net.gegy1000.earth.server.world.composer.OreDecorationComposer;
+import net.gegy1000.earth.server.world.composer.OreDistribution;
 import net.gegy1000.earth.server.world.composer.SoilSurfaceComposer;
 import net.gegy1000.earth.server.world.composer.WaterFillSurfaceComposer;
 import net.gegy1000.gengen.api.HeightFunction;
@@ -21,6 +24,7 @@ import net.gegy1000.terrarium.server.world.composer.surface.HeightmapSurfaceComp
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.generator.CompositeTerrariumGenerator;
 import net.gegy1000.terrarium.server.world.generator.TerrariumGenerator;
+import net.minecraft.block.BlockStone;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 
@@ -61,7 +65,6 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
             builder.addSurfaceComposer(new EarthCarvingComposer(EarthDataKeys.COVER));
         }
 
-        // TODO: GenGen cave generator is broken
         if (this.ctx.settings.get(CAVE_GENERATION)) {
             builder.addSurfaceComposer(GenericSurfaceComposer.of(new GenericCavePrimer(world)));
         }
@@ -81,6 +84,72 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
 
             // TODO: More decorators such as this
             builder.addDecorationComposer(new BoulderDecorationComposer(this.ctx.world, EarthDataKeys.SLOPE));
+        }
+
+        if (this.ctx.settings.getBoolean(ORE_GENERATION)) {
+            // TODO: emerald gen & mod compat
+
+            OreDecorationComposer ores = new OreDecorationComposer(this.ctx.world, EarthDataKeys.HEIGHT);
+
+            ores.add(OreConfig.builder()
+                    .ore(Blocks.DIRT.getDefaultState()).veinSize(33)
+                    .distribution(OreDistribution.vanillaUniform(10, 256))
+                    .build()
+            );
+            ores.add(OreConfig.builder()
+                    .ore(Blocks.GRAVEL.getDefaultState()).veinSize(33)
+                    .distribution(OreDistribution.vanillaUniform(8, 256))
+                    .build()
+            );
+
+            ores.add(OreConfig.builder()
+                    .ore(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.GRANITE)).veinSize(33)
+                    .distribution(OreDistribution.vanillaUniform(10, 80))
+                    .build()
+            );
+            ores.add(OreConfig.builder()
+                    .ore(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.DIORITE)).veinSize(33)
+                    .distribution(OreDistribution.vanillaUniform(10, 80))
+                    .build()
+            );
+            ores.add(OreConfig.builder()
+                    .ore(Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.ANDESITE)).veinSize(33)
+                    .distribution(OreDistribution.vanillaUniform(10, 80))
+                    .build()
+            );
+
+            ores.add(OreConfig.builder()
+                    .ore(Blocks.COAL_ORE.getDefaultState()).veinSize(17)
+                    .distribution(OreDistribution.vanillaUniform(20, 128))
+                    .build()
+            );
+            ores.add(OreConfig.builder()
+                    .ore(Blocks.IRON_ORE.getDefaultState()).veinSize(9)
+                    .distribution(OreDistribution.vanillaUniform(20, 64))
+                    .build()
+            );
+            ores.add(OreConfig.builder()
+                    .ore(Blocks.GOLD_ORE.getDefaultState()).veinSize(9)
+                    .distribution(OreDistribution.vanillaUniform(2, 32))
+                    .build()
+            );
+            ores.add(OreConfig.builder()
+                    .ore(Blocks.REDSTONE_ORE.getDefaultState()).veinSize(8)
+                    .distribution(OreDistribution.vanillaUniform(8, 16))
+                    .build()
+            );
+            ores.add(OreConfig.builder()
+                    .ore(Blocks.DIAMOND_ORE.getDefaultState()).veinSize(8)
+                    .distribution(OreDistribution.vanillaUniform(1, 16))
+                    .build()
+            );
+            ores.add(OreConfig.builder()
+                    .ore(Blocks.LAPIS_ORE.getDefaultState()).veinSize(7)
+                    .distribution(OreDistribution.vanillaBand(1, 16, 16))
+                    .build()
+            );
+
+            builder.addDecorationComposer(ores);
         }
 
         builder.addDecorationComposer(new FreezeSurfaceComposer(this.ctx.world, EarthDataKeys.SLOPE));
