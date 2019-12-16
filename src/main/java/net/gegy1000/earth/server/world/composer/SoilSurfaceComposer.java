@@ -10,6 +10,7 @@ import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.data.raster.UByteRaster;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
 
@@ -71,12 +72,11 @@ public class SoilSurfaceComposer implements SurfaceComposer {
         for (int localZ = 0; localZ < 16; localZ++) {
             for (int localX = 0; localX < 16; localX++) {
                 int height = heightRaster.get(localX, localZ);
-                if (pos.getMinY() <= height) {
-                    this.random.setSeed(localX + globalX, globalY, localZ + globalZ);
 
-                    double depthNoise = this.depthBuffer[localX + localZ * 16];
-                    this.coverColumn(pos, writer, localX, localZ, height, depthNoise);
-                }
+                this.random.setSeed(localX + globalX, globalY, localZ + globalZ);
+
+                double depthNoise = this.depthBuffer[localZ + localX * 16];
+                this.coverColumn(pos, writer, localX, localZ, height, (depthNoise + 4.0) / 8.0);
             }
         }
     }
@@ -97,26 +97,26 @@ public class SoilSurfaceComposer implements SurfaceComposer {
 
     private void coverColumn(CubicPos pos, ChunkPrimeWriter writer, int localX, int localZ, int height, double depthNoise) {
         int minY = pos.getMinY();
-        int maxY = Math.min(pos.getMaxY(), height);
+        int maxY = pos.getMaxY();
 
-        int depth = -1;
-        int soilDepth = Math.max((int) (depthNoise / 3.0 + 3.0 + this.random.nextDouble() * 0.25), 1);
-        soilDepth = maxY - (height - soilDepth);
-        if (soilDepth <= 0) {
-            return;
-        }
+        int currentDepth = -1;
 
-        for (int y = maxY; y >= minY; y--) {
+        int soilDepth = MathHelper.floor(1.0 + this.random.nextDouble() * 0.25 + depthNoise * 1.5);
+
+        soilDepth = (maxY - height) + soilDepth;
+        if (soilDepth <= 0) return;
+
+        for (int y = Math.min(maxY, height + 1); y >= minY; y--) {
             IBlockState current = writer.get(localX, y, localZ);
             while (current == AIR && --y >= 0) {
                 current = writer.get(localX, y, localZ);
-                depth = -1;
+                currentDepth = -1;
             }
             if (current == this.replaceBlock) {
-                if (depth == -1) {
-                    depth = soilDepth + 1;
+                if (currentDepth == -1) {
+                    currentDepth = soilDepth + 1;
                 }
-                if (depth-- > 0) {
+                if (currentDepth-- > 0) {
                     // TODO
                     writer.set(localX, y, localZ, height == y ? GRASS : DIRT);
                 } else {

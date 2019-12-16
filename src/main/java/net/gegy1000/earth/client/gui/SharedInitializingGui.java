@@ -5,6 +5,9 @@ import net.gegy1000.earth.server.shared.SharedDataInitializers;
 import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.earth.server.util.ProcessTracker;
 import net.gegy1000.earth.server.util.ProgressTracker;
+import net.gegy1000.gengen.api.GenericWorldType;
+import net.gegy1000.terrarium.client.ClientProxy;
+import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiCreateWorld;
@@ -14,6 +17,7 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiWorldSelection;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.WorldType;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -83,8 +87,12 @@ public class SharedInitializingGui extends GuiScreen {
         GuiScreen gui = event.getGui();
 
         if (gui instanceof GuiCreateWorld && event.getButton().id == 0) {
-            onCreateWorldPressed(event.getButton(), gui);
-            event.setCanceled(true);
+            int selectedWorldIndex = ClientProxy.getSelectedWorldType((GuiCreateWorld) gui);
+            TerrariumWorldType worldType = GenericWorldType.unwrapAs(WorldType.WORLD_TYPES[selectedWorldIndex], TerrariumWorldType.class);
+            if (worldType != null) {
+                onCreateWorldPressed(event.getButton(), gui);
+                event.setCanceled(true);
+            }
         }
     }
 
