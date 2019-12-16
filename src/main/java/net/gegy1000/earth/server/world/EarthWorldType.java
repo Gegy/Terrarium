@@ -16,7 +16,6 @@ import net.gegy1000.terrarium.server.world.TerrariumGeneratorInitializer;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.chunk.ComposableChunkGenerator;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
-import net.gegy1000.terrarium.server.world.coordinate.LatLngCoordRef;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.generator.customization.PropertyPrototype;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumCustomization;
@@ -43,13 +42,8 @@ import java.util.Random;
 
 // TODO: Code to update old terrarium world configs to new format
 public class EarthWorldType extends TerrariumWorldType {
-    public static final double EARTH_CIRCUMFERENCE = 40075000.0;
-
-    public static final double SRTM_WIDTH = 1200.0 * 360.0;
-
-    public static final double SRTM_SCALE = EARTH_CIRCUMFERENCE / SRTM_WIDTH;
-    public static final double LANDCOVER_SCALE = EARTH_CIRCUMFERENCE / LandCoverSource.GLOBAL_WIDTH;
-    public static final double CLIMATE_SCALE = EARTH_CIRCUMFERENCE / WorldClimateRaster.WIDTH;
+    public static final double LANDCOVER_SCALE = EarthWorld.EQUATOR_CIRCUMFERENCE / LandCoverSource.GLOBAL_WIDTH;
+    public static final double CLIMATE_SCALE = EarthWorld.EQUATOR_CIRCUMFERENCE / WorldClimateRaster.WIDTH;
 
     public static final int HIGHEST_POINT_METERS = 8900;
 
@@ -60,9 +54,9 @@ public class EarthWorldType extends TerrariumWorldType {
     public static final PropertyKey<Number> SPAWN_LONGITUDE = new NumberKey("spawn_longitude");
     public static final PropertyKey<Boolean> ENABLE_DECORATION = new BooleanKey("enable_decoration");
     public static final PropertyKey<Number> WORLD_SCALE = new NumberKey("world_scale");
-    public static final PropertyKey<Number> HEIGHT_SCALE = new NumberKey("height_scale");
+    public static final PropertyKey<Number> TERRESTRIAL_HEIGHT_SCALE = new NumberKey("terrestrial_height_scale");
+    public static final PropertyKey<Number> OCEANIC_HEIGHT_SCALE = new NumberKey("oceanic_height_scale");
     public static final PropertyKey<Number> HEIGHT_OFFSET = new NumberKey("height_offset");
-    public static final PropertyKey<Number> SEA_DEPTH = new NumberKey("ocean_depth");
     public static final PropertyKey<Number> BEACH_SIZE = new NumberKey("beach_size");
     public static final PropertyKey<Boolean> ENABLE_BUILDINGS = new BooleanKey("enable_buildings");
     public static final PropertyKey<Boolean> ENABLE_STREETS = new BooleanKey("enable_streets");
@@ -94,16 +88,16 @@ public class EarthWorldType extends TerrariumWorldType {
 
     @Override
     public Collection<ICapabilityProvider> createCapabilities(World world, GenerationSettings settings) {
-        CoordinateReference earthCoordinates = new LatLngCoordRef((SRTM_SCALE * 1200.0) / settings.getDouble(WORLD_SCALE));
-        return Lists.newArrayList(new EarthWorld.Impl(earthCoordinates));
+        CoordinateReference crs = EarthInitContext.from(world, settings).latLngCrs;
+        return Lists.newArrayList(new EarthWorld.Impl(crs));
     }
 
     @Override
     public PropertyPrototype buildPropertyPrototype() {
         return PropertyPrototype.builder()
                 .withProperties(SPAWN_LATITUDE, SPAWN_LONGITUDE)
-                .withProperties(WORLD_SCALE, HEIGHT_SCALE)
-                .withProperties(SEA_DEPTH, HEIGHT_OFFSET)
+                .withProperties(WORLD_SCALE, TERRESTRIAL_HEIGHT_SCALE)
+                .withProperties(HEIGHT_OFFSET)
                 .withProperties(BEACH_SIZE)
                 .withProperties(ENABLE_DECORATION, ENABLE_BUILDINGS, ENABLE_STREETS)
                 .withProperties(CAVE_GENERATION, RAVINE_GENERATION, ORE_GENERATION)
@@ -115,9 +109,9 @@ public class EarthWorldType extends TerrariumWorldType {
     public TerrariumCustomization buildCustomization() {
         return TerrariumCustomization.builder()
                 .withCategory("world",
-                        new SliderWidget(WORLD_SCALE, 1.0, 250.0, 5.0, 1.0, value -> String.format("1:%.0f", value)),
-                        new SliderWidget(HEIGHT_SCALE, 0.0, 10.0, 0.5, 0.1, value -> String.format("%.1fx", value)),
-                        new SliderWidget(SEA_DEPTH, 0, 32, 1, 1, value -> String.format("%.0f blocks", value)),
+                        new SliderWidget(WORLD_SCALE, 1.0, 2000.0, 5.0, 1.0, value -> String.format("1:%.0f", value)).logarithmic(),
+                        new SliderWidget(TERRESTRIAL_HEIGHT_SCALE, 0.0, 10.0, 0.5, 0.1, value -> String.format("%.1fx", value)),
+                        new SliderWidget(OCEANIC_HEIGHT_SCALE, 0.0, 10.0, 0.5, 0.1, value -> String.format("%.1fx", value)),
                         new SliderWidget(HEIGHT_OFFSET, -63, 128, 1, 1, value -> String.format("%.0f blocks", value)),
                         new SliderWidget(BEACH_SIZE, 0, 8, 1, 1, value -> String.format("%.0f blocks", value))
                 )
@@ -170,7 +164,7 @@ public class EarthWorldType extends TerrariumWorldType {
 
     @Override
     protected int calculateMaxGenerationHeight(WorldServer world, GenerationSettings settings) {
-        double globalScale = settings.getDouble(HEIGHT_SCALE) / settings.getDouble(WORLD_SCALE);
+        double globalScale = settings.getDouble(TERRESTRIAL_HEIGHT_SCALE) / settings.getDouble(WORLD_SCALE);
         double highestPointBlocks = HIGHEST_POINT_METERS * globalScale;
         return MathHelper.ceil(highestPointBlocks + settings.getDouble(HEIGHT_OFFSET) + 1);
     }

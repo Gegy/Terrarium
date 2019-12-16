@@ -17,6 +17,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public interface EarthWorld extends ICapabilityProvider {
+    double EQUATOR_CIRCUMFERENCE = 40075000.0;
+
     Geocoder getGeocoder();
 
     CoordinateReference getCrs();
@@ -54,11 +56,11 @@ public interface EarthWorld extends ICapabilityProvider {
     }
 
     class Impl implements EarthWorld {
-        private final CoordinateReference geoCoordinate;
+        private final CoordinateReference crs;
         private final Geocoder geocoder;
 
-        public Impl(CoordinateReference geoCoordinate) {
-            this.geoCoordinate = geoCoordinate;
+        public Impl(CoordinateReference crs) {
+            this.crs = crs;
             this.geocoder = TerrariumEarth.getPreferredGeocoder();
         }
 
@@ -69,7 +71,7 @@ public interface EarthWorld extends ICapabilityProvider {
 
         @Override
         public CoordinateReference getCrs() {
-            return this.geoCoordinate;
+            return this.crs;
         }
 
         @Nullable

@@ -75,7 +75,7 @@ public class SoilSurfaceComposer implements SurfaceComposer {
 
                 this.random.setSeed(localX + globalX, globalY, localZ + globalZ);
 
-                double depthNoise = this.depthBuffer[localZ + localX * 16];
+                double depthNoise = this.depthBuffer[localX + localZ * 16];
                 this.coverColumn(pos, writer, localX, localZ, height, (depthNoise + 4.0) / 8.0);
             }
         }

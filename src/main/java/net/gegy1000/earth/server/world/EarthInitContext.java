@@ -1,11 +1,16 @@
 package net.gegy1000.earth.server.world;
 
+import net.gegy1000.earth.server.capability.EarthWorld;
+import net.gegy1000.earth.server.util.Zoomed;
+import net.gegy1000.earth.server.world.data.source.ElevationSource;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.coordinate.LatLngCoordRef;
 import net.gegy1000.terrarium.server.world.coordinate.LngLatCoordRef;
 import net.gegy1000.terrarium.server.world.coordinate.ScaledCoordRef;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.minecraft.world.World;
+
+import java.util.stream.IntStream;
 
 import static net.gegy1000.earth.server.world.EarthWorldType.*;
 
@@ -15,22 +20,26 @@ public final class EarthInitContext {
 
     public final double worldScale;
 
-    public final CoordinateReference latLngCoordinates;
-    public final CoordinateReference lngLatCoordinates;
-    public final CoordinateReference srtmRaster;
-    public final CoordinateReference landcoverRaster;
-    public final CoordinateReference climateRaster;
+    public final CoordinateReference latLngCrs;
+    public final CoordinateReference lngLatCrs;
+    public final Zoomed<CoordinateReference> elevationRasterCrs;
+    public final CoordinateReference landcoverRasterCrs;
+    public final CoordinateReference climateRasterCrs;
 
     private EarthInitContext(World world, GenerationSettings settings) {
         this.world = world;
         this.settings = settings;
 
         this.worldScale = 1.0 / settings.getDouble(WORLD_SCALE);
-        this.latLngCoordinates = new LatLngCoordRef(this.worldScale * SRTM_SCALE * 1200.0);
-        this.lngLatCoordinates = new LngLatCoordRef(this.worldScale * SRTM_SCALE * 1200.0);
-        this.srtmRaster = new ScaledCoordRef(this.worldScale * SRTM_SCALE);
-        this.landcoverRaster = new ScaledCoordRef(this.worldScale * LANDCOVER_SCALE);
-        this.climateRaster = new ScaledCoordRef(this.worldScale * CLIMATE_SCALE);
+
+        double metersPerDegree = EarthWorld.EQUATOR_CIRCUMFERENCE / 360.0;
+        this.latLngCrs = new LatLngCoordRef(this.worldScale * metersPerDegree);
+        this.lngLatCrs = new LngLatCoordRef(this.worldScale * metersPerDegree);
+
+        this.elevationRasterCrs = Zoomed.create(IntStream.of(0, 1, 2), zoom -> ElevationSource.crs(this.worldScale, zoom));
+
+        this.landcoverRasterCrs = new ScaledCoordRef(this.worldScale * LANDCOVER_SCALE);
+        this.climateRasterCrs = new ScaledCoordRef(this.worldScale * CLIMATE_SCALE);
     }
 
     public static EarthInitContext from(World world, GenerationSettings settings) {

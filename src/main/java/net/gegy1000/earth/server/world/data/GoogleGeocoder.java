@@ -25,7 +25,7 @@ public class GoogleGeocoder implements Geocoder {
 
     @Override
     public Vector2d get(String place) throws IOException {
-        String key = EarthRemoteData.info.getGeocoderKey();
+        String key = EarthRemoteData.keys.getGeocoderKey();
 
         HttpURLConnection connection = (HttpURLConnection) new URL(String.format(GEOCODER_ADDRESS, URLEncoder.encode(place, "UTF-8"), key)).openConnection();
         connection.setRequestMethod("GET");
@@ -62,7 +62,7 @@ public class GoogleGeocoder implements Geocoder {
 
     @Override
     public String[] suggest(String place) throws IOException {
-        String key = EarthRemoteData.info.getAutocompleteKey();
+        String key = EarthRemoteData.keys.getAutocompleteKey();
 
         HttpURLConnection connection = (HttpURLConnection) new URL(String.format(SUGGESTION_ADDRESS, URLEncoder.encode(place, "UTF-8"), key)).openConnection();
         connection.setRequestMethod("GET");

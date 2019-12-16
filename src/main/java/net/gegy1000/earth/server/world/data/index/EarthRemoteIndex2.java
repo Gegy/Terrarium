@@ -1,33 +1,33 @@
-package net.gegy1000.earth.server.world.data;
+package net.gegy1000.earth.server.world.data.index;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.gegy1000.earth.server.util.Zoomed;
 import net.gegy1000.terrarium.server.world.data.source.DataTilePos;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.IntStream;
 
-public final class EarthRemoteIndex {
-    public final Endpoint srtm;
-    public final Endpoint landcover;
-    public final Endpoint oceans;
+public final class EarthRemoteIndex2 {
+    public final Zoomed<Endpoint> elevation;
 
-    private EarthRemoteIndex(Endpoint srtm, Endpoint landcover, Endpoint oceans) {
-        this.srtm = srtm;
-        this.landcover = landcover;
-        this.oceans = oceans;
+    private EarthRemoteIndex2(Zoomed<Endpoint> elevation) {
+        this.elevation = elevation;
     }
 
-    public static EarthRemoteIndex parse(JsonObject root) {
+    public static EarthRemoteIndex2 parse(JsonObject root) {
         JsonObject endpointsRoot = root.getAsJsonObject("endpoints");
 
-        Endpoint srtm = parseEndpoint(endpointsRoot.getAsJsonObject("srtm"));
-        Endpoint landcover = parseEndpoint(endpointsRoot.getAsJsonObject("landcover"));
-        Endpoint oceans = parseEndpoint(endpointsRoot.getAsJsonObject("ocean"));
+        Zoomed<Endpoint> elevation = Zoomed.create(IntStream.of(0, 1, 2), zoom -> {
+            JsonObject endpointRoot = endpointsRoot.getAsJsonObject("elevation/" + zoom);
+            return parseEndpoint(endpointRoot);
+        }).orElse(Endpoint.EMPTY);
 
-        return new EarthRemoteIndex(srtm, landcover, oceans);
+        return new EarthRemoteIndex2(elevation);
     }
 
     private static Endpoint parseEndpoint(JsonObject root) {
@@ -59,6 +59,8 @@ public final class EarthRemoteIndex {
     }
 
     public static class Endpoint {
+        private static final Endpoint EMPTY = new Endpoint("", Collections.emptyMap());
+
         private final String url;
         private final Map<DataTilePos, String> entries;
 

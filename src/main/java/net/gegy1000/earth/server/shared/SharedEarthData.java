@@ -1,7 +1,8 @@
 package net.gegy1000.earth.server.shared;
 
 import net.gegy1000.earth.server.util.ProcessTracker;
-import net.gegy1000.earth.server.world.data.EarthRemoteIndex;
+import net.gegy1000.earth.server.world.data.index.EarthRemoteIndex;
+import net.gegy1000.earth.server.world.data.index.EarthRemoteIndex2;
 import net.gegy1000.earth.server.world.data.source.WorldClimateRaster;
 
 import javax.annotation.Nullable;
@@ -12,6 +13,7 @@ public final class SharedEarthData {
     public static final Key<WorldClimateRaster> JANUARY_CLIMATE = Key.create();
     public static final Key<WorldClimateRaster> JULY_CLIMATE = Key.create();
     public static final Key<EarthRemoteIndex> REMOTE_INDEX = Key.create();
+    public static final Key<EarthRemoteIndex2> REMOTE_INDEX2 = Key.create();
 
     private static SharedEarthData loaded;
 

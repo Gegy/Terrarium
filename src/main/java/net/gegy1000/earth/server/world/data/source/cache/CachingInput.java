@@ -1,6 +1,8 @@
 package net.gegy1000.earth.server.world.data.source.cache;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import net.gegy1000.earth.server.util.IoFunction;
+import net.gegy1000.earth.server.util.IoSupplier;
 import net.gegy1000.terrarium.Terrarium;
 import org.apache.commons.io.IOUtils;
 
@@ -68,13 +70,5 @@ public final class CachingInput<T> {
             this.cache.delete(key);
         } catch (IOException ignored) {
         }
-    }
-
-    public interface IoFunction<T, R> {
-        R apply(T key) throws IOException;
-    }
-
-    public interface IoSupplier<T> {
-        T get() throws IOException;
     }
 }

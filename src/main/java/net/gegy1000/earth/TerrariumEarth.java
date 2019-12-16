@@ -11,6 +11,7 @@ import net.gegy1000.earth.server.config.TerrariumEarthConfig;
 import net.gegy1000.earth.server.message.EarthMapGuiMessage;
 import net.gegy1000.earth.server.message.EarthPanoramaMessage;
 import net.gegy1000.earth.server.shared.ClimateRasterInitializer;
+import net.gegy1000.earth.server.shared.RemoteIndex2Initializer;
 import net.gegy1000.earth.server.shared.RemoteIndexInitializer;
 import net.gegy1000.earth.server.shared.SharedDataInitializers;
 import net.gegy1000.earth.server.world.EarthWorldType;
@@ -84,7 +85,8 @@ public class TerrariumEarth {
 
         SharedDataInitializers.add(
                 new ClimateRasterInitializer(),
-                new RemoteIndexInitializer()
+                new RemoteIndexInitializer(),
+                new RemoteIndex2Initializer()
         );
 
         Thread thread = new Thread(() -> {
@@ -131,7 +133,7 @@ public class TerrariumEarth {
     }
 
     public static Geocoder getPreferredGeocoder() {
-        if (TerrariumEarthConfig.osmGeocoder || Strings.isNullOrEmpty(EarthRemoteData.info.getGeocoderKey())) {
+        if (TerrariumEarthConfig.osmGeocoder || Strings.isNullOrEmpty(EarthRemoteData.keys.getGeocoderKey())) {
             return new NominatimGeocoder();
         } else {
             return new GoogleGeocoder();

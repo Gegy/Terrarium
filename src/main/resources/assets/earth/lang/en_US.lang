@@ -37,14 +37,14 @@ category.terrarium.natural.name=Natural Properties
 # World Properties
 
 property.terrarium.world_scale.name=World Scale
-property.terrarium.height_scale.name=Height Scale
-property.terrarium.ocean_depth.name=Ocean Depth
+property.terrarium.terrestrial_height_scale.name=Terrestrial Height Scale
+property.terrarium.oceanic_height_scale.name=Oceanic Height Scale
 property.terrarium.height_offset.name=Height Offset
 property.terrarium.beach_size.name=Beach Size
 
 property.terrarium.world_scale.tooltip=The amount of meters in real life representing one block in-game
-property.terrarium.height_scale.tooltip=Elevation multiplier from meters to blocks
-property.terrarium.ocean_depth.tooltip=Depth to generate the bottom of the ocean at
+property.terrarium.terrestrial_height_scale.tooltip=Elevation multiplier from meters to blocks for terrain above sea level
+property.terrarium.oceanic_height_scale.tooltip=Elevation multiplier from meters to blocks for terrain below sea level
 property.terrarium.height_offset.tooltip=The height in-game that corresponds to sea-level
 property.terrarium.beach_size.tooltip=Radius in blocks for beaches to be generated around coastlines
 

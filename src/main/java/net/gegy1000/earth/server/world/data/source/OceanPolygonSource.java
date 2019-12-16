@@ -6,12 +6,11 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.shared.SharedEarthData;
-import net.gegy1000.earth.server.world.data.EarthRemoteIndex;
 import net.gegy1000.earth.server.world.data.PolygonData;
+import net.gegy1000.earth.server.world.data.index.EarthRemoteIndex;
 import net.gegy1000.earth.server.world.data.source.cache.AbstractRegionKey;
 import net.gegy1000.earth.server.world.data.source.cache.CachingInput;
 import net.gegy1000.earth.server.world.data.source.cache.FileTileCache;
-import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.data.source.DataTilePos;
 import net.gegy1000.terrarium.server.world.data.source.TiledDataSource;
@@ -30,7 +29,6 @@ import java.util.Optional;
 
 public class OceanPolygonSource extends TiledDataSource<PolygonData> {
     private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
-    private static final double TILE_SIZE = 1.0;
 
 //    private static final TileCache<Key> CACHE = RegionTileCache.<Key>builder()
 //            .keyProvider(new KeyProvider())
@@ -43,8 +41,8 @@ public class OceanPolygonSource extends TiledDataSource<PolygonData> {
 
     private static final CachingInput<DataTilePos> CACHING_INPUT = new CachingInput<>(CACHE);
 
-    public OceanPolygonSource(CoordinateReference coordinateReference) {
-        super(new Coordinate(coordinateReference, TILE_SIZE, TILE_SIZE));
+    public OceanPolygonSource(CoordinateReference crs) {
+        super(crs, 1.0, 1.0);
     }
 
     @Override
@@ -152,17 +150,25 @@ public class OceanPolygonSource extends TiledDataSource<PolygonData> {
     private static final int LOC_BITS = 4;
 
     private static class Key extends AbstractRegionKey<Key> {
-        Key(int x, int z) { super(x, z); }
+        Key(int x, int z) {
+            super(x, z);
+        }
 
         @Override
-        protected int bits() { return LOC_BITS; }
+        protected int bits() {
+            return LOC_BITS;
+        }
     }
 
     private static class KeyProvider extends AbstractRegionKey.Provider<Key> {
         @Override
-        protected Key create(int x, int z) { return new Key(x, z); }
+        protected Key create(int x, int z) {
+            return new Key(x, z);
+        }
 
         @Override
-        protected int bits() { return LOC_BITS; }
+        protected int bits() {
+            return LOC_BITS;
+        }
     }
 }

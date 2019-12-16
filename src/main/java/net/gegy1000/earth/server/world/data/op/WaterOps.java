@@ -50,35 +50,6 @@ public final class WaterOps {
         });
     }
 
-    // TODO: Carve smoothed edges
-    public static DataOp<ShortRaster> applyToHeight(DataOp<ShortRaster> height, DataOp<EnumRaster<Landform>> landforms, DataOp<ShortRaster> waterLevel, int seaDepth) {
-        return DataOp.of(view -> {
-            CompletableFuture<ShortRaster> heightFuture = height.apply(view);
-            CompletableFuture<EnumRaster<Landform>> landformFuture = landforms.apply(view);
-            CompletableFuture<ShortRaster> waterLevelFuture = waterLevel.apply(view);
-
-            return CompletableFuture.allOf(heightFuture, landformFuture, waterLevelFuture)
-                    .thenApply(v -> {
-                        ShortRaster heightRaster = heightFuture.join();
-                        EnumRaster<Landform> landformRaster = landformFuture.join();
-                        ShortRaster waterLevelRaster = waterLevelFuture.join();
-
-                        heightRaster.transform((source, x, y) -> {
-                            Landform landform = landformRaster.get(x, y);
-                            if (landform == Landform.SEA) {
-                                int level = waterLevelRaster.get(x, y);
-                                double carvedHeight = level - seaDepth;
-                                return (short) Math.round(carvedHeight);
-                            }
-
-                            return source;
-                        });
-
-                        return heightRaster;
-                    });
-        });
-    }
-
     // TODO: Properly select cover type for filled in space!
     public static DataOp<EnumRaster<Cover>> applyToCover(DataOp<EnumRaster<Cover>> cover, DataOp<EnumRaster<Landform>> landforms) {
         return DataOp.of(view -> {

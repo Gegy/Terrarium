@@ -24,7 +24,7 @@ public class PanoramaLookupHandler {
 
     @Nullable
     public static Result queryPanorama(double latitude, double longitude) throws IOException {
-        String key = EarthRemoteData.info.getStreetviewKey();
+        String key = EarthRemoteData.keys.getStreetviewKey();
 
         HttpURLConnection connection = (HttpURLConnection) new URL(String.format(METADATA_ADDRESS, latitude, longitude, key)).openConnection();
         connection.setRequestMethod("GET");

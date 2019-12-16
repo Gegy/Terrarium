@@ -4,7 +4,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import net.gegy1000.earth.server.world.data.EarthRemoteData;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.world.data.source.TiledDataSource;
 import net.minecraftforge.fml.relauncher.Side;
@@ -99,8 +98,7 @@ public class SlippyMapTileCache {
         if (Files.exists(cachePath)) {
             return new BufferedInputStream(Files.newInputStream(cachePath));
         }
-        String query = String.format(EarthRemoteData.info.getRasterMapQuery(), pos.getZoom(), pos.getX(), pos.getY());
-        URL url = new URL(EarthRemoteData.info.getRasterMapEndpoint() + "/" + query);
+        URL url = new URL(String.format("http://tile.openstreetmap.org/%s/%s/%s", pos.getZoom(), pos.getX(), pos.getY()));
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setConnectTimeout(1000);
         connection.setReadTimeout(5000);

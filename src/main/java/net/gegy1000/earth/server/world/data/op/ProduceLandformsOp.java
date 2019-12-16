@@ -22,12 +22,10 @@ public final class ProduceLandformsOp {
 
                         EnumRaster<Landform> landformRaster = EnumRaster.create(Landform.LAND, view);
                         coverIdRaster.iterate((id, x, y) -> {
-                            if (id == CoverIds.WATER) {
-                                if (heightRaster.get(x, y) <= 1) {
-                                    landformRaster.set(x, y, Landform.SEA);
-                                } else {
-                                    landformRaster.set(x, y, Landform.LAKE_OR_RIVER);
-                                }
+                            if (heightRaster.get(x, y) <= 0) {
+                                landformRaster.set(x, y, Landform.SEA);
+                            } else if (id == CoverIds.WATER) {
+                                landformRaster.set(x, y, Landform.LAKE_OR_RIVER);
                             } else {
                                 landformRaster.set(x, y, Landform.LAND);
                             }

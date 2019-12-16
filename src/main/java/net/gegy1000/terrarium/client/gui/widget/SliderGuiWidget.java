@@ -26,6 +26,7 @@ public class SliderGuiWidget extends GuiButtonExt implements TooltipRenderer {
     private final DoubleFunction<String> display;
 
     private final List<Runnable> listeners = new ArrayList<>();
+    private final Scale scale;
 
     private final double min;
     private final double max;
@@ -39,11 +40,19 @@ public class SliderGuiWidget extends GuiButtonExt implements TooltipRenderer {
 
     private float hoverTime;
 
-    public SliderGuiWidget(int widgetId, int x, int y, PropertyKey<Number> propertyKey, PropertyValue<Number> property, double min, double max, double step, double fineStep, DoubleFunction<String> display) {
+    public SliderGuiWidget(
+            int widgetId, int x, int y,
+            PropertyKey<Number> propertyKey, PropertyValue<Number> property,
+            double min, double max,
+            double step, double fineStep,
+            DoubleFunction<String> display,
+            Scale scale
+    ) {
         super(widgetId, x, y, 150, 20, "");
         this.propertyKey = propertyKey;
         this.property = property;
         this.display = display;
+        this.scale = scale;
 
         this.min = min;
         this.max = max;
@@ -54,7 +63,7 @@ public class SliderGuiWidget extends GuiButtonExt implements TooltipRenderer {
     }
 
     public SliderGuiWidget(int widgetId, int x, int y, PropertyKey<Number> propertyKey, PropertyValue<Number> property, double min, double max) {
-        this(widgetId, x, y, propertyKey, property, min, max, 1.0, 0.1, null);
+        this(widgetId, x, y, propertyKey, property, min, max, 1.0, 0.1, null, Scale.LINEAR);
     }
 
     public void addListener(Runnable listener) {
@@ -63,7 +72,6 @@ public class SliderGuiWidget extends GuiButtonExt implements TooltipRenderer {
 
     public void setSliderPosition(double position) {
         double value = this.toValue(position);
-
         this.position = position;
 
         String valueString = this.display != null ? this.display.apply(value) : String.format("%.2f", value);
@@ -149,19 +157,39 @@ public class SliderGuiWidget extends GuiButtonExt implements TooltipRenderer {
     }
 
     private double step(double position, double step) {
-        double value = this.min + (this.max - this.min) * position;
-        double clamped = MathHelper.clamp(value, this.min, this.max);
-        double stepped = clamped - (clamped % step);
+        double value = this.toValue(position);
+        double stepped = value - (value % step);
         return this.toPosition(stepped);
     }
 
     private double toPosition(double value) {
-        double clampedValue = MathHelper.clamp(value, this.min, this.max);
-        return (clampedValue - this.min) / (this.max - this.min);
+        if (this.scale == Scale.LOGARITHMIC) {
+            return toPosition(Math.log(value), Math.log(this.min), Math.log(this.max));
+        } else {
+            return toPosition(value, this.min, this.max);
+        }
+    }
+
+    private static double toPosition(double value, double min, double max) {
+        double clampedValue = MathHelper.clamp(value, min, max);
+        return (clampedValue - min) / (max - min);
     }
 
     private double toValue(double position) {
-        double value = this.min + (this.max - this.min) * position;
-        return MathHelper.clamp(value, this.min, this.max);
+        if (this.scale == Scale.LOGARITHMIC) {
+            return Math.exp(toValue(position, Math.log(this.min), Math.log(this.max)));
+        } else {
+            return toValue(position, this.min, this.max);
+        }
+    }
+
+    private static double toValue(double position, double min, double max) {
+        double value = min + (max - min) * position;
+        return MathHelper.clamp(value, min, max);
+    }
+
+    public enum Scale {
+        LINEAR,
+        LOGARITHMIC
     }
 }

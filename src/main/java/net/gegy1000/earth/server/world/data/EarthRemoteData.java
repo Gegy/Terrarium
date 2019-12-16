@@ -19,64 +19,52 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 public class EarthRemoteData {
-    private final static String INFO_JSON = "https://gist.githubusercontent.com/gegy1000/0a0ac9ec610d6d9716d43820a0825a6d/raw/terrarium_info.json";
+    private final static String KEYS_URL = "https://gist.githubusercontent.com/gegy1000/07de90970dbb502f9b544481e090a081/raw/terrarium_keys.json";
 
     private final static Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    private static final Path INFO_CACHE = TiledDataSource.GLOBAL_CACHE_ROOT.resolve("terrarium_info.json.gz");
+    private static final Path KEYS_CACHE = TiledDataSource.GLOBAL_CACHE_ROOT.resolve("terrarium_keys.json.gz");
 
-    public static EarthRemoteData.Info info = new EarthRemoteData.Info();
+    public static Keys keys = new Keys();
 
     public static void load() throws IOException {
         try {
-            URL url = new URL(INFO_JSON);
-            info = EarthRemoteData.loadInfo(url.openStream());
-            EarthRemoteData.cacheInfo(info);
+            URL url = new URL(KEYS_URL);
+            keys = EarthRemoteData.loadKeys(url.openStream());
+            EarthRemoteData.cacheKeys(keys);
         } catch (IOException e) {
-            TerrariumEarth.LOGGER.error("Failed to load remote Terrarium Earth info, checking cache {}", e.toString());
-            EarthRemoteData.loadCachedInfo();
+            TerrariumEarth.LOGGER.error("Failed to load remote Terrarium Earth keys, checking cache {}", e.toString());
+            EarthRemoteData.loadCachedKeys();
         }
     }
 
-    private static void loadCachedInfo() throws IOException {
-        try (InputStream input = new GZIPInputStream(Files.newInputStream(INFO_CACHE))) {
-            info = loadInfo(input);
+    private static void loadCachedKeys() throws IOException {
+        try (InputStream input = new GZIPInputStream(Files.newInputStream(KEYS_CACHE))) {
+            keys = loadKeys(input);
         }
     }
 
-    private static EarthRemoteData.Info loadInfo(InputStream input) throws IOException {
+    private static Keys loadKeys(InputStream input) throws IOException {
         try (InputStreamReader reader = new InputStreamReader(new BufferedInputStream(input))) {
-            return GSON.fromJson(reader, Info.class);
+            return GSON.fromJson(reader, Keys.class);
         }
     }
 
-    private static void cacheInfo(EarthRemoteData.Info info) {
-        try (PrintWriter output = new PrintWriter(new GZIPOutputStream(Files.newOutputStream(INFO_CACHE)))) {
-            output.write(GSON.toJson(info));
+    private static void cacheKeys(Keys keys) {
+        try (PrintWriter output = new PrintWriter(new GZIPOutputStream(Files.newOutputStream(KEYS_CACHE)))) {
+            output.write(GSON.toJson(keys));
         } catch (IOException e) {
             TerrariumEarth.LOGGER.error("Failed to cache Terrarium Earth info", e);
         }
     }
 
-    public static class Info {
-        @SerializedName("raster_map_endpoint")
-        private String rasterMapEndpoint = "http://tile.openstreetmap.org";
-        @SerializedName("raster_map_query")
-        private String rasterMapQuery = "%s/%s%s.png";
+    public static class Keys {
         @SerializedName("geocoder_key")
         private String geocoderKey = "";
         @SerializedName("autocomplete_key")
         private String autocompleteKey = "";
         @SerializedName("streetview_key")
         private String streetviewKey = "";
-
-        public String getRasterMapEndpoint() {
-            return this.rasterMapEndpoint;
-        }
-
-        public String getRasterMapQuery() {
-            return this.rasterMapQuery;
-        }
 
         public String getGeocoderKey() {
             byte[] encodedKeyBytes = Base64.getDecoder().decode(this.geocoderKey);
