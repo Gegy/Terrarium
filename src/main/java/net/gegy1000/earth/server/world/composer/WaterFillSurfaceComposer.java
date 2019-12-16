@@ -42,15 +42,17 @@ public class WaterFillSurfaceComposer implements SurfaceComposer {
         int minY = pos.getMinY();
         int maxY = pos.getMaxY();
 
-        landformRaster.iterate((landform, localX, localZ) -> {
-            if (landform.isWater()) {
-                int height = Math.max(heightRaster.get(localX, localZ), minY);
-                int waterLevel = Math.min(waterLevelRaster.get(localX, localZ), maxY);
-                if (height < waterLevel) {
-                    for (int y = height + 1; y <= waterLevel; y++) {
-                        writer.set(localX, y, localZ, this.block);
-                    }
-                }
+        landformRaster.iterate((landform, x, z) -> {
+            if (!landform.isWater()) return;
+
+            int height = heightRaster.get(x, z);
+            int waterLevel = waterLevelRaster.get(x, z);
+            if (height >= waterLevel) return;
+
+            int startY = Math.max(height + 1, minY);
+            int endY = Math.min(waterLevel, maxY);
+            for (int y = startY; y <= endY; y++) {
+                writer.set(x, y, z, this.block);
             }
         });
     }

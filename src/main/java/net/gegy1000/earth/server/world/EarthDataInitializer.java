@@ -41,7 +41,7 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
 
     @Override
     public ColumnDataGenerator buildDataGenerator() {
-        int heightOrigin = this.ctx.settings.getInteger(HEIGHT_OFFSET);
+        int heightOffset = this.ctx.settings.getInteger(HEIGHT_OFFSET);
 
         InterpolationScaleOp heightScaleOp = this.selectSrtmScaleOp(this.ctx.settings);
 
@@ -68,9 +68,9 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
         DataOp<EnumRaster<Cover>> cover = ProduceCoverOp.produce(coverId);
 
         heights = new ScaleValueOp(this.ctx.settings.getDouble(HEIGHT_SCALE) * this.ctx.worldScale).applyShort(heights);
-        heights = new OffsetValueOp(heightOrigin).apply(heights);
+        heights = new OffsetValueOp(heightOffset).apply(heights);
 
-        int seaLevel = heightOrigin + 1;
+        int seaLevel = heightOffset;
         int seaDepth = this.ctx.settings.getInteger(SEA_DEPTH);
 
         DataOp<ShortRaster> waterLevel = WaterOps.produceWaterLevel(landforms, seaLevel).cached(ShortRaster::copy);
