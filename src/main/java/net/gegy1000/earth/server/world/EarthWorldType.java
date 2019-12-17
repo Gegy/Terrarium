@@ -24,6 +24,7 @@ import net.gegy1000.terrarium.server.world.generator.customization.property.Enum
 import net.gegy1000.terrarium.server.world.generator.customization.property.NumberKey;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.CycleWidget;
+import net.gegy1000.terrarium.server.world.generator.customization.widget.SliderScale;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.SliderWidget;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.ToggleWidget;
 import net.minecraft.client.Minecraft;
@@ -110,7 +111,8 @@ public class EarthWorldType extends TerrariumWorldType {
         return TerrariumCustomization.builder()
                 .withCategory("world",
                         new SliderWidget(WORLD_SCALE)
-                                .range(1.0, 2000.0).step(5.0, 1.0).logarithmic()
+                                .range(1.0, 2000.0).step(5.0, 1.0)
+                                .scale(SliderScale.power(3.0))
                                 .display(value -> String.format("1:%.0f", value)),
                         new SliderWidget(TERRESTRIAL_HEIGHT_SCALE)
                                 .range(0.0, 10.0).step(0.5, 0.1)

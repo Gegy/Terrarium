@@ -3,6 +3,7 @@ package net.gegy1000.terrarium.client.gui.widget;
 import com.google.common.collect.Lists;
 import net.gegy1000.terrarium.client.gui.GuiRenderUtils;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyPair;
+import net.gegy1000.terrarium.server.world.generator.customization.widget.SliderScale;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
@@ -24,7 +25,7 @@ public class SliderGuiWidget extends GuiButtonExt implements TooltipRenderer {
     private final DoubleFunction<String> display;
 
     private final List<Runnable> listeners = new ArrayList<>();
-    private final Scale scale;
+    private final SliderScale scale;
 
     private final double min;
     private final double max;
@@ -43,7 +44,7 @@ public class SliderGuiWidget extends GuiButtonExt implements TooltipRenderer {
             double min, double max,
             double step, double fineStep,
             DoubleFunction<String> display,
-            Scale scale
+            SliderScale scale
     ) {
         super(0, 0, 0, 150, 20, "");
         this.property = property;
@@ -160,11 +161,7 @@ public class SliderGuiWidget extends GuiButtonExt implements TooltipRenderer {
     }
 
     private double toPosition(double value) {
-        if (this.scale == Scale.LOGARITHMIC) {
-            return toPosition(Math.log(value), Math.log(this.min), Math.log(this.max));
-        } else {
-            return toPosition(value, this.min, this.max);
-        }
+        return this.scale.reverse(toPosition(value, this.min, this.max));
     }
 
     private static double toPosition(double value, double min, double max) {
@@ -173,20 +170,11 @@ public class SliderGuiWidget extends GuiButtonExt implements TooltipRenderer {
     }
 
     private double toValue(double position) {
-        if (this.scale == Scale.LOGARITHMIC) {
-            return Math.exp(toValue(position, Math.log(this.min), Math.log(this.max)));
-        } else {
-            return toValue(position, this.min, this.max);
-        }
+        return toValue(this.scale.apply(position), this.min, this.max);
     }
 
     private static double toValue(double position, double min, double max) {
         double value = min + (max - min) * position;
         return MathHelper.clamp(value, min, max);
-    }
-
-    public enum Scale {
-        LINEAR,
-        LOGARITHMIC
     }
 }

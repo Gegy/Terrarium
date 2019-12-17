@@ -20,7 +20,7 @@ public class SliderWidget implements CustomizationWidget {
 
     private DoubleFunction<String> display;
 
-    private boolean logarithmic;
+    private SliderScale scale = SliderScale.linear();
 
     public SliderWidget(PropertyKey<Number> propertyKey) {
         this.propertyKey = propertyKey;
@@ -47,6 +47,11 @@ public class SliderWidget implements CustomizationWidget {
         return this;
     }
 
+    public SliderWidget scale(SliderScale scale) {
+        this.scale = scale;
+        return this;
+    }
+
     @Override
     @SideOnly(Side.CLIENT)
     public GuiButton createWidget(GenerationSettings settings, Runnable onPropertyChange) {
@@ -55,14 +60,9 @@ public class SliderWidget implements CustomizationWidget {
                 this.minimum, this.maximum,
                 this.step, this.fineStep,
                 this.display,
-                this.logarithmic ? SliderGuiWidget.Scale.LOGARITHMIC : SliderGuiWidget.Scale.LINEAR
+                this.scale
         );
         widget.addListener(onPropertyChange);
         return widget;
-    }
-
-    public SliderWidget logarithmic() {
-        this.logarithmic = true;
-        return this;
     }
 }
