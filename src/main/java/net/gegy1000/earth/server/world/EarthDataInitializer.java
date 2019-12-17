@@ -1,5 +1,6 @@
 package net.gegy1000.earth.server.world;
 
+import net.gegy1000.earth.server.util.Zoomable;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.data.AreaData;
 import net.gegy1000.earth.server.world.data.PolygonData;
@@ -10,6 +11,7 @@ import net.gegy1000.earth.server.world.data.op.PolygonToAreaOp;
 import net.gegy1000.earth.server.world.data.op.ProduceCoverOp;
 import net.gegy1000.earth.server.world.data.op.ProduceLandformsOp;
 import net.gegy1000.earth.server.world.data.op.RasterizeAreaOp;
+import net.gegy1000.earth.server.world.data.op.ResampleZoomRasters;
 import net.gegy1000.earth.server.world.data.op.ScaleTerrainElevationOp;
 import net.gegy1000.earth.server.world.data.op.WaterOps;
 import net.gegy1000.earth.server.world.data.source.ElevationSource;
@@ -20,7 +22,7 @@ import net.gegy1000.terrarium.server.world.TerrariumDataInitializer;
 import net.gegy1000.terrarium.server.world.data.ColumnDataGenerator;
 import net.gegy1000.terrarium.server.world.data.DataOp;
 import net.gegy1000.terrarium.server.world.data.op.InterpolationScaleOp;
-import net.gegy1000.terrarium.server.world.data.op.RasterSourceSampler;
+import net.gegy1000.terrarium.server.world.data.op.SampleRaster;
 import net.gegy1000.terrarium.server.world.data.op.SlopeOp;
 import net.gegy1000.terrarium.server.world.data.op.VoronoiScaleOp;
 import net.gegy1000.terrarium.server.world.data.raster.BitRaster;
@@ -28,7 +30,6 @@ import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.data.raster.FloatRaster;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.data.raster.UByteRaster;
-import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 
 import static net.gegy1000.earth.server.world.EarthWorldType.*;
 
@@ -41,45 +42,52 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
 
     @Override
     public ColumnDataGenerator buildDataGenerator() {
+        double worldScale = this.ctx.settings.getDouble(WORLD_SCALE);
         int heightOffset = this.ctx.settings.getInteger(HEIGHT_OFFSET);
         int seaLevel = heightOffset + 1;
 
-        int elevationZoom = this.selectElevationZoom(this.ctx.settings);
+        int elevationZoom = this.selectElevationZoom(worldScale);
 
-        ElevationSource elevationSource = new ElevationSource(this.ctx.elevationRasterCrs, elevationZoom);
+        Zoomable<ElevationSource> elevationSource = this.ctx.elevationRasterCrs.map(ElevationSource::new);
 
-        DataOp<ShortRaster> elevationSampler = RasterSourceSampler.sampleShort(elevationSource);
-        DataOp<ShortRaster> elevation = this.selectElevationScaleOp(this.ctx.settings, elevationZoom)
-                .scaleShortsFrom(elevationSampler, elevationSource.getCrs())
-                .cached(ShortRaster::copy);
+        DataOp<ShortRaster> elevation = new ResampleZoomRasters<ShortRaster>()
+                .from(elevationSource).sample(SampleRaster::sampleShort)
+                .atStandardZoom(elevationZoom)
+                .create(ShortRaster::create);
 
-        DataOp<UByteRaster> slope = SlopeOp.from(elevation, (float) this.ctx.worldScale);
+        DataOp<UByteRaster> slope = SlopeOp.from(elevation, 1.0F / (float) worldScale);
 
         LandCoverSource landCoverSource = new LandCoverSource(this.ctx.landcoverRasterCrs);
-        DataOp<UByteRaster> coverId = RasterSourceSampler.sampleUnsignedByte(landCoverSource);
-        coverId = VoronoiScaleOp.scaleUBytesFrom(coverId, this.ctx.landcoverRasterCrs, UByteRaster::create).cached(UByteRaster::copy);
+
+        DataOp<UByteRaster> coverId = SampleRaster.sampleUByte(landCoverSource);
+        coverId = VoronoiScaleOp.scaleUBytesFrom(coverId, this.ctx.landcoverRasterCrs, UByteRaster::create)
+                .cached(UByteRaster::copy);
 
         DataOp<EnumRaster<Landform>> landforms = ProduceLandformsOp.produce(elevation, coverId);
 
-        if (this.ctx.settings.getDouble(WORLD_SCALE) <= 100.0) {
-            OceanPolygonSource oceanPolygonSource = new OceanPolygonSource(this.ctx.lngLatCrs);
-
-            DataOp<PolygonData> oceanPolygons = PolygonSampler.sample(oceanPolygonSource, this.ctx.lngLatCrs);
-            DataOp<AreaData> oceanArea = PolygonToAreaOp.apply(oceanPolygons, this.ctx.lngLatCrs);
-            DataOp<BitRaster> oceanMask = RasterizeAreaOp.apply(oceanArea);
-            landforms = WaterOps.applyWaterMask(landforms, oceanMask).cached(EnumRaster::copy);
-        }
-
         DataOp<EnumRaster<Cover>> cover = ProduceCoverOp.produce(coverId);
 
-        double terrestrialHeightScale = this.ctx.settings.getDouble(TERRESTRIAL_HEIGHT_SCALE) * this.ctx.worldScale;
-        double oceanicHeightScale = this.ctx.settings.getDouble(OCEANIC_HEIGHT_SCALE) * this.ctx.worldScale;
+        double terrestrialHeightScale = this.ctx.settings.getDouble(TERRESTRIAL_HEIGHT_SCALE) / worldScale;
+        double oceanicHeightScale = this.ctx.settings.getDouble(OCEANIC_HEIGHT_SCALE) / worldScale;
         elevation = new ScaleTerrainElevationOp(terrestrialHeightScale, oceanicHeightScale).apply(elevation);
         elevation = new OffsetValueOp(heightOffset).apply(elevation);
 
-        DataOp<ShortRaster> waterLevel = WaterOps.produceWaterLevel(landforms, seaLevel);
+        if (worldScale <= 100.0) {
+            OceanPolygonSource oceanPolygonSource = new OceanPolygonSource(this.ctx.lngLatCrs);
+
+            // TODO: this causes weird holes in the water when it does not match up with the heightmap
+            //  potentially needs flood fill like is done with cover
+            DataOp<PolygonData> oceanPolygons = PolygonSampler.sample(oceanPolygonSource, this.ctx.lngLatCrs);
+            DataOp<AreaData> oceanArea = PolygonToAreaOp.apply(oceanPolygons, this.ctx.lngLatCrs);
+            DataOp<BitRaster> oceanMask = RasterizeAreaOp.apply(oceanArea);
+
+            landforms = WaterOps.applyWaterMask(landforms, oceanMask).cached(EnumRaster::copy);
+            elevation = WaterOps.forceSeaFloorBelowSurface(elevation, landforms, seaLevel);
+        }
 
         cover = WaterOps.applyToCover(cover, landforms);
+
+        DataOp<ShortRaster> waterLevel = WaterOps.produceWaterLevel(landforms, seaLevel);
 
         Season season = this.ctx.settings.get(SEASON);
         ClimateSampler climateSampler = new ClimateSampler(season.getClimateRaster());
@@ -101,33 +109,17 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
                 .build();
     }
 
-    private int selectElevationZoom(GenerationSettings settings) {
-        double scale = settings.getDouble(WORLD_SCALE);
-        if (scale > 300.0) {
+    private int selectElevationZoom(double worldScale) {
+        if (worldScale > 300.0) {
             return 0;
-        } else if (scale > 80.0) {
+        } else if (worldScale > 80.0) {
             return 1;
-        } else if (scale > 30.0) {
+        } else if (worldScale > 30.0) {
             return 2;
         } else {
             // TODO: Zoom level 3
 //            return 3;
             return 2;
-        }
-    }
-
-    private InterpolationScaleOp selectElevationScaleOp(GenerationSettings settings, int zoom) {
-        double resolutionMeters = ElevationSource.estimateResolutionMeters(zoom);
-
-        double relativeScale = resolutionMeters / settings.getDouble(WORLD_SCALE);
-        if (relativeScale <= 1.0) {
-            return InterpolationScaleOp.NEAREST;
-        } else if (relativeScale <= 2.0) {
-            return InterpolationScaleOp.LINEAR;
-        } else if (relativeScale <= 3.0) {
-            return InterpolationScaleOp.COSINE;
-        } else {
-            return InterpolationScaleOp.CUBIC;
         }
     }
 }

@@ -73,8 +73,8 @@ public class GeoToolCommand extends CommandBase {
         Coordinate coordinate = Coordinate.atBlock(player.posX, player.posZ)
                 .to(earth.getCrs());
 
-        double latitude = coordinate.getX();
-        double longitude = coordinate.getZ();
+        double longitude = coordinate.getX();
+        double latitude = coordinate.getZ();
 
         if (TerrariumUserTracker.usesTerrarium(player)) {
             TerrariumEarth.NETWORK.sendTo(new EarthMapGuiMessage(latitude, longitude, EarthMapGuiMessage.Type.LOCATE), player);
@@ -88,8 +88,8 @@ public class GeoToolCommand extends CommandBase {
         Coordinate coordinate = Coordinate.atBlock(player.posX, player.posZ)
                 .to(earth.getCrs());
 
-        double latitude = coordinate.getX();
-        double longitude = coordinate.getZ();
+        double longitude = coordinate.getX();
+        double latitude = coordinate.getZ();
 
         TerrariumEarth.NETWORK.sendTo(new EarthMapGuiMessage(latitude, longitude, EarthMapGuiMessage.Type.TELEPORT), player);
     }
@@ -102,8 +102,8 @@ public class GeoToolCommand extends CommandBase {
         Coordinate coordinate = Coordinate.atBlock(player.posX, player.posZ)
                 .to(earth.getCrs());
 
-        double latitude = coordinate.getX();
-        double longitude = coordinate.getZ();
+        double longitude = coordinate.getX();
+        double latitude = coordinate.getZ();
 
         int blockX = MathHelper.floor(player.posX);
         int blockZ = MathHelper.floor(player.posZ);

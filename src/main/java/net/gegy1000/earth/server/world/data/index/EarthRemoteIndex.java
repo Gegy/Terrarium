@@ -3,7 +3,7 @@ package net.gegy1000.earth.server.world.data.index;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.gegy1000.terrarium.server.world.data.source.DataTilePos;
+import net.gegy1000.terrarium.server.util.Vec2i;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -34,7 +34,7 @@ public final class EarthRemoteIndex {
         String url = root.get("url").getAsString();
 
         JsonArray entryArray = root.getAsJsonArray("entries");
-        Map<DataTilePos, String> entries = new HashMap<>(entryArray.size());
+        Map<Vec2i, String> entries = new HashMap<>(entryArray.size());
 
         for (JsonElement entry : entryArray) {
             parseEntry(entries, entry.getAsJsonObject());
@@ -43,7 +43,7 @@ public final class EarthRemoteIndex {
         return new Endpoint(url, entries);
     }
 
-    private static void parseEntry(Map<DataTilePos, String> entries, JsonObject root) {
+    private static void parseEntry(Map<Vec2i, String> entries, JsonObject root) {
         JsonArray key = root.getAsJsonArray("key");
         String path = root.get("path").getAsString();
 
@@ -54,25 +54,25 @@ public final class EarthRemoteIndex {
         int x = key.get(0).getAsInt();
         int y = key.get(1).getAsInt();
 
-        DataTilePos pos = new DataTilePos(x, y);
+        Vec2i pos = new Vec2i(x, y);
         entries.put(pos, path);
     }
 
     public static class Endpoint {
         private final String url;
-        private final Map<DataTilePos, String> entries;
+        private final Map<Vec2i, String> entries;
 
-        Endpoint(String url, Map<DataTilePos, String> entries) {
+        Endpoint(String url, Map<Vec2i, String> entries) {
             this.url = url;
             this.entries = entries;
         }
 
-        public boolean hasEntryFor(DataTilePos pos) {
+        public boolean hasEntryFor(Vec2i pos) {
             return this.entries.containsKey(pos);
         }
 
         @Nullable
-        public String getUrlFor(DataTilePos pos) {
+        public String getUrlFor(Vec2i pos) {
             String path = this.entries.get(pos);
             if (path == null) {
                 return null;

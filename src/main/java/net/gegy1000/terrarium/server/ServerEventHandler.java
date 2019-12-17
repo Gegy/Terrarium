@@ -9,7 +9,7 @@ import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
-import net.gegy1000.terrarium.server.world.data.source.DataSourceHandler;
+import net.gegy1000.terrarium.server.world.data.source.DataSourceReader;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
@@ -49,7 +49,7 @@ public class ServerEventHandler {
             TerrariumWorld worldData = TerrariumWorld.get(world);
             if (worldData != null) {
                 worldData.getDataCache().close();
-                DataSourceHandler.INSTANCE.clear();
+                DataSourceReader.INSTANCE.clear();
             }
         }
     }

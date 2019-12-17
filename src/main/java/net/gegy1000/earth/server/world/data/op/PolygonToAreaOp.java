@@ -12,7 +12,7 @@ import net.gegy1000.terrarium.server.world.rasterization.PolygonShapeProducer;
 import java.awt.geom.Area;
 
 public final class PolygonToAreaOp {
-    public static DataOp<AreaData> apply(DataOp<PolygonData> polygons, CoordinateReference coordinateReference) {
+    public static DataOp<AreaData> apply(DataOp<PolygonData> polygons, CoordinateReference crs) {
         return polygons.map((polygonData, view) -> {
             Area area = new Area();
 
@@ -20,7 +20,7 @@ public final class PolygonToAreaOp {
                 for (int i = 0; i < polygon.getNumGeometries(); i++) {
                     Geometry geometry = polygon.getGeometryN(i);
                     if (geometry instanceof Polygon) {
-                        area.add(PolygonShapeProducer.toShape((Polygon) geometry, coordinateReference));
+                        area.add(PolygonShapeProducer.toShape((Polygon) geometry, crs));
                     }
                 }
             }

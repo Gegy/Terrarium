@@ -56,8 +56,8 @@ public class ClientProxy extends ServerProxy {
             player.sendStatusMessage(new TextComponentTranslation("status.earth.panorama.searching"), true);
 
             Coordinate coordinate = Coordinate.atBlock(player.posX, player.posZ).to(earth.getCrs());
-            double latitude = coordinate.getX();
-            double longitude = coordinate.getZ();
+            double longitude = coordinate.getX();
+            double latitude = coordinate.getZ();
 
             Thread thread = new Thread(() -> {
                 try {
@@ -79,9 +79,9 @@ public class ClientProxy extends ServerProxy {
     }
 
     private void setPanoramaState(EarthWorld earth, EntityPlayer player, PanoramaLookupHandler.Result result) {
-        Coordinate coordinate = new Coordinate(earth.getCrs(), result.getLatitude(), result.getLongitude());
-        double blockX = coordinate.getBlockX();
-        double blockZ = coordinate.getBlockZ();
+        Coordinate coord = new Coordinate(earth.getCrs(), result.getLongitude(), result.getLatitude());
+        double blockX = coord.getBlockX();
+        double blockZ = coord.getBlockZ();
 
         double deltaX = player.posX - blockX;
         double deltaZ = player.posZ - blockZ;
@@ -90,7 +90,7 @@ public class ClientProxy extends ServerProxy {
             PanoramaHandler.setState(new PanoramaHandler.Immersed(result.getId(), blockX, player.posY, blockZ));
         } else {
             player.sendStatusMessage(new TextComponentTranslation("status.earth.panorama.found"), true);
-            PanoramaHandler.setState(new PanoramaHandler.Located(result.getId(), result.getLatitude(), result.getLongitude()));
+            PanoramaHandler.setState(new PanoramaHandler.Located(result.getId(), coord));
         }
     }
 }

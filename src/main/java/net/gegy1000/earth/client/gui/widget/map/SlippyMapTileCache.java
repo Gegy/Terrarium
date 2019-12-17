@@ -98,7 +98,7 @@ public class SlippyMapTileCache {
         if (Files.exists(cachePath)) {
             return new BufferedInputStream(Files.newInputStream(cachePath));
         }
-        URL url = new URL(String.format("http://tile.openstreetmap.org/%s/%s/%s", pos.getZoom(), pos.getX(), pos.getY()));
+        URL url = new URL(String.format("http://tile.openstreetmap.org/%s/%s/%s.png", pos.getZoom(), pos.getX(), pos.getY()));
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setConnectTimeout(1000);
         connection.setReadTimeout(5000);

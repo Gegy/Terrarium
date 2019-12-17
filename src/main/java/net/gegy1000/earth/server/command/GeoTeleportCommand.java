@@ -145,7 +145,7 @@ public class GeoTeleportCommand extends CommandBase {
             connection.setPlayerLocation(coordinate.getBlockX(), height + 0.5, coordinate.getBlockZ(), 180.0F, 0.0F);
         }
 
-        entity.sendMessage(DeferredTranslator.translate(entity, new TextComponentTranslation("commands.earth.geotp.success", coordinate.getX(), coordinate.getZ())));
+        entity.sendMessage(DeferredTranslator.translate(entity, new TextComponentTranslation("commands.earth.geotp.success", coordinate.getZ(), coordinate.getX())));
     }
 
     private int getHeight(World world, EarthWorld earthData, int x, int z) {
@@ -176,7 +176,7 @@ public class GeoTeleportCommand extends CommandBase {
 
         @Override
         public Coordinate getCoordinate(ICommandSender sender, EarthWorld worldData) {
-            return new Coordinate(worldData.getCrs(), this.latitude, this.longitude);
+            return new Coordinate(worldData.getCrs(), this.longitude, this.latitude);
         }
     }
 
@@ -194,8 +194,7 @@ public class GeoTeleportCommand extends CommandBase {
                 if (coordinate == null) {
                     throw DeferredTranslator.createException(sender, "commands.earth.geotp.not_found", this.place);
                 }
-
-                return new Coordinate(worldData.getCrs(), coordinate.getX(), coordinate.getY());
+                return new Coordinate(worldData.getCrs(), coordinate.getY(), coordinate.getX());
             } catch (IOException e) {
                 Terrarium.LOGGER.error("Failed to get geocode for {}", this.place, e);
                 throw DeferredTranslator.createException(sender, "commands.earth.geotp.error", this.place, e.getClass().getSimpleName(), e.getMessage());

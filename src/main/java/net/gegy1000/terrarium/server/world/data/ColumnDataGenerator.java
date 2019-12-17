@@ -5,7 +5,6 @@ import net.gegy1000.terrarium.Terrarium;
 import net.minecraft.util.math.ChunkPos;
 
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 public final class ColumnDataGenerator {
     private final ImmutableMap<DataKey<?>, DataOp<?>> attachedData;
@@ -25,8 +24,7 @@ public final class ColumnDataGenerator {
 
         this.attachedData.forEach((key, op) -> {
             try {
-                CompletableFuture<?> future = op.apply(view);
-                result.put(key, Optional.of(future.join()));
+                result.put(key, op.apply(view).join());
             } catch (Exception e) {
                 Terrarium.LOGGER.error("Failed to load DataOp result", e);
                 result.put(key, Optional.empty());

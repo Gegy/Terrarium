@@ -14,7 +14,7 @@ import net.gegy1000.terrarium.server.world.generator.customization.PropertyProto
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPreset;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.CustomizationCategory;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.CustomizationWidget;
-import net.gegy1000.terrarium.server.world.data.source.DataSourceHandler;
+import net.gegy1000.terrarium.server.world.data.source.DataSourceReader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiCreateWorld;
@@ -248,7 +248,7 @@ public class TerrariumCustomizationGui extends GuiScreen {
         if (!this.freeze) {
             super.onGuiClosed();
             this.deletePreview();
-            DataSourceHandler.INSTANCE.clear();
+            DataSourceReader.INSTANCE.clear();
         }
     }
 

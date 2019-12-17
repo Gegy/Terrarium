@@ -3,26 +3,26 @@ package net.gegy1000.earth.server.world.data.index;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.gegy1000.earth.server.util.Zoomed;
-import net.gegy1000.terrarium.server.world.data.source.DataTilePos;
+import net.gegy1000.earth.server.util.ZoomLevels;
+import net.gegy1000.earth.server.util.Zoomable;
+import net.gegy1000.terrarium.server.util.Vec2i;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.IntStream;
 
 public final class EarthRemoteIndex2 {
-    public final Zoomed<Endpoint> elevation;
+    public final Zoomable<Endpoint> elevation;
 
-    private EarthRemoteIndex2(Zoomed<Endpoint> elevation) {
+    private EarthRemoteIndex2(Zoomable<Endpoint> elevation) {
         this.elevation = elevation;
     }
 
     public static EarthRemoteIndex2 parse(JsonObject root) {
         JsonObject endpointsRoot = root.getAsJsonObject("endpoints");
 
-        Zoomed<Endpoint> elevation = Zoomed.create(IntStream.of(0, 1, 2), zoom -> {
+        Zoomable<Endpoint> elevation = Zoomable.create(ZoomLevels.range(0, 2), zoom -> {
             JsonObject endpointRoot = endpointsRoot.getAsJsonObject("elevation/" + zoom);
             return parseEndpoint(endpointRoot);
         }).orElse(Endpoint.EMPTY);
@@ -34,7 +34,7 @@ public final class EarthRemoteIndex2 {
         String url = root.get("url").getAsString();
 
         JsonArray entryArray = root.getAsJsonArray("entries");
-        Map<DataTilePos, String> entries = new HashMap<>(entryArray.size());
+        Map<Vec2i, String> entries = new HashMap<>(entryArray.size());
 
         for (JsonElement entry : entryArray) {
             parseEntry(entries, entry.getAsJsonObject());
@@ -43,7 +43,7 @@ public final class EarthRemoteIndex2 {
         return new Endpoint(url, entries);
     }
 
-    private static void parseEntry(Map<DataTilePos, String> entries, JsonObject root) {
+    private static void parseEntry(Map<Vec2i, String> entries, JsonObject root) {
         JsonArray key = root.getAsJsonArray("key");
         String path = root.get("path").getAsString();
 
@@ -54,7 +54,7 @@ public final class EarthRemoteIndex2 {
         int x = key.get(0).getAsInt();
         int y = key.get(1).getAsInt();
 
-        DataTilePos pos = new DataTilePos(x, y);
+        Vec2i pos = new Vec2i(x, y);
         entries.put(pos, path);
     }
 
@@ -62,19 +62,19 @@ public final class EarthRemoteIndex2 {
         private static final Endpoint EMPTY = new Endpoint("", Collections.emptyMap());
 
         private final String url;
-        private final Map<DataTilePos, String> entries;
+        private final Map<Vec2i, String> entries;
 
-        Endpoint(String url, Map<DataTilePos, String> entries) {
+        Endpoint(String url, Map<Vec2i, String> entries) {
             this.url = url;
             this.entries = entries;
         }
 
-        public boolean hasEntryFor(DataTilePos pos) {
+        public boolean hasEntryFor(Vec2i pos) {
             return this.entries.containsKey(pos);
         }
 
         @Nullable
-        public String getUrlFor(DataTilePos pos) {
+        public String getUrlFor(Vec2i pos) {
             String path = this.entries.get(pos);
             if (path == null) {
                 return null;

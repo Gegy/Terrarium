@@ -1,33 +1,53 @@
 package net.gegy1000.terrarium.server.world.coordinate;
 
-public interface CoordinateReference {
-    CoordinateReference BLOCK = new CoordinateReference() {
-        @Override
-        public double blockX(double x, double z) {
-            return x;
-        }
+public final class CoordinateReference {
+    private static final CoordinateReference BLOCK = new CoordinateReference(1.0, 1.0);
 
-        @Override
-        public double blockZ(double x, double z) {
-            return z;
-        }
+    private final double scaleX;
+    private final double scaleZ;
 
-        @Override
-        public double x(double blockX, double blockZ) {
-            return blockX;
-        }
+    private CoordinateReference(double scaleX, double scaleZ) {
+        this.scaleX = scaleX;
+        this.scaleZ = scaleZ;
+    }
 
-        @Override
-        public double z(double blockX, double blockZ) {
-            return blockZ;
-        }
-    };
+    public static CoordinateReference block() {
+        return BLOCK;
+    }
 
-    double blockX(double x, double z);
+    public static CoordinateReference scale(double x, double z) {
+        return new CoordinateReference(x, z);
+    }
 
-    double blockZ(double x, double z);
+    public static CoordinateReference scale(double scale) {
+        return new CoordinateReference(scale, scale);
+    }
 
-    double x(double blockX, double blockZ);
+    public static CoordinateReference lngLat(double scale) {
+        return new CoordinateReference(scale, -scale);
+    }
 
-    double z(double blockX, double blockZ);
+    public double blockX(double x) {
+        return x * this.scaleX;
+    }
+
+    public double blockZ(double z) {
+        return z * this.scaleZ;
+    }
+
+    public double x(double blockX) {
+        return blockX / this.scaleX;
+    }
+
+    public double z(double blockZ) {
+        return blockZ / this.scaleZ;
+    }
+
+    public double scaleX() {
+        return this.scaleX;
+    }
+
+    public double scaleZ() {
+        return this.scaleZ;
+    }
 }

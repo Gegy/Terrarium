@@ -3,16 +3,14 @@ package net.gegy1000.earth.server.world.data.source;
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.capability.EarthWorld;
 import net.gegy1000.earth.server.shared.SharedEarthData;
-import net.gegy1000.earth.server.util.Zoomed;
 import net.gegy1000.earth.server.world.data.index.EarthRemoteIndex2;
 import net.gegy1000.earth.server.world.data.source.cache.AbstractRegionKey;
 import net.gegy1000.earth.server.world.data.source.cache.CachingInput;
 import net.gegy1000.earth.server.world.data.source.cache.FileTileCache;
 import net.gegy1000.earth.server.world.data.source.reader.TerrariumRasterReader;
+import net.gegy1000.terrarium.server.util.Vec2i;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
-import net.gegy1000.terrarium.server.world.coordinate.ScaledCoordRef;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
-import net.gegy1000.terrarium.server.world.data.source.DataTilePos;
 import net.gegy1000.terrarium.server.world.data.source.TiledDataSource;
 
 import java.io.IOException;
@@ -24,7 +22,6 @@ import java.util.Optional;
 
 public class ElevationSource extends TiledDataSource<ShortRaster> {
     public static final int TILE_SIZE = 1200;
-    private static final ShortRaster DEFAULT_RESULT = ShortRaster.createSquare(TILE_SIZE);
 
 //    private static final TileCache<Key> CACHE = RegionTileCache.<Key>builder()
 //            .keyProvider(new KeyProvider())
@@ -35,22 +32,22 @@ public class ElevationSource extends TiledDataSource<ShortRaster> {
     private final int zoom;
 
     private final Path cacheRoot;
-    private final FileTileCache<DataTilePos> cache;
-    private final CachingInput<DataTilePos> cachingInput;
+    private final FileTileCache<Vec2i> cache;
+    private final CachingInput<Vec2i> cachingInput;
 
-    public ElevationSource(Zoomed<CoordinateReference> crs, int zoom) {
-        super(crs.forZoom(zoom), TILE_SIZE, TILE_SIZE);
+    public ElevationSource(int zoom, CoordinateReference crs) {
+        super(crs, TILE_SIZE);
 
         this.zoom = zoom;
         this.cacheRoot = GLOBAL_CACHE_ROOT.resolve("elevation").resolve(String.valueOf(zoom));
 
-        this.cache = new FileTileCache<>(pos -> this.cacheRoot.resolve(pos.getX() + "/" + pos.getZ()));
+        this.cache = new FileTileCache<>(pos -> this.cacheRoot.resolve(pos.x + "/" + pos.y));
         this.cachingInput = new CachingInput<>(this.cache);
     }
 
     public static CoordinateReference crs(double worldScale, int zoom) {
         double globalWidth = globalWidth(zoom);
-        return new ScaledCoordRef(worldScale * EarthWorld.EQUATOR_CIRCUMFERENCE / globalWidth);
+        return CoordinateReference.scale(EarthWorld.EQUATOR_CIRCUMFERENCE / (globalWidth * worldScale));
     }
 
     public static double tileSizeDeg(int zoom) {
@@ -61,12 +58,12 @@ public class ElevationSource extends TiledDataSource<ShortRaster> {
         return (360.0 / tileSizeDeg(zoom)) * TILE_SIZE;
     }
 
-    public static double estimateResolutionMeters(int zoom) {
+    public static double resolutionMeters(int zoom) {
         return 30.0 * Math.pow(3.0, 3.0 - zoom);
     }
 
     @Override
-    public Optional<ShortRaster> load(DataTilePos pos) throws IOException {
+    public Optional<ShortRaster> load(Vec2i pos) throws IOException {
         SharedEarthData sharedData = SharedEarthData.instance();
         EarthRemoteIndex2 remoteIndex = sharedData.get(SharedEarthData.REMOTE_INDEX2);
         if (remoteIndex == null) {
@@ -85,11 +82,6 @@ public class ElevationSource extends TiledDataSource<ShortRaster> {
         })) {
             return Optional.of(TerrariumRasterReader.read(input, ShortRaster.class));
         }
-    }
-
-    @Override
-    public ShortRaster getDefaultResult() {
-        return DEFAULT_RESULT;
     }
 
     private static final int LOC_BITS = 3;

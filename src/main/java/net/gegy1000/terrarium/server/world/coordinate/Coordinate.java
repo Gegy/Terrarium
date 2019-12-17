@@ -32,14 +32,14 @@ public final class Coordinate {
         if (this.state == null) {
             return this.x;
         }
-        return this.state.blockX(this.x, this.z);
+        return this.state.blockX(this.x);
     }
 
     public double getBlockZ() {
         if (this.state == null) {
             return this.z;
         }
-        return this.state.blockZ(this.x, this.z);
+        return this.state.blockZ(this.z);
     }
 
     public Coordinate to(CoordinateReference to) {
@@ -49,7 +49,7 @@ public final class Coordinate {
 
         double blockX = this.getBlockX();
         double blockZ = this.getBlockZ();
-        return new Coordinate(to, to.x(blockX, blockZ), to.z(blockX, blockZ));
+        return new Coordinate(to, to.x(blockX), to.z(blockZ));
     }
 
     public Coordinate addBlock(double x, double z) {
@@ -68,8 +68,8 @@ public final class Coordinate {
             return Coordinate.atBlock(this.x + blockX, this.z + blockZ);
         }
 
-        double offsetX = this.state.x(blockX, blockZ);
-        double offsetZ = this.state.z(blockX, blockZ);
+        double offsetX = this.state.x(blockX);
+        double offsetZ = this.state.z(blockX);
         return new Coordinate(this.state, this.x + offsetX, this.z + offsetZ);
     }
 

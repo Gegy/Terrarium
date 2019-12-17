@@ -2,24 +2,24 @@ package net.gegy1000.earth.server.world.data.op;
 
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.geography.Landform;
+import net.gegy1000.terrarium.server.util.FutureUtil;
 import net.gegy1000.terrarium.server.world.data.DataOp;
 import net.gegy1000.terrarium.server.world.data.raster.BitRaster;
 import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 
-import java.util.concurrent.CompletableFuture;
+import java.util.Optional;
 
 public final class WaterOps {
     public static DataOp<EnumRaster<Landform>> applyWaterMask(DataOp<EnumRaster<Landform>> landforms, DataOp<BitRaster> ocean) {
         return DataOp.of(view -> {
-            CompletableFuture<EnumRaster<Landform>> landformFuture = landforms.apply(view);
-            CompletableFuture<BitRaster> oceanFuture = ocean.apply(view);
+            return FutureUtil.join2(landforms.apply(view), ocean.apply(view)).thenApply(tup -> {
+                Optional<EnumRaster<Landform>> landformOption = tup.a;
+                Optional<BitRaster> oceanOption = tup.b;
 
-            return CompletableFuture.allOf(landformFuture, oceanFuture)
-                    .thenApply(v -> {
-                        EnumRaster<Landform> landformRaster = landformFuture.join();
-                        BitRaster oceanRaster = oceanFuture.join();
-
+                return landformOption.map(landformRaster -> {
+                    if (oceanOption.isPresent()) {
+                        BitRaster oceanRaster = oceanOption.get();
                         landformRaster.transform((source, x, y) -> {
                             if (oceanRaster.get(x, y)) {
                                 return Landform.SEA;
@@ -28,9 +28,10 @@ public final class WaterOps {
                             }
                             return source;
                         });
-
-                        return landformRaster;
-                    });
+                    }
+                    return landformRaster;
+                });
+            });
         });
     }
 
@@ -50,29 +51,40 @@ public final class WaterOps {
         });
     }
 
+    public static DataOp<ShortRaster> forceSeaFloorBelowSurface(DataOp<ShortRaster> height, DataOp<EnumRaster<Landform>> landforms, int seaLevel) {
+        return DataOp.join2(height, landforms).map((tup, view) -> {
+            ShortRaster heightRaster = tup.a;
+            EnumRaster<Landform> landformRaster = tup.b;
+
+            heightRaster.transform((source, x, y) -> {
+                Landform landform = landformRaster.get(x, y);
+                if (landform == Landform.SEA) {
+                    return (short) Math.min(source, seaLevel - 1);
+                }
+                return source;
+            });
+
+            return heightRaster;
+        });
+    }
+
     // TODO: Properly select cover type for filled in space!
     public static DataOp<EnumRaster<Cover>> applyToCover(DataOp<EnumRaster<Cover>> cover, DataOp<EnumRaster<Landform>> landforms) {
-        return DataOp.of(view -> {
-            CompletableFuture<EnumRaster<Cover>> coverFuture = cover.apply(view);
-            CompletableFuture<EnumRaster<Landform>> landformFuture = landforms.apply(view);
+        return DataOp.join2(cover, landforms).map((tup, view) -> {
+            EnumRaster<Cover> coverRaster = tup.a;
+            EnumRaster<Landform> landformRaster = tup.b;
 
-            return CompletableFuture.allOf(coverFuture, landformFuture)
-                    .thenApply(v -> {
-                        EnumRaster<Cover> coverRaster = coverFuture.join();
-                        EnumRaster<Landform> landformRaster = landformFuture.join();
+            coverRaster.transform((source, x, y) -> {
+                Landform landform = landformRaster.get(x, y);
+                if (landform.isWater()) {
+                    return Cover.WATER;
+                } else if (source == Cover.WATER) {
+                    return Cover.NONE;
+                }
+                return source;
+            });
 
-                        coverRaster.transform((source, x, y) -> {
-                            Landform landform = landformRaster.get(x, y);
-                            if (landform.isWater()) {
-                                return Cover.WATER;
-                            } else if (source == Cover.WATER) {
-                                return Cover.NONE;
-                            }
-                            return source;
-                        });
-
-                        return coverRaster;
-                    });
+            return coverRaster;
         });
     }
 }

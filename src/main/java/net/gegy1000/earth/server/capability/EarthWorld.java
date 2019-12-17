@@ -45,7 +45,7 @@ public interface EarthWorld extends ICapabilityProvider {
 
         @Override
         public CoordinateReference getCrs() {
-            return CoordinateReference.BLOCK;
+            return CoordinateReference.block();
         }
 
         @Nullable

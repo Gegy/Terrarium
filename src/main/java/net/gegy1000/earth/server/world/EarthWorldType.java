@@ -88,7 +88,7 @@ public class EarthWorldType extends TerrariumWorldType {
 
     @Override
     public Collection<ICapabilityProvider> createCapabilities(World world, GenerationSettings settings) {
-        CoordinateReference crs = EarthInitContext.from(world, settings).latLngCrs;
+        CoordinateReference crs = EarthInitContext.from(world, settings).lngLatCrs;
         return Lists.newArrayList(new EarthWorld.Impl(crs));
     }
 
@@ -96,7 +96,7 @@ public class EarthWorldType extends TerrariumWorldType {
     public PropertyPrototype buildPropertyPrototype() {
         return PropertyPrototype.builder()
                 .withProperties(SPAWN_LATITUDE, SPAWN_LONGITUDE)
-                .withProperties(WORLD_SCALE, TERRESTRIAL_HEIGHT_SCALE)
+                .withProperties(WORLD_SCALE, TERRESTRIAL_HEIGHT_SCALE, OCEANIC_HEIGHT_SCALE)
                 .withProperties(HEIGHT_OFFSET)
                 .withProperties(BEACH_SIZE)
                 .withProperties(ENABLE_DECORATION, ENABLE_BUILDINGS, ENABLE_STREETS)

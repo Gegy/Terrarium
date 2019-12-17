@@ -28,6 +28,17 @@ public enum InterpolationScaleOp {
         this.kernel = ThreadLocal.withInitial(() -> new double[kernelWidth][kernelWidth]);
     }
 
+    public static InterpolationScaleOp appropriateForScale(double relativeScale) {
+        if (relativeScale <= 1.0) {
+            return InterpolationScaleOp.NEAREST;
+        } else if (relativeScale <= 2.0) {
+            return InterpolationScaleOp.LINEAR;
+        } else if (relativeScale <= 3.0) {
+            return InterpolationScaleOp.COSINE;
+        }
+        return InterpolationScaleOp.CUBIC;
+    }
+
     public DataOp<ShortRaster> scaleShortsFrom(DataOp<ShortRaster> data, CoordinateReference src) {
         return this.scaleFrom(data, src, ShortRaster::create);
     }
@@ -40,11 +51,8 @@ public enum InterpolationScaleOp {
         return DataOp.of(view -> {
             DataView srcView = this.getSourceView(view, src);
 
-            double sizeX = view.getWidth();
-            double sizeY = view.getHeight();
-
-            double scaleX = Math.abs(src.x(sizeX, sizeY) / sizeX);
-            double scaleY = Math.abs(src.z(sizeX, sizeY) / sizeY);
+            double destToSrcX = 1.0 / src.scaleX();
+            double destToSrcY = 1.0 / src.scaleZ();
 
             Coordinate minCoordinate = Coordinate.min(
                     view.getMinCoordinate().to(src),
@@ -54,17 +62,17 @@ public enum InterpolationScaleOp {
             double offsetX = minCoordinate.getX() - srcView.getMinX();
             double offsetY = minCoordinate.getZ() - srcView.getMinY();
 
-            return data.apply(srcView).thenApply(source -> {
+            return data.apply(srcView).thenApply(opt -> opt.map(source -> {
                 double[][] kernel = this.kernel.get();
                 T result = function.apply(view);
                 for (int y = 0; y < view.getHeight(); y++) {
                     for (int x = 0; x < view.getWidth(); x++) {
-                        double value = this.evaluate(kernel, source, x * scaleX + offsetX - 0.5, y * scaleY + offsetY - 0.5);
+                        double value = this.evaluate(kernel, source, x * destToSrcX + offsetX - 0.5, y * destToSrcY + offsetY - 0.5);
                         result.setDouble(x, y, value);
                     }
                 }
                 return result;
-            });
+            }));
         });
     }
 

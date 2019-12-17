@@ -24,7 +24,7 @@ public final class SlopeOp {
         return DataOp.of(view -> {
             DataView sourceView = view.grow(1);
             return heights.apply(sourceView)
-                    .thenApply(source -> {
+                    .thenApply(opt -> opt.map(source -> {
                         UByteRaster result = UByteRaster.create(view);
                         for (int localY = 0; localY < view.getHeight(); localY++) {
                             for (int localX = 0; localX < view.getWidth(); localX++) {
@@ -33,7 +33,7 @@ public final class SlopeOp {
                             }
                         }
                         return result;
-                    });
+                    }));
         });
     }
 

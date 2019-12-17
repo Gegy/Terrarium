@@ -1,10 +1,9 @@
 package net.gegy1000.earth.client.render;
 
 import net.gegy1000.earth.TerrariumEarth;
-import net.gegy1000.earth.server.capability.EarthWorld;
 import net.gegy1000.earth.server.config.TerrariumEarthConfig;
 import net.gegy1000.terrarium.server.util.FlipFlopTimer;
-import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
+import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
@@ -120,54 +119,38 @@ public class PanoramaHandler {
 
     public static class Located implements State {
         private final String id;
-        private final double latitude;
-        private final double longitude;
+        private final Coordinate coord;
 
-        public Located(String id, double latitude, double longitude) {
+        public Located(String id, Coordinate coord) {
             this.id = id;
-            this.latitude = latitude;
-            this.longitude = longitude;
+            this.coord = coord;
         }
 
         @Override
         public void renderWorld(Minecraft mc, float partialTicks, float deltaTicks) {
-            EarthWorld earth = mc.world.getCapability(TerrariumEarth.worldCap(), null);
-            if (earth != null) {
-                CoordinateReference crs = earth.getCrs();
-                double blockX = crs.x(this.latitude, this.longitude);
-                double blockZ = crs.z(this.latitude, this.longitude);
+            double deltaX = this.coord.getBlockX() - TileEntityRendererDispatcher.staticPlayerX;
+            double deltaZ = this.coord.getBlockZ() - TileEntityRendererDispatcher.staticPlayerZ;
+            double y = -TileEntityRendererDispatcher.staticPlayerY;
+            long worldTime = mc.world.getTotalWorldTime();
 
-                double deltaX = blockX - TileEntityRendererDispatcher.staticPlayerX;
-                double deltaZ = blockZ - TileEntityRendererDispatcher.staticPlayerZ;
-                double y = -TileEntityRendererDispatcher.staticPlayerY;
-                long worldTime = mc.world.getTotalWorldTime();
+            GlStateManager.disableFog();
 
-                GlStateManager.disableFog();
+            mc.getTextureManager().bindTexture(TileEntityBeaconRenderer.TEXTURE_BEACON_BEAM);
+            TileEntityBeaconRenderer.renderBeamSegment(deltaX, y, deltaZ, partialTicks, 1.0F, worldTime, 0, 256, new float[] { 0.2F, 1.0F, 0.2F });
 
-                mc.getTextureManager().bindTexture(TileEntityBeaconRenderer.TEXTURE_BEACON_BEAM);
-                TileEntityBeaconRenderer.renderBeamSegment(deltaX, y, deltaZ, partialTicks, 1.0F, worldTime, 0, 256, new float[] { 0.2F, 1.0F, 0.2F });
-
-                GlStateManager.enableFog();
-                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            }
+            GlStateManager.enableFog();
+            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         }
 
         @Nullable
         @Override
         public State update(World world, EntityPlayer player) {
-            EarthWorld earth = world.getCapability(TerrariumEarth.worldCap(), null);
-            if (earth != null) {
-                CoordinateReference crs = earth.getCrs();
-                double blockX = crs.x(this.latitude, this.longitude);
-                double blockZ = crs.z(this.latitude, this.longitude);
-                double deltaX = player.posX - blockX;
-                double deltaZ = player.posZ - blockZ;
-                if (deltaX * deltaX + deltaZ * deltaZ < IMMERSION_MIN_DISTANCE) {
-                    return new Immersed(this.id, blockX, player.posY, blockZ);
-                }
-                return this;
+            double deltaX = player.posX - this.coord.getBlockX();
+            double deltaZ = player.posZ - this.coord.getBlockZ();
+            if (deltaX * deltaX + deltaZ * deltaZ < IMMERSION_MIN_DISTANCE) {
+                return new Immersed(this.id, this.coord.getBlockX(), player.posY, this.coord.getBlockZ());
             }
-            return null;
+            return this;
         }
     }
 

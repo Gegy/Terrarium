@@ -2,56 +2,61 @@ package net.gegy1000.earth.server.world.data.op;
 
 import com.vividsolutions.jts.geom.MultiPolygon;
 import net.gegy1000.earth.server.world.data.PolygonData;
+import net.gegy1000.terrarium.server.util.Vec2i;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.data.DataOp;
-import net.gegy1000.terrarium.server.world.data.source.DataSourceHandler;
-import net.gegy1000.terrarium.server.world.data.source.DataTileEntry;
-import net.gegy1000.terrarium.server.world.data.source.DataTilePos;
+import net.gegy1000.terrarium.server.world.data.source.DataSourceReader;
+import net.gegy1000.terrarium.server.world.data.source.DataTileResult;
 import net.gegy1000.terrarium.server.world.data.source.TiledDataSource;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 
 public final class PolygonSampler {
-    public static DataOp<PolygonData> sample(TiledDataSource<PolygonData> source, CoordinateReference coordinateReference) {
+    public static DataOp<PolygonData> sample(TiledDataSource<PolygonData> source, CoordinateReference crs) {
         return DataOp.of(view -> {
-            Coordinate blockMin = view.getMinCoordinate().to(coordinateReference);
-            Coordinate blockMax = view.getMaxCoordinate().to(coordinateReference);
+            Coordinate blockMin = view.getMinCoordinate().to(crs);
+            Coordinate blockMax = view.getMaxCoordinate().to(crs);
 
             Coordinate min = Coordinate.min(blockMin, blockMax);
             Coordinate max = Coordinate.max(blockMin, blockMax);
 
-            DataTilePos minTilePos = getTilePos(source, min);
-            DataTilePos maxTilePos = getTilePos(source, max);
+            Vec2i minTilePos = getTilePos(source, min);
+            Vec2i maxTilePos = getTilePos(source, max);
 
-            return DataSourceHandler.INSTANCE.getTiles(source, minTilePos, maxTilePos)
+            return DataSourceReader.INSTANCE.getTiles(source, minTilePos, maxTilePos)
                     .thenApply(tiles -> {
                         PolygonClipper clipper = PolygonClipper.rect(min.getX(), min.getZ(), max.getX(), max.getZ());
 
                         Collection<MultiPolygon> polygons = new ArrayList<>();
 
-                        for (DataTileEntry<PolygonData> entry : tiles) {
-                            PolygonData data = entry.getData();
-
-                            for (MultiPolygon polygon : data.getPolygons()) {
-                                MultiPolygon clipped = clipper.clip(polygon);
-                                if (clipped != null) {
-                                    polygons.add(clipped);
+                        for (DataTileResult<PolygonData> entry : tiles) {
+                            entry.data.ifPresent(data -> {
+                                for (MultiPolygon polygon : data.getPolygons()) {
+                                    MultiPolygon clipped = clipper.clip(polygon);
+                                    if (clipped != null) {
+                                        polygons.add(clipped);
+                                    }
                                 }
-                            }
+                            });
                         }
 
-                        return new PolygonData(polygons);
+                        if (!polygons.isEmpty()) {
+                            return Optional.of(new PolygonData(polygons));
+                        } else {
+                            return Optional.empty();
+                        }
                     });
         });
     }
 
-    private static DataTilePos getTilePos(TiledDataSource<PolygonData> source, Coordinate coordinate) {
-        Coordinate tileSize = source.getTileSize();
-        int tileX = MathHelper.floor(coordinate.getX() / tileSize.getX());
-        int tileZ = MathHelper.floor(coordinate.getZ() / tileSize.getZ());
-        return new DataTilePos(tileX, tileZ);
+    private static Vec2i getTilePos(TiledDataSource<PolygonData> source, Coordinate coordinate) {
+        return new Vec2i(
+                MathHelper.floor(coordinate.getX() / source.getTileWidth()),
+                MathHelper.floor(coordinate.getZ() / source.getTileHeight())
+        );
     }
 }

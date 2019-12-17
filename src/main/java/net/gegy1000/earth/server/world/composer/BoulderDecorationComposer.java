@@ -3,12 +3,12 @@ package net.gegy1000.earth.server.world.composer;
 import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.gengen.api.writer.ChunkPopulationWriter;
 import net.gegy1000.gengen.util.SpatialRandom;
-import net.gegy1000.terrarium.server.world.feature.BoulderGenerator;
 import net.gegy1000.terrarium.server.world.composer.decoration.DecorationComposer;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.DataKey;
 import net.gegy1000.terrarium.server.world.data.DataView;
 import net.gegy1000.terrarium.server.world.data.raster.UByteRaster;
+import net.gegy1000.terrarium.server.world.feature.BoulderGenerator;
 import net.minecraft.block.BlockStone;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
@@ -55,7 +55,7 @@ public class BoulderDecorationComposer implements DecorationComposer {
                 if (slope >= MIN_SLOPE || this.random.nextInt(30) == 0) {
                     mutablePos.setPos(spawnX, 0, spawnZ);
                     BlockPos surface = writer.getSurface(mutablePos);
-                    if (surface != null) {
+                    if (surface != null && writer.get(surface).isFullBlock()) {
                         BOULDER_GENERATOR.generate(writer.getGlobal(), this.random, surface);
                     }
                 }

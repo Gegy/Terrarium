@@ -17,11 +17,8 @@ public final class VoronoiScaleOp {
         return DataOp.of(view -> {
             DataView srcView = getSourceView(view, src);
 
-            double sizeX = view.getWidth();
-            double sizeY = view.getHeight();
-
-            double scaleX = Math.abs(src.x(sizeX, sizeY) / sizeX);
-            double scaleY = Math.abs(src.z(sizeX, sizeY) / sizeY);
+            double destToSrcX = 1.0 / src.scaleX();
+            double destToSrcY = 1.0 / src.scaleZ();
 
             Coordinate minCoordinate = Coordinate.min(
                     view.getMinCoordinate().to(src),
@@ -31,11 +28,11 @@ public final class VoronoiScaleOp {
             double offsetX = minCoordinate.getX() - srcView.getX();
             double offsetY = minCoordinate.getZ() - srcView.getY();
 
-            return data.apply(srcView).thenApply(source -> {
+            return data.apply(srcView).thenApply(opt -> opt.map(source -> {
                 T result = function.apply(view);
-                voronoi.scaleBytes(source.getData(), result.getData(), srcView, view, scaleX, scaleY, offsetX, offsetY);
+                voronoi.scaleBytes(source.getData(), result.getData(), srcView, view, destToSrcX, destToSrcY, offsetX, offsetY);
                 return result;
-            });
+            }));
         });
     }
 

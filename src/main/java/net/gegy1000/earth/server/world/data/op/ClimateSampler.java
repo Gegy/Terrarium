@@ -5,6 +5,7 @@ import net.gegy1000.terrarium.server.world.data.DataOp;
 import net.gegy1000.terrarium.server.world.data.raster.FloatRaster;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public final class ClimateSampler {
@@ -22,8 +23,7 @@ public final class ClimateSampler {
                     rainfallRaster.set(x, y, this.source.getMonthlyRainfall(view.getX() + x, view.getY() + y));
                 }
             }
-
-            return CompletableFuture.completedFuture(rainfallRaster);
+            return CompletableFuture.completedFuture(Optional.of(rainfallRaster));
         });
     }
 
@@ -36,8 +36,7 @@ public final class ClimateSampler {
                     temperatureRaster.set(x, y, this.source.getAverageTemperature(view.getX() + x, view.getY() + y));
                 }
             }
-
-            return CompletableFuture.completedFuture(temperatureRaster);
+            return CompletableFuture.completedFuture(Optional.of(temperatureRaster));
         });
     }
 }

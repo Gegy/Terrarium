@@ -14,10 +14,10 @@ public final class RasterizeAreaOp {
             canvas.setColor(1);
             canvas.fill(areaData.getArea());
 
-            for (int localY = 0; localY < view.getHeight(); localY++) {
-                for (int localX = 0; localX < view.getWidth(); localX++) {
-                    if (canvas.getData(localX, localY) == 1) {
-                        raster.put(localX, localY);
+            for (int y = 0; y < view.getHeight(); y++) {
+                for (int x = 0; x < view.getWidth(); x++) {
+                    if (canvas.getData(x, y) == 1) {
+                        raster.put(x, y);
                     }
                 }
             }

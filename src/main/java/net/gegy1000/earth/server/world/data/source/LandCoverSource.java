@@ -6,9 +6,9 @@ import net.gegy1000.earth.server.world.data.index.EarthRemoteIndex;
 import net.gegy1000.earth.server.world.data.source.cache.AbstractRegionKey;
 import net.gegy1000.earth.server.world.data.source.cache.CachingInput;
 import net.gegy1000.earth.server.world.data.source.cache.FileTileCache;
+import net.gegy1000.terrarium.server.util.Vec2i;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.data.raster.UByteRaster;
-import net.gegy1000.terrarium.server.world.data.source.DataTilePos;
 import net.gegy1000.terrarium.server.world.data.source.TiledDataSource;
 import org.apache.commons.io.IOUtils;
 import org.tukaani.xz.SingleXZInputStream;
@@ -26,8 +26,6 @@ public class LandCoverSource extends TiledDataSource<UByteRaster> {
     public static final int GLOBAL_WIDTH = 129600;
     public static final int GLOBAL_HEIGHT = 64800;
 
-    private static final UByteRaster DEFAULT_RESULT = UByteRaster.create(TILE_SIZE, TILE_SIZE);
-
     //    private static final TileCache<Key> CACHE = RegionTileCache.<Key>builder()
 //            .keyProvider(new KeyProvider())
 //            .inDirectory(GLOBAL_CACHE_ROOT.resolve("landcover"))
@@ -35,16 +33,16 @@ public class LandCoverSource extends TiledDataSource<UByteRaster> {
 //            .build();
 
     private static final Path CACHE_ROOT = GLOBAL_CACHE_ROOT.resolve("landcover");
-    private static final FileTileCache<DataTilePos> CACHE = new FileTileCache<>(pos -> CACHE_ROOT.resolve("x" + pos.getX() + "y" + pos.getZ()));
+    private static final FileTileCache<Vec2i> CACHE = new FileTileCache<>(pos -> CACHE_ROOT.resolve(pos.x + "/" + pos.y));
 
-    private static final CachingInput<DataTilePos> CACHING_INPUT = new CachingInput<>(CACHE);
+    private static final CachingInput<Vec2i> CACHING_INPUT = new CachingInput<>(CACHE);
 
     public LandCoverSource(CoordinateReference crs) {
-        super(crs, TILE_SIZE, TILE_SIZE);
+        super(crs, TILE_SIZE);
     }
 
     @Override
-    public Optional<UByteRaster> load(DataTilePos pos) throws IOException {
+    public Optional<UByteRaster> load(Vec2i pos) throws IOException {
         SharedEarthData sharedData = SharedEarthData.instance();
         EarthRemoteIndex remoteIndex = sharedData.get(SharedEarthData.REMOTE_INDEX);
         if (remoteIndex == null) {
@@ -67,11 +65,6 @@ public class LandCoverSource extends TiledDataSource<UByteRaster> {
         }
     }
 
-    @Override
-    public UByteRaster getDefaultResult() {
-        return DEFAULT_RESULT;
-    }
-
     private UByteRaster parseStream(InputStream input) throws IOException {
         byte[] bytes = IOUtils.readFully(input, TILE_SIZE * TILE_SIZE);
 
@@ -89,17 +82,25 @@ public class LandCoverSource extends TiledDataSource<UByteRaster> {
     private static final int LOC_BITS = 2;
 
     private static class Key extends AbstractRegionKey<Key> {
-        Key(int x, int z) { super(x, z); }
+        Key(int x, int z) {
+            super(x, z);
+        }
 
         @Override
-        protected int bits() { return LOC_BITS; }
+        protected int bits() {
+            return LOC_BITS;
+        }
     }
 
     private static class KeyProvider extends AbstractRegionKey.Provider<Key> {
         @Override
-        protected Key create(int x, int z) { return new Key(x, z); }
+        protected Key create(int x, int z) {
+            return new Key(x, z);
+        }
 
         @Override
-        protected int bits() { return LOC_BITS; }
+        protected int bits() {
+            return LOC_BITS;
+        }
     }
 }

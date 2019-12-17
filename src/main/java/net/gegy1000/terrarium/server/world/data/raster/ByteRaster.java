@@ -41,6 +41,10 @@ public final class ByteRaster extends AbstractRaster<byte[]> implements IntegerR
         return this.data[this.index(x, y)];
     }
 
+    public void fill(byte value) {
+        Arrays.fill(this.data, value);
+    }
+
     public int getUnsigned(int x, int y) {
         return this.get(x, y) & 0xFF;
     }

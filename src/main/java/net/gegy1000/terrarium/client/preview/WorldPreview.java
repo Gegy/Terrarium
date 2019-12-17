@@ -12,7 +12,7 @@ import net.gegy1000.terrarium.server.world.GenerationCancelledException;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.DataView;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
-import net.gegy1000.terrarium.server.world.data.source.DataSourceHandler;
+import net.gegy1000.terrarium.server.world.data.source.DataSourceReader;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -277,7 +277,7 @@ public class WorldPreview implements IBlockAccess {
         this.executor.shutdownNow();
 
         this.terrarium.getDataCache().close();
-        DataSourceHandler.INSTANCE.cancelLoading();
+        DataSourceReader.INSTANCE.cancelLoading();
     }
 
     public BufferBuilder takeBuilder() {

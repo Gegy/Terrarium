@@ -11,8 +11,8 @@ import net.gegy1000.earth.server.world.data.index.EarthRemoteIndex;
 import net.gegy1000.earth.server.world.data.source.cache.AbstractRegionKey;
 import net.gegy1000.earth.server.world.data.source.cache.CachingInput;
 import net.gegy1000.earth.server.world.data.source.cache.FileTileCache;
+import net.gegy1000.terrarium.server.util.Vec2i;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
-import net.gegy1000.terrarium.server.world.data.source.DataTilePos;
 import net.gegy1000.terrarium.server.world.data.source.TiledDataSource;
 import org.tukaani.xz.SingleXZInputStream;
 
@@ -37,16 +37,16 @@ public class OceanPolygonSource extends TiledDataSource<PolygonData> {
 //            .build();
 
     private static final Path CACHE_ROOT = GLOBAL_CACHE_ROOT.resolve("ocean");
-    private static final FileTileCache<DataTilePos> CACHE = new FileTileCache<>(pos -> CACHE_ROOT.resolve("x" + pos.getX() + "y" + pos.getZ()));
+    private static final FileTileCache<Vec2i> CACHE = new FileTileCache<>(pos -> CACHE_ROOT.resolve(pos.x + "/" + pos.y));
 
-    private static final CachingInput<DataTilePos> CACHING_INPUT = new CachingInput<>(CACHE);
+    private static final CachingInput<Vec2i> CACHING_INPUT = new CachingInput<>(CACHE);
 
     public OceanPolygonSource(CoordinateReference crs) {
-        super(crs, 1.0, 1.0);
+        super(crs, 1.0);
     }
 
     @Override
-    public Optional<PolygonData> load(DataTilePos pos) throws IOException {
+    public Optional<PolygonData> load(Vec2i pos) throws IOException {
         SharedEarthData sharedData = SharedEarthData.instance();
         EarthRemoteIndex remoteIndex = sharedData.get(SharedEarthData.REMOTE_INDEX);
         if (remoteIndex == null) {
@@ -67,11 +67,6 @@ public class OceanPolygonSource extends TiledDataSource<PolygonData> {
         try (InputStream input = new SingleXZInputStream(new BufferedInputStream(sourceInput))) {
             return Optional.of(this.parseStream(input));
         }
-    }
-
-    @Override
-    public PolygonData getDefaultResult() {
-        return PolygonData.EMPTY;
     }
 
     private PolygonData parseStream(InputStream input) throws IOException {
