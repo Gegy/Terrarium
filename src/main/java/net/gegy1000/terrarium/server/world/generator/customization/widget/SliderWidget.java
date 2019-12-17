@@ -3,7 +3,7 @@ package net.gegy1000.terrarium.server.world.generator.customization.widget;
 import net.gegy1000.terrarium.client.gui.widget.SliderGuiWidget;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
-import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyValue;
+import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyPair;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -13,45 +13,46 @@ import java.util.function.DoubleFunction;
 public class SliderWidget implements CustomizationWidget {
     private final PropertyKey<Number> propertyKey;
 
-    private final double minimum;
-    private final double maximum;
-    private final double step;
-    private final double fineStep;
+    private double minimum = 0.0;
+    private double maximum = 1.0;
+    private double step = 1.0;
+    private double fineStep = 1.0;
 
-    private final DoubleFunction<String> display;
+    private DoubleFunction<String> display;
 
     private boolean logarithmic;
 
-    public SliderWidget(PropertyKey<Number> propertyKey, double minimum, double maximum, double step, double fineStep, DoubleFunction<String> display) {
+    public SliderWidget(PropertyKey<Number> propertyKey) {
         this.propertyKey = propertyKey;
-
-        this.minimum = Math.min(minimum, maximum);
-        this.maximum = Math.max(maximum, minimum);
-        this.step = step;
-        this.fineStep = fineStep;
-
-        this.display = display;
     }
 
-    public SliderWidget(PropertyKey<Number> propertyKey, double minimum, double maximum, double step, double fineStep) {
-        this.propertyKey = propertyKey;
+    public SliderWidget range(double minimum, double maximum) {
+        this.minimum = minimum;
+        this.maximum = maximum;
+        return this;
+    }
 
-        this.minimum = Math.min(minimum, maximum);
-        this.maximum = Math.max(maximum, minimum);
+    public SliderWidget step(double step) {
+        return this.step(step, step);
+    }
+
+    public SliderWidget step(double step, double fineStep) {
         this.step = step;
         this.fineStep = fineStep;
+        return this;
+    }
 
-        this.display = null;
+    public SliderWidget display(DoubleFunction<String> display) {
+        this.display = display;
+        return this;
     }
 
     @Override
     @SideOnly(Side.CLIENT)
-    public GuiButton createWidget(GenerationSettings settings, int id, int x, int y, Runnable onPropertyChange) {
-        PropertyValue<Number> value = settings.getValue(this.propertyKey);
+    public GuiButton createWidget(GenerationSettings settings, Runnable onPropertyChange) {
         SliderGuiWidget widget = new SliderGuiWidget(
-                id, x, y,
-                this.propertyKey,
-                value, this.minimum, this.maximum,
+                PropertyPair.of(this.propertyKey, settings.getValue(this.propertyKey)),
+                this.minimum, this.maximum,
                 this.step, this.fineStep,
                 this.display,
                 this.logarithmic ? SliderGuiWidget.Scale.LOGARITHMIC : SliderGuiWidget.Scale.LINEAR

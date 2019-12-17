@@ -2,8 +2,7 @@ package net.gegy1000.terrarium.client.gui.widget;
 
 import com.google.common.collect.Lists;
 import net.gegy1000.terrarium.client.gui.GuiRenderUtils;
-import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
-import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyValue;
+import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyPair;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
@@ -16,8 +15,7 @@ import java.util.List;
 
 @SideOnly(Side.CLIENT)
 public class ToggleGuiWidget extends GuiButtonExt implements TooltipRenderer {
-    private final PropertyKey<Boolean> propertyKey;
-    private final PropertyValue<Boolean> property;
+    private final PropertyPair<Boolean> property;
 
     private final List<Runnable> listeners = new ArrayList<>();
 
@@ -25,12 +23,11 @@ public class ToggleGuiWidget extends GuiButtonExt implements TooltipRenderer {
     private float hoverTime;
     private boolean locked;
 
-    public ToggleGuiWidget(int buttonId, int x, int y, PropertyKey<Boolean> propertyKey, PropertyValue<Boolean> property) {
-        super(buttonId, x, y, 150, 20, "");
-        this.propertyKey = propertyKey;
+    public ToggleGuiWidget(PropertyPair<Boolean> property) {
+        super(0, 0, 0, 150, 20, "");
         this.property = property;
 
-        this.setState(property.get());
+        this.setState(property.value.get());
     }
 
     public void addListener(Runnable listener) {
@@ -67,15 +64,15 @@ public class ToggleGuiWidget extends GuiButtonExt implements TooltipRenderer {
         if (this.locked) {
             return Lists.newArrayList(TextFormatting.GRAY + I18n.format("property.terrarium.locked.name"));
         } else {
-            String name = TextFormatting.BLUE + this.propertyKey.getLocalizedName();
-            String tooltip = TextFormatting.GRAY + this.propertyKey.getLocalizedTooltip();
+            String name = TextFormatting.BLUE + this.property.key.getLocalizedName();
+            String tooltip = TextFormatting.GRAY + this.property.key.getLocalizedTooltip();
             return Lists.newArrayList(name, tooltip);
         }
     }
 
     public void setState(boolean state) {
         if (state != this.state) {
-            this.property.set(state);
+            this.property.value.set(state);
             for (Runnable listener : this.listeners) {
                 listener.run();
             }
@@ -89,7 +86,7 @@ public class ToggleGuiWidget extends GuiButtonExt implements TooltipRenderer {
         } else {
             stateKey = TextFormatting.RED + stateKey;
         }
-        this.displayString = String.format("%s: %s", this.propertyKey.getLocalizedName(), stateKey);
+        this.displayString = String.format("%s: %s", this.property.key.getLocalizedName(), stateKey);
     }
 
     @Override

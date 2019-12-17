@@ -109,11 +109,21 @@ public class EarthWorldType extends TerrariumWorldType {
     public TerrariumCustomization buildCustomization() {
         return TerrariumCustomization.builder()
                 .withCategory("world",
-                        new SliderWidget(WORLD_SCALE, 1.0, 2000.0, 5.0, 1.0, value -> String.format("1:%.0f", value)).logarithmic(),
-                        new SliderWidget(TERRESTRIAL_HEIGHT_SCALE, 0.0, 10.0, 0.5, 0.1, value -> String.format("%.1fx", value)),
-                        new SliderWidget(OCEANIC_HEIGHT_SCALE, 0.0, 10.0, 0.5, 0.1, value -> String.format("%.1fx", value)),
-                        new SliderWidget(HEIGHT_OFFSET, -63, 128, 1, 1, value -> String.format("%.0f blocks", value)),
-                        new SliderWidget(BEACH_SIZE, 0, 8, 1, 1, value -> String.format("%.0f blocks", value))
+                        new SliderWidget(WORLD_SCALE)
+                                .range(1.0, 2000.0).step(5.0, 1.0).logarithmic()
+                                .display(value -> String.format("1:%.0f", value)),
+                        new SliderWidget(TERRESTRIAL_HEIGHT_SCALE)
+                                .range(0.0, 10.0).step(0.5, 0.1)
+                                .display(value -> String.format("%.1fx", value)),
+                        new SliderWidget(OCEANIC_HEIGHT_SCALE)
+                                .range(0.0, 10.0).step(0.5, 0.1)
+                                .display(value -> String.format("%.1fx", value)),
+                        new SliderWidget(HEIGHT_OFFSET)
+                                .range(-63, 128)
+                                .display(value -> String.format("%.0f blocks", value)),
+                        new SliderWidget(BEACH_SIZE)
+                                .range(0, 8)
+                                .display(value -> String.format("%.0f blocks", value))
                 )
                 .withCategory("natural",
                         new CycleWidget<>(SEASON)

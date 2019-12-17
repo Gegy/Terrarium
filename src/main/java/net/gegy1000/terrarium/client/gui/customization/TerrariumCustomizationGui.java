@@ -9,12 +9,12 @@ import net.gegy1000.terrarium.client.preview.PreviewController;
 import net.gegy1000.terrarium.client.preview.PreviewRenderer;
 import net.gegy1000.terrarium.client.preview.WorldPreview;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
+import net.gegy1000.terrarium.server.world.data.source.DataSourceReader;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.generator.customization.PropertyPrototype;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPreset;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.CustomizationCategory;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.CustomizationWidget;
-import net.gegy1000.terrarium.server.world.data.source.DataSourceReader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiCreateWorld;
@@ -94,7 +94,7 @@ public class TerrariumCustomizationGui extends GuiScreen {
 
         this.addButton(new GuiButton(PRESET_BUTTON, this.width / 2 - 154, this.height - 52, 150, 20, I18n.format("gui.terrarium.preset")));
 
-        ActionButtonWidget upLevelButton = new ActionButtonWidget(0, 0, 0, "<<") {
+        ActionButtonWidget upLevelButton = new ActionButtonWidget("<<") {
             @Override
             protected void handlePress() {
                 TerrariumCustomizationGui.this.activeList = TerrariumCustomizationGui.this.categoryList;
@@ -111,7 +111,7 @@ public class TerrariumCustomizationGui extends GuiScreen {
             currentWidgets.add(upLevelButton);
             for (CustomizationWidget widget : category.getWidgets()) {
                 try {
-                    currentWidgets.add(widget.createWidget(this.settings, 0, 0, 0, onPropertyChange));
+                    currentWidgets.add(widget.createWidget(this.settings, onPropertyChange));
                 } catch (Throwable t) {
                     Terrarium.LOGGER.error("Failed to create widget for {}", widget, t);
                 }
@@ -119,7 +119,7 @@ public class TerrariumCustomizationGui extends GuiScreen {
 
             CustomizationList currentList = new CustomizationList(this.mc, this, PADDING_X, TOP_OFFSET, previewWidth, previewHeight, currentWidgets);
 
-            categoryListWidgets.add(new ActionButtonWidget(0, 0, 0, category.getLocalizedName()) {
+            categoryListWidgets.add(new ActionButtonWidget(category.getLocalizedName()) {
                 @Override
                 protected void handlePress() {
                     TerrariumCustomizationGui.this.activeList = currentList;

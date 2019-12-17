@@ -3,8 +3,7 @@ package net.gegy1000.terrarium.client.gui.widget;
 import com.google.common.collect.Lists;
 import net.gegy1000.terrarium.client.gui.GuiRenderUtils;
 import net.gegy1000.terrarium.server.world.generator.customization.property.CycleEnumProperty;
-import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
-import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyValue;
+import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyPair;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextFormatting;
@@ -17,20 +16,18 @@ import java.util.List;
 
 @SideOnly(Side.CLIENT)
 public class CycleGuiWidget<T extends Enum & CycleEnumProperty> extends GuiButtonExt implements TooltipRenderer {
-    private final PropertyKey<T> propertyKey;
-    private final PropertyValue<T> property;
+    private final PropertyPair<T> property;
 
     private final List<Runnable> listeners = new ArrayList<>();
 
     private int ordinal;
     private float hoverTime;
 
-    public CycleGuiWidget(int buttonId, int x, int y, PropertyKey<T> propertyKey, PropertyValue<T> property) {
-        super(buttonId, x, y, 150, 20, "");
-        this.propertyKey = propertyKey;
+    public CycleGuiWidget(PropertyPair<T> property) {
+        super(0,0,0, 150, 20, "");
         this.property = property;
 
-        this.setOrdinal(property.get().ordinal());
+        this.setOrdinal(property.value.get().ordinal());
     }
 
     public void addListener(Runnable listener) {
@@ -59,8 +56,8 @@ public class CycleGuiWidget<T extends Enum & CycleEnumProperty> extends GuiButto
     }
 
     private List<String> getTooltip() {
-        String name = TextFormatting.BLUE + this.propertyKey.getLocalizedName();
-        String tooltip = TextFormatting.GRAY + this.propertyKey.getLocalizedTooltip();
+        String name = TextFormatting.BLUE + this.property.key.getLocalizedName();
+        String tooltip = TextFormatting.GRAY + this.property.key.getLocalizedTooltip();
 
         List<String> lines = Lists.newArrayList(name, tooltip);
 
@@ -79,17 +76,15 @@ public class CycleGuiWidget<T extends Enum & CycleEnumProperty> extends GuiButto
     public void setOrdinal(int ordinal) {
         if (ordinal != this.ordinal) {
             T[] constants = this.getVariants();
-            this.property.set(constants[ordinal]);
-            for (Runnable listener : this.listeners) {
-                listener.run();
-            }
+            this.property.value.set(constants[ordinal]);
+            this.listeners.forEach(Runnable::run);
         }
 
         this.ordinal = ordinal;
 
         T variant = this.getVariant(this.ordinal);
         String state = variant.getFormatting() + I18n.format(variant.getTranslationKey());
-        this.displayString = String.format("%s: %s", this.propertyKey.getLocalizedName(), state);
+        this.displayString = String.format("%s: %s", this.property.key.getLocalizedName(), state);
     }
 
     @Override
@@ -112,6 +107,6 @@ public class CycleGuiWidget<T extends Enum & CycleEnumProperty> extends GuiButto
     }
 
     private T[] getVariants() {
-        return this.propertyKey.getType().getEnumConstants();
+        return this.property.key.getType().getEnumConstants();
     }
 }

@@ -4,6 +4,7 @@ import net.gegy1000.terrarium.client.gui.widget.CycleGuiWidget;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.generator.customization.property.CycleEnumProperty;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
+import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyPair;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyValue;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraftforge.fml.relauncher.Side;
@@ -18,9 +19,8 @@ public class CycleWidget<T extends Enum & CycleEnumProperty> implements Customiz
 
     @Override
     @SideOnly(Side.CLIENT)
-    public GuiButton createWidget(GenerationSettings settings, int id, int x, int y, Runnable onPropertyChange) {
-        PropertyValue<T> value = settings.getValue(this.propertyKey);
-        CycleGuiWidget<T> widget = new CycleGuiWidget<>(id, x, y, this.propertyKey, value);
+    public GuiButton createWidget(GenerationSettings settings, Runnable onPropertyChange) {
+        CycleGuiWidget<T> widget = new CycleGuiWidget<>(PropertyPair.of(this.propertyKey, settings.getValue(this.propertyKey)));
         widget.addListener(onPropertyChange);
         return widget;
     }

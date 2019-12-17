@@ -2,8 +2,7 @@ package net.gegy1000.terrarium.client.gui.widget;
 
 import com.google.common.collect.Lists;
 import net.gegy1000.terrarium.client.gui.GuiRenderUtils;
-import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
-import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyValue;
+import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyPair;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
@@ -20,8 +19,7 @@ import java.util.function.DoubleFunction;
 
 @SideOnly(Side.CLIENT)
 public class SliderGuiWidget extends GuiButtonExt implements TooltipRenderer {
-    private final PropertyKey<Number> propertyKey;
-    private final PropertyValue<Number> property;
+    private final PropertyPair<Number> property;
 
     private final DoubleFunction<String> display;
 
@@ -41,15 +39,13 @@ public class SliderGuiWidget extends GuiButtonExt implements TooltipRenderer {
     private float hoverTime;
 
     public SliderGuiWidget(
-            int widgetId, int x, int y,
-            PropertyKey<Number> propertyKey, PropertyValue<Number> property,
+            PropertyPair<Number> property,
             double min, double max,
             double step, double fineStep,
             DoubleFunction<String> display,
             Scale scale
     ) {
-        super(widgetId, x, y, 150, 20, "");
-        this.propertyKey = propertyKey;
+        super(0, 0, 0, 150, 20, "");
         this.property = property;
         this.display = display;
         this.scale = scale;
@@ -59,11 +55,7 @@ public class SliderGuiWidget extends GuiButtonExt implements TooltipRenderer {
         this.step = step;
         this.fineStep = fineStep;
 
-        this.setSliderPosition(this.toPosition(property.get().doubleValue()));
-    }
-
-    public SliderGuiWidget(int widgetId, int x, int y, PropertyKey<Number> propertyKey, PropertyValue<Number> property, double min, double max) {
-        this(widgetId, x, y, propertyKey, property, min, max, 1.0, 0.1, null, Scale.LINEAR);
+        this.setValue(property.value.get().doubleValue());
     }
 
     public void addListener(Runnable listener) {
@@ -71,11 +63,18 @@ public class SliderGuiWidget extends GuiButtonExt implements TooltipRenderer {
     }
 
     public void setSliderPosition(double position) {
-        double value = this.toValue(position);
         this.position = position;
+        this.updateDisplayString(this.toValue(position));
+    }
 
+    public void setValue(double value) {
+        this.position = this.toPosition(value);
+        this.updateDisplayString(value);
+    }
+
+    private void updateDisplayString(double value) {
         String valueString = this.display != null ? this.display.apply(value) : String.format("%.2f", value);
-        this.displayString = String.format("%s: %s", this.propertyKey.getLocalizedName(), valueString);
+        this.displayString = String.format("%s: %s", this.property.key.getLocalizedName(), valueString);
     }
 
     @Override
@@ -94,8 +93,8 @@ public class SliderGuiWidget extends GuiButtonExt implements TooltipRenderer {
     @Override
     public void renderTooltip(int mouseX, int mouseY) {
         if (this.hoverTime >= 15) {
-            String name = TextFormatting.BLUE + this.propertyKey.getLocalizedName();
-            String tooltip = TextFormatting.GRAY + this.propertyKey.getLocalizedTooltip();
+            String name = TextFormatting.BLUE + this.property.key.getLocalizedName();
+            String tooltip = TextFormatting.GRAY + this.property.key.getLocalizedTooltip();
             String defaults = TextFormatting.YELLOW + I18n.format("property.terrarium.slider_range.name", this.min, this.max);
             List<String> lines = Lists.newArrayList(name, tooltip, defaults);
             if (Math.abs(this.step - this.fineStep) > 1E-6) {
@@ -135,7 +134,7 @@ public class SliderGuiWidget extends GuiButtonExt implements TooltipRenderer {
     }
 
     private double getMousePosition(int mouseX) {
-        return this.step((double) (mouseX - (this.x + 4)) / (double) (this.width - 8));
+        return this.stepped((double) (mouseX - (this.x + 4)) / (double) (this.width - 8));
     }
 
     @Override
@@ -143,20 +142,18 @@ public class SliderGuiWidget extends GuiButtonExt implements TooltipRenderer {
         if (this.mouseDown) {
             this.mouseDown = false;
             double value = this.toValue(this.position);
-            if (Math.abs(this.property.get().doubleValue() - value) > 1e-06) {
-                this.property.set(value);
-                for (Runnable listener : this.listeners) {
-                    listener.run();
-                }
+            if (Math.abs(this.property.value.get().doubleValue() - value) > 1e-06) {
+                this.property.value.set(value);
+                this.listeners.forEach(Runnable::run);
             }
         }
     }
 
-    private double step(double position) {
-        return this.step(position, GuiScreen.isShiftKeyDown() ? this.fineStep : this.step);
+    private double stepped(double position) {
+        return this.stepped(position, GuiScreen.isShiftKeyDown() ? this.fineStep : this.step);
     }
 
-    private double step(double position, double step) {
+    private double stepped(double position, double step) {
         double value = this.toValue(position);
         double stepped = value - (value % step);
         return this.toPosition(stepped);

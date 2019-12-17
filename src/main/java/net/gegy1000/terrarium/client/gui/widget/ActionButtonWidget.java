@@ -4,12 +4,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.client.config.GuiButtonExt;
 
 public abstract class ActionButtonWidget extends GuiButtonExt {
-    public ActionButtonWidget(int buttonId, int x, int y, String buttonText) {
-        super(buttonId, x, y, buttonText);
+    public ActionButtonWidget(String buttonText) {
+        super(0, 0, 0, buttonText);
     }
 
-    public ActionButtonWidget(int buttonId, int x, int y, int width, int height, String buttonText) {
-        super(buttonId, x, y, width, height, buttonText);
+    public ActionButtonWidget(int width, int height, String buttonText) {
+        super(0, 0, 0, width, height, buttonText);
     }
 
     @Override

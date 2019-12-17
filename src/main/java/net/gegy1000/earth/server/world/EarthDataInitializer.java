@@ -72,7 +72,7 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
         elevation = new ScaleTerrainElevationOp(terrestrialHeightScale, oceanicHeightScale).apply(elevation);
         elevation = new OffsetValueOp(heightOffset).apply(elevation);
 
-        if (worldScale <= 100.0) {
+        if (worldScale <= 130.0) {
             OceanPolygonSource oceanPolygonSource = new OceanPolygonSource(this.ctx.lngLatCrs);
 
             DataOp<PolygonData> oceanPolygons = PolygonSampler.sample(oceanPolygonSource, this.ctx.lngLatCrs);
