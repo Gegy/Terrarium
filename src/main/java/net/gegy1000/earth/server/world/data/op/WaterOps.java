@@ -51,8 +51,8 @@ public final class WaterOps {
         });
     }
 
-    public static DataOp<ShortRaster> forceSeaFloorBelowSurface(DataOp<ShortRaster> height, DataOp<EnumRaster<Landform>> landforms, int seaLevel) {
-        return DataOp.join2(height, landforms).map((tup, view) -> {
+    public static DataOp<ShortRaster> applyToElevation(DataOp<ShortRaster> elevation, DataOp<EnumRaster<Landform>> landforms, int seaLevel) {
+        return DataOp.join2(elevation, landforms).map((tup, view) -> {
             ShortRaster heightRaster = tup.a;
             EnumRaster<Landform> landformRaster = tup.b;
 
@@ -60,6 +60,8 @@ public final class WaterOps {
                 Landform landform = landformRaster.get(x, y);
                 if (landform == Landform.SEA) {
                     return (short) Math.min(source, seaLevel - 1);
+                } else if (landform == Landform.LAND && source < seaLevel) {
+                    return (short) seaLevel;
                 }
                 return source;
             });

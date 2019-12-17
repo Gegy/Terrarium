@@ -75,14 +75,12 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
         if (worldScale <= 100.0) {
             OceanPolygonSource oceanPolygonSource = new OceanPolygonSource(this.ctx.lngLatCrs);
 
-            // TODO: this causes weird holes in the water when it does not match up with the heightmap
-            //  potentially needs flood fill like is done with cover
             DataOp<PolygonData> oceanPolygons = PolygonSampler.sample(oceanPolygonSource, this.ctx.lngLatCrs);
             DataOp<AreaData> oceanArea = PolygonToAreaOp.apply(oceanPolygons, this.ctx.lngLatCrs);
             DataOp<BitRaster> oceanMask = RasterizeAreaOp.apply(oceanArea);
 
             landforms = WaterOps.applyWaterMask(landforms, oceanMask).cached(EnumRaster::copy);
-            elevation = WaterOps.forceSeaFloorBelowSurface(elevation, landforms, seaLevel);
+            elevation = WaterOps.applyToElevation(elevation, landforms, seaLevel);
         }
 
         cover = WaterOps.applyToCover(cover, landforms);
