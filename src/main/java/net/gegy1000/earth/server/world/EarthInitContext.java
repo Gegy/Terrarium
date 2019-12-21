@@ -28,7 +28,7 @@ public final class EarthInitContext {
         double metersPerDegree = EarthWorld.EQUATOR_CIRCUMFERENCE / 360.0;
         this.lngLatCrs = CoordinateReference.lngLat(metersPerDegree / worldScale);
 
-        this.elevationRasterCrs = Zoomable.create(ZoomLevels.range(0, 2), zoom -> ElevationSource.crs(worldScale, zoom));
+        this.elevationRasterCrs = Zoomable.create(ZoomLevels.range(0, 3), zoom -> ElevationSource.crs(worldScale, zoom));
 
         this.landcoverRasterCrs = CoordinateReference.scale(LANDCOVER_SCALE / worldScale);
         this.climateRasterCrs = CoordinateReference.scale(CLIMATE_SCALE / worldScale);

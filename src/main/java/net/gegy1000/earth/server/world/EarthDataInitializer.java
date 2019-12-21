@@ -115,9 +115,7 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
         } else if (worldScale > 30.0) {
             return 2;
         } else {
-            // TODO: Zoom level 3
-//            return 3;
-            return 2;
+            return 3;
         }
     }
 }

@@ -22,7 +22,7 @@ public final class EarthRemoteIndex2 {
     public static EarthRemoteIndex2 parse(JsonObject root) {
         JsonObject endpointsRoot = root.getAsJsonObject("endpoints");
 
-        Zoomable<Endpoint> elevation = Zoomable.create(ZoomLevels.range(0, 2), zoom -> {
+        Zoomable<Endpoint> elevation = Zoomable.create(ZoomLevels.range(0, 3), zoom -> {
             JsonObject endpointRoot = endpointsRoot.getAsJsonObject("elevation/" + zoom);
             return parseEndpoint(endpointRoot);
         }).orElse(Endpoint.EMPTY);
