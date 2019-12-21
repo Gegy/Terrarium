@@ -5,13 +5,11 @@ import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.data.DataOp;
 import net.gegy1000.terrarium.server.world.data.DataView;
-import net.gegy1000.terrarium.server.world.data.raster.UByteRaster;
+import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
 import net.minecraft.util.math.MathHelper;
 
-import java.util.function.Function;
-
 public final class VoronoiScaleOp {
-    public static <T extends UByteRaster> DataOp<T> scaleUBytesFrom(DataOp<T> data, CoordinateReference src, Function<DataView, T> function) {
+    public static <T extends Enum<T>> DataOp<EnumRaster<T>> scaleEnumsFrom(DataOp<EnumRaster<T>> data, CoordinateReference src, T defaultValue) {
         Voronoi voronoi = new Voronoi(Voronoi.DistanceFunc.EUCLIDEAN, 0.9, 1000);
 
         return DataOp.of(view -> {
@@ -29,7 +27,7 @@ public final class VoronoiScaleOp {
             double offsetY = minCoordinate.getZ() - srcView.getY();
 
             return data.apply(srcView).thenApply(opt -> opt.map(source -> {
-                T result = function.apply(view);
+                EnumRaster<T> result = EnumRaster.create(defaultValue, view);
                 voronoi.scaleBytes(source.getData(), result.getData(), srcView, view, destToSrcX, destToSrcY, offsetX, offsetY);
                 return result;
             }));

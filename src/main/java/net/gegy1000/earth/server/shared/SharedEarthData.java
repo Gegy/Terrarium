@@ -10,8 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class SharedEarthData {
-    public static final Key<WorldClimateRaster> JANUARY_CLIMATE = Key.create();
-    public static final Key<WorldClimateRaster> JULY_CLIMATE = Key.create();
+    public static final Key<WorldClimateRaster> CLIMATIC_VARIABLES = Key.create();
     public static final Key<EarthRemoteIndex> REMOTE_INDEX = Key.create();
     public static final Key<EarthRemoteIndex2> REMOTE_INDEX2 = Key.create();
 

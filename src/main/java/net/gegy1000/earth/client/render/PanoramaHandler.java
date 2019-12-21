@@ -31,7 +31,7 @@ import org.lwjgl.util.glu.Sphere;
 import javax.annotation.Nullable;
 
 @SideOnly(Side.CLIENT)
-@Mod.EventBusSubscriber(modid = TerrariumEarth.MODID, value = Side.CLIENT)
+@Mod.EventBusSubscriber(modid = TerrariumEarth.ID, value = Side.CLIENT)
 public class PanoramaHandler {
     private static final String ATTRIBUTION = "\u00a9 Google Street View";
 

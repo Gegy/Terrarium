@@ -1,35 +1,34 @@
 package net.gegy1000.earth.server.world.cover;
 
-import net.gegy1000.earth.server.world.biome.CoverMarker;
 import net.gegy1000.earth.server.world.cover.carver.CoverCarver;
 import net.gegy1000.earth.server.world.cover.decorator.CoverDecorator;
+import net.gegy1000.earth.server.world.cover.decorator.CoverDecoratorType;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.Set;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-public final class CoverConfig {
-    private final EnumSet<CoverMarker> markers = EnumSet.noneOf(CoverMarker.class);
+public class CoverConfig {
+    private final Map<CoverDecoratorType<?>, CoverDecorator> decorators = new LinkedHashMap<>();
     private final Collection<CoverCarver> carvers = new ArrayList<>();
-    private final Collection<CoverDecorator> decorators = new ArrayList<>();
 
-    public void mark(CoverMarker... markers) {
-        Collections.addAll(this.markers, markers);
+    public <T extends CoverDecorator> void addDecorator(CoverDecoratorType<T> type, T decorator) {
+        this.decorators.put(type, decorator);
     }
 
-    public void carve(CoverCarver carver) {
+    @SuppressWarnings("unchecked")
+    public <T extends CoverDecorator> void configureDecorator(CoverDecoratorType<T> type, Consumer<T> configurator) {
+        CoverDecorator decorator = this.decorators.get(type);
+        if (decorator != null) {
+            configurator.accept((T) decorator);
+        }
+    }
+
+    public void addCarver(CoverCarver carver) {
         this.carvers.add(carver);
-    }
-
-    public void decorate(CoverDecorator decorator) {
-        this.decorators.add(decorator);
-    }
-
-    public Set<CoverMarker> markers() {
-        return this.markers;
     }
 
     public Stream<CoverCarver> carvers() {
@@ -37,6 +36,6 @@ public final class CoverConfig {
     }
 
     public Stream<CoverDecorator> decorators() {
-        return this.decorators.stream();
+        return this.decorators.values().stream();
     }
 }

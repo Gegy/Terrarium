@@ -10,8 +10,8 @@ import net.minecraftforge.common.capabilities.CapabilityManager;
 import java.util.concurrent.Callable;
 
 public class TerrariumCapabilities {
-    public static final ResourceLocation WORLD_DATA_ID = new ResourceLocation(Terrarium.MODID, "world_data");
-    public static final ResourceLocation AUX_DATA_ID = new ResourceLocation(Terrarium.MODID, "aux_data");
+    public static final ResourceLocation WORLD_DATA_ID = new ResourceLocation(Terrarium.ID, "world_data");
+    public static final ResourceLocation AUX_DATA_ID = new ResourceLocation(Terrarium.ID, "aux_data");
 
     @CapabilityInject(TerrariumWorld.class)
     private static Capability<TerrariumWorld> world;

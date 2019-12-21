@@ -28,17 +28,17 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.stream.Stream;
 
-@Mod(modid = Terrarium.MODID, name = "Terrarium", version = Terrarium.VERSION, acceptedMinecraftVersions = "[1.12]", dependencies = "after:cubicchunks")
+@Mod(modid = Terrarium.ID, name = "Terrarium", version = Terrarium.VERSION, acceptedMinecraftVersions = "[1.12]", dependencies = "after:cubicchunks")
 public class Terrarium {
-    public static final String MODID = "terrarium";
+    public static final String ID = "terrarium";
     public static final String VERSION = "1.1.0";
 
     public static final String CLIENT_PROXY = "net.gegy1000.terrarium.client.ClientProxy";
     public static final String SERVER_PROXY = "net.gegy1000.terrarium.server.ServerProxy";
 
-    public static final Logger LOGGER = LogManager.getLogger(MODID);
+    public static final Logger LOGGER = LogManager.getLogger(ID);
 
-    public static final SimpleNetworkWrapper NETWORK = NetworkRegistry.INSTANCE.newSimpleChannel(Terrarium.MODID);
+    public static final SimpleNetworkWrapper NETWORK = NetworkRegistry.INSTANCE.newSimpleChannel(Terrarium.ID);
 
     public static boolean serverHasMod = false;
 
@@ -74,9 +74,9 @@ public class Terrarium {
     @NetworkCheckHandler
     public static boolean onCheckNetwork(Map<String, String> mods, Side side) {
         if (side.isServer()) {
-            serverHasMod = mods.containsKey(Terrarium.MODID);
+            serverHasMod = mods.containsKey(Terrarium.ID);
         }
-        return !mods.containsKey(Terrarium.MODID) || mods.get(Terrarium.MODID).equals(VERSION);
+        return !mods.containsKey(Terrarium.ID) || mods.get(Terrarium.ID).equals(VERSION);
     }
 
     private static void setupCacheDirectory() {

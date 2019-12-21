@@ -15,15 +15,15 @@ public final class ClimateSampler {
         this.source = source;
     }
 
-    public DataOp<ShortRaster> monthlyRainfall() {
+    public DataOp<ShortRaster> annualRainfall() {
         return DataOp.of(view -> {
-            ShortRaster rainfallRaster = ShortRaster.create(view);
+            ShortRaster annualRainfall = ShortRaster.create(view);
             for (int y = 0; y < view.getHeight(); y++) {
                 for (int x = 0; x < view.getWidth(); x++) {
-                    rainfallRaster.set(x, y, this.source.getMonthlyRainfall(view.getX() + x, view.getY() + y));
+                    annualRainfall.set(x, y, this.source.getAnnualRainfall(view.getX() + x, view.getY() + y));
                 }
             }
-            return CompletableFuture.completedFuture(Optional.of(rainfallRaster));
+            return CompletableFuture.completedFuture(Optional.of(annualRainfall));
         });
     }
 
@@ -33,7 +33,7 @@ public final class ClimateSampler {
             FloatRaster temperatureRaster = FloatRaster.create(view);
             for (int y = 0; y < view.getHeight(); y++) {
                 for (int x = 0; x < view.getWidth(); x++) {
-                    temperatureRaster.set(x, y, this.source.getAverageTemperature(view.getX() + x, view.getY() + y));
+                    temperatureRaster.set(x, y, this.source.getMeanTemperature(view.getX() + x, view.getY() + y));
                 }
             }
             return CompletableFuture.completedFuture(Optional.of(temperatureRaster));

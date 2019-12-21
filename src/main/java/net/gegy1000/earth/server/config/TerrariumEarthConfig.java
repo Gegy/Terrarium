@@ -7,8 +7,8 @@ import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-@Config(modid = TerrariumEarth.MODID)
-@Mod.EventBusSubscriber(modid = TerrariumEarth.MODID)
+@Config(modid = TerrariumEarth.ID)
+@Mod.EventBusSubscriber(modid = TerrariumEarth.ID)
 public class TerrariumEarthConfig {
     @Config.Name("street_view_zoom")
     @Config.LangKey("config.earth.street_view_zoom")
@@ -23,8 +23,8 @@ public class TerrariumEarthConfig {
 
     @SubscribeEvent
     public static void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent event) {
-        if (event.getModID().equals(TerrariumEarth.MODID)) {
-            ConfigManager.sync(TerrariumEarth.MODID, Config.Type.INSTANCE);
+        if (event.getModID().equals(TerrariumEarth.ID)) {
+            ConfigManager.sync(TerrariumEarth.ID, Config.Type.INSTANCE);
         }
     }
 }

@@ -7,6 +7,7 @@ import net.gegy1000.earth.server.world.ecology.GrowthPredictors;
 import net.minecraft.util.ResourceLocation;
 
 import java.io.IOException;
+import java.util.Optional;
 
 public final class MaxentGrowthIndicator implements GrowthIndicator {
     private final ImmutableList<GrowthIndicator> features;
@@ -27,13 +28,13 @@ public final class MaxentGrowthIndicator implements GrowthIndicator {
         this.output = output;
     }
 
-    public static GrowthIndicator tryParse(ResourceLocation location) {
+    public static Optional<GrowthIndicator> tryParse(ResourceLocation location) {
         try {
             MaxentLambdasFile lambdasFile = MaxentLambdasFile.parse(location);
-            return from(lambdasFile, MaxentOutput.CLOGLOG);
+            return Optional.of(from(lambdasFile, MaxentOutput.CLOGLOG));
         } catch (IOException | MaxentParseException e) {
-            TerrariumEarth.LOGGER.error("Failed to parse maxent lambdas file for {}", location, e);
-            return GrowthIndicator.relaxed();
+            TerrariumEarth.LOGGER.error("Failed to load maxent growth indicator at {}", location, e);
+            return Optional.empty();
         }
     }
 

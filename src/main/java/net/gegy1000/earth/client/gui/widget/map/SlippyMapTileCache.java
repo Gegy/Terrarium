@@ -102,7 +102,7 @@ public class SlippyMapTileCache {
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setConnectTimeout(1000);
         connection.setReadTimeout(5000);
-        connection.setRequestProperty("User-Agent", Terrarium.MODID);
+        connection.setRequestProperty("User-Agent", Terrarium.ID);
         InputStream stream = connection.getInputStream();
         this.loadingStreams.add(stream);
         try (InputStream input = new BufferedInputStream(stream)) {

@@ -85,7 +85,7 @@ public final class MaxentLambdasFile {
             } else if (ident.contains("*")) {
                 int idx = ident.indexOf('*');
                 GrowthIndicator left = GrowthPredictors.byId(ident.substring(0, idx));
-                GrowthIndicator right = GrowthPredictors.byId(ident.substring(idx));
+                GrowthIndicator right = GrowthPredictors.byId(ident.substring(idx + 1));
                 return MaxentFeatures.product(left, right, lambda, min, max);
             } else if (ident.contains("^2")) {
                 GrowthIndicator predictor = GrowthPredictors.byId(ident.substring(0, ident.length() - 2));

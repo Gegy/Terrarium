@@ -22,7 +22,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-@Mod.EventBusSubscriber(modid = Terrarium.MODID, value = Side.CLIENT)
+@Mod.EventBusSubscriber(modid = Terrarium.ID, value = Side.CLIENT)
 public class ClientEventHandler {
     private static final Minecraft MC = Minecraft.getMinecraft();
     private static final int STRUCTURES_BUTTON_ID = 4;

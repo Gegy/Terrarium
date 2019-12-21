@@ -42,7 +42,7 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
         this.addSurfaceComposers(builder, preview);
         this.addDecorationComposers(preview, builder);
 
-        builder.setBiomeComposer(new EarthBiomeComposer(EarthDataKeys.COVER, EarthDataKeys.LANDFORM, EarthDataKeys.AVERAGE_TEMPERATURE, EarthDataKeys.MONTHLY_RAINFALL));
+        builder.setBiomeComposer(new EarthBiomeComposer());
         builder.setSpawnPosition(new Coordinate(this.ctx.lngLatCrs, this.ctx.settings.getDouble(SPAWN_LONGITUDE), this.ctx.settings.getDouble(SPAWN_LATITUDE)));
 
         return builder.build();
@@ -53,9 +53,9 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
         int heightOffset = this.ctx.settings.getInteger(HEIGHT_OFFSET);
         HeightFunction surfaceFunction = HeightmapStore.global(world, heightOffset);
 
-        builder.addSurfaceComposer(new HeightmapSurfaceComposer(EarthDataKeys.HEIGHT, Blocks.STONE.getDefaultState()));
-        builder.addSurfaceComposer(new WaterFillSurfaceComposer(EarthDataKeys.HEIGHT, EarthDataKeys.LANDFORM, EarthDataKeys.WATER_LEVEL, Blocks.WATER.getDefaultState()));
-        builder.addSurfaceComposer(new SoilSurfaceComposer(world, EarthDataKeys.HEIGHT, EarthDataKeys.SLOPE, Blocks.STONE.getDefaultState()));
+        builder.addSurfaceComposer(new HeightmapSurfaceComposer(EarthDataKeys.TERRAIN_HEIGHT, Blocks.STONE.getDefaultState()));
+        builder.addSurfaceComposer(new WaterFillSurfaceComposer(EarthDataKeys.TERRAIN_HEIGHT, EarthDataKeys.LANDFORM, EarthDataKeys.WATER_LEVEL, Blocks.WATER.getDefaultState()));
+        builder.addSurfaceComposer(new SoilSurfaceComposer(world, EarthDataKeys.TERRAIN_HEIGHT, EarthDataKeys.SLOPE, Blocks.STONE.getDefaultState()));
 
         if (preview) return;
 
@@ -85,9 +85,9 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
         }
 
         if (this.ctx.settings.getBoolean(ORE_GENERATION)) {
-            // TODO: emerald gen & mod compat
+            // TODO: mod compat
 
-            OreDecorationComposer oreComposer = new OreDecorationComposer(this.ctx.world, EarthDataKeys.HEIGHT);
+            OreDecorationComposer oreComposer = new OreDecorationComposer(this.ctx.world, EarthDataKeys.TERRAIN_HEIGHT);
             VanillaOres.get().addTo(oreComposer);
 
             builder.addDecorationComposer(oreComposer);

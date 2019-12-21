@@ -6,7 +6,6 @@ import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.data.raster.UByteRaster;
 import net.minecraft.util.math.MathHelper;
 
-// TODO: operate on floating-point slopes?
 public final class SlopeOp {
     private static final int CACHE_SIZE = 128;
     private static final int CACHE_RES = 4;

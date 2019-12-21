@@ -4,8 +4,8 @@ import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.capability.EarthWorld;
 import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.earth.server.util.ZoomLevels;
+import net.gegy1000.earth.server.util.Zoomable;
 import net.gegy1000.earth.server.world.data.index.EarthRemoteIndex2;
-import net.gegy1000.earth.server.world.data.source.cache.AbstractRegionKey;
 import net.gegy1000.earth.server.world.data.source.cache.CachingInput;
 import net.gegy1000.earth.server.world.data.source.cache.FileTileCache;
 import net.gegy1000.earth.server.world.data.source.reader.TerrariumRasterReader;
@@ -20,32 +20,53 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.function.Function;
 
-public class ElevationSource extends TiledDataSource<ShortRaster> {
-    public static final int TILE_SIZE = 1200;
-
-//    private static final TileCache<Key> CACHE = RegionTileCache.<Key>builder()
-//            .keyProvider(new KeyProvider())
-//            .inDirectory(GLOBAL_CACHE_ROOT.resolve("elevation"))
-//            .sectorSize(512 * 1024)
-//            .build();
+public class SoilSource extends TiledDataSource<ShortRaster> {
+    public static final int TILE_SIZE = 480;
 
     private final int zoom;
-
     private final CachingInput<Vec2i> cachingInput;
 
-    public ElevationSource(int zoom, CoordinateReference crs) {
+    private final Function<EarthRemoteIndex2, Zoomable<EarthRemoteIndex2.Endpoint>> endpointFunction;
+
+    private SoilSource(int zoom, CoordinateReference crs, String cacheName, Function<EarthRemoteIndex2, Zoomable<EarthRemoteIndex2.Endpoint>> endpointFunction) {
         super(crs, TILE_SIZE);
 
         this.zoom = zoom;
+        this.endpointFunction = endpointFunction;
 
-        Path cacheRoot = GLOBAL_CACHE_ROOT.resolve("elevation").resolve(String.valueOf(zoom));
+        Path cacheRoot = GLOBAL_CACHE_ROOT.resolve(cacheName).resolve(String.valueOf(zoom));
         FileTileCache<Vec2i> cache = new FileTileCache<>(pos -> cacheRoot.resolve(pos.x + "/" + pos.y));
         this.cachingInput = new CachingInput<>(cache);
     }
 
     public static ZoomLevels zoomLevels() {
-        return ZoomLevels.range(0, 3);
+        return ZoomLevels.range(0, 1);
+    }
+
+    public static SoilSource cationExchangeCapacity(int zoom, CoordinateReference crs) {
+        return new SoilSource(zoom, crs, "soil/cec", index -> index.cationExchangeCapacity);
+    }
+
+    public static SoilSource organicCarbonContent(int zoom, CoordinateReference crs) {
+        return new SoilSource(zoom, crs, "soil/occ", index -> index.organicCarbonContent);
+    }
+
+    public static SoilSource ph(int zoom, CoordinateReference crs) {
+        return new SoilSource(zoom, crs, "soil/ph", index -> index.ph);
+    }
+
+    public static SoilSource clayContent(int zoom, CoordinateReference crs) {
+        return new SoilSource(zoom, crs, "soil/clay", index -> index.clayContent);
+    }
+
+    public static SoilSource siltContent(int zoom, CoordinateReference crs) {
+        return new SoilSource(zoom, crs, "soil/silt", index -> index.siltContent);
+    }
+
+    public static SoilSource sandContent(int zoom, CoordinateReference crs) {
+        return new SoilSource(zoom, crs, "soil/sand", index -> index.sandContent);
     }
 
     public static CoordinateReference crs(double worldScale, int zoom) {
@@ -54,7 +75,7 @@ public class ElevationSource extends TiledDataSource<ShortRaster> {
     }
 
     public static double tileSizeDeg(int zoom) {
-        return Math.pow(3.0, 2.0 - zoom);
+        return Math.pow(3.0, 1.0 - zoom);
     }
 
     public static double globalWidth(int zoom) {
@@ -73,7 +94,7 @@ public class ElevationSource extends TiledDataSource<ShortRaster> {
             return Optional.empty();
         }
 
-        String url = remoteIndex.elevation.forZoom(this.zoom).getUrlFor(pos);
+        String url = this.endpointFunction.apply(remoteIndex).forZoom(this.zoom).getUrlFor(pos);
         if (url == null) {
             return Optional.empty();
         }
@@ -84,31 +105,6 @@ public class ElevationSource extends TiledDataSource<ShortRaster> {
             return connection.getInputStream();
         })) {
             return Optional.of(TerrariumRasterReader.read(input, ShortRaster.class));
-        }
-    }
-
-    private static final int LOC_BITS = 3;
-
-    private static class Key extends AbstractRegionKey<Key> {
-        Key(int x, int z) {
-            super(x, z);
-        }
-
-        @Override
-        protected int bits() {
-            return LOC_BITS;
-        }
-    }
-
-    private static class KeyProvider extends AbstractRegionKey.Provider<Key> {
-        @Override
-        protected Key create(int x, int z) {
-            return new Key(x, z);
-        }
-
-        @Override
-        protected int bits() {
-            return LOC_BITS;
         }
     }
 }

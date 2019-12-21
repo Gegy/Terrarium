@@ -51,7 +51,7 @@ public final class WaterOps {
         });
     }
 
-    public static DataOp<ShortRaster> applyToElevation(DataOp<ShortRaster> elevation, DataOp<EnumRaster<Landform>> landforms, int seaLevel) {
+    public static DataOp<ShortRaster> applyToHeight(DataOp<ShortRaster> elevation, DataOp<EnumRaster<Landform>> landforms, int seaLevel) {
         return DataOp.join2(elevation, landforms).map((tup, view) -> {
             ShortRaster heightRaster = tup.a;
             EnumRaster<Landform> landformRaster = tup.b;
@@ -70,7 +70,6 @@ public final class WaterOps {
         });
     }
 
-    // TODO: Properly select cover type for filled in space!
     public static DataOp<EnumRaster<Cover>> applyToCover(DataOp<EnumRaster<Cover>> cover, DataOp<EnumRaster<Landform>> landforms) {
         return DataOp.join2(cover, landforms).map((tup, view) -> {
             EnumRaster<Cover> coverRaster = tup.a;
@@ -81,7 +80,7 @@ public final class WaterOps {
                 if (landform.isWater()) {
                     return Cover.WATER;
                 } else if (source == Cover.WATER) {
-                    return Cover.NONE;
+                    return Cover.NO;
                 }
                 return source;
             });

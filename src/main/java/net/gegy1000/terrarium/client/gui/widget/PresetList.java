@@ -21,7 +21,7 @@ import java.io.IOException;
 
 @SideOnly(Side.CLIENT)
 public class PresetList extends GuiListExtended {
-    private static final ResourceLocation FALLBACK_ICON = new ResourceLocation(Terrarium.MODID, "textures/preset/fallback.png");
+    private static final ResourceLocation FALLBACK_ICON = new ResourceLocation(Terrarium.ID, "textures/preset/fallback.png");
     private static final ResourceLocation ICON_OVERLAY = new ResourceLocation("textures/gui/world_selection.png");
 
     private final SelectPresetGui parent;

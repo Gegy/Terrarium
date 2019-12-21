@@ -12,7 +12,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class MarkerMapComponent implements MapComponent {
-    private static final ResourceLocation WIDGETS_TEXTURE = new ResourceLocation(Terrarium.MODID, "textures/gui/widgets.png");
+    private static final ResourceLocation WIDGETS_TEXTURE = new ResourceLocation(Terrarium.ID, "textures/gui/widgets.png");
 
     private SlippyMapPoint marker;
     private boolean canMove;

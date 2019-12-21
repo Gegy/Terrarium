@@ -1,7 +1,6 @@
 package net.gegy1000.earth.server.world.composer;
 
 import net.gegy1000.earth.server.world.cover.Cover;
-import net.gegy1000.earth.server.world.cover.CoverConfig;
 import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.gengen.api.writer.ChunkPopulationWriter;
 import net.gegy1000.gengen.util.SpatialRandom;
@@ -20,16 +19,17 @@ public class CoverDecorationComposer implements DecorationComposer {
 
     public CoverDecorationComposer(World world, DataKey<EnumRaster<Cover>> coverKey) {
         this.random = new SpatialRandom(world, DECORATION_SEED);
-        this.coverSampler = EnumRaster.sampler(coverKey, Cover.NONE);
+        this.coverSampler = EnumRaster.sampler(coverKey, Cover.NO);
     }
 
     @Override
     public void composeDecoration(ColumnDataCache dataCache, CubicPos pos, ChunkPopulationWriter writer) {
         this.random.setSeed(pos.getCenterX(), pos.getCenterY(), pos.getCenterZ());
 
-        Cover focus = this.coverSampler.sample(dataCache, pos.getMaxX(), pos.getMaxZ());
+        Cover cover = this.coverSampler.sample(dataCache, pos.getMaxX(), pos.getMaxZ());
 
-        CoverConfig config = focus.getConfig();
-        config.decorators().forEach(decorator -> decorator.decorate(writer, pos, this.random));
+        cover.getConfig().decorators().forEach(decorator -> {
+            decorator.decorate(dataCache, writer, pos, this.random);
+        });
     }
 }

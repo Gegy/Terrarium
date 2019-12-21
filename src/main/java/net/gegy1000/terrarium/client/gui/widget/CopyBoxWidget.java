@@ -15,7 +15,7 @@ import net.minecraftforge.fml.client.config.GuiUtils;
 import java.util.List;
 
 public class CopyBoxWidget extends Gui {
-    private static final ResourceLocation WIDGETS_TEXTURE = new ResourceLocation(Terrarium.MODID, "textures/gui/widgets.png");
+    private static final ResourceLocation WIDGETS_TEXTURE = new ResourceLocation(Terrarium.ID, "textures/gui/widgets.png");
     private static final Minecraft MC = Minecraft.getMinecraft();
     private static final int CLIPBOARD_PADDING = 2;
 

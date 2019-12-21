@@ -1,12 +1,13 @@
 package net.gegy1000.earth.server.world.biome;
 
 import net.gegy1000.earth.server.world.cover.Cover;
+import net.gegy1000.earth.server.world.cover.CoverMarkers;
 import net.gegy1000.earth.server.world.geography.Landform;
 import net.minecraft.init.Biomes;
 import net.minecraft.world.biome.Biome;
 
 public final class BiomeClassifier {
-    public static final float FREEZE_TEMPERATURE = 5.0F;
+    public static final float FREEZE_TEMPERATURE = 0.0F;
 
     public static Biome classify(Context context) {
         if (context.isLand()) {
@@ -21,11 +22,7 @@ public final class BiomeClassifier {
             return context.isForested() ? Biomes.COLD_TAIGA : Biomes.ICE_PLAINS;
         }
 
-        if (context.isFlooded()) {
-            return Biomes.SWAMPLAND;
-        }
-
-        if (context.isWet()) {
+        if (context.isWet() || context.isFlooded()) {
             return context.isForested() ? Biomes.JUNGLE : Biomes.JUNGLE_EDGE;
         }
 
@@ -45,10 +42,16 @@ public final class BiomeClassifier {
     }
 
     public static class Context {
+        public int elevation;
         public Landform landform;
-        public float averageTemperature;
-        public int monthlyRainfall;
+        public float minTemperature;
+        public float meanTemperature;
+        public int annualRainfall;
         public Cover cover;
+
+        public int getElevation() {
+            return this.elevation;
+        }
 
         public boolean isSea() {
             return this.landform == Landform.SEA;
@@ -63,33 +66,28 @@ public final class BiomeClassifier {
         }
 
         public boolean isFrozen() {
-            // TODO: Use mean min temperature rather?
-            return this.averageTemperature < FREEZE_TEMPERATURE || this.is(CoverMarker.FROZEN);
+            return this.minTemperature < FREEZE_TEMPERATURE || this.cover.is(CoverMarkers.FROZEN);
         }
 
         public boolean isForested() {
-            return this.is(CoverMarker.FORESTED);
+            return this.cover.is(CoverMarkers.FOREST);
         }
 
         public boolean isFlooded() {
-            return this.is(CoverMarker.FLOODED);
+            return this.cover.is(CoverMarkers.FLOODED);
         }
 
         public boolean isBarren() {
-            return this.is(CoverMarker.BARREN);
+            return this.cover.is(CoverMarkers.BARREN);
         }
 
         // TODO: These values?
         public boolean isWet() {
-            return this.monthlyRainfall > 200;
+            return this.annualRainfall > 2400;
         }
 
         public boolean isDry() {
-            return this.monthlyRainfall < 30;
-        }
-
-        public boolean is(CoverMarker marker) {
-            return this.cover.getConfig().markers().contains(marker);
+            return this.annualRainfall < 360;
         }
     }
 }

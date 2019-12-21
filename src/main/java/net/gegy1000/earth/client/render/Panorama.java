@@ -27,7 +27,7 @@ public class Panorama {
 
     public Panorama(String id, String suffix, int zoom) {
         this.id = id;
-        this.textureLocation = new ResourceLocation(TerrariumEarth.MODID, "panorama_" + id.hashCode() + "_" + suffix);
+        this.textureLocation = new ResourceLocation(TerrariumEarth.ID, "panorama_" + id.hashCode() + "_" + suffix);
 
         this.zoom = zoom;
         this.stitchedWidth = (1 << this.zoom) * BASE_PANORAMA_WIDTH;

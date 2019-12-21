@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-@Mod.EventBusSubscriber(modid = Terrarium.MODID)
+@Mod.EventBusSubscriber(modid = Terrarium.ID)
 public class TerrariumUserTracker {
     private static final Set<EntityPlayer> TERRARIUM_USERS = new HashSet<>();
     private static GenerationSettings providedSettings;

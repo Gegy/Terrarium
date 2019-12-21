@@ -5,6 +5,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.gegy1000.earth.server.util.ZoomLevels;
 import net.gegy1000.earth.server.util.Zoomable;
+import net.gegy1000.earth.server.world.data.source.ElevationSource;
+import net.gegy1000.earth.server.world.data.source.SoilSource;
 import net.gegy1000.terrarium.server.util.Vec2i;
 
 import javax.annotation.Nullable;
@@ -14,20 +16,50 @@ import java.util.Map;
 
 public final class EarthRemoteIndex2 {
     public final Zoomable<Endpoint> elevation;
+    public final Zoomable<Endpoint> cationExchangeCapacity;
+    public final Zoomable<Endpoint> organicCarbonContent;
+    public final Zoomable<Endpoint> ph;
+    public final Zoomable<Endpoint> clayContent;
+    public final Zoomable<Endpoint> siltContent;
+    public final Zoomable<Endpoint> sandContent;
 
-    private EarthRemoteIndex2(Zoomable<Endpoint> elevation) {
+    private EarthRemoteIndex2(
+            Zoomable<Endpoint> elevation,
+            Zoomable<Endpoint> cationExchangeCapacity,
+            Zoomable<Endpoint> organicCarbonContent,
+            Zoomable<Endpoint> ph,
+            Zoomable<Endpoint> clayContent,
+            Zoomable<Endpoint> siltContent,
+            Zoomable<Endpoint> sandContent
+    ) {
         this.elevation = elevation;
+        this.cationExchangeCapacity = cationExchangeCapacity;
+        this.organicCarbonContent = organicCarbonContent;
+        this.ph = ph;
+        this.clayContent = clayContent;
+        this.siltContent = siltContent;
+        this.sandContent = sandContent;
     }
 
     public static EarthRemoteIndex2 parse(JsonObject root) {
         JsonObject endpointsRoot = root.getAsJsonObject("endpoints");
 
-        Zoomable<Endpoint> elevation = Zoomable.create(ZoomLevels.range(0, 3), zoom -> {
-            JsonObject endpointRoot = endpointsRoot.getAsJsonObject("elevation/" + zoom);
+        return new EarthRemoteIndex2(
+                parseZoomableEndpoint(endpointsRoot, "elevation", ElevationSource.zoomLevels()),
+                parseZoomableEndpoint(endpointsRoot, "soil/cec", SoilSource.zoomLevels()),
+                parseZoomableEndpoint(endpointsRoot, "soil/occ", SoilSource.zoomLevels()),
+                parseZoomableEndpoint(endpointsRoot, "soil/ph", SoilSource.zoomLevels()),
+                parseZoomableEndpoint(endpointsRoot, "soil/clay", SoilSource.zoomLevels()),
+                parseZoomableEndpoint(endpointsRoot, "soil/silt", SoilSource.zoomLevels()),
+                parseZoomableEndpoint(endpointsRoot, "soil/sand", SoilSource.zoomLevels())
+        );
+    }
+
+    private static Zoomable<Endpoint> parseZoomableEndpoint(JsonObject endpointsRoot, String name, ZoomLevels zoomLevels) {
+        return Zoomable.create(zoomLevels, zoom -> {
+            JsonObject endpointRoot = endpointsRoot.getAsJsonObject(name + "/" + zoom);
             return parseEndpoint(endpointRoot);
         }).orElse(Endpoint.EMPTY);
-
-        return new EarthRemoteIndex2(elevation);
     }
 
     private static Endpoint parseEndpoint(JsonObject root) {

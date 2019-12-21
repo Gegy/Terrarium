@@ -11,7 +11,7 @@ public final class Lazy<T> {
     private final Supplier<T> supplier;
 
     private T value;
-    private boolean present;
+    private boolean initialized;
 
     private Lazy(Supplier<T> supplier) {
         this.supplier = supplier;
@@ -27,9 +27,9 @@ public final class Lazy<T> {
 
     @Nonnull
     public T get() {
-        if (!this.present) {
+        if (!this.initialized) {
             this.value = this.supplier.get();
-            this.present = true;
+            this.initialized = true;
         }
         return this.value;
     }

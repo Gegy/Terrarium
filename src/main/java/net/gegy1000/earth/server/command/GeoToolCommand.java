@@ -6,6 +6,7 @@ import net.gegy1000.earth.server.capability.EarthWorld;
 import net.gegy1000.earth.server.message.EarthMapGuiMessage;
 import net.gegy1000.earth.server.message.EarthPanoramaMessage;
 import net.gegy1000.earth.server.world.EarthDataKeys;
+import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.terrarium.server.TerrariumUserTracker;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
@@ -132,14 +133,19 @@ public class GeoToolCommand extends CommandBase {
             player.sendMessage(new TextComponentString(TextFormatting.BOLD + String.format("Debug Info at %.4f, %.4f", latitude, longitude)));
 
             // TODO: Extract all predictor values
-            columnData.get(EarthDataKeys.AVERAGE_TEMPERATURE).ifPresent(rainfallRaster -> {
+            columnData.get(EarthDataKeys.MEAN_TEMPERATURE).ifPresent(rainfallRaster -> {
                 float temperature = rainfallRaster.get(localX, localZ);
                 player.sendMessage(new TextComponentString(TextFormatting.AQUA + String.format("Mean Temperature: %s%.2f°C", TextFormatting.RESET, temperature)));
             });
 
-            columnData.get(EarthDataKeys.MONTHLY_RAINFALL).ifPresent(rainfallRaster -> {
+            columnData.get(EarthDataKeys.ANNUAL_RAINFALL).ifPresent(rainfallRaster -> {
                 short rainfall = rainfallRaster.get(localX, localZ);
-                player.sendMessage(new TextComponentString(TextFormatting.AQUA + String.format("Monthly Rainfall: %s%smm", TextFormatting.RESET, rainfall)));
+                player.sendMessage(new TextComponentString(TextFormatting.AQUA + String.format("Annual Rainfall: %s%smm", TextFormatting.RESET, rainfall)));
+            });
+
+            columnData.get(EarthDataKeys.COVER).ifPresent(coverRaster -> {
+                Cover cover = coverRaster.get(localX, localZ);
+                player.sendMessage(new TextComponentString(TextFormatting.AQUA + String.format("Cover Classification: %s%s", TextFormatting.RESET, cover)));
             });
         });
     }

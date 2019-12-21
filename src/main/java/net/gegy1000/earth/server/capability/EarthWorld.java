@@ -82,7 +82,7 @@ public interface EarthWorld extends ICapabilityProvider {
 
             ColumnDataCache dataCache = terrarium.getDataCache();
 
-            ShortRaster.Sampler sampler = ShortRaster.sampler(EarthDataKeys.HEIGHT);
+            ShortRaster.Sampler sampler = ShortRaster.sampler(EarthDataKeys.TERRAIN_HEIGHT);
 
             short height = sampler.sample(dataCache, blockX, blockZ);
             return new BlockPos(blockX, height + 1, blockZ);

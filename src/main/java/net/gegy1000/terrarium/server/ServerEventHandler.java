@@ -23,7 +23,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.Collection;
 
-@Mod.EventBusSubscriber(modid = Terrarium.MODID)
+@Mod.EventBusSubscriber(modid = Terrarium.ID)
 public class ServerEventHandler {
     private static final long DATA_TRACK_INTERVAL = 2000;
     private static long lastDataTrackTime;

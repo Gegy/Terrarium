@@ -2,13 +2,14 @@ package net.gegy1000.earth.server.world.data.source;
 
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.shared.SharedEarthData;
+import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.data.index.EarthRemoteIndex;
 import net.gegy1000.earth.server.world.data.source.cache.AbstractRegionKey;
 import net.gegy1000.earth.server.world.data.source.cache.CachingInput;
 import net.gegy1000.earth.server.world.data.source.cache.FileTileCache;
 import net.gegy1000.terrarium.server.util.Vec2i;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
-import net.gegy1000.terrarium.server.world.data.raster.UByteRaster;
+import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.data.source.TiledDataSource;
 import org.apache.commons.io.IOUtils;
 import org.tukaani.xz.SingleXZInputStream;
@@ -21,7 +22,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.Optional;
 
-public class LandCoverSource extends TiledDataSource<UByteRaster> {
+public class LandCoverSource extends TiledDataSource<EnumRaster<Cover>> {
     public static final int TILE_SIZE = 1800;
     public static final int GLOBAL_WIDTH = 129600;
     public static final int GLOBAL_HEIGHT = 64800;
@@ -42,7 +43,7 @@ public class LandCoverSource extends TiledDataSource<UByteRaster> {
     }
 
     @Override
-    public Optional<UByteRaster> load(Vec2i pos) throws IOException {
+    public Optional<EnumRaster<Cover>> load(Vec2i pos) throws IOException {
         SharedEarthData sharedData = SharedEarthData.instance();
         EarthRemoteIndex remoteIndex = sharedData.get(SharedEarthData.REMOTE_INDEX);
         if (remoteIndex == null) {
@@ -65,14 +66,14 @@ public class LandCoverSource extends TiledDataSource<UByteRaster> {
         }
     }
 
-    private UByteRaster parseStream(InputStream input) throws IOException {
+    private EnumRaster<Cover> parseStream(InputStream input) throws IOException {
         byte[] bytes = IOUtils.readFully(input, TILE_SIZE * TILE_SIZE);
 
-        UByteRaster raster = UByteRaster.create(TILE_SIZE, TILE_SIZE);
+        EnumRaster<Cover> raster = EnumRaster.createSquare(Cover.NO, TILE_SIZE);
         for (int y = 0; y < TILE_SIZE; y++) {
             for (int x = 0; x < TILE_SIZE; x++) {
-                byte id = bytes[x + y * TILE_SIZE];
-                raster.set(x, y, id);
+                int id = bytes[x + y * TILE_SIZE] & 0xFF;
+                raster.set(x, y, Cover.byId(id));
             }
         }
 

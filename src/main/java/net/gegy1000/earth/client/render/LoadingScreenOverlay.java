@@ -22,14 +22,13 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
 @SideOnly(Side.CLIENT)
-@Mod.EventBusSubscriber(modid = Terrarium.MODID, value = Side.CLIENT)
+@Mod.EventBusSubscriber(modid = Terrarium.ID, value = Side.CLIENT)
 public class LoadingScreenOverlay {
     private static final Minecraft MC = Minecraft.getMinecraft();
 
     private static final String[] ATTRIBUTION = new String[] {
             TextFormatting.GRAY + "NASA SRTM,",
             TextFormatting.GRAY + "ESA LandCover,",
-            TextFormatting.GRAY + "Google APIs,",
             TextFormatting.GRAY + "WorldClim,",
             TextFormatting.GRAY + "ISRIC World Soil Info,",
             TextFormatting.GRAY + "\u00a9 OpenStreetMap Contributors"

@@ -181,7 +181,7 @@ public class WorldPreview implements IBlockAccess {
         ColumnDataCache dataCache = this.terrarium.getDataCache();
 
         DataView view = DataView.square(originX, originZ, size);
-        return ShortRaster.sampler(EarthDataKeys.HEIGHT).sample(dataCache, view);
+        return ShortRaster.sampler(EarthDataKeys.TERRAIN_HEIGHT).sample(dataCache, view);
     }
 
     private short computeAverageHeight(ShortRaster heightTile) {

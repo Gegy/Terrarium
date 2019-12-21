@@ -37,7 +37,7 @@ public class EarthChunkGenerator extends ComposableChunkGenerator {
             try (ColumnDataEntry.Handle handle = dataCache.acquireEntry(columnPos)) {
                 ColumnData data = handle.join();
 
-                Optional<ShortRaster> heightOption = data.get(EarthDataKeys.HEIGHT);
+                Optional<ShortRaster> heightOption = data.get(EarthDataKeys.TERRAIN_HEIGHT);
                 if (heightOption.isPresent()) {
                     ShortRaster heightRaster = heightOption.get();
                     return Heightmap.create(heightRaster::get);

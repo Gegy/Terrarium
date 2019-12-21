@@ -6,7 +6,7 @@
     "spawn_latitude": 27.988350,
     "spawn_longitude": 86.923641,
     "enable_decoration": true,
-    "world_scale": 65.0,
+    "world_scale": 70.0,
     "terrestrial_height_scale": 1.5,
     "oceanic_height_scale": 1.5,
     "height_offset": 62,
@@ -15,7 +15,6 @@
     "enable_streets": false,
     "cave_generation": true,
     "ravine_generation": true,
-    "ore_generation": true,
-    "season": "january"
+    "ore_generation": true
   }
 }

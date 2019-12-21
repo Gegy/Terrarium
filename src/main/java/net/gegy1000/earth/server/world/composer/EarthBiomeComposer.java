@@ -1,12 +1,12 @@
 package net.gegy1000.earth.server.world.composer;
 
+import net.gegy1000.earth.server.world.EarthDataKeys;
 import net.gegy1000.earth.server.world.biome.BiomeClassifier;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.geography.Landform;
 import net.gegy1000.terrarium.server.util.ArrayUtils;
 import net.gegy1000.terrarium.server.world.composer.biome.BiomeComposer;
 import net.gegy1000.terrarium.server.world.data.ColumnData;
-import net.gegy1000.terrarium.server.world.data.DataKey;
 import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.data.raster.FloatRaster;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
@@ -17,51 +17,43 @@ import net.minecraft.world.biome.Biome;
 import java.util.Optional;
 
 public final class EarthBiomeComposer implements BiomeComposer {
-    private final DataKey<EnumRaster<Cover>> coverKey;
-    private final DataKey<EnumRaster<Landform>> landformKey;
-    private final DataKey<FloatRaster> temperatureKey;
-    private final DataKey<ShortRaster> rainfallKey;
-
     private final Biome[] biomeBuffer = new Biome[16 * 16];
 
     private final BiomeClassifier.Context context = new BiomeClassifier.Context();
 
-    public EarthBiomeComposer(
-            DataKey<EnumRaster<Cover>> coverKey,
-            DataKey<EnumRaster<Landform>> landformKey,
-            DataKey<FloatRaster> temperatureKey,
-            DataKey<ShortRaster> rainfallKey
-    ) {
-        this.coverKey = coverKey;
-        this.landformKey = landformKey;
-        this.temperatureKey = temperatureKey;
-        this.rainfallKey = rainfallKey;
-    }
-
     @Override
     public Biome[] composeBiomes(ColumnData data, ChunkPos columnPos) {
-        Optional<EnumRaster<Cover>> coverOption = data.get(this.coverKey);
-        Optional<EnumRaster<Landform>> landformOption = data.get(this.landformKey);
-        Optional<FloatRaster> temperatureOption = data.get(this.temperatureKey);
-        Optional<ShortRaster> rainfallOption = data.get(this.rainfallKey);
+        Optional<ShortRaster> elevationOption = data.get(EarthDataKeys.ELEVATION_METERS);
+        Optional<EnumRaster<Cover>> coverOption = data.get(EarthDataKeys.COVER);
+        Optional<EnumRaster<Landform>> landformOption = data.get(EarthDataKeys.LANDFORM);
+        Optional<FloatRaster> minTemperatureOption = data.get(EarthDataKeys.MIN_TEMPERATURE);
+        Optional<FloatRaster> meanTemperatureOption = data.get(EarthDataKeys.MEAN_TEMPERATURE);
+        Optional<ShortRaster> rainfallOption = data.get(EarthDataKeys.ANNUAL_RAINFALL);
 
-        if (!coverOption.isPresent() || !temperatureOption.isPresent() || !rainfallOption.isPresent() || !landformOption.isPresent()) {
+        if (!elevationOption.isPresent() || !coverOption.isPresent()
+                || !minTemperatureOption.isPresent() || !meanTemperatureOption.isPresent()
+                || !rainfallOption.isPresent() || !landformOption.isPresent()
+        ) {
             return ArrayUtils.fill(this.biomeBuffer, Biomes.DEFAULT);
         }
 
+        ShortRaster elevationRaster = elevationOption.get();
         EnumRaster<Cover> coverRaster = coverOption.get();
         EnumRaster<Landform> landformRaster = landformOption.get();
-        FloatRaster temperatureRaster = temperatureOption.get();
+        FloatRaster minTemperatureRaster = minTemperatureOption.get();
+        FloatRaster meanTemperatureRaster = meanTemperatureOption.get();
         ShortRaster rainfallRaster = rainfallOption.get();
 
-        for (int localZ = 0; localZ < 16; localZ++) {
-            for (int localX = 0; localX < 16; localX++) {
-                this.context.monthlyRainfall = rainfallRaster.get(localX, localZ);
-                this.context.averageTemperature = temperatureRaster.get(localX, localZ);
-                this.context.cover = coverRaster.get(localX, localZ);
-                this.context.landform = landformRaster.get(localX, localZ);
+        for (int z = 0; z < 16; z++) {
+            for (int x = 0; x < 16; x++) {
+                this.context.elevation = elevationRaster.get(x, z);
+                this.context.annualRainfall = rainfallRaster.get(x, z);
+                this.context.minTemperature = minTemperatureRaster.get(x, z);
+                this.context.meanTemperature = meanTemperatureRaster.get(x, z);
+                this.context.cover = coverRaster.get(x, z);
+                this.context.landform = landformRaster.get(x, z);
 
-                this.biomeBuffer[localX + localZ * 16] = BiomeClassifier.classify(this.context);
+                this.biomeBuffer[x + z * 16] = BiomeClassifier.classify(this.context);
             }
         }
 

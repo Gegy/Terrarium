@@ -13,7 +13,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Mod.EventBusSubscriber(modid = TerrariumEarth.MODID)
+@Mod.EventBusSubscriber(modid = TerrariumEarth.ID)
 public class ErrorBroadcastHandler {
     private static final long FAIL_NOTIFICATION_INTERVAL = 8000;
     private static final int FAIL_NOTIFICATION_THRESHOLD = 5;

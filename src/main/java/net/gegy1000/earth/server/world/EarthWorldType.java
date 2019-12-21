@@ -20,10 +20,8 @@ import net.gegy1000.terrarium.server.world.generator.customization.GenerationSet
 import net.gegy1000.terrarium.server.world.generator.customization.PropertyPrototype;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumCustomization;
 import net.gegy1000.terrarium.server.world.generator.customization.property.BooleanKey;
-import net.gegy1000.terrarium.server.world.generator.customization.property.EnumKey;
 import net.gegy1000.terrarium.server.world.generator.customization.property.NumberKey;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
-import net.gegy1000.terrarium.server.world.generator.customization.widget.CycleWidget;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.SliderScale;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.SliderWidget;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.ToggleWidget;
@@ -48,8 +46,8 @@ public class EarthWorldType extends TerrariumWorldType {
 
     public static final int HIGHEST_POINT_METERS = 8900;
 
-    private static final ResourceLocation IDENTIFIER = new ResourceLocation(TerrariumEarth.MODID, "earth");
-    private static final ResourceLocation PRESET = new ResourceLocation(TerrariumEarth.MODID, "global_default");
+    private static final ResourceLocation IDENTIFIER = new ResourceLocation(TerrariumEarth.ID, "earth");
+    private static final ResourceLocation PRESET = new ResourceLocation(TerrariumEarth.ID, "global_default");
 
     public static final PropertyKey<Number> SPAWN_LATITUDE = new NumberKey("spawn_latitude");
     public static final PropertyKey<Number> SPAWN_LONGITUDE = new NumberKey("spawn_longitude");
@@ -65,7 +63,6 @@ public class EarthWorldType extends TerrariumWorldType {
     public static final PropertyKey<Boolean> CAVE_GENERATION = new BooleanKey("cave_generation");
     public static final PropertyKey<Boolean> RAVINE_GENERATION = new BooleanKey("ravine_generation");
     public static final PropertyKey<Boolean> ORE_GENERATION = new BooleanKey("ore_generation");
-    public static final PropertyKey<Season> SEASON = new EnumKey<>("season", Season.class);
 
     public EarthWorldType() {
         super("earth", IDENTIFIER, PRESET);
@@ -102,7 +99,6 @@ public class EarthWorldType extends TerrariumWorldType {
                 .withProperties(BEACH_SIZE)
                 .withProperties(ENABLE_DECORATION, ENABLE_BUILDINGS, ENABLE_STREETS)
                 .withProperties(CAVE_GENERATION, RAVINE_GENERATION, ORE_GENERATION)
-                .withProperties(SEASON)
                 .build();
     }
 
@@ -126,9 +122,6 @@ public class EarthWorldType extends TerrariumWorldType {
                         new SliderWidget(BEACH_SIZE)
                                 .range(0, 8)
                                 .display(value -> String.format("%.0f blocks", value))
-                )
-                .withCategory("natural",
-                        new CycleWidget<>(SEASON)
                 )
                 .withCategory("features",
                         new ToggleWidget(ENABLE_DECORATION),

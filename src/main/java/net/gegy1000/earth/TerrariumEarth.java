@@ -3,8 +3,8 @@ package net.gegy1000.earth;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import net.gegy1000.earth.server.ServerProxy;
-import net.gegy1000.earth.server.capability.HeightmapStore;
 import net.gegy1000.earth.server.capability.EarthWorld;
+import net.gegy1000.earth.server.capability.HeightmapStore;
 import net.gegy1000.earth.server.command.GeoTeleportCommand;
 import net.gegy1000.earth.server.command.GeoToolCommand;
 import net.gegy1000.earth.server.config.TerrariumEarthConfig;
@@ -15,6 +15,8 @@ import net.gegy1000.earth.server.shared.RemoteIndex2Initializer;
 import net.gegy1000.earth.server.shared.RemoteIndexInitializer;
 import net.gegy1000.earth.server.shared.SharedDataInitializers;
 import net.gegy1000.earth.server.world.EarthWorldType;
+import net.gegy1000.earth.server.world.cover.CoverConfigurator;
+import net.gegy1000.earth.server.world.cover.CoverMarkers;
 import net.gegy1000.earth.server.world.data.EarthRemoteData;
 import net.gegy1000.earth.server.world.data.GoogleGeocoder;
 import net.gegy1000.earth.server.world.data.NominatimGeocoder;
@@ -47,9 +49,9 @@ import java.io.IOException;
 import java.util.Map;
 
 @Mod.EventBusSubscriber
-@Mod(modid = TerrariumEarth.MODID, name = "Terrarium: Earth", version = TerrariumEarth.VERSION, acceptedMinecraftVersions = "[1.12]", dependencies = "required-after:terrarium@[0.1.0,]")
+@Mod(modid = TerrariumEarth.ID, name = "Terrarium: Earth", version = TerrariumEarth.VERSION, acceptedMinecraftVersions = "[1.12]", dependencies = "required-after:terrarium@[0.1.0,]")
 public class TerrariumEarth {
-    public static final String MODID = "earth";
+    public static final String ID = "earth";
     public static final String VERSION = "1.1.0";
 
     public static final String USER_AGENT = "terrarium-earth";
@@ -57,14 +59,14 @@ public class TerrariumEarth {
     public static final String CLIENT_PROXY = "net.gegy1000.earth.client.ClientProxy";
     public static final String SERVER_PROXY = "net.gegy1000.earth.server.ServerProxy";
 
-    public static final Logger LOGGER = LogManager.getLogger(MODID);
+    public static final Logger LOGGER = LogManager.getLogger(ID);
 
     @SidedProxy(clientSide = CLIENT_PROXY, serverSide = SERVER_PROXY)
     public static ServerProxy PROXY;
 
     public static final WorldType EARTH_TYPE = new EarthWorldType().create();
 
-    public static final SimpleNetworkWrapper NETWORK = NetworkRegistry.INSTANCE.newSimpleChannel(TerrariumEarth.MODID);
+    public static final SimpleNetworkWrapper NETWORK = NetworkRegistry.INSTANCE.newSimpleChannel(TerrariumEarth.ID);
 
     @CapabilityInject(EarthWorld.class)
     private static Capability<EarthWorld> worldCap;
@@ -109,6 +111,9 @@ public class TerrariumEarth {
     @Mod.EventHandler
     public static void onInit(FMLInitializationEvent event) {
         PROXY.onInit();
+
+        CoverMarkers.register();
+        CoverConfigurator.configure();
     }
 
     @Mod.EventHandler
@@ -118,7 +123,7 @@ public class TerrariumEarth {
 
     @NetworkCheckHandler
     public static boolean onCheckNetwork(Map<String, String> mods, Side side) {
-        return !mods.containsKey(TerrariumEarth.MODID) || mods.get(TerrariumEarth.MODID).equals(VERSION);
+        return !mods.containsKey(TerrariumEarth.ID) || mods.get(TerrariumEarth.ID).equals(VERSION);
     }
 
     @Mod.EventHandler
@@ -129,7 +134,7 @@ public class TerrariumEarth {
 
     @SubscribeEvent
     public static void onAttachChunkCapabilities(AttachCapabilitiesEvent<Chunk> event) {
-        event.addCapability(new ResourceLocation(MODID, "heightmap"), new HeightmapStore());
+        event.addCapability(new ResourceLocation(ID, "heightmap"), new HeightmapStore());
     }
 
     public static Geocoder getPreferredGeocoder() {

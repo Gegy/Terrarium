@@ -14,7 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-@Mod.EventBusSubscriber(modid = Terrarium.MODID)
+@Mod.EventBusSubscriber(modid = Terrarium.ID)
 public class TerrariumPresetRegistry {
     private static final Map<ResourceLocation, TerrariumPreset> PRESETS = new LinkedHashMap<>();
 

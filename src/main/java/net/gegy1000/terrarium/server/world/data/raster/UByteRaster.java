@@ -33,6 +33,12 @@ public final class UByteRaster extends AbstractRaster<byte[]> implements Integer
         return new Sampler(key);
     }
 
+    public static UByteRaster copyFrom(IntegerRaster<?> from) {
+        UByteRaster raster = UByteRaster.create(from.getWidth(), from.getHeight());
+        from.copyInto(raster);
+        return raster;
+    }
+
     public void fill(int value) {
         Arrays.fill(this.data, (byte) (value & 0xFF));
     }

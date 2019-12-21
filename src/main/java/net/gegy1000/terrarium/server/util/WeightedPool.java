@@ -1,33 +1,68 @@
 package net.gegy1000.terrarium.server.util;
 
+import com.google.common.base.Preconditions;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 
 public final class WeightedPool<T> implements Iterable<WeightedPool.Entry<T>> {
-    private final Collection<Entry<T>> entries;
-    private final float totalWeight;
+    private final List<Entry<T>> entries;
+    private float totalWeight;
 
-    private WeightedPool(Collection<Entry<T>> entries, float totalWeight) {
+    private WeightedPool(List<Entry<T>> entries) {
         this.entries = entries;
-        this.totalWeight = totalWeight;
+        for (Entry<T> entry : entries) {
+            this.totalWeight += entry.weight;
+        }
     }
 
-    public T sample(Random random) {
-        if (this.entries.isEmpty()) throw new IllegalStateException("Cannot sample empty pool");
+    public WeightedPool() {
+        this.entries = new ArrayList<>();
+    }
 
-        float position = random.nextFloat() * this.totalWeight;
+    public WeightedPool<T> add(T value, float weight) {
+        if (weight <= 0) throw new IllegalArgumentException("weight must be positive");
+        this.entries.add(new Entry<>(value, weight));
+        this.totalWeight += weight;
+        return this;
+    }
+
+    public WeightedPool<T> addAll(Iterable<WeightedPool.Entry<T>> entries) {
+        for (WeightedPool.Entry<T> entry : entries) {
+            this.entries.add(entry);
+            this.totalWeight += entry.weight;
+        }
+        return this;
+    }
+
+    @Nullable
+    public T sampleOrNull(Random random) {
+        float sample = random.nextFloat() * this.totalWeight;
 
         float w = 0;
         for (Entry<T> entry : this.entries) {
             w += entry.weight;
-            if (w > position) {
-                return entry.value;
-            }
+            if (w > sample) return entry.value;
         }
 
-        throw new IllegalStateException("Unable to sample from pool " + this + " at " + position);
+        return null;
+    }
+
+    @Nonnull
+    public T sampleOrExcept(Random random) {
+        return Preconditions.checkNotNull(this.sampleOrNull(random), "empty pool");
+    }
+
+    public Entry<T> get(int index) {
+        return this.entries.get(index);
+    }
+
+    public int size() {
+        return this.entries.size();
     }
 
     public boolean isEmpty() {
@@ -39,41 +74,16 @@ public final class WeightedPool<T> implements Iterable<WeightedPool.Entry<T>> {
         return String.format("WeightedPool{entries=%d, totalWeight=%s}", this.entries.size(), this.totalWeight);
     }
 
-    public static <T> Builder<T> builder() {
-        return new Builder<>();
-    }
-
     @Override
     public Iterator<Entry<T>> iterator() {
         return this.entries.iterator();
-    }
-
-    public static class Builder<T> {
-        private final Collection<Entry<T>> entries = new ArrayList<>();
-        private float totalWeight;
-
-        private Builder() {
-        }
-
-        public Builder<T> add(T value, float weight) {
-            if (weight <= 0) {
-                throw new IllegalArgumentException("Weight must be >0");
-            }
-            this.entries.add(new Entry<>(value, weight));
-            this.totalWeight += weight;
-            return this;
-        }
-
-        public WeightedPool<T> build() {
-            return new WeightedPool<>(this.entries, this.totalWeight);
-        }
     }
 
     public static class Entry<T> {
         private final T value;
         private final float weight;
 
-        private Entry(T value, float weight) {
+        Entry(T value, float weight) {
             this.value = value;
             this.weight = weight;
         }

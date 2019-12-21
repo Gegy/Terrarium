@@ -31,7 +31,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 @SideOnly(Side.CLIENT)
-@Mod.EventBusSubscriber(modid = TerrariumEarth.MODID, value = Side.CLIENT)
+@Mod.EventBusSubscriber(modid = TerrariumEarth.ID, value = Side.CLIENT)
 public class SharedInitializingGui extends GuiScreen {
     private static final int RETRY_BUTTON = 0;
     private static final int CANCEL_BUTTON = 1;

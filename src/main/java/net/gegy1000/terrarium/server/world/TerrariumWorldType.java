@@ -37,7 +37,7 @@ public abstract class TerrariumWorldType implements GenericWorldType {
     private final TerrariumCustomization customization;
 
     public TerrariumWorldType(String name, ResourceLocation identifier, ResourceLocation presetIdentifier) {
-        this.name = Terrarium.MODID + "." + name;
+        this.name = Terrarium.ID + "." + name;
         this.identifier = identifier;
         this.presetIdentifier = presetIdentifier;
         this.customization = this.buildCustomization();

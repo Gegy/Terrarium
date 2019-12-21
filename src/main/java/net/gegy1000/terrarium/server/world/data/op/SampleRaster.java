@@ -30,12 +30,12 @@ public final class SampleRaster {
         return sample(source, UByteRaster::create);
     }
 
-    public static <T> DataOp<ObjRaster<T>> sampleObj(TiledDataSource<ObjRaster<T>> source, T value) {
-        return sample(source, view -> ObjRaster.create(value, view));
+    public static <T> DataOp<ObjRaster<T>> sampleObj(TiledDataSource<ObjRaster<T>> source, T defaultValue) {
+        return sample(source, view -> ObjRaster.create(defaultValue, view));
     }
 
-    public static <T extends Enum<T>> DataOp<EnumRaster<T>> sampleEnum(TiledDataSource<EnumRaster<T>> source, T value) {
-        return sample(source, view -> EnumRaster.create(value, view));
+    public static <T extends Enum<T>> DataOp<EnumRaster<T>> sampleEnum(TiledDataSource<EnumRaster<T>> source, T defaultValue) {
+        return sample(source, view -> EnumRaster.create(defaultValue, view));
     }
 
     public static <T extends Raster<?>> DataOp<T> sample(TiledDataSource<T> source, Function<DataView, T> function) {
