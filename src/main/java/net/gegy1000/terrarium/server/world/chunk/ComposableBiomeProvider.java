@@ -3,9 +3,7 @@ package net.gegy1000.terrarium.server.world.chunk;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.util.Lazy;
-import net.gegy1000.terrarium.server.world.composer.biome.BiomeComposer;
 import net.gegy1000.terrarium.server.world.data.ColumnData;
-import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.ColumnDataEntry;
 import net.minecraft.init.Biomes;
 import net.minecraft.util.math.BlockPos;
@@ -19,28 +17,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 public class ComposableBiomeProvider extends BiomeProvider {
-    private final World world;
-
-    private final Lazy<ColumnDataCache> dataCache;
-    private final Lazy<BiomeComposer> biomeComposer;
+    private final Lazy<Optional<TerrariumWorld>> terrarium;
 
     private final BiomeCache biomeCache = new BiomeCache(this);
 
     public ComposableBiomeProvider(World world) {
-        this.world = world;
-
-        this.dataCache = Lazy.of(() -> {
-            TerrariumWorld capability = this.world.getCapability(TerrariumCapabilities.world(), null);
-            if (capability != null) {
-                return capability.getDataCache();
-            }
-            throw new IllegalStateException("Tried to load ColumnDataCache before it was present");
-        });
-
-        this.biomeComposer = Lazy.worldCap(world, TerrariumWorld::getBiomeComposer);
+        this.terrarium = Lazy.ofCapability(world, TerrariumCapabilities.world());
     }
 
     @Override
@@ -107,15 +93,19 @@ public class ComposableBiomeProvider extends BiomeProvider {
     }
 
     private void populateArea(Biome[] resultBiomes, int x, int z, int width, int height) {
-        ColumnDataCache dataCache = this.dataCache.get();
+        Optional<TerrariumWorld> terrariumOption = this.terrarium.get();
+        if (!terrariumOption.isPresent() ) {
+            Arrays.fill(resultBiomes, Biomes.PLAINS);
+            return;
+        }
 
-        BiomeComposer biomeComposer = this.biomeComposer.get();
+        TerrariumWorld terrarium = terrariumOption.get();
 
         if (this.isChunk(x, z, width, height)) {
             ChunkPos columnPos = new ChunkPos(x >> 4, z >> 4);
-            try (ColumnDataEntry.Handle handle = dataCache.acquireEntry(columnPos)) {
+            try (ColumnDataEntry.Handle handle = terrarium.getDataCache().acquireEntry(columnPos)) {
                 ColumnData data = handle.join();
-                Biome[] biomeBuffer = biomeComposer.composeBiomes(data, columnPos);
+                Biome[] biomeBuffer = terrarium.getBiomeComposer().composeBiomes(data, columnPos);
                 System.arraycopy(biomeBuffer, 0, resultBiomes, 0, biomeBuffer.length);
             }
             return;
@@ -129,7 +119,7 @@ public class ComposableBiomeProvider extends BiomeProvider {
         Collection<ColumnDataEntry.Handle> columnHandles = new ArrayList<>();
         for (int chunkZ = chunkMinZ; chunkZ <= chunkMaxZ; chunkZ++) {
             for (int chunkX = chunkMinX; chunkX <= chunkMaxX; chunkX++) {
-                columnHandles.add(dataCache.acquireEntry(new ChunkPos(chunkX, chunkZ)));
+                columnHandles.add(terrarium.getDataCache().acquireEntry(new ChunkPos(chunkX, chunkZ)));
             }
         }
 
@@ -137,7 +127,7 @@ public class ComposableBiomeProvider extends BiomeProvider {
             for (ColumnDataEntry.Handle handle : columnHandles) {
                 ColumnData data = handle.join();
                 ChunkPos columnPos = handle.getColumnPos();
-                Biome[] biomeBuffer = biomeComposer.composeBiomes(data, columnPos);
+                Biome[] biomeBuffer = terrarium.getBiomeComposer().composeBiomes(data, columnPos);
 
                 int minColumnX = columnPos.getXStart();
                 int minColumnZ = columnPos.getZStart();

@@ -1,11 +1,10 @@
 package net.gegy1000.terrarium.server.util;
 
-import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
-import net.gegy1000.terrarium.server.capability.TerrariumWorld;
-import net.minecraft.world.World;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
 
 import javax.annotation.Nonnull;
-import java.util.function.Function;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 public final class Lazy<T> {
@@ -22,14 +21,8 @@ public final class Lazy<T> {
         return new Lazy<>(supplier);
     }
 
-    public static <T> Lazy<T> worldCap(World world, Function<TerrariumWorld, T> function) {
-        return new Lazy<>(() -> {
-            TerrariumWorld capability = world.getCapability(TerrariumCapabilities.world(), null);
-            if (capability != null) {
-                return function.apply(capability);
-            }
-            throw new IllegalStateException("Tried to get world capability before it was present");
-        });
+    public static <O extends ICapabilityProvider, T> Lazy<Optional<T>> ofCapability(O object, Capability<T> capability) {
+        return Lazy.of(() -> Optional.ofNullable(object.getCapability(capability, null)));
     }
 
     @Nonnull

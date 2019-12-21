@@ -31,18 +31,20 @@ public class EarthChunkGenerator extends ComposableChunkGenerator {
     }
 
     private Heightmap genereateHeightmap(ChunkPos columnPos) {
-        ColumnDataCache dataCache = this.dataCache.get();
+        return this.terrarium.get().map(terrarium -> {
+            ColumnDataCache dataCache = terrarium.getDataCache();
 
-        try (ColumnDataEntry.Handle handle = dataCache.acquireEntry(columnPos)) {
-            ColumnData data = handle.join();
+            try (ColumnDataEntry.Handle handle = dataCache.acquireEntry(columnPos)) {
+                ColumnData data = handle.join();
 
-            Optional<ShortRaster> heightOption = data.get(EarthDataKeys.HEIGHT);
-            if (heightOption.isPresent()) {
-                ShortRaster heightRaster = heightOption.get();
-                return Heightmap.create(heightRaster::get);
+                Optional<ShortRaster> heightOption = data.get(EarthDataKeys.HEIGHT);
+                if (heightOption.isPresent()) {
+                    ShortRaster heightRaster = heightOption.get();
+                    return Heightmap.create(heightRaster::get);
+                }
             }
-        }
 
-        return null;
+            return null;
+        }).orElse(null);
     }
 }

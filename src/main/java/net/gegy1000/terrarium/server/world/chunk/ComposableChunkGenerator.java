@@ -5,11 +5,10 @@ import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.gengen.api.generator.GenericChunkGenerator;
 import net.gegy1000.gengen.api.writer.ChunkPopulationWriter;
 import net.gegy1000.gengen.api.writer.ChunkPrimeWriter;
+import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.util.Lazy;
-import net.gegy1000.terrarium.server.world.composer.decoration.DecorationComposer;
 import net.gegy1000.terrarium.server.world.composer.structure.StructureComposer;
-import net.gegy1000.terrarium.server.world.composer.surface.SurfaceComposer;
 import net.gegy1000.terrarium.server.world.data.ColumnData;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.ColumnDataEntry;
@@ -22,55 +21,49 @@ import net.minecraft.world.biome.Biome;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
+import java.util.Optional;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class ComposableChunkGenerator implements GenericChunkGenerator {
     protected final World world;
 
-    protected final Lazy<SurfaceComposer> surfaceComposer;
-    protected final Lazy<DecorationComposer> decorationComposer;
-    protected final Lazy<StructureComposer> structureComposer;
-
-    protected final Lazy<ColumnDataCache> dataCache;
+    protected final Lazy<Optional<TerrariumWorld>> terrarium;
 
     protected final ColumnDataEntry.Handle[] populationHandles = new ColumnDataEntry.Handle[4];
 
     public ComposableChunkGenerator(World world) {
         this.world = world;
-
-        this.surfaceComposer = Lazy.worldCap(world, TerrariumWorld::getSurfaceComposer);
-        this.decorationComposer = Lazy.worldCap(world, TerrariumWorld::getDecorationComposer);
-        this.structureComposer = Lazy.worldCap(world, TerrariumWorld::getStructureComposer);
-
-        this.dataCache = Lazy.worldCap(world, TerrariumWorld::getDataCache);
+        this.terrarium = Lazy.ofCapability(world, TerrariumCapabilities.world());
     }
 
     @Override
     public void primeChunk(CubicPos pos, ChunkPrimeWriter writer) {
-        ColumnDataCache dataCache = this.dataCache.get();
+        this.terrarium.get().ifPresent(terrarium -> {
+            ChunkPos columnPos = new ChunkPos(pos.getX(), pos.getZ());
 
-        ChunkPos columnPos = new ChunkPos(pos.getX(), pos.getZ());
-        try (ColumnDataEntry.Handle handle = dataCache.acquireEntry(columnPos)) {
-            ColumnData data = handle.join();
-            this.surfaceComposer.get().composeSurface(data, pos, writer);
-        }
+            try (ColumnDataEntry.Handle handle = terrarium.getDataCache().acquireEntry(columnPos)) {
+                ColumnData data = handle.join();
+                terrarium.getSurfaceComposer().composeSurface(data, pos, writer);
+            }
 
-        this.structureComposer.get().primeStructures(pos, writer);
+            terrarium.getStructureComposer().primeStructures(pos, writer);
+        });
     }
 
     @Override
     public void populateChunk(CubicPos pos, ChunkPopulationWriter writer) {
-        ColumnDataCache dataCache = this.dataCache.get();
+        this.terrarium.get().ifPresent(terrarium -> {
+            ColumnDataCache dataCache = terrarium.getDataCache();
+            ColumnDataEntry.Handle[] handles = this.acquirePopulationHandles(pos, dataCache);
 
-        ColumnDataEntry.Handle[] handles = this.acquirePopulationHandles(pos, dataCache);
+            terrarium.getDecorationComposer().composeDecoration(dataCache, pos, writer);
+            terrarium.getStructureComposer().populateStructures(pos, writer);
 
-        this.decorationComposer.get().composeDecoration(dataCache, pos, writer);
-        this.structureComposer.get().populateStructures(pos, writer);
-
-        for (ColumnDataEntry.Handle handle : handles) {
-            handle.release();
-        }
+            for (ColumnDataEntry.Handle handle : handles) {
+                handle.release();
+            }
+        });
     }
 
     private ColumnDataEntry.Handle[] acquirePopulationHandles(CubicPos pos, ColumnDataCache dataCache) {
@@ -88,17 +81,27 @@ public class ComposableChunkGenerator implements GenericChunkGenerator {
 
     @Override
     public void prepareStructures(CubicPos pos) {
-        this.structureComposer.get().prepareStructures(pos);
+        this.terrarium.get().ifPresent(terrarium -> {
+            terrarium.getStructureComposer().prepareStructures(pos);
+        });
     }
 
     @Nullable
     @Override
     public BlockPos getClosestStructure(String name, BlockPos pos, boolean findUnexplored) {
-        return this.structureComposer.get().getClosestStructure(this.world, name, pos, findUnexplored);
+        return this.terrarium.get().map(terrarium -> {
+            StructureComposer composer = terrarium.getStructureComposer();
+            return composer.getClosestStructure(this.world, name, pos, findUnexplored);
+        }).orElse(null);
     }
 
     @Override
     public boolean isInsideStructure(String name, BlockPos pos) {
-        return this.structureComposer.get().isInsideStructure(this.world, name, pos);
+        Optional<TerrariumWorld> terrariumOption = this.terrarium.get();
+        if (terrariumOption.isPresent()) {
+            StructureComposer composer = terrariumOption.get().getStructureComposer();
+            return composer.isInsideStructure(this.world, name, pos);
+        }
+        return false;
     }
 }
