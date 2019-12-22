@@ -136,7 +136,7 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
         DataOp<FloatRaster> meanTemperature = climateSampler.meanTemperature();
         meanTemperature = InterpolationScaleOp.LINEAR.scaleFloatsFrom(meanTemperature, this.ctx.climateRasterCrs);
 
-        DataOp<FloatRaster> minTemperature = climateSampler.meanTemperature();
+        DataOp<FloatRaster> minTemperature = climateSampler.minTemperature();
         minTemperature = InterpolationScaleOp.LINEAR.scaleFloatsFrom(minTemperature, this.ctx.climateRasterCrs);
 
         DataOp<UByteRaster> cationExchangeCapacity = this.genericSoil(worldScale, SoilSource::cationExchangeCapacity)

@@ -39,4 +39,16 @@ public final class ClimateSampler {
             return CompletableFuture.completedFuture(Optional.of(temperatureRaster));
         });
     }
+
+    public DataOp<FloatRaster> minTemperature() {
+        return DataOp.of(view -> {
+            FloatRaster temperatureRaster = FloatRaster.create(view);
+            for (int y = 0; y < view.getHeight(); y++) {
+                for (int x = 0; x < view.getWidth(); x++) {
+                    temperatureRaster.set(x, y, this.source.getMinTemperature(view.getX() + x, view.getY() + y));
+                }
+            }
+            return CompletableFuture.completedFuture(Optional.of(temperatureRaster));
+        });
+    }
 }

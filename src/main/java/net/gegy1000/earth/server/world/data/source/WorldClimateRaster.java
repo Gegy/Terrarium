@@ -19,7 +19,8 @@ public final class WorldClimateRaster {
     private static final int PACK_RANGE = 255;
 
     private static final float TEMP_MIN = -40.0F;
-    private static final float TEMP_RANGE = 45.0F;
+    private static final float TEMP_MAX = 45.0F;
+    private static final float TEMP_RANGE = TEMP_MAX - TEMP_MIN;
     private static final float TEMP_CURVE = 1.0F;
 
     private static final float RAIN_MIN = 0.0F;
