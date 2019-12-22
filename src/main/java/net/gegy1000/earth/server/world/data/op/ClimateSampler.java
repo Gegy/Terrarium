@@ -28,7 +28,7 @@ public final class ClimateSampler {
     }
 
     // TODO: Can probably make a byte raster
-    public DataOp<FloatRaster> averageTemperature() {
+    public DataOp<FloatRaster> meanTemperature() {
         return DataOp.of(view -> {
             FloatRaster temperatureRaster = FloatRaster.create(view);
             for (int y = 0; y < view.getHeight(); y++) {

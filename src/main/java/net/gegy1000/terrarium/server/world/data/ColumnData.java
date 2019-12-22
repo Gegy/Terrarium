@@ -13,10 +13,10 @@ public class ColumnData {
     }
 
     @SuppressWarnings({ "unchecked", "OptionalAssignedToNull" })
-    public <T> Optional<T> get(DataKey<T> key) throws IllegalArgumentException {
+    public <T> Optional<T> get(DataKey<T> key) {
         Optional<?> data = this.store.get(key);
         if (data == null) {
-            throw new IllegalArgumentException("Data with key `" + key.getIdentifier() + "` not found!");
+            return Optional.empty();
         }
         return (Optional<T>) data;
     }

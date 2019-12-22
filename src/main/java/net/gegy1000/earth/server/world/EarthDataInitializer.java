@@ -133,8 +133,11 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
         DataOp<ShortRaster> annualRainfall = climateSampler.annualRainfall();
         annualRainfall = InterpolationScaleOp.LINEAR.scaleShortsFrom(annualRainfall, this.ctx.climateRasterCrs);
 
-        DataOp<FloatRaster> averageTemperature = climateSampler.averageTemperature();
-        averageTemperature = InterpolationScaleOp.LINEAR.scaleFloatsFrom(averageTemperature, this.ctx.climateRasterCrs);
+        DataOp<FloatRaster> meanTemperature = climateSampler.meanTemperature();
+        meanTemperature = InterpolationScaleOp.LINEAR.scaleFloatsFrom(meanTemperature, this.ctx.climateRasterCrs);
+
+        DataOp<FloatRaster> minTemperature = climateSampler.meanTemperature();
+        minTemperature = InterpolationScaleOp.LINEAR.scaleFloatsFrom(minTemperature, this.ctx.climateRasterCrs);
 
         DataOp<UByteRaster> cationExchangeCapacity = this.genericSoil(worldScale, SoilSource::cationExchangeCapacity)
                 .map((raster, view) -> UByteRaster.copyFrom(raster));
@@ -155,7 +158,8 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
                 .with(EarthDataKeys.COVER, cover)
                 .with(EarthDataKeys.LANDFORM, landforms)
                 .with(EarthDataKeys.WATER_LEVEL, waterLevel)
-                .with(EarthDataKeys.MEAN_TEMPERATURE, averageTemperature)
+                .with(EarthDataKeys.MEAN_TEMPERATURE, meanTemperature)
+                .with(EarthDataKeys.MIN_TEMPERATURE, minTemperature)
                 .with(EarthDataKeys.ANNUAL_RAINFALL, annualRainfall)
                 .with(EarthDataKeys.CATION_EXCHANGE_CAPACITY, cationExchangeCapacity)
                 .with(EarthDataKeys.ORGANIC_CARBON_CONTENT, organicCarbonContent)
