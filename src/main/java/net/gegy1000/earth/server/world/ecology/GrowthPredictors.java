@@ -51,15 +51,15 @@ public final class GrowthPredictors {
         private final UByteRaster.Sampler sandContent;
 
         Sampler() {
-            this.elevation = ShortRaster.sampler(EarthDataKeys.ELEVATION_METERS);
-            this.annualRainfall = ShortRaster.sampler(EarthDataKeys.ANNUAL_RAINFALL);
-            this.averageTemperature = FloatRaster.sampler(EarthDataKeys.MEAN_TEMPERATURE);
-            this.cationExchangeCapacity = UByteRaster.sampler(EarthDataKeys.CATION_EXCHANGE_CAPACITY);
-            this.organicCarbonContent = ShortRaster.sampler(EarthDataKeys.ORGANIC_CARBON_CONTENT);
-            this.pH = UByteRaster.sampler(EarthDataKeys.SOIL_PH);
-            this.clayContent = UByteRaster.sampler(EarthDataKeys.CLAY_CONTENT);
-            this.siltContent = UByteRaster.sampler(EarthDataKeys.SILT_CONTENT);
-            this.sandContent = UByteRaster.sampler(EarthDataKeys.SAND_CONTENT);
+            this.elevation = ShortRaster.sampler(EarthDataKeys.ELEVATION_METERS).defaultValue(0);
+            this.annualRainfall = ShortRaster.sampler(EarthDataKeys.ANNUAL_RAINFALL).defaultValue(300);
+            this.averageTemperature = FloatRaster.sampler(EarthDataKeys.MEAN_TEMPERATURE).defaultValue(14.0F);
+            this.cationExchangeCapacity = UByteRaster.sampler(EarthDataKeys.CATION_EXCHANGE_CAPACITY).defaultValue(10);
+            this.organicCarbonContent = ShortRaster.sampler(EarthDataKeys.ORGANIC_CARBON_CONTENT).defaultValue(10);
+            this.pH = UByteRaster.sampler(EarthDataKeys.SOIL_PH).defaultValue(70);
+            this.clayContent = UByteRaster.sampler(EarthDataKeys.CLAY_CONTENT).defaultValue(33);
+            this.siltContent = UByteRaster.sampler(EarthDataKeys.SILT_CONTENT).defaultValue(33);
+            this.sandContent = UByteRaster.sampler(EarthDataKeys.SAND_CONTENT).defaultValue(33);
         }
 
         public void sampleTo(ColumnDataCache dataCache, int x, int z, GrowthPredictors predictors) {

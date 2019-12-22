@@ -101,8 +101,8 @@ public final class ShortRaster extends AbstractRaster<short[]> implements Intege
             this.key = key;
         }
 
-        public Sampler setDefaultValue(short value) {
-            this.defaultValue = value;
+        public Sampler defaultValue(int value) {
+            this.defaultValue = (short) value;
             return this;
         }
 

@@ -81,7 +81,7 @@ public final class FloatRaster extends AbstractRaster<float[]> implements Number
             this.key = key;
         }
 
-        public Sampler setDefaultValue(float value) {
+        public Sampler defaultValue(float value) {
             this.defaultValue = value;
             return this;
         }

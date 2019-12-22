@@ -111,7 +111,7 @@ public final class UByteRaster extends AbstractRaster<byte[]> implements Integer
             this.key = key;
         }
 
-        public Sampler setDefaultValue(int value) {
+        public Sampler defaultValue(int value) {
             this.defaultValue = value;
             return this;
         }
