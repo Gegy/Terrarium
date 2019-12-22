@@ -5,6 +5,7 @@ import com.google.common.base.Strings;
 import net.gegy1000.earth.server.ServerProxy;
 import net.gegy1000.earth.server.capability.EarthWorld;
 import net.gegy1000.earth.server.capability.HeightmapStore;
+import net.gegy1000.earth.server.command.GeoDebugCommand;
 import net.gegy1000.earth.server.command.GeoTeleportCommand;
 import net.gegy1000.earth.server.command.GeoToolCommand;
 import net.gegy1000.earth.server.config.TerrariumEarthConfig;
@@ -130,6 +131,10 @@ public class TerrariumEarth {
     public static void onServerStarting(FMLServerStartingEvent event) {
         event.registerServerCommand(new GeoTeleportCommand());
         event.registerServerCommand(new GeoToolCommand());
+
+        if (deobfuscatedEnvironment) {
+            event.registerServerCommand(new GeoDebugCommand());
+        }
     }
 
     @SubscribeEvent
