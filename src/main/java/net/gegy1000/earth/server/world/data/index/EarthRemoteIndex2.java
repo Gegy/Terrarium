@@ -3,6 +3,7 @@ package net.gegy1000.earth.server.world.data.index;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.util.ZoomLevels;
 import net.gegy1000.earth.server.util.Zoomable;
 import net.gegy1000.earth.server.world.data.source.ElevationSource;
@@ -57,8 +58,14 @@ public final class EarthRemoteIndex2 {
 
     private static Zoomable<Endpoint> parseZoomableEndpoint(JsonObject endpointsRoot, String name, ZoomLevels zoomLevels) {
         return Zoomable.create(zoomLevels, zoom -> {
-            JsonObject endpointRoot = endpointsRoot.getAsJsonObject(name + "/" + zoom);
-            return parseEndpoint(endpointRoot);
+            String key = name + "/" + zoom;
+            if (endpointsRoot.has(key)) {
+                JsonObject endpointRoot = endpointsRoot.getAsJsonObject(key);
+                return parseEndpoint(endpointRoot);
+            } else {
+                TerrariumEarth.LOGGER.warn("missing remote endpoint for {}", key);
+                return Endpoint.EMPTY;
+            }
         }).orElse(Endpoint.EMPTY);
     }
 
