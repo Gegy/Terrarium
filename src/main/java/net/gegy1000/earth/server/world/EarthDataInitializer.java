@@ -32,6 +32,7 @@ import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.data.raster.FloatRaster;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.data.raster.UByteRaster;
+import net.minecraft.util.math.MathHelper;
 
 import static net.gegy1000.earth.server.world.EarthWorldType.*;
 
@@ -82,6 +83,7 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
     }
 
     private int selectElevationZoom(double worldScale) {
+        worldScale = MathHelper.floor(worldScale);
         if (worldScale > 300.0) {
             return 0;
         } else if (worldScale > 80.0) {

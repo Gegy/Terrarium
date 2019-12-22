@@ -19,7 +19,7 @@ import net.minecraft.world.gen.feature.WorldGenTaiga2;
 import net.minecraft.world.gen.feature.WorldGenTrees;
 
 public final class Trees {
-    public static final float RADIUS = 2.0F;
+    public static final float RADIUS = 2.5F;
 
     public static final Vegetation ACACIA = Vegetation.builder()
             .generator(Generators.ACACIA::generate)

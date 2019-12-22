@@ -8,6 +8,8 @@ generator.terrarium.earth_debug=Earth Debug
 container.earth.geotool.name=Earth Toolbox
 geotool.earth.locate.success=You are at %s
 
+container.earth.geodebug.name=Earth Debug Toolbox
+
 gui.earth.credits=Terrarium data provided by:
 gui.earth.spawnpoint=Set Spawn
 gui.earth.locate=Locate Player
@@ -91,6 +93,7 @@ commands.earth.geotp.success=Successfully teleported to %s, %s
 commands.earth.geotp.error=An error occurred while finding "%s": %s: %s
 
 commands.earth.geotool.usage=geotool
+commands.earth.geodebug.usage=geodebug
 
 # Status
 

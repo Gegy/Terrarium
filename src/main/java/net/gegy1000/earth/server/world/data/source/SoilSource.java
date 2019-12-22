@@ -82,10 +82,6 @@ public class SoilSource extends TiledDataSource<ShortRaster> {
         return (360.0 / tileSizeDeg(zoom)) * TILE_SIZE;
     }
 
-    public static double resolutionMeters(int zoom) {
-        return 30.0 * Math.pow(3.0, 3.0 - zoom);
-    }
-
     @Override
     public Optional<ShortRaster> load(Vec2i pos) throws IOException {
         SharedEarthData sharedData = SharedEarthData.instance();

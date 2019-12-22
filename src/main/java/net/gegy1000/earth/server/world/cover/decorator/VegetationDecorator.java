@@ -95,7 +95,7 @@ public final class VegetationDecorator implements CoverDecorator {
         float weight = 0.0F;
         for (int i = 0; i < this.pool.size(); i++) {
             WeightedPool.Entry<Vegetation> entry = this.pool.get(i);
-            weight += entry.getWeight() * this.weightsBuffer[i];
+            weight += this.weightsBuffer[i];
             if (weight > threshold) {
                 return entry.getValue();
             }

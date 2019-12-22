@@ -41,7 +41,7 @@ public final class CoverConfigurator {
         CoverMarkers.FOREST.and(CoverMarkers.BROADLEAF).and(CoverMarkers.DECIDUOUS)
                 .configureEach(c -> c.configureDecorator(CoverDecorators.TREES, vegetation -> {
                     vegetation.add(Trees.OAK, 10.0F);
-                    vegetation.add(Trees.ACACIA, 5.0F);
+                    vegetation.add(Trees.ACACIA, 10.0F);
                 }));
 
         CoverMarkers.FOREST.and(CoverMarkers.BROADLEAF).and(CoverMarkers.EVERGREEN)
@@ -52,13 +52,13 @@ public final class CoverConfigurator {
         CoverMarkers.FOREST.and(CoverMarkers.NEEDLELEAF).and(CoverMarkers.DECIDUOUS)
                 .configureEach(c -> c.configureDecorator(CoverDecorators.TREES, vegetation -> {
                     vegetation.add(Trees.BIRCH, 10.0F);
-                    vegetation.add(Trees.ACACIA, 5.0F);
+                    vegetation.add(Trees.ACACIA, 10.0F);
                 }));
 
         CoverMarkers.FOREST.and(CoverMarkers.NEEDLELEAF).and(CoverMarkers.EVERGREEN)
                 .configureEach(c -> c.configureDecorator(CoverDecorators.TREES, vegetation -> {
                     vegetation.add(Trees.SPRUCE, 10.0F);
-                    vegetation.add(Trees.PINE, 5.0F);
+                    vegetation.add(Trees.PINE, 10.0F);
                 }));
     }
 }
