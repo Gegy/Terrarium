@@ -58,7 +58,7 @@ public final class MaxentGrowthIndicator implements GrowthIndicator {
             case LOGISTIC:
                 return 1.0 - 1.0 / (raw * this.entropyExp + 1.0);
             case CLOGLOG:
-                return 1.0 - Math.exp(-raw * this.entropyExp);
+                return 1.0 - Math.exp(raw * -this.entropyExp);
             case RAW:
             default:
                 return raw;

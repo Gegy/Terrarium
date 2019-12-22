@@ -29,7 +29,7 @@ public final class MaxentFeatures {
     public static GrowthIndicator hinge(GrowthIndicator feature, double lambda, double hinge, double max) {
         return predictors -> {
             double value = feature.evaluate(predictors);
-            if (value < hinge) return 0.0;
+            if (value <= hinge) return 0.0;
             return lambda * (value - hinge) / (max - hinge);
         };
     }
@@ -45,7 +45,7 @@ public final class MaxentFeatures {
     public static GrowthIndicator threshold(GrowthIndicator feature, double lambda, double min, double max, double threshold) {
         return predictors -> {
             double value = feature.evaluate(predictors);
-            return lambda * (value > threshold ? max : min);
+            return lambda * (value >= threshold ? max : min);
         };
     }
 

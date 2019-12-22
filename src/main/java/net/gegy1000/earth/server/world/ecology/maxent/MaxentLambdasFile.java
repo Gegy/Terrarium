@@ -30,6 +30,7 @@ public final class MaxentLambdasFile {
         }
     }
 
+    // TODO: Clamp predictors based on range specified by linear features?
     public static MaxentLambdasFile parse(InputStream input) throws IOException, MaxentParseException {
         Object2DoubleMap<String> fields = new Object2DoubleOpenHashMap<>();
 
@@ -68,7 +69,7 @@ public final class MaxentLambdasFile {
             String ident = tokens[0];
 
             double lambda = Double.parseDouble(tokens[1]);
-            if (lambda <= 1e-6) return null;
+            if (Math.abs(lambda) <= 1e-6) return null;
 
             double min = Double.parseDouble(tokens[2]);
             double max = Double.parseDouble(tokens[3]);
