@@ -100,7 +100,7 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
     }
 
     @Override
-    public ColumnDataGenerator buildDataGenerator() {
+    public void setup(ColumnDataGenerator.Builder builder) {
         double worldScale = this.ctx.settings.getDouble(WORLD_SCALE);
         int heightOffset = this.ctx.settings.getInteger(HEIGHT_OFFSET);
         int seaLevel = heightOffset + 1;
@@ -153,22 +153,20 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
         DataOp<UByteRaster> sandContent = this.genericSoil(worldScale, SoilSource::sandContent)
                 .map((raster, view) -> UByteRaster.copyFrom(raster));
 
-        return ColumnDataGenerator.builder()
-                .with(EarthDataKeys.TERRAIN_HEIGHT, terrainHeight)
-                .with(EarthDataKeys.ELEVATION_METERS, elevation)
-                .with(EarthDataKeys.SLOPE, slope)
-                .with(EarthDataKeys.COVER, cover)
-                .with(EarthDataKeys.LANDFORM, landforms)
-                .with(EarthDataKeys.WATER_LEVEL, waterLevel)
-                .with(EarthDataKeys.MEAN_TEMPERATURE, meanTemperature)
-                .with(EarthDataKeys.MIN_TEMPERATURE, minTemperature)
-                .with(EarthDataKeys.ANNUAL_RAINFALL, annualRainfall)
-                .with(EarthDataKeys.CATION_EXCHANGE_CAPACITY, cationExchangeCapacity)
-                .with(EarthDataKeys.ORGANIC_CARBON_CONTENT, organicCarbonContent)
-                .with(EarthDataKeys.SOIL_PH, soilPh)
-                .with(EarthDataKeys.CLAY_CONTENT, clayContent)
-                .with(EarthDataKeys.SILT_CONTENT, siltContent)
-                .with(EarthDataKeys.SAND_CONTENT, sandContent)
-                .build();
+        builder.put(EarthDataKeys.TERRAIN_HEIGHT, terrainHeight);
+        builder.put(EarthDataKeys.ELEVATION_METERS, elevation);
+        builder.put(EarthDataKeys.SLOPE, slope);
+        builder.put(EarthDataKeys.COVER, cover);
+        builder.put(EarthDataKeys.LANDFORM, landforms);
+        builder.put(EarthDataKeys.WATER_LEVEL, waterLevel);
+        builder.put(EarthDataKeys.MEAN_TEMPERATURE, meanTemperature);
+        builder.put(EarthDataKeys.MIN_TEMPERATURE, minTemperature);
+        builder.put(EarthDataKeys.ANNUAL_RAINFALL, annualRainfall);
+        builder.put(EarthDataKeys.CATION_EXCHANGE_CAPACITY, cationExchangeCapacity);
+        builder.put(EarthDataKeys.ORGANIC_CARBON_CONTENT, organicCarbonContent);
+        builder.put(EarthDataKeys.SOIL_PH, soilPh);
+        builder.put(EarthDataKeys.CLAY_CONTENT, clayContent);
+        builder.put(EarthDataKeys.SILT_CONTENT, siltContent);
+        builder.put(EarthDataKeys.SAND_CONTENT, sandContent);
     }
 }

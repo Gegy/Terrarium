@@ -1,5 +1,6 @@
 package net.gegy1000.terrarium.server.capability;
 
+import net.gegy1000.terrarium.server.event.InitializeTerrariumWorldEvent;
 import net.gegy1000.terrarium.server.world.TerrariumDataInitializer;
 import net.gegy1000.terrarium.server.world.TerrariumGeneratorInitializer;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
@@ -10,10 +11,12 @@ import net.gegy1000.terrarium.server.world.composer.surface.SurfaceComposer;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.ColumnDataGenerator;
+import net.gegy1000.terrarium.server.world.generator.CompositeTerrariumGenerator;
 import net.gegy1000.terrarium.server.world.generator.TerrariumGenerator;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 
@@ -62,10 +65,16 @@ public interface TerrariumWorld extends ICapabilityProvider {
             TerrariumGeneratorInitializer generatorInitializer = worldType.createGeneratorInitializer(world, this.settings);
             TerrariumDataInitializer dataInitializer = worldType.createDataInitializer(world, this.settings);
 
-            this.generator = generatorInitializer.buildGenerator(PREVIEW_WORLD.get());
+            CompositeTerrariumGenerator.Builder generator = CompositeTerrariumGenerator.builder();
+            generatorInitializer.setup(generator, PREVIEW_WORLD.get());
 
-            ColumnDataGenerator dataGenerator = dataInitializer.buildDataGenerator();
-            this.dataCache = new ColumnDataCache(world, dataGenerator);
+            ColumnDataGenerator.Builder dataGenerator = ColumnDataGenerator.builder();
+            dataInitializer.setup(dataGenerator);
+
+            MinecraftForge.EVENT_BUS.post(new InitializeTerrariumWorldEvent(world, worldType, this.settings, generator, dataGenerator));
+
+            this.generator = generator.build();
+            this.dataCache = new ColumnDataCache(world, dataGenerator.build());
         }
 
         @Override

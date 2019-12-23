@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableMap;
 import net.gegy1000.terrarium.Terrarium;
 import net.minecraft.util.math.ChunkPos;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 public final class ColumnDataGenerator {
@@ -35,18 +37,28 @@ public final class ColumnDataGenerator {
     }
 
     public static class Builder {
-        private final ImmutableMap.Builder<DataKey<?>, DataOp<?>> attachedData = ImmutableMap.builder();
+        private final Map<DataKey<?>, DataOp<?>> attachedData = new HashMap<>();
 
         private Builder() {
         }
 
-        public <T> Builder with(DataKey<T> key, DataOp<T> data) {
+        public <T> Builder put(DataKey<T> key, DataOp<T> data) {
             this.attachedData.put(key, data);
             return this;
         }
 
+        @SuppressWarnings("unchecked")
+        public <T> DataOp<T> get(DataKey<T> key) {
+            return (DataOp<T>) this.attachedData.get(key);
+        }
+
+        @SuppressWarnings("unchecked")
+        public <T> DataOp<T> remove(DataKey<T> key) {
+            return (DataOp<T>) this.attachedData.remove(key);
+        }
+
         public ColumnDataGenerator build() {
-            return new ColumnDataGenerator(this.attachedData.build());
+            return new ColumnDataGenerator(ImmutableMap.copyOf(this.attachedData));
         }
     }
 }

@@ -22,7 +22,6 @@ import net.gegy1000.terrarium.server.world.composer.surface.GenericSurfaceCompos
 import net.gegy1000.terrarium.server.world.composer.surface.HeightmapSurfaceComposer;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.generator.CompositeTerrariumGenerator;
-import net.gegy1000.terrarium.server.world.generator.TerrariumGenerator;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 
@@ -36,16 +35,12 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
     }
 
     @Override
-    public TerrariumGenerator buildGenerator(boolean preview) {
-        CompositeTerrariumGenerator.Builder builder = CompositeTerrariumGenerator.builder();
-
+    public void setup(CompositeTerrariumGenerator.Builder builder, boolean preview) {
         this.addSurfaceComposers(builder, preview);
         this.addDecorationComposers(preview, builder);
 
         builder.setBiomeComposer(new EarthBiomeComposer());
         builder.setSpawnPosition(new Coordinate(this.ctx.lngLatCrs, this.ctx.settings.getDouble(SPAWN_LONGITUDE), this.ctx.settings.getDouble(SPAWN_LATITUDE)));
-
-        return builder.build();
     }
 
     private void addSurfaceComposers(CompositeTerrariumGenerator.Builder builder, boolean preview) {
