@@ -41,7 +41,7 @@ public class RemoteDataWarningGui extends GuiScreen {
                 this.complete = true;
 
                 TerrariumConfig.acceptedRemoteDataWarning = true;
-                ConfigManager.sync(Terrarium.MODID, Config.Type.INSTANCE);
+                ConfigManager.sync(Terrarium.ID, Config.Type.INSTANCE);
 
                 this.mc.displayGuiScreen(this.parent);
             } else if (button.id == CANCEL_ID) {
