@@ -23,12 +23,12 @@ public final class Trees {
     public static final float RADIUS = 2.5F;
 
     public static final Vegetation ACACIA = Vegetation.builder()
-            .generator((world, random, pos, indicator) -> Generators.ACACIA.generate(world, random, pos))
+            .generator(VegetationGenerator.of(Generators.ACACIA))
             .growthIndicator(maxentIndicator("acacia"))
             .build();
 
     public static final Vegetation BIRCH = Vegetation.builder()
-            .generator((world, random, pos, indicator) -> Generators.BIRCH.generate(world, random, pos))
+            .generator(VegetationGenerator.of(Generators.BIRCH))
             .growthIndicator(maxentIndicator("birch"))
             .build();
 
@@ -56,12 +56,12 @@ public final class Trees {
             .build();
 
     public static final Vegetation SPRUCE = Vegetation.builder()
-            .generator((world, random, pos, indicator) -> Generators.SPRUCE.generate(world, random, pos))
+            .generator(VegetationGenerator.of(Generators.SPRUCE))
             .growthIndicator(maxentIndicator("spruce"))
             .build();
 
     public static final Vegetation PINE = Vegetation.builder()
-            .generator((world, random, pos, indicator) -> Generators.PINE.generate(world, random, pos))
+            .generator(VegetationGenerator.of(Generators.PINE))
             .growthIndicator(maxentIndicator("pine"))
             .build();
 

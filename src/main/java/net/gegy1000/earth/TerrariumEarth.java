@@ -9,6 +9,7 @@ import net.gegy1000.earth.server.command.GeoDebugCommand;
 import net.gegy1000.earth.server.command.GeoTeleportCommand;
 import net.gegy1000.earth.server.command.GeoToolCommand;
 import net.gegy1000.earth.server.config.TerrariumEarthConfig;
+import net.gegy1000.earth.server.integration.bop.BoPIntegration;
 import net.gegy1000.earth.server.message.EarthMapGuiMessage;
 import net.gegy1000.earth.server.message.EarthPanoramaMessage;
 import net.gegy1000.earth.server.shared.ClimateRasterInitializer;
@@ -32,6 +33,7 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -107,6 +109,10 @@ public class TerrariumEarth {
 
         NETWORK.registerMessage(EarthMapGuiMessage.Handler.class, EarthMapGuiMessage.class, 0, Side.CLIENT);
         NETWORK.registerMessage(EarthPanoramaMessage.Handler.class, EarthPanoramaMessage.class, 1, Side.CLIENT);
+
+        if (Loader.isModLoaded("biomesoplenty")) {
+            BoPIntegration.setup();
+        }
     }
 
     @Mod.EventHandler

@@ -26,8 +26,8 @@ public final class DataSourceReader {
     private final ExecutorService loadService = Executors.newFixedThreadPool(3, new ThreadFactoryBuilder().setNameFormat("terrarium-data-loader-%s").setDaemon(true).build());
 
     private final Cache<TileKey<?>, DataTileResult<?>> tileCache = CacheBuilder.newBuilder()
-            .maximumSize(32)
-            .expireAfterAccess(30, TimeUnit.SECONDS)
+            .maximumSize(128)
+            .expireAfterAccess(60, TimeUnit.SECONDS)
             .build();
 
     private final Map<TileKey<?>, CompletableFuture<DataTileResult<?>>> queuedTiles = new HashMap<>();

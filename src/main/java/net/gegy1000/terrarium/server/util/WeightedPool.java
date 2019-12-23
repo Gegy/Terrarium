@@ -31,6 +31,11 @@ public final class WeightedPool<T> implements Iterable<WeightedPool.Entry<T>> {
         return this;
     }
 
+    public WeightedPool<T> remove(T value) {
+        this.entries.removeIf(e -> e.value.equals(value));
+        return this;
+    }
+
     public WeightedPool<T> addAll(Iterable<WeightedPool.Entry<T>> entries) {
         for (WeightedPool.Entry<T> entry : entries) {
             this.entries.add(entry);

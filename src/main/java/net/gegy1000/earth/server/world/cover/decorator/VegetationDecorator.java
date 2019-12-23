@@ -47,13 +47,21 @@ public final class VegetationDecorator implements CoverDecorator {
 
     public VegetationDecorator add(Vegetation vegetation, float weight) {
         this.pool.add(vegetation, weight);
-        this.weightsBuffer = new float[this.pool.size()];
+        return this;
+    }
+
+    public VegetationDecorator remove(Vegetation vegetation) {
+        this.pool.remove(vegetation);
         return this;
     }
 
     @Override
     public void decorate(ColumnDataCache dataCache, ChunkPopulationWriter writer, CubicPos cubePos, Random random) {
         if (this.pool.isEmpty()) return;
+
+        if (this.weightsBuffer == null || this.weightsBuffer.length != this.pool.size()) {
+            this.weightsBuffer = new float[this.pool.size()];
+        }
 
         World world = writer.getGlobal();
         int minX = cubePos.getCenterX();
@@ -84,10 +92,13 @@ public final class VegetationDecorator implements CoverDecorator {
     @Nullable
     private Vegetation sample(Random random, GrowthPredictors predictors) {
         float totalWeight = 0.0F;
+
         for (int i = 0; i < this.pool.size(); i++) {
             WeightedPool.Entry<Vegetation> entry = this.pool.get(i);
             Vegetation vegetation = entry.getValue();
+
             double indicator = vegetation.getGrowthIndicator().evaluate(predictors);
+            indicator = Math.pow(indicator, 3.0);
 
             float weight = (float) (entry.getWeight() * indicator);
             this.weightsBuffer[i] = weight;
