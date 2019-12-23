@@ -24,10 +24,10 @@ import net.gegy1000.earth.server.world.data.GoogleGeocoder;
 import net.gegy1000.earth.server.world.data.NominatimGeocoder;
 import net.gegy1000.terrarium.server.capability.DelegatedStorage;
 import net.gegy1000.terrarium.server.capability.VoidStorage;
+import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.data.source.Geocoder;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
@@ -67,7 +67,7 @@ public class TerrariumEarth {
     @SidedProxy(clientSide = CLIENT_PROXY, serverSide = SERVER_PROXY)
     public static ServerProxy PROXY;
 
-    public static final WorldType EARTH_TYPE = new EarthWorldType().create();
+    public static final TerrariumWorldType WORLD_TYPE = new EarthWorldType();
 
     public static final SimpleNetworkWrapper NETWORK = NetworkRegistry.INSTANCE.newSimpleChannel(TerrariumEarth.ID);
 
@@ -81,6 +81,8 @@ public class TerrariumEarth {
 
     @Mod.EventHandler
     public static void onPreInit(FMLPreInitializationEvent event) {
+        WORLD_TYPE.create();
+
         deobfuscatedEnvironment = (boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
 
         CapabilityManager.INSTANCE.register(EarthWorld.class, new VoidStorage<>(), EarthWorld.None::new);

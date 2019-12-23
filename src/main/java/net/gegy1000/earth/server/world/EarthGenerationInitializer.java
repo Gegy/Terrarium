@@ -80,10 +80,8 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
         }
 
         if (this.ctx.settings.getBoolean(ORE_GENERATION)) {
-            // TODO: mod compat
-
             OreDecorationComposer oreComposer = new OreDecorationComposer(this.ctx.world, EarthDataKeys.TERRAIN_HEIGHT);
-            VanillaOres.get().addTo(oreComposer);
+            VanillaOres.addTo(oreComposer);
 
             builder.addDecorationComposer(oreComposer);
         }
