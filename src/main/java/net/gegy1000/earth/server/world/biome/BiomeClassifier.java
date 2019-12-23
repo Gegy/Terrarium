@@ -8,6 +8,7 @@ import net.minecraft.world.biome.Biome;
 
 public final class BiomeClassifier {
     public static final float FREEZE_TEMPERATURE = 0.0F;
+    public static final float COLD_TEMPERATURE = 10.0F;
 
     public static Biome classify(Context context) {
         if (context.isLand()) {
@@ -20,6 +21,8 @@ public final class BiomeClassifier {
     private static Biome classifyLand(Context context) {
         if (context.isFrozen()) {
             return context.isForested() ? Biomes.COLD_TAIGA : Biomes.ICE_PLAINS;
+        } else if (context.isCold()) {
+            return Biomes.TAIGA;
         }
 
         if (context.isWet() || context.isFlooded()) {
@@ -67,6 +70,10 @@ public final class BiomeClassifier {
 
         public boolean isFrozen() {
             return this.minTemperature < FREEZE_TEMPERATURE || this.cover.is(CoverMarkers.FROZEN);
+        }
+
+        public boolean isCold() {
+            return this.meanTemperature < COLD_TEMPERATURE || this.isFrozen();
         }
 
         public boolean isForested() {

@@ -1,6 +1,5 @@
 package net.gegy1000.earth.server.world.cover.decorator;
 
-import net.gegy1000.earth.server.world.ecology.GrowthIndicator;
 import net.gegy1000.earth.server.world.ecology.GrowthPredictors;
 import net.gegy1000.earth.server.world.ecology.vegetation.Vegetation;
 import net.gegy1000.gengen.api.CubicPos;
@@ -11,6 +10,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.NoiseGeneratorSimplex;
 
+import javax.annotation.Nullable;
 import java.util.Random;
 
 public final class VegetationDecorator implements CoverDecorator {
@@ -74,18 +74,22 @@ public final class VegetationDecorator implements CoverDecorator {
             this.predictorSampler.sampleTo(dataCache, x, z, this.predictors);
 
             Vegetation vegetation = this.sample(random, this.predictors);
-            vegetation.getGenerator().generate(world, random, this.mutablePos);
+            if (vegetation != null) {
+                double indicator = vegetation.getGrowthIndicator().evaluate(this.predictors);
+                vegetation.getGenerator().generate(world, random, this.mutablePos, indicator);
+            }
         }
     }
 
+    @Nullable
     private Vegetation sample(Random random, GrowthPredictors predictors) {
         float totalWeight = 0.0F;
         for (int i = 0; i < this.pool.size(); i++) {
             WeightedPool.Entry<Vegetation> entry = this.pool.get(i);
             Vegetation vegetation = entry.getValue();
-            GrowthIndicator indicator = vegetation.getGrowthIndicator();
+            double indicator = vegetation.getGrowthIndicator().evaluate(predictors);
 
-            float weight = (float) (entry.getWeight() * indicator.evaluate(predictors));
+            float weight = (float) (entry.getWeight() * indicator);
             this.weightsBuffer[i] = weight;
             totalWeight += weight;
         }
@@ -101,6 +105,6 @@ public final class VegetationDecorator implements CoverDecorator {
             }
         }
 
-        throw new IllegalStateException("nothing to sample");
+        return null;
     }
 }

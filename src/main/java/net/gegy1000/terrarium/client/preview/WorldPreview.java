@@ -8,7 +8,6 @@ import net.gegy1000.earth.server.world.EarthDataKeys;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
-import net.gegy1000.terrarium.server.world.GenerationCancelledException;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.DataView;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
@@ -37,6 +36,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -117,7 +117,7 @@ public class WorldPreview implements IBlockAccess {
             this.generator.setColumnHandler(this::handleGeneratedColumn);
 
             this.generator.initiate();
-        } catch (GenerationCancelledException e) {
+        } catch (CancellationException e) {
             // We can safely ignore
         } catch (Throwable t) {
             Terrarium.LOGGER.error("Failed to generate preview chunks", t);

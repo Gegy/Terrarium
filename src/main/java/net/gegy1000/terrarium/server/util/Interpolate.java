@@ -6,7 +6,7 @@ public final class Interpolate {
         return buffer[0] + (buffer[1] - buffer[0]) * x;
     });
     public static final Interpolate COSINE = new Interpolate(new Kernel(2), (buffer, x) -> {
-        return LINEAR.evaluate(buffer, (1.0 - Math.cos(x * Math.PI)) / 2.0);
+        return LINEAR.evaluate(buffer, cosine(x));
     });
     public static final Interpolate CUBIC = new Interpolate(new Kernel(4).offset(-1), (b, x) -> {
         return b[1] + 0.5 * x * (b[2] - b[0] + x * (2.0 * b[0] - 5.0 * b[1] + 4.0 * b[2] - b[3] + x * (3.0 * (b[1] - b[2]) + b[3] - b[0])));
@@ -18,6 +18,10 @@ public final class Interpolate {
     private Interpolate(Kernel kernel, Function function) {
         this.kernel = kernel;
         this.function = function;
+    }
+
+    public static double cosine(double x) {
+        return (1.0 - Math.cos(x * Math.PI)) / 2.0;
     }
 
     public Kernel getKernel() {

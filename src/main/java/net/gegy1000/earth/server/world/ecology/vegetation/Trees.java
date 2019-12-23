@@ -3,6 +3,7 @@ package net.gegy1000.earth.server.world.ecology.vegetation;
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.world.ecology.GrowthIndicator;
 import net.gegy1000.earth.server.world.ecology.maxent.MaxentGrowthIndicator;
+import net.gegy1000.terrarium.server.util.Interpolate;
 import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockOldLeaf;
 import net.minecraft.block.BlockOldLog;
@@ -22,17 +23,17 @@ public final class Trees {
     public static final float RADIUS = 2.5F;
 
     public static final Vegetation ACACIA = Vegetation.builder()
-            .generator(Generators.ACACIA::generate)
+            .generator((world, random, pos, indicator) -> Generators.ACACIA.generate(world, random, pos))
             .growthIndicator(maxentIndicator("acacia"))
             .build();
 
     public static final Vegetation BIRCH = Vegetation.builder()
-            .generator(Generators.BIRCH::generate)
+            .generator((world, random, pos, indicator) -> Generators.BIRCH.generate(world, random, pos))
             .growthIndicator(maxentIndicator("birch"))
             .build();
 
     public static final Vegetation OAK = Vegetation.builder()
-            .generator((world, random, pos) -> {
+            .generator((world, random, pos, indicator) -> {
                 if (random.nextInt(10) == 0) {
                     Generators.BIG_OAK.generate(world, random, pos);
                 } else {
@@ -43,8 +44,9 @@ public final class Trees {
             .build();
 
     public static final Vegetation JUNGLE = Vegetation.builder()
-            .generator((world, random, pos) -> {
-                if (random.nextInt(3) == 0) {
+            .generator((world, random, pos, indicator) -> {
+                double bigChance = 1.0 / (3 * Math.pow(1.0 / Interpolate.cosine(indicator), 3.0));
+                if (random.nextFloat() <= bigChance) {
                     Generators.BIG_JUNGLE.generate(world, random, pos);
                 } else {
                     Generators.JUNGLE.generate(world, random, pos);
@@ -54,12 +56,12 @@ public final class Trees {
             .build();
 
     public static final Vegetation SPRUCE = Vegetation.builder()
-            .generator(Generators.SPRUCE::generate)
+            .generator((world, random, pos, indicator) -> Generators.SPRUCE.generate(world, random, pos))
             .growthIndicator(maxentIndicator("spruce"))
             .build();
 
     public static final Vegetation PINE = Vegetation.builder()
-            .generator(Generators.PINE::generate)
+            .generator((world, random, pos, indicator) -> Generators.PINE.generate(world, random, pos))
             .growthIndicator(maxentIndicator("pine"))
             .build();
 

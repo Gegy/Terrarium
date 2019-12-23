@@ -6,5 +6,5 @@ import net.minecraft.world.World;
 import java.util.Random;
 
 public interface VegetationGenerator {
-    void generate(World world, Random random, BlockPos pos);
+    void generate(World world, Random random, BlockPos pos, double indicator);
 }
