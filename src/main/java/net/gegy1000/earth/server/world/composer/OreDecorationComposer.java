@@ -1,7 +1,6 @@
 package net.gegy1000.earth.server.world.composer;
 
 import net.gegy1000.earth.server.world.ores.OreConfig;
-import net.gegy1000.earth.server.world.ores.OreDistribution;
 import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.gengen.api.writer.ChunkPopulationWriter;
 import net.gegy1000.gengen.core.GenGen;
@@ -11,7 +10,6 @@ import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.DataKey;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.feature.WorldGenerator;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,17 +35,19 @@ public class OreDecorationComposer implements DecorationComposer {
     public void composeDecoration(ColumnDataCache dataCache, CubicPos cubePos, ChunkPopulationWriter writer) {
         this.random.setSeed(cubePos.getX(), cubePos.getY(), cubePos.getZ());
 
-        int surfaceHeight = this.heightSampler.sample(dataCache, cubePos.getMaxX(), cubePos.getMaxZ());
+        int x = cubePos.getMaxX();
+        int z = cubePos.getMaxZ();
+        int surfaceHeight = this.heightSampler.sample(dataCache, x, z);
 
         World world = writer.getGlobal();
         boolean cubic = GenGen.isCubic(world);
 
         for (OreConfig ore : this.ores) {
-            WorldGenerator generator = ore.getGenerator();
-            OreDistribution distribution = ore.getDistribution();
-            distribution.forChunk(cubePos, surfaceHeight, this.random).forEach(pos -> {
+            if (!ore.getSelector().shouldGenerateAt(dataCache, x, z)) continue;
+
+            ore.getDistribution().forChunk(cubePos, surfaceHeight, this.random).forEach(pos -> {
                 if (!cubic && pos.getY() <= 1) return;
-                generator.generate(world, this.random, pos);
+                ore.getGenerator().generate(world, this.random, pos);
             });
         }
     }
