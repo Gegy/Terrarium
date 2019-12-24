@@ -4,7 +4,6 @@ import net.gegy1000.earth.server.world.EarthDataKeys;
 import net.gegy1000.earth.server.world.geography.Landform;
 import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.gengen.api.writer.ChunkPrimeWriter;
-import net.gegy1000.terrarium.server.util.tuple.Tuple3;
 import net.gegy1000.terrarium.server.world.composer.surface.SurfaceComposer;
 import net.gegy1000.terrarium.server.world.data.ColumnData;
 import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
@@ -20,14 +19,14 @@ public class WaterFillSurfaceComposer implements SurfaceComposer {
 
     @Override
     public void composeSurface(ColumnData data, CubicPos pos, ChunkPrimeWriter writer) {
-        Tuple3.join(
-                data.get(EarthDataKeys.TERRAIN_HEIGHT),
-                data.get(EarthDataKeys.LANDFORM),
-                data.get(EarthDataKeys.WATER_LEVEL)
-        ).ifPresent(tup -> {
-            ShortRaster heightRaster = tup.a;
-            EnumRaster<Landform> landformRaster = tup.b;
-            ShortRaster waterLevelRaster = tup.c;
+        data.with(
+                EarthDataKeys.TERRAIN_HEIGHT,
+                EarthDataKeys.LANDFORM,
+                EarthDataKeys.WATER_LEVEL
+        ).ifPresent(with -> {
+            ShortRaster heightRaster = with.get(EarthDataKeys.TERRAIN_HEIGHT);
+            EnumRaster<Landform> landformRaster = with.get(EarthDataKeys.LANDFORM);
+            ShortRaster waterLevelRaster = with.get(EarthDataKeys.WATER_LEVEL);
 
             int minY = pos.getMinY();
             int maxY = pos.getMaxY();

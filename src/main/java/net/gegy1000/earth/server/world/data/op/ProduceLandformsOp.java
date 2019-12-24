@@ -8,12 +8,9 @@ import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 
 public final class ProduceLandformsOp {
     public static DataOp<EnumRaster<Landform>> produce(DataOp<ShortRaster> height, DataOp<EnumRaster<Cover>> cover) {
-        return DataOp.join2(height, cover).map((tup, view) -> {
-            ShortRaster heightRaster = tup.a;
-            EnumRaster<Cover> coverIdRaster = tup.b;
-
+        return DataOp.map2(height, cover, (view, heightRaster, coverRaster) -> {
             EnumRaster<Landform> landformRaster = EnumRaster.create(Landform.LAND, view);
-            coverIdRaster.iterate((id, x, y) -> {
+            coverRaster.iterate((id, x, y) -> {
                 if (heightRaster.get(x, y) <= 0) {
                     landformRaster.set(x, y, Landform.SEA);
                 } else if (id == Cover.WATER) {

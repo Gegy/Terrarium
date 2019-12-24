@@ -1,6 +1,7 @@
 package net.gegy1000.terrarium.server.world.data;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 
 import java.util.Optional;
 import java.util.Set;
@@ -23,5 +24,26 @@ public class ColumnData {
 
     public Set<DataKey<?>> keys() {
         return this.store.keySet();
+    }
+
+    public Optional<With> with(DataKey<?>... keys) {
+        for (DataKey<?> key : keys) {
+            Optional<?> value = this.store.get(key);
+            if (value == null || !value.isPresent()) return Optional.empty();
+        }
+        return Optional.of(new With(Sets.newHashSet(keys)));
+    }
+
+    public class With {
+        private final Set<DataKey<?>> keys;
+
+        private With(Set<DataKey<?>> keys) {
+            this.keys = keys;
+        }
+
+        public <T> T get(DataKey<T> key) {
+            if (!this.keys.contains(key)) throw new IllegalArgumentException();
+            return ColumnData.this.get(key).orElseThrow(IllegalStateException::new);
+        }
     }
 }

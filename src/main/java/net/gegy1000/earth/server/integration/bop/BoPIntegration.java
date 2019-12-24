@@ -2,7 +2,6 @@ package net.gegy1000.earth.server.integration.bop;
 
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.event.ConfigureCoverEvent;
-import net.gegy1000.earth.server.world.EarthDataKeys;
 import net.gegy1000.earth.server.world.EarthWorldType;
 import net.gegy1000.earth.server.world.composer.OreDecorationComposer;
 import net.gegy1000.earth.server.world.cover.CoverMarkers;
@@ -43,7 +42,7 @@ public final class BoPIntegration {
         GenerationSettings settings = event.getSettings();
 
         if (settings.getBoolean(EarthWorldType.ORE_GENERATION)) {
-            OreDecorationComposer oreComposer = new OreDecorationComposer(world, EarthDataKeys.TERRAIN_HEIGHT);
+            OreDecorationComposer oreComposer = new OreDecorationComposer(world);
             BoPOres.addTo(oreComposer);
 
             event.getGenerator().addDecorationComposer(oreComposer);

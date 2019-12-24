@@ -4,7 +4,6 @@ import net.gegy1000.earth.server.world.EarthDataKeys;
 import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.gengen.api.writer.ChunkPrimeWriter;
 import net.gegy1000.gengen.util.SpatialRandom;
-import net.gegy1000.terrarium.server.util.tuple.Tuple2;
 import net.gegy1000.terrarium.server.world.composer.surface.SurfaceComposer;
 import net.gegy1000.terrarium.server.world.data.ColumnData;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
@@ -45,12 +44,9 @@ public class SoilSurfaceComposer implements SurfaceComposer {
     public void composeSurface(ColumnData data, CubicPos pos, ChunkPrimeWriter writer) {
         // TODO: the only strictly required data is height
 
-        Tuple2.join(
-                data.get(EarthDataKeys.TERRAIN_HEIGHT),
-                data.get(EarthDataKeys.SLOPE)
-        ).ifPresent(tup -> {
-            ShortRaster heightRaster = tup.a;
-            UByteRaster slopeRaster = tup.b;
+        data.with(EarthDataKeys.TERRAIN_HEIGHT, EarthDataKeys.SLOPE).ifPresent(with -> {
+            ShortRaster heightRaster = with.get(EarthDataKeys.TERRAIN_HEIGHT);
+            UByteRaster slopeRaster = with.get(EarthDataKeys.SLOPE);
 
             if (!this.containsSurface(pos, heightRaster)) return;
 

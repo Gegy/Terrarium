@@ -28,4 +28,20 @@ public class FutureUtil {
         CompletableFuture[] array = futures.toArray(new CompletableFuture[0]);
         CompletableFuture.allOf(array).join();
     }
+
+    public static <A, B, R> CompletableFuture<R> map2(CompletableFuture<A> a, CompletableFuture<B> b, Map2<A, B, R> map) {
+        return CompletableFuture.allOf(a, b).thenApply(v -> map.apply(a.join(), b.join()));
+    }
+
+    public static <A, B, C, R> CompletableFuture<R> map3(CompletableFuture<A> a, CompletableFuture<B> b, CompletableFuture<C> c, Map3<A, B, C, R> map) {
+        return CompletableFuture.allOf(a, b, c).thenApply(v -> map.apply(a.join(), b.join(), c.join()));
+    }
+
+    public interface Map2<A, B, R> {
+        R apply(A a, B b);
+    }
+
+    public interface Map3<A, B, C, R> {
+        R apply(A a, B b, C c);
+    }
 }

@@ -5,7 +5,6 @@ import net.gegy1000.earth.server.world.biome.BiomeClassifier;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.geography.Landform;
 import net.gegy1000.terrarium.server.util.ArrayUtils;
-import net.gegy1000.terrarium.server.util.tuple.Tuple5;
 import net.gegy1000.terrarium.server.world.composer.biome.BiomeComposer;
 import net.gegy1000.terrarium.server.world.data.ColumnData;
 import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
@@ -22,18 +21,18 @@ public final class EarthBiomeComposer implements BiomeComposer {
 
     @Override
     public Biome[] composeBiomes(ColumnData data, ChunkPos columnPos) {
-        return Tuple5.join(
-                data.get(EarthDataKeys.COVER),
-                data.get(EarthDataKeys.LANDFORM),
-                data.get(EarthDataKeys.MIN_TEMPERATURE),
-                data.get(EarthDataKeys.MEAN_TEMPERATURE),
-                data.get(EarthDataKeys.ANNUAL_RAINFALL)
-        ).map(tup -> {
-            EnumRaster<Cover> coverRaster = tup.a;
-            EnumRaster<Landform> landformRaster = tup.b;
-            FloatRaster minTemperatureRaster = tup.c;
-            FloatRaster meanTemperatureRaster = tup.d;
-            ShortRaster rainfallRaster = tup.e;
+        return data.with(
+                EarthDataKeys.COVER,
+                EarthDataKeys.LANDFORM,
+                EarthDataKeys.MIN_TEMPERATURE,
+                EarthDataKeys.MEAN_TEMPERATURE,
+                EarthDataKeys.ANNUAL_RAINFALL
+        ).map(with -> {
+            EnumRaster<Cover> coverRaster = with.get(EarthDataKeys.COVER);
+            EnumRaster<Landform> landformRaster = with.get(EarthDataKeys.LANDFORM);
+            FloatRaster minTemperatureRaster = with.get(EarthDataKeys.MIN_TEMPERATURE);
+            FloatRaster meanTemperatureRaster = with.get(EarthDataKeys.MEAN_TEMPERATURE);
+            ShortRaster rainfallRaster = with.get(EarthDataKeys.ANNUAL_RAINFALL);
 
             for (int z = 0; z < 16; z++) {
                 for (int x = 0; x < 16; x++) {

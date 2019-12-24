@@ -2,9 +2,7 @@ package net.gegy1000.terrarium.server.world.data;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import net.gegy1000.terrarium.server.util.tuple.Tuple2;
-import net.gegy1000.terrarium.server.util.tuple.Tuple3;
-import net.gegy1000.terrarium.server.util.tuple.Tuple4;
+import net.gegy1000.terrarium.server.util.FutureUtil;
 import net.gegy1000.terrarium.server.world.data.op.DataFunction;
 
 import java.util.Optional;
@@ -73,25 +71,33 @@ public final class DataOp<T> {
         });
     }
 
-    public static <A, B> DataOp<Tuple2<A, B>> join2(DataOp<A> a, DataOp<B> b) {
+    public static <A, B, R> DataOp<R> map2(DataOp<A> a, DataOp<B> b, Map2<A, B, R> map) {
         return DataOp.of(view -> {
-            return Tuple2.join(a.apply(view), b.apply(view))
-                    .thenApply(tup -> Tuple2.join(tup.a, tup.b));
+            return FutureUtil.map2(a.apply(view), b.apply(view), (aOption, bOption) -> {
+                if (aOption.isPresent() && bOption.isPresent()) {
+                    return Optional.of(map.apply(view, aOption.get(), bOption.get()));
+                }
+                return Optional.empty();
+            });
         });
     }
 
-    public static <A, B, C> DataOp<Tuple3<A, B, C>> join3(DataOp<A> a, DataOp<B> b, DataOp<C> c) {
+    public static <A, B, C, R> DataOp<R> map3(DataOp<A> a, DataOp<B> b, DataOp<C> c, Map3<A, B, C, R> map) {
         return DataOp.of(view -> {
-            return Tuple3.join(a.apply(view), b.apply(view), c.apply(view))
-                    .thenApply(tup -> Tuple3.join(tup.a, tup.b, tup.c));
+            return FutureUtil.map3(a.apply(view), b.apply(view), c.apply(view), (aOption, bOption, cOption) -> {
+                if (aOption.isPresent() && bOption.isPresent() && cOption.isPresent()) {
+                    return Optional.of(map.apply(view, aOption.get(), bOption.get(), cOption.get()));
+                }
+                return Optional.empty();
+            });
         });
     }
 
-    public static <A, B, C, D> DataOp<Tuple4<A, B, C, D>> join4(DataOp<A> a, DataOp<B> b, DataOp<C> c, DataOp<D> d) {
-        return DataOp.of(view -> {
-            return Tuple4.join(a.apply(view), b.apply(view), c.apply(view), d.apply(view))
-                    .thenApply(tup -> Tuple4.join(tup.a, tup.b, tup.c, tup.d));
-        });
+    public interface Map2<A, B, R> {
+        R apply(DataView view, A a, B b);
+    }
+
+    public interface Map3<A, B, C, R> {
+        R apply(DataView view, A a, B b, C c);
     }
 }
-
