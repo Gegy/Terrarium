@@ -2,9 +2,9 @@ package net.gegy1000.terrarium.server.world.data;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import net.gegy1000.terrarium.server.util.FutureUtil;
 import net.gegy1000.terrarium.server.util.tuple.Tuple2;
 import net.gegy1000.terrarium.server.util.tuple.Tuple3;
+import net.gegy1000.terrarium.server.util.tuple.Tuple4;
 import net.gegy1000.terrarium.server.world.data.op.DataFunction;
 
 import java.util.Optional;
@@ -75,25 +75,22 @@ public final class DataOp<T> {
 
     public static <A, B> DataOp<Tuple2<A, B>> join2(DataOp<A> a, DataOp<B> b) {
         return DataOp.of(view -> {
-            return FutureUtil.join2(a.apply(view), b.apply(view))
-                    .thenApply(tup -> {
-                        if (tup.a.isPresent() && tup.b.isPresent()) {
-                            return Optional.of(new Tuple2<>(tup.a.get(), tup.b.get()));
-                        }
-                        return Optional.empty();
-                    });
+            return Tuple2.join(a.apply(view), b.apply(view))
+                    .thenApply(tup -> Tuple2.join(tup.a, tup.b));
         });
     }
 
     public static <A, B, C> DataOp<Tuple3<A, B, C>> join3(DataOp<A> a, DataOp<B> b, DataOp<C> c) {
         return DataOp.of(view -> {
-            return FutureUtil.join3(a.apply(view), b.apply(view), c.apply(view))
-                    .thenApply(tup -> {
-                        if (tup.a.isPresent() && tup.b.isPresent() && tup.c.isPresent()) {
-                            return Optional.of(new Tuple3<>(tup.a.get(), tup.b.get(), tup.c.get()));
-                        }
-                        return Optional.empty();
-                    });
+            return Tuple3.join(a.apply(view), b.apply(view), c.apply(view))
+                    .thenApply(tup -> Tuple3.join(tup.a, tup.b, tup.c));
+        });
+    }
+
+    public static <A, B, C, D> DataOp<Tuple4<A, B, C, D>> join4(DataOp<A> a, DataOp<B> b, DataOp<C> c, DataOp<D> d) {
+        return DataOp.of(view -> {
+            return Tuple4.join(a.apply(view), b.apply(view), c.apply(view), d.apply(view))
+                    .thenApply(tup -> Tuple4.join(tup.a, tup.b, tup.c, tup.d));
         });
     }
 }

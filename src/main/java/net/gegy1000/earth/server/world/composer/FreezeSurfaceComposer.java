@@ -1,11 +1,11 @@
 package net.gegy1000.earth.server.world.composer;
 
+import net.gegy1000.earth.server.world.EarthDataKeys;
 import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.gengen.api.writer.ChunkPopulationWriter;
 import net.gegy1000.gengen.util.SpatialRandom;
 import net.gegy1000.terrarium.server.world.composer.decoration.DecorationComposer;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
-import net.gegy1000.terrarium.server.world.data.DataKey;
 import net.gegy1000.terrarium.server.world.data.DataView;
 import net.gegy1000.terrarium.server.world.data.raster.UByteRaster;
 import net.minecraft.block.Block;
@@ -21,13 +21,11 @@ public class FreezeSurfaceComposer implements DecorationComposer {
 
     private static final int MAX_SLOPE = 60;
 
-    private final UByteRaster.Sampler slopeSampler;
+    private final UByteRaster.Sampler slopeSampler = UByteRaster.sampler(EarthDataKeys.SLOPE);
 
     private final SpatialRandom random;
 
-    public FreezeSurfaceComposer(World world, DataKey<UByteRaster> slopeKey) {
-        this.slopeSampler = UByteRaster.sampler(slopeKey);
-
+    public FreezeSurfaceComposer(World world) {
         this.random = new SpatialRandom(world, SCATTER_SEED);
     }
 

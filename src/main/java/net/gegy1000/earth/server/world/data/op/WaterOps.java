@@ -2,7 +2,7 @@ package net.gegy1000.earth.server.world.data.op;
 
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.geography.Landform;
-import net.gegy1000.terrarium.server.util.FutureUtil;
+import net.gegy1000.terrarium.server.util.tuple.Tuple2;
 import net.gegy1000.terrarium.server.world.data.DataOp;
 import net.gegy1000.terrarium.server.world.data.raster.BitRaster;
 import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
@@ -13,7 +13,7 @@ import java.util.Optional;
 public final class WaterOps {
     public static DataOp<EnumRaster<Landform>> applyWaterMask(DataOp<EnumRaster<Landform>> landforms, DataOp<BitRaster> ocean) {
         return DataOp.of(view -> {
-            return FutureUtil.join2(landforms.apply(view), ocean.apply(view)).thenApply(tup -> {
+            return Tuple2.join(landforms.apply(view), ocean.apply(view)).thenApply(tup -> {
                 Optional<EnumRaster<Landform>> landformOption = tup.a;
                 Optional<BitRaster> oceanOption = tup.b;
 

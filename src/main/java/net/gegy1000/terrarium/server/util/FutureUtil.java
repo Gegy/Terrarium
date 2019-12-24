@@ -1,8 +1,5 @@
 package net.gegy1000.terrarium.server.util;
 
-import net.gegy1000.terrarium.server.util.tuple.Tuple2;
-import net.gegy1000.terrarium.server.util.tuple.Tuple3;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
@@ -30,13 +27,5 @@ public class FutureUtil {
     public static void joinAll(Collection<? extends CompletableFuture<?>> futures) {
         CompletableFuture[] array = futures.toArray(new CompletableFuture[0]);
         CompletableFuture.allOf(array).join();
-    }
-
-    public static <A, B> CompletableFuture<Tuple2<A, B>> join2(CompletableFuture<A> a, CompletableFuture<B> b) {
-        return CompletableFuture.allOf(a, b).thenApply(v -> new Tuple2<>(a.join(), b.join()));
-    }
-
-    public static <A, B, C> CompletableFuture<Tuple3<A, B, C>> join3(CompletableFuture<A> a, CompletableFuture<B> b, CompletableFuture<C> c) {
-        return CompletableFuture.allOf(a, b, c).thenApply(v -> new Tuple3<>(a.join(), b.join(), c.join()));
     }
 }

@@ -1,12 +1,12 @@
 package net.gegy1000.earth.server.world.composer;
 
+import net.gegy1000.earth.server.world.EarthDataKeys;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.gengen.api.writer.ChunkPopulationWriter;
 import net.gegy1000.gengen.util.SpatialRandom;
 import net.gegy1000.terrarium.server.world.composer.decoration.DecorationComposer;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
-import net.gegy1000.terrarium.server.world.data.DataKey;
 import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
 import net.minecraft.world.World;
 
@@ -15,11 +15,10 @@ public class CoverDecorationComposer implements DecorationComposer {
 
     private final SpatialRandom random;
 
-    private final EnumRaster.Sampler<Cover> coverSampler;
+    private final EnumRaster.Sampler<Cover> coverSampler = EnumRaster.sampler(EarthDataKeys.COVER, Cover.NO);
 
-    public CoverDecorationComposer(World world, DataKey<EnumRaster<Cover>> coverKey) {
+    public CoverDecorationComposer(World world) {
         this.random = new SpatialRandom(world, DECORATION_SEED);
-        this.coverSampler = EnumRaster.sampler(coverKey, Cover.NO);
     }
 
     @Override

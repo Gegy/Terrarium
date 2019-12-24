@@ -1,11 +1,12 @@
 package net.gegy1000.earth.server.world.composer;
 
+import net.gegy1000.earth.server.world.EarthDataKeys;
 import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.gengen.api.writer.ChunkPrimeWriter;
 import net.gegy1000.gengen.util.SpatialRandom;
+import net.gegy1000.terrarium.server.util.tuple.Tuple2;
 import net.gegy1000.terrarium.server.world.composer.surface.SurfaceComposer;
 import net.gegy1000.terrarium.server.world.data.ColumnData;
-import net.gegy1000.terrarium.server.world.data.DataKey;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.data.raster.UByteRaster;
 import net.minecraft.block.state.IBlockState;
@@ -13,8 +14,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
-
-import java.util.Optional;
 
 public class SoilSurfaceComposer implements SurfaceComposer {
     private static final long SEED = 6035435416693430887L;
@@ -30,55 +29,48 @@ public class SoilSurfaceComposer implements SurfaceComposer {
 
     private final SpatialRandom random;
 
-    private final DataKey<ShortRaster> heightKey;
-    private final DataKey<UByteRaster> slopeKey;
-
     private final IBlockState replaceBlock;
 
     public SoilSurfaceComposer(
             World world,
-            DataKey<ShortRaster> heightKey,
-            DataKey<UByteRaster> slopeKey,
             IBlockState replaceBlock
     ) {
         this.random = new SpatialRandom(world.getWorldInfo().getSeed(), SEED);
         this.depthNoise = new NoiseGeneratorPerlin(this.random, 4);
-
-        this.heightKey = heightKey;
-        this.slopeKey = slopeKey;
 
         this.replaceBlock = replaceBlock;
     }
 
     @Override
     public void composeSurface(ColumnData data, CubicPos pos, ChunkPrimeWriter writer) {
-        int globalX = pos.getMinX();
-        int globalY = pos.getMinY();
-        int globalZ = pos.getMinZ();
+        // TODO: the only strictly required data is height
 
-        Optional<ShortRaster> heightOption = data.get(this.heightKey);
-        if (!heightOption.isPresent()) return;
+        Tuple2.join(
+                data.get(EarthDataKeys.TERRAIN_HEIGHT),
+                data.get(EarthDataKeys.SLOPE)
+        ).ifPresent(tup -> {
+            ShortRaster heightRaster = tup.a;
+            UByteRaster slopeRaster = tup.b;
 
-        ShortRaster heightRaster = heightOption.get();
-        if (!this.containsSurface(pos, heightRaster)) return;
+            if (!this.containsSurface(pos, heightRaster)) return;
 
-        Optional<UByteRaster> slopeOption = data.get(this.slopeKey);
-        if (!slopeOption.isPresent()) return;
+            int minX = pos.getMinX();
+            int minY = pos.getMinY();
+            int minZ = pos.getMinZ();
 
-        UByteRaster slopeRaster = slopeOption.get();
+            this.depthBuffer = this.depthNoise.getRegion(this.depthBuffer, minX, minZ, 16, 16, 0.0625, 0.0625, 1.0);
 
-        this.depthBuffer = this.depthNoise.getRegion(this.depthBuffer, globalX, globalZ, 16, 16, 0.0625, 0.0625, 1.0);
+            for (int z = 0; z < 16; z++) {
+                for (int x = 0; x < 16; x++) {
+                    int height = heightRaster.get(x, z);
 
-        for (int localZ = 0; localZ < 16; localZ++) {
-            for (int localX = 0; localX < 16; localX++) {
-                int height = heightRaster.get(localX, localZ);
+                    this.random.setSeed(x + minX, minY, z + minZ);
 
-                this.random.setSeed(localX + globalX, globalY, localZ + globalZ);
-
-                double depthNoise = this.depthBuffer[localX + localZ * 16];
-                this.coverColumn(pos, writer, localX, localZ, height, (depthNoise + 4.0) / 8.0);
+                    double depthNoise = this.depthBuffer[x + z * 16];
+                    this.coverColumn(pos, writer, x, z, height, (depthNoise + 4.0) / 8.0);
+                }
             }
-        }
+        });
     }
 
     private boolean containsSurface(CubicPos cubePos, ShortRaster heightRaster) {

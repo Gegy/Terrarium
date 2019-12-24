@@ -1,24 +1,17 @@
 package net.gegy1000.earth.server.world.composer;
 
+import net.gegy1000.earth.server.world.EarthDataKeys;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.cover.CoverConfig;
 import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.gengen.api.writer.ChunkPrimeWriter;
 import net.gegy1000.terrarium.server.world.composer.surface.SurfaceComposer;
 import net.gegy1000.terrarium.server.world.data.ColumnData;
-import net.gegy1000.terrarium.server.world.data.DataKey;
-import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
 
 public class EarthCarvingComposer implements SurfaceComposer {
-    private final DataKey<EnumRaster<Cover>> coverKey;
-
-    public EarthCarvingComposer(DataKey<EnumRaster<Cover>> coverKey) {
-        this.coverKey = coverKey;
-    }
-
     @Override
     public void composeSurface(ColumnData data, CubicPos pos, ChunkPrimeWriter writer) {
-        data.get(this.coverKey).ifPresent(coverRaster -> {
+        data.get(EarthDataKeys.COVER).ifPresent(coverRaster -> {
             Cover focus = coverRaster.get(8, 8);
 
             CoverConfig config = focus.getConfig();

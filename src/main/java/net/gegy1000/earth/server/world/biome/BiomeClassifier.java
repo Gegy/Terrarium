@@ -45,16 +45,11 @@ public final class BiomeClassifier {
     }
 
     public static class Context {
-        public int elevation;
         public Landform landform;
         public float minTemperature;
         public float meanTemperature;
         public int annualRainfall;
         public Cover cover;
-
-        public int getElevation() {
-            return this.elevation;
-        }
 
         public boolean isSea() {
             return this.landform == Landform.SEA;

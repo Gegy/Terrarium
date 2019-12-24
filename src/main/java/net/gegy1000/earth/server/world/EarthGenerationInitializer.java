@@ -49,13 +49,13 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
         HeightFunction surfaceFunction = HeightmapStore.global(world, heightOffset);
 
         builder.addSurfaceComposer(new HeightmapSurfaceComposer(EarthDataKeys.TERRAIN_HEIGHT, Blocks.STONE.getDefaultState()));
-        builder.addSurfaceComposer(new WaterFillSurfaceComposer(EarthDataKeys.TERRAIN_HEIGHT, EarthDataKeys.LANDFORM, EarthDataKeys.WATER_LEVEL, Blocks.WATER.getDefaultState()));
-        builder.addSurfaceComposer(new SoilSurfaceComposer(world, EarthDataKeys.TERRAIN_HEIGHT, EarthDataKeys.SLOPE, Blocks.STONE.getDefaultState()));
+        builder.addSurfaceComposer(new WaterFillSurfaceComposer(Blocks.WATER.getDefaultState()));
+        builder.addSurfaceComposer(new SoilSurfaceComposer(world, Blocks.STONE.getDefaultState()));
 
         if (preview) return;
 
         if (this.ctx.settings.getBoolean(ENABLE_DECORATION)) {
-            builder.addSurfaceComposer(new EarthCarvingComposer(EarthDataKeys.COVER));
+            builder.addSurfaceComposer(new EarthCarvingComposer());
         }
 
         if (this.ctx.settings.get(CAVE_GENERATION)) {
@@ -73,20 +73,20 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
 
     private void addDecorationComposers(boolean preview, CompositeTerrariumGenerator.Builder builder) {
         if (this.ctx.settings.getBoolean(ENABLE_DECORATION)) {
-            builder.addDecorationComposer(new CoverDecorationComposer(this.ctx.world, EarthDataKeys.COVER));
+            builder.addDecorationComposer(new CoverDecorationComposer(this.ctx.world));
 
             // TODO: More decorators such as this
-            builder.addDecorationComposer(new BoulderDecorationComposer(this.ctx.world, EarthDataKeys.SLOPE));
+            builder.addDecorationComposer(new BoulderDecorationComposer(this.ctx.world));
         }
 
         if (this.ctx.settings.getBoolean(ORE_GENERATION)) {
-            OreDecorationComposer oreComposer = new OreDecorationComposer(this.ctx.world, EarthDataKeys.TERRAIN_HEIGHT);
+            OreDecorationComposer oreComposer = new OreDecorationComposer(this.ctx.world);
             VanillaOres.addTo(oreComposer);
 
             builder.addDecorationComposer(oreComposer);
         }
 
-        builder.addDecorationComposer(new FreezeSurfaceComposer(this.ctx.world, EarthDataKeys.SLOPE));
+        builder.addDecorationComposer(new FreezeSurfaceComposer(this.ctx.world));
         builder.addDecorationComposer(new VanillaEntitySpawnComposer(this.ctx.world));
 
         if (!preview) {

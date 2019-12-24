@@ -5,6 +5,7 @@ import net.gegy1000.earth.server.world.biome.BiomeClassifier;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.geography.Landform;
 import net.gegy1000.terrarium.server.util.ArrayUtils;
+import net.gegy1000.terrarium.server.util.tuple.Tuple5;
 import net.gegy1000.terrarium.server.world.composer.biome.BiomeComposer;
 import net.gegy1000.terrarium.server.world.data.ColumnData;
 import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
@@ -14,8 +15,6 @@ import net.minecraft.init.Biomes;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.biome.Biome;
 
-import java.util.Optional;
-
 public final class EarthBiomeComposer implements BiomeComposer {
     private final Biome[] biomeBuffer = new Biome[16 * 16];
 
@@ -23,40 +22,32 @@ public final class EarthBiomeComposer implements BiomeComposer {
 
     @Override
     public Biome[] composeBiomes(ColumnData data, ChunkPos columnPos) {
-        Optional<ShortRaster> elevationOption = data.get(EarthDataKeys.ELEVATION_METERS);
-        Optional<EnumRaster<Cover>> coverOption = data.get(EarthDataKeys.COVER);
-        Optional<EnumRaster<Landform>> landformOption = data.get(EarthDataKeys.LANDFORM);
-        Optional<FloatRaster> minTemperatureOption = data.get(EarthDataKeys.MIN_TEMPERATURE);
-        Optional<FloatRaster> meanTemperatureOption = data.get(EarthDataKeys.MEAN_TEMPERATURE);
-        Optional<ShortRaster> rainfallOption = data.get(EarthDataKeys.ANNUAL_RAINFALL);
+        return Tuple5.join(
+                data.get(EarthDataKeys.COVER),
+                data.get(EarthDataKeys.LANDFORM),
+                data.get(EarthDataKeys.MIN_TEMPERATURE),
+                data.get(EarthDataKeys.MEAN_TEMPERATURE),
+                data.get(EarthDataKeys.ANNUAL_RAINFALL)
+        ).map(tup -> {
+            EnumRaster<Cover> coverRaster = tup.a;
+            EnumRaster<Landform> landformRaster = tup.b;
+            FloatRaster minTemperatureRaster = tup.c;
+            FloatRaster meanTemperatureRaster = tup.d;
+            ShortRaster rainfallRaster = tup.e;
 
-        if (!elevationOption.isPresent() || !coverOption.isPresent()
-                || !minTemperatureOption.isPresent() || !meanTemperatureOption.isPresent()
-                || !rainfallOption.isPresent() || !landformOption.isPresent()
-        ) {
-            return ArrayUtils.fill(this.biomeBuffer, Biomes.DEFAULT);
-        }
+            for (int z = 0; z < 16; z++) {
+                for (int x = 0; x < 16; x++) {
+                    this.context.annualRainfall = rainfallRaster.get(x, z);
+                    this.context.minTemperature = minTemperatureRaster.get(x, z);
+                    this.context.meanTemperature = meanTemperatureRaster.get(x, z);
+                    this.context.cover = coverRaster.get(x, z);
+                    this.context.landform = landformRaster.get(x, z);
 
-        ShortRaster elevationRaster = elevationOption.get();
-        EnumRaster<Cover> coverRaster = coverOption.get();
-        EnumRaster<Landform> landformRaster = landformOption.get();
-        FloatRaster minTemperatureRaster = minTemperatureOption.get();
-        FloatRaster meanTemperatureRaster = meanTemperatureOption.get();
-        ShortRaster rainfallRaster = rainfallOption.get();
-
-        for (int z = 0; z < 16; z++) {
-            for (int x = 0; x < 16; x++) {
-                this.context.elevation = elevationRaster.get(x, z);
-                this.context.annualRainfall = rainfallRaster.get(x, z);
-                this.context.minTemperature = minTemperatureRaster.get(x, z);
-                this.context.meanTemperature = meanTemperatureRaster.get(x, z);
-                this.context.cover = coverRaster.get(x, z);
-                this.context.landform = landformRaster.get(x, z);
-
-                this.biomeBuffer[x + z * 16] = BiomeClassifier.classify(this.context);
+                    this.biomeBuffer[x + z * 16] = BiomeClassifier.classify(this.context);
+                }
             }
-        }
 
-        return this.biomeBuffer;
+            return this.biomeBuffer;
+        }).orElseGet(() -> ArrayUtils.fill(this.biomeBuffer, Biomes.DEFAULT));
     }
 }
