@@ -73,7 +73,7 @@ public final class FloatRaster extends AbstractRaster<float[]> implements Number
         void accept(float value, int x, int y);
     }
 
-    public static class Sampler {
+    public static class Sampler implements Raster.Sampler<FloatRaster> {
         private final DataKey<FloatRaster> key;
         private float defaultValue;
 
@@ -96,6 +96,7 @@ public final class FloatRaster extends AbstractRaster<float[]> implements Number
             return this.defaultValue;
         }
 
+        @Override
         public FloatRaster sample(ColumnDataCache dataCache, DataView view) {
             FloatRaster raster = FloatRaster.create(view);
             if (this.defaultValue != 0.0F) {

@@ -1,6 +1,5 @@
 package net.gegy1000.earth.server.world.data.source;
 
-import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.data.index.EarthRemoteIndex;
@@ -12,13 +11,13 @@ import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.data.source.TiledDataSource;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.tukaani.xz.SingleXZInputStream;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.nio.file.Path;
 import java.util.Optional;
 
@@ -56,9 +55,8 @@ public class LandCoverSource extends TiledDataSource<EnumRaster<Cover>> {
         }
 
         InputStream sourceInput = CACHING_INPUT.getInputStream(pos, p -> {
-            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-            connection.setRequestProperty("User-Agent", TerrariumEarth.USER_AGENT);
-            return connection.getInputStream();
+            HttpResponse response = HTTP.execute(new HttpGet(url));
+            return response.getEntity().getContent();
         });
 
         try (InputStream input = new SingleXZInputStream(new BufferedInputStream(sourceInput))) {

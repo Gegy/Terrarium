@@ -99,7 +99,7 @@ public final class ByteRaster extends AbstractRaster<byte[]> implements IntegerR
         void accept(byte value, int x, int y);
     }
 
-    public static class Sampler {
+    public static class Sampler implements Raster.Sampler<ByteRaster> {
         private final DataKey<ByteRaster> key;
         private byte defaultValue;
 
@@ -122,6 +122,7 @@ public final class ByteRaster extends AbstractRaster<byte[]> implements IntegerR
             return this.defaultValue;
         }
 
+        @Override
         public ByteRaster sample(ColumnDataCache dataCache, DataView view) {
             ByteRaster raster = ByteRaster.create(view);
             if (this.defaultValue != 0) {

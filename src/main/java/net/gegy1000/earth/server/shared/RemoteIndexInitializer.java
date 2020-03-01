@@ -17,8 +17,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
@@ -52,9 +52,7 @@ public final class RemoteIndexInitializer implements SharedDataInitializer {
 
         URL url = new URL(INDEX_URL);
 
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestProperty("User-Agent", TerrariumEarth.USER_AGENT);
-
+        URLConnection connection = url.openConnection();
         try (
                 InputStream input = new TrackedInputStream(connection.getInputStream())
                         .submitTo(new TextComponentTranslation("initializer.terrarium.remote_index.downloading"), processTracker)
@@ -93,9 +91,7 @@ public final class RemoteIndexInitializer implements SharedDataInitializer {
     private byte[] loadRemoteHash() throws IOException {
         URL url = new URL(SHA1_URL);
 
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestProperty("User-Agent", TerrariumEarth.USER_AGENT);
-
+        URLConnection connection = url.openConnection();
         try (InputStream input = connection.getInputStream()) {
             return IOUtils.toByteArray(input);
         }

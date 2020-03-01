@@ -81,7 +81,7 @@ public final class EnumRaster<T extends Enum<T>> extends AbstractRaster<byte[]> 
         void accept(T value, int x, int y);
     }
 
-    public static class Sampler<T extends Enum<T>> {
+    public static class Sampler<T extends Enum<T>> implements Raster.Sampler<EnumRaster<T>> {
         private final DataKey<EnumRaster<T>> key;
         private final T defaultVariant;
 
@@ -100,6 +100,7 @@ public final class EnumRaster<T extends Enum<T>> extends AbstractRaster<byte[]> 
             return this.defaultVariant;
         }
 
+        @Override
         public EnumRaster<T> sample(ColumnDataCache dataCache, DataView view) {
             EnumRaster<T> raster = EnumRaster.create(this.defaultVariant, view);
             AbstractRaster.sampleInto(raster, dataCache, view, this.key);

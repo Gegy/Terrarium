@@ -17,7 +17,13 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public interface EarthWorld extends ICapabilityProvider {
-    double EQUATOR_CIRCUMFERENCE = 40075000.0;
+    double EQUATOR_CIRCUMFERENCE = 40075017.0;
+    int HIGHEST_POINT_METERS = 8900;
+
+    @Nullable
+    static EarthWorld get(World world) {
+        return world.getCapability(TerrariumEarth.worldCap(), null);
+    }
 
     Geocoder getGeocoder();
 

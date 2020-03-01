@@ -5,7 +5,6 @@ import net.gegy1000.earth.server.world.ecology.GrowthIndicator;
 public final class MaxentFeatures {
     public static GrowthIndicator raw(GrowthIndicator feature, double lambda, double min, double max) {
         return predictors -> {
-            // TODO: These math ops could be optimized, but for clarity, keeping them as is unless it causes a problem
             double value = feature.evaluate(predictors);
             return lambda * (value - min) / (max - min);
         };

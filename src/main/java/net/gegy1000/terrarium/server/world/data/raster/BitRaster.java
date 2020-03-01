@@ -93,7 +93,7 @@ public final class BitRaster extends AbstractRaster<char[]> {
         return index / WORD_SIZE_BITS;
     }
 
-    public static class Sampler {
+    public static class Sampler implements Raster.Sampler<BitRaster> {
         private final DataKey<BitRaster> key;
         private boolean defaultValue;
 
@@ -116,6 +116,7 @@ public final class BitRaster extends AbstractRaster<char[]> {
             return this.defaultValue;
         }
 
+        @Override
         public BitRaster sample(ColumnDataCache dataCache, DataView view) {
             BitRaster raster = BitRaster.create(view);
             if (this.defaultValue) {

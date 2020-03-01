@@ -3,15 +3,15 @@ package net.gegy1000.earth.server.command;
 import com.google.common.base.Preconditions;
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.capability.EarthWorld;
+import net.gegy1000.earth.server.command.debugger.DebugGeoProfile;
+import net.gegy1000.earth.server.command.debugger.GeoDebugger;
 import net.gegy1000.earth.server.world.EarthDataKeys;
-import net.gegy1000.earth.server.world.ecology.GrowthIndicator;
-import net.gegy1000.earth.server.world.ecology.GrowthPredictors;
+import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.ecology.vegetation.Trees;
-import net.gegy1000.earth.server.world.ecology.vegetation.Vegetation;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
-import net.gegy1000.terrarium.server.world.data.DataKey;
 import net.gegy1000.terrarium.server.world.data.DataView;
+import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.data.raster.UByteRaster;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -27,14 +27,14 @@ import net.minecraft.util.text.TextComponentTranslation;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.function.BiFunction;
 
 public class GeoDebugCommand extends CommandBase {
     private static final Path DEBUG = Paths.get("debug");
-    private static final int RASTER_RADIUS = 64;
+    private static final int RASTER_RADIUS = 128;
     private static final int RASTER_SIZE = RASTER_RADIUS * 2 + 1;
 
     @Override
@@ -44,7 +44,7 @@ public class GeoDebugCommand extends CommandBase {
 
     @Override
     public int getRequiredPermissionLevel() {
-        return 0;
+        return 3;
     }
 
     @Override
@@ -58,10 +58,21 @@ public class GeoDebugCommand extends CommandBase {
 
         EarthWorld earth = player.world.getCapability(TerrariumEarth.worldCap(), null);
         if (earth != null) {
+            GeoDebugger debug = GeoDebugger.from(player.world);
+
             ContainerUi.Builder builder = ContainerUi.builder(player)
                     .withTitle(DeferredTranslator.translate(player, new TextComponentTranslation("container.earth.geodebug.name")));
 
-            builder.withElement(Items.FILLED_MAP, "Make Rasters", () -> this.openRasterUi(player));
+            builder.withElement(Items.FILLED_MAP, "Make Rasters", () -> this.openRasterUi(player, debug));
+
+            builder.withElement(Items.WRITABLE_BOOK, "Take Profile Here", () -> {
+                DebugGeoProfile profile = debug.takeProfile("Current Location", player.posX, player.posZ);
+                profile.sendTo(player);
+            });
+
+            builder.withElement(Items.ENDER_PEARL, "Export Test Profiles", () -> {
+                this.writeProfiles(debug.takeTestProfiles());
+            });
 
             ContainerUi ui = builder.build();
             player.displayGUIChest(ui.createInventory());
@@ -70,69 +81,37 @@ public class GeoDebugCommand extends CommandBase {
         }
     }
 
-    private void openRasterUi(EntityPlayerMP player) {
+    private void openRasterUi(EntityPlayerMP player, GeoDebugger debug) {
         ContainerUi.Builder builder = ContainerUi.builder(player)
                 .withTitle(DeferredTranslator.translate(player, new TextComponentTranslation("container.earth.geodebug.name")));
 
         builder.withElement(Item.getItemFromBlock(Blocks.SAPLING), "Vegetation Suitability Index", () -> {
-            this.writeRasters(player,
-                    this.vegetation("acacia", Trees.ACACIA),
-                    this.vegetation("birch", Trees.BIRCH),
-                    this.vegetation("oak", Trees.OAK),
-                    this.vegetation("jungle", Trees.JUNGLE),
-                    this.vegetation("spruce", Trees.SPRUCE),
-                    this.vegetation("pine", Trees.PINE)
-            );
+            this.writeRaster(player, debug.vegetation("acacia", Trees.ACACIA));
+            this.writeRaster(player, debug.vegetation("birch", Trees.BIRCH));
+            this.writeRaster(player, debug.vegetation("oak", Trees.OAK));
+            this.writeRaster(player, debug.vegetation("jungle", Trees.JUNGLE));
+            this.writeRaster(player, debug.vegetation("spruce", Trees.SPRUCE));
+            this.writeRaster(player, debug.vegetation("pine", Trees.PINE));
         });
 
         builder.withElement(Items.CLAY_BALL, "Soil", () -> {
-            this.writeRasters(player,
-                    this.variable("clay_content", EarthDataKeys.CLAY_CONTENT),
-                    this.variable("silt_content", EarthDataKeys.SILT_CONTENT),
-                    this.variable("sand_content", EarthDataKeys.SAND_CONTENT)
-            );
+            this.writeRaster(player, debug.scaledHeatmap("clay_content", UByteRaster.sampler(EarthDataKeys.CLAY_CONTENT)));
+            this.writeRaster(player, debug.scaledHeatmap("silt_content", UByteRaster.sampler(EarthDataKeys.SILT_CONTENT)));
+            this.writeRaster(player, debug.scaledHeatmap("sand_content", UByteRaster.sampler(EarthDataKeys.SAND_CONTENT)));
+        });
+
+        builder.withElement(Items.FILLED_MAP, "Cover", () -> {
+            EnumRaster.Sampler<Cover> sampler = EnumRaster.sampler(EarthDataKeys.COVER, Cover.NO);
+            this.writeRaster(player, debug.cover("cover", sampler));
         });
 
         ContainerUi ui = builder.build();
         player.displayGUIChest(ui.createInventory());
     }
 
-    private RasterProvider vegetation(String name, Vegetation vegetation) {
-        return new RasterProvider(name).function((dataCache, view) -> {
-            GrowthIndicator indicator = vegetation.getGrowthIndicator();
-
-            GrowthPredictors predictors = new GrowthPredictors();
-            GrowthPredictors.Sampler predictorSampler = GrowthPredictors.sampler();
-
-            UByteRaster raster = UByteRaster.create(view);
-
-            for (int y = 0; y < view.getHeight(); y++) {
-                for (int x = 0; x < view.getWidth(); x++) {
-                    int blockX = view.getMinX() + x;
-                    int blockZ = view.getMinY() + y;
-                    predictorSampler.sampleTo(dataCache, blockX, blockZ, predictors);
-
-                    if (predictors.elevation >= 0.0) {
-                        double suitabilityIndex = indicator.evaluate(predictors);
-                        raster.set(x, y, MathHelper.floor(suitabilityIndex * 255.0));
-                    }
-                }
-            }
-
-            return raster;
-        });
-    }
-
-    private RasterProvider variable(String name, DataKey<UByteRaster> key) {
-        return new RasterProvider(name).function((dataCache, view) -> {
-            UByteRaster.Sampler sampler = UByteRaster.sampler(key);
-            return sampler.sample(dataCache, view);
-        });
-    }
-
-    private void writeRasters(EntityPlayerMP player, RasterProvider... providers) {
+    private void writeRaster(EntityPlayerMP player, GeoDebugger.RasterSampler sampler) {
         TerrariumWorld terrarium = TerrariumWorld.get(player.world);
-        Preconditions.checkNotNull(terrarium, "terrarium world data was null");
+        Preconditions.checkNotNull(terrarium, "terrarium world was null");
 
         ColumnDataCache dataCache = terrarium.getDataCache();
 
@@ -141,40 +120,41 @@ public class GeoDebugCommand extends CommandBase {
 
         DataView view = DataView.rect(x - RASTER_RADIUS, z - RASTER_RADIUS, RASTER_SIZE, RASTER_SIZE);
 
-        for (RasterProvider provider : providers) {
-            UByteRaster raster = provider.function.apply(dataCache, view);
-            this.writeRaster(raster, provider.name);
-        }
-    }
-
-    private void writeRaster(UByteRaster raster, String name) {
-        BufferedImage image = new BufferedImage(raster.getWidth(), raster.getHeight(), BufferedImage.TYPE_INT_RGB);
-        for (int y = 0; y < raster.getHeight(); y++) {
-            for (int x = 0; x < raster.getWidth(); x++) {
-                int value = raster.get(x, y);
-                image.setRGB(x, y, 255 << 16 | value << 8);
-            }
-        }
+        BufferedImage image = sampler.sample(dataCache, view);
 
         try {
             if (!Files.exists(DEBUG)) Files.createDirectories(DEBUG);
-            ImageIO.write(image, "png", DEBUG.resolve(name + ".png").toFile());
+            ImageIO.write(image, "png", DEBUG.resolve(sampler.name + ".png").toFile());
         } catch (IOException e) {
-            TerrariumEarth.LOGGER.warn("Failed to write raster {}", name, e);
+            TerrariumEarth.LOGGER.warn("Failed to write raster {}", sampler.name, e);
         }
     }
 
-    private static class RasterProvider {
-        private final String name;
-        private BiFunction<ColumnDataCache, DataView, UByteRaster> function;
+    private void writeProfiles(DebugGeoProfile[] profiles) {
+        try {
+            if (!Files.exists(DEBUG)) Files.createDirectories(DEBUG);
 
-        RasterProvider(String name) {
-            this.name = name;
-        }
+            Path path = DEBUG.resolve("debug_profiles.csv");
 
-        public RasterProvider function(BiFunction<ColumnDataCache, DataView, UByteRaster> function) {
-            this.function = function;
-            return this;
+            try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(path))) {
+                writer.println("Name,Latitude,Longitude," +
+                        "Surface Elevation,Cover," +
+                        "Mean Temperature,Min Temperature,Annual Rainfall," +
+                        "Silt Content,Sand Content,Clay Content," +
+                        "Organic Carbon Content,Cation Exchange Capacity,Soil pH"
+                );
+
+                for (DebugGeoProfile profile : profiles) {
+                    writer.print(profile.name + "," + profile.latitude + "," + profile.longitude + ",");
+                    writer.print(profile.surfaceElevation + "," + profile.cover + ",");
+                    writer.print(profile.meanTemperature + "," + profile.minTemperature + "," + profile.annualRainfall + ",");
+                    writer.print(profile.siltContent + "," + profile.sandContent + "," + profile.clayContent + ",");
+                    writer.print(profile.organicCarbonContent + "," + profile.cationExchangeCapacity + "," + profile.soilPh + ",");
+                    writer.println();
+                }
+            }
+        } catch (IOException e) {
+            TerrariumEarth.LOGGER.warn("Failed to write profiles", e);
         }
     }
 }

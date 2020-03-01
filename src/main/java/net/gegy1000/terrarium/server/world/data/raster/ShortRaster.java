@@ -93,7 +93,7 @@ public final class ShortRaster extends AbstractRaster<short[]> implements Intege
         void accept(short value, int x, int y);
     }
 
-    public static class Sampler {
+    public static class Sampler implements Raster.Sampler<ShortRaster> {
         private final DataKey<ShortRaster> key;
         private short defaultValue;
 
@@ -116,6 +116,7 @@ public final class ShortRaster extends AbstractRaster<short[]> implements Intege
             return this.defaultValue;
         }
 
+        @Override
         public ShortRaster sample(ColumnDataCache dataCache, DataView view) {
             ShortRaster raster = ShortRaster.create(view);
             if (this.defaultValue != 0) {

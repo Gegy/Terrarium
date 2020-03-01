@@ -5,13 +5,13 @@ import net.minecraft.util.math.BlockPos;
 import java.util.Objects;
 
 public final class Coordinate {
-    private final CoordinateReference state;
+    private final CoordinateReference crs;
 
     private final double x;
     private final double z;
 
-    public Coordinate(CoordinateReference state, double x, double z) {
-        this.state = state;
+    public Coordinate(CoordinateReference crs, double x, double z) {
+        this.crs = crs;
         this.x = x;
         this.z = z;
     }
@@ -29,21 +29,21 @@ public final class Coordinate {
     }
 
     public double getBlockX() {
-        if (this.state == null) {
+        if (this.crs == null) {
             return this.x;
         }
-        return this.state.blockX(this.x);
+        return this.crs.blockX(this.x);
     }
 
     public double getBlockZ() {
-        if (this.state == null) {
+        if (this.crs == null) {
             return this.z;
         }
-        return this.state.blockZ(this.z);
+        return this.crs.blockZ(this.z);
     }
 
     public Coordinate to(CoordinateReference to) {
-        if (this.state == to) {
+        if (this.crs == to) {
             return this;
         }
 
@@ -64,13 +64,13 @@ public final class Coordinate {
         double blockX = coordinate.getBlockX();
         double blockZ = coordinate.getBlockZ();
 
-        if (this.state == null) {
+        if (this.crs == null) {
             return Coordinate.atBlock(this.x + blockX, this.z + blockZ);
         }
 
-        double offsetX = this.state.x(blockX);
-        double offsetZ = this.state.z(blockX);
-        return new Coordinate(this.state, this.x + offsetX, this.z + offsetZ);
+        double offsetX = this.crs.x(blockX);
+        double offsetZ = this.crs.z(blockX);
+        return new Coordinate(this.crs, this.x + offsetX, this.z + offsetZ);
     }
 
     public BlockPos toBlockPos() {
@@ -78,21 +78,21 @@ public final class Coordinate {
     }
 
     public boolean is(CoordinateReference state) {
-        return Objects.equals(this.state, state);
+        return Objects.equals(this.crs, state);
     }
 
     public static Coordinate min(Coordinate left, Coordinate right) {
-        if (!left.is(right.state)) {
+        if (!left.is(right.crs)) {
             throw new IllegalArgumentException("Cannot get minimum coordinate between coordinates of different state");
         }
-        return new Coordinate(left.state, Math.min(left.getX(), right.getX()), Math.min(left.getZ(), right.getZ()));
+        return new Coordinate(left.crs, Math.min(left.getX(), right.getX()), Math.min(left.getZ(), right.getZ()));
     }
 
     public static Coordinate max(Coordinate left, Coordinate right) {
-        if (!left.is(right.state)) {
+        if (!left.is(right.crs)) {
             throw new IllegalArgumentException("Cannot get maximum coordinate between coordinates of different state");
         }
-        return new Coordinate(left.state, Math.max(left.getX(), right.getX()), Math.max(left.getZ(), right.getZ()));
+        return new Coordinate(left.crs, Math.max(left.getX(), right.getX()), Math.max(left.getZ(), right.getZ()));
     }
 
     @Override

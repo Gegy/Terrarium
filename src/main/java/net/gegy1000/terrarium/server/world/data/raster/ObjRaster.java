@@ -69,7 +69,7 @@ public final class ObjRaster<T> extends AbstractRaster<T[]> {
         void accept(T value, int x, int y);
     }
 
-    public static class Sampler<T> {
+    public static class Sampler<T> implements Raster.Sampler<ObjRaster<T>> {
         private final DataKey<ObjRaster<T>> key;
         private final T defaultValue;
 
@@ -88,6 +88,7 @@ public final class ObjRaster<T> extends AbstractRaster<T[]> {
             return this.defaultValue;
         }
 
+        @Override
         public ObjRaster<T> sample(ColumnDataCache dataCache, DataView view) {
             ObjRaster<T> raster = ObjRaster.create(this.defaultValue, view);
             AbstractRaster.sampleInto(raster, dataCache, view, this.key);

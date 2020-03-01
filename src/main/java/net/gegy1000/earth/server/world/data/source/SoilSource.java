@@ -1,6 +1,5 @@
 package net.gegy1000.earth.server.world.data.source;
 
-import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.capability.EarthWorld;
 import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.earth.server.util.ZoomLevels;
@@ -13,11 +12,11 @@ import net.gegy1000.terrarium.server.util.Vec2i;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.data.source.TiledDataSource;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Function;
@@ -96,9 +95,8 @@ public class SoilSource extends TiledDataSource<ShortRaster> {
         }
 
         try (InputStream input = this.cachingInput.getInputStream(pos, p -> {
-            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-            connection.setRequestProperty("User-Agent", TerrariumEarth.USER_AGENT);
-            return connection.getInputStream();
+            HttpResponse response = HTTP.execute(new HttpGet(url));
+            return response.getEntity().getContent();
         })) {
             return Optional.of(TerrariumRasterReader.read(input, ShortRaster.class));
         }

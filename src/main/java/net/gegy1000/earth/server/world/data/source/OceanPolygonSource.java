@@ -4,7 +4,6 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
-import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.earth.server.world.data.PolygonData;
 import net.gegy1000.earth.server.world.data.index.EarthRemoteIndex;
@@ -14,14 +13,14 @@ import net.gegy1000.earth.server.world.data.source.cache.FileTileCache;
 import net.gegy1000.terrarium.server.util.Vec2i;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.data.source.TiledDataSource;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.tukaani.xz.SingleXZInputStream;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -59,9 +58,8 @@ public class OceanPolygonSource extends TiledDataSource<PolygonData> {
         }
 
         InputStream sourceInput = CACHING_INPUT.getInputStream(pos, p -> {
-            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-            connection.setRequestProperty("User-Agent", TerrariumEarth.USER_AGENT);
-            return connection.getInputStream();
+            HttpResponse response = HTTP.execute(new HttpGet(url));
+            return response.getEntity().getContent();
         });
 
         try (InputStream input = new SingleXZInputStream(new BufferedInputStream(sourceInput))) {

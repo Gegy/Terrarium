@@ -40,6 +40,7 @@ public class ClientEventHandler {
             if (MC.player != null && MC.player.ticksExisted > 1) {
                 if (awaitingLoad) {
                     awaitingLoad = false;
+                    // TODO: must display this before customization!
                     if (!TerrariumConfig.acceptedRemoteDataWarning) {
                         MC.displayGuiScreen(new RemoteDataWarningGui(MC.currentScreen));
                     }

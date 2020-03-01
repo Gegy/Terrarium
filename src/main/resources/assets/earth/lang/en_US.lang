@@ -10,7 +10,7 @@ geotool.earth.locate.success=You are at %s
 
 container.earth.geodebug.name=Earth Debug Toolbox
 
-gui.earth.credits=Terrarium data provided by:
+gui.earth.credits=Terrarium data:
 gui.earth.spawnpoint=Set Spawn
 gui.earth.locate=Locate Player
 gui.earth.teleport=Teleport Player
@@ -89,7 +89,7 @@ commands.earth.wrong_world=Cannot use command in this world
 
 commands.earth.geotp.usage=geotp <latitude> <longitude> OR geotp <place>
 commands.earth.geotp.not_found=Could not find "%s"
-commands.earth.geotp.success=Successfully teleported to %s, %s
+commands.earth.geotp.success=Teleported %s to %.5f, %.5f
 commands.earth.geotp.error=An error occurred while finding "%s": %s: %s
 
 commands.earth.geotool.usage=geotool

@@ -46,10 +46,10 @@ public class Voronoi {
         int height = destView.getHeight();
 
         for (int y = 0; y < height; y++) {
-            double srcY = y * scaleY + offsetX;
+            double srcY = y * scaleY + offsetY;
 
             for (int x = 0; x < width; x++) {
-                double srcX = x * scaleX + offsetY;
+                double srcX = x * scaleX + offsetX;
 
                 int srcIndex = this.getCellIndex(srcView, srcX, srcY);
                 int destIndex = x + y * width;

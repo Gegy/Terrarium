@@ -2,7 +2,7 @@ buildscript {
   repositories {
     jcenter()
     maven { url = "http://files.minecraftforge.net/maven" }
-    maven { url "https://plugins.gradle.org/m2/" }
+    maven { url = "https://plugins.gradle.org/m2/" }
   }
   dependencies {
     classpath "net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT"
@@ -20,7 +20,7 @@ archivesBaseName = "terrarium"
 sourceCompatibility = targetCompatibility = "1.8"
 
 minecraft {
-  version = "1.12.2-14.23.5.2768 "
+  version = "1.12.2-14.23.5.2847"
   runDir = "minecraft"
   mappings = "stable_39"
 }

@@ -39,12 +39,10 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import java.util.Collection;
 import java.util.Random;
 
-// TODO: Code to update old terrarium world configs to new format
+// TODO: Warn loading old Terrarium worlds
 public class EarthWorldType extends TerrariumWorldType {
     public static final double LANDCOVER_SCALE = EarthWorld.EQUATOR_CIRCUMFERENCE / LandCoverSource.GLOBAL_WIDTH;
     public static final double CLIMATE_SCALE = EarthWorld.EQUATOR_CIRCUMFERENCE / WorldClimateRaster.WIDTH;
-
-    public static final int HIGHEST_POINT_METERS = 8900;
 
     private static final ResourceLocation IDENTIFIER = new ResourceLocation(TerrariumEarth.ID, "earth");
     private static final ResourceLocation PRESET = new ResourceLocation(TerrariumEarth.ID, "global_default");
@@ -168,9 +166,23 @@ public class EarthWorldType extends TerrariumWorldType {
     }
 
     @Override
+    public float getCloudHeight() {
+        GenerationSettings settings = TerrariumUserTracker.getProvidedSettings();
+        if (settings == null) return 128.0F;
+
+        double cloudHeight = this.transformHeight(settings, 2000.0);
+        return (float) Math.max(cloudHeight, settings.getDouble(HEIGHT_OFFSET) + 64.0);
+    }
+
+    @Override
     protected int calculateMaxGenerationHeight(WorldServer world, GenerationSettings settings) {
-        double globalScale = settings.getDouble(TERRESTRIAL_HEIGHT_SCALE) / settings.getDouble(WORLD_SCALE);
-        double highestPointBlocks = HIGHEST_POINT_METERS * globalScale;
-        return MathHelper.ceil(highestPointBlocks + settings.getDouble(HEIGHT_OFFSET) + 1);
+        double height = this.transformHeight(settings, EarthWorld.HIGHEST_POINT_METERS);
+        return MathHelper.ceil(height) + 1;
+    }
+
+    private double transformHeight(GenerationSettings settings, double height) {
+        double scale = settings.getDouble(TERRESTRIAL_HEIGHT_SCALE) / settings.getDouble(WORLD_SCALE);
+        double offset = settings.getDouble(HEIGHT_OFFSET);
+        return height * scale + offset;
     }
 }

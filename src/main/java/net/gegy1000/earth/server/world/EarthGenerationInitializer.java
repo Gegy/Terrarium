@@ -1,13 +1,12 @@
 package net.gegy1000.earth.server.world;
 
 import net.gegy1000.earth.server.capability.HeightmapStore;
-import net.gegy1000.earth.server.world.composer.BoulderDecorationComposer;
 import net.gegy1000.earth.server.world.composer.CoverDecorationComposer;
 import net.gegy1000.earth.server.world.composer.EarthBiomeComposer;
 import net.gegy1000.earth.server.world.composer.EarthCarvingComposer;
 import net.gegy1000.earth.server.world.composer.FreezeSurfaceComposer;
 import net.gegy1000.earth.server.world.composer.OreDecorationComposer;
-import net.gegy1000.earth.server.world.composer.SoilSurfaceComposer;
+import net.gegy1000.earth.server.world.composer.TerrainSurfaceComposer;
 import net.gegy1000.earth.server.world.composer.WaterFillSurfaceComposer;
 import net.gegy1000.earth.server.world.ores.VanillaOres;
 import net.gegy1000.gengen.api.HeightFunction;
@@ -37,7 +36,11 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
     @Override
     public void setup(CompositeTerrariumGenerator.Builder builder, boolean preview) {
         this.addSurfaceComposers(builder, preview);
-        this.addDecorationComposers(preview, builder);
+        this.addDecorationComposers(builder);
+
+        if (!preview) {
+            builder.addStructureComposer(new VanillaStructureComposer(this.ctx.world));
+        }
 
         builder.setBiomeComposer(new EarthBiomeComposer());
         builder.setSpawnPosition(new Coordinate(this.ctx.lngLatCrs, this.ctx.settings.getDouble(SPAWN_LONGITUDE), this.ctx.settings.getDouble(SPAWN_LATITUDE)));
@@ -50,7 +53,7 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
 
         builder.addSurfaceComposer(new HeightmapSurfaceComposer(EarthDataKeys.TERRAIN_HEIGHT, Blocks.STONE.getDefaultState()));
         builder.addSurfaceComposer(new WaterFillSurfaceComposer(Blocks.WATER.getDefaultState()));
-        builder.addSurfaceComposer(new SoilSurfaceComposer(world, Blocks.STONE.getDefaultState()));
+        builder.addSurfaceComposer(new TerrainSurfaceComposer(world, Blocks.STONE.getDefaultState()));
 
         if (preview) return;
 
@@ -71,12 +74,9 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
         }
     }
 
-    private void addDecorationComposers(boolean preview, CompositeTerrariumGenerator.Builder builder) {
+    private void addDecorationComposers(CompositeTerrariumGenerator.Builder builder) {
         if (this.ctx.settings.getBoolean(ENABLE_DECORATION)) {
             builder.addDecorationComposer(new CoverDecorationComposer(this.ctx.world));
-
-            // TODO: More decorators such as this
-            builder.addDecorationComposer(new BoulderDecorationComposer(this.ctx.world));
         }
 
         if (this.ctx.settings.getBoolean(ORE_GENERATION)) {
@@ -88,9 +88,5 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
 
         builder.addDecorationComposer(new FreezeSurfaceComposer(this.ctx.world));
         builder.addDecorationComposer(new VanillaEntitySpawnComposer(this.ctx.world));
-
-        if (!preview) {
-            builder.addStructureComposer(new VanillaStructureComposer(this.ctx.world));
-        }
     }
 }

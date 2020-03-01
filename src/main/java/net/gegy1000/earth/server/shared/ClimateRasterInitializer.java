@@ -1,6 +1,5 @@
 package net.gegy1000.earth.server.shared;
 
-import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.util.ProcessTracker;
 import net.gegy1000.earth.server.util.ProgressTracker;
 import net.gegy1000.earth.server.world.data.source.WorldClimateRaster;
@@ -10,8 +9,8 @@ import net.minecraft.util.text.TextComponentTranslation;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -45,10 +44,7 @@ public final class ClimateRasterInitializer implements SharedDataInitializer {
     }
 
     private static InputStream getRemoteStream() throws IOException {
-        URL url = new URL(URL);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestProperty("User-Agent", TerrariumEarth.USER_AGENT);
-
+        URLConnection connection = new URL(URL).openConnection();
         return connection.getInputStream();
     }
 }

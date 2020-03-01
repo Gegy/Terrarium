@@ -1,6 +1,9 @@
 package net.gegy1000.terrarium.server.world.data.raster;
 
+import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.DataView;
+
+import java.util.function.BiFunction;
 
 public interface Raster<T> {
     int getWidth();
@@ -44,5 +47,14 @@ public interface Raster<T> {
     static <R extends Raster<?>> void rasterCopy(R src, R dest) {
         int length = src.getWidth() * src.getHeight();
         System.arraycopy(src.getData(), 0, dest.getData(), 0, length);
+    }
+
+    interface Sampler<T> extends BiFunction<ColumnDataCache, DataView, T> {
+        T sample(ColumnDataCache dataCache, DataView view);
+
+        @Override
+        default T apply(ColumnDataCache dataCache, DataView view) {
+            return this.sample(dataCache, view);
+        }
     }
 }

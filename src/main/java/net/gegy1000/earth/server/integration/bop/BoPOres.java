@@ -24,7 +24,7 @@ public final class BoPOres {
     public static final OreConfig TANZANITE = OreConfig.builder()
             .ore(BOPBlocks.gem_ore.getDefaultState().withProperty(BlockBOPGem.VARIANT, BOPGems.TANZANITE))
             .distribution(OreDistribution.vanillaUniform(12, 32))
-            .select((data, x, z) -> MIN_TEMPERATURE.sample(data, x, z) < BiomeClassifier.FREEZE_TEMPERATURE)
+            .select((data, x, z) -> MIN_TEMPERATURE.sample(data, x, z) < BiomeClassifier.FREEZE_MIN_TEMPERATURE)
             .build();
 
     public static final OreConfig SAPPHIRE = OreConfig.builder()
