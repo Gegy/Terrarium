@@ -8,7 +8,10 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiCreateWorld;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.relauncher.ReflectionHelper.UnableToFindFieldException;
+import net.minecraftforge.fml.relauncher.ReflectionHelper.UnableToFindMethodException;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -23,36 +26,16 @@ public class ClientProxy extends ServerProxy {
 
     static {
         try {
-            ClientProxy.selectedWorldType = reflectSelectedWorldType();
-        } catch (ReflectiveOperationException e) {
+            selectedWorldType = ObfuscationReflectionHelper.findField(GuiCreateWorld.class, "field_146331_K");
+        } catch (UnableToFindFieldException e) {
             Terrarium.LOGGER.warn("Failed to reflect selected world type", e);
         }
 
         try {
-            ClientProxy.actionPerformed = reflectActionPerformed();
-        } catch (ReflectiveOperationException e) {
+            actionPerformed = ObfuscationReflectionHelper.findMethod(GuiScreen.class, "func_146284_a", void.class, GuiButton.class);
+        } catch (UnableToFindMethodException e) {
             Terrarium.LOGGER.warn("Failed to reflect action performed", e);
         }
-    }
-
-    private static Field reflectSelectedWorldType() throws ReflectiveOperationException {
-        for (Field field : GuiCreateWorld.class.getDeclaredFields()) {
-            if (field.getType() == int.class) {
-                field.setAccessible(true);
-                return field;
-            }
-        }
-        throw new ReflectiveOperationException("Could not find selected world type field");
-    }
-
-    private static Method reflectActionPerformed() throws ReflectiveOperationException {
-        for (Method method : GuiScreen.class.getDeclaredMethods()) {
-            if (method.getParameterCount() == 1 && method.getParameterTypes()[0] == GuiButton.class && method.getReturnType() == void.class) {
-                method.setAccessible(true);
-                return method;
-            }
-        }
-        throw new ReflectiveOperationException("Could not find action performed method");
     }
 
     @Override
@@ -79,9 +62,9 @@ public class ClientProxy extends ServerProxy {
     }
 
     public static void actionPerformed(GuiScreen gui, GuiButton button) {
-        if (ClientProxy.actionPerformed != null) {
+        if (actionPerformed != null) {
             try {
-                ClientProxy.actionPerformed.invoke(gui, button);
+                actionPerformed.invoke(gui, button);
             } catch (IllegalAccessException | InvocationTargetException e) {
                 Terrarium.LOGGER.warn("Failed to invoke actionPerformed", e);
             }
@@ -89,11 +72,11 @@ public class ClientProxy extends ServerProxy {
     }
 
     public static int getSelectedWorldType(GuiCreateWorld gui) {
-        if (ClientProxy.selectedWorldType == null) {
+        if (selectedWorldType == null) {
             return 0;
         }
         try {
-            return (int) ClientProxy.selectedWorldType.get(gui);
+            return (int) selectedWorldType.get(gui);
         } catch (IllegalAccessException e) {
             return 0;
         }

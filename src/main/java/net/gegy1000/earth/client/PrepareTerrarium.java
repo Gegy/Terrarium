@@ -1,12 +1,12 @@
 package net.gegy1000.earth.client;
 
 import net.gegy1000.earth.TerrariumEarth;
+import net.gegy1000.earth.client.gui.RemoteDataWarningGui;
 import net.gegy1000.earth.client.gui.SharedInitializingGui;
 import net.gegy1000.earth.server.config.TerrariumEarthConfig;
 import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.gengen.api.GenericWorldType;
 import net.gegy1000.terrarium.client.ClientProxy;
-import net.gegy1000.earth.client.gui.RemoteDataWarningGui;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
@@ -20,27 +20,13 @@ import net.minecraft.world.storage.ISaveFormat;
 import net.minecraft.world.storage.WorldInfo;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.relauncher.ReflectionHelper.UnableToFindMethodException;
 import net.minecraftforge.fml.relauncher.Side;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
 
 @Mod.EventBusSubscriber(modid = TerrariumEarth.ID, value = Side.CLIENT)
 public final class PrepareTerrarium {
-    private static Method actionPerformedMethod;
-
-    static {
-        try {
-            actionPerformedMethod = ObfuscationReflectionHelper.findMethod(GuiScreen.class, "func_146284_a", void.class, GuiButton.class);
-        } catch (UnableToFindMethodException e) {
-            TerrariumEarth.LOGGER.warn("Failed to find actionPerformed method", e);
-        }
-    }
-
     public static GuiScreen prepareScreen(GuiScreen returnTo, Runnable onReturn) {
         GuiScreen screen = new SharedInitializingGui(returnTo, onReturn);
         if (!TerrariumEarthConfig.acceptedRemoteDataWarning) {
@@ -70,13 +56,7 @@ public final class PrepareTerrarium {
     private static void onCreateWorldPressed(GuiButton button, GuiScreen gui) {
         gui.mc.displayGuiScreen(new SharedInitializingGui(gui, () -> {
             gui.mc.displayGuiScreen(gui);
-            if (actionPerformedMethod != null) {
-                try {
-                    actionPerformedMethod.invoke(gui, button);
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    TerrariumEarth.LOGGER.warn("Failed to invoke actionPerformed", e);
-                }
-            }
+            ClientProxy.actionPerformed(gui, button);
         }));
     }
 
