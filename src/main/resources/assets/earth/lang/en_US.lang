@@ -111,6 +111,9 @@ config.earth.street_view_zoom.tooltip=The zoom level to load street view images 
 config.earth.osm_geocoder=Use OpenStreetMap Geocoder
 config.earth.osm_geocoder.tooltip=If true, the Nominatim OpenStreetMap Geocoder will be used instead of Google's
 
+config.earth.accept_remote_data=Accepted Remote Data Warning
+config.earth.accept_remote_data.tooltip=If true, you will no longer be warned about remote data usage. (Automatically set through GUI)
+
 # Initializers
 
 initializer.terrarium.climate_raster=Loading climate raster...

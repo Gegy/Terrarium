@@ -1,9 +1,8 @@
 package net.gegy1000.terrarium.client;
 
+import net.gegy1000.earth.client.gui.RemoteDataWarningGui;
 import net.gegy1000.gengen.api.GenericWorldType;
 import net.gegy1000.terrarium.Terrarium;
-import net.gegy1000.terrarium.client.gui.RemoteDataWarningGui;
-import net.gegy1000.terrarium.server.config.TerrariumConfig;
 import net.gegy1000.terrarium.server.message.TerrariumHandshakeMessage;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.minecraft.client.Minecraft;
@@ -27,43 +26,23 @@ public class ClientEventHandler {
     private static final Minecraft MC = Minecraft.getMinecraft();
     private static final int STRUCTURES_BUTTON_ID = 4;
 
-    private static int gameTicks = 0;
-
-    private static boolean awaitingLoad;
     private static boolean handshakeQueued;
 
     @SubscribeEvent
     public static void onTick(TickEvent.ClientTickEvent event) {
-        if (event.phase == TickEvent.Phase.END) {
-            gameTicks++;
+        if (!handshakeQueued) return;
 
-            if (MC.player != null && MC.player.ticksExisted > 1) {
-                if (awaitingLoad) {
-                    awaitingLoad = false;
-                    // TODO: must display this before customization!
-                    if (!TerrariumConfig.acceptedRemoteDataWarning) {
-                        MC.displayGuiScreen(new RemoteDataWarningGui(MC.currentScreen));
-                    }
-                }
-                if (handshakeQueued) {
-                    handshakeQueued = false;
-                    Terrarium.NETWORK.sendToServer(new TerrariumHandshakeMessage());
-                }
-            }
+        if (MC.player != null && MC.player.ticksExisted > 1) {
+            handshakeQueued = false;
+            Terrarium.NETWORK.sendToServer(new TerrariumHandshakeMessage());
         }
     }
 
     @SubscribeEvent
     public static void onJoinWorld(WorldEvent.Load event) {
         World world = event.getWorld();
-        if (world.isRemote) {
-            TerrariumWorldType worldType = GenericWorldType.unwrapAs(world.getWorldType(), TerrariumWorldType.class);
-            if (worldType != null && MC.isIntegratedServerRunning()) {
-                awaitingLoad = true;
-            }
-            if (Terrarium.serverHasMod) {
-                handshakeQueued = true;
-            }
+        if (world.isRemote && Terrarium.serverHasMod) {
+            handshakeQueued = true;
         }
     }
 
@@ -104,9 +83,5 @@ public class ClientEventHandler {
                 }
             }
         }
-    }
-
-    public static int getGameTicks() {
-        return ClientEventHandler.gameTicks;
     }
 }

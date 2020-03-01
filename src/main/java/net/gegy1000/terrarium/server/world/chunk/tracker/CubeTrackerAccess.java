@@ -8,7 +8,6 @@ import net.gegy1000.terrarium.Terrarium;
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.WorldServer;
-import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -27,8 +26,9 @@ public class CubeTrackerAccess implements ChunkTrackerAccess {
 
     static {
         try {
-            cubeWatchersField = ReflectionHelper.findField(PlayerCubeMap.class, "cubeWatchers");
-        } catch (ReflectionHelper.UnableToFindFieldException e) {
+            cubeWatchersField = PlayerCubeMap.class.getDeclaredField("cubeWatchers");
+            cubeWatchersField.setAccessible(true);
+        } catch (NoSuchFieldException e) {
             Terrarium.LOGGER.error("Failed to find cube watchers field", e);
         }
         try {

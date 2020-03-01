@@ -7,7 +7,7 @@ gui.terrarium.remote_data_warning.1=Warning: Terrarium downloads data from the I
 gui.terrarium.remote_data_warning.2=Various data may be required for chunk generation.
 gui.terrarium.remote_data_warning.3=This can lead to large data usage, depending on the chunks generated.
 gui.terrarium.remote_data_warning.4=Data is only requested for chunks that players view, and is then cached.
-gui.terrarium.remote_data_warning.5=Terrarium is not responsible for any damage caused.
+gui.terrarium.remote_data_warning.5=If you are on a limited connection, please watch your data usage!
 
 gui.terrarium.select_preset.name=Select World Preset
 
@@ -22,8 +22,3 @@ property.terrarium.locked.name=Coming in a future version!
 
 toast.terrarium.data_failure.title=Terrarium data failures
 toast.terrarium.data_failure.desc=Failed to load %s data tiles
-
-# Config
-
-config.terrarium.accept_remote_data=Accepted Remote Data Warning
-config.terrarium.accept_remote_data.tooltip=If true, you will no longer be warned about remote data usage. (Automatically set through GUI)

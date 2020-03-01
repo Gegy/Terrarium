@@ -19,7 +19,6 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
@@ -32,9 +31,10 @@ public final class SavedCubeTracker {
 
     static {
         try {
-            cubeWatcherPlayersField = ReflectionHelper.findField(CubeWatcher.class, "players");
-        } catch (ReflectionHelper.UnableToFindFieldException e) {
-            Terrarium.LOGGER.error("Failed to find cube watcher playersfield", e);
+            cubeWatcherPlayersField = CubeWatcher.class.getDeclaredField("players");
+            cubeWatcherPlayersField.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            Terrarium.LOGGER.error("Failed to find cube watcher players field", e);
         }
     }
 

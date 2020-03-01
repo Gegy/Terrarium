@@ -10,11 +10,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 @Config(modid = Terrarium.ID)
 @Mod.EventBusSubscriber(modid = Terrarium.ID)
 public class TerrariumConfig {
-    @Config.Name("accept_remote_data")
-    @Config.LangKey("config.terrarium.accept_remote_data")
-    @Config.Comment("If true, you will no longer be warned about remote data usage. (Automatically set through GUI)")
-    public static boolean acceptedRemoteDataWarning = false;
-
     @SubscribeEvent
     public static void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent event) {
         if (event.getModID().equals(Terrarium.ID)) {

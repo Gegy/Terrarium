@@ -5,33 +5,16 @@ import net.gegy1000.earth.server.shared.SharedDataInitializers;
 import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.earth.server.util.ProcessTracker;
 import net.gegy1000.earth.server.util.ProgressTracker;
-import net.gegy1000.gengen.api.GenericWorldType;
-import net.gegy1000.terrarium.client.ClientProxy;
-import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiCreateWorld;
-import net.minecraft.client.gui.GuiListWorldSelection;
-import net.minecraft.client.gui.GuiListWorldSelectionEntry;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiWorldSelection;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.WorldType;
-import net.minecraftforge.client.event.GuiScreenEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.lwjgl.input.Keyboard;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.List;
-
 @SideOnly(Side.CLIENT)
-@Mod.EventBusSubscriber(modid = TerrariumEarth.ID, value = Side.CLIENT)
 public class SharedInitializingGui extends GuiScreen {
     private static final int RETRY_BUTTON = 0;
     private static final int CANCEL_BUTTON = 1;
@@ -42,8 +25,6 @@ public class SharedInitializingGui extends GuiScreen {
     private static final int BAR_WORKING_COLOR = 0xFF336622;
     private static final int BAR_ERRORED_COLOR = 0xFF662222;
 
-    private static Method actionPerformedMethod;
-
     private final GuiScreen parent;
     private final Runnable onComplete;
 
@@ -51,14 +32,6 @@ public class SharedInitializingGui extends GuiScreen {
 
     private boolean errored;
     private int completeTicks;
-
-    static {
-        try {
-            actionPerformedMethod = ReflectionHelper.findMethod(GuiScreen.class, "actionPerformed", "func_146284_a", GuiButton.class);
-        } catch (ReflectionHelper.UnableToFindMethodException e) {
-            TerrariumEarth.LOGGER.warn("Failed to find actionPerformed method", e);
-        }
-    }
 
     public SharedInitializingGui(GuiScreen parent, Runnable onComplete) {
         this.parent = parent;
@@ -76,55 +49,6 @@ public class SharedInitializingGui extends GuiScreen {
             SharedEarthData.supply(data);
             return data;
         });
-    }
-
-    @SubscribeEvent
-    public static void onButtonPress(GuiScreenEvent.ActionPerformedEvent event) {
-        if (SharedEarthData.isInitialized()) {
-            return;
-        }
-
-        GuiScreen gui = event.getGui();
-
-        if (gui instanceof GuiCreateWorld && event.getButton().id == 0) {
-            int selectedWorldIndex = ClientProxy.getSelectedWorldType((GuiCreateWorld) gui);
-            TerrariumWorldType worldType = GenericWorldType.unwrapAs(WorldType.WORLD_TYPES[selectedWorldIndex], TerrariumWorldType.class);
-            if (worldType != null) {
-                onCreateWorldPressed(event.getButton(), gui);
-                event.setCanceled(true);
-            }
-        }
-    }
-
-    @SubscribeEvent
-    public static void onGuiInit(GuiScreenEvent.InitGuiEvent.Post event) {
-        if (SharedEarthData.isInitialized()) {
-            return;
-        }
-
-        GuiScreen gui = event.getGui();
-
-        if (gui instanceof GuiWorldSelection) {
-            GuiListWorldSelection list = ((GuiWorldSelection) gui).selectionList;
-            List<GuiListWorldSelectionEntry> entries = list.entries;
-            for (int i = 0; i < entries.size(); i++) {
-                GuiListWorldSelectionEntry entry = entries.get(i);
-                entries.set(i, new HookedWorldSelectionEntry(list, entry));
-            }
-        }
-    }
-
-    private static void onCreateWorldPressed(GuiButton button, GuiScreen gui) {
-        gui.mc.displayGuiScreen(new SharedInitializingGui(gui, () -> {
-            gui.mc.displayGuiScreen(gui);
-            if (actionPerformedMethod != null) {
-                try {
-                    actionPerformedMethod.invoke(gui, button);
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    TerrariumEarth.LOGGER.warn("Failed to invoke actionPerformed", e);
-                }
-            }
-        }));
     }
 
     @Override

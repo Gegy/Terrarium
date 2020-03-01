@@ -1,7 +1,7 @@
-package net.gegy1000.terrarium.client.gui;
+package net.gegy1000.earth.client.gui;
 
+import net.gegy1000.earth.server.config.TerrariumEarthConfig;
 import net.gegy1000.terrarium.Terrarium;
-import net.gegy1000.terrarium.server.config.TerrariumConfig;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.GuiScreen;
@@ -40,7 +40,7 @@ public class RemoteDataWarningGui extends GuiScreen {
             if (button.id == ACCEPT_ID) {
                 this.complete = true;
 
-                TerrariumConfig.acceptedRemoteDataWarning = true;
+                TerrariumEarthConfig.acceptedRemoteDataWarning = true;
                 ConfigManager.sync(Terrarium.ID, Config.Type.INSTANCE);
 
                 this.mc.displayGuiScreen(this.parent);

@@ -2,8 +2,8 @@ package net.gegy1000.earth.server.world;
 
 import com.google.common.collect.Lists;
 import net.gegy1000.earth.TerrariumEarth;
+import net.gegy1000.earth.client.PrepareTerrarium;
 import net.gegy1000.earth.client.gui.EarthCustomizationGui;
-import net.gegy1000.earth.client.gui.SharedInitializingGui;
 import net.gegy1000.earth.server.capability.EarthWorld;
 import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.earth.server.world.data.source.LandCoverSource;
@@ -138,7 +138,7 @@ public class EarthWorldType extends TerrariumWorldType {
     @SideOnly(Side.CLIENT)
     public void onCustomize(Minecraft client, WorldType worldType, GuiCreateWorld parent) {
         if (!SharedEarthData.isInitialized()) {
-            client.displayGuiScreen(new SharedInitializingGui(parent, () -> super.onCustomize(client, worldType, parent)));
+            client.displayGuiScreen(PrepareTerrarium.prepareScreen(parent, () -> super.onCustomize(client, worldType, parent)));
             return;
         }
 

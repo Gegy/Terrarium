@@ -4,7 +4,8 @@ import net.gegy1000.terrarium.Terrarium;
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.world.WorldServer;
-import net.minecraftforge.fml.relauncher.ReflectionHelper;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraftforge.fml.relauncher.ReflectionHelper.UnableToFindFieldException;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -18,8 +19,8 @@ public class ColumnTrackerAccess implements ChunkTrackerAccess {
 
     static {
         try {
-            chunkMapEntriesField = ReflectionHelper.findField(PlayerChunkMap.class, "entries", "field_111193_e");
-        } catch (ReflectionHelper.UnableToFindFieldException e) {
+            chunkMapEntriesField = ObfuscationReflectionHelper.findField(PlayerChunkMap.class, "field_111193_e");
+        } catch (UnableToFindFieldException e) {
             Terrarium.LOGGER.error("Failed to find chunk entries field", e);
         }
     }
