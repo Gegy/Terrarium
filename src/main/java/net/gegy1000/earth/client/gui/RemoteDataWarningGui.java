@@ -1,12 +1,11 @@
 package net.gegy1000.earth.client.gui;
 
+import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.config.TerrariumEarthConfig;
-import net.gegy1000.terrarium.Terrarium;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.realms.RealmsBridge;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.ConfigManager;
@@ -41,7 +40,7 @@ public class RemoteDataWarningGui extends GuiScreen {
                 this.complete = true;
 
                 TerrariumEarthConfig.acceptedRemoteDataWarning = true;
-                ConfigManager.sync(Terrarium.ID, Config.Type.INSTANCE);
+                ConfigManager.sync(TerrariumEarth.ID, Config.Type.INSTANCE);
 
                 this.mc.displayGuiScreen(this.parent);
             } else if (button.id == CANCEL_ID) {
@@ -49,14 +48,12 @@ public class RemoteDataWarningGui extends GuiScreen {
 
                 button.enabled = false;
 
-                this.mc.world.sendQuittingDisconnectingPacket();
-                this.mc.loadWorld(null);
-
-                if (this.mc.isConnectedToRealms()) {
-                    new RealmsBridge().switchToRealms(new GuiMainMenu());
-                } else {
-                    this.mc.displayGuiScreen(new GuiMainMenu());
+                if (this.mc.world != null) {
+                    this.mc.world.sendQuittingDisconnectingPacket();
+                    this.mc.loadWorld(null);
                 }
+
+                this.mc.displayGuiScreen(new GuiMainMenu());
             }
         }
     }
