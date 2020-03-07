@@ -35,10 +35,14 @@ public final class Interpolate {
 
     public double evaluate(double[][] buffer, double x, double y) {
         double[] verticalSampleBuffer = this.kernel.getBuffer();
+        return this.evaluate(buffer, x, y, verticalSampleBuffer);
+    }
+
+    public double evaluate(double[][] buffer, double x, double y, double[] tmp) {
         for (int kernelX = 0; kernelX < this.kernel.width; kernelX++) {
-            verticalSampleBuffer[kernelX] = this.evaluate(buffer[kernelX], y);
+            tmp[kernelX] = this.evaluate(buffer[kernelX], y);
         }
-        return this.evaluate(verticalSampleBuffer, x);
+        return this.evaluate(tmp, x);
     }
 
     public static class Kernel {

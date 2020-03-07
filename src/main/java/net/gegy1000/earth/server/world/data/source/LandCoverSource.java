@@ -7,7 +7,6 @@ import net.gegy1000.earth.server.world.data.source.cache.AbstractRegionKey;
 import net.gegy1000.earth.server.world.data.source.cache.CachingInput;
 import net.gegy1000.earth.server.world.data.source.cache.FileTileCache;
 import net.gegy1000.terrarium.server.util.Vec2i;
-import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.data.source.TiledDataSource;
 import org.apache.commons.io.IOUtils;
@@ -37,8 +36,8 @@ public class LandCoverSource extends TiledDataSource<EnumRaster<Cover>> {
 
     private static final CachingInput<Vec2i> CACHING_INPUT = new CachingInput<>(CACHE);
 
-    public LandCoverSource(CoordinateReference crs) {
-        super(crs, TILE_SIZE);
+    public LandCoverSource() {
+        super(TILE_SIZE);
     }
 
     @Override

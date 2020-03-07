@@ -19,13 +19,15 @@ public enum InterpolationScaleOp {
     CUBIC(Interpolate.CUBIC);
 
     private final Interpolate interpolate;
-    private final ThreadLocal<double[][]> kernel;
+    private final ThreadLocal<double[][]> kernel2;
+    private final ThreadLocal<double[]> kernel1;
 
     InterpolationScaleOp(Interpolate interpolate) {
         this.interpolate = interpolate;
 
         int kernelWidth = this.interpolate.getKernel().getWidth();
-        this.kernel = ThreadLocal.withInitial(() -> new double[kernelWidth][kernelWidth]);
+        this.kernel2 = ThreadLocal.withInitial(() -> new double[kernelWidth][kernelWidth]);
+        this.kernel1 = ThreadLocal.withInitial(() -> new double[kernelWidth]);
     }
 
     public static InterpolationScaleOp appropriateForScale(double relativeScale) {
@@ -63,11 +65,12 @@ public enum InterpolationScaleOp {
             double offsetY = minCoordinate.getZ() - srcView.getMinY();
 
             return data.apply(srcView).thenApply(opt -> opt.map(source -> {
-                double[][] kernel = this.kernel.get();
+                double[][] kernel2 = this.kernel2.get();
+                double[] kernel1 = this.kernel1.get();
                 T result = function.apply(view);
                 for (int y = 0; y < view.getHeight(); y++) {
                     for (int x = 0; x < view.getWidth(); x++) {
-                        double value = this.evaluate(kernel, source, x * destToSrcX + offsetX - 0.5, y * destToSrcY + offsetY - 0.5);
+                        double value = this.evaluate(kernel1, kernel2, source, x * destToSrcX + offsetX - 0.5, y * destToSrcY + offsetY - 0.5);
                         result.setDouble(x, y, value);
                     }
                 }
@@ -76,14 +79,14 @@ public enum InterpolationScaleOp {
         });
     }
 
-    private <T extends NumberRaster<?>> double evaluate(double[][] kernelBuffer, T source, double x, double y) {
+    private <T extends NumberRaster<?>> double evaluate(double[] kernel1, double[][] kernel2, T source, double x, double y) {
         int originX = MathHelper.floor(x);
         int originY = MathHelper.floor(y);
-        this.sampleKernel(source, kernelBuffer, originX, originY);
+        this.sampleKernel(source, kernel2, originX, originY);
 
         double intermediateX = x - originX;
         double intermediateY = y - originY;
-        return this.interpolate.evaluate(kernelBuffer, intermediateX, intermediateY);
+        return this.interpolate.evaluate(kernel2, intermediateX, intermediateY, kernel1);
     }
 
     private <T extends NumberRaster<?>> void sampleKernel(T source, double[][] buffer, int x, int y) {

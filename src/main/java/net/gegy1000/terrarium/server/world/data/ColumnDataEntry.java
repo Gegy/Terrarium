@@ -12,7 +12,7 @@ public final class ColumnDataEntry {
     private final ChunkPos columnPos;
     private final ColumnDataLoader loader;
 
-    private int acquireCount;
+    private int handleCount;
     private boolean tracked;
 
     private boolean dropped;
@@ -27,14 +27,18 @@ public final class ColumnDataEntry {
         this.loader = loader;
     }
 
-    private CompletableFuture<ColumnData> enqueue() {
-        return this.loader.getAsync(this.columnPos);
+    CompletableFuture<ColumnData> acquireFuture() {
+        this.touch();
+        if (this.future == null) {
+            this.future = this.loader.getAsync(this.columnPos);
+        }
+        return this.future;
     }
 
     void track() {
         if (!this.tracked) {
             this.tracked = true;
-            this.future = this.enqueue();
+            this.acquireFuture();
         }
     }
 
@@ -43,24 +47,13 @@ public final class ColumnDataEntry {
     }
 
     public Handle acquire() {
-        this.acquireCount++;
-        if (this.future == null) {
-            this.future = this.enqueue();
-        }
+        this.handleCount++;
+        this.acquireFuture();
         return new Handle();
     }
 
     public ChunkPos getColumnPos() {
         return this.columnPos;
-    }
-
-    CompletableFuture<ColumnData> future() {
-        this.touch();
-        if (this.future == null) {
-            this.future = this.enqueue();
-        }
-
-        return this.future;
     }
 
     ColumnData join() {
@@ -94,7 +87,7 @@ public final class ColumnDataEntry {
     }
 
     boolean shouldDrop() {
-        return !this.tracked && this.acquireCount <= 0 || this.checkLeaked();
+        return !this.tracked && this.handleCount <= 0 || this.checkLeaked();
     }
 
     boolean tryDrop() {
@@ -111,25 +104,25 @@ public final class ColumnDataEntry {
 
     @Override
     public String toString() {
-        return "ColumnDataEntry{acquireCount=" + this.acquireCount + ", tracked=" + this.tracked + "}";
+        return "ColumnDataEntry{handleCount=" + this.handleCount + ", tracked=" + this.tracked + "}";
     }
 
     public class Handle implements AutoCloseable {
         private boolean released;
 
         public CompletableFuture<ColumnData> future() {
-            return ColumnDataEntry.this.future();
+            this.checkValid();
+            return ColumnDataEntry.this.acquireFuture();
         }
 
         public ColumnData join() {
+            this.checkValid();
             return ColumnDataEntry.this.join();
         }
 
         public void release() {
-            if (this.released) {
-                throw new IllegalStateException("Handle has already been released!");
-            }
-            ColumnDataEntry.this.acquireCount--;
+            this.checkValid();
+            ColumnDataEntry.this.handleCount--;
             this.released = true;
         }
 
@@ -140,6 +133,12 @@ public final class ColumnDataEntry {
         @Override
         public void close() {
             this.release();
+        }
+
+        private void checkValid() {
+            if (this.released) {
+                throw new IllegalStateException("Handle has already been released!");
+            }
         }
     }
 }

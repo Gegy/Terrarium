@@ -1,38 +1,31 @@
 package net.gegy1000.terrarium.server.world.data;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.minecraft.util.math.ChunkPos;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.function.Consumer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
 
 public final class DistributedColumnLoader implements ColumnDataLoader {
-    private static final int WORKER_COUNT = 1;
+    private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor(
+            new ThreadFactoryBuilder()
+                    .setNameFormat("terrarium-data-worker")
+                    .build()
+    );
 
     private final Function<ChunkPos, ColumnData> generator;
 
-    private final Worker[] workers = new Worker[WORKER_COUNT];
-
-    private final LinkedBlockingQueue<Work> workQueue = new LinkedBlockingQueue<>();
     private final Map<ChunkPos, Work> unseenWorkMap = new HashMap<>();
     private final Map<ChunkPos, Work> activeWorkMap = new HashMap<>();
 
     private final Object workStateMutex = new Object();
 
-    private boolean active = true;
-
     public DistributedColumnLoader(Function<ChunkPos, ColumnData> generator) {
         this.generator = generator;
-
-        for (int index = 0; index < WORKER_COUNT; index++) {
-            Worker worker = new Worker(index);
-            worker.start();
-
-            this.workers[index] = worker;
-        }
     }
 
     @Override
@@ -40,7 +33,18 @@ public final class DistributedColumnLoader implements ColumnDataLoader {
         CompletableFuture<ColumnData> future = new CompletableFuture<>();
 
         Work work = new Work(columnPos, future);
-        this.workQueue.add(work);
+        EXECUTOR.submit(() -> {
+            try {
+                this.startWork(work);
+                ColumnData data = this.generate(columnPos);
+                work.future.complete(data);
+            } catch (Throwable t) {
+                work.future.completeExceptionally(t);
+            } finally {
+                this.completeWork(work);
+            }
+        });
+
         synchronized (this.workStateMutex) {
             this.unseenWorkMap.put(columnPos, work);
         }
@@ -55,7 +59,7 @@ public final class DistributedColumnLoader implements ColumnDataLoader {
             // cancel any work that we haven't started processing yet
             Work unseenWork = this.unseenWorkMap.remove(columnPos);
             if (unseenWork != null) {
-                unseenWork.cancel();
+                unseenWork.future.cancel(true);
             } else {
                 activeWork = this.activeWorkMap.get(columnPos);
             }
@@ -71,40 +75,34 @@ public final class DistributedColumnLoader implements ColumnDataLoader {
 
     @Override
     public void close() {
-        for (Worker worker : this.workers) {
-            worker.interrupt();
-        }
-        this.active = false;
+        this.cancelAll();
     }
 
-    ColumnData generate(ChunkPos columnPos) {
+    private void cancelAll() {
+        synchronized (this.workStateMutex) {
+            for (Work work : this.activeWorkMap.values()) {
+                work.future.cancel(true);
+            }
+            for (Work work : this.unseenWorkMap.values()) {
+                work.future.cancel(true);
+            }
+        }
+    }
+
+    private ColumnData generate(ChunkPos columnPos) {
         return this.generator.apply(columnPos);
     }
 
-    void processWork(Consumer<Work> worker) throws InterruptedException {
-        Work work;
-        do {
-            work = this.workQueue.take();
-            synchronized (this.workStateMutex) {
-                this.unseenWorkMap.remove(work.columnPos);
-            }
-        } while (work.isCancelled());
-
-        try {
-            this.setActive(work, true);
-            worker.accept(work);
-        } finally {
-            this.setActive(work, false);
+    private void startWork(Work work) {
+        synchronized (this.workStateMutex) {
+            this.activeWorkMap.put(work.columnPos, work);
+            this.unseenWorkMap.remove(work.columnPos);
         }
     }
 
-    private void setActive(Work work, boolean active) {
+    private void completeWork(Work work) {
         synchronized (this.workStateMutex) {
-            if (active) {
-                this.activeWorkMap.put(work.columnPos, work);
-            } else {
-                this.activeWorkMap.remove(work.columnPos);
-            }
+            this.activeWorkMap.remove(work.columnPos);
         }
     }
 
@@ -115,47 +113,6 @@ public final class DistributedColumnLoader implements ColumnDataLoader {
         Work(ChunkPos columnPos, CompletableFuture<ColumnData> future) {
             this.columnPos = columnPos;
             this.future = future;
-        }
-
-        void complete(ColumnData data) {
-            this.future.complete(data);
-        }
-
-        void complete(Throwable throwable) {
-            this.future.completeExceptionally(throwable);
-        }
-
-        void cancel() {
-            this.future.cancel(true);
-        }
-
-        boolean isCancelled() {
-            return this.future.isCancelled();
-        }
-    }
-
-    private class Worker extends Thread {
-        Worker(int index) {
-            this.setName("terrarium-data-worker-" + index);
-            this.setDaemon(true);
-        }
-
-        @Override
-        public void run() {
-            while (DistributedColumnLoader.this.active) {
-                try {
-                    DistributedColumnLoader.this.processWork(work -> {
-                        try {
-                            ColumnData data = DistributedColumnLoader.this.generate(work.columnPos);
-                            work.complete(data);
-                        } catch (Throwable t) {
-                            work.complete(t);
-                        }
-                    });
-                } catch (InterruptedException e) {
-                    break;
-                }
-            }
         }
     }
 }

@@ -29,8 +29,8 @@ public class SoilSource extends TiledDataSource<ShortRaster> {
 
     private final Function<EarthRemoteIndex2, Zoomable<EarthRemoteIndex2.Endpoint>> endpointFunction;
 
-    private SoilSource(int zoom, CoordinateReference crs, String cacheName, Function<EarthRemoteIndex2, Zoomable<EarthRemoteIndex2.Endpoint>> endpointFunction) {
-        super(crs, TILE_SIZE);
+    private SoilSource(int zoom, String cacheName, Function<EarthRemoteIndex2, Zoomable<EarthRemoteIndex2.Endpoint>> endpointFunction) {
+        super(TILE_SIZE);
 
         this.zoom = zoom;
         this.endpointFunction = endpointFunction;
@@ -44,28 +44,28 @@ public class SoilSource extends TiledDataSource<ShortRaster> {
         return ZoomLevels.range(0, 1);
     }
 
-    public static SoilSource cationExchangeCapacity(int zoom, CoordinateReference crs) {
-        return new SoilSource(zoom, crs, "soil/cec", index -> index.cationExchangeCapacity);
+    public static SoilSource cationExchangeCapacity(int zoom) {
+        return new SoilSource(zoom, "soil/cec", index -> index.cationExchangeCapacity);
     }
 
-    public static SoilSource organicCarbonContent(int zoom, CoordinateReference crs) {
-        return new SoilSource(zoom, crs, "soil/occ", index -> index.organicCarbonContent);
+    public static SoilSource organicCarbonContent(int zoom) {
+        return new SoilSource(zoom, "soil/occ", index -> index.organicCarbonContent);
     }
 
-    public static SoilSource ph(int zoom, CoordinateReference crs) {
-        return new SoilSource(zoom, crs, "soil/ph", index -> index.ph);
+    public static SoilSource ph(int zoom) {
+        return new SoilSource(zoom, "soil/ph", index -> index.ph);
     }
 
-    public static SoilSource clayContent(int zoom, CoordinateReference crs) {
-        return new SoilSource(zoom, crs, "soil/clay", index -> index.clayContent);
+    public static SoilSource clayContent(int zoom) {
+        return new SoilSource(zoom, "soil/clay", index -> index.clayContent);
     }
 
-    public static SoilSource siltContent(int zoom, CoordinateReference crs) {
-        return new SoilSource(zoom, crs, "soil/silt", index -> index.siltContent);
+    public static SoilSource siltContent(int zoom) {
+        return new SoilSource(zoom, "soil/silt", index -> index.siltContent);
     }
 
-    public static SoilSource sandContent(int zoom, CoordinateReference crs) {
-        return new SoilSource(zoom, crs, "soil/sand", index -> index.sandContent);
+    public static SoilSource sandContent(int zoom) {
+        return new SoilSource(zoom, "soil/sand", index -> index.sandContent);
     }
 
     public static CoordinateReference crs(double worldScale, int zoom) {

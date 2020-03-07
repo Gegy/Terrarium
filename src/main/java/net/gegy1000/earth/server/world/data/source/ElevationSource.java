@@ -33,8 +33,8 @@ public class ElevationSource extends TiledDataSource<ShortRaster> {
 
     private final CachingInput<Vec2i> cachingInput;
 
-    public ElevationSource(int zoom, CoordinateReference crs) {
-        super(crs, TILE_SIZE);
+    public ElevationSource(int zoom) {
+        super(TILE_SIZE);
 
         this.zoom = zoom;
 

@@ -1,7 +1,6 @@
 package net.gegy1000.terrarium.server.world.data.source;
 
 import net.gegy1000.terrarium.server.util.Vec2i;
-import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 
@@ -19,22 +18,16 @@ public abstract class TiledDataSource<T> {
             .setUserAgent("terrarium")
             .build();
 
-    protected final CoordinateReference crs;
     protected final double tileWidth;
     protected final double tileHeight;
 
-    protected TiledDataSource(CoordinateReference crs, double tileWidth, double tileHeight) {
-        this.crs = crs;
+    protected TiledDataSource(double tileWidth, double tileHeight) {
         this.tileWidth = tileWidth;
         this.tileHeight = tileHeight;
     }
 
-    protected TiledDataSource(CoordinateReference crs, double size) {
-        this(crs, size, size);
-    }
-
-    public final CoordinateReference getCrs() {
-        return this.crs;
+    protected TiledDataSource(double tileSize) {
+        this(tileSize, tileSize);
     }
 
     public final double getTileWidth() {

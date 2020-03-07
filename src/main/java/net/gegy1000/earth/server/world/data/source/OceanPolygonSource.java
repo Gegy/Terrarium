@@ -11,7 +11,6 @@ import net.gegy1000.earth.server.world.data.source.cache.AbstractRegionKey;
 import net.gegy1000.earth.server.world.data.source.cache.CachingInput;
 import net.gegy1000.earth.server.world.data.source.cache.FileTileCache;
 import net.gegy1000.terrarium.server.util.Vec2i;
-import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.data.source.TiledDataSource;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -40,8 +39,8 @@ public class OceanPolygonSource extends TiledDataSource<PolygonData> {
 
     private static final CachingInput<Vec2i> CACHING_INPUT = new CachingInput<>(CACHE);
 
-    public OceanPolygonSource(CoordinateReference crs) {
-        super(crs, 1.0);
+    public OceanPolygonSource() {
+        super(1.0);
     }
 
     @Override

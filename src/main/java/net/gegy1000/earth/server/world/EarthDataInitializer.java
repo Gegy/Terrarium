@@ -20,6 +20,7 @@ import net.gegy1000.earth.server.world.data.source.OceanPolygonSource;
 import net.gegy1000.earth.server.world.data.source.SoilSource;
 import net.gegy1000.earth.server.world.geography.Landform;
 import net.gegy1000.terrarium.server.world.TerrariumDataInitializer;
+import net.gegy1000.terrarium.server.world.coordinate.CoordReferenced;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.data.ColumnDataGenerator;
 import net.gegy1000.terrarium.server.world.data.DataOp;
@@ -37,6 +38,18 @@ import net.minecraft.util.math.MathHelper;
 import static net.gegy1000.earth.server.world.EarthWorldType.*;
 
 final class EarthDataInitializer implements TerrariumDataInitializer {
+    private static final Zoomable<ElevationSource> ELEVATION_SOURCE = Zoomable.create(ElevationSource.zoomLevels(), ElevationSource::new);
+    private static final LandCoverSource LAND_COVER_SOURCE = new LandCoverSource();
+
+    private static final Zoomable<SoilSource> CATION_EXCHANGE_CAPACITY_SOURCE = Zoomable.create(SoilSource.zoomLevels(), SoilSource::cationExchangeCapacity);
+    private static final Zoomable<SoilSource> ORGANIC_CARBON_CONTENT_SOURCE = Zoomable.create(SoilSource.zoomLevels(), SoilSource::organicCarbonContent);
+    private static final Zoomable<SoilSource> PH_SOURCE = Zoomable.create(SoilSource.zoomLevels(), SoilSource::ph);
+    private static final Zoomable<SoilSource> CLAY_CONTENT_SOURCE = Zoomable.create(SoilSource.zoomLevels(), SoilSource::clayContent);
+    private static final Zoomable<SoilSource> SILT_CONTENT_SOURCE = Zoomable.create(SoilSource.zoomLevels(), SoilSource::siltContent);
+    private static final Zoomable<SoilSource> SAND_CONTENT_SOURCE = Zoomable.create(SoilSource.zoomLevels(), SoilSource::sandContent);
+
+    private static final OceanPolygonSource OCEAN_SOURCE = new OceanPolygonSource();
+
     private final EarthInitContext ctx;
 
     EarthDataInitializer(EarthInitContext ctx) {
@@ -46,18 +59,18 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
     private DataOp<ShortRaster> elevation(double worldScale) {
         int elevationZoom = this.selectElevationZoom(worldScale);
 
-        Zoomable<ElevationSource> elevationSource = this.ctx.elevationRasterCrs.map(ElevationSource::new);
-
         return new ResampleZoomRasters<ShortRaster>()
-                .from(elevationSource).sample(SampleRaster::sampleShort)
+                .from(ELEVATION_SOURCE.map((zoom, source) -> {
+                    CoordinateReference crs = this.ctx.elevationRasterCrs.forZoom(zoom);
+                    return new CoordReferenced<>(source, crs);
+                }))
+                .sample(SampleRaster::sampleShort)
                 .atStandardZoom(elevationZoom)
                 .create(ShortRaster::create);
     }
 
     private DataOp<EnumRaster<Cover>> landcover() {
-        LandCoverSource landCoverSource = new LandCoverSource(this.ctx.landcoverRasterCrs);
-
-        DataOp<EnumRaster<Cover>> cover = SampleRaster.sampleEnum(landCoverSource, Cover.NO);
+        DataOp<EnumRaster<Cover>> cover = SampleRaster.sampleEnum(LAND_COVER_SOURCE, Cover.NO);
         cover = VoronoiScaleOp.scaleEnumsFrom(cover, this.ctx.landcoverRasterCrs, Cover.NO)
                 .cached(EnumRaster::copy);
 
@@ -65,19 +78,20 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
     }
 
     private DataOp<BitRaster> oceanMask() {
-        OceanPolygonSource oceanPolygonSource = new OceanPolygonSource(this.ctx.lngLatCrs);
-
-        DataOp<PolygonData> oceanPolygons = PolygonSampler.sample(oceanPolygonSource, this.ctx.lngLatCrs);
+        DataOp<PolygonData> oceanPolygons = PolygonSampler.sample(OCEAN_SOURCE, this.ctx.lngLatCrs);
         DataOp<AreaData> oceanArea = PolygonToAreaOp.apply(oceanPolygons, this.ctx.lngLatCrs);
         return RasterizeAreaOp.apply(oceanArea);
     }
 
-    private DataOp<ShortRaster> genericSoil(double worldScale, Zoomable.Map<CoordinateReference, SoilSource> createSource) {
+    private DataOp<ShortRaster> genericSoil(double worldScale, Zoomable<SoilSource> zoomableSource) {
         int soilZoom = this.selectSoilZoom(worldScale);
-        Zoomable<SoilSource> soilSource = this.ctx.soilRasterCrs.map(createSource);
 
         return new ResampleZoomRasters<ShortRaster>()
-                .from(soilSource).sample(SampleRaster::sampleShort)
+                .from(zoomableSource.map((zoom, source) -> {
+                    CoordinateReference crs = this.ctx.soilRasterCrs.forZoom(zoom);
+                    return new CoordReferenced<>(source, crs);
+                }))
+                .sample(SampleRaster::sampleShort)
                 .atStandardZoom(soilZoom)
                 .create(ShortRaster::create);
     }
@@ -141,16 +155,16 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
         DataOp<FloatRaster> minTemperature = climateSampler.minTemperature();
         minTemperature = InterpolationScaleOp.LINEAR.scaleFloatsFrom(minTemperature, this.ctx.climateRasterCrs);
 
-        DataOp<UByteRaster> cationExchangeCapacity = this.genericSoil(worldScale, SoilSource::cationExchangeCapacity)
+        DataOp<UByteRaster> cationExchangeCapacity = this.genericSoil(worldScale, CATION_EXCHANGE_CAPACITY_SOURCE)
                 .map((raster, view) -> UByteRaster.copyFrom(raster));
-        DataOp<ShortRaster> organicCarbonContent = this.genericSoil(worldScale, SoilSource::organicCarbonContent);
-        DataOp<UByteRaster> soilPh = this.genericSoil(worldScale, SoilSource::ph)
+        DataOp<ShortRaster> organicCarbonContent = this.genericSoil(worldScale, ORGANIC_CARBON_CONTENT_SOURCE);
+        DataOp<UByteRaster> soilPh = this.genericSoil(worldScale, PH_SOURCE)
                 .map((raster, view) -> UByteRaster.copyFrom(raster));
-        DataOp<UByteRaster> clayContent = this.genericSoil(worldScale, SoilSource::clayContent)
+        DataOp<UByteRaster> clayContent = this.genericSoil(worldScale, CLAY_CONTENT_SOURCE)
                 .map((raster, view) -> UByteRaster.copyFrom(raster));
-        DataOp<UByteRaster> siltContent = this.genericSoil(worldScale, SoilSource::siltContent)
+        DataOp<UByteRaster> siltContent = this.genericSoil(worldScale, SILT_CONTENT_SOURCE)
                 .map((raster, view) -> UByteRaster.copyFrom(raster));
-        DataOp<UByteRaster> sandContent = this.genericSoil(worldScale, SoilSource::sandContent)
+        DataOp<UByteRaster> sandContent = this.genericSoil(worldScale, SAND_CONTENT_SOURCE)
                 .map((raster, view) -> UByteRaster.copyFrom(raster));
 
         builder.put(EarthDataKeys.TERRAIN_HEIGHT, terrainHeight);

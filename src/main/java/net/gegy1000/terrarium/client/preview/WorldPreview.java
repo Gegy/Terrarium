@@ -105,7 +105,7 @@ public class WorldPreview implements IBlockAccess {
             ShortRaster heightRaster = this.sampleHeightRaster(originX, originZ, viewSizeBlocks);
 
             this.heightMesh = new PreviewHeightMesh(heightRaster);
-            this.heightMesh.submitTo(this.executor, 5);
+            this.heightMesh.submitTo(this.executor, 4);
 
             short averageHeight = this.computeAverageHeight(heightRaster);
 

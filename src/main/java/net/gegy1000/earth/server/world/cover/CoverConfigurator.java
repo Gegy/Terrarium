@@ -39,33 +39,33 @@ public final class CoverConfigurator {
                 ));
 
         CoverMarkers.FOREST.and(CoverMarkers.BROADLEAF).and(CoverMarkers.DECIDUOUS)
-                .configureEach(c -> c.configureDecorator(CoverDecorators.TREES, vegetation -> {
-                    vegetation.add(Trees.OAK, 10.0F);
-                    vegetation.add(Trees.ACACIA, 10.0F);
-                    vegetation.add(Trees.JUNGLE, 2.0F);
+                .configureEach(c -> c.configureDecorator(CoverDecorators.TREES, trees -> {
+                    trees.add(Trees.OAK, 10.0F);
+                    trees.add(Trees.ACACIA, 10.0F);
+                    trees.add(Trees.JUNGLE, 2.0F);
                 }));
 
         CoverMarkers.FOREST.and(CoverMarkers.BROADLEAF).and(CoverMarkers.EVERGREEN)
-                .configureEach(c -> c.configureDecorator(CoverDecorators.TREES, vegetation -> {
-                    vegetation.add(Trees.OAK, 2.0F);
-                    vegetation.add(Trees.ACACIA, 2.0F);
-                    vegetation.add(Trees.JUNGLE, 10.0F);
+                .configureEach(c -> c.configureDecorator(CoverDecorators.TREES, trees -> {
+                    trees.add(Trees.OAK, 2.0F);
+                    trees.add(Trees.ACACIA, 2.0F);
+                    trees.add(Trees.JUNGLE, 10.0F);
                 }));
 
         CoverMarkers.FOREST.and(CoverMarkers.NEEDLELEAF).and(CoverMarkers.DECIDUOUS)
-                .configureEach(c -> c.configureDecorator(CoverDecorators.TREES, vegetation -> {
-                    vegetation.add(Trees.BIRCH, 10.0F);
-                    vegetation.add(Trees.ACACIA, 10.0F);
-                    vegetation.add(Trees.SPRUCE, 2.0F);
-                    vegetation.add(Trees.PINE, 2.0F);
+                .configureEach(c -> c.configureDecorator(CoverDecorators.TREES, trees -> {
+                    trees.add(Trees.BIRCH, 10.0F);
+                    trees.add(Trees.ACACIA, 10.0F);
+                    trees.add(Trees.SPRUCE, 2.0F);
+                    trees.add(Trees.PINE, 2.0F);
                 }));
 
         CoverMarkers.FOREST.and(CoverMarkers.NEEDLELEAF).and(CoverMarkers.EVERGREEN)
-                .configureEach(c -> c.configureDecorator(CoverDecorators.TREES, vegetation -> {
-                    vegetation.add(Trees.SPRUCE, 10.0F);
-                    vegetation.add(Trees.PINE, 10.0F);
-                    vegetation.add(Trees.BIRCH, 2.0F);
-                    vegetation.add(Trees.ACACIA, 2.0F);
+                .configureEach(c -> c.configureDecorator(CoverDecorators.TREES, trees -> {
+                    trees.add(Trees.SPRUCE, 10.0F);
+                    trees.add(Trees.PINE, 10.0F);
+                    trees.add(Trees.BIRCH, 2.0F);
+                    trees.add(Trees.ACACIA, 2.0F);
                 }));
     }
 }
