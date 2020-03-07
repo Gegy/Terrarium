@@ -6,7 +6,7 @@ import com.google.common.collect.Sets;
 import java.util.Optional;
 import java.util.Set;
 
-public class ColumnData {
+public final class ColumnData {
     private final ImmutableMap<DataKey<?>, Optional<?>> store;
 
     ColumnData(ImmutableMap<DataKey<?>, Optional<?>> store) {
@@ -34,7 +34,7 @@ public class ColumnData {
         return Optional.of(new With(Sets.newHashSet(keys)));
     }
 
-    public class With {
+    public final class With {
         private final Set<DataKey<?>> keys;
 
         private With(Set<DataKey<?>> keys) {

@@ -3,15 +3,15 @@ package net.gegy1000.terrarium.client.preview;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.earth.server.world.EarthDataKeys;
+import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
-import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
-import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
+import net.gegy1000.terrarium.server.world.data.DataGenerator;
 import net.gegy1000.terrarium.server.world.data.DataView;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.data.source.DataSourceReader;
+import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -178,10 +178,11 @@ public class WorldPreview implements IBlockAccess {
     }
 
     private ShortRaster sampleHeightRaster(int originX, int originZ, int size) {
-        ColumnDataCache dataCache = this.terrarium.getDataCache();
+        DataGenerator dataGenerator = this.terrarium.getDataGenerator();
 
         DataView view = DataView.square(originX, originZ, size);
-        return ShortRaster.sampler(EarthDataKeys.TERRAIN_HEIGHT).sample(dataCache, view);
+        return dataGenerator.generateOne(view, EarthDataKeys.TERRAIN_HEIGHT)
+                .orElseGet(() -> ShortRaster.create(view));
     }
 
     private short computeAverageHeight(ShortRaster heightTile) {

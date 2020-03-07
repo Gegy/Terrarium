@@ -26,7 +26,7 @@ public final class DataSourceReader {
     private final ExecutorService loadService = Executors.newFixedThreadPool(3, new ThreadFactoryBuilder().setNameFormat("terrarium-data-loader-%s").setDaemon(true).build());
 
     private final Cache<TileKey<?>, DataTileResult<?>> tileCache = CacheBuilder.newBuilder()
-            .maximumSize(256)
+            .maximumSize(128)
             .expireAfterAccess(60, TimeUnit.SECONDS)
             .build();
 
@@ -141,7 +141,7 @@ public final class DataSourceReader {
 
     private <T> void logError(TileKey<T> key, Throwable throwable) {
         String sourceName = key.source.getClass().getSimpleName();
-        Terrarium.LOGGER.warn("[{}] Loading tile at {} rose error", sourceName, key.asVec2(), throwable);
+        Terrarium.LOGGER.warn("[{}] Loading tile at {} raised error", sourceName, key.asVec2(), throwable);
         ErrorBroadcastHandler.recordFailure();
     }
 

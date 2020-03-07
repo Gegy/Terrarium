@@ -10,7 +10,7 @@ import net.gegy1000.terrarium.server.world.composer.structure.StructureComposer;
 import net.gegy1000.terrarium.server.world.composer.surface.SurfaceComposer;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
-import net.gegy1000.terrarium.server.world.data.ColumnDataGenerator;
+import net.gegy1000.terrarium.server.world.data.DataGenerator;
 import net.gegy1000.terrarium.server.world.generator.CompositeTerrariumGenerator;
 import net.gegy1000.terrarium.server.world.generator.TerrariumGenerator;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
@@ -31,6 +31,8 @@ public interface TerrariumWorld extends ICapabilityProvider {
     }
 
     GenerationSettings getSettings();
+
+    DataGenerator getDataGenerator();
 
     ColumnDataCache getDataCache();
 
@@ -57,6 +59,7 @@ public interface TerrariumWorld extends ICapabilityProvider {
     class Impl implements TerrariumWorld {
         private final GenerationSettings settings;
         private final TerrariumGenerator generator;
+        private final DataGenerator dataGenerator;
         private final ColumnDataCache dataCache;
 
         public Impl(World world, TerrariumWorldType worldType) {
@@ -68,18 +71,24 @@ public interface TerrariumWorld extends ICapabilityProvider {
             CompositeTerrariumGenerator.Builder generator = CompositeTerrariumGenerator.builder();
             generatorInitializer.setup(generator, PREVIEW_WORLD.get());
 
-            ColumnDataGenerator.Builder dataGenerator = ColumnDataGenerator.builder();
+            DataGenerator.Builder dataGenerator = DataGenerator.builder();
             dataInitializer.setup(dataGenerator);
 
             MinecraftForge.EVENT_BUS.post(new InitializeTerrariumWorldEvent(world, worldType, this.settings, generator, dataGenerator));
 
             this.generator = generator.build();
-            this.dataCache = new ColumnDataCache(world, dataGenerator.build());
+            this.dataGenerator = dataGenerator.build();
+            this.dataCache = new ColumnDataCache(world, this.dataGenerator);
         }
 
         @Override
         public GenerationSettings getSettings() {
             return this.settings;
+        }
+
+        @Override
+        public DataGenerator getDataGenerator() {
+            return this.dataGenerator;
         }
 
         @Override

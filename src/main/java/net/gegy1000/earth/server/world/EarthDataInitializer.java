@@ -22,7 +22,7 @@ import net.gegy1000.earth.server.world.geography.Landform;
 import net.gegy1000.terrarium.server.world.TerrariumDataInitializer;
 import net.gegy1000.terrarium.server.world.coordinate.CoordReferenced;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
-import net.gegy1000.terrarium.server.world.data.ColumnDataGenerator;
+import net.gegy1000.terrarium.server.world.data.DataGenerator;
 import net.gegy1000.terrarium.server.world.data.DataOp;
 import net.gegy1000.terrarium.server.world.data.op.InterpolationScaleOp;
 import net.gegy1000.terrarium.server.world.data.op.SampleRaster;
@@ -114,7 +114,7 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
     }
 
     @Override
-    public void setup(ColumnDataGenerator.Builder builder) {
+    public void setup(DataGenerator.Builder builder) {
         double worldScale = this.ctx.settings.getDouble(WORLD_SCALE);
         int heightOffset = this.ctx.settings.getInteger(HEIGHT_OFFSET);
         int seaLevel = heightOffset + 1;

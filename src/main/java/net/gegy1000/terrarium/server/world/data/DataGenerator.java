@@ -2,16 +2,15 @@ package net.gegy1000.terrarium.server.world.data;
 
 import com.google.common.collect.ImmutableMap;
 import net.gegy1000.terrarium.Terrarium;
-import net.minecraft.util.math.ChunkPos;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public final class ColumnDataGenerator {
+public final class DataGenerator {
     private final ImmutableMap<DataKey<?>, DataOp<?>> attachedData;
 
-    public ColumnDataGenerator(ImmutableMap<DataKey<?>, DataOp<?>> attachedData) {
+    public DataGenerator(ImmutableMap<DataKey<?>, DataOp<?>> attachedData) {
         this.attachedData = attachedData;
     }
 
@@ -19,9 +18,7 @@ public final class ColumnDataGenerator {
         return new Builder();
     }
 
-    public ColumnData generate(ChunkPos columnPos) {
-        DataView view = DataView.of(columnPos);
-
+    public ColumnData generate(DataView view) {
         ImmutableMap.Builder<DataKey<?>, Optional<?>> result = ImmutableMap.builder();
 
         this.attachedData.forEach((key, op) -> {
@@ -34,6 +31,15 @@ public final class ColumnDataGenerator {
         });
 
         return new ColumnData(result.build());
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> Optional<T> generateOne(DataView view, DataKey<T> key) {
+        DataOp<?> op = this.attachedData.get(key);
+        if (op != null) {
+            return (Optional<T>) op.apply(view).join();
+        }
+        return Optional.empty();
     }
 
     public static class Builder {
@@ -57,8 +63,8 @@ public final class ColumnDataGenerator {
             return (DataOp<T>) this.attachedData.remove(key);
         }
 
-        public ColumnDataGenerator build() {
-            return new ColumnDataGenerator(ImmutableMap.copyOf(this.attachedData));
+        public DataGenerator build() {
+            return new DataGenerator(ImmutableMap.copyOf(this.attachedData));
         }
     }
 }

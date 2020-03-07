@@ -27,8 +27,8 @@ public class ColumnDataCache implements AutoCloseable {
 
     private final ChunkTrackerAccess chunkTrackerAccess;
 
-    public ColumnDataCache(World world, ColumnDataGenerator generator) {
-        this.loader = new DistributedColumnLoader(generator::generate);
+    public ColumnDataCache(World world, DataGenerator generator) {
+        this.loader = new DistributedColumnLoader(column -> generator.generate(DataView.of(column)));
         this.chunkTrackerAccess = createTrackerAccess(world);
     }
 
@@ -86,8 +86,8 @@ public class ColumnDataCache implements AutoCloseable {
 
     public <T> Optional<T> joinData(ChunkPos columnPos, DataKey<T> key) {
         try (ColumnDataEntry.Handle handle = this.acquireEntry(columnPos)) {
-            ColumnData columnData = handle.join();
-            return columnData.get(key);
+            ColumnData data = handle.join();
+            return data.get(key);
         }
     }
 

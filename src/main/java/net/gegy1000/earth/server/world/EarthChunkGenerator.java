@@ -24,13 +24,13 @@ public class EarthChunkGenerator extends ComposableChunkGenerator {
         HeightmapStore heightmapStore = column.getCapability(TerrariumEarth.heightmapCap(), null);
         if (heightmapStore == null) return;
 
-        Heightmap heightmap = this.genereateHeightmap(column.getPos());
+        Heightmap heightmap = this.generateHeightmap(column.getPos());
         if (heightmap != null) {
             heightmapStore.set(heightmap);
         }
     }
 
-    private Heightmap genereateHeightmap(ChunkPos columnPos) {
+    private Heightmap generateHeightmap(ChunkPos columnPos) {
         return this.terrarium.get().map(terrarium -> {
             ColumnDataCache dataCache = terrarium.getDataCache();
 
