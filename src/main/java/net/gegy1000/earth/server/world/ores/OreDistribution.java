@@ -40,7 +40,7 @@ public interface OreDistribution {
 
     static OreDistribution uniformWithin(double countPerCube, IntPredicate validY) {
         return (cubePos, surfaceHeight, random) -> {
-            BlockPos cubeOrigin = new BlockPos(cubePos.getCenterX(), cubePos.getCenterY(), cubePos.getCenterZ());
+            BlockPos cubeOrigin = new BlockPos(cubePos.getX(), cubePos.getCenterY(), cubePos.getZ());
 
             int minRelativeY = cubeOrigin.getY() - surfaceHeight;
             int maxRelativeY = cubeOrigin.getY() + 16 - surfaceHeight;

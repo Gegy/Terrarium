@@ -30,8 +30,6 @@ public class ComposableChunkGenerator implements GenericChunkGenerator {
 
     protected final Lazy<Optional<TerrariumWorld>> terrarium;
 
-    protected final ColumnDataEntry.Handle[] populationHandles = new ColumnDataEntry.Handle[4];
-
     public ComposableChunkGenerator(World world) {
         this.world = world;
         this.terrarium = Lazy.ofCapability(world, TerrariumCapabilities.world());
@@ -67,11 +65,12 @@ public class ComposableChunkGenerator implements GenericChunkGenerator {
     }
 
     private ColumnDataEntry.Handle[] acquirePopulationHandles(CubicPos pos, ColumnDataCache dataCache) {
-        this.populationHandles[0] = dataCache.acquireEntry(new ChunkPos(pos.getX(), pos.getZ()));
-        this.populationHandles[1] = dataCache.acquireEntry(new ChunkPos(pos.getX() + 1, pos.getZ()));
-        this.populationHandles[2] = dataCache.acquireEntry(new ChunkPos(pos.getX(), pos.getZ() + 1));
-        this.populationHandles[3] = dataCache.acquireEntry(new ChunkPos(pos.getX() + 1, pos.getZ() + 1));
-        return this.populationHandles;
+        return new ColumnDataEntry.Handle[] {
+                dataCache.acquireEntry(new ChunkPos(pos.getX(), pos.getZ())),
+                dataCache.acquireEntry(new ChunkPos(pos.getX() + 1, pos.getZ())),
+                dataCache.acquireEntry(new ChunkPos(pos.getX(), pos.getZ() + 1)),
+                dataCache.acquireEntry(new ChunkPos(pos.getX() + 1, pos.getZ() + 1)),
+        };
     }
 
     @Override
