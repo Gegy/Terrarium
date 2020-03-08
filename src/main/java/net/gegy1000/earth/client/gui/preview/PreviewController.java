@@ -1,4 +1,4 @@
-package net.gegy1000.terrarium.client.preview;
+package net.gegy1000.earth.client.gui.preview;
 
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.relauncher.Side;

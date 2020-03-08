@@ -8,12 +8,13 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 
 import java.io.IOException;
+import java.util.function.Consumer;
 
 public class SelectPresetGui extends GuiScreen {
     private static final int SELECT_BUTTON = 0;
     private static final int CANCEL_BUTTON = 1;
 
-    private final TerrariumCustomizationGui forward;
+    private final Consumer<TerrariumPreset> acceptPreset;
     private final GuiScreen backward;
     private final TerrariumWorldType worldType;
 
@@ -22,8 +23,8 @@ public class SelectPresetGui extends GuiScreen {
     private PresetList presetList;
     private TerrariumPreset selectedPreset;
 
-    public SelectPresetGui(TerrariumCustomizationGui forward, GuiScreen backward, TerrariumWorldType worldType) {
-        this.forward = forward;
+    public SelectPresetGui(Consumer<TerrariumPreset> acceptPreset, GuiScreen backward, TerrariumWorldType worldType) {
+        this.acceptPreset = acceptPreset;
         this.backward = backward;
         this.worldType = worldType;
     }
@@ -82,8 +83,7 @@ public class SelectPresetGui extends GuiScreen {
 
     public void applyPreset() {
         if (this.selectedPreset != null) {
-            this.forward.applyPreset(this.selectedPreset);
-            this.mc.displayGuiScreen(this.forward);
+            this.acceptPreset.accept(this.selectedPreset);
         } else {
             this.mc.displayGuiScreen(this.backward);
         }

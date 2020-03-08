@@ -1,11 +1,7 @@
 package net.gegy1000.terrarium.server.world;
 
-import com.google.common.base.Strings;
 import net.gegy1000.gengen.api.GenericWorldType;
 import net.gegy1000.terrarium.Terrarium;
-import net.gegy1000.terrarium.client.gui.customization.SelectPresetGui;
-import net.gegy1000.terrarium.client.gui.customization.TerrariumCustomizationGui;
-import net.gegy1000.terrarium.client.preview.PreviewDummyWorld;
 import net.gegy1000.terrarium.server.world.chunk.ComposableBiomeProvider;
 import net.gegy1000.terrarium.server.world.chunk.ComposableChunkGenerator;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
@@ -45,9 +41,9 @@ public abstract class TerrariumWorldType implements GenericWorldType {
 
     public abstract TerrariumGeneratorInitializer createGeneratorInitializer(World world, GenerationSettings settings);
 
-    public abstract TerrariumDataInitializer createDataInitializer(World world, GenerationSettings settings);
+    public abstract TerrariumDataInitializer createDataInitializer(GenerationSettings settings);
 
-    public abstract Collection<ICapabilityProvider> createCapabilities(World world, GenerationSettings settings);
+    public abstract Collection<ICapabilityProvider> createCapabilities(GenerationSettings settings);
 
     public abstract PropertyPrototype buildPropertyPrototype();
 
@@ -65,7 +61,7 @@ public abstract class TerrariumWorldType implements GenericWorldType {
 
     @Override
     public BiomeProvider createBiomeProvider(World world) {
-        if (!world.isRemote || world instanceof PreviewDummyWorld) {
+        if (!world.isRemote) {
             return new ComposableBiomeProvider(world);
         }
         return new BiomeProviderSingle(Biomes.DEFAULT);
@@ -73,19 +69,7 @@ public abstract class TerrariumWorldType implements GenericWorldType {
 
     @Override
     @SideOnly(Side.CLIENT)
-    public void onCustomize(Minecraft client, WorldType worldType, GuiCreateWorld parent) {
-        TerrariumCustomizationGui customizationGui = this.createCustomizationGui(parent, worldType);
-        if (Strings.isNullOrEmpty(parent.chunkProviderSettingsJson)) {
-            client.displayGuiScreen(new SelectPresetGui(customizationGui, parent, this));
-        } else {
-            client.displayGuiScreen(customizationGui);
-        }
-    }
-
-    @SideOnly(Side.CLIENT)
-    protected TerrariumCustomizationGui createCustomizationGui(GuiCreateWorld parent, WorldType worldType) {
-        return new TerrariumCustomizationGui(parent, worldType, this);
-    }
+    public abstract void onCustomize(Minecraft client, WorldType worldType, GuiCreateWorld parent);
 
     @Override
     public final boolean isCustomizable() {

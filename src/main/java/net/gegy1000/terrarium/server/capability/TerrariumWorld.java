@@ -23,8 +23,6 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import javax.annotation.Nullable;
 
 public interface TerrariumWorld extends ICapabilityProvider {
-    ThreadLocal<Boolean> PREVIEW_WORLD = ThreadLocal.withInitial(() -> false);
-
     @Nullable
     static TerrariumWorld get(World world) {
         return world.getCapability(TerrariumCapabilities.world(), null);
@@ -66,10 +64,10 @@ public interface TerrariumWorld extends ICapabilityProvider {
             this.settings = GenerationSettings.parse(world);
 
             TerrariumGeneratorInitializer generatorInitializer = worldType.createGeneratorInitializer(world, this.settings);
-            TerrariumDataInitializer dataInitializer = worldType.createDataInitializer(world, this.settings);
+            TerrariumDataInitializer dataInitializer = worldType.createDataInitializer(this.settings);
 
             CompositeTerrariumGenerator.Builder generator = CompositeTerrariumGenerator.builder();
-            generatorInitializer.setup(generator, PREVIEW_WORLD.get());
+            generatorInitializer.setup(generator);
 
             DataGenerator.Builder dataGenerator = DataGenerator.builder();
             dataInitializer.setup(dataGenerator);

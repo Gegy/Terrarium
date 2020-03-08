@@ -2,7 +2,6 @@ package net.gegy1000.terrarium.server;
 
 import net.gegy1000.gengen.api.GenericWorldType;
 import net.gegy1000.terrarium.Terrarium;
-import net.gegy1000.terrarium.client.preview.PreviewDummyWorld;
 import net.gegy1000.terrarium.server.capability.TerrariumAuxCaps;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
@@ -64,10 +63,10 @@ public class ServerEventHandler {
 
             TerrariumAuxCaps aux = new TerrariumAuxCaps.Implementation();
 
-            if (!world.isRemote || world instanceof PreviewDummyWorld) {
+            if (!world.isRemote) {
                 TerrariumWorld worldData = new TerrariumWorld.Impl(world, worldType);
 
-                Collection<ICapabilityProvider> capabilities = worldType.createCapabilities(world, worldData.getSettings());
+                Collection<ICapabilityProvider> capabilities = worldType.createCapabilities(worldData.getSettings());
                 for (ICapabilityProvider provider : capabilities) {
                     aux.addAux(provider);
                 }

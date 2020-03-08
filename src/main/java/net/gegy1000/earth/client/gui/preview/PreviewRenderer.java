@@ -1,4 +1,4 @@
-package net.gegy1000.terrarium.client.preview;
+package net.gegy1000.earth.client.gui.preview;
 
 import net.gegy1000.terrarium.client.gui.GuiRenderUtils;
 import net.minecraft.client.Minecraft;
@@ -61,15 +61,7 @@ public class PreviewRenderer {
             GlStateManager.rotate(rotationX, 1.0F, 0.0F, 0.0F);
             GlStateManager.rotate(rotationY, 0.0F, 1.0F, 0.0F);
 
-            preview.renderHeightMesh();
-
-            GlStateManager.popMatrix();
-
-            GlStateManager.pushMatrix();
-            GlStateManager.rotate(rotationX, 1.0F, 0.0F, 0.0F);
-            GlStateManager.rotate(rotationY, 0.0F, 1.0F, 0.0F);
-
-            preview.renderChunks();
+            preview.render();
 
             GlStateManager.popMatrix();
 

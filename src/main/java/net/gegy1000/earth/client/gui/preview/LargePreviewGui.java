@@ -1,9 +1,6 @@
-package net.gegy1000.terrarium.client.gui.customization;
+package net.gegy1000.earth.client.gui.preview;
 
 import net.gegy1000.terrarium.client.gui.widget.CopyBoxWidget;
-import net.gegy1000.terrarium.client.preview.PreviewController;
-import net.gegy1000.terrarium.client.preview.PreviewRenderer;
-import net.gegy1000.terrarium.client.preview.WorldPreview;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
@@ -11,7 +8,7 @@ import org.lwjgl.input.Keyboard;
 
 import java.io.IOException;
 
-public class PreviewWorldGui extends GuiScreen {
+public class LargePreviewGui extends GuiScreen {
     private final WorldPreview preview;
     private final GuiScreen parent;
     private final String generatorSettings;
@@ -21,7 +18,7 @@ public class PreviewWorldGui extends GuiScreen {
 
     private CopyBoxWidget settingsBox;
 
-    public PreviewWorldGui(WorldPreview preview, GuiScreen parent, String generatorSettings) {
+    public LargePreviewGui(WorldPreview preview, GuiScreen parent, String generatorSettings) {
         this.preview = preview;
         this.parent = parent;
         this.generatorSettings = generatorSettings;

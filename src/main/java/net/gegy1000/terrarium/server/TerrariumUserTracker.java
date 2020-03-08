@@ -33,6 +33,7 @@ public class TerrariumUserTracker {
         if (world == null) return;
 
         TerrariumWorldType worldType = GenericWorldType.unwrapAs(world.getWorldType(), TerrariumWorldType.class);
+        if (worldType == null) return;
 
         PropertyPrototype prototype = worldType.buildPropertyPrototype();
         providedSettings = GenerationSettings.parse(prototype, settings);
@@ -40,7 +41,7 @@ public class TerrariumUserTracker {
         TerrariumAuxCaps aux = world.getCapability(TerrariumCapabilities.aux(), null);
         if (aux == null) return;
 
-        Collection<ICapabilityProvider> capabilities = worldType.createCapabilities(world, providedSettings);
+        Collection<ICapabilityProvider> capabilities = worldType.createCapabilities(providedSettings);
         for (ICapabilityProvider provider : capabilities) {
             aux.addAux(provider);
         }

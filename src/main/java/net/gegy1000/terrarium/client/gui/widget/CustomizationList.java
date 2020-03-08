@@ -13,14 +13,12 @@ import java.util.List;
 @SideOnly(Side.CLIENT)
 public class CustomizationList extends ListGuiWidget {
     private final Minecraft client;
-    private final GuiScreen parent;
 
     private final List<SingleWidgetEntry> entries = new ArrayList<>();
 
     public CustomizationList(Minecraft client, GuiScreen parent, int x, int y, int width, int height, List<GuiButton> widgets) {
         super(client, parent.width, parent.height, x, y, width, height, 20);
         this.client = client;
-        this.parent = parent;
 
         for (GuiButton widget : widgets) {
             this.entries.add(new SingleWidgetEntry(widget));
@@ -48,10 +46,10 @@ public class CustomizationList extends ListGuiWidget {
         return this.entries.size();
     }
 
-    public class SingleWidgetEntry implements IGuiListEntry {
+    private class SingleWidgetEntry implements IGuiListEntry {
         private final GuiButton button;
 
-        public SingleWidgetEntry(GuiButton button) {
+        SingleWidgetEntry(GuiButton button) {
             this.button = button;
         }
 
@@ -81,20 +79,14 @@ public class CustomizationList extends ListGuiWidget {
             }
         }
 
-        public void drawTooltip(int mouseX, int mouseY) {
+        private void drawTooltip(int mouseX, int mouseY) {
             if (this.button instanceof TooltipRenderer) {
-                this.drawTooltip((TooltipRenderer) this.button, mouseX, mouseY);
+                ((TooltipRenderer) this.button).renderTooltip(mouseX, mouseY);
+
+                GlStateManager.disableLighting();
+                GlStateManager.disableDepth();
+                GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
             }
-        }
-
-        private void drawTooltip(TooltipRenderer renderer, int mouseX, int mouseY) {
-            int width = CustomizationList.this.parent.width;
-            int height = CustomizationList.this.parent.height;
-            renderer.renderTooltip(mouseX, mouseY);
-
-            GlStateManager.disableLighting();
-            GlStateManager.disableDepth();
-            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
 }

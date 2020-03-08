@@ -28,65 +28,62 @@ import static net.gegy1000.earth.server.world.EarthWorldType.*;
 
 final class EarthGenerationInitializer implements TerrariumGeneratorInitializer {
     private final EarthInitContext ctx;
+    private final World world;
 
-    EarthGenerationInitializer(EarthInitContext ctx) {
+    EarthGenerationInitializer(EarthInitContext ctx, World world) {
         this.ctx = ctx;
+        this.world = world;
     }
 
     @Override
-    public void setup(CompositeTerrariumGenerator.Builder builder, boolean preview) {
-        this.addSurfaceComposers(builder, preview);
+    public void setup(CompositeTerrariumGenerator.Builder builder) {
+        this.addSurfaceComposers(builder);
         this.addDecorationComposers(builder);
 
-        if (!preview) {
-            builder.addStructureComposer(new VanillaStructureComposer(this.ctx.world));
-        }
+        builder.addStructureComposer(new VanillaStructureComposer(this.world));
 
         builder.setBiomeComposer(new EarthBiomeComposer());
         builder.setSpawnPosition(new Coordinate(this.ctx.lngLatCrs, this.ctx.settings.getDouble(SPAWN_LONGITUDE), this.ctx.settings.getDouble(SPAWN_LATITUDE)));
     }
 
-    private void addSurfaceComposers(CompositeTerrariumGenerator.Builder builder, boolean preview) {
-        World world = this.ctx.world;
+    private void addSurfaceComposers(CompositeTerrariumGenerator.Builder builder) {
         int heightOffset = this.ctx.settings.getInteger(HEIGHT_OFFSET);
-        HeightFunction surfaceFunction = HeightmapStore.global(world, heightOffset);
+        HeightFunction surfaceFunction = HeightmapStore.global(this.world, heightOffset);
 
         builder.addSurfaceComposer(new HeightmapSurfaceComposer(EarthDataKeys.TERRAIN_HEIGHT, Blocks.STONE.getDefaultState()));
         builder.addSurfaceComposer(new WaterFillSurfaceComposer(Blocks.WATER.getDefaultState()));
-        builder.addSurfaceComposer(new TerrainSurfaceComposer(world, Blocks.STONE.getDefaultState()));
-
-        if (preview) return;
+        builder.addSurfaceComposer(new TerrainSurfaceComposer(this.world, Blocks.STONE.getDefaultState()));
 
         if (this.ctx.settings.getBoolean(ENABLE_DECORATION)) {
             builder.addSurfaceComposer(new EarthCarvingComposer());
         }
 
         if (this.ctx.settings.get(CAVE_GENERATION)) {
-            builder.addSurfaceComposer(GenericSurfaceComposer.of(new GenericCavePrimer(world)));
+            builder.addSurfaceComposer(GenericSurfaceComposer.of(new GenericCavePrimer(this.world)));
         }
 
         if (this.ctx.settings.get(RAVINE_GENERATION)) {
-            builder.addSurfaceComposer(GenericSurfaceComposer.of(new GenericRavinePrimer(world, surfaceFunction)));
+            builder.addSurfaceComposer(GenericSurfaceComposer.of(new GenericRavinePrimer(this.world, surfaceFunction)));
         }
 
-        if (!GenGen.isCubic(world)) {
-            builder.addSurfaceComposer(new BedrockSurfaceComposer(world, Blocks.BEDROCK.getDefaultState(), Math.min(heightOffset - 1, 5)));
+        if (!GenGen.isCubic(this.world)) {
+            builder.addSurfaceComposer(new BedrockSurfaceComposer(this.world, Blocks.BEDROCK.getDefaultState(), Math.min(heightOffset - 1, 5)));
         }
     }
 
     private void addDecorationComposers(CompositeTerrariumGenerator.Builder builder) {
         if (this.ctx.settings.getBoolean(ENABLE_DECORATION)) {
-            builder.addDecorationComposer(new CoverDecorationComposer(this.ctx.world));
+            builder.addDecorationComposer(new CoverDecorationComposer(this.world));
         }
 
         if (this.ctx.settings.getBoolean(ORE_GENERATION)) {
-            OreDecorationComposer oreComposer = new OreDecorationComposer(this.ctx.world);
+            OreDecorationComposer oreComposer = new OreDecorationComposer(this.world);
             VanillaOres.addTo(oreComposer);
 
             builder.addDecorationComposer(oreComposer);
         }
 
-        builder.addDecorationComposer(new FreezeSurfaceComposer(this.ctx.world));
-        builder.addDecorationComposer(new VanillaEntitySpawnComposer(this.ctx.world));
+        builder.addDecorationComposer(new FreezeSurfaceComposer(this.world));
+        builder.addDecorationComposer(new VanillaEntitySpawnComposer(this.world));
     }
 }

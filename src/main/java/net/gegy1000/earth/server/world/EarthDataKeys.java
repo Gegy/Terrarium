@@ -10,7 +10,7 @@ import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.data.raster.UByteRaster;
 import net.minecraft.util.ResourceLocation;
 
-public class EarthDataKeys {
+public final class EarthDataKeys {
     public static final DataKey<ShortRaster> TERRAIN_HEIGHT = create("terrain_height");
     public static final DataKey<UByteRaster> SLOPE = create("slope");
     public static final DataKey<EnumRaster<Cover>> COVER = create("cover");

@@ -1,5 +1,6 @@
 package net.gegy1000.earth.server.world;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.client.PrepareTerrarium;
@@ -8,7 +9,7 @@ import net.gegy1000.earth.server.capability.EarthWorld;
 import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.earth.server.world.data.source.LandCoverSource;
 import net.gegy1000.earth.server.world.data.source.WorldClimateRaster;
-import net.gegy1000.terrarium.client.gui.customization.TerrariumCustomizationGui;
+import net.gegy1000.terrarium.client.gui.customization.SelectPresetGui;
 import net.gegy1000.terrarium.server.TerrariumUserTracker;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.TerrariumDataInitializer;
@@ -19,6 +20,7 @@ import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.generator.customization.PropertyPrototype;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumCustomization;
+import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPreset;
 import net.gegy1000.terrarium.server.world.generator.customization.property.BooleanKey;
 import net.gegy1000.terrarium.server.world.generator.customization.property.NumberKey;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
@@ -38,6 +40,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.Collection;
 import java.util.Random;
+import java.util.function.Consumer;
 
 // TODO: Warn loading old Terrarium worlds
 public class EarthWorldType extends TerrariumWorldType {
@@ -74,17 +77,17 @@ public class EarthWorldType extends TerrariumWorldType {
     @Override
     public TerrariumGeneratorInitializer createGeneratorInitializer(World world, GenerationSettings settings) {
         world.setSeaLevel(settings.getInteger(HEIGHT_OFFSET));
-        return new EarthGenerationInitializer(EarthInitContext.from(world, settings));
+        return new EarthGenerationInitializer(EarthInitContext.from(settings), world);
     }
 
     @Override
-    public TerrariumDataInitializer createDataInitializer(World world, GenerationSettings settings) {
-        return new EarthDataInitializer(EarthInitContext.from(world, settings));
+    public TerrariumDataInitializer createDataInitializer(GenerationSettings settings) {
+        return new EarthDataInitializer(EarthInitContext.from(settings));
     }
 
     @Override
-    public Collection<ICapabilityProvider> createCapabilities(World world, GenerationSettings settings) {
-        CoordinateReference crs = EarthInitContext.from(world, settings).lngLatCrs;
+    public Collection<ICapabilityProvider> createCapabilities(GenerationSettings settings) {
+        CoordinateReference crs = EarthInitContext.from(settings).lngLatCrs;
         return Lists.newArrayList(new EarthWorld.Impl(crs));
     }
 
@@ -138,17 +141,21 @@ public class EarthWorldType extends TerrariumWorldType {
     @SideOnly(Side.CLIENT)
     public void onCustomize(Minecraft client, WorldType worldType, GuiCreateWorld parent) {
         if (!SharedEarthData.isInitialized()) {
-            client.displayGuiScreen(PrepareTerrarium.prepareScreen(parent, () -> super.onCustomize(client, worldType, parent)));
+            client.displayGuiScreen(PrepareTerrarium.prepareScreen(parent, () -> this.onCustomize(client, worldType, parent)));
             return;
         }
 
-        super.onCustomize(client, worldType, parent);
-    }
+        EarthCustomizationGui customizationGui = new EarthCustomizationGui(parent, this);
 
-    @Override
-    @SideOnly(Side.CLIENT)
-    protected TerrariumCustomizationGui createCustomizationGui(GuiCreateWorld parent, WorldType worldType) {
-        return new EarthCustomizationGui(parent, worldType, this);
+        if (Strings.isNullOrEmpty(parent.chunkProviderSettingsJson)) {
+            Consumer<TerrariumPreset> acceptPreset = preset -> {
+                customizationGui.applyPreset(preset);
+                client.displayGuiScreen(customizationGui);
+            };
+            client.displayGuiScreen(new SelectPresetGui(acceptPreset, parent, this));
+        } else {
+            client.displayGuiScreen(customizationGui);
+        }
     }
 
     @Override

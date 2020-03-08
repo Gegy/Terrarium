@@ -13,6 +13,7 @@ import java.util.function.Function;
 public final class DistributedColumnLoader implements ColumnDataLoader {
     private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor(
             new ThreadFactoryBuilder()
+                    .setDaemon(true)
                     .setNameFormat("terrarium-data-worker")
                     .build()
     );

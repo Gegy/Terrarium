@@ -6,12 +6,10 @@ import net.gegy1000.earth.server.world.data.source.ElevationSource;
 import net.gegy1000.earth.server.world.data.source.SoilSource;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
-import net.minecraft.world.World;
 
 import static net.gegy1000.earth.server.world.EarthWorldType.*;
 
 public final class EarthInitContext {
-    public final World world;
     public final GenerationSettings settings;
 
     public final CoordinateReference lngLatCrs;
@@ -20,8 +18,7 @@ public final class EarthInitContext {
     public final CoordinateReference climateRasterCrs;
     public final Zoomable<CoordinateReference> soilRasterCrs;
 
-    private EarthInitContext(World world, GenerationSettings settings) {
-        this.world = world;
+    private EarthInitContext(GenerationSettings settings) {
         this.settings = settings;
 
         double worldScale = settings.getDouble(WORLD_SCALE);
@@ -37,7 +34,7 @@ public final class EarthInitContext {
         this.soilRasterCrs = Zoomable.create(SoilSource.zoomLevels(), zoom -> SoilSource.crs(worldScale, zoom));
     }
 
-    public static EarthInitContext from(World world, GenerationSettings settings) {
-        return new EarthInitContext(world, settings);
+    public static EarthInitContext from(GenerationSettings settings) {
+        return new EarthInitContext(settings);
     }
 }
