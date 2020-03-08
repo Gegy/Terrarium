@@ -9,8 +9,8 @@ import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.data.DataGenerator;
 import net.gegy1000.terrarium.server.world.data.DataView;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
-import net.gegy1000.terrarium.server.world.data.source.DataSourceReader;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -26,6 +26,10 @@ import static net.gegy1000.earth.server.world.EarthWorldType.SPAWN_LONGITUDE;
 public class WorldPreview {
     private static final int VIEW_RANGE = 16 * 16;
     private static final int VIEW_SIZE = VIEW_RANGE * 2 + 1;
+
+    private static final int VIEW_GRANULARITY = 2;
+
+    private static final BufferBuilder BUILDER = new BufferBuilder(PreviewMesh.computeBufferSize(VIEW_SIZE, VIEW_SIZE, VIEW_GRANULARITY));
 
     private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor(
             new ThreadFactoryBuilder()
@@ -63,7 +67,7 @@ public class WorldPreview {
         int originZ = (spawnPos.getZ() - VIEW_RANGE);
         ShortRaster heightRaster = sampleHeightRaster(dataGenerator, originX, originZ, VIEW_SIZE);
 
-        return PreviewMesh.build(heightRaster, 2);
+        return PreviewMesh.build(heightRaster, BUILDER, VIEW_GRANULARITY);
     }
 
     private static ShortRaster sampleHeightRaster(DataGenerator dataGenerator, int originX, int originZ, int size) {

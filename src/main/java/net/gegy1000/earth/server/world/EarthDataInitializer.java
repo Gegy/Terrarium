@@ -6,13 +6,12 @@ import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.data.AreaData;
 import net.gegy1000.earth.server.world.data.PolygonData;
 import net.gegy1000.earth.server.world.data.op.ClimateSampler;
-import net.gegy1000.earth.server.world.data.op.OffsetValueOp;
 import net.gegy1000.earth.server.world.data.op.PolygonSampler;
 import net.gegy1000.earth.server.world.data.op.PolygonToAreaOp;
 import net.gegy1000.earth.server.world.data.op.ProduceLandformsOp;
 import net.gegy1000.earth.server.world.data.op.RasterizeAreaOp;
 import net.gegy1000.earth.server.world.data.op.ResampleZoomRasters;
-import net.gegy1000.earth.server.world.data.op.ScaleTerrainElevationOp;
+import net.gegy1000.earth.server.world.data.op.TransformTerrainElevation;
 import net.gegy1000.earth.server.world.data.op.WaterOps;
 import net.gegy1000.earth.server.world.data.source.ElevationSource;
 import net.gegy1000.earth.server.world.data.source.LandCoverSource;
@@ -119,7 +118,7 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
         int heightOffset = this.ctx.settings.getInteger(HEIGHT_OFFSET);
         int seaLevel = heightOffset + 1;
 
-        DataOp<ShortRaster> elevation = this.elevation(worldScale);
+        DataOp<ShortRaster> elevation = this.elevation(worldScale).cached(ShortRaster::copy);
         DataOp<UByteRaster> slope = SlopeOp.from(elevation, 1.0F / (float) worldScale);
 
         DataOp<EnumRaster<Cover>> cover = this.landcover();
@@ -129,10 +128,13 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
         double terrestrialHeightScale = this.ctx.settings.getDouble(TERRESTRIAL_HEIGHT_SCALE) / worldScale;
         double oceanicHeightScale = this.ctx.settings.getDouble(OCEANIC_HEIGHT_SCALE) / worldScale;
 
-        DataOp<ShortRaster> terrainHeight = new ScaleTerrainElevationOp(terrestrialHeightScale, oceanicHeightScale).apply(elevation);
-        terrainHeight = new OffsetValueOp(heightOffset).apply(terrainHeight);
+        DataOp<ShortRaster> terrainHeight = new TransformTerrainElevation(
+                terrestrialHeightScale,
+                oceanicHeightScale,
+                heightOffset
+        ).apply(elevation);
 
-        if (worldScale <= 130.0) {
+        if (worldScale <= 90.0) {
             DataOp<BitRaster> oceanMask = this.oceanMask();
 
             landforms = WaterOps.applyWaterMask(landforms, oceanMask).cached(EnumRaster::copy);

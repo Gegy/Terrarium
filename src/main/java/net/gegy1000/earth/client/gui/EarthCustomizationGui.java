@@ -32,6 +32,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 public class EarthCustomizationGui extends GuiScreen {
+    private static final long PREVIEW_UPDATE_INTERVAL = 200;
+
     private static final int DONE_BUTTON = 0;
     private static final int CANCEL_BUTTON = 1;
 
@@ -57,6 +59,7 @@ public class EarthCustomizationGui extends GuiScreen {
     private PreviewController previewController;
 
     private boolean previewDirty = true;
+    private long lastPreviewUpdateTime;
 
     private WorldPreview preview;
     private CompletableFuture<WorldPreview> previewFuture;
@@ -213,8 +216,15 @@ public class EarthCustomizationGui extends GuiScreen {
         super.updateScreen();
 
         if (this.previewDirty) {
-            this.rebuildPreview();
-            this.previewDirty = false;
+            long time = System.currentTimeMillis();
+
+            boolean previewExpired = time - this.lastPreviewUpdateTime > PREVIEW_UPDATE_INTERVAL;
+            boolean generateInactive = this.previewFuture == null || this.previewFuture.isDone();
+            if (previewExpired || generateInactive) {
+                this.rebuildPreview();
+                this.previewDirty = false;
+                this.lastPreviewUpdateTime = time;
+            }
         }
 
         this.previewController.update();
@@ -279,7 +289,6 @@ public class EarthCustomizationGui extends GuiScreen {
 
     private void rebuildPreview() {
         this.cancelPreview();
-
         this.previewFuture = WorldPreview.generate(this.worldType, this.settings);
     }
 

@@ -21,15 +21,6 @@ public final class PreviewMesh {
         this.buffer = buffer;
     }
 
-    public static PreviewMesh build(ShortRaster heightRaster, int granularity) {
-        int bufferSize = PreviewMesh.computeBufferSize(heightRaster, granularity);
-        BufferBuilder builder = new BufferBuilder(bufferSize);
-
-        PreviewMesh.build(heightRaster, builder, granularity);
-
-        return new PreviewMesh(builder);
-    }
-
     public void upload() {
         if (this.buffer == null) return;
 
@@ -48,7 +39,7 @@ public final class PreviewMesh {
         }
     }
 
-    private static void build(ShortRaster heightRaster, BufferBuilder builder, int granularity) {
+    public static PreviewMesh build(ShortRaster heightRaster, BufferBuilder builder, int granularity) {
         builder.begin(GL11.GL_QUADS, TerrariumVertexFormats.POSITION_COLOR_NORMAL);
 
         short meanHeight = computeMeanHeight(heightRaster);
@@ -94,12 +85,14 @@ public final class PreviewMesh {
 
         builder.setTranslation(0, 0, 0);
         builder.finishDrawing();
+
+        return new PreviewMesh(builder);
     }
 
-    private static int computeBufferSize(ShortRaster heightRaster, int granularity) {
+    public static int computeBufferSize(int width, int height, int granularity) {
         int vertexWidth = TerrariumVertexFormats.POSITION_COLOR_NORMAL.getSize();
-        int quadCountX = (heightRaster.getWidth() - granularity) / granularity;
-        int quadCountZ = (heightRaster.getHeight() - granularity) / granularity;
+        int quadCountX = (width - granularity) / granularity;
+        int quadCountZ = (height - granularity) / granularity;
         int vertexCount = (quadCountX * quadCountZ) * 4;
         return vertexCount * vertexWidth;
     }

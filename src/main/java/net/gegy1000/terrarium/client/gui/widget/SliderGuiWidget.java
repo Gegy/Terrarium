@@ -115,6 +115,7 @@ public class SliderGuiWidget extends GuiButtonExt implements TooltipRenderer {
         if (this.visible) {
             if (this.mouseDown) {
                 this.setSliderPosition(MathHelper.clamp(this.getMousePosition(mouseX), 0.0, 1.0));
+                this.notifyValue();
                 this.hoverTime = 0;
             }
 
@@ -142,11 +143,15 @@ public class SliderGuiWidget extends GuiButtonExt implements TooltipRenderer {
     public void mouseReleased(int mouseX, int mouseY) {
         if (this.mouseDown) {
             this.mouseDown = false;
-            double value = this.toValue(this.position);
-            if (Math.abs(this.property.value.get().doubleValue() - value) > 1e-06) {
-                this.property.value.set(value);
-                this.listeners.forEach(Runnable::run);
-            }
+            this.notifyValue();
+        }
+    }
+
+    private void notifyValue() {
+        double value = this.toValue(this.position);
+        if (Math.abs(this.property.value.get().doubleValue() - value) > 1e-06) {
+            this.property.value.set(value);
+            this.listeners.forEach(Runnable::run);
         }
     }
 
