@@ -3,7 +3,7 @@ package net.gegy1000.earth.server.world;
 import net.gegy1000.earth.server.capability.HeightmapStore;
 import net.gegy1000.earth.server.world.composer.CoverDecorationComposer;
 import net.gegy1000.earth.server.world.composer.EarthBiomeComposer;
-import net.gegy1000.earth.server.world.composer.EarthCarvingComposer;
+import net.gegy1000.earth.server.world.composer.CoverCarveComposer;
 import net.gegy1000.earth.server.world.composer.FreezeSurfaceComposer;
 import net.gegy1000.earth.server.world.composer.OreDecorationComposer;
 import net.gegy1000.earth.server.world.composer.TerrainSurfaceComposer;
@@ -55,7 +55,7 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
         builder.addSurfaceComposer(new TerrainSurfaceComposer(this.world, Blocks.STONE.getDefaultState()));
 
         if (this.ctx.settings.getBoolean(ENABLE_DECORATION)) {
-            builder.addSurfaceComposer(new EarthCarvingComposer());
+            builder.addSurfaceComposer(new CoverCarveComposer());
         }
 
         if (this.ctx.settings.get(CAVE_GENERATION)) {

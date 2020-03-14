@@ -33,7 +33,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class GeoDebugCommand extends CommandBase {
-    private static final Path DEBUG = Paths.get("debug");
+    private static final Path DEBUG = Paths.get("mods/terrarium/debug");
     private static final int RASTER_RADIUS = 128;
     private static final int RASTER_SIZE = RASTER_RADIUS * 2 + 1;
 

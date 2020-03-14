@@ -62,6 +62,12 @@ public final class GrowthPredictors {
             this.sandContent = UByteRaster.sampler(EarthDataKeys.SAND_CONTENT).defaultValue(33);
         }
 
+        public GrowthPredictors sample(ColumnDataCache dataCache, int x, int z) {
+            GrowthPredictors predictors = new GrowthPredictors();
+            this.sampleTo(dataCache, x, z, predictors);
+            return predictors;
+        }
+
         public void sampleTo(ColumnDataCache dataCache, int x, int z, GrowthPredictors predictors) {
             predictors.elevation = this.elevation.sample(dataCache, x, z);
             predictors.annualRainfall = this.annualRainfall.sample(dataCache, x, z);

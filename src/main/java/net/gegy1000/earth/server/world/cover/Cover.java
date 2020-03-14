@@ -1,8 +1,12 @@
 package net.gegy1000.earth.server.world.cover;
 
 import com.google.common.collect.Iterators;
+import net.gegy1000.earth.server.world.EarthCoverPriming;
+import net.gegy1000.earth.server.world.EarthCoverDecoration;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
@@ -49,22 +53,36 @@ public enum Cover implements CoverSelector {
     private static final Cover[] ID_TO_COVER = new Cover[256];
 
     public final int id;
-    private final CoverConfig config = new CoverConfig();
+
+    private final Collection<Consumer<EarthCoverPriming.Builder>> primers = new ArrayList<>();
+    private final Collection<Consumer<EarthCoverDecoration.Builder>> decorators = new ArrayList<>();
 
     Cover(int id) {
         this.id = id;
     }
 
-    public void configure(Consumer<CoverConfig> configurator) {
-        configurator.accept(this.config);
+    public void decorate(Consumer<EarthCoverDecoration.Builder> configurator) {
+        this.decorators.add(configurator);
+    }
+
+    public void prime(Consumer<EarthCoverPriming.Builder> configurator) {
+        this.primers.add(configurator);
+    }
+
+    public void configureDecorator(EarthCoverDecoration.Builder builder) {
+        for (Consumer<EarthCoverDecoration.Builder> configurator : this.decorators) {
+            configurator.accept(builder);
+        }
+    }
+
+    public void configurePrimer(EarthCoverPriming.Builder builder) {
+        for (Consumer<EarthCoverPriming.Builder> configurator : this.primers) {
+            configurator.accept(builder);
+        }
     }
 
     public boolean is(CoverMarker marker) {
         return marker.contains(this);
-    }
-
-    public CoverConfig getConfig() {
-        return this.config;
     }
 
     public static Cover byId(int id) {

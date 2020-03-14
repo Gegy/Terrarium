@@ -8,8 +8,8 @@ import java.util.Random;
 
 public interface VegetationGenerator {
     static VegetationGenerator of(WorldGenerator generator) {
-        return (world, random, pos, indicator) -> generator.generate(world, random, pos);
+        return generator::generate;
     }
 
-    void generate(World world, Random random, BlockPos pos, double indicator);
+    void generate(World world, Random random, BlockPos pos);
 }

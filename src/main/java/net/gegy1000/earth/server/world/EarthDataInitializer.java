@@ -5,6 +5,7 @@ import net.gegy1000.earth.server.util.Zoomable;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.data.AreaData;
 import net.gegy1000.earth.server.world.data.PolygonData;
+import net.gegy1000.earth.server.world.data.op.AddNoiseOp;
 import net.gegy1000.earth.server.world.data.op.ClimateSampler;
 import net.gegy1000.earth.server.world.data.op.PolygonSampler;
 import net.gegy1000.earth.server.world.data.op.PolygonToAreaOp;
@@ -33,6 +34,9 @@ import net.gegy1000.terrarium.server.world.data.raster.FloatRaster;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.data.raster.UByteRaster;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.gen.NoiseGeneratorPerlin;
+
+import java.util.Random;
 
 import static net.gegy1000.earth.server.world.EarthWorldType.*;
 
@@ -46,6 +50,8 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
     private static final Zoomable<SoilSource> CLAY_CONTENT_SOURCE = Zoomable.create(SoilSource.zoomLevels(), SoilSource::clayContent);
     private static final Zoomable<SoilSource> SILT_CONTENT_SOURCE = Zoomable.create(SoilSource.zoomLevels(), SoilSource::siltContent);
     private static final Zoomable<SoilSource> SAND_CONTENT_SOURCE = Zoomable.create(SoilSource.zoomLevels(), SoilSource::sandContent);
+
+    private static final NoiseGeneratorPerlin TEMPERATURE_NOISE = new NoiseGeneratorPerlin(new Random(12345), 1);
 
     private static final OceanPolygonSource OCEAN_SOURCE = new OceanPolygonSource();
 
@@ -112,6 +118,10 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
         return worldScale > 250.0 ? 0 : 1;
     }
 
+    private AddNoiseOp temperatureNoise() {
+        return new AddNoiseOp(TEMPERATURE_NOISE, 0.05, 1.5);
+    }
+
     @Override
     public void setup(DataGenerator.Builder builder) {
         double worldScale = this.ctx.settings.getDouble(WORLD_SCALE);
@@ -153,9 +163,11 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
 
         DataOp<FloatRaster> meanTemperature = climateSampler.meanTemperature();
         meanTemperature = InterpolationScaleOp.LINEAR.scaleFloatsFrom(meanTemperature, this.ctx.climateRasterCrs);
+        meanTemperature = this.temperatureNoise().applyFloats(meanTemperature);
 
         DataOp<FloatRaster> minTemperature = climateSampler.minTemperature();
         minTemperature = InterpolationScaleOp.LINEAR.scaleFloatsFrom(minTemperature, this.ctx.climateRasterCrs);
+        minTemperature = this.temperatureNoise().applyFloats(minTemperature);
 
         DataOp<UByteRaster> cationExchangeCapacity = this.genericSoil(worldScale, CATION_EXCHANGE_CAPACITY_SOURCE)
                 .map((raster, view) -> UByteRaster.copyFrom(raster));

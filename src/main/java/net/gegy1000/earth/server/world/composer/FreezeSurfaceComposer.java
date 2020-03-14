@@ -46,11 +46,20 @@ public class FreezeSurfaceComposer implements DecorationComposer {
 
         for (int localZ = 0; localZ < 16; localZ++) {
             for (int localX = 0; localX < 16; localX++) {
-                mutablePos.setPos(globalX + localX, 0, globalZ + localZ);
+                int x = globalX + localX;
+                int z = globalZ + localZ;
+
+                mutablePos.setPos(
+                        x + this.random.nextInt(3) - this.random.nextInt(3),
+                        0,
+                        z + this.random.nextInt(3) - this.random.nextInt(3)
+                );
 
                 Biome biome = world.getBiome(mutablePos);
                 float temperature = biome.getTemperature(mutablePos);
                 if (temperature >= 0.15F) continue;
+
+                mutablePos.setPos(x, 0, z);
 
                 if (!writer.getSurfaceMut(mutablePos)) continue;
 

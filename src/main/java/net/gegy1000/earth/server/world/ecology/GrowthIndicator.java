@@ -9,5 +9,9 @@ public interface GrowthIndicator {
         return predictors -> this.evaluate(predictors) * scale;
     }
 
+    default GrowthIndicator pow(double pow) {
+        return predictors -> Math.pow(this.evaluate(predictors), pow);
+    }
+
     double evaluate(GrowthPredictors predictors);
 }

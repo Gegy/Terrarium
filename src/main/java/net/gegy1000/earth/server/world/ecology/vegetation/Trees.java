@@ -3,7 +3,6 @@ package net.gegy1000.earth.server.world.ecology.vegetation;
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.world.ecology.GrowthIndicator;
 import net.gegy1000.earth.server.world.ecology.maxent.MaxentGrowthIndicator;
-import net.gegy1000.terrarium.server.util.Interpolate;
 import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockOldLeaf;
 import net.minecraft.block.BlockOldLog;
@@ -33,7 +32,7 @@ public final class Trees {
             .build();
 
     public static final Vegetation OAK = Vegetation.builder()
-            .generator((world, random, pos, indicator) -> {
+            .generator((world, random, pos) -> {
                 if (random.nextInt(10) == 0) {
                     Generators.BIG_OAK.generate(world, random, pos);
                 } else {
@@ -44,15 +43,13 @@ public final class Trees {
             .build();
 
     public static final Vegetation JUNGLE = Vegetation.builder()
-            .generator((world, random, pos, indicator) -> {
-                double bigChance = 1.0 / (3 * Math.pow(1.0 / Interpolate.cosine(indicator), 3.0));
-                if (random.nextFloat() <= bigChance) {
-                    Generators.BIG_JUNGLE.generate(world, random, pos);
-                } else {
-                    Generators.JUNGLE.generate(world, random, pos);
-                }
-            })
+            .generator(VegetationGenerator.of(Generators.JUNGLE))
             .growthIndicator(maxentIndicator("jungle_like"))
+            .build();
+
+    public static final Vegetation BIG_JUNGLE = Vegetation.builder()
+            .generator(VegetationGenerator.of(Generators.BIG_JUNGLE))
+            .growthIndicator(maxentIndicator("jungle_like").pow(3.0))
             .build();
 
     public static final Vegetation SPRUCE = Vegetation.builder()

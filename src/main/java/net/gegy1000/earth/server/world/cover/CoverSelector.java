@@ -1,6 +1,8 @@
 package net.gegy1000.earth.server.world.cover;
 
 import com.google.common.collect.Sets;
+import net.gegy1000.earth.server.world.EarthCoverDecoration;
+import net.gegy1000.earth.server.world.EarthCoverPriming;
 
 import java.util.Iterator;
 import java.util.Set;
@@ -15,8 +17,12 @@ public interface CoverSelector extends Iterable<Cover> {
         return StreamSupport.stream(this.spliterator(), false);
     }
 
-    default void configureEach(Consumer<CoverConfig> configurator) {
-        this.forEach(cover -> cover.configure(configurator));
+    default void primeEach(Consumer<EarthCoverPriming.Builder> configurator) {
+        this.forEach(cover -> cover.prime(configurator));
+    }
+
+    default void decorateEach(Consumer<EarthCoverDecoration.Builder> configurator) {
+        this.forEach(cover -> cover.decorate(configurator));
     }
 
     default CoverSelector or(CoverSelector rhs) {

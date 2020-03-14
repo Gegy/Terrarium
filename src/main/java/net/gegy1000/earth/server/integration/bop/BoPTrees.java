@@ -21,12 +21,12 @@ public final class BoPTrees {
 
     public static final Vegetation PALM = Vegetation.builder()
             .generator(VegetationGenerator.of(Generators.PALM))
-            .growthIndicator(maxentIndicator("palm"))
+            .growthIndicator(maxentIndicator("palm").pow(3.0))
             .build();
 
     public static final Vegetation EUCALYPTUS = Vegetation.builder()
             .generator(VegetationGenerator.of(Generators.EUCALYPTUS))
-            .growthIndicator(maxentIndicator("eucalyptus"))
+            .growthIndicator(maxentIndicator("eucalyptus").pow(3.0))
             .build();
 
     private static GrowthIndicator maxentIndicator(String path) {
