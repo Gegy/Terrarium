@@ -22,6 +22,10 @@ public final class ColumnData {
         return (Optional<T>) data;
     }
 
+    public <T> T getOrExcept(DataKey<T> key) {
+        return this.get(key).orElseThrow(() -> new RuntimeException("missing " + key));
+    }
+
     public Set<DataKey<?>> keys() {
         return this.store.keySet();
     }

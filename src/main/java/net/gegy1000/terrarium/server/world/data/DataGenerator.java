@@ -42,6 +42,24 @@ public final class DataGenerator {
         return Optional.empty();
     }
 
+    public ColumnData generateOnly(DataView view, DataKey<?>... keys) {
+        ImmutableMap.Builder<DataKey<?>, Optional<?>> result = ImmutableMap.builder();
+
+        for (DataKey<?> key : keys) {
+            DataOp<?> op = this.attachedData.get(key);
+            if (op != null) {
+                try {
+                    result.put(key, op.apply(view).join());
+                } catch (Exception e) {
+                    Terrarium.LOGGER.error("Failed to load DataOp result", e);
+                    result.put(key, Optional.empty());
+                }
+            }
+        }
+
+        return new ColumnData(result.build());
+    }
+
     public static class Builder {
         private final Map<DataKey<?>, DataOp<?>> attachedData = new HashMap<>();
 

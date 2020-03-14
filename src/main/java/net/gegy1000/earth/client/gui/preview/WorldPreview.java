@@ -7,6 +7,7 @@ import net.gegy1000.earth.server.world.EarthInitContext;
 import net.gegy1000.terrarium.server.world.TerrariumDataInitializer;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
+import net.gegy1000.terrarium.server.world.data.ColumnData;
 import net.gegy1000.terrarium.server.world.data.DataGenerator;
 import net.gegy1000.terrarium.server.world.data.DataView;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
@@ -67,24 +68,32 @@ public class WorldPreview {
     }
 
     private static WorldPreview generate(DataGenerator dataGenerator, BlockPos spawnPos) {
+        try {
+            // make sure this builder is not poisoned
+            BUILDER.finishDrawing();
+        } catch (IllegalStateException e) {
+            // ignore
+        }
+
         int originX = (spawnPos.getX() - VIEW_RANGE);
         int originZ = (spawnPos.getZ() - VIEW_RANGE);
-        ShortRaster heightRaster = sampleHeightRaster(dataGenerator, originX, originZ, VIEW_SIZE);
+        ColumnData data = sampleData(dataGenerator, originX, originZ, VIEW_SIZE);
 
-        TerrainMesh mesh = TerrainMesh.build(heightRaster, BUILDER, VIEW_GRANULARITY);
+        TerrainMesh mesh = TerrainMesh.build(data, BUILDER, VIEW_GRANULARITY);
+
+        ShortRaster heightRaster = data.getOrExcept(EarthDataKeys.TERRAIN_HEIGHT);
         Vec3d translation = new Vec3d(
                 -heightRaster.getWidth() / 2.0,
-                -computeCenterHeight(heightRaster),
+                -computeOriginHeight(heightRaster),
                 -heightRaster.getHeight() / 2.0
         );
 
         return new WorldPreview(mesh, translation);
     }
 
-    private static ShortRaster sampleHeightRaster(DataGenerator dataGenerator, int originX, int originZ, int size) {
+    private static ColumnData sampleData(DataGenerator dataGenerator, int originX, int originZ, int size) {
         DataView view = DataView.square(originX, originZ, size);
-        return dataGenerator.generateOne(view, EarthDataKeys.TERRAIN_HEIGHT)
-                .orElseGet(() -> ShortRaster.create(view));
+        return dataGenerator.generateOnly(view, TerrainMesh.REQUIRED_DATA);
     }
 
     public void upload() {
@@ -102,7 +111,7 @@ public class WorldPreview {
         this.mesh.delete();
     }
 
-    private static short computeCenterHeight(ShortRaster heightRaster) {
+    private static short computeOriginHeight(ShortRaster heightRaster) {
         long total = 0;
         long maxHeight = 0;
 

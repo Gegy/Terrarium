@@ -1,7 +1,14 @@
 package net.gegy1000.earth.client.terrain;
 
+import net.gegy1000.earth.server.world.EarthDataKeys;
+import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.terrarium.client.render.TerrariumVertexFormats;
+import net.gegy1000.terrarium.server.world.data.ColumnData;
+import net.gegy1000.terrarium.server.world.data.DataKey;
+import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
+import net.gegy1000.terrarium.server.world.data.raster.FloatRaster;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
+import net.gegy1000.terrarium.server.world.data.raster.UByteRaster;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.GlStateManager;
@@ -12,6 +19,13 @@ import javax.vecmath.Vector3f;
 import java.awt.Color;
 
 public final class TerrainMesh {
+    public static final DataKey<?>[] REQUIRED_DATA = new DataKey<?>[] {
+            EarthDataKeys.TERRAIN_HEIGHT,
+            EarthDataKeys.SLOPE,
+            EarthDataKeys.MIN_TEMPERATURE,
+            EarthDataKeys.COVER
+    };
+
     private static final Vector3f NORMAL_STORE = new Vector3f();
 
     private BufferBuilder buffer;
@@ -39,8 +53,13 @@ public final class TerrainMesh {
         }
     }
 
-    public static TerrainMesh build(ShortRaster heightRaster, BufferBuilder builder, int granularity) {
+    public static TerrainMesh build(ColumnData data, BufferBuilder builder, int granularity) {
         builder.begin(GL11.GL_QUADS, TerrariumVertexFormats.POSITION_COLOR_NORMAL);
+
+        ShortRaster heightRaster = data.getOrExcept(EarthDataKeys.TERRAIN_HEIGHT);
+        UByteRaster slopeRaster = data.getOrExcept(EarthDataKeys.SLOPE);
+        FloatRaster minTemperatureRaster = data.getOrExcept(EarthDataKeys.MIN_TEMPERATURE);
+        EnumRaster<Cover> coverRaster = data.getOrExcept(EarthDataKeys.COVER);
 
         int width = heightRaster.getWidth();
         int height = heightRaster.getHeight();
@@ -58,7 +77,11 @@ public final class TerrainMesh {
                 int bottomLeft = heightBuffer[index + strideY];
                 int bottomRight = heightBuffer[index + strideX + strideY];
 
-                Color color = Color.WHITE; // TODO
+                Cover cover = coverRaster.get(localX, localZ);
+                int slope = slopeRaster.get(localX, localZ);
+                float minTemperature = minTemperatureRaster.get(localX, localZ);
+                Color color = TerrainColorizer.get(cover, slope, minTemperature);
+
                 int red = color.getRed();
                 int green = color.getGreen();
                 int blue = color.getBlue();
