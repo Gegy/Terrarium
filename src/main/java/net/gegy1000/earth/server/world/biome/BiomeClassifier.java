@@ -21,12 +21,16 @@ public final class BiomeClassifier {
     private static Biome classifyLand(Context context) {
         if (context.isFrozen()) {
             return context.isForested() ? Biomes.COLD_TAIGA : Biomes.ICE_PLAINS;
-        } else if (context.isCold()) {
+        } if (context.isCold()) {
             return Biomes.TAIGA;
         }
 
         if (context.isWet() || context.isFlooded()) {
-            return context.isForested() ? Biomes.JUNGLE : Biomes.JUNGLE_EDGE;
+            if (context.cover == Cover.SALINE_FLOODED_FOREST) {
+                return Biomes.SWAMPLAND;
+            } else {
+                return context.isForested() ? Biomes.JUNGLE : Biomes.JUNGLE_EDGE;
+            }
         }
 
         if (context.isDry()) {

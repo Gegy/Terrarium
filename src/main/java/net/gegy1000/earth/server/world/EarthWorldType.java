@@ -42,22 +42,23 @@ import java.util.Collection;
 import java.util.Random;
 import java.util.function.Consumer;
 
-// TODO: Warn loading old Terrarium worlds
+// TODO: Upgrade old terrarium worlds
 public class EarthWorldType extends TerrariumWorldType {
     public static final double LANDCOVER_SCALE = EarthWorld.EQUATOR_CIRCUMFERENCE / LandCoverSource.GLOBAL_WIDTH;
     public static final double CLIMATE_SCALE = EarthWorld.EQUATOR_CIRCUMFERENCE / WorldClimateRaster.WIDTH;
 
     private static final ResourceLocation IDENTIFIER = new ResourceLocation(TerrariumEarth.ID, "earth");
-    private static final ResourceLocation PRESET = new ResourceLocation(TerrariumEarth.ID, "global_default");
+    private static final ResourceLocation PRESET = new ResourceLocation(TerrariumEarth.ID, "global_scenic");
 
     public static final PropertyKey<Number> SPAWN_LATITUDE = new NumberKey("spawn_latitude");
     public static final PropertyKey<Number> SPAWN_LONGITUDE = new NumberKey("spawn_longitude");
-    public static final PropertyKey<Boolean> ENABLE_DECORATION = new BooleanKey("enable_decoration");
+    public static final PropertyKey<Boolean> ADD_TREES = new BooleanKey("add_trees");
+    public static final PropertyKey<Boolean> ADD_GRASS = new BooleanKey("add_grass");
+    public static final PropertyKey<Boolean> ADD_CACTI = new BooleanKey("add_cacti");
     public static final PropertyKey<Number> WORLD_SCALE = new NumberKey("world_scale");
     public static final PropertyKey<Number> TERRESTRIAL_HEIGHT_SCALE = new NumberKey("terrestrial_height_scale");
     public static final PropertyKey<Number> OCEANIC_HEIGHT_SCALE = new NumberKey("oceanic_height_scale");
     public static final PropertyKey<Number> HEIGHT_OFFSET = new NumberKey("height_offset");
-    public static final PropertyKey<Number> BEACH_SIZE = new NumberKey("beach_size");
     public static final PropertyKey<Boolean> ENABLE_BUILDINGS = new BooleanKey("enable_buildings");
     public static final PropertyKey<Boolean> ENABLE_STREETS = new BooleanKey("enable_streets");
 
@@ -97,8 +98,8 @@ public class EarthWorldType extends TerrariumWorldType {
                 .withProperties(SPAWN_LATITUDE, SPAWN_LONGITUDE)
                 .withProperties(WORLD_SCALE, TERRESTRIAL_HEIGHT_SCALE, OCEANIC_HEIGHT_SCALE)
                 .withProperties(HEIGHT_OFFSET)
-                .withProperties(BEACH_SIZE)
-                .withProperties(ENABLE_DECORATION, ENABLE_BUILDINGS, ENABLE_STREETS)
+                .withProperties(ADD_TREES, ADD_GRASS, ADD_CACTI)
+                .withProperties(ENABLE_BUILDINGS, ENABLE_STREETS)
                 .withProperties(CAVE_GENERATION, RAVINE_GENERATION, ORE_GENERATION)
                 .build();
     }
@@ -119,13 +120,12 @@ public class EarthWorldType extends TerrariumWorldType {
                                 .display(value -> String.format("%.1fx", value)),
                         new SliderWidget(HEIGHT_OFFSET)
                                 .range(-63, 128)
-                                .display(value -> String.format("%.0f blocks", value)),
-                        new SliderWidget(BEACH_SIZE)
-                                .range(0, 8)
                                 .display(value -> String.format("%.0f blocks", value))
                 )
                 .withCategory("features",
-                        new ToggleWidget(ENABLE_DECORATION),
+                        new ToggleWidget(ADD_TREES),
+                        new ToggleWidget(ADD_GRASS),
+                        new ToggleWidget(ADD_CACTI),
                         new ToggleWidget(ENABLE_BUILDINGS).locked(),
                         new ToggleWidget(ENABLE_STREETS).locked()
                 )

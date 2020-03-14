@@ -1,8 +1,8 @@
 package net.gegy1000.earth.server.world.ecology;
 
 public interface GrowthIndicator {
-    static GrowthIndicator relaxed() {
-        return predictors -> 1.0;
+    static GrowthIndicator no() {
+        return predictors -> 0.0;
     }
 
     default GrowthIndicator mul(double scale) {

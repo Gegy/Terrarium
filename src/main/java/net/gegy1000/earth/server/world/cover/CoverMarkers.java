@@ -9,15 +9,21 @@ public final class CoverMarkers {
     public static final CoverMarker FLOODED = create();
     public static final CoverMarker BARREN = create();
 
+    public static final CoverMarker MODERATE_TREES = create();
+
     public static final CoverMarker FOREST = create();
     public static final CoverMarker SHRUBS = create();
+
+    public static final CoverMarker OPEN_FOREST = create();
+    public static final CoverMarker CLOSED_FOREST = create();
+    public static final CoverMarker CLOSED_TO_OPEN_FOREST = create();
+
     public static final CoverMarker DECIDUOUS = create();
     public static final CoverMarker EVERGREEN = create();
     public static final CoverMarker BROADLEAF = create();
     public static final CoverMarker NEEDLELEAF = create();
-    public static final CoverMarker OPEN_FOREST = create();
-    public static final CoverMarker CLOSED_FOREST = create();
-    public static final CoverMarker CLOSED_TO_OPEN_FOREST = create();
+
+    public static final CoverMarker DENSE_GRASS = create();
 
     public static CoverMarker create() {
         return new CoverMarker();
@@ -31,11 +37,11 @@ public final class CoverMarkers {
 
         FOREST.add(
                 Cover.MIXED_LEAF_TYPE,
+                Cover.FRESH_FLOODED_FOREST, Cover.SALINE_FLOODED_FOREST,
                 Cover.BROADLEAF_DECIDUOUS, Cover.BROADLEAF_DECIDUOUS_CLOSED, Cover.BROADLEAF_DECIDUOUS_OPEN,
                 Cover.BROADLEAF_EVERGREEN,
                 Cover.NEEDLEAF_DECIDUOUS, Cover.NEEDLEAF_DECIDUOUS_CLOSED, Cover.NEEDLEAF_DECIDUOUS_OPEN,
-                Cover.NEEDLEAF_EVERGREEN, Cover.NEEDLEAF_EVERGREEN_CLOSED, Cover.NEEDLEAF_EVERGREEN_OPEN,
-                Cover.FRESH_FLOODED_FOREST, Cover.SALINE_FLOODED_FOREST
+                Cover.NEEDLEAF_EVERGREEN, Cover.NEEDLEAF_EVERGREEN_CLOSED, Cover.NEEDLEAF_EVERGREEN_OPEN
         );
 
         CLOSED_TO_OPEN_FOREST.add(
@@ -47,21 +53,18 @@ public final class CoverMarkers {
         CLOSED_FOREST.add(Cover.BROADLEAF_DECIDUOUS_CLOSED, Cover.NEEDLEAF_EVERGREEN_CLOSED, Cover.NEEDLEAF_DECIDUOUS_CLOSED);
 
         DECIDUOUS.add(
-                Cover.MIXED_LEAF_TYPE,
                 Cover.BROADLEAF_DECIDUOUS, Cover.BROADLEAF_DECIDUOUS_CLOSED, Cover.BROADLEAF_DECIDUOUS_OPEN,
                 Cover.NEEDLEAF_DECIDUOUS, Cover.NEEDLEAF_DECIDUOUS_CLOSED, Cover.NEEDLEAF_DECIDUOUS_OPEN,
                 Cover.SHRUBLAND_DECIDUOUS
         );
 
         EVERGREEN.add(
-                Cover.MIXED_LEAF_TYPE,
                 Cover.BROADLEAF_EVERGREEN,
                 Cover.NEEDLEAF_EVERGREEN, Cover.NEEDLEAF_EVERGREEN_CLOSED, Cover.NEEDLEAF_EVERGREEN_OPEN,
                 Cover.SHRUBLAND_EVERGREEN
         );
 
         BROADLEAF.add(
-                Cover.MIXED_LEAF_TYPE,
                 Cover.BROADLEAF_EVERGREEN,
                 Cover.BROADLEAF_DECIDUOUS, Cover.BROADLEAF_DECIDUOUS_CLOSED, Cover.BROADLEAF_DECIDUOUS_OPEN
         );
@@ -78,6 +81,21 @@ public final class CoverMarkers {
                 Cover.SHRUBLAND, Cover.SHRUBLAND_EVERGREEN, Cover.SHRUBLAND_DECIDUOUS,
                 Cover.SPARSE_SHRUB
         );
+
+        MODERATE_TREES.add(
+                Cover.TREE_OR_SHRUB_COVER,
+                Cover.TREE_AND_SHRUB_WITH_HERBACEOUS_COVER,
+                Cover.HERBACEOUS_COVER_WITH_TREE_AND_SHRUB,
+                Cover.FLOODED_VEGETATION,
+                Cover.VEGETATION_WITH_CROPLAND,
+                Cover.CROPLAND_WITH_VEGETATION
+        );
+
+        DENSE_GRASS.add(
+                Cover.GRASSLAND,
+                Cover.LICHENS_AND_MOSSES
+        );
+        DENSE_GRASS.addAll(FLOODED);
 
         MinecraftForge.EVENT_BUS.post(new AddCoverMarkersEvent());
     }

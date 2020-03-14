@@ -1,6 +1,6 @@
 {
   "world_type": "earth:earth",
-  "name": "global_survival",
+  "name": "global_playable",
   "icon": "earth:earth_default",
   "properties": {
     "spawn_latitude": 27.988350,
@@ -10,7 +10,9 @@
     "terrestrial_height_scale": 1.5,
     "oceanic_height_scale": 1.5,
     "height_offset": 62,
-    "beach_size": 4,
+    "add_trees": true,
+    "add_grass": true,
+    "add_cacti": true,
     "enable_buildings": false,
     "enable_streets": false,
     "cave_generation": true,

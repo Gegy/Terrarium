@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import net.gegy1000.earth.server.world.ecology.GrowthIndicator;
 
 public final class Vegetation {
-    private static final Vegetation EMPTY = new Vegetation(GrowthIndicator.relaxed(), (world, random, pos) -> {});
+    private static final Vegetation EMPTY = new Vegetation(GrowthIndicator.no(), (world, random, pos) -> {});
 
     private final GrowthIndicator growthIndicator;
     private final VegetationGenerator generator;
@@ -31,7 +31,7 @@ public final class Vegetation {
     }
 
     public static class Builder {
-        private GrowthIndicator growthIndicator = GrowthIndicator.relaxed();
+        private GrowthIndicator growthIndicator = GrowthIndicator.no();
         private VegetationGenerator generator;
 
         Builder() {

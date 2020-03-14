@@ -1,9 +1,11 @@
 package net.gegy1000.earth.server.world;
 
 import net.gegy1000.earth.server.capability.HeightmapStore;
-import net.gegy1000.earth.server.world.composer.CoverDecorationComposer;
 import net.gegy1000.earth.server.world.composer.EarthBiomeComposer;
-import net.gegy1000.earth.server.world.composer.CoverCarveComposer;
+import net.gegy1000.earth.server.world.composer.EarthCactusComposer;
+import net.gegy1000.earth.server.world.composer.EarthGrassComposer;
+import net.gegy1000.earth.server.world.composer.EarthTreeComposer;
+import net.gegy1000.earth.server.world.composer.FloodedSurfaceComposer;
 import net.gegy1000.earth.server.world.composer.FreezeSurfaceComposer;
 import net.gegy1000.earth.server.world.composer.OreDecorationComposer;
 import net.gegy1000.earth.server.world.composer.TerrainSurfaceComposer;
@@ -54,9 +56,7 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
         builder.addSurfaceComposer(new WaterFillSurfaceComposer(Blocks.WATER.getDefaultState()));
         builder.addSurfaceComposer(new TerrainSurfaceComposer(this.world, Blocks.STONE.getDefaultState()));
 
-        if (this.ctx.settings.getBoolean(ENABLE_DECORATION)) {
-            builder.addSurfaceComposer(new CoverCarveComposer());
-        }
+        builder.addSurfaceComposer(new FloodedSurfaceComposer());
 
         if (this.ctx.settings.get(CAVE_GENERATION)) {
             builder.addSurfaceComposer(GenericSurfaceComposer.of(new GenericCavePrimer(this.world)));
@@ -72,8 +72,16 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
     }
 
     private void addDecorationComposers(CompositeTerrariumGenerator.Builder builder) {
-        if (this.ctx.settings.getBoolean(ENABLE_DECORATION)) {
-            builder.addDecorationComposer(new CoverDecorationComposer(this.world));
+        if (this.ctx.settings.getBoolean(ADD_TREES)) {
+            builder.addDecorationComposer(new EarthTreeComposer(this.world));
+        }
+
+        if (this.ctx.settings.getBoolean(ADD_GRASS)) {
+            builder.addDecorationComposer(new EarthGrassComposer(this.world));
+        }
+
+        if (this.ctx.settings.getBoolean(ADD_CACTI)) {
+            builder.addDecorationComposer(new EarthCactusComposer(this.world));
         }
 
         if (this.ctx.settings.getBoolean(ORE_GENERATION)) {

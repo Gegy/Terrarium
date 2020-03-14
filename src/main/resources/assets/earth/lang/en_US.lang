@@ -42,17 +42,18 @@ property.terrarium.world_scale.name=World Scale
 property.terrarium.terrestrial_height_scale.name=Terrestrial Height Scale
 property.terrarium.oceanic_height_scale.name=Oceanic Height Scale
 property.terrarium.height_offset.name=Height Offset
-property.terrarium.beach_size.name=Beach Size
 
 property.terrarium.world_scale.tooltip=The amount of meters in real life representing one block in-game
 property.terrarium.terrestrial_height_scale.tooltip=Elevation multiplier from meters to blocks for terrain above sea level
 property.terrarium.oceanic_height_scale.tooltip=Elevation multiplier from meters to blocks for terrain below sea level
 property.terrarium.height_offset.tooltip=The height in-game that corresponds to sea-level
-property.terrarium.beach_size.tooltip=Radius in blocks for beaches to be generated around coastlines
 
 # Feature Properties
 
-property.terrarium.enable_decoration.name=Enable Decoration
+property.terrarium.add_trees.name=Add Trees
+property.terrarium.add_grass.name=Add Grass
+property.terrarium.add_cacti.name=Add Cacti
+
 property.terrarium.enable_buildings.name=Enable Buildings
 property.terrarium.enable_streets.name=Enable Streets
 
@@ -60,7 +61,10 @@ property.terrarium.cave_generation.name=Cave Generation
 property.terrarium.ravine_generation.name=Ravine Generation
 property.terrarium.ore_generation.name=Ore Generation
 
-property.terrarium.enable_decoration.tooltip=If enabled, custom Earth decorations such as plants and trees will be placed
+property.terrarium.add_trees.tooltip=If enabled, trees will be generated on the terrain
+property.terrarium.add_grass.tooltip=If enabled, grass will be generated on the terrain
+property.terrarium.add_cacti.tooltip=If enabled, cacti will be generated on the terrain
+
 property.terrarium.enable_buildings.tooltip=If enabled, buildings from OpenStreetMap will be generated
 property.terrarium.enable_streets.tooltip=If enabled, streets from OpenStreetMap will be generated
 
@@ -78,10 +82,10 @@ property.earth.season.july=June/July
 
 # Presets
 
-preset.terrarium.earth.global_default.name=Global Default
-preset.terrarium.earth.global_default.desc=Default Global Earth generator
-preset.terrarium.earth.global_survival.name=Global Survival
-preset.terrarium.earth.global_survival.desc=Global Earth generator optimized for a survival experience
+preset.terrarium.earth.global_scenic.name=Global Scenic
+preset.terrarium.earth.global_scenic.desc=Global generator for a scenic creative experience
+preset.terrarium.earth.global_playable.name=Global Playable
+preset.terrarium.earth.global_playable.desc=Global generator for a playable survival experience
 
 # Commands
 

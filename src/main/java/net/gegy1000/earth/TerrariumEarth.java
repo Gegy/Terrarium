@@ -17,7 +17,6 @@ import net.gegy1000.earth.server.shared.RemoteIndex2Initializer;
 import net.gegy1000.earth.server.shared.RemoteIndexInitializer;
 import net.gegy1000.earth.server.shared.SharedDataInitializers;
 import net.gegy1000.earth.server.world.EarthWorldType;
-import net.gegy1000.earth.server.world.cover.CoverConfigurator;
 import net.gegy1000.earth.server.world.cover.CoverMarkers;
 import net.gegy1000.earth.server.world.data.EarthRemoteData;
 import net.gegy1000.earth.server.world.data.GoogleGeocoder;
@@ -28,6 +27,7 @@ import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.data.source.Geocoder;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
@@ -65,7 +65,8 @@ public class TerrariumEarth {
     @SidedProxy(clientSide = CLIENT_PROXY, serverSide = SERVER_PROXY)
     public static ServerProxy PROXY;
 
-    public static final TerrariumWorldType WORLD_TYPE = new EarthWorldType();
+    public static final TerrariumWorldType GENERIC_WORLD_TYPE = new EarthWorldType();
+    public static final WorldType WORLD_TYPE = GENERIC_WORLD_TYPE.create();
 
     public static final SimpleNetworkWrapper NETWORK = NetworkRegistry.INSTANCE.newSimpleChannel(TerrariumEarth.ID);
 
@@ -79,8 +80,6 @@ public class TerrariumEarth {
 
     @Mod.EventHandler
     public static void onPreInit(FMLPreInitializationEvent event) {
-        WORLD_TYPE.create();
-
         deobfuscatedEnvironment = (boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
 
         CapabilityManager.INSTANCE.register(EarthWorld.class, new VoidStorage<>(), EarthWorld.None::new);
@@ -120,7 +119,6 @@ public class TerrariumEarth {
         PROXY.onInit();
 
         CoverMarkers.register();
-        CoverConfigurator.configure();
     }
 
     @Mod.EventHandler

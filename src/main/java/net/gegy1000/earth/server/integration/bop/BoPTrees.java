@@ -31,7 +31,7 @@ public final class BoPTrees {
 
     private static GrowthIndicator maxentIndicator(String path) {
         return MaxentGrowthIndicator.tryParse(new ResourceLocation(TerrariumEarth.ID, "vegetation/models/trees/" + path + ".lambdas"))
-                .orElse(GrowthIndicator.relaxed());
+                .orElse(GrowthIndicator.no());
     }
 
     static class Generators {

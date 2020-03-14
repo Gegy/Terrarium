@@ -1,4 +1,4 @@
-package net.gegy1000.earth.client.gui.preview;
+package net.gegy1000.earth.client.terrain;
 
 import net.gegy1000.terrarium.client.render.TerrariumVertexFormats;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
@@ -11,13 +11,13 @@ import org.lwjgl.opengl.GL11;
 import javax.vecmath.Vector3f;
 import java.awt.Color;
 
-public final class PreviewMesh {
+public final class TerrainMesh {
     private static final Vector3f NORMAL_STORE = new Vector3f();
 
     private BufferBuilder buffer;
     private int displayList = -1;
 
-    private PreviewMesh(BufferBuilder buffer) {
+    private TerrainMesh(BufferBuilder buffer) {
         this.buffer = buffer;
     }
 
@@ -39,10 +39,8 @@ public final class PreviewMesh {
         }
     }
 
-    public static PreviewMesh build(ShortRaster heightRaster, BufferBuilder builder, int granularity) {
+    public static TerrainMesh build(ShortRaster heightRaster, BufferBuilder builder, int granularity) {
         builder.begin(GL11.GL_QUADS, TerrariumVertexFormats.POSITION_COLOR_NORMAL);
-
-        short meanHeight = computeMeanHeight(heightRaster);
 
         int width = heightRaster.getWidth();
         int height = heightRaster.getHeight();
@@ -50,12 +48,6 @@ public final class PreviewMesh {
 
         int strideX = granularity;
         int strideY = width * granularity;
-
-        builder.setTranslation(
-                -heightRaster.getWidth() / 2,
-                -meanHeight,
-                -heightRaster.getHeight() / 2
-        );
 
         for (int localZ = 0; localZ < height - granularity; localZ += granularity) {
             for (int localX = 0; localX < width - granularity; localX += granularity) {
@@ -83,10 +75,9 @@ public final class PreviewMesh {
             }
         }
 
-        builder.setTranslation(0, 0, 0);
         builder.finishDrawing();
 
-        return new PreviewMesh(builder);
+        return new TerrainMesh(builder);
     }
 
     public static int computeBufferSize(int width, int height, int granularity) {
@@ -101,22 +92,6 @@ public final class PreviewMesh {
         NORMAL_STORE.set(topLeft - topRight, 1, topLeft - bottomLeft);
         NORMAL_STORE.normalize();
         return NORMAL_STORE;
-    }
-
-    private static short computeMeanHeight(ShortRaster heightRaster) {
-        long total = 0;
-        long maxHeight = 0;
-
-        short[] shortData = heightRaster.getData();
-        for (short value : shortData) {
-            if (value > maxHeight) {
-                maxHeight = value;
-            }
-            total += value;
-        }
-
-        long averageHeight = total / shortData.length;
-        return (short) ((averageHeight + maxHeight + maxHeight) / 3);
     }
 
     public void delete() {
