@@ -30,13 +30,15 @@ public final class WaterOps {
         });
     }
 
-    public static DataOp<ShortRaster> produceWaterLevel(DataOp<EnumRaster<Landform>> landforms, int seaLevel) {
-        return landforms.map((landformRaster, view) -> {
+    public static DataOp<ShortRaster> produceWaterLevel(DataOp<ShortRaster> elevation, DataOp<EnumRaster<Landform>> landforms, int seaLevel) {
+        return DataOp.map2(elevation, landforms, (view, heightRaster, landformRaster) -> {
             ShortRaster waterLevelRaster = ShortRaster.create(view);
 
             landformRaster.iterate((landform, x, y) -> {
                 if (landform == Landform.SEA) {
                     waterLevelRaster.set(x, y, (short) seaLevel);
+                } else if (landform == Landform.LAKE_OR_RIVER) {
+                    waterLevelRaster.set(x, y, heightRaster.get(x, y));
                 } else {
                     waterLevelRaster.set(x, y, Short.MIN_VALUE);
                 }
@@ -54,6 +56,8 @@ public final class WaterOps {
                     return (short) Math.min(source, seaLevel - 1);
                 } else if (landform == Landform.LAND && source < seaLevel) {
                     return (short) seaLevel;
+                } else if (landform == Landform.LAKE_OR_RIVER) {
+                    return (short) (source - 1);
                 }
                 return source;
             });

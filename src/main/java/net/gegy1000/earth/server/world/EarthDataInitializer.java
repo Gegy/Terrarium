@@ -142,18 +142,18 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
                 terrestrialHeightScale,
                 oceanicHeightScale,
                 heightOffset
-        ).apply(elevation);
+        ).apply(elevation).cached(ShortRaster::copy);
 
         if (worldScale <= 90.0) {
             DataOp<BitRaster> oceanMask = this.oceanMask();
 
             landforms = WaterOps.applyWaterMask(landforms, oceanMask).cached(EnumRaster::copy);
-            terrainHeight = WaterOps.applyToHeight(terrainHeight, landforms, seaLevel);
         }
 
-        cover = WaterOps.applyToCover(cover, landforms);
+        DataOp<ShortRaster> waterLevel = WaterOps.produceWaterLevel(terrainHeight, landforms, seaLevel);
 
-        DataOp<ShortRaster> waterLevel = WaterOps.produceWaterLevel(landforms, seaLevel);
+        terrainHeight = WaterOps.applyToHeight(terrainHeight, landforms, seaLevel);
+        cover = WaterOps.applyToCover(cover, landforms);
 
         SharedEarthData sharedData = SharedEarthData.instance();
         ClimateSampler climateSampler = new ClimateSampler(sharedData.get(SharedEarthData.CLIMATIC_VARIABLES));
