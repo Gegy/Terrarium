@@ -12,11 +12,10 @@ import net.gegy1000.terrarium.server.util.Vec2i;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.data.source.TiledDataSource;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Path;
 import java.util.Optional;
 
@@ -78,8 +77,7 @@ public class ElevationSource extends TiledDataSource<ShortRaster> {
         }
 
         try (InputStream input = this.cachingInput.getInputStream(pos, p -> {
-            HttpResponse response = HTTP.execute(new HttpGet(url));
-            return response.getEntity().getContent();
+            return get(new URL(url));
         })) {
             return Optional.of(TerrariumRasterReader.read(input, ShortRaster.class));
         }
