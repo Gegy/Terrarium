@@ -28,7 +28,7 @@ public final class Trees {
 
     public static final Vegetation BIRCH = Vegetation.builder()
             .generator(VegetationGenerator.of(Generators.BIRCH))
-            .growthIndicator(maxentIndicator("birch"))
+            .growthIndicator(maxentIndicator("birch").pow(1.0 / 2.0))
             .build();
 
     public static final Vegetation OAK = Vegetation.builder()

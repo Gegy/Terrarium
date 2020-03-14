@@ -31,9 +31,6 @@ public final class SoilTexture {
     public static final SoilConfig SAND = SoilConfig.unary(SoilLayer.uniform(SAND_BLOCK));
     public static final SoilConfig DEEP_SNOW = SoilConfig.unary(SoilLayer.uniform(SNOW_BLOCK));
     public static final SoilConfig STONE = SoilConfig.unary(SoilLayer.uniform(STONE_BLOCK));
-    public static final SoilConfig COBBLESTONE = SoilConfig.unary(SoilLayer.uniform(COBBLESTONE_BLOCK));
-
-    public static final SoilConfig DARK_STONE = SoilConfig.unary(SoilLayer.uniform(GRAY_TERRACOTTA_BLOCK));
 
     private SoilTexture() {
     }
@@ -45,7 +42,7 @@ public final class SoilTexture {
             Cover cover
     ) {
         // TODO: better ocean generation
-        if (cover == Cover.WATER) return DIRT;
+        if (cover == Cover.WATER) return SAND;
 
         if (slope < 60) {
             // TODO: gravel, erosion based on slope & rainfall

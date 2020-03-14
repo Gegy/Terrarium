@@ -1,16 +1,26 @@
 package net.gegy1000.earth.server.world.biome;
 
+import net.gegy1000.earth.server.event.ClassifyBiomeEvent;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.cover.CoverMarkers;
 import net.gegy1000.earth.server.world.geography.Landform;
 import net.minecraft.init.Biomes;
 import net.minecraft.world.biome.Biome;
+import net.minecraftforge.common.MinecraftForge;
 
 public final class BiomeClassifier {
-    public static final float FREEZE_MIN_TEMPERATURE = 0.0F;
+    public static final float FREEZE_MIN_TEMPERATURE = -1.0F;
     public static final float COLD_MEAN_TEMPERATURE = 12.0F;
 
     public static Biome classify(Context context) {
+        ClassifyBiomeEvent event = new ClassifyBiomeEvent(context);
+        if (MinecraftForge.TERRAIN_GEN_BUS.post(event)) {
+            Biome biome = event.getBiome();
+            if (biome != null) {
+                return biome;
+            }
+        }
+
         if (context.isLand()) {
             return classifyLand(context);
         } else {
@@ -21,7 +31,8 @@ public final class BiomeClassifier {
     private static Biome classifyLand(Context context) {
         if (context.isFrozen()) {
             return context.isForested() ? Biomes.COLD_TAIGA : Biomes.ICE_PLAINS;
-        } if (context.isCold()) {
+        }
+        if (context.isCold()) {
             return Biomes.TAIGA;
         }
 
@@ -68,7 +79,7 @@ public final class BiomeClassifier {
         }
 
         public boolean isFrozen() {
-            return (this.minTemperature < 0.0F && this.meanTemperature < 5.0F)
+            return (this.minTemperature < FREEZE_MIN_TEMPERATURE && this.meanTemperature < 5.0F)
                     || this.cover.is(CoverMarkers.FROZEN);
         }
 

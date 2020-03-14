@@ -23,7 +23,7 @@ public final class ColumnData {
     }
 
     public <T> T getOrExcept(DataKey<T> key) {
-        return this.get(key).orElseThrow(() -> new RuntimeException("missing " + key));
+        return this.get(key).orElseThrow(() -> new RuntimeException("missing " + key.getIdentifier()));
     }
 
     public Set<DataKey<?>> keys() {

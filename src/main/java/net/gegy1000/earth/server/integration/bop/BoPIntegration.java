@@ -1,8 +1,11 @@
 package net.gegy1000.earth.server.integration.bop;
 
+import biomesoplenty.api.biome.BOPBiomes;
 import net.gegy1000.earth.TerrariumEarth;
+import net.gegy1000.earth.server.event.ClassifyBiomeEvent;
 import net.gegy1000.earth.server.event.ConfigureTreesEvent;
 import net.gegy1000.earth.server.world.EarthWorldType;
+import net.gegy1000.earth.server.world.biome.BiomeClassifier;
 import net.gegy1000.earth.server.world.composer.EarthTreeComposer;
 import net.gegy1000.earth.server.world.composer.OreDecorationComposer;
 import net.gegy1000.earth.server.world.cover.Cover;
@@ -30,6 +33,25 @@ public final class BoPIntegration {
         if (cover.is(CoverSelectors.broadleafEvergreen())) {
             trees.addCandidate(BoPTrees.PALM);
             trees.addCandidate(BoPTrees.EUCALYPTUS);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onClassifyBiome(ClassifyBiomeEvent event) {
+        BiomeClassifier.Context ctx = event.getContext();
+
+        if (ctx.isFrozen()) {
+            return;
+        }
+
+        if (ctx.cover == Cover.LICHENS_AND_MOSSES) {
+            event.setCanceled(true);
+            event.setBiome(BOPBiomes.tundra.orNull());
+        }
+
+        if (ctx.cover == Cover.GRASSLAND) {
+            event.setCanceled(true);
+            event.setBiome(BOPBiomes.grassland.orNull());
         }
     }
 
