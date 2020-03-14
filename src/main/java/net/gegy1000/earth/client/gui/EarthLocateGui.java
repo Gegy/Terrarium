@@ -15,7 +15,6 @@ public class EarthLocateGui extends GuiScreen {
     private final double longitude;
 
     private SlippyMapWidget mapWidget;
-    private MarkerMapComponent markerComponent;
 
     private CopyBoxWidget locationBox;
 
@@ -34,10 +33,9 @@ public class EarthLocateGui extends GuiScreen {
         this.buttonList.add(new GuiButton(0, (this.width - 200) / 2, this.height - 30, 200, 20, I18n.format("gui.done")));
 
         this.mapWidget = new SlippyMapWidget(60, 20, this.width - 120, this.height - 100);
-        this.mapWidget.getMap().focus(this.latitude, this.longitude, 5);
+        this.mapWidget.getMap().focus(this.latitude, this.longitude, 11);
 
-        this.markerComponent = new MarkerMapComponent(new SlippyMapPoint(this.latitude, this.longitude));
-        this.mapWidget.addComponent(this.markerComponent);
+        this.mapWidget.addComponent(new MarkerMapComponent(new SlippyMapPoint(this.latitude, this.longitude)));
 
         int copyBoxWidth = 240;
         String locationText = String.format("%.5f, %.5f", this.latitude, this.longitude);

@@ -42,7 +42,7 @@ public class EarthTeleportGui extends GuiScreen {
         this.addButton(new GuiButton(CANCEL_BUTTON, this.width / 2 + 5, this.height - 28, 150, 20, I18n.format("gui.cancel")));
 
         this.mapWidget = new SlippyMapWidget(60, 20, this.width - 120, this.height - 80);
-        this.mapWidget.getMap().focus(this.latitude, this.longitude, 5);
+        this.mapWidget.getMap().focus(this.latitude, this.longitude, 11);
 
         this.markerComponent = new MarkerMapComponent(new SlippyMapPoint(this.latitude, this.longitude)).allowMovement();
         this.mapWidget.addComponent(this.markerComponent);

@@ -23,7 +23,7 @@ gui.copy_box.copied.name=Copied to clipboard!
 
 gui.earth.preparing=Please Wait
 gui.earth.preparing.desc.1=Preparing Terrarium for use...
-gui.earth.preparing.desc.2=This may take a moment!
+gui.earth.preparing.desc.2=This may take a minute
 
 gui.earth.preparing.errored=An error occurred
 gui.earth.preparing.errored.desc.1=Failed to prepare Terrarium for use!
@@ -53,6 +53,7 @@ property.terrarium.height_offset.tooltip=The height in-game that corresponds to 
 property.terrarium.add_trees.name=Add Trees
 property.terrarium.add_grass.name=Add Grass
 property.terrarium.add_cacti.name=Add Cacti
+property.terrarium.add_gourds.name=Add Pumpkins & Melons
 
 property.terrarium.enable_buildings.name=Enable Buildings
 property.terrarium.enable_streets.name=Enable Streets
@@ -61,9 +62,10 @@ property.terrarium.cave_generation.name=Cave Generation
 property.terrarium.ravine_generation.name=Ravine Generation
 property.terrarium.ore_generation.name=Ore Generation
 
-property.terrarium.add_trees.tooltip=If enabled, trees will be generated on the terrain
-property.terrarium.add_grass.tooltip=If enabled, grass will be generated on the terrain
-property.terrarium.add_cacti.tooltip=If enabled, cacti will be generated on the terrain
+property.terrarium.add_trees.tooltip=If enabled, trees will be generated
+property.terrarium.add_grass.tooltip=If enabled, grass will be generated
+property.terrarium.add_cacti.tooltip=If enabled, cacti will be generated
+property.terrarium.add_gourd.tooltip=If enabled, pumpkins and melons will be generated
 
 property.terrarium.enable_buildings.tooltip=If enabled, buildings from OpenStreetMap will be generated
 property.terrarium.enable_streets.tooltip=If enabled, streets from OpenStreetMap will be generated

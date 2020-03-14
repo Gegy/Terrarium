@@ -55,6 +55,7 @@ public class EarthWorldType extends TerrariumWorldType {
     public static final PropertyKey<Boolean> ADD_TREES = new BooleanKey("add_trees");
     public static final PropertyKey<Boolean> ADD_GRASS = new BooleanKey("add_grass");
     public static final PropertyKey<Boolean> ADD_CACTI = new BooleanKey("add_cacti");
+    public static final PropertyKey<Boolean> ADD_GOURDS = new BooleanKey("add_gourds");
     public static final PropertyKey<Number> WORLD_SCALE = new NumberKey("world_scale");
     public static final PropertyKey<Number> TERRESTRIAL_HEIGHT_SCALE = new NumberKey("terrestrial_height_scale");
     public static final PropertyKey<Number> OCEANIC_HEIGHT_SCALE = new NumberKey("oceanic_height_scale");
@@ -98,7 +99,7 @@ public class EarthWorldType extends TerrariumWorldType {
                 .withProperties(SPAWN_LATITUDE, SPAWN_LONGITUDE)
                 .withProperties(WORLD_SCALE, TERRESTRIAL_HEIGHT_SCALE, OCEANIC_HEIGHT_SCALE)
                 .withProperties(HEIGHT_OFFSET)
-                .withProperties(ADD_TREES, ADD_GRASS, ADD_CACTI)
+                .withProperties(ADD_TREES, ADD_GRASS, ADD_CACTI, ADD_GOURDS)
                 .withProperties(ENABLE_BUILDINGS, ENABLE_STREETS)
                 .withProperties(CAVE_GENERATION, RAVINE_GENERATION, ORE_GENERATION)
                 .build();
@@ -126,6 +127,7 @@ public class EarthWorldType extends TerrariumWorldType {
                         new ToggleWidget(ADD_TREES),
                         new ToggleWidget(ADD_GRASS),
                         new ToggleWidget(ADD_CACTI),
+                        new ToggleWidget(ADD_GOURDS),
                         new ToggleWidget(ENABLE_BUILDINGS).locked(),
                         new ToggleWidget(ENABLE_STREETS).locked()
                 )

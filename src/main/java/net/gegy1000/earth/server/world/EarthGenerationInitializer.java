@@ -3,6 +3,7 @@ package net.gegy1000.earth.server.world;
 import net.gegy1000.earth.server.capability.HeightmapStore;
 import net.gegy1000.earth.server.world.composer.EarthBiomeComposer;
 import net.gegy1000.earth.server.world.composer.EarthCactusComposer;
+import net.gegy1000.earth.server.world.composer.EarthGourdComposer;
 import net.gegy1000.earth.server.world.composer.EarthGrassComposer;
 import net.gegy1000.earth.server.world.composer.EarthTreeComposer;
 import net.gegy1000.earth.server.world.composer.FloodedSurfaceComposer;
@@ -82,6 +83,10 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
 
         if (this.ctx.settings.getBoolean(ADD_CACTI)) {
             builder.addDecorationComposer(new EarthCactusComposer(this.world));
+        }
+
+        if (this.ctx.settings.getBoolean(ADD_GOURDS)) {
+            builder.addDecorationComposer(new EarthGourdComposer(this.world));
         }
 
         if (this.ctx.settings.getBoolean(ORE_GENERATION)) {
