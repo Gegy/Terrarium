@@ -59,8 +59,8 @@ public final class EarthGrassComposer implements DecorationComposer {
         this.generateGrass(FERN, writer, pos, fernsPerChunk);
 
         if (cover.is(CoverMarkers.DENSE_GRASS)) {
-            this.generateGrass(TALL_GRASS, writer, pos, grassPerChunk);
-            this.generateGrass(TALL_FERN, writer, pos, fernsPerChunk);
+            this.generateGrass(TALL_GRASS, writer, pos, grassPerChunk / 2);
+            this.generateGrass(TALL_FERN, writer, pos, fernsPerChunk / 2);
         }
     }
 

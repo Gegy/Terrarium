@@ -67,13 +67,9 @@ public final class EarthTreeComposer implements DecorationComposer {
         if (cover.is(CoverMarkers.CLOSED_TO_OPEN_FOREST)) {
             trees.setDensity(0.15F, 0.9F);
         } else if (cover.is(CoverMarkers.CLOSED_FOREST)) {
-            trees.setDensity(0.4F, 0.9F);
+            trees.setDensity(0.5F, 0.9F);
         } else if (cover.is(CoverMarkers.OPEN_FOREST)) {
             trees.setDensity(0.15F, 0.4F);
-        } else if (cover == Cover.FRESH_FLOODED_FOREST) {
-            trees.setDensity(0.2F, 0.6F);
-        } else if (cover == Cover.SALINE_FLOODED_FOREST) {
-            trees.setDensity(0.2F, 0.4F);
         }
     }
 

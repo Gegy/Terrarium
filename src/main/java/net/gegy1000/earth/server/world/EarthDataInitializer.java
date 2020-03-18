@@ -146,7 +146,6 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
 
         if (worldScale <= 90.0) {
             DataOp<BitRaster> oceanMask = this.oceanMask();
-
             landforms = WaterOps.applyWaterMask(landforms, oceanMask).cached(EnumRaster::copy);
         }
 
