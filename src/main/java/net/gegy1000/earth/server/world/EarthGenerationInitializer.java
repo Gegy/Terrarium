@@ -7,6 +7,7 @@ import net.gegy1000.earth.server.world.composer.EarthFlowerComposer;
 import net.gegy1000.earth.server.world.composer.EarthGourdComposer;
 import net.gegy1000.earth.server.world.composer.EarthGrassComposer;
 import net.gegy1000.earth.server.world.composer.EarthShrubComposer;
+import net.gegy1000.earth.server.world.composer.EarthSugarCaneComposer;
 import net.gegy1000.earth.server.world.composer.EarthTreeComposer;
 import net.gegy1000.earth.server.world.composer.FloodedSurfaceComposer;
 import net.gegy1000.earth.server.world.composer.FreezeSurfaceComposer;
@@ -90,6 +91,10 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
 
         if (this.ctx.settings.getBoolean(ADD_CACTI)) {
             builder.addDecorationComposer(new EarthCactusComposer(this.world));
+        }
+
+        if (this.ctx.settings.getBoolean(ADD_SUGAR_CANE)) {
+            builder.addDecorationComposer(new EarthSugarCaneComposer(this.world));
         }
 
         if (this.ctx.settings.getBoolean(ADD_GOURDS)) {

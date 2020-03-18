@@ -13,6 +13,7 @@
     "add_grass": true,
     "add_flowers": true,
     "add_cacti": true,
+    "add_sugar_cane": true,
     "add_gourds": true,
     "enable_buildings": false,
     "enable_streets": false,
