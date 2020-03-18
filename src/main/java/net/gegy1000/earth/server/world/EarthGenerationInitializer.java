@@ -5,6 +5,7 @@ import net.gegy1000.earth.server.world.composer.EarthBiomeComposer;
 import net.gegy1000.earth.server.world.composer.EarthCactusComposer;
 import net.gegy1000.earth.server.world.composer.EarthGourdComposer;
 import net.gegy1000.earth.server.world.composer.EarthGrassComposer;
+import net.gegy1000.earth.server.world.composer.EarthShrubComposer;
 import net.gegy1000.earth.server.world.composer.EarthTreeComposer;
 import net.gegy1000.earth.server.world.composer.FloodedSurfaceComposer;
 import net.gegy1000.earth.server.world.composer.FreezeSurfaceComposer;
@@ -75,6 +76,7 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
     private void addDecorationComposers(CompositeTerrariumGenerator.Builder builder) {
         if (this.ctx.settings.getBoolean(ADD_TREES)) {
             builder.addDecorationComposer(new EarthTreeComposer(this.world));
+            builder.addDecorationComposer(new EarthShrubComposer(this.world));
         }
 
         if (this.ctx.settings.getBoolean(ADD_GRASS)) {

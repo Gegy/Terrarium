@@ -102,6 +102,10 @@ public final class ColumnDataEntry {
         return false;
     }
 
+    boolean isLoaded() {
+        return this.future != null && this.future.isDone();
+    }
+
     @Override
     public String toString() {
         return "ColumnDataEntry{handleCount=" + this.handleCount + ", tracked=" + this.tracked + "}";

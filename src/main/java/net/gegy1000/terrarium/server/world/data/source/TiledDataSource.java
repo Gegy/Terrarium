@@ -1,6 +1,7 @@
 package net.gegy1000.terrarium.server.world.data.source;
 
 import net.gegy1000.terrarium.server.util.Vec2i;
+import org.apache.http.HttpHeaders;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,7 +40,7 @@ public abstract class TiledDataSource<T> {
     protected static InputStream get(URL url) throws IOException {
         HttpURLConnection http = (HttpURLConnection) url.openConnection();
         http.setRequestMethod("GET");
-        http.setRequestProperty("User-Agent", "terrarium");
+        http.setRequestProperty(HttpHeaders.USER_AGENT, "terrarium");
         return http.getInputStream();
     }
 }

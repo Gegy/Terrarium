@@ -11,6 +11,8 @@ public final class CoverSelectors {
     private static final CoverSelector NEEDLELEAF_EVERGREEN = NEEDLELEAF.and(EVERGREEN);
     private static final CoverSelector NEEDLELEAF_DECIDUOUS = NEEDLELEAF.and(DECIDUOUS);
 
+    private static final CoverSelector SHRUBS = CoverMarkers.DENSE_SHRUBS.or(CoverMarkers.SPARSE_SHRUBS);
+
     public static CoverSelector broadleaf() {
         return BROADLEAF;
     }
@@ -41,5 +43,9 @@ public final class CoverSelectors {
 
     public static CoverSelector needleleafDeciduous() {
         return NEEDLELEAF_DECIDUOUS;
+    }
+
+    public static CoverSelector shrubs() {
+        return SHRUBS;
     }
 }

@@ -3,6 +3,7 @@ package net.gegy1000.earth.server.world.composer;
 import net.gegy1000.earth.server.world.EarthDataKeys;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.cover.CoverMarkers;
+import net.gegy1000.earth.server.world.cover.CoverSelectors;
 import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.gengen.api.writer.ChunkPopulationWriter;
 import net.gegy1000.gengen.util.SpatialRandom;
@@ -63,7 +64,7 @@ public final class EarthGrassComposer implements DecorationComposer {
             return 4;
         }
 
-        if (cover.is(CoverMarkers.FOREST) || cover.is(CoverMarkers.SHRUBS)) {
+        if (cover.is(CoverMarkers.FOREST) || cover.is(CoverSelectors.shrubs())) {
             return 2;
         }
 

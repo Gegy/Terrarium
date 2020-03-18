@@ -36,12 +36,16 @@ public class OreDecorationComposer implements DecorationComposer {
 
         int x = cubePos.getMaxX();
         int z = cubePos.getMaxZ();
-        int surfaceHeight = this.heightSampler.sample(dataCache, x, z);
 
         World world = writer.getGlobal();
         boolean cubic = GenGen.isCubic(world);
 
-        // TODO: When cubic chunks is not installed, we need to make sure ores are still present (they might fall below y=0!)
+        int surfaceHeight = this.heightSampler.sample(dataCache, x, z);
+        if (!cubic) {
+            // when cubic chunks is not enabled, all ores need to still have space within the world
+            surfaceHeight = Math.max(surfaceHeight, 64);
+        }
+
         for (OreConfig ore : this.ores) {
             if (!ore.getSelector().shouldGenerateAt(dataCache, x, z)) continue;
 

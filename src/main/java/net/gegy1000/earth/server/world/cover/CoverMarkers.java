@@ -8,15 +8,18 @@ public final class CoverMarkers {
     public static final CoverMarker FROZEN = create();
     public static final CoverMarker FLOODED = create();
     public static final CoverMarker BARREN = create();
+    public static final CoverMarker NO_VEGETATION = create();
 
     public static final CoverMarker MODERATE_TREES = create();
 
     public static final CoverMarker FOREST = create();
-    public static final CoverMarker SHRUBS = create();
 
     public static final CoverMarker OPEN_FOREST = create();
     public static final CoverMarker CLOSED_FOREST = create();
     public static final CoverMarker CLOSED_TO_OPEN_FOREST = create();
+
+    public static final CoverMarker DENSE_SHRUBS = create();
+    public static final CoverMarker SPARSE_SHRUBS = create();
 
     public static final CoverMarker DECIDUOUS = create();
     public static final CoverMarker EVERGREEN = create();
@@ -34,6 +37,8 @@ public final class CoverMarkers {
         FROZEN.add(Cover.PERMANENT_SNOW);
         FLOODED.add(Cover.FLOODED_VEGETATION, Cover.FRESH_FLOODED_FOREST, Cover.SALINE_FLOODED_FOREST);
         BARREN.add(Cover.BARE, Cover.BARE_CONSOLIDATED, Cover.BARE_UNCONSOLIDATED, Cover.URBAN);
+
+        NO_VEGETATION.add(Cover.WATER, Cover.PERMANENT_SNOW);
 
         FOREST.add(
                 Cover.MIXED_LEAF_TYPE,
@@ -74,13 +79,20 @@ public final class CoverMarkers {
                 Cover.NEEDLEAF_DECIDUOUS, Cover.NEEDLEAF_DECIDUOUS_CLOSED, Cover.NEEDLEAF_DECIDUOUS_OPEN
         );
 
-        SHRUBS.add(
+        DENSE_SHRUBS.add(
                 Cover.TREE_OR_SHRUB_COVER,
                 Cover.TREE_AND_SHRUB_WITH_HERBACEOUS_COVER,
                 Cover.HERBACEOUS_COVER_WITH_TREE_AND_SHRUB,
-                Cover.SHRUBLAND, Cover.SHRUBLAND_EVERGREEN, Cover.SHRUBLAND_DECIDUOUS,
-                Cover.SPARSE_SHRUB
+                Cover.SHRUBLAND, Cover.SHRUBLAND_EVERGREEN, Cover.SHRUBLAND_DECIDUOUS
         );
+        DENSE_SHRUBS.addAll(CLOSED_FOREST);
+
+        SPARSE_SHRUBS.add(
+                Cover.SPARSE_SHRUB,
+                Cover.VEGETATION_WITH_CROPLAND, Cover.CROPLAND_WITH_VEGETATION,
+                Cover.FLOODED_VEGETATION, Cover.HERBACEOUS_COVER
+        );
+        SPARSE_SHRUBS.addAll(OPEN_FOREST);
 
         MODERATE_TREES.add(
                 Cover.TREE_OR_SHRUB_COVER,
@@ -93,7 +105,12 @@ public final class CoverMarkers {
 
         DENSE_GRASS.add(
                 Cover.GRASSLAND,
-                Cover.LICHENS_AND_MOSSES
+                Cover.LICHENS_AND_MOSSES,
+                Cover.HERBACEOUS_COVER_WITH_TREE_AND_SHRUB,
+                Cover.HERBACEOUS_COVER,
+                Cover.SHRUBLAND, Cover.SHRUBLAND_EVERGREEN, Cover.SHRUBLAND_DECIDUOUS,
+                Cover.VEGETATION_WITH_CROPLAND, Cover.CROPLAND_WITH_VEGETATION,
+                Cover.RAINFED_CROPLAND, Cover.IRRIGATED_CROPLAND
         );
         DENSE_GRASS.addAll(FLOODED);
 

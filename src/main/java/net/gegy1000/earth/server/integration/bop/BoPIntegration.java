@@ -6,10 +6,10 @@ import net.gegy1000.earth.server.event.ClassifyBiomeEvent;
 import net.gegy1000.earth.server.event.ConfigureTreesEvent;
 import net.gegy1000.earth.server.world.EarthWorldType;
 import net.gegy1000.earth.server.world.biome.BiomeClassifier;
-import net.gegy1000.earth.server.world.composer.EarthTreeComposer;
 import net.gegy1000.earth.server.world.composer.OreDecorationComposer;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.cover.CoverSelectors;
+import net.gegy1000.earth.server.world.ecology.vegetation.TreeDecorator;
 import net.gegy1000.terrarium.server.event.InitializeTerrariumWorldEvent;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.minecraft.world.World;
@@ -19,12 +19,13 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 public final class BoPIntegration {
     public static void setup() {
         MinecraftForge.TERRAIN_GEN_BUS.register(BoPIntegration.class);
+        MinecraftForge.EVENT_BUS.register(BoPIntegration.class);
     }
 
     @SubscribeEvent
     public static void onConfigureTrees(ConfigureTreesEvent event) {
         Cover cover = event.getCover();
-        EarthTreeComposer.Builder trees = event.getBuilder();
+        TreeDecorator.Builder trees = event.getBuilder();
 
         if (cover.is(CoverSelectors.broadleafDeciduous())) {
             trees.addCandidate(BoPTrees.MAHOGANY);

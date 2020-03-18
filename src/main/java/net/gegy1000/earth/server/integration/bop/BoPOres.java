@@ -8,6 +8,7 @@ import net.gegy1000.earth.server.world.biome.BiomeClassifier;
 import net.gegy1000.earth.server.world.composer.OreDecorationComposer;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.cover.CoverMarkers;
+import net.gegy1000.earth.server.world.cover.CoverSelectors;
 import net.gegy1000.earth.server.world.ores.OreConfig;
 import net.gegy1000.earth.server.world.ores.OreDistribution;
 import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
@@ -56,7 +57,7 @@ public final class BoPOres {
             .distribution(OreDistribution.vanillaUniform(12, 32))
             .select((data, x, z) -> {
                 Cover cover = COVER.sample(data, x, z);
-                return cover.is(CoverMarkers.SHRUBS) || cover.is(CoverMarkers.BARREN);
+                return cover.is(CoverSelectors.shrubs()) || cover.is(CoverMarkers.BARREN);
             })
             .build();
 

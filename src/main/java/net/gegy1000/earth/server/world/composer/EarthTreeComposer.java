@@ -8,12 +8,9 @@ import net.gegy1000.earth.server.world.cover.CoverSelectors;
 import net.gegy1000.earth.server.world.ecology.GrowthPredictors;
 import net.gegy1000.earth.server.world.ecology.vegetation.TreeDecorator;
 import net.gegy1000.earth.server.world.ecology.vegetation.Trees;
-import net.gegy1000.earth.server.world.ecology.vegetation.Vegetation;
-import net.gegy1000.earth.server.world.ecology.vegetation.VegetationGenerator;
 import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.gengen.api.writer.ChunkPopulationWriter;
 import net.gegy1000.gengen.util.SpatialRandom;
-import net.gegy1000.terrarium.server.util.WeightedPool;
 import net.gegy1000.terrarium.server.world.composer.decoration.DecorationComposer;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
@@ -22,7 +19,6 @@ import net.minecraftforge.common.MinecraftForge;
 
 public final class EarthTreeComposer implements DecorationComposer {
     private static final long DECORATION_SEED = 2492037454623254033L;
-    private static final double SUITABILITY_THRESHOLD = 0.85;
 
     private final SpatialRandom random;
 
@@ -43,17 +39,19 @@ public final class EarthTreeComposer implements DecorationComposer {
         int dataZ = pos.getMaxZ();
 
         Cover cover = this.coverSampler.sample(dataCache, dataX, dataZ);
+        if (cover.is(CoverMarkers.NO_VEGETATION)) return;
 
         this.predictorSampler.sampleTo(dataCache, dataX, dataZ, this.predictors);
 
-        Builder trees = new Builder(this.predictors);
+        TreeDecorator.Builder trees = new TreeDecorator.Builder(this.predictors);
+        trees.setRadius(Trees.RADIUS);
 
         if (cover.is(CoverMarkers.FOREST)) {
             this.configureForestDensity(cover, trees);
         } else if (cover.is(CoverMarkers.MODERATE_TREES)) {
-            trees.setTreeDensity(0.0F, 0.1F);
+            trees.setDensity(0.0F, 0.1F);
         } else {
-            trees.setTreeDensity(0.0F, 0.05F);
+            trees.setDensity(0.0F, 0.025F);
         }
 
         this.addTreeCandidates(cover, trees);
@@ -63,21 +61,21 @@ public final class EarthTreeComposer implements DecorationComposer {
         trees.build().decorate(writer, pos, this.random);
     }
 
-    private void configureForestDensity(Cover cover, Builder trees) {
+    private void configureForestDensity(Cover cover, TreeDecorator.Builder trees) {
         if (cover.is(CoverMarkers.CLOSED_TO_OPEN_FOREST)) {
-            trees.setTreeDensity(0.15F, 0.9F);
+            trees.setDensity(0.15F, 0.9F);
         } else if (cover.is(CoverMarkers.CLOSED_FOREST)) {
-            trees.setTreeDensity(0.4F, 0.9F);
+            trees.setDensity(0.4F, 0.9F);
         } else if (cover.is(CoverMarkers.OPEN_FOREST)) {
-            trees.setTreeDensity(0.15F, 0.4F);
+            trees.setDensity(0.15F, 0.4F);
         } else if (cover == Cover.FRESH_FLOODED_FOREST) {
-            trees.setTreeDensity(0.2F, 0.6F);
+            trees.setDensity(0.2F, 0.6F);
         } else if (cover == Cover.SALINE_FLOODED_FOREST) {
-            trees.setTreeDensity(0.2F, 0.4F);
+            trees.setDensity(0.2F, 0.4F);
         }
     }
 
-    private void addTreeCandidates(Cover cover, Builder trees) {
+    private void addTreeCandidates(Cover cover, TreeDecorator.Builder trees) {
         if (cover.is(CoverSelectors.broadleafDeciduous())) {
             trees.addCandidate(Trees.OAK);
             trees.addCandidate(Trees.ACACIA);
@@ -96,54 +94,6 @@ public final class EarthTreeComposer implements DecorationComposer {
         if (cover.is(CoverSelectors.needleleafEvergreen())) {
             trees.addCandidate(Trees.SPRUCE);
             trees.addCandidate(Trees.PINE);
-        }
-    }
-
-    public static class Builder {
-        private final GrowthPredictors predictors;
-
-        private final WeightedPool<VegetationGenerator> trees = new WeightedPool<>();
-
-        private VegetationGenerator mostSuitableTree;
-        private double mostSuitableTreeIndicator;
-
-        private float minTreeDensity = 0.0F;
-        private float maxTreeDensity = 0.2F;
-
-        Builder(GrowthPredictors predictors) {
-            this.predictors = predictors;
-        }
-
-        public Builder addCandidate(Vegetation tree) {
-            double indicator = tree.getGrowthIndicator().evaluate(this.predictors);
-            if (indicator > SUITABILITY_THRESHOLD) {
-                this.trees.add(tree.getGenerator(), (float) indicator);
-            }
-
-            if (indicator > this.mostSuitableTreeIndicator) {
-                this.mostSuitableTree = tree.getGenerator();
-                this.mostSuitableTreeIndicator = indicator;
-            }
-
-            return this;
-        }
-
-        public Builder setTreeDensity(float minDensity, float maxDensity) {
-            this.minTreeDensity = minDensity;
-            this.maxTreeDensity = maxDensity;
-            return this;
-        }
-
-        TreeDecorator build() {
-            if (this.trees.isEmpty() && this.mostSuitableTree != null) {
-                this.trees.add(this.mostSuitableTree, (float) this.mostSuitableTreeIndicator);
-            }
-
-            TreeDecorator trees = new TreeDecorator(this.trees);
-            trees.setDensity(this.minTreeDensity, this.maxTreeDensity);
-            trees.setRadius(Trees.RADIUS);
-
-            return trees;
         }
     }
 }

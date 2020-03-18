@@ -19,16 +19,16 @@ import net.minecraft.world.gen.feature.WorldGenTaiga2;
 import net.minecraft.world.gen.feature.WorldGenTrees;
 
 public final class Trees {
-    public static final float RADIUS = 2.5F;
+    public static final float RADIUS = 3.0F;
 
     public static final Vegetation ACACIA = Vegetation.builder()
             .generator(VegetationGenerator.of(Generators.ACACIA))
-            .growthIndicator(maxentIndicator("acacia"))
+            .growthIndicator(Indicators.ACACIA)
             .build();
 
     public static final Vegetation BIRCH = Vegetation.builder()
             .generator(VegetationGenerator.of(Generators.BIRCH))
-            .growthIndicator(maxentIndicator("birch").pow(1.0 / 2.0))
+            .growthIndicator(Indicators.BIRCH)
             .build();
 
     public static final Vegetation OAK = Vegetation.builder()
@@ -39,32 +39,41 @@ public final class Trees {
                     Generators.OAK.generate(world, random, pos);
                 }
             })
-            .growthIndicator(maxentIndicator("oak"))
+            .growthIndicator(Indicators.OAK)
             .build();
 
     public static final Vegetation JUNGLE = Vegetation.builder()
             .generator(VegetationGenerator.of(Generators.JUNGLE))
-            .growthIndicator(maxentIndicator("jungle_like"))
+            .growthIndicator(Indicators.JUNGLE_LIKE)
             .build();
 
     public static final Vegetation BIG_JUNGLE = Vegetation.builder()
             .generator(VegetationGenerator.of(Generators.BIG_JUNGLE))
-            .growthIndicator(maxentIndicator("jungle_like").pow(3.0))
+            .growthIndicator(Indicators.JUNGLE_LIKE.pow(3.0))
             .build();
 
     public static final Vegetation SPRUCE = Vegetation.builder()
             .generator(VegetationGenerator.of(Generators.SPRUCE))
-            .growthIndicator(maxentIndicator("spruce"))
+            .growthIndicator(Indicators.SPRUCE)
             .build();
 
     public static final Vegetation PINE = Vegetation.builder()
             .generator(VegetationGenerator.of(Generators.PINE))
-            .growthIndicator(maxentIndicator("pine"))
+            .growthIndicator(Indicators.PINE)
             .build();
 
-    private static GrowthIndicator maxentIndicator(String path) {
-        return MaxentGrowthIndicator.tryParse(new ResourceLocation(TerrariumEarth.ID, "vegetation/models/trees/" + path + ".lambdas"))
-                .orElse(GrowthIndicator.no());
+    public static class Indicators {
+        public static final GrowthIndicator ACACIA = maxentIndicator("acacia");
+        public static final GrowthIndicator BIRCH = maxentIndicator("birch").pow(1.0 / 2.0);
+        public static final GrowthIndicator OAK = maxentIndicator("oak");
+        public static final GrowthIndicator JUNGLE_LIKE = maxentIndicator("jungle_like");
+        public static final GrowthIndicator SPRUCE = maxentIndicator("spruce");
+        public static final GrowthIndicator PINE = maxentIndicator("pine");
+
+        private static GrowthIndicator maxentIndicator(String path) {
+            return MaxentGrowthIndicator.tryParse(new ResourceLocation(TerrariumEarth.ID, "vegetation/models/trees/" + path + ".lambdas"))
+                    .orElse(GrowthIndicator.no());
+        }
     }
 
     static class Generators {
