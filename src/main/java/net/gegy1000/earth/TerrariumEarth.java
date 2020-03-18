@@ -12,13 +12,15 @@ import net.gegy1000.earth.server.config.TerrariumEarthConfig;
 import net.gegy1000.earth.server.integration.bop.BoPIntegration;
 import net.gegy1000.earth.server.message.EarthMapGuiMessage;
 import net.gegy1000.earth.server.message.EarthPanoramaMessage;
+import net.gegy1000.earth.server.shared.ApiKeyInitializer;
 import net.gegy1000.earth.server.shared.ClimateRasterInitializer;
 import net.gegy1000.earth.server.shared.RemoteIndex2Initializer;
 import net.gegy1000.earth.server.shared.RemoteIndexInitializer;
 import net.gegy1000.earth.server.shared.SharedDataInitializers;
+import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.earth.server.world.EarthWorldType;
 import net.gegy1000.earth.server.world.cover.CoverMarkers;
-import net.gegy1000.earth.server.world.data.EarthRemoteData;
+import net.gegy1000.earth.server.world.data.EarthApiKeys;
 import net.gegy1000.earth.server.world.data.GoogleGeocoder;
 import net.gegy1000.earth.server.world.data.NominatimGeocoder;
 import net.gegy1000.terrarium.server.capability.DelegatedStorage;
@@ -48,7 +50,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
 import java.util.Map;
 
 @Mod.EventBusSubscriber
@@ -88,23 +89,11 @@ public class TerrariumEarth {
         PROXY.onPreInit();
 
         SharedDataInitializers.add(
+                new ApiKeyInitializer(),
                 new ClimateRasterInitializer(),
                 new RemoteIndexInitializer(),
                 new RemoteIndex2Initializer()
         );
-
-        Thread thread = new Thread(() -> {
-            try {
-                // TODO: SharedDataInitializer
-                EarthRemoteData.load();
-            } catch (IOException e) {
-                LOGGER.warn("Failed to load remote Earth data {}", e.toString());
-            } catch (Throwable t) {
-                LOGGER.error("An unexpected exception occurred while loading remote data", t);
-            }
-        }, "Terrarium Remote Load");
-        thread.setDaemon(true);
-        thread.start();
 
         NETWORK.registerMessage(EarthMapGuiMessage.Handler.class, EarthMapGuiMessage.class, 0, Side.CLIENT);
         NETWORK.registerMessage(EarthPanoramaMessage.Handler.class, EarthPanoramaMessage.class, 1, Side.CLIENT);
@@ -147,7 +136,8 @@ public class TerrariumEarth {
     }
 
     public static Geocoder getPreferredGeocoder() {
-        if (TerrariumEarthConfig.osmGeocoder || Strings.isNullOrEmpty(EarthRemoteData.keys.getGeocoderKey())) {
+        EarthApiKeys keys = SharedEarthData.instance().get(SharedEarthData.API_KEYS);
+        if (TerrariumEarthConfig.osmGeocoder || (keys == null || Strings.isNullOrEmpty(keys.getGeocoderKey()))) {
             return new NominatimGeocoder();
         } else {
             return new GoogleGeocoder();

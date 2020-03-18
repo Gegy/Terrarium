@@ -1,7 +1,7 @@
 package net.gegy1000.earth.server.shared;
 
 import net.gegy1000.earth.server.util.ProcessTracker;
-import net.gegy1000.earth.server.util.ProgressTracker;
+import net.gegy1000.earth.server.util.TrackedInputStream;
 import net.gegy1000.earth.server.world.data.source.WorldClimateRaster;
 import net.gegy1000.earth.server.world.data.source.cache.CachingInput;
 import net.gegy1000.terrarium.server.world.data.source.TiledDataSource;
@@ -20,14 +20,12 @@ public final class ClimateRasterInitializer implements SharedDataInitializer {
 
     @Override
     public void initialize(SharedEarthData data, ProcessTracker processTracker) {
-        ProgressTracker master = processTracker.push(new TextComponentTranslation("initializer.terrarium.climate_raster"), 1);
-
-        master.use(() -> {
-            try (InputStream input = getStream()) {
-                data.put(SharedEarthData.CLIMATIC_VARIABLES, WorldClimateRaster.parse(input));
-            }
-            master.step(1);
-        });
+        try (TrackedInputStream input = new TrackedInputStream(getStream())) {
+            input.submitTo(new TextComponentTranslation("initializer.terrarium.climate_raster"), processTracker);
+            data.put(SharedEarthData.CLIMATIC_VARIABLES, WorldClimateRaster.parse(input));
+        } catch (IOException e) {
+            processTracker.raiseException(e);
+        }
     }
 
     private static InputStream getStream() throws IOException {

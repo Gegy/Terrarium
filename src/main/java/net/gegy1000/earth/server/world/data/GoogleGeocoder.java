@@ -1,12 +1,15 @@
 package net.gegy1000.earth.server.world.data;
 
+import com.google.common.base.Strings;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.world.data.source.Geocoder;
 
+import javax.annotation.Nullable;
 import javax.vecmath.Vector2d;
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -24,8 +27,13 @@ public class GoogleGeocoder implements Geocoder {
     private static final JsonParser JSON_PARSER = new JsonParser();
 
     @Override
+    @Nullable
     public Vector2d get(String place) throws IOException {
-        String key = EarthRemoteData.keys.getGeocoderKey();
+        EarthApiKeys keys = SharedEarthData.instance().get(SharedEarthData.API_KEYS);
+        if (keys == null) return null;
+
+        String key = keys.getGeocoderKey();
+        if (Strings.isNullOrEmpty(key)) return null;
 
         HttpURLConnection connection = (HttpURLConnection) new URL(String.format(GEOCODER_ADDRESS, URLEncoder.encode(place, "UTF-8"), key)).openConnection();
         connection.setRequestMethod("GET");
@@ -62,7 +70,11 @@ public class GoogleGeocoder implements Geocoder {
 
     @Override
     public String[] suggest(String place) throws IOException {
-        String key = EarthRemoteData.keys.getAutocompleteKey();
+        EarthApiKeys keys = SharedEarthData.instance().get(SharedEarthData.API_KEYS);
+        if (keys == null) return null;
+
+        String key = keys.getAutocompleteKey();
+        if (Strings.isNullOrEmpty(key)) return null;
 
         HttpURLConnection connection = (HttpURLConnection) new URL(String.format(SUGGESTION_ADDRESS, URLEncoder.encode(place, "UTF-8"), key)).openConnection();
         connection.setRequestMethod("GET");

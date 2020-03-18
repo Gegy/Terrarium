@@ -1,8 +1,10 @@
 package net.gegy1000.earth.client.render;
 
+import com.google.common.base.Strings;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.gegy1000.earth.server.world.data.EarthRemoteData;
+import net.gegy1000.earth.server.shared.SharedEarthData;
+import net.gegy1000.earth.server.world.data.EarthApiKeys;
 
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
@@ -24,7 +26,11 @@ public class PanoramaLookupHandler {
 
     @Nullable
     public static Result queryPanorama(double latitude, double longitude) throws IOException {
-        String key = EarthRemoteData.keys.getStreetviewKey();
+        EarthApiKeys keys = SharedEarthData.instance().get(SharedEarthData.API_KEYS);
+        if (keys == null) return null;
+
+        String key = keys.getStreetviewKey();
+        if (Strings.isNullOrEmpty(key)) return null;
 
         HttpURLConnection connection = (HttpURLConnection) new URL(String.format(METADATA_ADDRESS, latitude, longitude, key)).openConnection();
         connection.setRequestMethod("GET");

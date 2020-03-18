@@ -22,7 +22,7 @@ public class TrackedInputStream extends InputStream {
     public int read() throws IOException {
         int read = this.input.read();
         if (read != -1) {
-            this.readBytes(1);
+            this.trackBytes(1);
         }
         return read;
     }
@@ -30,21 +30,21 @@ public class TrackedInputStream extends InputStream {
     @Override
     public int read(byte[] b) throws IOException {
         int count = this.input.read(b);
-        this.readBytes(count);
+        this.trackBytes(count);
         return count;
     }
 
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
         int count = this.input.read(b, off, len);
-        this.readBytes(count);
+        this.trackBytes(count);
         return count;
     }
 
     @Override
     public long skip(long n) throws IOException {
         long skipped = this.input.skip(n);
-        this.readBytes((int) skipped);
+        this.trackBytes((int) skipped);
         return skipped;
     }
 
@@ -61,7 +61,7 @@ public class TrackedInputStream extends InputStream {
         }
     }
 
-    private void readBytes(int count) {
+    private void trackBytes(int count) {
         if (count <= 0 || this.tracker == null) return;
         this.tracker.step(count);
     }

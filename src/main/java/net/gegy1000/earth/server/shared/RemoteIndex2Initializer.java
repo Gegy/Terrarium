@@ -37,6 +37,7 @@ public final class RemoteIndex2Initializer implements SharedDataInitializer {
         ProgressTracker master = processTracker.push(new TextComponentTranslation("initializer.terrarium.remote_index"), 1);
 
         master.use(() -> {
+            master.step(1);
             EarthRemoteIndex2 index = this.loadIndex(processTracker);
             data.put(SharedEarthData.REMOTE_INDEX2, index);
         });
