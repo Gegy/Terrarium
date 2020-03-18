@@ -32,7 +32,7 @@ public class TallShrubFeature extends AbstractTreeFeature {
             this.setLeaves(world, origin.up(2));
         }
 
-        return false;
+        return true;
     }
 
     private void setWood(World world, BlockPos origin, BlockPos.MutableBlockPos mutablePos) {

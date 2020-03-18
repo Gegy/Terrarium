@@ -53,19 +53,32 @@ public final class EarthShrubComposer implements DecorationComposer {
             shrubs.setDensity(0.0F, 0.0125F);
         }
 
-        this.addShrubCandidates(shrubs);
+        if (cover.is(CoverMarkers.CLOSED_FOREST)) {
+            this.addFloorShrubCandidates(shrubs);
+        } else {
+            this.addTallShrubCandidates(shrubs);
+        }
 
         MinecraftForge.TERRAIN_GEN_BUS.post(new ConfigureShrubsEvent(cover, this.predictors, shrubs));
 
         shrubs.build().decorate(writer, pos, this.random);
     }
 
-    private void addShrubCandidates(TreeDecorator.Builder shrubs) {
-        shrubs.addCandidate(Shrubs.OAK);
-        shrubs.addCandidate(Shrubs.ACACIA);
-        shrubs.addCandidate(Shrubs.JUNGLE);
-        shrubs.addCandidate(Shrubs.BIRCH);
-        shrubs.addCandidate(Shrubs.ACACIA);
-        shrubs.addCandidate(Shrubs.SPRUCE);
+    private void addTallShrubCandidates(TreeDecorator.Builder shrubs) {
+        shrubs.addCandidate(Shrubs.TALL_OAK);
+        shrubs.addCandidate(Shrubs.TALL_ACACIA);
+        shrubs.addCandidate(Shrubs.TALL_JUNGLE);
+        shrubs.addCandidate(Shrubs.TALL_BIRCH);
+        shrubs.addCandidate(Shrubs.TALL_ACACIA);
+        shrubs.addCandidate(Shrubs.TALL_SPRUCE);
+    }
+
+    private void addFloorShrubCandidates(TreeDecorator.Builder shrubs) {
+        shrubs.addCandidate(Shrubs.FLOOR_OAK);
+        shrubs.addCandidate(Shrubs.FLOOR_ACACIA);
+        shrubs.addCandidate(Shrubs.FLOOR_JUNGLE);
+        shrubs.addCandidate(Shrubs.FLOOR_BIRCH);
+        shrubs.addCandidate(Shrubs.FLOOR_ACACIA);
+        shrubs.addCandidate(Shrubs.FLOOR_SPRUCE);
     }
 }
