@@ -32,13 +32,13 @@ public final class EarthShrubComposer implements DecorationComposer {
 
     @Override
     public void composeDecoration(ColumnDataCache dataCache, CubicPos pos, ChunkPopulationWriter writer) {
-        this.random.setSeed(pos.getCenterX(), pos.getCenterY(), pos.getCenterZ());
-
         int dataX = pos.getMaxX();
         int dataZ = pos.getMaxZ();
 
         Cover cover = this.coverSampler.sample(dataCache, dataX, dataZ);
         if (cover.is(CoverMarkers.NO_VEGETATION)) return;
+
+        this.random.setSeed(pos.getCenterX(), pos.getCenterY(), pos.getCenterZ());
 
         this.predictorSampler.sampleTo(dataCache, dataX, dataZ, this.predictors);
 

@@ -40,7 +40,8 @@ public final class TreeDecorator {
         float fCount = density * CHUNK_AREA / this.area;
 
         int count = MathHelper.floor(fCount);
-        if (random.nextFloat() < fCount - count) {
+        float remainder = fCount - count;
+        if (random.nextFloat() < remainder) {
             count += 1;
         }
 

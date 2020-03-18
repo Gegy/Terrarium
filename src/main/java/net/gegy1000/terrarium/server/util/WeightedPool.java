@@ -45,9 +45,8 @@ public final class WeightedPool<T> implements Iterable<WeightedPool.Entry<T>> {
     }
 
     @Nullable
-    public T sampleOrNull(Random random) {
-        float sample = random.nextFloat() * this.totalWeight;
-
+    public T sampleOrNull(float sample) {
+        sample = sample * this.totalWeight;
         float w = 0;
         for (Entry<T> entry : this.entries) {
             w += entry.weight;
@@ -57,9 +56,15 @@ public final class WeightedPool<T> implements Iterable<WeightedPool.Entry<T>> {
         return null;
     }
 
+    @Nullable
+    public T sampleOrNull(Random random) {
+        return this.sampleOrNull(random.nextFloat());
+    }
+
     @Nonnull
     public T sampleOrExcept(Random random) {
-        return Preconditions.checkNotNull(this.sampleOrNull(random), "empty pool");
+        T sample = this.sampleOrNull(random.nextFloat());
+        return Preconditions.checkNotNull(sample, "empty pool");
     }
 
     public Entry<T> get(int index) {

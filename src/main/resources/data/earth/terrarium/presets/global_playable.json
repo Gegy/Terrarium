@@ -12,6 +12,7 @@
     "height_offset": 62,
     "add_trees": true,
     "add_grass": true,
+    "add_flowers": true,
     "add_cacti": true,
     "add_gourds": true,
     "enable_buildings": false,

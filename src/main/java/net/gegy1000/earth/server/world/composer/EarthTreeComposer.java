@@ -41,6 +41,8 @@ public final class EarthTreeComposer implements DecorationComposer {
         Cover cover = this.coverSampler.sample(dataCache, dataX, dataZ);
         if (cover.is(CoverMarkers.NO_VEGETATION)) return;
 
+        this.random.setSeed(pos.getCenterX(), pos.getCenterY(), pos.getCenterZ());
+
         this.predictorSampler.sampleTo(dataCache, dataX, dataZ, this.predictors);
 
         TreeDecorator.Builder trees = new TreeDecorator.Builder(this.predictors);

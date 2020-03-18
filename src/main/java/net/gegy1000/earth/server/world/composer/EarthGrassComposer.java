@@ -29,11 +29,15 @@ public final class EarthGrassComposer implements DecorationComposer {
 
     private final BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
 
-    private static final WorldGenerator TALL_GRASS = new WorldGenTallGrass(BlockTallGrass.EnumType.GRASS);
-    private static final WorldGenDoublePlant DOUBLE_GRASS = new WorldGenDoublePlant();
+    private static final WorldGenerator GRASS = new WorldGenTallGrass(BlockTallGrass.EnumType.GRASS);
+    private static final WorldGenerator FERN = new WorldGenTallGrass(BlockTallGrass.EnumType.FERN);
+
+    private static final WorldGenDoublePlant TALL_GRASS = new WorldGenDoublePlant();
+    private static final WorldGenDoublePlant TALL_FERN = new WorldGenDoublePlant();
 
     static {
-        DOUBLE_GRASS.setPlantType(BlockDoublePlant.EnumPlantType.GRASS);
+        TALL_GRASS.setPlantType(BlockDoublePlant.EnumPlantType.GRASS);
+        TALL_FERN.setPlantType(BlockDoublePlant.EnumPlantType.FERN);
     }
 
     public EarthGrassComposer(World world) {
@@ -48,14 +52,15 @@ public final class EarthGrassComposer implements DecorationComposer {
         int dataZ = pos.getMaxZ();
         Cover cover = this.coverSampler.sample(dataCache, dataX, dataZ);
 
-        int minX = pos.getCenterX();
-        int minZ = pos.getCenterZ();
-
         int grassPerChunk = this.getGrassPerChunk(this.random, cover);
-        this.generateGrass(writer, minX, minZ, grassPerChunk);
+        int fernsPerChunk = this.getFernsPerChunk(cover);
+
+        this.generateGrass(GRASS, writer, pos, grassPerChunk);
+        this.generateGrass(FERN, writer, pos, fernsPerChunk);
 
         if (cover.is(CoverMarkers.DENSE_GRASS)) {
-            this.generateDoubleGrass(writer, minX, minZ, 3);
+            this.generateGrass(TALL_GRASS, writer, pos, grassPerChunk);
+            this.generateGrass(TALL_FERN, writer, pos, fernsPerChunk);
         }
     }
 
@@ -71,24 +76,20 @@ public final class EarthGrassComposer implements DecorationComposer {
         return random.nextInt(2);
     }
 
-    private void generateGrass(ChunkPopulationWriter writer, int minX, int minZ, int count) {
-        World world = writer.getGlobal();
-
-        for (int i = 0; i < count; i++) {
-            this.mutablePos.setPos(
-                    minX + this.random.nextInt(16),
-                    0,
-                    minZ + this.random.nextInt(16)
-            );
-
-            if (writer.getSurfaceMut(this.mutablePos)) {
-                TALL_GRASS.generate(world, this.random, this.mutablePos);
-            }
+    private int getFernsPerChunk(Cover cover) {
+        if (cover.is(CoverMarkers.FLOODED)) {
+            return 3;
+        } else if (cover.is(CoverMarkers.FOREST)) {
+            return 1;
         }
+
+        return 0;
     }
 
-    private void generateDoubleGrass(ChunkPopulationWriter writer, int minX, int minZ, int count) {
+    private void generateGrass(WorldGenerator generator, ChunkPopulationWriter writer, CubicPos pos, int count) {
         World world = writer.getGlobal();
+        int minX = pos.getCenterX();
+        int minZ = pos.getCenterZ();
 
         for (int i = 0; i < count; i++) {
             this.mutablePos.setPos(
@@ -98,7 +99,7 @@ public final class EarthGrassComposer implements DecorationComposer {
             );
 
             if (writer.getSurfaceMut(this.mutablePos)) {
-                DOUBLE_GRASS.generate(world, this.random, this.mutablePos);
+                generator.generate(world, this.random, this.mutablePos);
             }
         }
     }

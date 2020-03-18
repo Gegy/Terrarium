@@ -18,6 +18,7 @@ public final class CoverMarkers {
     public static final CoverMarker CLOSED_FOREST = create();
     public static final CoverMarker CLOSED_TO_OPEN_FOREST = create();
 
+    public static final CoverMarker PLAINS = create();
     public static final CoverMarker DENSE_SHRUBS = create();
     public static final CoverMarker SPARSE_SHRUBS = create();
 
@@ -77,6 +78,15 @@ public final class CoverMarkers {
         NEEDLELEAF.add(
                 Cover.NEEDLEAF_EVERGREEN, Cover.NEEDLEAF_EVERGREEN_CLOSED, Cover.NEEDLEAF_EVERGREEN_OPEN,
                 Cover.NEEDLEAF_DECIDUOUS, Cover.NEEDLEAF_DECIDUOUS_CLOSED, Cover.NEEDLEAF_DECIDUOUS_OPEN
+        );
+
+        PLAINS.add(
+                Cover.VEGETATION_WITH_CROPLAND, Cover.CROPLAND_WITH_VEGETATION,
+                Cover.FLOODED_VEGETATION, Cover.HERBACEOUS_COVER,
+                Cover.GRASSLAND, Cover.LICHENS_AND_MOSSES,
+                Cover.RAINFED_CROPLAND, Cover.IRRIGATED_CROPLAND,
+                Cover.HERBACEOUS_COVER_WITH_TREE_AND_SHRUB, Cover.SPARSE_SHRUB,
+                Cover.SHRUBLAND, Cover.SHRUBLAND_EVERGREEN, Cover.SHRUBLAND_DECIDUOUS
         );
 
         DENSE_SHRUBS.add(

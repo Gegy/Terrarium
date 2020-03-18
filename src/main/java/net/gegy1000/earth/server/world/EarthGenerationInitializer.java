@@ -3,6 +3,7 @@ package net.gegy1000.earth.server.world;
 import net.gegy1000.earth.server.capability.HeightmapStore;
 import net.gegy1000.earth.server.world.composer.EarthBiomeComposer;
 import net.gegy1000.earth.server.world.composer.EarthCactusComposer;
+import net.gegy1000.earth.server.world.composer.EarthFlowerComposer;
 import net.gegy1000.earth.server.world.composer.EarthGourdComposer;
 import net.gegy1000.earth.server.world.composer.EarthGrassComposer;
 import net.gegy1000.earth.server.world.composer.EarthShrubComposer;
@@ -77,6 +78,10 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
         if (this.ctx.settings.getBoolean(ADD_TREES)) {
             builder.addDecorationComposer(new EarthTreeComposer(this.world));
             builder.addDecorationComposer(new EarthShrubComposer(this.world));
+        }
+
+        if (this.ctx.settings.getBoolean(ADD_FLOWERS)) {
+            builder.addDecorationComposer(new EarthFlowerComposer(this.world));
         }
 
         if (this.ctx.settings.getBoolean(ADD_GRASS)) {
