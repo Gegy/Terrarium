@@ -4,7 +4,6 @@ import biomesoplenty.api.block.BOPBlocks;
 import biomesoplenty.api.enums.BOPGems;
 import biomesoplenty.common.block.BlockBOPGem;
 import net.gegy1000.earth.server.world.EarthDataKeys;
-import net.gegy1000.earth.server.world.biome.BiomeClassifier;
 import net.gegy1000.earth.server.world.composer.OreDecorationComposer;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.cover.CoverMarkers;
@@ -13,6 +12,8 @@ import net.gegy1000.earth.server.world.ores.OreDistribution;
 import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.data.raster.FloatRaster;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
+
+import static net.gegy1000.earth.server.world.Temperature.MIN_FREEZE;
 
 public final class BoPOres {
     private static final FloatRaster.Sampler MEAN_TEMPERATURE = FloatRaster.sampler(EarthDataKeys.MEAN_TEMPERATURE);
@@ -24,7 +25,7 @@ public final class BoPOres {
     public static final OreConfig TANZANITE = OreConfig.builder()
             .ore(BOPBlocks.gem_ore.getDefaultState().withProperty(BlockBOPGem.VARIANT, BOPGems.TANZANITE))
             .distribution(OreDistribution.vanillaUniform(12, 32))
-            .select((data, x, z) -> MIN_TEMPERATURE.sample(data, x, z) < BiomeClassifier.FREEZE_MIN_TEMPERATURE)
+            .select((data, x, z) -> MIN_TEMPERATURE.sample(data, x, z) < MIN_FREEZE)
             .build();
 
     public static final OreConfig SAPPHIRE = OreConfig.builder()

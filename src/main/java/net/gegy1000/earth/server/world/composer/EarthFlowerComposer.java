@@ -1,8 +1,10 @@
 package net.gegy1000.earth.server.world.composer;
 
+import net.gegy1000.earth.server.event.ConfigureFlowersEvent;
 import net.gegy1000.earth.server.world.EarthDataKeys;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.cover.CoverMarkers;
+import net.gegy1000.earth.server.world.ecology.GrowthPredictors;
 import net.gegy1000.earth.server.world.ecology.vegetation.FlowerDecorator;
 import net.gegy1000.earth.server.world.ecology.vegetation.Flowers;
 import net.gegy1000.gengen.api.CubicPos;
@@ -12,13 +14,17 @@ import net.gegy1000.terrarium.server.world.composer.decoration.DecorationCompose
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
 
 public final class EarthFlowerComposer implements DecorationComposer {
     private static final long DECORATION_SEED = 7877688494185984193L;
 
     private final SpatialRandom random;
 
+    private final GrowthPredictors.Sampler predictorSampler = GrowthPredictors.sampler();
     private final EnumRaster.Sampler<Cover> coverSampler = EnumRaster.sampler(EarthDataKeys.COVER, Cover.NO);
+
+    private final GrowthPredictors predictors = new GrowthPredictors();
 
     public EarthFlowerComposer(World world) {
         this.random = new SpatialRandom(world, DECORATION_SEED);
@@ -35,15 +41,17 @@ public final class EarthFlowerComposer implements DecorationComposer {
 
         this.random.setSeed(pos.getCenterX(), pos.getCenterY(), pos.getCenterZ());
 
+        this.predictorSampler.sampleTo(dataCache, dataX, dataZ, this.predictors);
+
         FlowerDecorator flowers = new FlowerDecorator();
         flowers.add(Flowers.DANDELION, 0.1F);
 
         if (cover.is(CoverMarkers.FOREST)) {
-            flowers.setCountPerChunk(0.7F);
+            flowers.setCountPerChunk(0.5F);
         } else if (cover.is(CoverMarkers.DENSE_GRASS)) {
-            flowers.setCountPerChunk(0.4F);
+            flowers.setCountPerChunk(0.3F);
         } else {
-            flowers.setCountPerChunk(0.25F);
+            flowers.setCountPerChunk(0.2F);
         }
 
         if (cover.is(CoverMarkers.FOREST)) {
@@ -55,6 +63,8 @@ public final class EarthFlowerComposer implements DecorationComposer {
         if (cover.is(CoverMarkers.FLOODED)) {
             flowers.add(Flowers.BLUE_ORCHID, 3.0F);
         }
+
+        MinecraftForge.TERRAIN_GEN_BUS.post(new ConfigureFlowersEvent(cover, this.predictors, flowers));
 
         flowers.decorate(writer, pos, this.random);
     }

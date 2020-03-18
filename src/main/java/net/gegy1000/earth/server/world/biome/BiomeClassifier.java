@@ -1,6 +1,8 @@
 package net.gegy1000.earth.server.world.biome;
 
 import net.gegy1000.earth.server.event.ClassifyBiomeEvent;
+import net.gegy1000.earth.server.world.Rainfall;
+import net.gegy1000.earth.server.world.Temperature;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.cover.CoverMarkers;
 import net.gegy1000.earth.server.world.geography.Landform;
@@ -9,9 +11,6 @@ import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.MinecraftForge;
 
 public final class BiomeClassifier {
-    public static final float FREEZE_MIN_TEMPERATURE = -1.0F;
-    public static final float COLD_MEAN_TEMPERATURE = 12.0F;
-
     public static Biome classify(Context context) {
         ClassifyBiomeEvent event = new ClassifyBiomeEvent(context);
         if (MinecraftForge.TERRAIN_GEN_BUS.post(event)) {
@@ -79,12 +78,11 @@ public final class BiomeClassifier {
         }
 
         public boolean isFrozen() {
-            return (this.minTemperature < FREEZE_MIN_TEMPERATURE && this.meanTemperature < 5.0F)
-                    || this.cover.is(CoverMarkers.FROZEN);
+            return Temperature.isFrozen(this.minTemperature, this.meanTemperature) || this.cover.is(CoverMarkers.FROZEN);
         }
 
         public boolean isCold() {
-            return this.meanTemperature < COLD_MEAN_TEMPERATURE || this.isFrozen();
+            return Temperature.isCold(this.meanTemperature) || this.isFrozen();
         }
 
         public boolean isForested() {
@@ -99,13 +97,12 @@ public final class BiomeClassifier {
             return this.cover.is(CoverMarkers.BARREN);
         }
 
-        // TODO: These values?
         public boolean isWet() {
-            return this.annualRainfall > 2400;
+            return Rainfall.isWet(this.annualRainfall);
         }
 
         public boolean isDry() {
-            return this.annualRainfall < 360;
+            return Rainfall.isDry(this.annualRainfall);
         }
     }
 }

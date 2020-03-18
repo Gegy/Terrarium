@@ -1,6 +1,7 @@
 package net.gegy1000.earth.server.world.feature;
 
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -15,7 +16,11 @@ public class FlowersFeature extends WorldGenerator {
 
     public FlowersFeature(IBlockState flowerState) {
         this.flowerState = flowerState;
-        this.flower = (IPlantable) flowerState.getBlock();
+        if (flowerState.getBlock() instanceof IPlantable) {
+            this.flower = (IPlantable) flowerState.getBlock();
+        } else {
+            this.flower = Blocks.YELLOW_FLOWER;
+        }
     }
 
     @Override
@@ -25,7 +30,7 @@ public class FlowersFeature extends WorldGenerator {
         int count = random.nextInt(64);
         int worldHeight = world.getHeight();
 
-        for (int i = 0; i < count; ++i) {
+        for (int i = 0; i < count; i++) {
             mutablePos.setPos(
                     origin.getX() + random.nextInt(8) - random.nextInt(8),
                     origin.getY() + random.nextInt(4) - random.nextInt(4),
