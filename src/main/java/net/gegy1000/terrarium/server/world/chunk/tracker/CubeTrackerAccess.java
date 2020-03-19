@@ -12,13 +12,11 @@ import net.minecraft.world.WorldServer;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class CubeTrackerAccess implements ChunkTrackerAccess {
     public static Field cubeWatchersField;
@@ -46,7 +44,7 @@ public class CubeTrackerAccess implements ChunkTrackerAccess {
     }
 
     @Override
-    public Collection<TrackedColumn> getSortedTrackedColumns() {
+    public LinkedHashSet<ChunkPos> getSortedQueuedColumns() {
         PlayerChunkMap chunkTracker = this.world.getPlayerChunkMap();
         if (chunkTracker instanceof PlayerCubeMap) {
             XYZMap<CubeWatcher> watchers = getWatchers((PlayerCubeMap) chunkTracker);
@@ -70,17 +68,25 @@ public class CubeTrackerAccess implements ChunkTrackerAccess {
                 }
             }
 
-            List<TrackedColumn> columns = new ArrayList<>(columnStates.size());
-            for (Map.Entry<ChunkPos, ColumnState> entry : columnStates.entrySet()) {
-                columns.add(new TrackedColumn(entry.getKey(), entry.getValue().queued));
+            LinkedHashSet<ChunkPos> queuedColumns = columnStates.entrySet().stream()
+                    .filter(e -> e.getValue().queued)
+                    .sorted(Comparator.comparingDouble(e -> e.getValue().distance))
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
+
+            // cubic chunks requires surrounding chunks to be loaded for diffuse lighting
+            for (ChunkPos column : columnStates.keySet()) {
+                for (int z = -2; z <= 2; z++) {
+                    for (int x = -2; x <= 2; x++) {
+                        queuedColumns.add(new ChunkPos(column.x + x, column.z + z));
+                    }
+                }
             }
 
-            columns.sort(Comparator.comparingDouble(c -> columnStates.get(c.getPos()).distance));
-
-            return columns;
+            return queuedColumns;
         }
 
-        return Collections.emptyList();
+        return new LinkedHashSet<>();
     }
 
     @SuppressWarnings("unchecked")
@@ -108,12 +114,12 @@ public class CubeTrackerAccess implements ChunkTrackerAccess {
         private double distance;
         private boolean queued;
 
-        public ColumnState(double distance, boolean queued) {
+        ColumnState(double distance, boolean queued) {
             this.distance = distance;
             this.queued = queued;
         }
 
-        public void merge(double distance, boolean queued) {
+        void merge(double distance, boolean queued) {
             if (distance < this.distance) {
                 this.distance = distance;
             }

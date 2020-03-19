@@ -7,6 +7,7 @@ import net.gegy1000.gengen.util.SpatialRandom;
 import net.gegy1000.terrarium.server.world.composer.decoration.DecorationComposer;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.DataView;
+import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.data.raster.UByteRaster;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
@@ -21,6 +22,7 @@ public class FreezeSurfaceComposer implements DecorationComposer {
 
     private static final int MAX_SLOPE = 60;
 
+    private final ShortRaster.Sampler heightSampler = ShortRaster.sampler(EarthDataKeys.TERRAIN_HEIGHT);
     private final UByteRaster.Sampler slopeSampler = UByteRaster.sampler(EarthDataKeys.SLOPE);
 
     private final SpatialRandom random;
@@ -33,42 +35,45 @@ public class FreezeSurfaceComposer implements DecorationComposer {
     public void composeDecoration(ColumnDataCache dataCache, CubicPos pos, ChunkPopulationWriter writer) {
         World world = writer.getGlobal();
 
-        int globalX = pos.getCenterX();
-        int globalZ = pos.getCenterZ();
+        int minX = pos.getCenterX();
+        int minZ = pos.getCenterZ();
 
         BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
 
-        DataView view = DataView.square(globalX, globalZ, 16);
+        DataView view = DataView.square(minX, minZ, 16);
 
+        ShortRaster heightRaster = this.heightSampler.sample(dataCache, view);
         UByteRaster slopeRaster = this.slopeSampler.sample(dataCache, view);
 
         this.random.setSeed(pos.getX(), pos.getZ());
 
-        for (int localZ = 0; localZ < 16; localZ++) {
-            for (int localX = 0; localX < 16; localX++) {
-                int x = globalX + localX;
-                int z = globalZ + localZ;
-
+        for (int z = 0; z < 16; z++) {
+            for (int x = 0; x < 16; x++) {
                 mutablePos.setPos(
-                        x + this.random.nextInt(3) - this.random.nextInt(3),
+                        minX + x + this.random.nextInt(3) - this.random.nextInt(3),
                         0,
-                        z + this.random.nextInt(3) - this.random.nextInt(3)
+                        minZ + z + this.random.nextInt(3) - this.random.nextInt(3)
                 );
 
                 Biome biome = world.getBiome(mutablePos);
                 float temperature = biome.getTemperature(mutablePos);
                 if (temperature >= 0.15F) continue;
 
-                mutablePos.setPos(x, 0, z);
+                mutablePos.setPos(minX + x, 0, minZ + z);
 
                 if (!writer.getSurfaceMut(mutablePos)) continue;
+
+                short terrainSurface = heightRaster.get(x, z);
+                if (mutablePos.getY() < terrainSurface) {
+                    continue;
+                }
 
                 BlockPos groundPos = mutablePos.down();
                 if (this.canBeFrozen(world, groundPos)) {
                     writer.set(groundPos, Blocks.ICE.getDefaultState());
                 }
 
-                int slope = slopeRaster.get(localX, localZ);
+                int slope = slopeRaster.get(x, z);
                 if (slope < MAX_SLOPE && this.canBeSnowedOn(world, mutablePos)) {
                     writer.set(mutablePos, Blocks.SNOW_LAYER.getDefaultState());
                 }

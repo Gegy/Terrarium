@@ -49,8 +49,8 @@ public interface OreDistribution {
             }
 
             int count = MathHelper.floor(countPerCube);
-            double countFract = countPerCube - count;
-            if (random.nextFloat() < countFract) count += 1;
+            double remainder = countPerCube - count;
+            if (random.nextFloat() < remainder) count += 1;
 
             if (count <= 0) return Stream.empty();
 

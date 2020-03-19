@@ -27,7 +27,7 @@ public final class ColumnDataEntry {
         this.loader = loader;
     }
 
-    CompletableFuture<ColumnData> acquireFuture() {
+    private CompletableFuture<ColumnData> acquireFuture() {
         this.touch();
         if (this.future == null) {
             this.future = this.loader.getAsync(this.columnPos);
@@ -46,7 +46,7 @@ public final class ColumnDataEntry {
         this.tracked = false;
     }
 
-    public Handle acquire() {
+    Handle acquire() {
         this.handleCount++;
         this.acquireFuture();
         return new Handle();
@@ -56,7 +56,7 @@ public final class ColumnDataEntry {
         return this.columnPos;
     }
 
-    ColumnData join() {
+    private ColumnData join() {
         this.touch();
         if (this.future != null && this.future.isDone()) {
             return this.future.join();
@@ -68,13 +68,13 @@ public final class ColumnDataEntry {
         return data;
     }
 
-    void touch() {
+    private void touch() {
         if (this.dropped) throw new IllegalStateException("Cannot access dropped entry");
 
         this.lastAccessTime = System.currentTimeMillis();
     }
 
-    boolean checkLeaked() {
+    private boolean checkLeaked() {
         if (this.tracked) {
             return false;
         }
@@ -86,7 +86,7 @@ public final class ColumnDataEntry {
         return false;
     }
 
-    boolean shouldDrop() {
+    private boolean shouldDrop() {
         return !this.tracked && this.handleCount <= 0 || this.checkLeaked();
     }
 

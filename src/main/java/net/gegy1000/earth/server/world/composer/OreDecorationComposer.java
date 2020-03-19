@@ -32,15 +32,21 @@ public class OreDecorationComposer implements DecorationComposer {
 
     @Override
     public void composeDecoration(ColumnDataCache dataCache, CubicPos cubePos, ChunkPopulationWriter writer) {
-        this.random.setSeed(cubePos.getX(), cubePos.getY(), cubePos.getZ());
-
         int x = cubePos.getMaxX();
         int z = cubePos.getMaxZ();
+
+        int surfaceHeight = this.heightSampler.sample(dataCache, x, z);
+
+        // quick exit if this chunk is above the terrain surface
+        if (cubePos.getMinY() > surfaceHeight + 16) {
+            return;
+        }
 
         World world = writer.getGlobal();
         boolean cubic = GenGen.isCubic(world);
 
-        int surfaceHeight = this.heightSampler.sample(dataCache, x, z);
+        this.random.setSeed(cubePos.getX(), cubePos.getY(), cubePos.getZ());
+
         if (!cubic) {
             // when cubic chunks is not enabled, all ores need to still have space within the world
             surfaceHeight = Math.max(surfaceHeight, 64);

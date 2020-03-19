@@ -3,14 +3,16 @@ package net.gegy1000.terrarium.server.world.chunk.tracker;
 import net.gegy1000.terrarium.Terrarium;
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerChunkMapEntry;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.relauncher.ReflectionHelper.UnableToFindFieldException;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,12 +34,28 @@ public class ColumnTrackerAccess implements ChunkTrackerAccess {
     }
 
     @Override
-    public List<TrackedColumn> getSortedTrackedColumns() {
-        List<PlayerChunkMapEntry> entries = getSortedChunkEntries(this.world.getPlayerChunkMap());
-
-        return entries.stream()
-                .map(entry -> new TrackedColumn(entry.getPos(), this.shouldQueue(entry)))
+    public LinkedHashSet<ChunkPos> getSortedQueuedColumns() {
+        List<PlayerChunkMapEntry> entries = getEntries(this.world.getPlayerChunkMap());
+        Collection<PlayerChunkMapEntry> queuedEntries = entries.stream()
+                .filter(this::shouldQueue)
                 .collect(Collectors.toList());
+
+        LinkedHashSet<ChunkPos> sortedColumns = queuedEntries.stream()
+                .sorted(Comparator.comparingDouble(PlayerChunkMapEntry::getClosestPlayerDistance))
+                .map(PlayerChunkMapEntry::getPos)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        // requires surrounding chunks to be loaded for decoration and lighting
+        for (PlayerChunkMapEntry entry : queuedEntries) {
+            ChunkPos column = entry.getPos();
+            for (int z = -1; z <= 1; z++) {
+                for (int x = -1; x <= 1; x++) {
+                    sortedColumns.add(new ChunkPos(column.x + x, column.z + z));
+                }
+            }
+        }
+
+        return sortedColumns;
     }
 
     private boolean shouldQueue(PlayerChunkMapEntry entry) {
@@ -45,7 +63,7 @@ public class ColumnTrackerAccess implements ChunkTrackerAccess {
     }
 
     @SuppressWarnings("unchecked")
-    public static List<PlayerChunkMapEntry> getEntries(PlayerChunkMap chunkTracker) {
+    private static List<PlayerChunkMapEntry> getEntries(PlayerChunkMap chunkTracker) {
         if (chunkMapEntriesField != null) {
             try {
                 return (List<PlayerChunkMapEntry>) chunkMapEntriesField.get(chunkTracker);
@@ -55,14 +73,5 @@ public class ColumnTrackerAccess implements ChunkTrackerAccess {
         }
 
         return Collections.emptyList();
-    }
-
-    private static List<PlayerChunkMapEntry> getSortedChunkEntries(PlayerChunkMap chunkTracker) {
-        List<PlayerChunkMapEntry> entries = getEntries(chunkTracker);
-
-        List<PlayerChunkMapEntry> sortedEntries = new ArrayList<>(entries);
-        sortedEntries.sort(Comparator.comparingDouble(PlayerChunkMapEntry::getClosestPlayerDistance));
-
-        return sortedEntries;
     }
 }

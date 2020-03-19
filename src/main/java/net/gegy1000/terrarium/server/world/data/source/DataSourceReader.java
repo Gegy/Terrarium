@@ -176,5 +176,10 @@ public final class DataSourceReader {
         Vec2i asVec2() {
             return new Vec2i(this.x, this.y);
         }
+
+        @Override
+        public String toString() {
+            return "TileKey(" + this.x + "; " + this.y + ")";
+        }
     }
 }
