@@ -2,14 +2,37 @@ package net.gegy1000.terrarium.server.util;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class FutureUtil {
     public static <T> CompletableFuture<Collection<T>> allOf(Collection<CompletableFuture<T>> collection) {
         CompletableFuture[] array = collection.toArray(new CompletableFuture[0]);
         return CompletableFuture.allOf(array)
                 .thenApply(v -> collection.stream()
+                        .map(CompletableFuture::join)
+                        .collect(Collectors.toList())
+                );
+    }
+
+    public static <K, V> CompletableFuture<Map<K, V>> allOf(Map<K, CompletableFuture<V>> map) {
+        CompletableFuture[] array = map.values().toArray(new CompletableFuture[0]);
+        return CompletableFuture.allOf(array)
+                .thenApply(v -> map.entrySet().stream()
+                        .collect(Collectors.toMap(
+                                Map.Entry::getKey,
+                                value -> value.getValue().join()
+                        ))
+                );
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> CompletableFuture<Collection<T>> allOf(Stream<CompletableFuture<T>> collection) {
+        CompletableFuture<T>[] array = collection.toArray(CompletableFuture[]::new);
+        return CompletableFuture.allOf(array)
+                .thenApply(v -> Arrays.stream(array)
                         .map(CompletableFuture::join)
                         .collect(Collectors.toList())
                 );

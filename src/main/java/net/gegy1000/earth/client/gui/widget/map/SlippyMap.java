@@ -130,6 +130,8 @@ public class SlippyMap {
         }
 
         public void zoom(int steps, int pivotX, int pivotY) {
+            if (steps == 0) return;
+
             int originX = this.origin.getX(this.zoom);
             int originY = this.origin.getY(this.zoom);
 

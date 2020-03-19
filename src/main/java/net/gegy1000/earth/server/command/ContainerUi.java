@@ -1,5 +1,6 @@
 package net.gegy1000.earth.server.command;
 
+import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -75,13 +76,17 @@ public class ContainerUi {
             this.player = player;
         }
 
-        public Builder withElement(Item icon, String name, Runnable clickHandler) {
+        public Builder addElement(Item icon, String name, Runnable clickHandler) {
             Element element = new Element(this.elements.size(), icon, name, clickHandler);
             this.elements.add(element);
             return this;
         }
 
-        public Builder withTitle(ITextComponent title) {
+        public Builder addElement(Block icon, String name, Runnable clickHandler) {
+            return this.addElement(Item.getItemFromBlock(icon), name, clickHandler);
+        }
+
+        public Builder setTitle(ITextComponent title) {
             this.title = title;
             return this;
         }

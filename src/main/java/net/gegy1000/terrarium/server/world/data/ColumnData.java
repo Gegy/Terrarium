@@ -1,15 +1,15 @@
 package net.gegy1000.terrarium.server.world.data;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 public final class ColumnData {
-    private final ImmutableMap<DataKey<?>, Optional<?>> store;
+    private final Map<DataKey<?>, Optional<?>> store;
 
-    ColumnData(ImmutableMap<DataKey<?>, Optional<?>> store) {
+    ColumnData(Map<DataKey<?>, Optional<?>> store) {
         this.store = store;
     }
 

@@ -104,19 +104,19 @@ public class EarthTeleportGui extends GuiScreen {
         if (this.searchWidget.mouseClicked(mouseX, mouseY, mouseButton)) {
             return;
         }
-        this.mapWidget.mouseClicked(mouseX, mouseY);
+        this.mapWidget.mouseClicked(mouseX, mouseY, mouseButton);
     }
 
     @Override
     protected void mouseClickMove(int mouseX, int mouseY, int mouseButton, long timeSinceLastClick) {
         super.mouseClickMove(mouseX, mouseY, mouseButton, timeSinceLastClick);
-        this.mapWidget.mouseDragged(mouseX, mouseY);
+        this.mapWidget.mouseDragged(mouseX, mouseY, mouseButton);
     }
 
     @Override
     protected void mouseReleased(int mouseX, int mouseY, int mouseButton) {
         super.mouseReleased(mouseX, mouseY, mouseButton);
-        this.mapWidget.mouseReleased(mouseX, mouseY);
+        this.mapWidget.mouseReleased(mouseX, mouseY, mouseButton);
     }
 
     @Override

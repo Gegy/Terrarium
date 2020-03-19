@@ -2,10 +2,13 @@ package net.gegy1000.terrarium.server.world.data;
 
 import com.google.common.collect.ImmutableMap;
 import net.gegy1000.terrarium.Terrarium;
+import net.gegy1000.terrarium.server.util.FutureUtil;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 public final class DataGenerator {
     private final ImmutableMap<DataKey<?>, DataOp<?>> attachedData;
@@ -18,19 +21,46 @@ public final class DataGenerator {
         return new Builder();
     }
 
-    public ColumnData generate(DataView view) {
-        ImmutableMap.Builder<DataKey<?>, Optional<?>> result = ImmutableMap.builder();
+    @SuppressWarnings("unchecked")
+    private CompletableFuture<Map<DataKey<?>, Optional<?>>> generateFuture(DataView view, Collection<DataKey<?>> keys) {
+        ImmutableMap.Builder<DataKey<?>, CompletableFuture<Optional<?>>> futures = ImmutableMap.builder();
+        for (DataKey<?> key : keys) {
+            DataOp<?> op = this.attachedData.get(key);
+            if (op != null) {
+                CompletableFuture<Optional<?>> future = (CompletableFuture<Optional<?>>) (CompletableFuture) op.apply(view);
+                futures.put(key, future);
+            }
+        }
 
-        this.attachedData.forEach((key, op) -> {
-            try {
-                result.put(key, op.apply(view).join());
-            } catch (Exception e) {
-                Terrarium.LOGGER.error("Failed to load DataOp result", e);
+        return FutureUtil.allOf(futures.build());
+    }
+
+    public ColumnData generateOnly(DataView view, Collection<DataKey<?>> keys) {
+        CompletableFuture<Map<DataKey<?>, Optional<?>>> future = this.generateFuture(view, keys);
+
+        Map<DataKey<?>, Optional<?>> result = new HashMap<>();
+        try {
+            result = future.join();
+        } catch (Exception e) {
+            Terrarium.LOGGER.error("Failed to load DataOp result", e);
+        }
+
+        for (DataKey<?> key : this.attachedData.keySet()) {
+            if (!result.containsKey(key)) {
                 result.put(key, Optional.empty());
             }
-        });
+        }
 
-        return new ColumnData(result.build());
+        return new ColumnData(result);
+    }
+
+    public ColumnData generate(DataView view) {
+        return this.generateOnly(view, this.attachedData.keySet());
+    }
+
+    public CompletableFuture<Void> preload(DataView view) {
+        return this.generateFuture(view, this.attachedData.keySet())
+                .thenApply(m -> null);
     }
 
     @SuppressWarnings("unchecked")
@@ -40,24 +70,6 @@ public final class DataGenerator {
             return (Optional<T>) op.apply(view).join();
         }
         return Optional.empty();
-    }
-
-    public ColumnData generateOnly(DataView view, DataKey<?>... keys) {
-        ImmutableMap.Builder<DataKey<?>, Optional<?>> result = ImmutableMap.builder();
-
-        for (DataKey<?> key : keys) {
-            DataOp<?> op = this.attachedData.get(key);
-            if (op != null) {
-                try {
-                    result.put(key, op.apply(view).join());
-                } catch (Exception e) {
-                    Terrarium.LOGGER.error("Failed to load DataOp result", e);
-                    result.put(key, Optional.empty());
-                }
-            }
-        }
-
-        return new ColumnData(result.build());
     }
 
     public static class Builder {

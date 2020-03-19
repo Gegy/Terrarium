@@ -14,8 +14,11 @@ gui.earth.credits=Terrarium data:
 gui.earth.spawnpoint=Set Spawn
 gui.earth.locate=Locate Player
 gui.earth.teleport=Teleport Player
+gui.earth.preload=Preload World
+gui.earth.preload.downloading=Downloading Chunks
 
 gui.earth.retry=Retry
+gui.earth.download=Download
 
 gui.button.earth.teleport=Teleport
 

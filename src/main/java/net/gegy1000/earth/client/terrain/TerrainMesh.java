@@ -1,5 +1,6 @@
 package net.gegy1000.earth.client.terrain;
 
+import com.google.common.collect.Sets;
 import net.gegy1000.earth.server.world.EarthDataKeys;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.terrarium.client.render.TerrariumVertexFormats;
@@ -17,14 +18,15 @@ import org.lwjgl.opengl.GL11;
 
 import javax.vecmath.Vector3f;
 import java.awt.Color;
+import java.util.Set;
 
 public final class TerrainMesh {
-    public static final DataKey<?>[] REQUIRED_DATA = new DataKey<?>[] {
+    public static final Set<DataKey<?>> REQUIRED_DATA = Sets.newHashSet(
             EarthDataKeys.TERRAIN_HEIGHT,
             EarthDataKeys.SLOPE,
             EarthDataKeys.MIN_TEMPERATURE,
             EarthDataKeys.COVER
-    };
+    );
 
     private static final Vector3f NORMAL_STORE = new Vector3f();
 

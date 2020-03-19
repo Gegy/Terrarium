@@ -4,6 +4,7 @@ import net.gegy1000.earth.client.gui.widget.map.SlippyMap;
 import net.gegy1000.earth.client.gui.widget.map.SlippyMapPoint;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -40,6 +41,8 @@ public class RectMapComponent implements MapComponent {
             Gui.drawRect(left, bottom - borderWidth, right, bottom, borderColor);
             Gui.drawRect(left, top, left + borderWidth, bottom, borderColor);
             Gui.drawRect(right - borderWidth, top, right, bottom, borderColor);
+
+            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
 

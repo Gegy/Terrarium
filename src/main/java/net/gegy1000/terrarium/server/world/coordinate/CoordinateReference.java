@@ -50,4 +50,8 @@ public final class CoordinateReference {
     public double scaleZ() {
         return this.scaleZ;
     }
+
+    public Coordinate coord(double x, double z) {
+        return new Coordinate(this, x, z);
+    }
 }

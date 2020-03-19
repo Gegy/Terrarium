@@ -7,15 +7,15 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public class EarthMapGuiMessage implements IMessage {
+public class EarthOpenMapMessage implements IMessage {
     private double latitude;
     private double longitude;
     private Type type;
 
-    public EarthMapGuiMessage() {
+    public EarthOpenMapMessage() {
     }
 
-    public EarthMapGuiMessage(double latitude, double longitude, Type type) {
+    public EarthOpenMapMessage(double latitude, double longitude, Type type) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.type = type;
@@ -35,9 +35,9 @@ public class EarthMapGuiMessage implements IMessage {
         buf.writeByte(this.type.ordinal() & 0xFF);
     }
 
-    public static class Handler implements IMessageHandler<EarthMapGuiMessage, IMessage> {
+    public static class Handler implements IMessageHandler<EarthOpenMapMessage, IMessage> {
         @Override
-        public IMessage onMessage(EarthMapGuiMessage message, MessageContext ctx) {
+        public IMessage onMessage(EarthOpenMapMessage message, MessageContext ctx) {
             if (ctx.side.isClient()) {
                 Terrarium.PROXY.scheduleTask(ctx, () -> TerrariumEarth.PROXY.openMapGui(message.type, message.latitude, message.longitude));
             }
@@ -47,6 +47,7 @@ public class EarthMapGuiMessage implements IMessage {
 
     public enum Type {
         LOCATE,
-        TELEPORT
+        TELEPORT,
+        PRELOAD,
     }
 }

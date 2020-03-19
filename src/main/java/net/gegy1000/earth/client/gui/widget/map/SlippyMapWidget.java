@@ -52,8 +52,9 @@ public class SlippyMapWidget extends Gui {
         return this.map;
     }
 
-    public void addComponent(MapComponent component) {
+    public <T extends MapComponent> T addComponent(T component) {
         this.components.add(component);
+        return component;
     }
 
     public void draw(int mouseX, int mouseY, float partialTicks) {
@@ -110,7 +111,7 @@ public class SlippyMapWidget extends Gui {
         GlStateManager.disableAlpha();
 
         int scroll = Mouse.getDWheel();
-        if (this.isSelected(mouseX, mouseY)) {
+        if (scroll != 0 && this.isSelected(mouseX, mouseY)) {
             this.map.zoom(MathHelper.clamp(scroll, -1, 1), mouseX - this.x, mouseY - this.y);
         }
     }
@@ -146,22 +147,24 @@ public class SlippyMapWidget extends Gui {
         tessellator.draw();
     }
 
-    public void mouseClicked(int mouseX, int mouseY) {
+    public void mouseClicked(int mouseX, int mouseY, int mouseButton) {
         this.prevMouseX = mouseX;
         this.prevMouseY = mouseY;
 
         if (this.isSelected(mouseX, mouseY)) {
             this.mouseDown = true;
 
-            ScaledResolution resolution = new ScaledResolution(MC);
-            SlippyMapPoint mouse = this.getPointUnderMouse(resolution, mouseX, mouseY);
-            for (MapComponent component : this.components) {
-                component.onMouseClicked(this.map, mouse);
+            if (mouseButton == 0) {
+                ScaledResolution resolution = new ScaledResolution(MC);
+                SlippyMapPoint mouse = this.getPointUnderMouse(resolution, mouseX, mouseY);
+                for (MapComponent component : this.components) {
+                    component.onMouseClicked(this.map, mouse);
+                }
             }
         }
     }
 
-    public void mouseDragged(int mouseX, int mouseY) {
+    public void mouseDragged(int mouseX, int mouseY, int mouseButton) {
         if (this.mouseDown) {
             int deltaX = this.prevMouseX - mouseX;
             int deltaY = this.prevMouseY - mouseY;
@@ -175,12 +178,14 @@ public class SlippyMapWidget extends Gui {
         }
     }
 
-    public void mouseReleased(int mouseX, int mouseY) {
-        if (this.mouseDown && !this.mouseDragged && this.isSelected(mouseX, mouseY)) {
-            ScaledResolution resolution = new ScaledResolution(MC);
-            SlippyMapPoint mouse = this.getPointUnderMouse(resolution, mouseX, mouseY);
-            for (MapComponent component : this.components) {
-                component.onMouseReleased(this.map, mouse);
+    public void mouseReleased(int mouseX, int mouseY, int mouseButton) {
+        if (mouseButton == 0) {
+            if (this.mouseDown && !this.mouseDragged && this.isSelected(mouseX, mouseY)) {
+                ScaledResolution resolution = new ScaledResolution(MC);
+                SlippyMapPoint mouse = this.getPointUnderMouse(resolution, mouseX, mouseY);
+                for (MapComponent component : this.components) {
+                    component.onMouseReleased(this.map, mouse);
+                }
             }
         }
 

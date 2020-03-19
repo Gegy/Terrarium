@@ -73,6 +73,10 @@ public final class Coordinate {
         return new Coordinate(this.crs, this.x + offsetX, this.z + offsetZ);
     }
 
+    public Coordinate toBlock() {
+        return new Coordinate(null, this.getBlockX(), this.getBlockZ());
+    }
+
     public BlockPos toBlockPos() {
         return new BlockPos(this.getBlockX(), 0, this.getBlockZ());
     }

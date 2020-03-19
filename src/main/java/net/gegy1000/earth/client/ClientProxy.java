@@ -2,13 +2,15 @@ package net.gegy1000.earth.client;
 
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.client.gui.EarthLocateGui;
+import net.gegy1000.earth.client.gui.EarthPreloadGui;
+import net.gegy1000.earth.client.gui.EarthPreloadProgressGui;
 import net.gegy1000.earth.client.gui.EarthTeleportGui;
 import net.gegy1000.earth.client.render.LoadingScreenOverlay;
 import net.gegy1000.earth.client.render.PanoramaHandler;
 import net.gegy1000.earth.client.render.PanoramaLookupHandler;
 import net.gegy1000.earth.server.ServerProxy;
 import net.gegy1000.earth.server.capability.EarthWorld;
-import net.gegy1000.earth.server.message.EarthMapGuiMessage;
+import net.gegy1000.earth.server.message.EarthOpenMapMessage;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
@@ -34,14 +36,29 @@ public class ClientProxy extends ServerProxy {
     }
 
     @Override
-    public void openMapGui(EarthMapGuiMessage.Type type, double latitude, double longitude) {
-        Minecraft mc = Minecraft.getMinecraft();
+    public void updateDownload(long count, long total) {
+        Minecraft client = Minecraft.getMinecraft();
+        if (client.currentScreen instanceof EarthPreloadProgressGui) {
+            ((EarthPreloadProgressGui) client.currentScreen).update(count, total);
+        }
+    }
+
+    @Override
+    public void openMapGui(EarthOpenMapMessage.Type type, double latitude, double longitude) {
+        Minecraft client = Minecraft.getMinecraft();
         switch (type) {
             case LOCATE:
-                mc.displayGuiScreen(new EarthLocateGui(latitude, longitude));
+                client.displayGuiScreen(new EarthLocateGui(latitude, longitude));
                 break;
             case TELEPORT:
-                mc.displayGuiScreen(new EarthTeleportGui(latitude, longitude));
+                client.displayGuiScreen(new EarthTeleportGui(latitude, longitude));
+                break;
+            case PRELOAD:
+                EarthWorld earth = EarthWorld.get(client.world);
+                if (earth != null) {
+                    client.displayGuiScreen(new EarthPreloadGui(earth, latitude, longitude));
+                }
+                break;
         }
     }
 

@@ -61,16 +61,16 @@ public class GeoDebugCommand extends CommandBase {
             GeoDebugger debug = GeoDebugger.from(player.world);
 
             ContainerUi.Builder builder = ContainerUi.builder(player)
-                    .withTitle(DeferredTranslator.translate(player, new TextComponentTranslation("container.earth.geodebug.name")));
+                    .setTitle(DeferredTranslator.translate(player, new TextComponentTranslation("container.earth.geodebug.name")));
 
-            builder.withElement(Items.FILLED_MAP, "Make Rasters", () -> this.openRasterUi(player, debug));
+            builder.addElement(Items.FILLED_MAP, "Make Rasters", () -> this.openRasterUi(player, debug));
 
-            builder.withElement(Items.WRITABLE_BOOK, "Take Profile Here", () -> {
+            builder.addElement(Items.WRITABLE_BOOK, "Take Profile Here", () -> {
                 DebugGeoProfile profile = debug.takeProfile("Current Location", player.posX, player.posZ);
                 profile.sendTo(player);
             });
 
-            builder.withElement(Items.ENDER_PEARL, "Export Test Profiles", () -> {
+            builder.addElement(Items.ENDER_PEARL, "Export Test Profiles", () -> {
                 this.writeProfiles(debug.takeTestProfiles());
             });
 
@@ -83,9 +83,9 @@ public class GeoDebugCommand extends CommandBase {
 
     private void openRasterUi(EntityPlayerMP player, GeoDebugger debug) {
         ContainerUi.Builder builder = ContainerUi.builder(player)
-                .withTitle(DeferredTranslator.translate(player, new TextComponentTranslation("container.earth.geodebug.name")));
+                .setTitle(DeferredTranslator.translate(player, new TextComponentTranslation("container.earth.geodebug.name")));
 
-        builder.withElement(Item.getItemFromBlock(Blocks.SAPLING), "Vegetation Suitability Index", () -> {
+        builder.addElement(Item.getItemFromBlock(Blocks.SAPLING), "Vegetation Suitability Index", () -> {
             this.writeRaster(player, debug.vegetation("acacia", Trees.ACACIA));
             this.writeRaster(player, debug.vegetation("birch", Trees.BIRCH));
             this.writeRaster(player, debug.vegetation("oak", Trees.OAK));
@@ -94,13 +94,13 @@ public class GeoDebugCommand extends CommandBase {
             this.writeRaster(player, debug.vegetation("pine", Trees.PINE));
         });
 
-        builder.withElement(Items.CLAY_BALL, "Soil", () -> {
+        builder.addElement(Items.CLAY_BALL, "Soil", () -> {
             this.writeRaster(player, debug.scaledHeatmap("clay_content", UByteRaster.sampler(EarthDataKeys.CLAY_CONTENT)));
             this.writeRaster(player, debug.scaledHeatmap("silt_content", UByteRaster.sampler(EarthDataKeys.SILT_CONTENT)));
             this.writeRaster(player, debug.scaledHeatmap("sand_content", UByteRaster.sampler(EarthDataKeys.SAND_CONTENT)));
         });
 
-        builder.withElement(Items.FILLED_MAP, "Cover", () -> {
+        builder.addElement(Items.FILLED_MAP, "Cover", () -> {
             EnumRaster.Sampler<Cover> sampler = EnumRaster.sampler(EarthDataKeys.COVER, Cover.NO);
             this.writeRaster(player, debug.cover("cover", sampler));
         });
