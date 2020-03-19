@@ -1,16 +1,15 @@
 package net.gegy1000.earth.server.world.data;
 
+import futures.executor.CurrentThreadExecutor;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.util.ChunkedIterator;
-import net.gegy1000.terrarium.server.util.FutureUtil;
 import net.gegy1000.terrarium.server.world.data.DataGenerator;
 import net.gegy1000.terrarium.server.world.data.DataView;
+import net.gegy1000.terrarium.server.world.data.source.DataSourceReader;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 
 import java.util.Collection;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
 
 public final class DataPreloadManager {
     private static final int BATCH_SIZE = 100;
@@ -45,13 +44,12 @@ public final class DataPreloadManager {
             ), BATCH_SIZE);
 
             for (Collection<BlockPos> chunk : chunks) {
-                Stream<CompletableFuture<Void>> futures = chunk.stream()
-                        .map(pos -> {
-                            DataView view = DataView.square(pos.getX() << 4, pos.getZ() << 4, 16);
-                            return this.generator.preload(view);
-                        });
+                for (BlockPos column : chunk) {
+                    DataView view = DataView.square(column.getX() << 4, column.getZ() << 4, 16);
+                    this.generator.generate(view);
+                }
 
-                FutureUtil.allOf(futures).join();
+                CurrentThreadExecutor.blockOn(DataSourceReader.INSTANCE.finishLoading());
 
                 count += chunk.size();
                 watcher.update(count, total);

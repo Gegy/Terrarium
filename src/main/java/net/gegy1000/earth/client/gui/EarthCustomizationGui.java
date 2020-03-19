@@ -2,6 +2,9 @@ package net.gegy1000.earth.client.gui;
 
 import com.google.common.base.Strings;
 import com.google.gson.JsonSyntaxException;
+import futures.executor.CurrentThreadExecutor;
+import futures.future.Cancelable;
+import futures.future.Future;
 import net.gegy1000.earth.client.gui.preview.LargePreviewGui;
 import net.gegy1000.earth.client.gui.preview.PreviewController;
 import net.gegy1000.earth.client.gui.preview.PreviewRenderer;
@@ -28,7 +31,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 public class EarthCustomizationGui extends GuiScreen {
@@ -62,7 +64,7 @@ public class EarthCustomizationGui extends GuiScreen {
     private long lastPreviewUpdateTime;
 
     private WorldPreview preview;
-    private CompletableFuture<WorldPreview> previewFuture;
+    private Cancelable<WorldPreview> previewFuture;
 
     public EarthCustomizationGui(GuiCreateWorld parent, TerrariumWorldType worldType) {
         this.parent = parent;
@@ -219,7 +221,8 @@ public class EarthCustomizationGui extends GuiScreen {
             long time = System.currentTimeMillis();
 
             boolean previewExpired = time - this.lastPreviewUpdateTime > PREVIEW_UPDATE_INTERVAL;
-            boolean generateInactive = this.previewFuture == null || this.previewFuture.isDone();
+
+            boolean generateInactive = this.previewFuture == null;
             if (previewExpired || generateInactive) {
                 this.rebuildPreview();
                 this.previewDirty = false;
@@ -249,15 +252,19 @@ public class EarthCustomizationGui extends GuiScreen {
     }
 
     private void drawPreview(float partialTicks) {
-        if (this.previewFuture != null && this.previewFuture.isDone()) {
-            if (this.preview != null) {
-                this.preview.delete();
+        if (this.previewFuture != null) {
+            WorldPreview step = CurrentThreadExecutor.advance(this.previewFuture);
+
+            if (step != null) {
+                if (this.preview != null) {
+                    this.preview.delete();
+                }
+
+                this.preview = step;
+                this.preview.upload();
+
+                this.previewFuture = null;
             }
-
-            this.preview = this.previewFuture.join();
-            this.preview.upload();
-
-            this.previewFuture = null;
         }
 
         float zoom = this.previewController.getZoom(partialTicks);
@@ -289,7 +296,7 @@ public class EarthCustomizationGui extends GuiScreen {
 
     private void rebuildPreview() {
         this.cancelPreview();
-        this.previewFuture = WorldPreview.generate(this.worldType, this.settings);
+        this.previewFuture = Future.cancelable(WorldPreview.generate(this.worldType, this.settings));
     }
 
     private void deletePreview() {
@@ -301,7 +308,7 @@ public class EarthCustomizationGui extends GuiScreen {
 
     private void cancelPreview() {
         if (this.previewFuture != null) {
-            this.previewFuture.cancel(true);
+            this.previewFuture.cancel();
         }
         DataSourceReader.INSTANCE.cancelLoading();
     }

@@ -1,16 +1,27 @@
 package net.gegy1000.terrarium.server.world.data;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import futures.future.Future;
 import net.gegy1000.terrarium.Terrarium;
-import net.gegy1000.terrarium.server.util.FutureUtil;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public final class DataGenerator {
+    public static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor(
+            new ThreadFactoryBuilder()
+                    .setDaemon(true)
+                    .setNameFormat("terrarium-data-worker")
+                    .build()
+    );
+
+    private static final DataExecutor DATA_EXECUTOR = EXECUTOR::execute;
+
     private final ImmutableMap<DataKey<?>, DataOp<?>> attachedData;
 
     public DataGenerator(ImmutableMap<DataKey<?>, DataOp<?>> attachedData) {
@@ -21,55 +32,45 @@ public final class DataGenerator {
         return new Builder();
     }
 
-    @SuppressWarnings("unchecked")
-    private CompletableFuture<Map<DataKey<?>, Optional<?>>> generateFuture(DataView view, Collection<DataKey<?>> keys) {
-        ImmutableMap.Builder<DataKey<?>, CompletableFuture<Optional<?>>> futures = ImmutableMap.builder();
+    public Future<ColumnData> generateOnly(DataView view, Collection<DataKey<?>> keys) {
+        ImmutableMap.Builder<DataKey<?>, Future<Optional<?>>> futures = ImmutableMap.builder();
         for (DataKey<?> key : keys) {
             DataOp<?> op = this.attachedData.get(key);
             if (op != null) {
-                CompletableFuture<Optional<?>> future = (CompletableFuture<Optional<?>>) (CompletableFuture) op.apply(view);
+                Future<Optional<?>> future = op.apply(view, DATA_EXECUTOR).handle((result, throwable) -> {
+                    if (throwable != null) {
+                        Terrarium.LOGGER.error("Failed to load DataOp result", throwable);
+                        return Optional.empty();
+                    }
+                    return result;
+                });
+
                 futures.put(key, future);
             }
         }
 
-        return FutureUtil.allOf(futures.build());
+        return Future.joinAll(futures.build())
+                .map(result -> {
+                    for (DataKey<?> key : keys) {
+                        if (!result.containsKey(key)) {
+                            result.put(key, Optional.empty());
+                        }
+                    }
+                    return new ColumnData(result);
+                });
     }
 
-    public ColumnData generateOnly(DataView view, Collection<DataKey<?>> keys) {
-        CompletableFuture<Map<DataKey<?>, Optional<?>>> future = this.generateFuture(view, keys);
-
-        Map<DataKey<?>, Optional<?>> result = new HashMap<>();
-        try {
-            result = future.join();
-        } catch (Exception e) {
-            Terrarium.LOGGER.error("Failed to load DataOp result", e);
-        }
-
-        for (DataKey<?> key : this.attachedData.keySet()) {
-            if (!result.containsKey(key)) {
-                result.put(key, Optional.empty());
-            }
-        }
-
-        return new ColumnData(result);
-    }
-
-    public ColumnData generate(DataView view) {
+    public Future<ColumnData> generate(DataView view) {
         return this.generateOnly(view, this.attachedData.keySet());
     }
 
-    public CompletableFuture<Void> preload(DataView view) {
-        return this.generateFuture(view, this.attachedData.keySet())
-                .thenApply(m -> null);
-    }
-
     @SuppressWarnings("unchecked")
-    public <T> Optional<T> generateOne(DataView view, DataKey<T> key) {
+    public <T> Future<Optional<T>> generateOne(DataView view, DataKey<T> key) {
         DataOp<?> op = this.attachedData.get(key);
         if (op != null) {
-            return (Optional<T>) op.apply(view).join();
+            return op.apply(view, DATA_EXECUTOR).map(o -> (Optional<T>) o);
         }
-        return Optional.empty();
+        return Future.ready(Optional.empty());
     }
 
     public static class Builder {

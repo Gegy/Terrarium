@@ -1,6 +1,7 @@
 package net.gegy1000.earth.server.world.data.op;
 
 import com.google.common.base.Preconditions;
+import futures.future.Future;
 import net.gegy1000.earth.server.util.Zoomable;
 import net.gegy1000.terrarium.server.world.coordinate.CoordReferenced;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
@@ -11,7 +12,6 @@ import net.gegy1000.terrarium.server.world.data.raster.NumberRaster;
 import net.gegy1000.terrarium.server.world.data.source.TiledDataSource;
 
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 public final class ResampleZoomRasters<T extends NumberRaster<?>> {
@@ -43,21 +43,21 @@ public final class ResampleZoomRasters<T extends NumberRaster<?>> {
 
     private DataOp<T> resampleRecursively(int zoom, Function<DataView, T> createRaster) {
         DataOp<T> sampleOp = this.sampleAndScaleAtZoom(zoom, createRaster);
-        return DataOp.of(view -> {
-            return sampleOp.apply(view).thenCompose(result -> {
+        return DataOp.of((view, executor) -> {
+            return sampleOp.apply(view, executor).andThen(result -> {
                 int nextZoom = zoom - 1;
                 if (result.isPresent() || !this.zoomableSource.contains(nextZoom)) {
-                    return CompletableFuture.completedFuture(result);
+                    return Future.ready(result);
                 }
 
-                return this.resampleRecursively(nextZoom, createRaster).apply(view);
+                return this.resampleRecursively(nextZoom, createRaster).apply(view, executor);
             });
         });
     }
 
     private DataOp<T> sampleAndScaleAtZoom(int zoom, Function<DataView, T> createRaster) {
         CoordReferenced<? extends TiledDataSource<T>> referencedSource = this.zoomableSource.forZoom(zoom);
-        if (referencedSource == null) return DataOp.completed(Optional.empty());
+        if (referencedSource == null) return DataOp.ready(Optional.empty());
 
         DataOp<T> sample = this.sampleFunction.apply(referencedSource.source);
         CoordinateReference crs = referencedSource.crs;

@@ -1,6 +1,7 @@
 package net.gegy1000.earth.client.gui.preview;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import futures.future.Future;
 import net.gegy1000.earth.client.terrain.TerrainMesh;
 import net.gegy1000.earth.server.world.EarthDataKeys;
 import net.gegy1000.earth.server.world.EarthInitContext;
@@ -19,7 +20,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -50,24 +50,21 @@ public class WorldPreview {
         this.translation = translation;
     }
 
-    public static CompletableFuture<WorldPreview> generate(TerrariumWorldType worldType, GenerationSettings settings) {
-        return CompletableFuture.supplyAsync(() -> {
-            TerrariumDataInitializer dataInitializer = worldType.createDataInitializer(settings);
+    public static Future<WorldPreview> generate(TerrariumWorldType worldType, GenerationSettings settings) {
+        TerrariumDataInitializer dataInitializer = worldType.createDataInitializer(settings);
+        EarthInitContext ctx = EarthInitContext.from(settings);
 
-            EarthInitContext ctx = EarthInitContext.from(settings);
+        DataGenerator.Builder dataGenerator = DataGenerator.builder();
+        dataInitializer.setup(dataGenerator);
 
-            DataGenerator.Builder dataGenerator = DataGenerator.builder();
-            dataInitializer.setup(dataGenerator);
+        double latitude = settings.getDouble(SPAWN_LATITUDE);
+        double longitude = settings.getDouble(SPAWN_LONGITUDE);
+        Coordinate spawnCoordinate = new Coordinate(ctx.lngLatCrs, longitude, latitude);
 
-            double latitude = settings.getDouble(SPAWN_LATITUDE);
-            double longitude = settings.getDouble(SPAWN_LONGITUDE);
-            Coordinate spawnCoordinate = new Coordinate(ctx.lngLatCrs, longitude, latitude);
-
-            return generate(dataGenerator.build(), spawnCoordinate.toBlockPos());
-        }, EXECUTOR);
+        return generate(dataGenerator.build(), spawnCoordinate.toBlockPos());
     }
 
-    private static WorldPreview generate(DataGenerator dataGenerator, BlockPos spawnPos) {
+    private static Future<WorldPreview> generate(DataGenerator dataGenerator, BlockPos spawnPos) {
         try {
             // make sure this builder is not poisoned
             BUILDER.finishDrawing();
@@ -77,21 +74,22 @@ public class WorldPreview {
 
         int originX = (spawnPos.getX() - VIEW_RANGE);
         int originZ = (spawnPos.getZ() - VIEW_RANGE);
-        ColumnData data = sampleData(dataGenerator, originX, originZ, VIEW_SIZE);
 
-        TerrainMesh mesh = TerrainMesh.build(data, BUILDER, VIEW_GRANULARITY);
+        return sampleData(dataGenerator, originX, originZ, VIEW_SIZE)
+                .andThen(data -> Future.spawnBlocking(EXECUTOR, () -> {
+                    ShortRaster heightRaster = data.getOrExcept(EarthDataKeys.TERRAIN_HEIGHT);
+                    Vec3d translation = new Vec3d(
+                            -heightRaster.getWidth() / 2.0,
+                            -computeOriginHeight(heightRaster),
+                            -heightRaster.getHeight() / 2.0
+                    );
 
-        ShortRaster heightRaster = data.getOrExcept(EarthDataKeys.TERRAIN_HEIGHT);
-        Vec3d translation = new Vec3d(
-                -heightRaster.getWidth() / 2.0,
-                -computeOriginHeight(heightRaster),
-                -heightRaster.getHeight() / 2.0
-        );
-
-        return new WorldPreview(mesh, translation);
+                    TerrainMesh mesh = TerrainMesh.build(data, BUILDER, VIEW_GRANULARITY);
+                    return new WorldPreview(mesh, translation);
+                }));
     }
 
-    private static ColumnData sampleData(DataGenerator dataGenerator, int originX, int originZ, int size) {
+    private static Future<ColumnData> sampleData(DataGenerator dataGenerator, int originX, int originZ, int size) {
         DataView view = DataView.square(originX, originZ, size);
         return dataGenerator.generateOnly(view, TerrainMesh.REQUIRED_DATA);
     }

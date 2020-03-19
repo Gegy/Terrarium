@@ -25,7 +25,7 @@ public class ColumnDataCache implements AutoCloseable {
     private final ChunkTrackerAccess chunkTrackerAccess;
 
     public ColumnDataCache(World world, DataGenerator generator) {
-        this.loader = new DistributedColumnLoader(column -> generator.generate(DataView.of(column)));
+        this.loader = new ColumnDataLoader(column -> generator.generate(DataView.of(column)));
         this.chunkTrackerAccess = createTrackerAccess(world);
     }
 
@@ -54,6 +54,10 @@ public class ColumnDataCache implements AutoCloseable {
             ColumnDataEntry entry = this.getEntry(column);
             entry.track();
         }
+    }
+
+    public void advanceLoading() {
+        this.loader.advance();
     }
 
     public void trackColumns() {

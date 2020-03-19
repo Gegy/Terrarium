@@ -82,15 +82,16 @@ public class ServerEventHandler {
     public static void onWorldTick(TickEvent.WorldTickEvent event) {
         World world = event.world;
         if (event.phase == TickEvent.Phase.START && ServerEventHandler.shouldHandle(world) && world instanceof WorldServer) {
+            TerrariumWorld terrarium = TerrariumWorld.get(world);
+            if (terrarium == null) return;
+
+            ColumnDataCache dataCache = terrarium.getDataCache();
+            dataCache.advanceLoading();
+
             long time = System.currentTimeMillis();
             if (time - lastDataTrackTime > DATA_TRACK_INTERVAL) {
-                TerrariumWorld worldData = TerrariumWorld.get(world);
-                if (worldData != null) {
-                    ColumnDataCache dataCache = worldData.getDataCache();
-                    dataCache.dropColumns();
-                    dataCache.trackColumns();
-                }
-
+                dataCache.dropColumns();
+                dataCache.trackColumns();
                 lastDataTrackTime = time;
             }
         }

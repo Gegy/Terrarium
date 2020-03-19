@@ -50,7 +50,7 @@ public enum InterpolationScaleOp {
     }
 
     public <T extends NumberRaster<?>> DataOp<T> scaleFrom(DataOp<T> data, CoordinateReference src, Function<DataView, T> function) {
-        return DataOp.of(view -> {
+        return DataOp.of((view, executor) -> {
             DataView srcView = this.getSourceView(view, src);
 
             double destToSrcX = 1.0 / src.scaleX();
@@ -64,18 +64,20 @@ public enum InterpolationScaleOp {
             double offsetX = minCoordinate.getX() - srcView.getMinX();
             double offsetY = minCoordinate.getZ() - srcView.getMinY();
 
-            return data.apply(srcView).thenApply(opt -> opt.map(source -> {
-                double[][] kernel2 = this.kernel2.get();
-                double[] kernel1 = this.kernel1.get();
-                T result = function.apply(view);
-                for (int y = 0; y < view.getHeight(); y++) {
-                    for (int x = 0; x < view.getWidth(); x++) {
-                        double value = this.evaluate(kernel1, kernel2, source, x * destToSrcX + offsetX - 0.5, y * destToSrcY + offsetY - 0.5);
-                        result.setDouble(x, y, value);
+            return data.apply(srcView, executor).andThen(opt -> {
+                return executor.spawnBlocking(() -> opt.map(source -> {
+                    double[][] kernel2 = this.kernel2.get();
+                    double[] kernel1 = this.kernel1.get();
+                    T result = function.apply(view);
+                    for (int y = 0; y < view.getHeight(); y++) {
+                        for (int x = 0; x < view.getWidth(); x++) {
+                            double value = this.evaluate(kernel1, kernel2, source, x * destToSrcX + offsetX - 0.5, y * destToSrcY + offsetY - 0.5);
+                            result.setDouble(x, y, value);
+                        }
                     }
-                }
-                return result;
-            }));
+                    return result;
+                }));
+            });
         });
     }
 

@@ -1,8 +1,8 @@
 package net.gegy1000.earth.server.world.data.op;
 
+import futures.future.Future;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.geography.Landform;
-import net.gegy1000.terrarium.server.util.FutureUtil;
 import net.gegy1000.terrarium.server.world.data.DataOp;
 import net.gegy1000.terrarium.server.world.data.raster.BitRaster;
 import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
@@ -10,8 +10,8 @@ import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 
 public final class WaterOps {
     public static DataOp<EnumRaster<Landform>> applyWaterMask(DataOp<EnumRaster<Landform>> landforms, DataOp<BitRaster> ocean) {
-        return DataOp.of(view -> {
-            return FutureUtil.map2(landforms.apply(view), ocean.apply(view), (landformOption, oceanOption) -> {
+        return DataOp.of((view, executor) -> {
+            return Future.map2(landforms.apply(view, executor), ocean.apply(view, executor), (landformOption, oceanOption) -> {
                 return landformOption.map(landformRaster -> {
                     if (oceanOption.isPresent()) {
                         BitRaster oceanRaster = oceanOption.get();

@@ -11,7 +11,7 @@ import java.util.Arrays;
 
 public class UniformRasterProducer {
     public static DataOp<ByteRaster> ofBytes(byte value) {
-        return DataOp.ofSync(view -> {
+        return DataOp.ofBlocking(view -> {
             ByteRaster result = ByteRaster.create(view);
             result.fill(value);
             return result;
@@ -19,7 +19,7 @@ public class UniformRasterProducer {
     }
 
     public static DataOp<UByteRaster> ofUBytes(int value) {
-        return DataOp.ofSync(view -> {
+        return DataOp.ofBlocking(view -> {
             UByteRaster result = UByteRaster.create(view);
             result.fill(value & 0xFF);
             return result;
@@ -27,7 +27,7 @@ public class UniformRasterProducer {
     }
 
     public static DataOp<ShortRaster> ofShorts(short value) {
-        return DataOp.ofSync(view -> {
+        return DataOp.ofBlocking(view -> {
             ShortRaster result = ShortRaster.create(view);
             Arrays.fill(result.getData(), value);
             return result;
@@ -35,10 +35,10 @@ public class UniformRasterProducer {
     }
 
     public static <T> DataOp<ObjRaster<T>> ofObjects(T value) {
-        return DataOp.ofSync(view -> ObjRaster.create(value, view));
+        return DataOp.ofBlocking(view -> ObjRaster.create(value, view));
     }
 
     public static <T extends Enum<T>> DataOp<EnumRaster<T>> ofEnumVariants(T variant) {
-        return DataOp.ofSync(view -> EnumRaster.create(variant, view));
+        return DataOp.ofBlocking(view -> EnumRaster.create(variant, view));
     }
 }

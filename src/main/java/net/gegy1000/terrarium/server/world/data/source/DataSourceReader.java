@@ -3,22 +3,24 @@ package net.gegy1000.terrarium.server.world.data.source;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import futures.Unit;
+import futures.Waker;
+import futures.future.Future;
+import futures.future.BlockingTaskHandle;
 import net.gegy1000.terrarium.Terrarium;
-import net.gegy1000.terrarium.server.util.FutureUtil;
 import net.gegy1000.terrarium.server.util.Vec2i;
 import net.gegy1000.terrarium.server.world.data.DataView;
 import net.minecraft.util.math.MathHelper;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 public final class DataSourceReader {
     public static final DataSourceReader INSTANCE = new DataSourceReader();
@@ -30,11 +32,31 @@ public final class DataSourceReader {
             .expireAfterAccess(60, TimeUnit.SECONDS)
             .build();
 
-    private final Map<TileKey<?>, CompletableFuture<DataTileResult<?>>> queuedTiles = new HashMap<>();
+    private final Map<TileKey<?>, BlockingTaskHandle<DataTileResult<?>>> queuedTiles = new HashMap<>();
+
+    private final LinkedBlockingDeque<Waker> queueEmpty = new LinkedBlockingDeque<>();
 
     private final Object lock = new Object();
 
     private DataSourceReader() {
+    }
+
+    public Future<Unit> finishLoading() {
+        return waker -> {
+            this.queueEmpty.add(waker);
+            if (this.queuedTiles.isEmpty()) {
+                return Unit.INSTANCE;
+            } else {
+                return null;
+            }
+        };
+    }
+
+    private void notifyQueueEmpty() {
+        while (!this.queueEmpty.isEmpty()) {
+            Waker waker = this.queueEmpty.remove();
+            waker.wake();
+        }
     }
 
     public void clear() {
@@ -43,50 +65,48 @@ public final class DataSourceReader {
     }
 
     public void cancelLoading() {
-        for (CompletableFuture<?> future : this.queuedTiles.values()) {
-            future.cancel(true);
+        for (BlockingTaskHandle<?> handle : this.queuedTiles.values()) {
+            handle.cancel();
         }
         this.queuedTiles.clear();
+        this.notifyQueueEmpty();
     }
 
-    private <T> CompletableFuture<DataTileResult<?>> enqueueTile(TileKey<T> key) {
-        CompletableFuture<DataTileResult<?>> future = CompletableFuture.supplyAsync(() -> this.loadTile(key), this.loadService)
-                .handle((result, throwable) -> {
-                    if (throwable != null) {
-                        this.logError(key, throwable);
-                        return DataTileResult.empty(key.asVec2());
-                    }
-                    this.handleResult(key, result);
-                    return result;
-                });
-
-        this.queuedTiles.put(key, future);
-
-        return future;
+    private <T> BlockingTaskHandle<DataTileResult<?>> enqueueTile(TileKey<T> key) {
+        return Future.spawnBlocking(this.loadService, () -> {
+            try {
+                DataTileResult<T> tile = this.loadTile(key);
+                this.handleResult(key, tile);
+                return tile;
+            } catch (Throwable t) {
+                this.logError(key, t);
+                return DataTileResult.empty(key.asVec2());
+            }
+        });
     }
 
     @SuppressWarnings("unchecked")
-    public <T> CompletableFuture<DataTileResult<T>> getTile(TiledDataSource<T> source, Vec2i pos) {
+    public <T> Future<DataTileResult<T>> getTile(TiledDataSource<T> source, Vec2i pos) {
         TileKey<T> key = new TileKey<>(source, pos.x, pos.y);
         try {
             DataTileResult<T> result = (DataTileResult<T>) this.tileCache.getIfPresent(key);
             if (result != null) {
-                return CompletableFuture.completedFuture(result);
+                return Future.ready(result);
             }
 
             synchronized (this.lock) {
-                CompletableFuture<DataTileResult<?>> future = this.queuedTiles.computeIfAbsent(key, this::enqueueTile);
-                return (CompletableFuture<DataTileResult<T>>) (Object) future;
+                BlockingTaskHandle<DataTileResult<?>> future = this.queuedTiles.computeIfAbsent(key, this::enqueueTile);
+                return (Future<DataTileResult<T>>) (Future) future;
             }
         } catch (Exception e) {
             Terrarium.LOGGER.warn("Unexpected error occurred at {} from {}", pos, source.getClass().getSimpleName(), e);
             ErrorBroadcastHandler.recordFailure();
         }
 
-        return CompletableFuture.completedFuture(DataTileResult.empty(pos));
+        return Future.ready(DataTileResult.empty(pos));
     }
 
-    public <T> CompletableFuture<Collection<DataTileResult<T>>> getTiles(TiledDataSource<T> source, DataView view) {
+    public <T> Future<Collection<DataTileResult<T>>> getTiles(TiledDataSource<T> source, DataView view) {
         double tileWidth = source.getTileWidth();
         double tileHeight = source.getTileHeight();
 
@@ -102,7 +122,7 @@ public final class DataSourceReader {
         return this.getTiles(source, minTile, maxTile);
     }
 
-    public <T> CompletableFuture<Collection<DataTileResult<T>>> getTiles(
+    public <T> Future<Collection<DataTileResult<T>>> getTiles(
             TiledDataSource<T> source,
             Vec2i min,
             Vec2i max
@@ -116,11 +136,8 @@ public final class DataSourceReader {
         return this.getTiles(source, tiles);
     }
 
-    public <T> CompletableFuture<Collection<DataTileResult<T>>> getTiles(TiledDataSource<T> source, Collection<Vec2i> tiles) {
-        return FutureUtil.allOf(tiles.stream()
-                .map(pos -> this.getTile(source, pos))
-                .collect(Collectors.toList())
-        );
+    public <T> Future<Collection<DataTileResult<T>>> getTiles(TiledDataSource<T> source, Collection<Vec2i> tiles) {
+        return Future.joinAll(tiles.stream().map(pos -> this.getTile(source, pos)));
     }
 
     private <T> void handleResult(TileKey<T> key, DataTileResult<T> result) {
@@ -128,15 +145,14 @@ public final class DataSourceReader {
             this.tileCache.put(key, result);
             this.queuedTiles.remove(key);
         }
+        if (this.queuedTiles.isEmpty()) {
+            this.notifyQueueEmpty();
+        }
     }
 
-    private <T> DataTileResult<T> loadTile(TileKey<T> key) {
-        try {
-            Vec2i pos = key.asVec2();
-            return new DataTileResult<>(pos, key.source.load(pos));
-        } catch (Throwable e) {
-            throw new CompletionException(e);
-        }
+    private <T> DataTileResult<T> loadTile(TileKey<T> key) throws IOException {
+        Vec2i pos = key.asVec2();
+        return new DataTileResult<>(pos, key.source.load(pos));
     }
 
     private <T> void logError(TileKey<T> key, Throwable throwable) {
@@ -179,7 +195,7 @@ public final class DataSourceReader {
 
         @Override
         public String toString() {
-            return "TileKey(" + this.x + "; " + this.y + ")";
+            return "TileKey(" + this.x + "; " + this.y + ") @ " + this.source;
         }
     }
 }
