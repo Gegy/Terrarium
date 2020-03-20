@@ -36,9 +36,8 @@ gui.earth.preparing.errored.desc.2=Please check your internet connection and try
 # Customization Categories
 
 category.terrarium.world.name=World Properties
-category.terrarium.features.name=Feature Properties
-category.terrarium.procedural_features.name=Procedural Feature Properties
-category.terrarium.natural.name=Natural Properties
+category.terrarium.ecological.name=Ecological Properties
+category.terrarium.geological.name=Geological Properties
 
 # World Properties
 
@@ -52,7 +51,7 @@ property.terrarium.terrestrial_height_scale.tooltip=Elevation multiplier from me
 property.terrarium.oceanic_height_scale.tooltip=Elevation multiplier from meters to blocks for terrain below sea level
 property.terrarium.height_offset.tooltip=The height in-game that corresponds to sea-level
 
-# Feature Properties
+# Ecological Properties
 
 property.terrarium.add_trees.name=Add Trees
 property.terrarium.add_grass.name=Add Grass
@@ -61,13 +60,6 @@ property.terrarium.add_cacti.name=Add Cacti
 property.terrarium.add_sugar_cane.name=Add Sugar Cane
 property.terrarium.add_gourds.name=Add Pumpkins & Melons
 
-property.terrarium.enable_buildings.name=Enable Buildings
-property.terrarium.enable_streets.name=Enable Streets
-
-property.terrarium.cave_generation.name=Cave Generation
-property.terrarium.ravine_generation.name=Ravine Generation
-property.terrarium.ore_generation.name=Ore Generation
-
 property.terrarium.add_trees.tooltip=If enabled, trees will be generated
 property.terrarium.add_grass.tooltip=If enabled, grass will be generated
 property.terrarium.add_flowers.tooltip=If enabled, flowers will be generated
@@ -75,20 +67,15 @@ property.terrarium.add_cacti.tooltip=If enabled, cacti will be generated
 property.terrarium.add_sugar_cane.tooltip=If enabled, sugar cane will be generated
 property.terrarium.add_gourd.tooltip=If enabled, pumpkins and melons will be generated
 
-property.terrarium.enable_buildings.tooltip=If enabled, buildings from OpenStreetMap will be generated
-property.terrarium.enable_streets.tooltip=If enabled, streets from OpenStreetMap will be generated
+# Geological Properties
+
+property.terrarium.cave_generation.name=Cave Generation
+property.terrarium.ravine_generation.name=Ravine Generation
+property.terrarium.ore_generation.name=Ore Generation
 
 property.terrarium.cave_generation.tooltip=If enabled, caves will be generated randomly
 property.terrarium.ravine_generation.tooltip=If enabled, ravines will be generated randomly
 property.terrarium.ore_generation.tooltip=If enabled, ores will be generated randomly
-
-# Natural Properties
-
-property.terrarium.season.name=Season
-property.terrarium.season.tooltip=The month of the year to be generated
-
-property.earth.season.january=December/January
-property.earth.season.july=June/July
 
 # Presets
 

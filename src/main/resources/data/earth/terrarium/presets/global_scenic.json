@@ -15,8 +15,6 @@
     "add_cacti": true,
     "add_sugar_cane": true,
     "add_gourds": true,
-    "enable_buildings": false,
-    "enable_streets": false,
     "cave_generation": false,
     "ravine_generation": false,
     "ore_generation": true

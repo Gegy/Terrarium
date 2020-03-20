@@ -62,8 +62,6 @@ public class EarthWorldType extends TerrariumWorldType {
     public static final PropertyKey<Number> TERRESTRIAL_HEIGHT_SCALE = new NumberKey("terrestrial_height_scale");
     public static final PropertyKey<Number> OCEANIC_HEIGHT_SCALE = new NumberKey("oceanic_height_scale");
     public static final PropertyKey<Number> HEIGHT_OFFSET = new NumberKey("height_offset");
-    public static final PropertyKey<Boolean> ENABLE_BUILDINGS = new BooleanKey("enable_buildings");
-    public static final PropertyKey<Boolean> ENABLE_STREETS = new BooleanKey("enable_streets");
 
     public static final PropertyKey<Boolean> CAVE_GENERATION = new BooleanKey("cave_generation");
     public static final PropertyKey<Boolean> RAVINE_GENERATION = new BooleanKey("ravine_generation");
@@ -102,7 +100,6 @@ public class EarthWorldType extends TerrariumWorldType {
                 .withProperties(WORLD_SCALE, TERRESTRIAL_HEIGHT_SCALE, OCEANIC_HEIGHT_SCALE)
                 .withProperties(HEIGHT_OFFSET)
                 .withProperties(ADD_TREES, ADD_GRASS, ADD_FLOWERS, ADD_CACTI, ADD_SUGAR_CANE, ADD_GOURDS)
-                .withProperties(ENABLE_BUILDINGS, ENABLE_STREETS)
                 .withProperties(CAVE_GENERATION, RAVINE_GENERATION, ORE_GENERATION)
                 .build();
     }
@@ -125,17 +122,15 @@ public class EarthWorldType extends TerrariumWorldType {
                                 .range(-63, 128)
                                 .display(value -> String.format("%.0f blocks", value))
                 )
-                .withCategory("features",
+                .withCategory("ecological",
                         new ToggleWidget(ADD_TREES),
                         new ToggleWidget(ADD_GRASS),
                         new ToggleWidget(ADD_FLOWERS),
                         new ToggleWidget(ADD_CACTI),
                         new ToggleWidget(ADD_SUGAR_CANE),
-                        new ToggleWidget(ADD_GOURDS),
-                        new ToggleWidget(ENABLE_BUILDINGS).locked(),
-                        new ToggleWidget(ENABLE_STREETS).locked()
+                        new ToggleWidget(ADD_GOURDS)
                 )
-                .withCategory("procedural_features",
+                .withCategory("geological",
                         new ToggleWidget(CAVE_GENERATION),
                         new ToggleWidget(RAVINE_GENERATION),
                         new ToggleWidget(ORE_GENERATION)
