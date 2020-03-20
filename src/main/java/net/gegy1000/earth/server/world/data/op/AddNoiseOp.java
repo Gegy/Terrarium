@@ -16,7 +16,7 @@ public final class AddNoiseOp {
     }
 
     public DataOp<FloatRaster> applyFloats(DataOp<FloatRaster> sourceOp) {
-        return sourceOp.map((raster, view) -> {
+        return sourceOp.mapBlocking((raster, view) -> {
             int minX = view.getMinX();
             int minY = view.getMinY();
             raster.transform((source, x, y) -> {

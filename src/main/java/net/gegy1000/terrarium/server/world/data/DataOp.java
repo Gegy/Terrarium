@@ -62,6 +62,15 @@ public final class DataOp<T> implements DataFunction<T> {
     public <U> DataOp<U> map(BiFunction<T, DataView, U> map) {
         return DataOp.of((view, executor) -> {
             Future<Optional<T>> future = this.apply(view, executor);
+            return future.map(opt -> {
+                return opt.map(result -> map.apply(result, view));
+            });
+        });
+    }
+
+    public <U> DataOp<U> mapBlocking(BiFunction<T, DataView, U> map) {
+        return DataOp.of((view, executor) -> {
+            Future<Optional<T>> future = this.apply(view, executor);
             return future.andThen(opt -> {
                 return executor.spawnBlocking(() -> {
                     return opt.map(result -> map.apply(result, view));
@@ -70,26 +79,13 @@ public final class DataOp<T> implements DataFunction<T> {
         });
     }
 
-    public <U> DataOp<U> flatMap(BiFunction<T, DataView, Optional<U>> map) {
-        return DataOp.of((view, executor) -> {
-            Future<Optional<T>> future = this.apply(view, executor);
-            return future.andThen(opt -> {
-                return executor.spawnBlocking(() -> {
-                    return opt.flatMap(result -> map.apply(result, view));
-                });
-            });
-        });
-    }
-
     public static <A, B, R> DataOp<R> map2(DataOp<A> a, DataOp<B> b, Map2<A, B, R> map) {
         return DataOp.of((view, executor) -> {
-            return Future.andThen2(a.apply(view, executor), b.apply(view, executor), (aOption, bOption) -> {
-                return executor.spawnBlocking(() -> {
-                    if (aOption.isPresent() && bOption.isPresent()) {
-                        return Optional.of(map.apply(view, aOption.get(), bOption.get()));
-                    }
-                    return Optional.empty();
-                });
+            return Future.map2(a.apply(view, executor), b.apply(view, executor), (aOption, bOption) -> {
+                if (aOption.isPresent() && bOption.isPresent()) {
+                    return Optional.of(map.apply(view, aOption.get(), bOption.get()));
+                }
+                return Optional.empty();
             });
         });
     }

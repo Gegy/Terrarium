@@ -39,17 +39,12 @@ public final class ColumnDataLoader implements AutoCloseable {
             handle = this.taskMap.remove(columnPos);
         }
 
-        // TODO
-        if (handle != null) {
-            this.executor.remove(handle);
-        }
-
         Future<ColumnData> future;
-//        if (handle != null) {
-//            future = this.executor.steal(handle);
-//        } else {
-        future = this.generator.apply(columnPos);
-//        }
+        if (handle != null) {
+            future = this.executor.steal(handle);
+        } else {
+            future = this.generator.apply(columnPos);
+        }
 
         return CurrentThreadExecutor.blockOn(future);
     }

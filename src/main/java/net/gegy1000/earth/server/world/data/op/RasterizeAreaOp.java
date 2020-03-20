@@ -7,7 +7,7 @@ import net.gegy1000.terrarium.server.world.rasterization.RasterCanvas;
 
 public final class RasterizeAreaOp {
     public static DataOp<BitRaster> apply(DataOp<AreaData> area) {
-        return area.map((areaData, view) -> {
+        return area.mapBlocking((areaData, view) -> {
             BitRaster raster = BitRaster.create(view);
 
             RasterCanvas canvas = RasterCanvas.of(view);

@@ -169,16 +169,16 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
         minTemperature = this.temperatureNoise().applyFloats(minTemperature);
 
         DataOp<UByteRaster> cationExchangeCapacity = this.genericSoil(worldScale, CATION_EXCHANGE_CAPACITY_SOURCE)
-                .map((raster, view) -> UByteRaster.copyFrom(raster));
+                .mapBlocking((raster, view) -> UByteRaster.copyFrom(raster));
         DataOp<ShortRaster> organicCarbonContent = this.genericSoil(worldScale, ORGANIC_CARBON_CONTENT_SOURCE);
         DataOp<UByteRaster> soilPh = this.genericSoil(worldScale, PH_SOURCE)
-                .map((raster, view) -> UByteRaster.copyFrom(raster));
+                .mapBlocking((raster, view) -> UByteRaster.copyFrom(raster));
         DataOp<UByteRaster> clayContent = this.genericSoil(worldScale, CLAY_CONTENT_SOURCE)
-                .map((raster, view) -> UByteRaster.copyFrom(raster));
+                .mapBlocking((raster, view) -> UByteRaster.copyFrom(raster));
         DataOp<UByteRaster> siltContent = this.genericSoil(worldScale, SILT_CONTENT_SOURCE)
-                .map((raster, view) -> UByteRaster.copyFrom(raster));
+                .mapBlocking((raster, view) -> UByteRaster.copyFrom(raster));
         DataOp<UByteRaster> sandContent = this.genericSoil(worldScale, SAND_CONTENT_SOURCE)
-                .map((raster, view) -> UByteRaster.copyFrom(raster));
+                .mapBlocking((raster, view) -> UByteRaster.copyFrom(raster));
 
         builder.put(EarthDataKeys.TERRAIN_HEIGHT, terrainHeight);
         builder.put(EarthDataKeys.ELEVATION_METERS, elevation);
