@@ -1,10 +1,10 @@
 package net.gegy1000.earth.server.command;
 
-import com.mojang.authlib.GameProfile;
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.capability.EarthWorld;
 import net.gegy1000.earth.server.message.EarthOpenMapMessage;
 import net.gegy1000.earth.server.message.EarthPanoramaMessage;
+import net.gegy1000.earth.server.world.data.DataPreloadManager;
 import net.gegy1000.terrarium.server.TerrariumUserTracker;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.minecraft.command.CommandBase;
@@ -14,8 +14,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.PlayerList;
-import net.minecraft.server.management.UserListOpsEntry;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 
@@ -49,7 +47,7 @@ public class GeoToolCommand extends CommandBase {
                 builder.addElement(Items.ENDER_PEARL, TextFormatting.BOLD + "Go to place", () -> this.handleTeleport(player, earth));
                 builder.addElement(Items.PAINTING, TextFormatting.BOLD + "Display Panorama", () -> this.handlePanorama(player));
 
-                if (hasPermission(player, 4)) {
+                if (DataPreloadManager.checkPermission(player)) {
                     builder.addElement(Blocks.COMMAND_BLOCK, TextFormatting.BOLD + "Preload World", () -> this.handlePreload(player, earth));
                 }
             }
@@ -95,23 +93,5 @@ public class GeoToolCommand extends CommandBase {
         double latitude = coordinate.getZ();
 
         TerrariumEarth.NETWORK.sendTo(new EarthOpenMapMessage(latitude, longitude, type), player);
-    }
-
-    private static boolean hasPermission(EntityPlayerMP player, int level) {
-        MinecraftServer server = player.getServer();
-        if (server == null) return false;
-
-        PlayerList players = server.getPlayerList();
-        GameProfile profile = player.getGameProfile();
-        if (!players.canSendCommands(profile)) {
-            return false;
-        }
-
-        UserListOpsEntry op = players.getOppedPlayers().getEntry(profile);
-        if (op != null) {
-            return op.getPermissionLevel() >= level;
-        } else {
-            return server.getOpPermissionLevel() >= level;
-        }
     }
 }

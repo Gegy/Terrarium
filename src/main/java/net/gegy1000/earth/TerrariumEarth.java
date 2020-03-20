@@ -10,10 +10,11 @@ import net.gegy1000.earth.server.command.GeoTeleportCommand;
 import net.gegy1000.earth.server.command.GeoToolCommand;
 import net.gegy1000.earth.server.config.TerrariumEarthConfig;
 import net.gegy1000.earth.server.integration.bop.BoPIntegration;
-import net.gegy1000.earth.server.message.EarthDownloadMessage;
-import net.gegy1000.earth.server.message.EarthDownloadUpdateMessage;
+import net.gegy1000.earth.server.message.ModifyDataDownloadMessage;
 import net.gegy1000.earth.server.message.EarthOpenMapMessage;
 import net.gegy1000.earth.server.message.EarthPanoramaMessage;
+import net.gegy1000.earth.server.message.StartDataDownloadMessage;
+import net.gegy1000.earth.server.message.UpdateDownloadMessage;
 import net.gegy1000.earth.server.shared.ApiKeyInitializer;
 import net.gegy1000.earth.server.shared.ClimateRasterInitializer;
 import net.gegy1000.earth.server.shared.RemoteIndex2Initializer;
@@ -100,8 +101,9 @@ public class TerrariumEarth {
         NETWORK.registerMessage(EarthOpenMapMessage.Handler.class, EarthOpenMapMessage.class, 0, Side.CLIENT);
         NETWORK.registerMessage(EarthPanoramaMessage.Handler.class, EarthPanoramaMessage.class, 1, Side.CLIENT);
 
-        NETWORK.registerMessage(EarthDownloadMessage.Handler.class, EarthDownloadMessage.class, 2, Side.SERVER);
-        NETWORK.registerMessage(EarthDownloadUpdateMessage.Handler.class, EarthDownloadUpdateMessage.class, 3, Side.CLIENT);
+        NETWORK.registerMessage(StartDataDownloadMessage.Handler.class, StartDataDownloadMessage.class, 2, Side.SERVER);
+        NETWORK.registerMessage(ModifyDataDownloadMessage.Handler.class, ModifyDataDownloadMessage.class, 3, Side.SERVER);
+        NETWORK.registerMessage(UpdateDownloadMessage.Handler.class, UpdateDownloadMessage.class, 4, Side.CLIENT);
 
         if (Loader.isModLoaded("biomesoplenty")) {
             BoPIntegration.setup();

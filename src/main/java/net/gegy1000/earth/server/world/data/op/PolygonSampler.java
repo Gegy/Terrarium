@@ -17,7 +17,7 @@ import java.util.Optional;
 
 public final class PolygonSampler {
     public static DataOp<PolygonData> sample(TiledDataSource<PolygonData> source, CoordinateReference crs) {
-        return DataOp.of(view -> {
+        return DataOp.of((view, executor) -> {
             Coordinate blockMin = view.getMinCoordinate().to(crs);
             Coordinate blockMax = view.getMaxCoordinate().to(crs);
 
@@ -28,7 +28,7 @@ public final class PolygonSampler {
             Vec2i maxTilePos = getTilePos(source, max);
 
             return DataSourceReader.INSTANCE.getTiles(source, minTilePos, maxTilePos)
-                    .thenApply(tiles -> {
+                    .andThen(tiles -> executor.spawnBlocking(() -> {
                         PolygonClipper clipper = PolygonClipper.rect(min.getX(), min.getZ(), max.getX(), max.getZ());
 
                         Collection<MultiPolygon> polygons = new ArrayList<>();
@@ -49,7 +49,7 @@ public final class PolygonSampler {
                         } else {
                             return Optional.empty();
                         }
-                    });
+                    }));
         });
     }
 

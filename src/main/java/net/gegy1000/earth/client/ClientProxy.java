@@ -36,10 +36,14 @@ public class ClientProxy extends ServerProxy {
     }
 
     @Override
-    public void updateDownload(long count, long total) {
+    public void updateDownload(int id, long count, long total) {
         Minecraft client = Minecraft.getMinecraft();
+        if (count == 0 && client.currentScreen == null) {
+            client.displayGuiScreen(new EarthPreloadProgressGui(id));
+        }
+
         if (client.currentScreen instanceof EarthPreloadProgressGui) {
-            ((EarthPreloadProgressGui) client.currentScreen).update(count, total);
+            ((EarthPreloadProgressGui) client.currentScreen).update(id, count, total);
         }
     }
 

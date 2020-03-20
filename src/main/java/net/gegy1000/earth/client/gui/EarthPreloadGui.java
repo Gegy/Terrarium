@@ -6,7 +6,7 @@ import net.gegy1000.earth.client.gui.widget.map.SlippyMapWidget;
 import net.gegy1000.earth.client.gui.widget.map.component.MarkerMapComponent;
 import net.gegy1000.earth.client.gui.widget.map.component.RectMapComponent;
 import net.gegy1000.earth.server.capability.EarthWorld;
-import net.gegy1000.earth.server.message.EarthDownloadMessage;
+import net.gegy1000.earth.server.message.StartDataDownloadMessage;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.minecraft.client.gui.GuiButton;
@@ -66,8 +66,8 @@ public class EarthPreloadGui extends GuiScreen {
             Tuple<ChunkPos, ChunkPos> selection = this.getSelection();
             if (selection == null) return;
 
-            TerrariumEarth.NETWORK.sendToServer(new EarthDownloadMessage(selection.getFirst(), selection.getSecond()));
-            this.mc.displayGuiScreen(new EarthPreloadProgressGui());
+            TerrariumEarth.NETWORK.sendToServer(new StartDataDownloadMessage(selection.getFirst(), selection.getSecond()));
+            this.mc.displayGuiScreen(null);
         }
     }
 

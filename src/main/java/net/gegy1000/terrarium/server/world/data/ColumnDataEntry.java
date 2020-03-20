@@ -1,10 +1,10 @@
 package net.gegy1000.terrarium.server.world.data;
 
+import net.gegy1000.justnow.future.Future;
 import net.gegy1000.terrarium.Terrarium;
 import net.minecraft.util.math.ChunkPos;
 
 import javax.annotation.Nullable;
-import java.util.concurrent.CompletableFuture;
 
 public final class ColumnDataEntry {
     private static final long LEAK_TIME_THRESHOLD = 60 * 1000;
@@ -18,7 +18,8 @@ public final class ColumnDataEntry {
     private boolean dropped;
 
     @Nullable
-    private CompletableFuture<ColumnData> future;
+    private Future<ColumnData> future;
+    private ColumnData data;
 
     private long lastAccessTime = System.currentTimeMillis();
 
@@ -27,18 +28,17 @@ public final class ColumnDataEntry {
         this.loader = loader;
     }
 
-    private CompletableFuture<ColumnData> acquireFuture() {
+    private void spawnIfNotLoaded() {
         this.touch();
-        if (this.future == null) {
-            this.future = this.loader.getAsync(this.columnPos);
+        if (this.future == null && this.data == null) {
+            this.future = this.loader.spawn(this.columnPos);
         }
-        return this.future;
     }
 
     void track() {
         if (!this.tracked) {
             this.tracked = true;
-            this.acquireFuture();
+            this.spawnIfNotLoaded();
         }
     }
 
@@ -48,7 +48,7 @@ public final class ColumnDataEntry {
 
     Handle acquire() {
         this.handleCount++;
-        this.acquireFuture();
+        this.spawnIfNotLoaded();
         return new Handle();
     }
 
@@ -58,14 +58,16 @@ public final class ColumnDataEntry {
 
     private ColumnData join() {
         this.touch();
-        if (this.future != null && this.future.isDone()) {
-            return this.future.join();
+
+        this.future = null;
+
+        if (this.data != null) {
+            return this.data;
         }
 
-        ColumnData data = this.loader.getNow(this.columnPos);
-        this.future = CompletableFuture.completedFuture(data);
+        this.data = this.loader.getNow(this.columnPos);
 
-        return data;
+        return this.data;
     }
 
     private void touch() {
@@ -93,17 +95,12 @@ public final class ColumnDataEntry {
     boolean tryDrop() {
         if (this.shouldDrop()) {
             this.dropped = true;
-            if (this.future != null) {
-                this.future.cancel(true);
-                this.future = null;
-            }
+            this.loader.cancel(this.columnPos);
+            this.future = null;
+            this.data = null;
             return true;
         }
         return false;
-    }
-
-    boolean isLoaded() {
-        return this.future != null && this.future.isDone();
     }
 
     @Override
@@ -113,11 +110,6 @@ public final class ColumnDataEntry {
 
     public class Handle implements AutoCloseable {
         private boolean released;
-
-        public CompletableFuture<ColumnData> future() {
-            this.checkValid();
-            return ColumnDataEntry.this.acquireFuture();
-        }
 
         public ColumnData join() {
             this.checkValid();

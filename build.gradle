@@ -49,6 +49,7 @@ dependencies {
 
   // embedded dependencies
   embed 'net.gegy1000:gengen:0.1.0-SNAPSHOT'
+  embed 'net.gegy1000:just-now:0.1.0-SNAPSHOT'
   embed 'com.vividsolutions:jts:1.13'
   embed 'org.tukaani:xz-fork:1.8'
   embed 'io.github.opencubicchunks:regionlib:0.61.0-SNAPSHOT'
