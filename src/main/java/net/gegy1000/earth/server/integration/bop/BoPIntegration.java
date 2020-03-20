@@ -16,7 +16,7 @@ import net.gegy1000.earth.server.world.cover.CoverSelectors;
 import net.gegy1000.earth.server.world.ecology.GrowthPredictors;
 import net.gegy1000.earth.server.world.ecology.vegetation.FlowerDecorator;
 import net.gegy1000.earth.server.world.ecology.vegetation.TreeDecorator;
-import net.gegy1000.terrarium.server.event.InitializeTerrariumWorldEvent;
+import net.gegy1000.terrarium.server.event.TerrariumInitializeGeneratorEvent;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
@@ -125,7 +125,7 @@ public final class BoPIntegration {
     }
 
     @SubscribeEvent
-    public static void onInitializeTerrariumWorld(InitializeTerrariumWorldEvent event) {
+    public static void onInitializeTerrariumGenerator(TerrariumInitializeGeneratorEvent event) {
         if (event.getWorldType() != TerrariumEarth.GENERIC_WORLD_TYPE) return;
 
         World world = event.getWorld();

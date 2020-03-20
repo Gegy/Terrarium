@@ -4,6 +4,7 @@ import net.gegy1000.gengen.api.GenericWorldType;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.world.chunk.ComposableBiomeProvider;
 import net.gegy1000.terrarium.server.world.chunk.ComposableChunkGenerator;
+import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.generator.customization.PropertyPrototype;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumCustomization;
@@ -39,7 +40,7 @@ public abstract class TerrariumWorldType implements GenericWorldType {
         this.customization = this.buildCustomization();
     }
 
-    public abstract TerrariumGeneratorInitializer createGeneratorInitializer(World world, GenerationSettings settings);
+    public abstract TerrariumGeneratorInitializer createGeneratorInitializer(World world, GenerationSettings settings, ColumnDataCache dataCache);
 
     public abstract TerrariumDataInitializer createDataInitializer(GenerationSettings settings);
 

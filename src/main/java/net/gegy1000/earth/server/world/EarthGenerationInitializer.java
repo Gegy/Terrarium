@@ -1,6 +1,5 @@
 package net.gegy1000.earth.server.world;
 
-import net.gegy1000.earth.server.capability.HeightmapStore;
 import net.gegy1000.earth.server.world.composer.EarthBiomeComposer;
 import net.gegy1000.earth.server.world.composer.EarthCactusComposer;
 import net.gegy1000.earth.server.world.composer.EarthFlowerComposer;
@@ -26,6 +25,8 @@ import net.gegy1000.terrarium.server.world.composer.surface.BedrockSurfaceCompos
 import net.gegy1000.terrarium.server.world.composer.surface.GenericSurfaceComposer;
 import net.gegy1000.terrarium.server.world.composer.surface.HeightmapSurfaceComposer;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
+import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
+import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.generator.CompositeTerrariumGenerator;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
@@ -35,10 +36,12 @@ import static net.gegy1000.earth.server.world.EarthWorldType.*;
 final class EarthGenerationInitializer implements TerrariumGeneratorInitializer {
     private final EarthInitContext ctx;
     private final World world;
+    private final ColumnDataCache dataCache;
 
-    EarthGenerationInitializer(EarthInitContext ctx, World world) {
+    EarthGenerationInitializer(EarthInitContext ctx, World world, ColumnDataCache dataCache) {
         this.ctx = ctx;
         this.world = world;
+        this.dataCache = dataCache;
     }
 
     @Override
@@ -54,7 +57,9 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
 
     private void addSurfaceComposers(CompositeTerrariumGenerator.Builder builder) {
         int heightOffset = this.ctx.settings.getInteger(HEIGHT_OFFSET);
-        HeightFunction surfaceFunction = HeightmapStore.global(this.world, heightOffset);
+
+        ShortRaster.Sampler surfaceSampler = ShortRaster.sampler(EarthDataKeys.TERRAIN_HEIGHT);
+        HeightFunction surfaceFunction = (x, z) -> surfaceSampler.sample(this.dataCache, x, z);
 
         builder.addSurfaceComposer(new HeightmapSurfaceComposer(EarthDataKeys.TERRAIN_HEIGHT, Blocks.STONE.getDefaultState()));
         builder.addSurfaceComposer(new WaterFillSurfaceComposer(Blocks.WATER.getDefaultState()));

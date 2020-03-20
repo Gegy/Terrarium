@@ -1,31 +1,22 @@
 package net.gegy1000.terrarium.server.event;
 
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
-import net.gegy1000.terrarium.server.world.data.DataGenerator;
-import net.gegy1000.terrarium.server.world.generator.CompositeTerrariumGenerator;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.eventhandler.Event;
 
-public class InitializeTerrariumWorldEvent extends Event {
+public abstract class TerrariumInitializeEvent extends Event {
     private final World world;
     private final TerrariumWorldType worldType;
     private final GenerationSettings settings;
 
-    private final CompositeTerrariumGenerator.Builder generator;
-    private final DataGenerator.Builder dataGenerator;
-
-    public InitializeTerrariumWorldEvent(
+    protected TerrariumInitializeEvent(
             World world, TerrariumWorldType worldType,
-            GenerationSettings settings,
-            CompositeTerrariumGenerator.Builder generator,
-            DataGenerator.Builder dataGenerator
+            GenerationSettings settings
     ) {
         this.world = world;
         this.worldType = worldType;
         this.settings = settings;
-        this.generator = generator;
-        this.dataGenerator = dataGenerator;
     }
 
     public World getWorld() {
@@ -38,13 +29,5 @@ public class InitializeTerrariumWorldEvent extends Event {
 
     public GenerationSettings getSettings() {
         return this.settings;
-    }
-
-    public CompositeTerrariumGenerator.Builder getGenerator() {
-        return this.generator;
-    }
-
-    public DataGenerator.Builder getDataGenerator() {
-        return this.dataGenerator;
     }
 }

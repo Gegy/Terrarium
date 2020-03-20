@@ -17,6 +17,7 @@ import net.gegy1000.terrarium.server.world.TerrariumGeneratorInitializer;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.chunk.ComposableChunkGenerator;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
+import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.generator.customization.PropertyPrototype;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumCustomization;
@@ -73,13 +74,13 @@ public class EarthWorldType extends TerrariumWorldType {
 
     @Override
     public ComposableChunkGenerator createGenerator(World world) {
-        return new EarthChunkGenerator(world);
+        return new ComposableChunkGenerator(world);
     }
 
     @Override
-    public TerrariumGeneratorInitializer createGeneratorInitializer(World world, GenerationSettings settings) {
+    public TerrariumGeneratorInitializer createGeneratorInitializer(World world, GenerationSettings settings, ColumnDataCache dataCache) {
         world.setSeaLevel(settings.getInteger(HEIGHT_OFFSET));
-        return new EarthGenerationInitializer(EarthInitContext.from(settings), world);
+        return new EarthGenerationInitializer(EarthInitContext.from(settings), world, dataCache);
     }
 
     @Override
