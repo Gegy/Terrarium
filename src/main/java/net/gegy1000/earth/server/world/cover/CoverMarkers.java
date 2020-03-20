@@ -38,7 +38,7 @@ public final class CoverMarkers {
         WATER.add(Cover.WATER);
         FROZEN.add(Cover.PERMANENT_SNOW);
         FLOODED.add(Cover.FLOODED_VEGETATION, Cover.FRESH_FLOODED_FOREST, Cover.SALINE_FLOODED_FOREST);
-        BARREN.add(Cover.BARE, Cover.BARE_CONSOLIDATED, Cover.BARE_UNCONSOLIDATED, Cover.URBAN);
+        BARREN.add(Cover.BARE, Cover.BARE_CONSOLIDATED, Cover.BARE_UNCONSOLIDATED);
 
         NO_VEGETATION.add(Cover.WATER, Cover.PERMANENT_SNOW);
 

@@ -35,11 +35,14 @@ public final class BoPIntegration {
 
         if (cover.is(CoverSelectors.broadleafDeciduous())) {
             trees.addCandidate(BoPTrees.MAHOGANY);
+            trees.addCandidate(BoPTrees.WILLOW);
         }
 
         if (cover.is(CoverSelectors.broadleafEvergreen())) {
             trees.addCandidate(BoPTrees.PALM);
             trees.addCandidate(BoPTrees.EUCALYPTUS);
+            trees.addCandidate(BoPTrees.MANGROVE);
+            trees.addCandidate(BoPTrees.EBONY);
         }
     }
 
