@@ -59,8 +59,8 @@ public final class EarthSugarCaneComposer implements DecorationComposer {
 
     private int getCountPerChunk(Cover cover) {
         if (cover.is(CoverMarkers.FLOODED)) {
-            return 5;
+            return 3;
         }
-        return 1;
+        return this.random.nextInt(2);
     }
 }

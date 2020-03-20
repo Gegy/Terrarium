@@ -28,6 +28,7 @@ public final class CoverMarkers {
     public static final CoverMarker NEEDLELEAF = create();
 
     public static final CoverMarker DENSE_GRASS = create();
+    public static final CoverMarker HARSH = create();
 
     public static CoverMarker create() {
         return new CoverMarker();
@@ -126,6 +127,11 @@ public final class CoverMarkers {
                 Cover.RAINFED_CROPLAND, Cover.IRRIGATED_CROPLAND
         );
         DENSE_GRASS.addAll(FLOODED);
+
+        HARSH.add(
+                Cover.BARE, Cover.BARE_CONSOLIDATED, Cover.BARE_UNCONSOLIDATED,
+                Cover.SALINE_FLOODED_FOREST, Cover.SPARSE_VEGETATION
+        );
 
         MinecraftForge.EVENT_BUS.post(new AddCoverMarkersEvent());
     }

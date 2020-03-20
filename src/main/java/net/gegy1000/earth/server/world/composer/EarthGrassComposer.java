@@ -14,6 +14,7 @@ import net.minecraft.block.BlockDoublePlant;
 import net.minecraft.block.BlockTallGrass;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.gen.feature.WorldGenDeadBush;
 import net.minecraft.world.gen.feature.WorldGenDoublePlant;
 import net.minecraft.world.gen.feature.WorldGenTallGrass;
 import net.minecraft.world.gen.feature.WorldGenerator;
@@ -35,6 +36,8 @@ public final class EarthGrassComposer implements DecorationComposer {
     private static final WorldGenDoublePlant TALL_GRASS = new WorldGenDoublePlant();
     private static final WorldGenDoublePlant TALL_FERN = new WorldGenDoublePlant();
 
+    private static final WorldGenerator DEAD_BUSH = new WorldGenDeadBush();
+
     static {
         TALL_GRASS.setPlantType(BlockDoublePlant.EnumPlantType.GRASS);
         TALL_FERN.setPlantType(BlockDoublePlant.EnumPlantType.FERN);
@@ -46,11 +49,12 @@ public final class EarthGrassComposer implements DecorationComposer {
 
     @Override
     public void composeDecoration(ColumnDataCache dataCache, CubicPos pos, ChunkPopulationWriter writer) {
-        this.random.setSeed(pos.getCenterX(), pos.getCenterY(), pos.getCenterZ());
-
         int dataX = pos.getMaxX();
         int dataZ = pos.getMaxZ();
         Cover cover = this.coverSampler.sample(dataCache, dataX, dataZ);
+        if (cover.is(CoverMarkers.NO_VEGETATION)) return;
+
+        this.random.setSeed(pos.getCenterX(), pos.getCenterY(), pos.getCenterZ());
 
         int grassPerChunk = this.getGrassPerChunk(this.random, cover);
         int fernsPerChunk = this.getFernsPerChunk(cover);
@@ -61,6 +65,10 @@ public final class EarthGrassComposer implements DecorationComposer {
         if (cover.is(CoverMarkers.DENSE_GRASS)) {
             this.generateGrass(TALL_GRASS, writer, pos, grassPerChunk / 2);
             this.generateGrass(TALL_FERN, writer, pos, fernsPerChunk / 2);
+        }
+
+        if (cover.is(CoverMarkers.HARSH) && this.random.nextBoolean()) {
+            this.generateGrass(DEAD_BUSH, writer, pos, 1);
         }
     }
 
