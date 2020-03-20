@@ -1,5 +1,7 @@
 package net.gegy1000.earth.client.gui;
 
+import net.gegy1000.earth.TerrariumEarth;
+import net.gegy1000.earth.server.message.ModifyDataDownloadMessage;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -10,15 +12,23 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class EarthPreloadProgressGui extends GuiScreen {
-    private static final int CANCEL_BUTTON = 0;
+    private static final int EXIT_BUTTON = 0;
+    private static final int RUN_IN_BACKGROUND_BUTTON = 1;
 
     private static final int BAR_HEIGHT = 14;
 
     private static final int BAR_BACKGROUND_COLOR = 0xFF000000;
     private static final int BAR_COLOR = 0xFF336622;
 
+    private final int id;
     private long count;
     private long total;
+
+    private GuiButton exitButton;
+
+    public EarthPreloadProgressGui(int id) {
+        this.id = id;
+    }
 
     @Override
     public void initGui() {
@@ -26,21 +36,45 @@ public class EarthPreloadProgressGui extends GuiScreen {
 
         this.buttonList.clear();
 
-        this.addButton(new GuiButton(CANCEL_BUTTON, (this.width - 150) / 2, this.height - 150, 150, 20, I18n.format("gui.cancel")));
+        this.exitButton = this.addButton(new GuiButton(EXIT_BUTTON, this.width / 2 - 155, this.height - 28, 150, 20, I18n.format("gui.cancel")));
+        this.addButton(new GuiButton(RUN_IN_BACKGROUND_BUTTON, this.width / 2 + 5, this.height - 28, 150, 20, I18n.format("gui.earth.run_in_background")));
     }
 
-    public void update(long count, long total) {
-        this.count = count;
-        this.total = total;
+    private String getExitText() {
+        if (this.isComplete()) {
+            return I18n.format("gui.done");
+        }
+        return I18n.format("gui.cancel");
+    }
+
+    private boolean isComplete() {
+        return this.total > 0 && this.count >= this.total;
+    }
+
+    public void update(int id, long count, long total) {
+        if (id == this.id) {
+            this.count = count;
+            this.total = total;
+
+            if (this.count >= this.total) {
+                this.exitButton.displayString = this.getExitText();
+            }
+        }
     }
 
     @Override
     protected void actionPerformed(GuiButton button) {
         if (!button.enabled) return;
-        if (button.id == CANCEL_BUTTON) {
-            // TODO
-            this.mc.displayGuiScreen(null);
+
+        if (!this.isComplete()) {
+            if (button.id == EXIT_BUTTON) {
+                TerrariumEarth.NETWORK.sendToServer(new ModifyDataDownloadMessage(this.id, true, false));
+            } else if (button.id == RUN_IN_BACKGROUND_BUTTON) {
+                TerrariumEarth.NETWORK.sendToServer(new ModifyDataDownloadMessage(this.id, false, true));
+            }
         }
+
+        this.mc.displayGuiScreen(null);
     }
 
     @Override

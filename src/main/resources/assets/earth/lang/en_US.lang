@@ -19,6 +19,7 @@ gui.earth.preload.downloading=Downloading Chunks
 
 gui.earth.retry=Retry
 gui.earth.download=Download
+gui.earth.run_in_background=Run in Background
 
 gui.button.earth.teleport=Teleport
 
