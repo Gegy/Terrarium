@@ -2,9 +2,9 @@ package net.gegy1000.earth.client.gui;
 
 import com.google.common.base.Strings;
 import com.google.gson.JsonSyntaxException;
-import futures.executor.CurrentThreadExecutor;
-import futures.future.Cancelable;
-import futures.future.Future;
+import net.gegy1000.justnow.executor.CurrentThreadExecutor;
+import net.gegy1000.justnow.future.Cancelable;
+import net.gegy1000.justnow.future.Future;
 import net.gegy1000.earth.client.gui.preview.LargePreviewGui;
 import net.gegy1000.earth.client.gui.preview.PreviewController;
 import net.gegy1000.earth.client.gui.preview.PreviewRenderer;

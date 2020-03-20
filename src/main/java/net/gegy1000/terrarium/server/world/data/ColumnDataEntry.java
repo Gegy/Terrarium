@@ -1,6 +1,6 @@
 package net.gegy1000.terrarium.server.world.data;
 
-import futures.future.Future;
+import net.gegy1000.justnow.future.Future;
 import net.gegy1000.terrarium.Terrarium;
 import net.minecraft.util.math.ChunkPos;
 

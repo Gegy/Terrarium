@@ -1,7 +1,7 @@
 package net.gegy1000.earth.server.world.data.op;
 
 import com.google.common.base.Preconditions;
-import futures.future.Future;
+import net.gegy1000.justnow.future.Future;
 import net.gegy1000.earth.server.util.Zoomable;
 import net.gegy1000.terrarium.server.world.coordinate.CoordReferenced;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;

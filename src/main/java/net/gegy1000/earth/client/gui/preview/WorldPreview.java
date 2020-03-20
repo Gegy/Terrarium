@@ -1,7 +1,7 @@
 package net.gegy1000.earth.client.gui.preview;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import futures.future.Future;
+import net.gegy1000.justnow.future.Future;
 import net.gegy1000.earth.client.terrain.TerrainMesh;
 import net.gegy1000.earth.server.world.EarthDataKeys;
 import net.gegy1000.earth.server.world.EarthInitContext;

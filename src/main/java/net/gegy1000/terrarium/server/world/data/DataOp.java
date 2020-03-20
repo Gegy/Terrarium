@@ -2,7 +2,7 @@ package net.gegy1000.terrarium.server.world.data;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import futures.future.Future;
+import net.gegy1000.justnow.future.Future;
 import net.gegy1000.terrarium.server.world.data.op.DataFunction;
 
 import java.util.Optional;

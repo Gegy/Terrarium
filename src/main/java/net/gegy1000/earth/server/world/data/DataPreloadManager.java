@@ -1,6 +1,6 @@
 package net.gegy1000.earth.server.world.data;
 
-import futures.executor.CurrentThreadExecutor;
+import net.gegy1000.justnow.executor.CurrentThreadExecutor;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.util.ChunkedIterator;
 import net.gegy1000.terrarium.server.world.data.DataGenerator;
@@ -12,7 +12,7 @@ import net.minecraft.util.math.ChunkPos;
 import java.util.Collection;
 
 public final class DataPreloadManager {
-    private static final int BATCH_SIZE = 100;
+    private static final int BATCH_SIZE = 1000;
 
     private final DataGenerator generator;
     private final ChunkPos min;

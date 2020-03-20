@@ -1,6 +1,6 @@
 package net.gegy1000.terrarium.server.world.data;
 
-import futures.future.Future;
+import net.gegy1000.justnow.future.Future;
 
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;

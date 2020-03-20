@@ -1,6 +1,6 @@
 package net.gegy1000.earth.server.world.data.op;
 
-import futures.future.Future;
+import net.gegy1000.justnow.future.Future;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.geography.Landform;
 import net.gegy1000.terrarium.server.world.data.DataOp;

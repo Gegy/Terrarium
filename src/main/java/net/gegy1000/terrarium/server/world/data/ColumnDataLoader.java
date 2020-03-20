@@ -1,9 +1,9 @@
 package net.gegy1000.terrarium.server.world.data;
 
-import futures.executor.CurrentThreadExecutor;
-import futures.executor.LocalExecutor;
-import futures.executor.TaskHandle;
-import futures.future.Future;
+import net.gegy1000.justnow.executor.CurrentThreadExecutor;
+import net.gegy1000.justnow.executor.LocalExecutor;
+import net.gegy1000.justnow.executor.TaskHandle;
+import net.gegy1000.justnow.future.Future;
 import net.minecraft.util.math.ChunkPos;
 
 import java.util.HashMap;

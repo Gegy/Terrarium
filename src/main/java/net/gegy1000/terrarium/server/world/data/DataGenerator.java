@@ -2,7 +2,7 @@ package net.gegy1000.terrarium.server.world.data;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import futures.future.Future;
+import net.gegy1000.justnow.future.Future;
 import net.gegy1000.terrarium.Terrarium;
 
 import java.util.Collection;
