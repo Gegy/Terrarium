@@ -3,6 +3,7 @@ package net.gegy1000.terrarium.server.world.data;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import net.gegy1000.justnow.future.Future;
+import net.gegy1000.justnow.future.MaybeDone;
 import net.gegy1000.terrarium.server.world.data.op.DataFunction;
 
 import java.util.Optional;
@@ -14,7 +15,7 @@ import java.util.function.Function;
 public final class DataOp<T> implements DataFunction<T> {
     private final DataFunction<T> function;
 
-    private Cache<DataView, Future<Optional<T>>> cache;
+    private Cache<DataView, MaybeDone<Optional<T>>> cache;
     private Function<T, T> copy;
 
     private DataOp(DataFunction<T> function) {
@@ -52,8 +53,13 @@ public final class DataOp<T> implements DataFunction<T> {
         if (this.cache == null) return this.function.apply(view, executor);
 
         try {
-            return this.cache.get(view, () -> this.function.apply(view, executor))
-                    .map(opt -> opt.map(v -> this.copy.apply(v)));
+            MaybeDone<Optional<T>> maybeDone = this.cache.get(view, () -> {
+                return Future.maybeDone(this.function.apply(view, executor));
+            });
+            return maybeDone.map(u -> {
+                if (!maybeDone.isDone()) return Optional.empty();
+                return maybeDone.getResult().map(this.copy);
+            });
         } catch (ExecutionException e) {
             throw new RuntimeException(e);
         }

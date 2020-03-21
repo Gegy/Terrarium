@@ -4,8 +4,8 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.gegy1000.justnow.Waker;
-import net.gegy1000.justnow.future.BlockingTaskHandle;
 import net.gegy1000.justnow.future.Future;
+import net.gegy1000.justnow.future.JoinHandle;
 import net.gegy1000.justnow.tuple.Unit;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.util.Vec2i;
@@ -32,7 +32,7 @@ public final class DataSourceReader {
             .expireAfterAccess(60, TimeUnit.SECONDS)
             .build();
 
-    private final Map<TileKey<?>, BlockingTaskHandle<DataTileResult<?>>> queuedTiles = new HashMap<>();
+    private final Map<TileKey<?>, JoinHandle<DataTileResult<?>>> queuedTiles = new HashMap<>();
 
     private final LinkedBlockingDeque<Waker> queueEmpty = new LinkedBlockingDeque<>();
 
@@ -65,14 +65,14 @@ public final class DataSourceReader {
     }
 
     public void cancelLoading() {
-        for (BlockingTaskHandle<?> handle : this.queuedTiles.values()) {
+        for (JoinHandle<?> handle : this.queuedTiles.values()) {
             handle.cancel();
         }
         this.queuedTiles.clear();
         this.notifyQueueEmpty();
     }
 
-    private <T> BlockingTaskHandle<DataTileResult<?>> enqueueTile(TileKey<T> key) {
+    private <T> JoinHandle<DataTileResult<?>> enqueueTile(TileKey<T> key) {
         return Future.spawnBlocking(this.loadService, () -> {
             try {
                 DataTileResult<T> tile = this.loadTile(key);
@@ -95,8 +95,8 @@ public final class DataSourceReader {
             }
 
             synchronized (this.lock) {
-                BlockingTaskHandle<DataTileResult<?>> future = this.queuedTiles.computeIfAbsent(key, this::enqueueTile);
-                return (Future<DataTileResult<T>>) (Future) future;
+                JoinHandle<DataTileResult<?>> handle = this.queuedTiles.computeIfAbsent(key, this::enqueueTile);
+                return (Future<DataTileResult<T>>) (Future) handle;
             }
         } catch (Exception e) {
             Terrarium.LOGGER.warn("Unexpected error occurred at {} from {}", pos, source.getClass().getSimpleName(), e);

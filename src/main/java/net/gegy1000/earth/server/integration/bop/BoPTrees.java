@@ -85,7 +85,7 @@ public final class BoPTrees {
                 .create();
         static final GeneratorBigTree EBONY = new GeneratorBigTree.Builder()
                 .log(BOPWoods.EBONY).leaves(BOPTrees.EBONY)
-                .minHeight(4).maxHeight(10).foliageHeight(1)
+                .minHeight(5).maxHeight(10).foliageHeight(1)
                 .create();
 
         @SuppressWarnings("unchecked")
