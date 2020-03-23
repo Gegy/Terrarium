@@ -16,15 +16,15 @@ public final class EnumRaster<T extends Enum<T>> extends AbstractRaster<byte[]> 
         super(data, width, height);
         this.type = type;
         this.universe = type.getEnumConstants();
+
+        if (this.universe.length > 255) {
+            throw new IllegalStateException("Enum has too many variants!");
+        }
     }
 
     @SuppressWarnings("unchecked")
     public static <T extends Enum<T>> EnumRaster<T> create(T variant, int width, int height) {
         Class<T> type = (Class<T>) variant.getClass();
-        if (type.getEnumConstants().length > 255) {
-            throw new IllegalStateException("Enum has too many variants!");
-        }
-
         byte[] array = new byte[width * height];
         Arrays.fill(array, (byte) variant.ordinal());
         return new EnumRaster<>(array, width, height, type);

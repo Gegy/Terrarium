@@ -1,6 +1,7 @@
 package net.gegy1000.earth.server.command.debugger;
 
 import net.gegy1000.earth.server.world.cover.Cover;
+import net.gegy1000.earth.server.world.ecology.soil.SoilClass;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
@@ -21,6 +22,7 @@ public final class DebugGeoProfile {
     public final float minTemperature;
     public final int annualRainfall;
 
+    public final SoilClass soilClass;
     public final int siltContent;
     public final int sandContent;
     public final int clayContent;
@@ -32,6 +34,7 @@ public final class DebugGeoProfile {
             String name, double latitude, double longitude,
             int surfaceElevation, Cover cover,
             float meanTemperature, float minTemperature, int annualRainfall,
+            SoilClass soilClass,
             int siltContent, int sandContent, int clayContent,
             int organicCarbonContent, int cationExchangeCapacity,
             float soilPh
@@ -44,6 +47,7 @@ public final class DebugGeoProfile {
         this.meanTemperature = meanTemperature;
         this.minTemperature = minTemperature;
         this.annualRainfall = annualRainfall;
+        this.soilClass = soilClass;
         this.siltContent = siltContent;
         this.sandContent = sandContent;
         this.clayContent = clayContent;
@@ -68,6 +72,7 @@ public final class DebugGeoProfile {
         });
 
         this.sendCategory(player, "Soil", p -> {
+            p.sendMessage(makeValue("Soil Class", "%s (%s)", this.soilClass, this.soilClass.id));
             p.sendMessage(makeValue("Silt Content", "%s%%", this.siltContent));
             p.sendMessage(makeValue("Sand Content", "%s%%", this.sandContent));
             p.sendMessage(makeValue("Clay Content", "%s%%", this.clayContent));

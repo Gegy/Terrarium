@@ -6,7 +6,7 @@ import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.util.ProcessTracker;
 import net.gegy1000.earth.server.util.ProgressTracker;
 import net.gegy1000.earth.server.util.TrackedInputStream;
-import net.gegy1000.earth.server.world.data.index.EarthRemoteIndex;
+import net.gegy1000.earth.server.world.data.index.DataIndex1;
 import net.gegy1000.terrarium.server.world.data.source.TiledDataSource;
 import net.minecraft.util.text.TextComponentTranslation;
 import org.apache.commons.io.IOUtils;
@@ -25,7 +25,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
-public final class RemoteIndexInitializer implements SharedDataInitializer {
+// TODO: remove
+public final class DataIndex1Initializer implements SharedDataInitializer {
     private final static String INDEX_URL = "https://terrariumearth.azureedge.net/geo/data_index.json.xz";
     private final static String SHA1_URL = "https://terrariumearth.azureedge.net/geo/data_index.json.xz.sha1";
 
@@ -38,12 +39,12 @@ public final class RemoteIndexInitializer implements SharedDataInitializer {
 
         master.use(() -> {
             master.step(1);
-            EarthRemoteIndex index = this.loadIndex(processTracker);
+            DataIndex1 index = this.loadIndex(processTracker);
             data.put(SharedEarthData.REMOTE_INDEX, index);
         });
     }
 
-    private EarthRemoteIndex loadIndex(ProcessTracker processTracker) throws IOException {
+    private DataIndex1 loadIndex(ProcessTracker processTracker) throws IOException {
         if (Files.exists(CACHE_PATH)) {
             byte[] cachedBytes = Files.readAllBytes(CACHE_PATH);
             if (this.isCacheUpToDate(cachedBytes)) {
@@ -82,10 +83,10 @@ public final class RemoteIndexInitializer implements SharedDataInitializer {
         }
     }
 
-    private EarthRemoteIndex parse(byte[] bytes) throws IOException {
+    private DataIndex1 parse(byte[] bytes) throws IOException {
         try (InputStream input = new SingleXZInputStream(new ByteArrayInputStream(bytes))) {
             JsonElement root = JSON_PARSER.parse(new InputStreamReader(input));
-            return EarthRemoteIndex.parse(root.getAsJsonObject());
+            return DataIndex1.parse(root.getAsJsonObject());
         }
     }
 

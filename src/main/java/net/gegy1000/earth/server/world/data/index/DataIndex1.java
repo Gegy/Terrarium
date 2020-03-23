@@ -9,25 +9,23 @@ import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class EarthRemoteIndex {
-    public final Endpoint srtm;
+// TODO: remove
+public final class DataIndex1 {
     public final Endpoint landcover;
     public final Endpoint oceans;
 
-    private EarthRemoteIndex(Endpoint srtm, Endpoint landcover, Endpoint oceans) {
-        this.srtm = srtm;
+    private DataIndex1(Endpoint landcover, Endpoint oceans) {
         this.landcover = landcover;
         this.oceans = oceans;
     }
 
-    public static EarthRemoteIndex parse(JsonObject root) {
+    public static DataIndex1 parse(JsonObject root) {
         JsonObject endpointsRoot = root.getAsJsonObject("endpoints");
 
-        Endpoint srtm = parseEndpoint(endpointsRoot.getAsJsonObject("srtm"));
         Endpoint landcover = parseEndpoint(endpointsRoot.getAsJsonObject("landcover"));
         Endpoint oceans = parseEndpoint(endpointsRoot.getAsJsonObject("ocean"));
 
-        return new EarthRemoteIndex(srtm, landcover, oceans);
+        return new DataIndex1(landcover, oceans);
     }
 
     private static Endpoint parseEndpoint(JsonObject root) {

@@ -56,8 +56,8 @@ public class ColumnDataCache implements AutoCloseable {
         }
     }
 
-    public void advanceLoading() {
-        this.loader.advance();
+    public void advanceLoadingFor(long nanos) {
+        this.loader.advanceFor(nanos);
     }
 
     public void trackColumns() {

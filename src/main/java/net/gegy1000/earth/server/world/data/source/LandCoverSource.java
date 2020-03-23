@@ -2,7 +2,7 @@ package net.gegy1000.earth.server.world.data.source;
 
 import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.earth.server.world.cover.Cover;
-import net.gegy1000.earth.server.world.data.index.EarthRemoteIndex;
+import net.gegy1000.earth.server.world.data.index.DataIndex1;
 import net.gegy1000.earth.server.world.data.source.cache.AbstractRegionKey;
 import net.gegy1000.earth.server.world.data.source.cache.CachingInput;
 import net.gegy1000.earth.server.world.data.source.cache.FileTileCache;
@@ -42,7 +42,7 @@ public class LandCoverSource extends TiledDataSource<EnumRaster<Cover>> {
     @Override
     public Optional<EnumRaster<Cover>> load(Vec2i pos) throws IOException {
         SharedEarthData sharedData = SharedEarthData.instance();
-        EarthRemoteIndex remoteIndex = sharedData.get(SharedEarthData.REMOTE_INDEX);
+        DataIndex1 remoteIndex = sharedData.get(SharedEarthData.REMOTE_INDEX);
         if (remoteIndex == null) {
             return Optional.empty();
         }

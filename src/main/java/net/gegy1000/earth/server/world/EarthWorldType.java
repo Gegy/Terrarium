@@ -110,7 +110,7 @@ public class EarthWorldType extends TerrariumWorldType {
         return TerrariumCustomization.builder()
                 .withCategory("world",
                         new SliderWidget(WORLD_SCALE)
-                                .range(1.0, 2000.0).step(5.0, 1.0)
+                                .range(1.0, 8000.0).step(5.0, 1.0)
                                 .scale(SliderScale.power(3.0))
                                 .display(value -> String.format("1:%.0f", value)),
                         new SliderWidget(TERRESTRIAL_HEIGHT_SCALE)

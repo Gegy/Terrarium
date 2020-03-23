@@ -6,7 +6,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 
-public final class Zoomable<T> {
+public final class Zoomable<T> implements ForZoom<T> {
     private final ZoomLevels levels;
     private final Int2ObjectMap<T> internal;
     private T orElse;
@@ -28,6 +28,7 @@ public final class Zoomable<T> {
         return new Zoomable<>(levels, internal);
     }
 
+    @Override
     public T forZoom(int zoom) {
         return this.internal.getOrDefault(zoom, this.orElse);
     }

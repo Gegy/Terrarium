@@ -7,6 +7,7 @@ import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.cover.CoverColors;
 import net.gegy1000.earth.server.world.ecology.GrowthIndicator;
 import net.gegy1000.earth.server.world.ecology.GrowthPredictors;
+import net.gegy1000.earth.server.world.ecology.soil.SoilClass;
 import net.gegy1000.earth.server.world.ecology.vegetation.Vegetation;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
@@ -139,6 +140,7 @@ public final class GeoDebugger {
         float minTemperature = FloatRaster.sampler(EarthDataKeys.MIN_TEMPERATURE).sample(data, bx, bz);
         short annualRainfall = ShortRaster.sampler(EarthDataKeys.ANNUAL_RAINFALL).sample(data, bx, bz);
 
+        SoilClass soilClass = EnumRaster.sampler(EarthDataKeys.SOIL_CLASS, SoilClass.NO).sample(data, bx, bz);
         int siltContent = UByteRaster.sampler(EarthDataKeys.SILT_CONTENT).sample(data, bx, bz);
         int sandContent = UByteRaster.sampler(EarthDataKeys.SAND_CONTENT).sample(data, bx, bz);
         int clayContent = UByteRaster.sampler(EarthDataKeys.CLAY_CONTENT).sample(data, bx, bz);
@@ -150,6 +152,7 @@ public final class GeoDebugger {
                 name, latitude, longitude,
                 elevation, cover,
                 meanTemperature, minTemperature, annualRainfall,
+                soilClass,
                 siltContent, sandContent, clayContent,
                 organicCarbonContent, cationExchangeCapacity, soilPh / 10.0F
         );

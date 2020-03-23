@@ -140,6 +140,7 @@ public class GeoDebugCommand extends CommandBase {
                 writer.println("Name,Latitude,Longitude," +
                         "Surface Elevation,Cover," +
                         "Mean Temperature,Min Temperature,Annual Rainfall," +
+                        "Soil Class," +
                         "Silt Content,Sand Content,Clay Content," +
                         "Organic Carbon Content,Cation Exchange Capacity,Soil pH"
                 );
@@ -148,6 +149,7 @@ public class GeoDebugCommand extends CommandBase {
                     writer.print(profile.name + "," + profile.latitude + "," + profile.longitude + ",");
                     writer.print(profile.surfaceElevation + "," + profile.cover + ",");
                     writer.print(profile.meanTemperature + "," + profile.minTemperature + "," + profile.annualRainfall + ",");
+                    writer.print(profile.soilClass + ",");
                     writer.print(profile.siltContent + "," + profile.sandContent + "," + profile.clayContent + ",");
                     writer.print(profile.organicCarbonContent + "," + profile.cationExchangeCapacity + "," + profile.soilPh + ",");
                     writer.println();

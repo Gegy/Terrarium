@@ -6,7 +6,7 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
 import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.earth.server.world.data.PolygonData;
-import net.gegy1000.earth.server.world.data.index.EarthRemoteIndex;
+import net.gegy1000.earth.server.world.data.index.DataIndex1;
 import net.gegy1000.earth.server.world.data.source.cache.AbstractRegionKey;
 import net.gegy1000.earth.server.world.data.source.cache.CachingInput;
 import net.gegy1000.earth.server.world.data.source.cache.FileTileCache;
@@ -45,7 +45,7 @@ public class OceanPolygonSource extends TiledDataSource<PolygonData> {
     @Override
     public Optional<PolygonData> load(Vec2i pos) throws IOException {
         SharedEarthData sharedData = SharedEarthData.instance();
-        EarthRemoteIndex remoteIndex = sharedData.get(SharedEarthData.REMOTE_INDEX);
+        DataIndex1 remoteIndex = sharedData.get(SharedEarthData.REMOTE_INDEX);
         if (remoteIndex == null) {
             return Optional.empty();
         }

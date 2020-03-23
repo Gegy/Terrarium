@@ -85,8 +85,9 @@ public class ServerEventHandler {
             TerrariumWorld terrarium = TerrariumWorld.get(world);
             if (terrarium == null) return;
 
+            // advance loading for up to 2ms
             ColumnDataCache dataCache = terrarium.getDataCache();
-            dataCache.advanceLoading();
+            dataCache.advanceLoadingFor(2 * 1000000);
 
             long time = System.currentTimeMillis();
             if (time - lastDataTrackTime > DATA_TRACK_INTERVAL) {

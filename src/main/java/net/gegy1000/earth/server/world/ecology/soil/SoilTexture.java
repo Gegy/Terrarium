@@ -36,8 +36,7 @@ public final class SoilTexture {
     }
 
     public static SoilConfig select(
-            int clay, int silt, int sand,
-            int organicCarbonContent,
+            SoilClass soilClass,
             int slope,
             Cover cover
     ) {
@@ -47,12 +46,16 @@ public final class SoilTexture {
         if (slope < 60) {
             // TODO: gravel, erosion based on slope & rainfall
 
-            if (cover == Cover.PERMANENT_SNOW) {
+            if (cover == Cover.PERMANENT_SNOW || soilClass.isIce()) {
                 return DEEP_SNOW;
             }
 
-            if (organicCarbonContent < 9) {
+            if (soilClass.isSandy()) {
                 return SAND;
+            }
+
+            if (soilClass.isRock()) {
+                return STONE;
             }
 
             return DIRT;

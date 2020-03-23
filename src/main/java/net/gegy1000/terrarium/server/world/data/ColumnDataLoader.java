@@ -21,8 +21,11 @@ public final class ColumnDataLoader implements AutoCloseable {
         this.generator = generator;
     }
 
-    public void advance() {
-        this.executor.advanceAll();
+    public void advanceFor(long nanos) {
+        long start = System.nanoTime();
+        while (System.nanoTime() - start < nanos) {
+            this.executor.advanceAll();
+        }
     }
 
     public Future<ColumnData> spawn(ChunkPos columnPos) {

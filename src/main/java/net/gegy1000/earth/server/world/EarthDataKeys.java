@@ -2,6 +2,7 @@ package net.gegy1000.earth.server.world;
 
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.world.cover.Cover;
+import net.gegy1000.earth.server.world.ecology.soil.SoilClass;
 import net.gegy1000.earth.server.world.geography.Landform;
 import net.gegy1000.terrarium.server.world.data.DataKey;
 import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
@@ -26,6 +27,7 @@ public final class EarthDataKeys {
     public static final DataKey<UByteRaster> CLAY_CONTENT = create("clay_content");
     public static final DataKey<UByteRaster> SILT_CONTENT = create("silt_content");
     public static final DataKey<UByteRaster> SAND_CONTENT = create("sand_content");
+    public static final DataKey<EnumRaster<SoilClass>> SOIL_CLASS = create("soil_class");
 
     private static <T> DataKey<T> create(String name) {
         return new DataKey<>(new ResourceLocation(TerrariumEarth.ID, name));

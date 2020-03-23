@@ -7,7 +7,7 @@ import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.util.ZoomLevels;
 import net.gegy1000.earth.server.util.Zoomable;
 import net.gegy1000.earth.server.world.data.source.ElevationSource;
-import net.gegy1000.earth.server.world.data.source.SoilSource;
+import net.gegy1000.earth.server.world.data.source.SoilSources;
 import net.gegy1000.terrarium.server.util.Vec2i;
 
 import javax.annotation.Nullable;
@@ -15,44 +15,48 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class EarthRemoteIndex2 {
+public final class DataIndex3 {
     public final Zoomable<Endpoint> elevation;
-    public final Zoomable<Endpoint> cationExchangeCapacity;
-    public final Zoomable<Endpoint> organicCarbonContent;
+    public final Zoomable<Endpoint> cec;
+    public final Zoomable<Endpoint> occ;
     public final Zoomable<Endpoint> ph;
-    public final Zoomable<Endpoint> clayContent;
-    public final Zoomable<Endpoint> siltContent;
-    public final Zoomable<Endpoint> sandContent;
+    public final Zoomable<Endpoint> clay;
+    public final Zoomable<Endpoint> silt;
+    public final Zoomable<Endpoint> sand;
+    public final Zoomable<Endpoint> usda;
 
-    private EarthRemoteIndex2(
+    private DataIndex3(
             Zoomable<Endpoint> elevation,
-            Zoomable<Endpoint> cationExchangeCapacity,
-            Zoomable<Endpoint> organicCarbonContent,
+            Zoomable<Endpoint> cec,
+            Zoomable<Endpoint> occ,
             Zoomable<Endpoint> ph,
-            Zoomable<Endpoint> clayContent,
-            Zoomable<Endpoint> siltContent,
-            Zoomable<Endpoint> sandContent
+            Zoomable<Endpoint> clay,
+            Zoomable<Endpoint> silt,
+            Zoomable<Endpoint> sand,
+            Zoomable<Endpoint> usda
     ) {
         this.elevation = elevation;
-        this.cationExchangeCapacity = cationExchangeCapacity;
-        this.organicCarbonContent = organicCarbonContent;
+        this.cec = cec;
+        this.occ = occ;
         this.ph = ph;
-        this.clayContent = clayContent;
-        this.siltContent = siltContent;
-        this.sandContent = sandContent;
+        this.clay = clay;
+        this.sand = sand;
+        this.silt = silt;
+        this.usda = usda;
     }
 
-    public static EarthRemoteIndex2 parse(JsonObject root) {
+    public static DataIndex3 parse(JsonObject root) {
         JsonObject endpointsRoot = root.getAsJsonObject("endpoints");
 
-        return new EarthRemoteIndex2(
+        return new DataIndex3(
                 parseZoomableEndpoint(endpointsRoot, "elevation", ElevationSource.zoomLevels()),
-                parseZoomableEndpoint(endpointsRoot, "soil/cec", SoilSource.zoomLevels()),
-                parseZoomableEndpoint(endpointsRoot, "soil/occ", SoilSource.zoomLevels()),
-                parseZoomableEndpoint(endpointsRoot, "soil/ph", SoilSource.zoomLevels()),
-                parseZoomableEndpoint(endpointsRoot, "soil/clay", SoilSource.zoomLevels()),
-                parseZoomableEndpoint(endpointsRoot, "soil/silt", SoilSource.zoomLevels()),
-                parseZoomableEndpoint(endpointsRoot, "soil/sand", SoilSource.zoomLevels())
+                parseZoomableEndpoint(endpointsRoot, "cec", SoilSources.zoomLevels()),
+                parseZoomableEndpoint(endpointsRoot, "occ", SoilSources.zoomLevels()),
+                parseZoomableEndpoint(endpointsRoot, "ph", SoilSources.zoomLevels()),
+                parseZoomableEndpoint(endpointsRoot, "clay", SoilSources.zoomLevels()),
+                parseZoomableEndpoint(endpointsRoot, "silt", SoilSources.zoomLevels()),
+                parseZoomableEndpoint(endpointsRoot, "sand", SoilSources.zoomLevels()),
+                parseZoomableEndpoint(endpointsRoot, "usda", SoilSources.zoomLevels())
         );
     }
 

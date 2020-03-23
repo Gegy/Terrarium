@@ -1,5 +1,6 @@
 package net.gegy1000.earth.server.util;
 
+import java.util.function.IntFunction;
 import java.util.stream.IntStream;
 
 public final class ZoomLevels {
@@ -21,5 +22,9 @@ public final class ZoomLevels {
 
     public static ZoomLevels range(int minInclusive, int maxInclusive) {
         return new ZoomLevels(minInclusive, maxInclusive);
+    }
+
+    public <T> Zoomable<T> map(IntFunction<T> function) {
+        return Zoomable.create(this, function);
     }
 }

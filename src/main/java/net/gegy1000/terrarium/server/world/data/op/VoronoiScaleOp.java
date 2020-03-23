@@ -15,8 +15,8 @@ public final class VoronoiScaleOp {
         return DataOp.of((view, executor) -> {
             DataView srcView = getSourceView(view, src);
 
-            double destToSrcX = 1.0 / src.scaleX();
-            double destToSrcY = 1.0 / src.scaleZ();
+            double dstToSrcX = 1.0 / src.scaleX();
+            double dstToSrcY = 1.0 / src.scaleZ();
 
             Coordinate minCoordinate = Coordinate.min(
                     view.getMinCoordinate().to(src),
@@ -30,7 +30,7 @@ public final class VoronoiScaleOp {
                 return executor.spawnBlocking(() -> {
                     return opt.map(source -> {
                         EnumRaster<T> result = EnumRaster.create(defaultValue, view);
-                        voronoi.scaleBytes(source.getData(), result.getData(), srcView, view, destToSrcX, destToSrcY, offsetX, offsetY);
+                        voronoi.scaleBytes(source.getData(), result.getData(), srcView, view, dstToSrcX, dstToSrcY, offsetX, offsetY);
                         return result;
                     });
                 });
