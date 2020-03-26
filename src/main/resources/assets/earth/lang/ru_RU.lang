@@ -94,6 +94,11 @@ commands.earth.geotp.success=Телепортирован к %s в %.5f, %.5f
 commands.earth.geotp.error=Во время поиска произошла ошибка "%s": %s: %s
 
 commands.earth.geotool.usage=geotool
+commands.earth.geotool.locate=Где я?
+commands.earth.geotool.teleport=Телепорт
+commands.earth.geotool.display_panorama=Панорама
+commands.earth.geotool.preload_world=Предзагрузка мира
+
 commands.earth.geodebug.usage=geodebug
 
 # Status
