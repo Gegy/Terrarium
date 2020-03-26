@@ -1,0 +1,125 @@
+# Generators
+
+generator.terrarium.earth=Земля
+generator.terrarium.earth_debug=Земля Debug
+
+# GUI
+
+container.earth.geotool.name=Параметры земли
+geotool.earth.locate.success=Вы у %s
+
+container.earth.geodebug.name=Параметры земли Debug
+
+gui.earth.credits=Данные Terrarium:
+gui.earth.spawnpoint=Установить спавн
+gui.earth.locate=Позиция игрока
+gui.earth.teleport=Телепорт игрока
+gui.earth.preload=Предзагрузка мира
+gui.earth.preload.downloading=Загрузка чанков
+
+gui.earth.retry=Повторить
+gui.earth.download=Скачать
+gui.earth.run_in_background=Фоновый режим
+
+gui.button.earth.teleport=Телепорт
+
+gui.copy_box.copied.name=Скопировано!
+
+gui.earth.preparing=Пожалуйста, подождите
+gui.earth.preparing.desc.1=Подготовка Terrarium...
+gui.earth.preparing.desc.2=Это может занять некоторое время
+
+gui.earth.preparing.errored=Произошла ошибка
+gui.earth.preparing.errored.desc.1=Ошибка подготовки Terrarium!
+gui.earth.preparing.errored.desc.2=Пожалуйста, проверьте ваше интернет соединение
+
+# Customization Categories
+
+category.terrarium.world.name=Свойства мира
+category.terrarium.ecological.name=Свойства экологии
+category.terrarium.geological.name=Свойства геологии
+
+# World Properties
+
+property.terrarium.world_scale.name=Масштаб мира
+property.terrarium.terrestrial_height_scale.name=Масштаб высоты земли
+property.terrarium.oceanic_height_scale.name=Масштаб высоты океана
+property.terrarium.height_offset.name=Высота смещения
+
+property.terrarium.world_scale.tooltip=Количество метров в реальном мире, равно одному блоку в игре
+property.terrarium.terrestrial_height_scale.tooltip=Высота земли от метров до блоков над уровнем моря
+property.terrarium.oceanic_height_scale.tooltip=Высота земли от метров до блоков ниже уровня моря
+property.terrarium.height_offset.tooltip=Высота в игре соответствующая уровню моря
+
+# Ecological Properties
+
+property.terrarium.add_trees.name=Добавить деревья
+property.terrarium.add_grass.name=Добавить траву
+property.terrarium.add_flowers.name=Добавить цветы
+property.terrarium.add_cacti.name=Добавить кактусы
+property.terrarium.add_sugar_cane.name=Добавить сахарные тростники
+property.terrarium.add_gourds.name=Добавить тыквы и арбузы
+
+property.terrarium.add_trees.tooltip=Если включено, деревья будут сгенерированы
+property.terrarium.add_grass.tooltip=Если включено, трава будет сгенерирована
+property.terrarium.add_flowers.tooltip=Если включено, цветы будут сгенерированы
+property.terrarium.add_cacti.tooltip=Если включено, кактусы будут сгенерированы
+property.terrarium.add_sugar_cane.tooltip=Если включено, сахарные тростники будут сгенерированы
+property.terrarium.add_gourd.tooltip=Если включено, тыквы и арбузы будут сгенерированы
+
+# Geological Properties
+
+property.terrarium.cave_generation.name=Генерация пещеры
+property.terrarium.ravine_generation.name=Генерация ущелья
+property.terrarium.ore_generation.name=Генерация руды
+
+property.terrarium.cave_generation.tooltip=Если включено, пещеры будут сгенерированы рандомно
+property.terrarium.ravine_generation.tooltip=Если включено, ущелья будут сгенерированы рандомно
+property.terrarium.ore_generation.tooltip=Если включено, руды будут сгенерированы рандомно
+
+# Presets
+
+preset.terrarium.earth.global_scenic.name=Земля для творчества
+preset.terrarium.earth.global_scenic.desc=Генератор по умолчанию, для креатив режима
+preset.terrarium.earth.global_playable.name=Земля для выживания
+preset.terrarium.earth.global_playable.desc=Генератор оптимизирован для режима выживания
+
+# Commands
+
+commands.earth.wrong_world=Нельзя использовать команды в этом мире
+
+commands.earth.geotp.usage=geotp <широта> <долгота> ИЛИ geotp <место>
+commands.earth.geotp.not_found="%s" не найдено
+commands.earth.geotp.success=Телепортирован к %s в %.5f, %.5f
+commands.earth.geotp.error=Во время поиска произошла ошибка "%s": %s: %s
+
+commands.earth.geotool.usage=geotool
+commands.earth.geodebug.usage=geodebug
+
+# Status
+
+status.earth.panorama.searching=Поиск ближайших панорам...
+status.earth.panorama.none_found=Панорамы не найдены!
+status.earth.panorama.found=Панорама найдена поблизости! Двигайтесь к маркеру чтобы увидеть!
+status.earth.panorama.error=Произошла ошибка определения ближайших панорам
+status.earth.panorama.immersed=Погружен в панораму!
+
+# Config
+
+config.earth.street_view_zoom=Street View Zoom
+config.earth.street_view_zoom.tooltip=The zoom level to load street view images at. Higher values means higher resolution
+
+config.earth.osm_geocoder=Use OpenStreetMap Geocoder
+config.earth.osm_geocoder.tooltip=If true, the Nominatim OpenStreetMap Geocoder will be used instead of Google's
+
+config.earth.accept_remote_data=Accepted Remote Data Warning
+config.earth.accept_remote_data.tooltip=If true, you will no longer be warned about remote data usage. (Automatically set through GUI)
+
+# Initializers
+
+initializer.terrarium.api_keys=Загрузка API ключей...
+
+initializer.terrarium.climate_raster=Загрузка климата...
+
+initializer.terrarium.remote_index=Загрузка внешних индексов...
+initializer.terrarium.remote_index.downloading=Скачивание
