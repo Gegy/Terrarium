@@ -40,15 +40,21 @@ public class GeoToolCommand extends CommandBase {
         EarthWorld earth = player.world.getCapability(TerrariumEarth.worldCap(), null);
         if (earth != null) {
             ContainerUi.Builder builder = ContainerUi.builder(player)
-                    .setTitle(DeferredTranslator.translate(player, new TextComponentTranslation("container.earth.geotool.name")))
-                    .addElement(Items.COMPASS, TextFormatting.BOLD + "Where am I?", () -> this.handleLocate(player, earth));
+                    .setTitle(DeferredTranslator.translate(player, new TextComponentTranslation("container.earth.geotool.name")));
+
+            String locate = DeferredTranslator.translateString(sender, "commands.earth.geotool.locate");
+            builder.addElement(Items.COMPASS, TextFormatting.BOLD + locate, () -> this.handleLocate(player, earth));
 
             if (TerrariumUserTracker.usesTerrarium(player)) {
-                builder.addElement(Items.ENDER_PEARL, TextFormatting.BOLD + "Go to place", () -> this.handleTeleport(player, earth));
-                builder.addElement(Items.PAINTING, TextFormatting.BOLD + "Display Panorama", () -> this.handlePanorama(player));
+                String teleport = DeferredTranslator.translateString(sender, "commands.earth.geotool.teleport");
+                builder.addElement(Items.ENDER_PEARL, TextFormatting.BOLD + teleport, () -> this.handleTeleport(player, earth));
+
+                String displayPanorama = DeferredTranslator.translateString(sender, "commands.earth.geotool.display_panorama");
+                builder.addElement(Items.PAINTING, TextFormatting.BOLD + displayPanorama, () -> this.handlePanorama(player));
 
                 if (DataPreloadManager.checkPermission(player)) {
-                    builder.addElement(Blocks.COMMAND_BLOCK, TextFormatting.BOLD + "Preload World", () -> this.handlePreload(player, earth));
+                    String preloadWorld = DeferredTranslator.translateString(sender, "commands.earth.geotool.preload_world");
+                    builder.addElement(Blocks.COMMAND_BLOCK, TextFormatting.BOLD + preloadWorld, () -> this.handlePreload(player, earth));
                 }
             }
 
