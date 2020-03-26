@@ -56,7 +56,7 @@ public final class DataGenerator {
                             result.put(key, Optional.empty());
                         }
                     }
-                    return new ColumnData(result);
+                    return new ColumnData(view, result);
                 });
     }
 

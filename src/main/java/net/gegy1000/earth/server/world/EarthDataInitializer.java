@@ -26,6 +26,7 @@ import net.gegy1000.terrarium.server.world.coordinate.CoordReferenced;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.data.DataGenerator;
 import net.gegy1000.terrarium.server.world.data.DataOp;
+import net.gegy1000.terrarium.server.world.data.DataView;
 import net.gegy1000.terrarium.server.world.data.op.InterpolationScaleOp;
 import net.gegy1000.terrarium.server.world.data.op.SampleRaster;
 import net.gegy1000.terrarium.server.world.data.op.SlopeOp;
@@ -33,18 +34,19 @@ import net.gegy1000.terrarium.server.world.data.op.VoronoiScaleOp;
 import net.gegy1000.terrarium.server.world.data.raster.BitRaster;
 import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.data.raster.FloatRaster;
+import net.gegy1000.terrarium.server.world.data.raster.IntegerRaster;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.data.raster.UByteRaster;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
 
 import java.util.Random;
+import java.util.function.Function;
 
 import static net.gegy1000.earth.server.world.EarthWorldType.*;
 
 final class EarthDataInitializer implements TerrariumDataInitializer {
     private static final Zoomable<StdSource<ShortRaster>> ELEVATION_SOURCE = ElevationSource.source();
-    private static final LandCoverSource LAND_COVER_SOURCE = new LandCoverSource();
+    private static final Zoomable<StdSource<EnumRaster<Cover>>> LAND_COVER_SOURCE = LandCoverSource.source();
 
     private static final Zoomable<StdSource<ShortRaster>> CATION_EXCHANGE_CAPACITY_SOURCE = SoilSources.cationExchangeCapacity();
     private static final Zoomable<StdSource<ShortRaster>> ORGANIC_CARBON_CONTENT_SOURCE = SoilSources.organicCarbonContent();
@@ -64,84 +66,71 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
         this.ctx = ctx;
     }
 
-    private DataOp<ShortRaster> elevation(double worldScale) {
+    private int selectStandardZoom(double worldScale) {
+        double zoom = StdSource.zoomForScale(worldScale);
+        return Math.max((int) Math.round(zoom), 0);
+    }
+
+    private <T extends IntegerRaster<?>> DataOp<T> sampleStdInterpolated(
+            double worldScale,
+            Zoomable<StdSource<T>> zoomableSource,
+            Function<DataView, T> createRaster
+    ) {
         int maxZoom = this.selectStandardZoom(worldScale);
-        return new ResampleZoomRasters<ShortRaster>()
-                .from(ELEVATION_SOURCE.map((zoom, source) -> {
+        return new ResampleZoomRasters<T>()
+                .from(zoomableSource.map((zoom, source) -> {
                     CoordinateReference crs = this.ctx.stdRasterCrs.forZoom(zoom);
                     return new CoordReferenced<>(source, crs);
                 }))
-                .sample(SampleRaster::sampleShort)
+                .sample(source -> SampleRaster.sample(source, createRaster))
                 .resample((sample, crs) -> {
                     return InterpolationScaleOp.appropriateForScale(crs.avgScale())
-                            .scaleShortsFrom(sample, crs);
+                            .scaleFrom(sample, crs, createRaster);
                 })
                 .atZoom(maxZoom)
                 .create();
     }
 
-    private DataOp<EnumRaster<Cover>> landcover() {
-        DataOp<EnumRaster<Cover>> cover = SampleRaster.sampleEnum(LAND_COVER_SOURCE, Cover.NO);
-        cover = VoronoiScaleOp.scaleEnumsFrom(cover, this.ctx.landcoverRasterCrs, Cover.NO)
-                .cached(EnumRaster::copy);
-
-        return cover;
+    private <E extends Enum<E>> DataOp<EnumRaster<E>> sampleStdEnum(
+            double worldScale,
+            Zoomable<StdSource<EnumRaster<E>>> zoomableSource,
+            E defaultValue
+    ) {
+        int maxZoom = this.selectStandardZoom(worldScale);
+        return new ResampleZoomRasters<EnumRaster<E>>()
+                .from(zoomableSource.map((zoom, source) -> {
+                    CoordinateReference crs = this.ctx.stdRasterCrs.forZoom(zoom);
+                    return new CoordReferenced<>(source, crs);
+                }))
+                .sample(source -> SampleRaster.sampleEnum(source, defaultValue))
+                .resample((sample, crs) -> VoronoiScaleOp.scaleEnumsFrom(sample, crs, defaultValue))
+                .atZoom(maxZoom)
+                .create();
     }
 
-    private DataOp<BitRaster> oceanMask() {
-        DataOp<PolygonData> oceanPolygons = PolygonSampler.sample(OCEAN_SOURCE, this.ctx.lngLatCrs);
-        DataOp<AreaData> oceanArea = PolygonToAreaOp.apply(oceanPolygons, this.ctx.lngLatCrs);
-        return RasterizeAreaOp.apply(oceanArea);
+    private DataOp<ShortRaster> elevation(double worldScale) {
+        return this.sampleStdInterpolated(worldScale, ELEVATION_SOURCE, ShortRaster::create);
+    }
+
+    private DataOp<EnumRaster<Cover>> landcover(double worldScale) {
+        return this.sampleStdEnum(worldScale, LAND_COVER_SOURCE, Cover.NO);
     }
 
     private DataOp<ShortRaster> genericSoil(
             double worldScale,
             Zoomable<StdSource<ShortRaster>> zoomableSource
     ) {
-        int maxZoom = this.selectStandardZoom(worldScale);
-        return new ResampleZoomRasters<ShortRaster>()
-                .from(zoomableSource.map((zoom, source) -> {
-                    CoordinateReference crs = this.ctx.stdRasterCrs.forZoom(zoom);
-                    return new CoordReferenced<>(source, crs);
-                }))
-                .sample(SampleRaster::sampleShort)
-                .resample((sample, crs) -> {
-                    return InterpolationScaleOp.appropriateForScale(crs.avgScale())
-                            .scaleShortsFrom(sample, crs);
-                })
-                .atZoom(maxZoom)
-                .create();
+        return this.sampleStdInterpolated(worldScale, zoomableSource, ShortRaster::create);
     }
 
     private DataOp<EnumRaster<SoilClass>> soilClass(double worldScale) {
-        int maxZoom = this.selectStandardZoom(worldScale);
-        return new ResampleZoomRasters<EnumRaster<SoilClass>>()
-                .from(SOIL_CLASS_SOURCE.map((zoom, source) -> {
-                    CoordinateReference crs = this.ctx.stdRasterCrs.forZoom(zoom);
-                    return new CoordReferenced<>(source, crs);
-                }))
-                .sample(source -> SampleRaster.sampleEnum(source, SoilClass.NO))
-                .resample((sample, crs) -> VoronoiScaleOp.scaleEnumsFrom(sample, crs, SoilClass.NO))
-                .atZoom(maxZoom)
-                .create();
+        return this.sampleStdEnum(worldScale, SOIL_CLASS_SOURCE, SoilClass.NO);
     }
 
-    private int selectStandardZoom(double worldScale) {
-        double zoom = StdSource.zoomForScale(worldScale);
-        return (int) Math.round(zoom);
-    }
-
-    private int selectElevationZoom(double worldScale) {
-        worldScale = MathHelper.floor(worldScale);
-        if (worldScale > 300.0) {
-            return 0;
-        } else if (worldScale > 80.0) {
-            return 1;
-        } else if (worldScale > 30.0) {
-            return 2;
-        } else {
-            return 3;
-        }
+    private DataOp<BitRaster> oceanMask() {
+        DataOp<PolygonData> oceanPolygons = PolygonSampler.sample(OCEAN_SOURCE, this.ctx.lngLatCrs);
+        DataOp<AreaData> oceanArea = PolygonToAreaOp.apply(oceanPolygons, this.ctx.lngLatCrs);
+        return RasterizeAreaOp.apply(oceanArea);
     }
 
     private AddNoiseOp temperatureNoise() {
@@ -157,7 +146,7 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
         DataOp<ShortRaster> elevation = this.elevation(worldScale).cached(ShortRaster::copy);
         DataOp<UByteRaster> slope = SlopeOp.from(elevation, 1.0F / (float) worldScale);
 
-        DataOp<EnumRaster<Cover>> cover = this.landcover();
+        DataOp<EnumRaster<Cover>> cover = this.landcover(worldScale);
 
         DataOp<EnumRaster<Landform>> landforms = ProduceLandformsOp.produce(elevation, cover);
 

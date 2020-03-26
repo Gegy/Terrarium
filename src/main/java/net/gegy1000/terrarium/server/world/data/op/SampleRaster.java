@@ -45,11 +45,15 @@ public final class SampleRaster {
 
             return DataSourceReader.INSTANCE.getTiles(source, view).andThen(tiles -> {
                 return executor.spawnBlocking(() -> {
+                    for (DataTileResult<T> tileResult : tiles) {
+                        if (!tileResult.data.isPresent()) {
+                            return Optional.empty();
+                        }
+                    }
+
                     T resultRaster = function.apply(view);
 
                     for (DataTileResult<T> tileResult : tiles) {
-                        if (!tileResult.data.isPresent()) return Optional.empty();
-
                         T sourceRaster = tileResult.data.get();
                         Vec2i tilePos = tileResult.pos;
 

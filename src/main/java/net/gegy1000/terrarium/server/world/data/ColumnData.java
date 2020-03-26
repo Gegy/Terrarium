@@ -2,15 +2,23 @@ package net.gegy1000.terrarium.server.world.data;
 
 import com.google.common.collect.Sets;
 
+import javax.annotation.Nonnull;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 public final class ColumnData {
+    private final DataView view;
     private final Map<DataKey<?>, Optional<?>> store;
 
-    ColumnData(Map<DataKey<?>, Optional<?>> store) {
+    ColumnData(DataView view, Map<DataKey<?>, Optional<?>> store) {
+        this.view = view;
         this.store = store;
+    }
+
+    @Nonnull
+    public DataView getView() {
+        return this.view;
     }
 
     @SuppressWarnings({ "unchecked", "OptionalAssignedToNull" })
@@ -22,8 +30,8 @@ public final class ColumnData {
         return (Optional<T>) data;
     }
 
-    public <T> T getOrExcept(DataKey<T> key) {
-        return this.get(key).orElseThrow(() -> new RuntimeException("missing " + key.getIdentifier()));
+    public <T> T getOrDefault(DataKey<T> key) {
+        return this.get(key).orElseGet(() -> key.createDefault(this.view));
     }
 
     public Set<DataKey<?>> keys() {

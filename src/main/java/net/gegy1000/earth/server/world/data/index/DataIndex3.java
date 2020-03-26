@@ -7,6 +7,7 @@ import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.util.ZoomLevels;
 import net.gegy1000.earth.server.util.Zoomable;
 import net.gegy1000.earth.server.world.data.source.ElevationSource;
+import net.gegy1000.earth.server.world.data.source.LandCoverSource;
 import net.gegy1000.earth.server.world.data.source.SoilSources;
 import net.gegy1000.terrarium.server.util.Vec2i;
 
@@ -17,6 +18,7 @@ import java.util.Map;
 
 public final class DataIndex3 {
     public final Zoomable<Endpoint> elevation;
+    public final Zoomable<Endpoint> landcover;
     public final Zoomable<Endpoint> cec;
     public final Zoomable<Endpoint> occ;
     public final Zoomable<Endpoint> ph;
@@ -27,6 +29,7 @@ public final class DataIndex3 {
 
     private DataIndex3(
             Zoomable<Endpoint> elevation,
+            Zoomable<Endpoint> landcover,
             Zoomable<Endpoint> cec,
             Zoomable<Endpoint> occ,
             Zoomable<Endpoint> ph,
@@ -36,6 +39,7 @@ public final class DataIndex3 {
             Zoomable<Endpoint> usda
     ) {
         this.elevation = elevation;
+        this.landcover = landcover;
         this.cec = cec;
         this.occ = occ;
         this.ph = ph;
@@ -50,6 +54,7 @@ public final class DataIndex3 {
 
         return new DataIndex3(
                 parseZoomableEndpoint(endpointsRoot, "elevation", ElevationSource.zoomLevels()),
+                parseZoomableEndpoint(endpointsRoot, "landcover", LandCoverSource.zoomLevels()),
                 parseZoomableEndpoint(endpointsRoot, "cec", SoilSources.zoomLevels()),
                 parseZoomableEndpoint(endpointsRoot, "occ", SoilSources.zoomLevels()),
                 parseZoomableEndpoint(endpointsRoot, "ph", SoilSources.zoomLevels()),

@@ -27,6 +27,12 @@ public final class ShortRaster extends AbstractRaster<short[]> implements Intege
         return create(view.getWidth(), view.getHeight());
     }
 
+    public static ShortRaster create(DataView view, int value) {
+        ShortRaster raster = create(view.getWidth(), view.getHeight());
+        Arrays.fill(raster.data, (short) value);
+        return raster;
+    }
+
     public static ShortRaster wrap(short[] data, int width, int height) {
         Preconditions.checkArgument(data.length == width * height, "invalid buffer size");
         return new ShortRaster(data, width, height);

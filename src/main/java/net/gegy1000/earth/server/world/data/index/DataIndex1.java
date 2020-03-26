@@ -11,21 +11,17 @@ import java.util.Map;
 
 // TODO: remove
 public final class DataIndex1 {
-    public final Endpoint landcover;
     public final Endpoint oceans;
 
-    private DataIndex1(Endpoint landcover, Endpoint oceans) {
-        this.landcover = landcover;
+    private DataIndex1(Endpoint oceans) {
         this.oceans = oceans;
     }
 
     public static DataIndex1 parse(JsonObject root) {
         JsonObject endpointsRoot = root.getAsJsonObject("endpoints");
-
-        Endpoint landcover = parseEndpoint(endpointsRoot.getAsJsonObject("landcover"));
         Endpoint oceans = parseEndpoint(endpointsRoot.getAsJsonObject("ocean"));
 
-        return new DataIndex1(landcover, oceans);
+        return new DataIndex1(oceans);
     }
 
     private static Endpoint parseEndpoint(JsonObject root) {

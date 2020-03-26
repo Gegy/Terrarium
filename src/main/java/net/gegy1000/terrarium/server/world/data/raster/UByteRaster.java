@@ -24,6 +24,12 @@ public final class UByteRaster extends AbstractRaster<byte[]> implements Integer
         return create(view.getWidth(), view.getHeight());
     }
 
+    public static UByteRaster create(DataView view, int value) {
+        UByteRaster raster = create(view.getWidth(), view.getHeight());
+        Arrays.fill(raster.data, (byte) value);
+        return raster;
+    }
+
     public static UByteRaster wrap(byte[] data, int width, int height) {
         Preconditions.checkArgument(data.length == width * height, "invalid buffer size");
         return new UByteRaster(data, width, height);

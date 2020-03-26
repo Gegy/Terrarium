@@ -1,10 +1,10 @@
 package net.gegy1000.earth.client.gui.preview;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import net.gegy1000.justnow.future.Future;
 import net.gegy1000.earth.client.terrain.TerrainMesh;
 import net.gegy1000.earth.server.world.EarthDataKeys;
 import net.gegy1000.earth.server.world.EarthInitContext;
+import net.gegy1000.justnow.future.Future;
 import net.gegy1000.terrarium.server.world.TerrariumDataInitializer;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
@@ -59,38 +59,48 @@ public class WorldPreview {
 
         double latitude = settings.getDouble(SPAWN_LATITUDE);
         double longitude = settings.getDouble(SPAWN_LONGITUDE);
-        Coordinate spawnCoordinate = new Coordinate(ctx.lngLatCrs, longitude, latitude);
+        Coordinate spawnCoordinate = ctx.lngLatCrs.coord(longitude, latitude);
 
-        return generate(dataGenerator.build(), spawnCoordinate.toBlockPos());
+        BlockPos topLeft = ctx.lngLatCrs.coord(-180.0, 90.0).toBlockPos()
+                .add(new BlockPos(4, 0, 4));
+        BlockPos bottomRight = ctx.lngLatCrs.coord(180.0, -90.0).toBlockPos()
+                .subtract(new BlockPos(4, 0, 4));
+
+        return generate(dataGenerator.build(), spawnCoordinate.toBlockPos(), topLeft, bottomRight);
     }
 
-    private static Future<WorldPreview> generate(DataGenerator dataGenerator, BlockPos spawnPos) {
-        try {
-            // make sure this builder is not poisoned
-            BUILDER.finishDrawing();
-        } catch (IllegalStateException e) {
-            // ignore
-        }
+    private static Future<WorldPreview> generate(DataGenerator dataGenerator, BlockPos spawnPos, BlockPos minCorner, BlockPos maxCorner) {
+        int minX = Math.max(spawnPos.getX() - VIEW_RANGE, minCorner.getX());
+        int minZ = Math.max(spawnPos.getZ() - VIEW_RANGE, minCorner.getZ());
+        int maxX = Math.min(spawnPos.getX() + VIEW_RANGE, maxCorner.getX());
+        int maxZ = Math.min(spawnPos.getZ() + VIEW_RANGE, maxCorner.getZ());
 
-        int originX = (spawnPos.getX() - VIEW_RANGE);
-        int originZ = (spawnPos.getZ() - VIEW_RANGE);
-
-        return sampleData(dataGenerator, originX, originZ, VIEW_SIZE)
+        int width = maxX - minX + 1;
+        int height = maxZ - minZ + 1;
+        return sampleData(dataGenerator, minX, minZ, width, height)
                 .andThen(data -> Future.spawnBlocking(EXECUTOR, () -> {
-                    ShortRaster heightRaster = data.getOrExcept(EarthDataKeys.TERRAIN_HEIGHT);
+                    ShortRaster heightRaster = data.getOrDefault(EarthDataKeys.TERRAIN_HEIGHT);
+
                     Vec3d translation = new Vec3d(
                             -heightRaster.getWidth() / 2.0,
                             -computeOriginHeight(heightRaster),
                             -heightRaster.getHeight() / 2.0
                     );
 
+                    try {
+                        // make sure this builder is not poisoned
+                        BUILDER.finishDrawing();
+                    } catch (IllegalStateException e) {
+                        // ignore
+                    }
+
                     TerrainMesh mesh = TerrainMesh.build(data, BUILDER, VIEW_GRANULARITY);
                     return new WorldPreview(mesh, translation);
                 }));
     }
 
-    private static Future<ColumnData> sampleData(DataGenerator dataGenerator, int originX, int originZ, int size) {
-        DataView view = DataView.square(originX, originZ, size);
+    private static Future<ColumnData> sampleData(DataGenerator dataGenerator, int x, int z, int width, int height) {
+        DataView view = DataView.rect(x, z, width, height);
         return dataGenerator.generateOnly(view, TerrainMesh.REQUIRED_DATA);
     }
 

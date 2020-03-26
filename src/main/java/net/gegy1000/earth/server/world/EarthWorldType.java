@@ -7,7 +7,6 @@ import net.gegy1000.earth.client.PrepareTerrarium;
 import net.gegy1000.earth.client.gui.EarthCustomizationGui;
 import net.gegy1000.earth.server.capability.EarthWorld;
 import net.gegy1000.earth.server.shared.SharedEarthData;
-import net.gegy1000.earth.server.world.data.source.LandCoverSource;
 import net.gegy1000.earth.server.world.data.source.WorldClimateRaster;
 import net.gegy1000.terrarium.client.gui.customization.SelectPresetGui;
 import net.gegy1000.terrarium.server.TerrariumUserTracker;
@@ -45,7 +44,6 @@ import java.util.function.Consumer;
 
 // TODO: Upgrade old terrarium worlds
 public class EarthWorldType extends TerrariumWorldType {
-    public static final double LANDCOVER_SCALE = EarthWorld.EQUATOR_CIRCUMFERENCE / LandCoverSource.GLOBAL_WIDTH;
     public static final double CLIMATE_SCALE = EarthWorld.EQUATOR_CIRCUMFERENCE / WorldClimateRaster.WIDTH;
 
     private static final ResourceLocation IDENTIFIER = new ResourceLocation(TerrariumEarth.ID, "earth");
@@ -110,14 +108,16 @@ public class EarthWorldType extends TerrariumWorldType {
         return TerrariumCustomization.builder()
                 .withCategory("world",
                         new SliderWidget(WORLD_SCALE)
-                                .range(1.0, 8000.0).step(5.0, 1.0)
+                                .range(1.0, 40000.0).step(5.0, 1.0)
                                 .scale(SliderScale.power(3.0))
                                 .display(value -> String.format("1:%.0f", value)),
                         new SliderWidget(TERRESTRIAL_HEIGHT_SCALE)
-                                .range(0.0, 10.0).step(0.5, 0.1)
+                                .range(0.0, 40.0).step(0.5, 0.1)
+                                .scale(SliderScale.power(3.0))
                                 .display(value -> String.format("%.1fx", value)),
                         new SliderWidget(OCEANIC_HEIGHT_SCALE)
-                                .range(0.0, 10.0).step(0.5, 0.1)
+                                .range(0.0, 40.0).step(0.5, 0.1)
+                                .scale(SliderScale.power(3.0))
                                 .display(value -> String.format("%.1fx", value)),
                         new SliderWidget(HEIGHT_OFFSET)
                                 .range(-63, 128)

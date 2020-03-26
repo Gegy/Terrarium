@@ -53,8 +53,8 @@ public enum InterpolationScaleOp {
         return DataOp.of((view, executor) -> {
             DataView srcView = this.getSourceView(view, src);
 
-            double destToSrcX = 1.0 / src.scaleX();
-            double destToSrcY = 1.0 / src.scaleZ();
+            double dstToSrcX = 1.0 / src.scaleX();
+            double dstToSrcY = 1.0 / src.scaleZ();
 
             Coordinate minCoordinate = Coordinate.min(
                     view.getMinCoordinate().to(src),
@@ -71,7 +71,7 @@ public enum InterpolationScaleOp {
                     T result = function.apply(view);
                     for (int y = 0; y < view.getHeight(); y++) {
                         for (int x = 0; x < view.getWidth(); x++) {
-                            double value = this.evaluate(kernel1, kernel2, source, x * destToSrcX + offsetX - 0.5, y * destToSrcY + offsetY - 0.5);
+                            double value = this.evaluate(kernel1, kernel2, source, x * dstToSrcX + offsetX - 0.5, y * dstToSrcY + offsetY - 0.5);
                             result.setDouble(x, y, value);
                         }
                     }

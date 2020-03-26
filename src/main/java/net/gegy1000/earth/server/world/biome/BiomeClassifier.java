@@ -52,7 +52,7 @@ public final class BiomeClassifier {
 
     private static Biome classifyWater(Context context) {
         if (context.isSea()) {
-            return context.isFrozen() ? Biomes.FROZEN_OCEAN : Biomes.OCEAN;
+            return context.meanTemperature < -10 ? Biomes.FROZEN_OCEAN : Biomes.OCEAN;
         }
 
         return context.isFrozen() ? Biomes.FROZEN_RIVER : Biomes.RIVER;

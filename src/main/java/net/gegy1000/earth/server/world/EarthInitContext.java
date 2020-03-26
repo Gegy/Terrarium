@@ -12,7 +12,6 @@ public final class EarthInitContext {
     public final GenerationSettings settings;
 
     public final CoordinateReference lngLatCrs;
-    public final CoordinateReference landcoverRasterCrs;
     public final CoordinateReference climateRasterCrs;
 
     public final ForZoom<CoordinateReference> stdRasterCrs;
@@ -25,7 +24,6 @@ public final class EarthInitContext {
         double metersPerDegree = EarthWorld.EQUATOR_CIRCUMFERENCE / 360.0;
         this.lngLatCrs = CoordinateReference.lngLat(metersPerDegree / worldScale);
 
-        this.landcoverRasterCrs = CoordinateReference.scale(LANDCOVER_SCALE / worldScale);
         this.climateRasterCrs = CoordinateReference.scale(CLIMATE_SCALE / worldScale);
 
         this.stdRasterCrs = zoom -> StdSource.crs(worldScale, zoom);

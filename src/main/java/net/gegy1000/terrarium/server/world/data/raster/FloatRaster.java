@@ -22,6 +22,12 @@ public final class FloatRaster extends AbstractRaster<float[]> implements Number
         return create(view.getWidth(), view.getHeight());
     }
 
+    public static FloatRaster create(DataView view, float value) {
+        FloatRaster raster = create(view.getWidth(), view.getHeight());
+        Arrays.fill(raster.data, value);
+        return raster;
+    }
+
     public static Sampler sampler(DataKey<FloatRaster> key) {
         return new Sampler(key);
     }

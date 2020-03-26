@@ -58,10 +58,10 @@ public final class TerrainMesh {
     public static TerrainMesh build(ColumnData data, BufferBuilder builder, int granularity) {
         builder.begin(GL11.GL_QUADS, TerrariumVertexFormats.POSITION_COLOR_NORMAL);
 
-        ShortRaster heightRaster = data.getOrExcept(EarthDataKeys.TERRAIN_HEIGHT);
-        UByteRaster slopeRaster = data.getOrExcept(EarthDataKeys.SLOPE);
-        FloatRaster minTemperatureRaster = data.getOrExcept(EarthDataKeys.MIN_TEMPERATURE);
-        EnumRaster<Cover> coverRaster = data.getOrExcept(EarthDataKeys.COVER);
+        ShortRaster heightRaster = data.getOrDefault(EarthDataKeys.TERRAIN_HEIGHT);
+        UByteRaster slopeRaster = data.getOrDefault(EarthDataKeys.SLOPE);
+        FloatRaster minTemperatureRaster = data.getOrDefault(EarthDataKeys.MIN_TEMPERATURE);
+        EnumRaster<Cover> coverRaster = data.getOrDefault(EarthDataKeys.COVER);
 
         int width = heightRaster.getWidth();
         int height = heightRaster.getHeight();
