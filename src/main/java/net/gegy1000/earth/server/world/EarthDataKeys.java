@@ -20,7 +20,7 @@ public final class EarthDataKeys {
     public static final DataKey<EnumRaster<Cover>> COVER = create("cover", view -> EnumRaster.create(Cover.NO, view));
     public static final DataKey<EnumRaster<Landform>> LANDFORM = create("landform", view -> EnumRaster.create(Landform.LAND, view));
     public static final DataKey<ShortRaster> WATER_LEVEL = create("water", ShortRaster::create);
-    public static final DataKey<ShortRaster> ELEVATION_METERS = create("elevation_meters", ShortRaster::create);
+    public static final DataKey<FloatRaster> ELEVATION_METERS = create("elevation_meters", FloatRaster::create);
     public static final DataKey<FloatRaster> MIN_TEMPERATURE = create("min_temperature", view -> FloatRaster.create(view, 10.0F));
     public static final DataKey<FloatRaster> MEAN_TEMPERATURE = create("mean_temperature", view -> FloatRaster.create(view, 14.0F));
     public static final DataKey<ShortRaster> ANNUAL_RAINFALL = create("annual_rainfall", view -> ShortRaster.create(view, 300));

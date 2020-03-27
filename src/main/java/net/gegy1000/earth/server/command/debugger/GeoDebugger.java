@@ -134,7 +134,7 @@ public final class GeoDebugger {
         int bx = MathHelper.floor(x);
         int bz = MathHelper.floor(z);
 
-        short elevation = ShortRaster.sampler(EarthDataKeys.ELEVATION_METERS).sample(data, bx, bz);
+        float elevation = FloatRaster.sampler(EarthDataKeys.ELEVATION_METERS).sample(data, bx, bz);
         Cover cover = EnumRaster.sampler(EarthDataKeys.COVER, Cover.NO).sample(data, bx, bz);
         float meanTemperature = FloatRaster.sampler(EarthDataKeys.MEAN_TEMPERATURE).sample(data, bx, bz);
         float minTemperature = FloatRaster.sampler(EarthDataKeys.MIN_TEMPERATURE).sample(data, bx, bz);

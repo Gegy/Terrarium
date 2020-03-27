@@ -2,7 +2,7 @@ package net.gegy1000.terrarium.server.world.data.op;
 
 import net.gegy1000.terrarium.server.world.data.DataOp;
 import net.gegy1000.terrarium.server.world.data.DataView;
-import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
+import net.gegy1000.terrarium.server.world.data.raster.FloatRaster;
 import net.gegy1000.terrarium.server.world.data.raster.UByteRaster;
 import net.minecraft.util.math.MathHelper;
 
@@ -19,7 +19,7 @@ public final class SlopeOp {
         }
     }
 
-    public static DataOp<UByteRaster> from(DataOp<ShortRaster> heights, float heightScale) {
+    public static DataOp<UByteRaster> from(DataOp<FloatRaster> heights, float heightScale) {
         return DataOp.of((view, executor) -> {
             DataView sourceView = view.grow(1);
             return heights.apply(sourceView, executor)
@@ -38,8 +38,8 @@ public final class SlopeOp {
         });
     }
 
-    private static int computeSlope(ShortRaster source, int x, int y, float heightScale) {
-        short current = source.get(x, y);
+    private static int computeSlope(FloatRaster source, int x, int y, float heightScale) {
+        float current = source.get(x, y);
 
         double slope = Math.max(
                 Math.max(

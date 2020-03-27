@@ -16,7 +16,7 @@ public final class DebugGeoProfile {
     public final double latitude;
     public final double longitude;
 
-    public final int surfaceElevation;
+    public final float surfaceElevation;
     public final Cover cover;
     public final float meanTemperature;
     public final float minTemperature;
@@ -32,7 +32,7 @@ public final class DebugGeoProfile {
 
     DebugGeoProfile(
             String name, double latitude, double longitude,
-            int surfaceElevation, Cover cover,
+            float surfaceElevation, Cover cover,
             float meanTemperature, float minTemperature, int annualRainfall,
             SoilClass soilClass,
             int siltContent, int sandContent, int clayContent,
@@ -64,7 +64,7 @@ public final class DebugGeoProfile {
         player.sendMessage(EMPTY);
 
         this.sendCategory(player, "General", p -> {
-            p.sendMessage(makeValue("Surface Elevation", "%sm", this.surfaceElevation));
+            p.sendMessage(makeValue("Surface Elevation", "%.1fm", this.surfaceElevation));
             p.sendMessage(makeValue("Cover Type", "%s (%s)", this.cover, this.cover.id));
             p.sendMessage(makeValue("Mean Temperature", "%.1fC", this.meanTemperature));
             p.sendMessage(makeValue("Min Temperature", "%.1fC", this.minTemperature));
