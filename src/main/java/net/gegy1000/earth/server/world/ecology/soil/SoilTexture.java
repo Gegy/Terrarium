@@ -1,6 +1,7 @@
 package net.gegy1000.earth.server.world.ecology.soil;
 
 import net.gegy1000.earth.server.world.cover.Cover;
+import net.gegy1000.earth.server.world.geography.Landform;
 import net.minecraft.block.BlockDirt;
 import net.minecraft.block.BlockStainedHardenedClay;
 import net.minecraft.block.state.IBlockState;
@@ -38,10 +39,16 @@ public final class SoilTexture {
     public static SoilConfig select(
             SoilClass soilClass,
             int slope,
-            Cover cover
+            Cover cover,
+            Landform landform
     ) {
-        // TODO: better ocean generation
-        if (cover == Cover.WATER) return SAND;
+        if (landform == Landform.SEA || landform == Landform.BEACH) {
+            return SAND;
+        }
+
+        if (landform == Landform.LAKE_OR_RIVER) {
+            return DIRT;
+        }
 
         if (slope < 60) {
             // TODO: gravel, erosion based on slope & rainfall

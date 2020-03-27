@@ -30,7 +30,7 @@ public class GeoToolCommand extends CommandBase {
 
     @Override
     public String getUsage(ICommandSender sender) {
-        return DeferredTranslator.translateString(sender, "commands.earth.geotool.usage");
+        return DeferredTranslator.translateStringOrKey(sender, "commands.earth.geotool.usage");
     }
 
     @Override

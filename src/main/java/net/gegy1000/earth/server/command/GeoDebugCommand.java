@@ -49,7 +49,7 @@ public class GeoDebugCommand extends CommandBase {
 
     @Override
     public String getUsage(ICommandSender sender) {
-        return DeferredTranslator.translateString(sender, "commands.earth.geodebug.usage");
+        return DeferredTranslator.translateStringOrKey(sender, "commands.earth.geodebug.usage");
     }
 
     @Override
