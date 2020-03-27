@@ -54,9 +54,6 @@ public final class WaterOps {
             heightRaster.transform((source, x, y) -> {
                 Landform landform = landformRaster.get(x, y);
                 if (landform == Landform.SEA) {
-                    if (source > seaLevel) {
-                        System.out.println("no");//TODO
-                    }
                     return (short) Math.min(source, seaLevel - 1);
                 } else if (landform == Landform.LAND && source < seaLevel) {
                     return (short) seaLevel;

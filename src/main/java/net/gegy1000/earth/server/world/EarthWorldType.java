@@ -110,7 +110,13 @@ public class EarthWorldType extends TerrariumWorldType {
                         new SliderWidget(WORLD_SCALE)
                                 .range(1.0, 40000.0).step(5.0, 1.0)
                                 .scale(SliderScale.power(3.0))
-                                .display(value -> String.format("1:%.0f", value)),
+                                .display(value -> {
+                                    if (value < 1000.0) {
+                                        return String.format("1:%.0fm", value);
+                                    } else {
+                                        return String.format("1:%.1fkm", value / 1000.0);
+                                    }
+                                }),
                         new SliderWidget(TERRESTRIAL_HEIGHT_SCALE)
                                 .range(0.0, 40.0).step(0.5, 0.1)
                                 .scale(SliderScale.power(3.0))
