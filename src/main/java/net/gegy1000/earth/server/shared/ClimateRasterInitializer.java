@@ -16,7 +16,7 @@ import java.nio.file.Path;
 
 public final class ClimateRasterInitializer implements SharedDataInitializer {
     private static final Path PATH = TiledDataSource.GLOBAL_CACHE_ROOT.resolve("climatic_variables.xz");
-    private static final String URL = "https://terrariumearth.azureedge.net/geo2/climatic_variables.xz";
+    private static final String URL = "https://terrariumearth.azureedge.net/geo3/climatic_variables.xz";
 
     @Override
     public void initialize(SharedEarthData data, ProcessTracker processTracker) {
