@@ -118,11 +118,11 @@ public class EarthWorldType extends TerrariumWorldType {
                                     }
                                 }),
                         new SliderWidget(TERRESTRIAL_HEIGHT_SCALE)
-                                .range(0.0, 40.0).step(0.5, 0.1)
+                                .range(0.0, 50.0).step(0.5, 0.1)
                                 .scale(SliderScale.power(3.0))
                                 .display(value -> String.format("%.1fx", value)),
                         new SliderWidget(OCEANIC_HEIGHT_SCALE)
-                                .range(0.0, 40.0).step(0.5, 0.1)
+                                .range(0.0, 50.0).step(0.5, 0.1)
                                 .scale(SliderScale.power(3.0))
                                 .display(value -> String.format("%.1fx", value)),
                         new SliderWidget(HEIGHT_OFFSET)
