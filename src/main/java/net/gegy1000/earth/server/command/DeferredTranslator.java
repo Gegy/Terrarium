@@ -17,6 +17,7 @@ import net.minecraft.util.text.translation.LanguageMap;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -58,8 +59,8 @@ public class DeferredTranslator {
             TextComponentTranslation translation = (TextComponentTranslation) component;
             if (!TerrariumUserTracker.usesTerrarium((EntityPlayer) sender)) {
                 String key = translation.getKey();
-                Language language = getLanguage(sender);
-                return new TextComponentString(String.format(language.get(key), translation.getFormatArgs()));
+                String translatedString = translateString(sender, key);
+                return new TextComponentString(String.format(translatedString, translation.getFormatArgs()));
             }
         }
         return component;
@@ -69,21 +70,28 @@ public class DeferredTranslator {
         if (sender instanceof EntityPlayer && TerrariumUserTracker.usesTerrarium((EntityPlayer) sender)) {
             return new WrongUsageException(key, objects);
         }
-        Language language = getLanguage(sender);
-        return new WrongUsageException(language.get(key), objects);
+        String translation = translateString(sender, key);
+        return new WrongUsageException(translation, objects);
     }
 
     public static String translateStringOrKey(ICommandSender sender, String translationKey) {
         if (sender instanceof EntityPlayer && TerrariumUserTracker.usesTerrarium((EntityPlayer) sender)) {
             return translationKey;
         }
-        Language language = getLanguage(sender);
-        return language.get(translationKey);
+        return translateString(sender, translationKey);
     }
 
     public static String translateString(ICommandSender sender, String translationKey) {
         Language language = getLanguage(sender);
-        return language.get(translationKey);
+        String translation = language.get(translationKey);
+
+        if (translation == null) {
+            Language fallbackLanguage = LANGUAGE_CACHE.getFallbackLanguage();
+            String fallback = fallbackLanguage.get(translationKey);
+            return fallback != null ? fallback : translationKey;
+        }
+
+        return translation;
     }
 
     private static class LanguageCache {
@@ -104,6 +112,10 @@ public class DeferredTranslator {
                 return Language.EMPTY;
             }
         }
+
+        public Language getFallbackLanguage() {
+            return this.getLanguage("en_US");
+        }
     }
 
     private static class Language {
@@ -121,8 +133,9 @@ public class DeferredTranslator {
             }
         }
 
+        @Nullable
         public String get(String key) {
-            return this.languageMap.getOrDefault(key, key);
+            return this.languageMap.get(key);
         }
     }
 }
