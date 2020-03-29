@@ -56,6 +56,11 @@ public final class BoPTrees {
             .growthIndicator(maxentIndicator("ebony"))
             .build();
 
+    public static final Vegetation FIR = Vegetation.builder()
+            .generator(VegetationGenerator.of(Generators.FIR))
+            .growthIndicator(maxentIndicator("fir"))
+            .build();
+
     private static GrowthIndicator maxentIndicator(String path) {
         return MaxentGrowthIndicator.tryParse(new ResourceLocation(TerrariumEarth.ID, "vegetation/models/trees/" + path + ".lambdas"))
                 .orElse(GrowthIndicator.no());
@@ -65,6 +70,7 @@ public final class BoPTrees {
         static {
             registerPatchGenerator("patched_mangrove", PatchedMangroveTreeFeature.class, new PatchedMangroveTreeFeature.Builder());
             registerPatchGenerator("patched_bayou", PatchedBayouTreeFeature.class, new PatchedBayouTreeFeature.Builder());
+            registerPatchGenerator("patched_taiga", PatchedTaigaTreeFeature.class, new PatchedTaigaTreeFeature.Builder());
         }
 
         private static final IBlockPosQuery ANY_SOIL = soilQuery(SoilPredicate.ANY);
@@ -87,12 +93,17 @@ public final class BoPTrees {
                 .create();
         static final WorldGenerator LARGE_WILLOW = new PatchedBayouTreeFeature.Builder()
                 .log(BOPWoods.WILLOW).leaves(BOPTrees.WILLOW)
-                .minHeight(10).maxHeight(18).minLeavesRadius(2).leavesGradient(3)
+                .minHeight(10).maxHeight(16).minLeavesRadius(2).leavesGradient(3)
                 .placeOn(ANY_SOIL)
                 .create();
         static final WorldGenerator EBONY = new GeneratorBigTree.Builder()
                 .log(BOPWoods.EBONY).leaves(BOPTrees.EBONY)
                 .minHeight(5).maxHeight(10).foliageHeight(1)
+                .placeOn(ANY_SOIL)
+                .create();
+        static final WorldGenerator FIR = new PatchedTaigaTreeFeature.Builder()
+                .log(BOPWoods.FIR).leaves(BOPTrees.FIR)
+                .minHeight(8).maxHeight(16)
                 .placeOn(ANY_SOIL)
                 .create();
 

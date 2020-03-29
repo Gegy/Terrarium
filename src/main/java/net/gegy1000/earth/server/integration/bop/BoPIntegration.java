@@ -44,6 +44,10 @@ public final class BoPIntegration {
             trees.addCandidate(BoPTrees.MANGROVE);
             trees.addCandidate(BoPTrees.EBONY);
         }
+
+        if (cover.is(CoverSelectors.needleleafEvergreen())) {
+            trees.addCandidate(BoPTrees.FIR);
+        }
     }
 
     @SubscribeEvent
