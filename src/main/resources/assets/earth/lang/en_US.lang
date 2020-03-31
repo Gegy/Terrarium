@@ -20,6 +20,7 @@ gui.earth.preload.downloading=Downloading Chunks
 gui.earth.retry=Retry
 gui.earth.download=Download
 gui.earth.run_in_background=Run in Background
+gui.earth.initializing=Initializing
 
 gui.button.earth.teleport=Teleport
 
@@ -94,8 +95,7 @@ commands.earth.geotp.success=Teleported %s to %.5f, %.5f
 commands.earth.geotp.error=An error occurred while finding "%s": %s: %s
 
 commands.earth.geotool.usage=geotool
-commands.earth.geotool.locate=Where am I?
-commands.earth.geotool.teleport=Go to Place
+commands.earth.geotool.locate=Map
 commands.earth.geotool.display_panorama=Display Panorama
 commands.earth.geotool.preload_world=Preload World
 

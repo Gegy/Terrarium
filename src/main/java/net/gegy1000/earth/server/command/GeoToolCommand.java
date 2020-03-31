@@ -16,6 +16,7 @@ import net.minecraft.init.Items;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
+import net.gegy1000.earth.server.command.DeferredTranslator;
 
 public class GeoToolCommand extends CommandBase {
     @Override
@@ -42,12 +43,9 @@ public class GeoToolCommand extends CommandBase {
             ContainerUi.Builder builder = ContainerUi.builder(player)
                     .setTitle(DeferredTranslator.translate(player, new TextComponentTranslation("container.earth.geotool.name")));
 
-            String locate = DeferredTranslator.translateString(sender, "commands.earth.geotool.locate");
-            builder.addElement(Items.COMPASS, TextFormatting.BOLD + locate, () -> this.handleLocate(player, earth));
-
             if (TerrariumUserTracker.usesTerrarium(player)) {
-                String teleport = DeferredTranslator.translateString(sender, "commands.earth.geotool.teleport");
-                builder.addElement(Items.ENDER_PEARL, TextFormatting.BOLD + teleport, () -> this.handleTeleport(player, earth));
+                String locate = DeferredTranslator.translateString(sender, "commands.earth.geotool.locate");
+                builder.addElement(Items.COMPASS, TextFormatting.BOLD + locate, () -> this.handleLocate(player, earth));
 
                 String displayPanorama = DeferredTranslator.translateString(sender, "commands.earth.geotool.display_panorama");
                 builder.addElement(Items.PAINTING, TextFormatting.BOLD + displayPanorama, () -> this.handlePanorama(player));
@@ -82,10 +80,6 @@ public class GeoToolCommand extends CommandBase {
 
         String location = TextFormatting.BOLD.toString() + TextFormatting.UNDERLINE + String.format("%.5f, %.5f", latitude, longitude);
         player.sendMessage(DeferredTranslator.translate(player, new TextComponentTranslation("geotool.earth.locate.success", location)));
-    }
-
-    private void handleTeleport(EntityPlayerMP player, EarthWorld earth) {
-        this.openMap(player, earth, EarthOpenMapMessage.Type.TELEPORT);
     }
 
     private void handlePreload(EntityPlayerMP player, EarthWorld earth) {

@@ -4,7 +4,6 @@ import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.client.gui.EarthLocateGui;
 import net.gegy1000.earth.client.gui.EarthPreloadGui;
 import net.gegy1000.earth.client.gui.EarthPreloadProgressGui;
-import net.gegy1000.earth.client.gui.EarthTeleportGui;
 import net.gegy1000.earth.client.render.LoadingScreenOverlay;
 import net.gegy1000.earth.client.render.PanoramaHandler;
 import net.gegy1000.earth.client.render.PanoramaLookupHandler;
@@ -53,9 +52,6 @@ public class ClientProxy extends ServerProxy {
         switch (type) {
             case LOCATE:
                 client.displayGuiScreen(new EarthLocateGui(latitude, longitude));
-                break;
-            case TELEPORT:
-                client.displayGuiScreen(new EarthTeleportGui(latitude, longitude));
                 break;
             case PRELOAD:
                 EarthWorld earth = EarthWorld.get(client.world);

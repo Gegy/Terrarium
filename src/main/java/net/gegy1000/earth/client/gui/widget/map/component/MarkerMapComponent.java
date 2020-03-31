@@ -16,6 +16,9 @@ public class MarkerMapComponent implements MapComponent {
 
     private SlippyMapPoint marker;
     private boolean canMove;
+    private float offsetX = 0.0F;
+    private float offsetY = 32.0F;
+    private boolean visible = true;
 
     public MarkerMapComponent(SlippyMapPoint marker) {
         this.marker = marker;
@@ -32,14 +35,14 @@ public class MarkerMapComponent implements MapComponent {
 
     @Override
     public void onDrawMap(SlippyMap map, ScaledResolution resolution, SlippyMapPoint mouse) {
-        if (this.marker != null) {
+        if (this.marker != null && this.visible) {
             int scale = resolution.getScaleFactor();
 
             int markerX = this.marker.getX(map.getCameraZoom()) - map.getCameraX();
             int markerY = this.marker.getY(map.getCameraZoom()) - map.getCameraY();
 
             Minecraft.getMinecraft().getTextureManager().bindTexture(WIDGETS_TEXTURE);
-            Gui.drawScaledCustomSizeModalRect(markerX - 5 * scale, markerY - 10 * scale, 0.0F, 32.0F, 16, 16, 10 * scale, 10 * scale, 256, 256);
+            Gui.drawScaledCustomSizeModalRect(markerX - 5 * scale, markerY - 10 * scale, this.offsetX, this.offsetY, 16, 16, 10 * scale, 10 * scale, 256, 256);
         }
     }
 
@@ -56,5 +59,21 @@ public class MarkerMapComponent implements MapComponent {
 
     public SlippyMapPoint getMarker() {
         return this.marker;
+    }
+
+    public void setOffsetX( float x ) {
+        this.offsetX = x;
+    }
+
+    public void setOffsetY( float y ) {
+        this.offsetY = y;
+    }
+
+    public void setVisible( boolean visible ) {
+        this.visible = visible;
+    }
+
+    public boolean isVisible() {
+        return this.visible;
     }
 }
