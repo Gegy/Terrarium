@@ -1,10 +1,9 @@
 package net.gegy1000.earth.server.world.feature;
 
+import net.gegy1000.earth.server.world.ecology.SoilPredicate;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.common.IPlantable;
 
 import java.util.Random;
 
@@ -15,7 +14,7 @@ public class FloorShrubFeature extends AbstractTreeFeature {
 
     @Override
     public boolean generate(World world, Random random, BlockPos origin) {
-        if (!this.tryGrowOn(world, origin.down(), (IPlantable) Blocks.SAPLING)) {
+        if (!this.tryGrowOn(world, origin.down(), SoilPredicate.ANY)) {
             return false;
         }
 

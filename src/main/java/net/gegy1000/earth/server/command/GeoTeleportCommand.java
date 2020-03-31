@@ -37,7 +37,7 @@ public class GeoTeleportCommand extends CommandBase {
 
     @Override
     public String getUsage(ICommandSender sender) {
-        return DeferredTranslator.translateString(sender, "commands.earth.geotp.usage");
+        return DeferredTranslator.translateStringOrKey(sender, "commands.earth.geotp.usage");
     }
 
     @Override

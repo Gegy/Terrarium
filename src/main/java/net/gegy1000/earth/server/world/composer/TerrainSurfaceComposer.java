@@ -6,6 +6,7 @@ import net.gegy1000.earth.server.world.ecology.soil.SoilClass;
 import net.gegy1000.earth.server.world.ecology.soil.SoilConfig;
 import net.gegy1000.earth.server.world.ecology.soil.SoilLayer;
 import net.gegy1000.earth.server.world.ecology.soil.SoilTexture;
+import net.gegy1000.earth.server.world.geography.Landform;
 import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.gengen.api.writer.ChunkPrimeWriter;
 import net.gegy1000.gengen.util.SpatialRandom;
@@ -50,12 +51,14 @@ public class TerrainSurfaceComposer implements SurfaceComposer {
                 EarthDataKeys.SLOPE,
                 EarthDataKeys.ORGANIC_CARBON_CONTENT,
                 EarthDataKeys.SOIL_CLASS,
-                EarthDataKeys.COVER
+                EarthDataKeys.COVER,
+                EarthDataKeys.LANDFORM
         ).ifPresent(with -> {
             ShortRaster heightRaster = with.get(EarthDataKeys.TERRAIN_HEIGHT);
             UByteRaster slopeRaster = with.get(EarthDataKeys.SLOPE);
             EnumRaster<SoilClass> soilClassRaster = with.get(EarthDataKeys.SOIL_CLASS);
             EnumRaster<Cover> coverRaster = with.get(EarthDataKeys.COVER);
+            EnumRaster<Landform> landformRaster = with.get(EarthDataKeys.LANDFORM);
 
             if (!this.containsSurface(pos, heightRaster)) return;
 
@@ -74,8 +77,9 @@ public class TerrainSurfaceComposer implements SurfaceComposer {
                     int slope = slopeRaster.get(x, z);
                     SoilClass soilClass = soilClassRaster.get(x, z);
                     Cover cover = coverRaster.get(x, z);
+                    Landform landform = landformRaster.get(x, z);
 
-                    SoilConfig texture = SoilTexture.select(soilClass, slope, cover);
+                    SoilConfig texture = SoilTexture.select(soilClass, slope, cover, landform);
 
                     double depthNoise = this.depthBuffer[x + z * 16];
                     this.coverColumn(texture, pos, writer, x, z, height, (depthNoise + 4.0) / 8.0);

@@ -28,6 +28,10 @@ public final class BiomeClassifier {
     }
 
     private static Biome classifyLand(Context context) {
+        if (context.landform == Landform.BEACH) {
+            return context.isCold() ? Biomes.COLD_BEACH : Biomes.BEACH;
+        }
+
         if (context.isFrozen()) {
             return context.isForested() ? Biomes.COLD_TAIGA : Biomes.ICE_PLAINS;
         }
@@ -74,7 +78,7 @@ public final class BiomeClassifier {
         }
 
         public boolean isLand() {
-            return this.landform == Landform.LAND;
+            return this.landform.isLand();
         }
 
         public boolean isFrozen() {

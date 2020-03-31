@@ -16,10 +16,14 @@ import java.util.Collection;
 import java.util.Optional;
 
 public final class PolygonSampler {
-    public static DataOp<PolygonData> sample(TiledDataSource<PolygonData> source, CoordinateReference crs) {
+    public static DataOp<PolygonData> sample(TiledDataSource<PolygonData> source, CoordinateReference crs, double sampleExpand) {
         return DataOp.of((view, executor) -> {
-            Coordinate blockMin = view.getMinCoordinate().to(crs);
-            Coordinate blockMax = view.getMaxCoordinate().to(crs);
+            Coordinate blockMin = view.getMinCoordinate()
+                    .addLocal(-sampleExpand, -sampleExpand)
+                    .to(crs);
+            Coordinate blockMax = view.getMaxCoordinate()
+                    .addLocal(sampleExpand, sampleExpand)
+                    .to(crs);
 
             Coordinate min = Coordinate.min(blockMin, blockMax);
             Coordinate max = Coordinate.max(blockMin, blockMax);

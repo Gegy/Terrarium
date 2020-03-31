@@ -1,6 +1,7 @@
 package net.gegy1000.earth.server.world.data.op;
 
 import net.gegy1000.terrarium.server.world.data.DataOp;
+import net.gegy1000.terrarium.server.world.data.raster.FloatRaster;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.minecraft.util.math.MathHelper;
 
@@ -15,16 +16,19 @@ public final class TransformTerrainElevation {
         this.offset = offset;
     }
 
-    public DataOp<ShortRaster> apply(DataOp<ShortRaster> source) {
+    public DataOp<ShortRaster> apply(DataOp<FloatRaster> source) {
         return source.map((raster, view) -> {
-            raster.transform((elevation, x, y) -> {
+            ShortRaster result = ShortRaster.create(view);
+            raster.iterate((elevation, x, y) -> {
+                short value;
                 if (elevation >= 0) {
-                    return (short) (MathHelper.ceil(elevation * this.terrestrialScale) + this.offset);
+                    value = (short) (MathHelper.ceil(elevation * this.terrestrialScale) + this.offset);
                 } else {
-                    return (short) (MathHelper.floor(elevation * this.oceanicScale) + this.offset);
+                    value = (short) (MathHelper.floor(elevation * this.oceanicScale) + this.offset);
                 }
+                result.set(x, y, value);
             });
-            return raster;
+            return result;
         });
     }
 }

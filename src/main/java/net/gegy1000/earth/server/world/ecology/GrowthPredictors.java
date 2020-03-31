@@ -8,7 +8,7 @@ import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.data.raster.UByteRaster;
 
 public final class GrowthPredictors {
-    public short elevation;
+    public float elevation;
     public float annualRainfall;
     public float minTemperature;
     public float meanTemperature;
@@ -41,7 +41,7 @@ public final class GrowthPredictors {
     }
 
     public static class Sampler {
-        private final ShortRaster.Sampler elevation;
+        private final FloatRaster.Sampler elevation;
         private final ShortRaster.Sampler annualRainfall;
         private final FloatRaster.Sampler meanTemperature;
         private final FloatRaster.Sampler minTemperature;
@@ -53,7 +53,7 @@ public final class GrowthPredictors {
         private final UByteRaster.Sampler sandContent;
 
         Sampler() {
-            this.elevation = ShortRaster.sampler(EarthDataKeys.ELEVATION_METERS).defaultValue(0);
+            this.elevation = FloatRaster.sampler(EarthDataKeys.ELEVATION_METERS).defaultValue(0);
             this.annualRainfall = ShortRaster.sampler(EarthDataKeys.ANNUAL_RAINFALL).defaultValue(300);
             this.meanTemperature = FloatRaster.sampler(EarthDataKeys.MEAN_TEMPERATURE).defaultValue(14.0F);
             this.minTemperature = FloatRaster.sampler(EarthDataKeys.MIN_TEMPERATURE).defaultValue(10.0F);

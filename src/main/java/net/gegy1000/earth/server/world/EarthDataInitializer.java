@@ -34,7 +34,7 @@ import net.gegy1000.terrarium.server.world.data.op.VoronoiScaleOp;
 import net.gegy1000.terrarium.server.world.data.raster.BitRaster;
 import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.data.raster.FloatRaster;
-import net.gegy1000.terrarium.server.world.data.raster.IntegerRaster;
+import net.gegy1000.terrarium.server.world.data.raster.NumberRaster;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.data.raster.UByteRaster;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
@@ -45,7 +45,7 @@ import java.util.function.Function;
 import static net.gegy1000.earth.server.world.EarthWorldType.*;
 
 final class EarthDataInitializer implements TerrariumDataInitializer {
-    private static final Zoomable<StdSource<ShortRaster>> ELEVATION_SOURCE = ElevationSource.source();
+    private static final Zoomable<StdSource<FloatRaster>> ELEVATION_SOURCE = ElevationSource.source();
     private static final Zoomable<StdSource<EnumRaster<Cover>>> LAND_COVER_SOURCE = LandCoverSource.source();
 
     private static final Zoomable<StdSource<ShortRaster>> CATION_EXCHANGE_CAPACITY_SOURCE = SoilSources.cationExchangeCapacity();
@@ -71,7 +71,7 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
         return Math.max((int) Math.round(zoom), 0);
     }
 
-    private <T extends IntegerRaster<?>> DataOp<T> sampleStdInterpolated(
+    private <T extends NumberRaster<?>> DataOp<T> sampleStdInterpolated(
             double worldScale,
             Zoomable<StdSource<T>> zoomableSource,
             Function<DataView, T> createRaster
@@ -108,8 +108,8 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
                 .create();
     }
 
-    private DataOp<ShortRaster> elevation(double worldScale) {
-        return this.sampleStdInterpolated(worldScale, ELEVATION_SOURCE, ShortRaster::create);
+    private DataOp<FloatRaster> elevation(double worldScale) {
+        return this.sampleStdInterpolated(worldScale, ELEVATION_SOURCE, FloatRaster::create);
     }
 
     private DataOp<EnumRaster<Cover>> landcover(double worldScale) {
@@ -127,8 +127,11 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
         return this.sampleStdEnum(worldScale, SOIL_CLASS_SOURCE, SoilClass.NO);
     }
 
-    private DataOp<BitRaster> oceanMask() {
-        DataOp<PolygonData> oceanPolygons = PolygonSampler.sample(OCEAN_SOURCE, this.ctx.lngLatCrs);
+    private DataOp<BitRaster> oceanMask(double worldScaleMeters) {
+        double coastDeviationMeters = 500.0;
+        double sampleExpand = coastDeviationMeters / worldScaleMeters;
+
+        DataOp<PolygonData> oceanPolygons = PolygonSampler.sample(OCEAN_SOURCE, this.ctx.lngLatCrs, sampleExpand);
         DataOp<AreaData> oceanArea = PolygonToAreaOp.apply(oceanPolygons, this.ctx.lngLatCrs);
         return RasterizeAreaOp.apply(oceanArea);
     }
@@ -143,7 +146,7 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
         int heightOffset = this.ctx.settings.getInteger(HEIGHT_OFFSET);
         int seaLevel = heightOffset + 1;
 
-        DataOp<ShortRaster> elevation = this.elevation(worldScale).cached(ShortRaster::copy);
+        DataOp<FloatRaster> elevation = this.elevation(worldScale).cached(FloatRaster::copy);
         DataOp<UByteRaster> slope = SlopeOp.from(elevation, 1.0F / (float) worldScale);
 
         DataOp<EnumRaster<Cover>> cover = this.landcover(worldScale);
@@ -160,7 +163,7 @@ final class EarthDataInitializer implements TerrariumDataInitializer {
         ).apply(elevation).cached(ShortRaster::copy);
 
         if (worldScale <= 90.0) {
-            DataOp<BitRaster> oceanMask = this.oceanMask();
+            DataOp<BitRaster> oceanMask = this.oceanMask(worldScale);
             landforms = WaterOps.applyWaterMask(landforms, oceanMask).cached(EnumRaster::copy);
         }
 

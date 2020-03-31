@@ -99,6 +99,7 @@ commands.earth.geotool.locate=Карта
 commands.earth.geotool.display_panorama=Панорама
 commands.earth.geotool.preload_world=Предзагрузка мира
 
+
 commands.earth.geodebug.usage=geodebug
 
 # Status

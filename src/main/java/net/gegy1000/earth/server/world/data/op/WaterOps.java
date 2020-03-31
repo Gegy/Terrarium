@@ -1,26 +1,27 @@
 package net.gegy1000.earth.server.world.data.op;
 
-import net.gegy1000.justnow.future.Future;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.geography.Landform;
+import net.gegy1000.justnow.future.Future;
 import net.gegy1000.terrarium.server.world.data.DataOp;
 import net.gegy1000.terrarium.server.world.data.raster.BitRaster;
 import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 
 public final class WaterOps {
-    public static DataOp<EnumRaster<Landform>> applyWaterMask(DataOp<EnumRaster<Landform>> landforms, DataOp<BitRaster> ocean) {
+    public static DataOp<EnumRaster<Landform>> applyWaterMask(
+            DataOp<EnumRaster<Landform>> landforms,
+            DataOp<BitRaster> ocean
+    ) {
         return DataOp.of((view, executor) -> {
             return Future.map2(landforms.apply(view, executor), ocean.apply(view, executor), (landformOption, oceanOption) -> {
                 return landformOption.map(landformRaster -> {
                     if (oceanOption.isPresent()) {
-                        BitRaster oceanRaster = oceanOption.get();
+                        BitRaster oceanMask = oceanOption.get();
                         landformRaster.transform((source, x, y) -> {
-                            if (oceanRaster.get(x, y)) {
-                                return Landform.SEA;
-                            } else if (source.isWater()) {
-                                return Landform.LAND;
-                            }
+                            boolean isOcean = oceanMask.get(x, y);
+                            if (isOcean && source != Landform.SEA) return Landform.BEACH;
+                            if (!isOcean && source.isWater()) return Landform.LAND;
                             return source;
                         });
                     }
@@ -72,7 +73,7 @@ public final class WaterOps {
                 Landform landform = landformRaster.get(x, y);
                 if (landform.isWater()) {
                     return Cover.WATER;
-                } else if (source == Cover.WATER) {
+                } else if (landform.isLand() && source == Cover.WATER) {
                     return Cover.NO;
                 }
                 return source;

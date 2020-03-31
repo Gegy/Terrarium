@@ -2,7 +2,9 @@ package net.gegy1000.earth.server.world.ecology.vegetation;
 
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.world.ecology.GrowthIndicator;
+import net.gegy1000.earth.server.world.ecology.SoilPredicate;
 import net.gegy1000.earth.server.world.ecology.maxent.MaxentGrowthIndicator;
+import net.gegy1000.earth.server.world.feature.HookGrowthCheckFeature;
 import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockOldLeaf;
 import net.minecraft.block.BlockOldLog;
@@ -17,6 +19,7 @@ import net.minecraft.world.gen.feature.WorldGenSavannaTree;
 import net.minecraft.world.gen.feature.WorldGenTaiga1;
 import net.minecraft.world.gen.feature.WorldGenTaiga2;
 import net.minecraft.world.gen.feature.WorldGenTrees;
+import net.minecraft.world.gen.feature.WorldGenerator;
 
 public final class Trees {
     public static final float RADIUS = 3.0F;
@@ -83,13 +86,17 @@ public final class Trees {
                 .withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE)
                 .withProperty(BlockLeaves.CHECK_DECAY, Boolean.FALSE);
 
-        static final WorldGenSavannaTree ACACIA = new WorldGenSavannaTree(false);
-        static final WorldGenBirchTree BIRCH = new WorldGenBirchTree(false, false);
-        static final WorldGenTrees OAK = new WorldGenTrees(false);
-        static final WorldGenBigTree BIG_OAK = new WorldGenBigTree(false);
-        static final WorldGenTrees JUNGLE = new WorldGenTrees(false, 7, JUNGLE_LOG, JUNGLE_LEAF, true);
-        static final WorldGenMegaJungle BIG_JUNGLE = new WorldGenMegaJungle(false, 10, 20, JUNGLE_LOG, JUNGLE_LEAF);
-        static final WorldGenTaiga1 PINE = new WorldGenTaiga1();
-        static final WorldGenTaiga2 SPRUCE = new WorldGenTaiga2(false);
+        static final WorldGenerator ACACIA = hookSoil(new WorldGenSavannaTree(false));
+        static final WorldGenerator BIRCH = hookSoil(new WorldGenBirchTree(false, false));
+        static final WorldGenerator OAK = hookSoil(new WorldGenTrees(false));
+        static final WorldGenerator BIG_OAK = hookSoil(new WorldGenBigTree(false));
+        static final WorldGenerator JUNGLE = hookSoil(new WorldGenTrees(false, 7, JUNGLE_LOG, JUNGLE_LEAF, true));
+        static final WorldGenerator BIG_JUNGLE = hookSoil(new WorldGenMegaJungle(false, 10, 20, JUNGLE_LOG, JUNGLE_LEAF));
+        static final WorldGenerator PINE = hookSoil(new WorldGenTaiga1());
+        static final WorldGenerator SPRUCE = hookSoil(new WorldGenTaiga2(false));
+
+        private static WorldGenerator hookSoil(WorldGenerator generator) {
+            return new HookGrowthCheckFeature(generator, SoilPredicate.ANY);
+        }
     }
 }

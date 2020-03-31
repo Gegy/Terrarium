@@ -19,7 +19,7 @@ public final class BoPOres {
     private static final FloatRaster.Sampler MEAN_TEMPERATURE = FloatRaster.sampler(EarthDataKeys.MEAN_TEMPERATURE);
     private static final FloatRaster.Sampler MIN_TEMPERATURE = FloatRaster.sampler(EarthDataKeys.MIN_TEMPERATURE);
     private static final ShortRaster.Sampler ANNUAL_RAINFALL = ShortRaster.sampler(EarthDataKeys.ANNUAL_RAINFALL);
-    private static final ShortRaster.Sampler ELEVATION = ShortRaster.sampler(EarthDataKeys.ELEVATION_METERS);
+    private static final FloatRaster.Sampler ELEVATION = FloatRaster.sampler(EarthDataKeys.ELEVATION_METERS);
     private static final EnumRaster.Sampler<Cover> COVER = EnumRaster.sampler(EarthDataKeys.COVER, Cover.NO);
 
     public static final OreConfig TANZANITE = OreConfig.builder()
@@ -31,7 +31,7 @@ public final class BoPOres {
     public static final OreConfig SAPPHIRE = OreConfig.builder()
             .ore(BOPBlocks.gem_ore.getDefaultState().withProperty(BlockBOPGem.VARIANT, BOPGems.SAPPHIRE))
             .distribution(OreDistribution.vanillaUniform(12, 32))
-            .select((data, x, z) -> ELEVATION.sample(data, x, z) < 0)
+            .select((data, x, z) -> ELEVATION.sample(data, x, z) < 0.0F)
             .build();
 
     public static final OreConfig RUBY = OreConfig.builder()

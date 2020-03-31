@@ -56,6 +56,10 @@ public final class Coordinate {
         return this.add(Coordinate.atBlock(x, z));
     }
 
+    public Coordinate addLocal(double x, double z) {
+        return new Coordinate(this.crs, this.x + x, this.z + z);
+    }
+
     public Coordinate add(CoordinateReference state, double x, double z) {
         return this.add(new Coordinate(state, x, z));
     }
