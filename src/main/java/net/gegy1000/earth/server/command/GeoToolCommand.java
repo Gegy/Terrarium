@@ -16,7 +16,6 @@ import net.minecraft.init.Items;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
-import net.gegy1000.earth.server.command.DeferredTranslator;
 
 public class GeoToolCommand extends CommandBase {
     @Override
@@ -45,7 +44,7 @@ public class GeoToolCommand extends CommandBase {
 
             if (TerrariumUserTracker.usesTerrarium(player)) {
                 String locate = DeferredTranslator.translateString(sender, "commands.earth.geotool.locate");
-                builder.addElement(Items.COMPASS, TextFormatting.BOLD + locate, () -> this.handleLocate(player, earth));
+                builder.addElement(Items.COMPASS, TextFormatting.BOLD + locate, () -> this.openMap(player, earth, EarthOpenMapMessage.Type.LOCATE));
 
                 String displayPanorama = DeferredTranslator.translateString(sender, "commands.earth.geotool.display_panorama");
                 builder.addElement(Items.PAINTING, TextFormatting.BOLD + displayPanorama, () -> this.handlePanorama(player));
@@ -54,6 +53,9 @@ public class GeoToolCommand extends CommandBase {
                     String preloadWorld = DeferredTranslator.translateString(sender, "commands.earth.geotool.preload_world");
                     builder.addElement(Blocks.COMMAND_BLOCK, TextFormatting.BOLD + preloadWorld, () -> this.handlePreload(player, earth));
                 }
+            } else {
+                String locate = DeferredTranslator.translateString(sender, "commands.earth.geotool.locate");
+                builder.addElement(Items.COMPASS, TextFormatting.BOLD + locate, () -> this.handleLocate(player, earth));
             }
 
             ContainerUi ui = builder.build();
@@ -68,11 +70,6 @@ public class GeoToolCommand extends CommandBase {
     }
 
     private void handleLocate(EntityPlayerMP player, EarthWorld earth) {
-        if (TerrariumUserTracker.usesTerrarium(player)) {
-            this.openMap(player, earth, EarthOpenMapMessage.Type.LOCATE);
-            return;
-        }
-
         Coordinate coordinate = Coordinate.atBlock(player.posX, player.posZ).to(earth.getCrs());
 
         double longitude = coordinate.getX();
