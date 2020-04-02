@@ -29,7 +29,7 @@ public final class BiomeClassifier {
 
     private static Biome classifyLand(Context context) {
         if (context.landform == Landform.BEACH) {
-            return context.isCold() ? Biomes.COLD_BEACH : Biomes.BEACH;
+            return context.isFrozen() ? Biomes.COLD_BEACH : Biomes.BEACH;
         }
 
         if (context.isFrozen()) {
