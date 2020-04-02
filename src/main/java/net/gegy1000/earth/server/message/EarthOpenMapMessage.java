@@ -47,7 +47,6 @@ public class EarthOpenMapMessage implements IMessage {
 
     public enum Type {
         LOCATE,
-        TELEPORT,
         PRELOAD,
     }
 }

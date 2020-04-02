@@ -20,6 +20,7 @@ gui.earth.preload.downloading=Загрузка чанков
 gui.earth.retry=Повторить
 gui.earth.download=Скачать
 gui.earth.run_in_background=Фоновый режим
+gui.earth.initializing=Инициализация
 
 gui.button.earth.teleport=Телепорт
 
@@ -86,18 +87,18 @@ preset.terrarium.earth.global_playable.desc=Генератор оптимизи�
 
 # Commands
 
-commands.earth.wrong_world=Нельзя использовать команды в этом мире
+commands.earth.wrong_world=Нельзя использовать команду в этом мире
 
 commands.earth.geotp.usage=geotp <широта> <долгота> ИЛИ geotp <место>
 commands.earth.geotp.not_found="%s" не найдено
-commands.earth.geotp.success=Телепортирован к %s в %.5f, %.5f
+commands.earth.geotp.success=%s телепортирован в %.5f, %.5f
 commands.earth.geotp.error=Во время поиска произошла ошибка "%s": %s: %s
 
 commands.earth.geotool.usage=geotool
-commands.earth.geotool.locate=Где я?
-commands.earth.geotool.teleport=Телепорт
+commands.earth.geotool.locate=Карта
 commands.earth.geotool.display_panorama=Панорама
 commands.earth.geotool.preload_world=Предзагрузка мира
+
 
 commands.earth.geodebug.usage=geodebug
 

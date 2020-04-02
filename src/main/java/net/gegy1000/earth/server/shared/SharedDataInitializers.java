@@ -3,7 +3,7 @@ package net.gegy1000.earth.server.shared;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.gegy1000.earth.server.util.ProcessTracker;
 import net.gegy1000.earth.server.util.ProgressTracker;
-import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,7 +28,7 @@ public final class SharedDataInitializers {
     }
 
     public static CompletableFuture<SharedEarthData> initialize(ProcessTracker tracker) {
-        ProgressTracker master = tracker.push(new TextComponentString("Initializing"), INITIALIZERS.size());
+        ProgressTracker master = tracker.push(new TextComponentTranslation("gui.earth.initializing"), INITIALIZERS.size());
 
         return CompletableFuture.supplyAsync(() -> {
             SharedEarthData data = new SharedEarthData();
