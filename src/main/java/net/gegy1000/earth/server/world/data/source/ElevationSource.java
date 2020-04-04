@@ -14,6 +14,7 @@ public final class ElevationSource {
     public static Zoomable<StdSource<FloatRaster>> source() {
         return StdSource.<FloatRaster>builder(zoomLevels())
                 .cacheName("elevation")
+                .endpoint("elevation")
                 .read(input -> {
                     ShortRaster shortRaster = TerrariumRasterReader.read(input, ShortRaster.class);
 
@@ -22,7 +23,6 @@ public final class ElevationSource {
 
                     return result;
                 })
-                .endpoint(idx -> idx.elevation)
                 .build();
     }
 }

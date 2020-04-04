@@ -1,54 +1,53 @@
 package net.gegy1000.earth.server.world.data.source;
 
 import net.gegy1000.earth.server.capability.EarthWorld;
-import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.earth.server.util.IoFunction;
 import net.gegy1000.earth.server.util.ZoomLevels;
 import net.gegy1000.earth.server.util.Zoomable;
-import net.gegy1000.earth.server.world.data.index.DataIndex3;
 import net.gegy1000.earth.server.world.data.source.cache.CachingInput;
 import net.gegy1000.earth.server.world.data.source.cache.FileTileCache;
 import net.gegy1000.terrarium.server.util.Vec2i;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.data.source.TiledDataSource;
+import net.minecraft.util.math.MathHelper;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.Optional;
-import java.util.function.Function;
 
 public final class StdSource<T> extends TiledDataSource<T> {
     public static final int TILE_SIZE = 1000;
     private static final int ZOOM_BASE = 3;
 
+    private static final String ENDPOINT = "https://terrariumearth.azureedge.net/geo3";
+
     private final IoFunction<InputStream, T> read;
-    private final Function<DataIndex3, DataIndex3.Endpoint> endpoint;
+    private final String endpoint;
+    private final int zoom;
 
     private final CachingInput<Vec2i> cachingInput;
 
     private StdSource(
             String cacheName,
+            String endpoint,
             IoFunction<InputStream, T> read,
-            Function<DataIndex3, DataIndex3.Endpoint> endpoint
+            int zoom
     ) {
         super(TILE_SIZE);
 
         this.read = read;
-        this.endpoint = endpoint;
+        this.endpoint = ENDPOINT + "/" + endpoint + "/" + zoom;
+        this.zoom = zoom;
 
-        Path cacheRoot = GLOBAL_CACHE_ROOT.resolve(cacheName);
+        Path cacheRoot = GLOBAL_CACHE_ROOT.resolve(cacheName + "/" + zoom);
         FileTileCache<Vec2i> cache = new FileTileCache<>(pos -> cacheRoot.resolve(pos.x + "/" + pos.y));
         this.cachingInput = new CachingInput<>(cache);
     }
 
-    public static <T> Builder<T> builder() {
-        return new Builder<>();
-    }
-
-    public static <T> ZoomBuilder<T> builder(ZoomLevels zoomLevels) {
-        return new ZoomBuilder<>(zoomLevels);
+    public static <T> Builder<T> builder(ZoomLevels zoomLevels) {
+        return new Builder<>(zoomLevels);
     }
 
     public static CoordinateReference crs(double worldScale, int zoom) {
@@ -90,33 +89,42 @@ public final class StdSource<T> extends TiledDataSource<T> {
         return Math.log(EarthWorld.EQUATOR_CIRCUMFERENCE / (2 * TILE_SIZE * meters)) / Math.log(3);
     }
 
+    public static boolean containsTile(Vec2i pos, int zoom) {
+        int tileCountX = MathHelper.ceil(tileCountX(zoom));
+        int tileCountY = MathHelper.ceil(tileCountY(zoom));
+        return pos.x >= 0 && pos.y >= 0 && pos.x < tileCountX && pos.y < tileCountY;
+    }
+
     @Override
     public Optional<T> load(Vec2i pos) throws IOException {
-        DataIndex3 index = SharedEarthData.instance().get(SharedEarthData.REMOTE_INDEX3);
-        if (index == null) {
-            throw new IllegalStateException("remote index not initialized");
-        }
-
-        String url = this.endpoint.apply(index).getUrlFor(pos);
-        if (url == null) {
+        if (!StdSource.containsTile(pos, this.zoom)) {
             return Optional.empty();
         }
 
+        String url = this.endpoint + "/" + pos.x + "/" + pos.y;
         try (InputStream input = this.cachingInput.getInputStream(pos, p -> get(new URL(url)))) {
             return Optional.of(this.read.apply(input));
         }
     }
 
     public static class Builder<T> {
+        private final ZoomLevels zoomLevels;
+
         private String cacheName;
         private IoFunction<InputStream, T> read;
-        private Function<DataIndex3, DataIndex3.Endpoint> endpoint;
+        private String endpoint;
 
-        private Builder() {
+        private Builder(ZoomLevels zoomLevels) {
+            this.zoomLevels = zoomLevels;
         }
 
         public Builder<T> cacheName(String cacheName) {
             this.cacheName = cacheName;
+            return this;
+        }
+
+        public Builder<T> endpoint(String endpoint) {
+            this.endpoint = endpoint;
             return this;
         }
 
@@ -125,47 +133,8 @@ public final class StdSource<T> extends TiledDataSource<T> {
             return this;
         }
 
-        public Builder<T> endpoint(Function<DataIndex3, DataIndex3.Endpoint> endpoint) {
-            this.endpoint = endpoint;
-            return this;
-        }
-
-        public StdSource<T> build() {
-            return new StdSource<>(this.cacheName, this.read, this.endpoint);
-        }
-    }
-
-    public static class ZoomBuilder<T> {
-        private final ZoomLevels zoomLevels;
-
-        private String cacheName;
-        private IoFunction<InputStream, T> read;
-        private Function<DataIndex3, Zoomable<DataIndex3.Endpoint>> endpoint;
-
-        private ZoomBuilder(ZoomLevels zoomLevels) {
-            this.zoomLevels = zoomLevels;
-        }
-
-        public ZoomBuilder<T> cacheName(String cacheName) {
-            this.cacheName = cacheName;
-            return this;
-        }
-
-        public ZoomBuilder<T> read(IoFunction<InputStream, T> read) {
-            this.read = read;
-            return this;
-        }
-
-        public ZoomBuilder<T> endpoint(Function<DataIndex3, Zoomable<DataIndex3.Endpoint>> endpoint) {
-            this.endpoint = endpoint;
-            return this;
-        }
-
         public Zoomable<StdSource<T>> build() {
-            return this.zoomLevels.map(zoom -> {
-                String cacheName = this.cacheName + "/" + zoom;
-                return new StdSource<>(cacheName, this.read, idx -> this.endpoint.apply(idx).forZoom(zoom));
-            });
+            return this.zoomLevels.map(zoom -> new StdSource<>(this.cacheName, this.endpoint, this.read, zoom));
         }
     }
 }

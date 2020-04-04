@@ -15,7 +15,7 @@ public final class LandCoverSource {
     public static Zoomable<StdSource<EnumRaster<Cover>>> source() {
         return StdSource.<EnumRaster<Cover>>builder(zoomLevels())
                 .cacheName("landcover")
-                .endpoint(idx -> idx.landcover)
+                .endpoint("landcover")
                 .read(input -> {
                     UByteRaster raw = TerrariumRasterReader.read(input, UByteRaster.class);
 

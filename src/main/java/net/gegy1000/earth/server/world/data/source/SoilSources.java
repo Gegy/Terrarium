@@ -2,59 +2,53 @@ package net.gegy1000.earth.server.world.data.source;
 
 import net.gegy1000.earth.server.util.ZoomLevels;
 import net.gegy1000.earth.server.util.Zoomable;
-import net.gegy1000.earth.server.world.data.index.DataIndex3;
 import net.gegy1000.earth.server.world.data.source.reader.TerrariumRasterReader;
 import net.gegy1000.earth.server.world.ecology.soil.SoilClass;
 import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.data.raster.UByteRaster;
 
-import java.util.function.Function;
-
 public final class SoilSources {
     public static ZoomLevels zoomLevels() {
         return ZoomLevels.range(0, 4);
     }
 
-    private static Zoomable<StdSource<ShortRaster>> genericSoil(
-            String cacheName,
-            Function<DataIndex3, Zoomable<DataIndex3.Endpoint>> endpoint
-    ) {
+    private static Zoomable<StdSource<ShortRaster>> genericSoil(String name) {
         return StdSource.<ShortRaster>builder(zoomLevels())
-                .cacheName("soil/" + cacheName)
-                .endpoint(endpoint)
+                .cacheName("soil/" + name)
+                .endpoint(name)
                 .read(input -> TerrariumRasterReader.read(input, ShortRaster.class))
                 .build();
     }
 
     public static Zoomable<StdSource<ShortRaster>> cationExchangeCapacity() {
-        return genericSoil("cec", idx -> idx.cec);
+        return genericSoil("cec");
     }
 
     public static Zoomable<StdSource<ShortRaster>> organicCarbonContent() {
-        return genericSoil("occ", idx -> idx.occ);
+        return genericSoil("occ");
     }
 
     public static Zoomable<StdSource<ShortRaster>> ph() {
-        return genericSoil("ph", idx -> idx.ph);
+        return genericSoil("ph");
     }
 
     public static Zoomable<StdSource<ShortRaster>> clayContent() {
-        return genericSoil("clay", idx -> idx.clay);
+        return genericSoil("clay");
     }
 
     public static Zoomable<StdSource<ShortRaster>> siltContent() {
-        return genericSoil("silt", idx -> idx.silt);
+        return genericSoil("silt");
     }
 
     public static Zoomable<StdSource<ShortRaster>> sandContent() {
-        return genericSoil("sand", idx -> idx.sand);
+        return genericSoil("sand");
     }
 
     public static Zoomable<StdSource<EnumRaster<SoilClass>>> soilClass() {
         return StdSource.<EnumRaster<SoilClass>>builder(zoomLevels())
                 .cacheName("soil/usda")
-                .endpoint(idx -> idx.usda)
+                .endpoint("usda")
                 .read(input -> {
                     UByteRaster raw = TerrariumRasterReader.read(input, UByteRaster.class);
 

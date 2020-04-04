@@ -16,7 +16,6 @@ import net.gegy1000.earth.server.message.StartDataDownloadMessage;
 import net.gegy1000.earth.server.message.UpdateDownloadMessage;
 import net.gegy1000.earth.server.shared.ApiKeyInitializer;
 import net.gegy1000.earth.server.shared.ClimateRasterInitializer;
-import net.gegy1000.earth.server.shared.DataIndex3Initializer;
 import net.gegy1000.earth.server.shared.DataIndex1Initializer;
 import net.gegy1000.earth.server.shared.SharedDataInitializers;
 import net.gegy1000.earth.server.shared.SharedEarthData;
@@ -84,8 +83,7 @@ public class TerrariumEarth {
         SharedDataInitializers.add(
                 new ApiKeyInitializer(),
                 new ClimateRasterInitializer(),
-                new DataIndex1Initializer(),
-                new DataIndex3Initializer()
+                new DataIndex1Initializer()
         );
 
         NETWORK.registerMessage(EarthOpenMapMessage.Handler.class, EarthOpenMapMessage.class, 0, Side.CLIENT);
