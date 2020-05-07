@@ -5,9 +5,13 @@ import net.gegy1000.gengen.api.writer.ChunkPopulationWriter;
 import net.gegy1000.gengen.api.writer.ChunkPrimeWriter;
 import net.gegy1000.gengen.util.SpatialRandom;
 import net.gegy1000.gengen.util.wrapper.OverworldGeneratorWrapper;
+import net.gegy1000.terrarium.Terrarium;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkGeneratorOverworld;
+import net.minecraft.world.gen.ChunkProviderServer;
+import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.gen.structure.MapGenMineshaft;
 import net.minecraft.world.gen.structure.MapGenScatteredFeature;
 import net.minecraft.world.gen.structure.MapGenStronghold;
@@ -41,13 +45,30 @@ public class VanillaStructureComposer implements StructureComposer {
         this.spatialRandom = new SpatialRandom(world, STRUCTURE_SEED);
 
         ChunkGeneratorOverworld overworldWrapper = OverworldGeneratorWrapper.from(world);
+        if (overworldWrapper == null) {
+            Terrarium.LOGGER.warn("Failed to unwrap Terrarium chunk generator! This is very likely to be caused by a mod compatibility issue");
+            Terrarium.LOGGER.warn("Attempting to continue on... Some vanilla generation integration may not work!");
+
+            IChunkProvider chunkProvider = world.getChunkProvider();
+            if (chunkProvider instanceof ChunkProviderServer) {
+                IChunkGenerator chunkGenerator = ((ChunkProviderServer) chunkProvider).chunkGenerator;
+                Terrarium.LOGGER.warn("Responsible chunk generator: {} ({})", chunkGenerator, chunkGenerator.getClass());
+            } else {
+                Terrarium.LOGGER.warn("Failed to access chunk generator for diagnostics. Chunk provider was: {} ({})", chunkProvider, chunkProvider.getClass());
+            }
+        }
 
         this.strongholdGenerator = (MapGenStructure) TerrainGen.getModdedMapGen(new MapGenStronghold(), InitMapGenEvent.EventType.STRONGHOLD);
         this.villageGenerator = (MapGenStructure) TerrainGen.getModdedMapGen(new MapGenVillage(), InitMapGenEvent.EventType.VILLAGE);
         this.mineshaftGenerator = (MapGenStructure) TerrainGen.getModdedMapGen(new MapGenMineshaft(), InitMapGenEvent.EventType.MINESHAFT);
         this.templeGenerator = (MapGenStructure) TerrainGen.getModdedMapGen(new MapGenScatteredFeature(), InitMapGenEvent.EventType.SCATTERED_FEATURE);
         this.oceanMonumentGenerator = (MapGenStructure) TerrainGen.getModdedMapGen(new StructureOceanMonument(), InitMapGenEvent.EventType.OCEAN_MONUMENT);
-        this.woodlandMansionGenerator = (MapGenStructure) TerrainGen.getModdedMapGen(new WoodlandMansion(overworldWrapper), InitMapGenEvent.EventType.WOODLAND_MANSION);
+
+        if (overworldWrapper != null) {
+            this.woodlandMansionGenerator = (MapGenStructure) TerrainGen.getModdedMapGen(new WoodlandMansion(overworldWrapper), InitMapGenEvent.EventType.WOODLAND_MANSION);
+        } else {
+            this.woodlandMansionGenerator = null;
+        }
     }
 
     @Override
