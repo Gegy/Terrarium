@@ -102,7 +102,7 @@ public final class StdSource<T> extends TiledDataSource<T> {
         }
 
         String url = this.endpoint + "/" + pos.x + "/" + pos.y;
-        try (InputStream input = this.cachingInput.getInputStream(pos, p -> get(new URL(url)))) {
+        try (InputStream input = this.cachingInput.getInputStream(pos, p -> httpGet(new URL(url)))) {
             return Optional.of(this.read.apply(input));
         }
     }

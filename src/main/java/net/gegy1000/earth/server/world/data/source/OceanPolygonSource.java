@@ -56,7 +56,7 @@ public class OceanPolygonSource extends TiledDataSource<PolygonData> {
         }
 
         InputStream sourceInput = CACHING_INPUT.getInputStream(pos, p -> {
-            return get(new URL(url));
+            return httpGet(new URL(url));
         });
 
         try (InputStream input = new SingleXZInputStream(new BufferedInputStream(sourceInput))) {

@@ -3,7 +3,6 @@ package net.gegy1000.earth.server.world.data.op;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
-import net.gegy1000.earth.server.world.data.AreaData;
 import net.gegy1000.earth.server.world.data.PolygonData;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.data.DataOp;
@@ -12,7 +11,7 @@ import net.gegy1000.terrarium.server.world.rasterization.PolygonShapeProducer;
 import java.awt.geom.Area;
 
 public final class PolygonToAreaOp {
-    public static DataOp<AreaData> apply(DataOp<PolygonData> polygons, CoordinateReference crs) {
+    public static DataOp<Area> apply(DataOp<PolygonData> polygons, CoordinateReference crs) {
         return polygons.mapBlocking((polygonData, view) -> {
             Area area = new Area();
 
@@ -25,7 +24,7 @@ public final class PolygonToAreaOp {
                 }
             }
 
-            return new AreaData(area);
+            return area;
         });
     }
 }

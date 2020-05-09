@@ -3,7 +3,6 @@ package net.gegy1000.earth.server.world;
 import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.earth.server.util.Zoomable;
 import net.gegy1000.earth.server.world.cover.Cover;
-import net.gegy1000.earth.server.world.data.AreaData;
 import net.gegy1000.earth.server.world.data.PolygonData;
 import net.gegy1000.earth.server.world.data.op.AddNoiseOp;
 import net.gegy1000.earth.server.world.data.op.ClimateSampler;
@@ -39,6 +38,7 @@ import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.data.raster.UByteRaster;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
 
+import java.awt.geom.Area;
 import java.util.Random;
 import java.util.function.Function;
 
@@ -133,7 +133,7 @@ public final class EarthDataInitializer implements TerrariumDataInitializer {
         double sampleExpand = coastDeviationMeters / worldScaleMeters;
 
         DataOp<PolygonData> oceanPolygons = PolygonSampler.sample(OCEAN_SOURCE, this.ctx.lngLatCrs, sampleExpand);
-        DataOp<AreaData> oceanArea = PolygonToAreaOp.apply(oceanPolygons, this.ctx.lngLatCrs);
+        DataOp<Area> oceanArea = PolygonToAreaOp.apply(oceanPolygons, this.ctx.lngLatCrs);
         return RasterizeAreaOp.apply(oceanArea);
     }
 

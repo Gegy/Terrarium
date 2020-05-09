@@ -37,7 +37,7 @@ public abstract class TiledDataSource<T> {
 
     public abstract Optional<T> load(Vec2i pos) throws IOException;
 
-    protected static InputStream get(URL url) throws IOException {
+    protected static InputStream httpGet(URL url) throws IOException {
         HttpURLConnection http = (HttpURLConnection) url.openConnection();
         http.setRequestMethod("GET");
         http.setRequestProperty(HttpHeaders.USER_AGENT, "terrarium");
