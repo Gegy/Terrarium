@@ -11,7 +11,8 @@ import net.minecraftforge.common.IPlantable;
 public interface SoilPredicate {
     SoilPredicate ANY = (world, soilPos, soilState) -> {
         Block soilBlock = soilState.getBlock();
-        return soilBlock == Blocks.GRASS || soilBlock == Blocks.DIRT || soilBlock == Blocks.FARMLAND || soilBlock == Blocks.SAND;
+        return soilBlock == Blocks.GRASS || soilBlock == Blocks.DIRT || soilBlock == Blocks.FARMLAND
+                || soilBlock == Blocks.SAND || soilBlock == Blocks.CLAY;
     };
 
     static SoilPredicate plantable(IPlantable plantable) {

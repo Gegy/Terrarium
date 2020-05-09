@@ -2,7 +2,7 @@ package net.gegy1000.earth.server.world;
 
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.world.cover.Cover;
-import net.gegy1000.earth.server.world.ecology.soil.SoilClass;
+import net.gegy1000.earth.server.world.ecology.soil.SoilSuborder;
 import net.gegy1000.earth.server.world.geography.Landform;
 import net.gegy1000.terrarium.server.world.data.DataKey;
 import net.gegy1000.terrarium.server.world.data.DataView;
@@ -30,7 +30,7 @@ public final class EarthDataKeys {
     public static final DataKey<UByteRaster> CLAY_CONTENT = create("clay_content", view -> UByteRaster.create(view, 33));
     public static final DataKey<UByteRaster> SILT_CONTENT = create("silt_content", view -> UByteRaster.create(view, 33));
     public static final DataKey<UByteRaster> SAND_CONTENT = create("sand_content", view -> UByteRaster.create(view, 33));
-    public static final DataKey<EnumRaster<SoilClass>> SOIL_CLASS = create("soil_class", view -> EnumRaster.create(SoilClass.NO, view));
+    public static final DataKey<EnumRaster<SoilSuborder>> SOIL_SUBORDER = create("soil_class", view -> EnumRaster.create(SoilSuborder.NO, view));
 
     private static <T> DataKey<T> create(String name, Function<DataView, T> createDefault) {
         return new DataKey<>(new ResourceLocation(TerrariumEarth.ID, name), createDefault);

@@ -9,7 +9,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class PatchedMangroveTreeFeature extends GeneratorMangroveTree {
-
     public static class Builder extends GeneratorMangroveTree.Builder {
         @Override
         public PatchedMangroveTreeFeature create() {

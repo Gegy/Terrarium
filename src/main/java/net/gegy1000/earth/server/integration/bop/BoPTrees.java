@@ -22,22 +22,22 @@ import net.minecraft.world.gen.feature.WorldGenerator;
 public final class BoPTrees {
     public static final Vegetation MAHOGANY = Vegetation.builder()
             .generator(VegetationGenerator.of(Generators.MAHOGANY))
-            .growthIndicator(maxentIndicator("mahogany"))
+            .growthIndicator(Indicators.MAHOGANY)
             .build();
 
     public static final Vegetation PALM = Vegetation.builder()
             .generator(VegetationGenerator.of(Generators.PALM))
-            .growthIndicator(maxentIndicator("palm").pow(3.0))
+            .growthIndicator(Indicators.PALM)
             .build();
 
     public static final Vegetation EUCALYPTUS = Vegetation.builder()
             .generator(VegetationGenerator.of(Generators.EUCALYPTUS))
-            .growthIndicator(maxentIndicator("eucalyptus").pow(3.0))
+            .growthIndicator(Indicators.EUCALYPTUS)
             .build();
 
     public static final Vegetation MANGROVE = Vegetation.builder()
             .generator(VegetationGenerator.of(Generators.MANGROVE))
-            .growthIndicator(maxentIndicator("mangrove"))
+            .growthIndicator(Indicators.MANGROVE)
             .build();
 
     public static final Vegetation WILLOW = Vegetation.builder()
@@ -48,22 +48,33 @@ public final class BoPTrees {
                     Generators.WILLOW.generate(world, random, pos);
                 }
             })
-            .growthIndicator(maxentIndicator("willow").pow(0.8))
+            .growthIndicator(Indicators.WILLOW)
             .build();
 
     public static final Vegetation EBONY = Vegetation.builder()
             .generator(VegetationGenerator.of(Generators.EBONY))
-            .growthIndicator(maxentIndicator("ebony"))
+            .growthIndicator(Indicators.EBONY)
             .build();
 
     public static final Vegetation FIR = Vegetation.builder()
             .generator(VegetationGenerator.of(Generators.FIR))
-            .growthIndicator(maxentIndicator("fir"))
+            .growthIndicator(Indicators.FIR)
             .build();
 
-    private static GrowthIndicator maxentIndicator(String path) {
-        return MaxentGrowthIndicator.tryParse(new ResourceLocation(TerrariumEarth.ID, "vegetation/models/trees/" + path + ".lambdas"))
-                .orElse(GrowthIndicator.no());
+    public static class Indicators {
+        public static final GrowthIndicator MAHOGANY = maxentIndicator("mahogany").pow(1.8);
+        public static final GrowthIndicator PALM = maxentIndicator("palm").pow(3.0);
+        public static final GrowthIndicator EUCALYPTUS = maxentIndicator("eucalyptus").pow(3.0);
+
+        public static final GrowthIndicator MANGROVE = maxentIndicator("mangrove");
+        public static final GrowthIndicator WILLOW = maxentIndicator("willow").pow(2.0);
+        public static final GrowthIndicator EBONY = maxentIndicator("ebony").pow(1.6);
+        public static final GrowthIndicator FIR = maxentIndicator("fir");
+
+        private static GrowthIndicator maxentIndicator(String path) {
+            return MaxentGrowthIndicator.tryParse(new ResourceLocation(TerrariumEarth.ID, "vegetation/models/trees/" + path + ".lambdas"))
+                    .orElse(GrowthIndicator.no());
+        }
     }
 
     static class Generators {

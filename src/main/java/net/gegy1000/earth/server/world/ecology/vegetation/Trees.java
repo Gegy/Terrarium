@@ -67,7 +67,7 @@ public final class Trees {
 
     public static class Indicators {
         public static final GrowthIndicator ACACIA = maxentIndicator("acacia");
-        public static final GrowthIndicator BIRCH = maxentIndicator("birch").pow(1.0 / 2.0);
+        public static final GrowthIndicator BIRCH = maxentIndicator("birch").pow(1.0 / 1.3);
         public static final GrowthIndicator OAK = maxentIndicator("oak");
         public static final GrowthIndicator JUNGLE_LIKE = maxentIndicator("jungle_like");
         public static final GrowthIndicator SPRUCE = maxentIndicator("spruce");

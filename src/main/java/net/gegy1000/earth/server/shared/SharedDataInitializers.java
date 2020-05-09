@@ -23,6 +23,14 @@ public final class SharedDataInitializers {
 
     private static final List<SharedDataInitializer> INITIALIZERS = new ArrayList<>();
 
+    static {
+        SharedDataInitializers.add(
+                new ApiKeyInitializer(),
+                new ClimateRasterInitializer(),
+                new DataIndex1Initializer()
+        );
+    }
+
     public static void add(SharedDataInitializer... initializers) {
         Collections.addAll(INITIALIZERS, initializers);
     }

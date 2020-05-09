@@ -7,6 +7,8 @@ import com.google.gson.JsonParser;
 import net.gegy1000.gengen.api.GenericWorldType;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
+import net.gegy1000.terrarium.server.world.generator.customization.property.BooleanValue;
+import net.gegy1000.terrarium.server.world.generator.customization.property.NumberValue;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyValue;
 import net.minecraft.world.World;
@@ -19,9 +21,16 @@ public class GenerationSettings {
     private final ImmutableMap<String, PropertyKey<?>> keys;
     private final ImmutableMap<PropertyKey<?>, PropertyValue<?>> values;
 
-    protected GenerationSettings(Map<String, PropertyKey<?>> keys, Map<PropertyKey<?>, PropertyValue<?>> values) {
-        this.keys = ImmutableMap.copyOf(keys);
-        this.values = ImmutableMap.copyOf(values);
+    private GenerationSettings(
+            ImmutableMap<String, PropertyKey<?>> keys,
+            ImmutableMap<PropertyKey<?>, PropertyValue<?>> values
+    ) {
+        this.keys = keys;
+        this.values = values;
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
     public static GenerationSettings parse(World world) {
@@ -44,13 +53,12 @@ public class GenerationSettings {
         if (element instanceof JsonObject) {
             return GenerationSettings.parse(prototype, element.getAsJsonObject());
         } else {
-            return new GenerationSettings(new HashMap<>(), new HashMap<>());
+            return new GenerationSettings(ImmutableMap.of(), ImmutableMap.of());
         }
     }
 
     public static GenerationSettings parse(PropertyPrototype prototype, JsonObject root) {
-        Map<String, PropertyKey<?>> keys = new HashMap<>();
-        Map<PropertyKey<?>, PropertyValue<?>> values = new HashMap<>();
+        Builder builder = new Builder();
 
         for (Map.Entry<String, JsonElement> propertyEntry : root.entrySet()) {
             String identifier = propertyEntry.getKey();
@@ -68,11 +76,10 @@ public class GenerationSettings {
                 continue;
             }
 
-            keys.put(key.getIdentifier(), key);
-            values.put(key, value);
+            builder.putUnchecked(key, value);
         }
 
-        return new GenerationSettings(keys, values);
+        return builder.build();
     }
 
     public JsonObject serialize() {
@@ -165,6 +172,39 @@ public class GenerationSettings {
         keys.putAll(other.keys);
         values.putAll(other.values);
 
-        return new GenerationSettings(keys, values);
+        return new GenerationSettings(ImmutableMap.copyOf(keys), ImmutableMap.copyOf(values));
+    }
+
+    public static class Builder {
+        private final ImmutableMap.Builder<String, PropertyKey<?>> keys = ImmutableMap.builder();
+        private final ImmutableMap.Builder<PropertyKey<?>, PropertyValue<?>> values = ImmutableMap.builder();
+
+        private Builder() {
+        }
+
+        void putUnchecked(PropertyKey<?> key, PropertyValue<?> value) {
+            this.keys.put(key.getIdentifier(), key);
+            this.values.put(key, value);
+        }
+
+        public <T> void putValue(PropertyKey<T> key, PropertyValue<T> value) {
+            this.putUnchecked(key, value);
+        }
+
+        public void putDouble(PropertyKey<Number> key, double value) {
+            this.putValue(key, new NumberValue(value));
+        }
+
+        public void putInteger(PropertyKey<Number> key, int value) {
+            this.putValue(key, new NumberValue(value));
+        }
+
+        public void putBoolean(PropertyKey<Boolean> key, boolean value) {
+            this.putValue(key, new BooleanValue(value));
+        }
+
+        public GenerationSettings build() {
+            return new GenerationSettings(this.keys.build(), this.values.build());
+        }
     }
 }

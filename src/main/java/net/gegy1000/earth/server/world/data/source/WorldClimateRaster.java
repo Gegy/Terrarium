@@ -1,17 +1,17 @@
 package net.gegy1000.earth.server.world.data.source;
 
+import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import org.tukaani.xz.SingleXZInputStream;
 
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static net.gegy1000.earth.server.world.EarthWorldType.CLIMATE_SCALE;
+
 public final class WorldClimateRaster {
     public static final int WIDTH = 4320;
     public static final int HEIGHT = 2160;
-
-    private static final int OFFSET_X = WorldClimateRaster.WIDTH / 2;
-    private static final int OFFSET_Y = WorldClimateRaster.HEIGHT / 2;
 
     private static final float STANDARD_TEMPERATURE = 14.0F;
     private static final short STANDARD_RAINFALL = 600;
@@ -51,6 +51,11 @@ public final class WorldClimateRaster {
         return new WorldClimateRaster(meanTemperature, minTemperature, annualRainfall);
     }
 
+    public static CoordinateReference crs(double worldScale) {
+        double scale = CLIMATE_SCALE / worldScale;
+        return CoordinateReference.scaleAndOffset(scale, scale, -WIDTH / 2.0, -HEIGHT / 2.0);
+    }
+
     public float getMeanTemperature(int x, int y) {
         if (outOfBounds(x, y)) return STANDARD_TEMPERATURE;
 
@@ -85,12 +90,10 @@ public final class WorldClimateRaster {
     }
 
     private static int index(int x, int y) {
-        return (x + OFFSET_X) + (y + OFFSET_Y) * WIDTH;
+        return x + y * WIDTH;
     }
 
     private static boolean outOfBounds(int x, int y) {
-        x += OFFSET_X;
-        y += OFFSET_Y;
         return x < 0 || y < 0 || x >= WIDTH || y >= HEIGHT;
     }
 

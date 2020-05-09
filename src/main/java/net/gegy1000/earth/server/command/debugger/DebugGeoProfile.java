@@ -1,7 +1,7 @@
 package net.gegy1000.earth.server.command.debugger;
 
 import net.gegy1000.earth.server.world.cover.Cover;
-import net.gegy1000.earth.server.world.ecology.soil.SoilClass;
+import net.gegy1000.earth.server.world.ecology.soil.SoilSuborder;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
@@ -22,7 +22,7 @@ public final class DebugGeoProfile {
     public final float minTemperature;
     public final int annualRainfall;
 
-    public final SoilClass soilClass;
+    public final SoilSuborder soilSuborder;
     public final int siltContent;
     public final int sandContent;
     public final int clayContent;
@@ -34,7 +34,7 @@ public final class DebugGeoProfile {
             String name, double latitude, double longitude,
             float surfaceElevation, Cover cover,
             float meanTemperature, float minTemperature, int annualRainfall,
-            SoilClass soilClass,
+            SoilSuborder soilSuborder,
             int siltContent, int sandContent, int clayContent,
             int organicCarbonContent, int cationExchangeCapacity,
             float soilPh
@@ -47,7 +47,7 @@ public final class DebugGeoProfile {
         this.meanTemperature = meanTemperature;
         this.minTemperature = minTemperature;
         this.annualRainfall = annualRainfall;
-        this.soilClass = soilClass;
+        this.soilSuborder = soilSuborder;
         this.siltContent = siltContent;
         this.sandContent = sandContent;
         this.clayContent = clayContent;
@@ -65,14 +65,15 @@ public final class DebugGeoProfile {
 
         this.sendCategory(player, "General", p -> {
             p.sendMessage(makeValue("Surface Elevation", "%.1fm", this.surfaceElevation));
-            p.sendMessage(makeValue("Cover Type", "%s (%s)", this.cover, this.cover.id));
+            p.sendMessage(makeValue("Cover Class", "%s (#%s)", this.cover, this.cover.id));
             p.sendMessage(makeValue("Mean Temperature", "%.1fC", this.meanTemperature));
             p.sendMessage(makeValue("Min Temperature", "%.1fC", this.minTemperature));
             p.sendMessage(makeValue("Annual Rainfall", "%smm", this.annualRainfall));
         });
 
         this.sendCategory(player, "Soil", p -> {
-            p.sendMessage(makeValue("Soil Class", "%s (%s)", this.soilClass, this.soilClass.id));
+            p.sendMessage(makeValue("Soil Order", "%s", this.soilSuborder.order));
+            p.sendMessage(makeValue("Soil Suborder", "%s (#%s)", this.soilSuborder, this.soilSuborder.id));
             p.sendMessage(makeValue("Silt Content", "%s%%", this.siltContent));
             p.sendMessage(makeValue("Sand Content", "%s%%", this.sandContent));
             p.sendMessage(makeValue("Clay Content", "%s%%", this.clayContent));

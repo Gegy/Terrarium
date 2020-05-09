@@ -21,6 +21,8 @@ public class PlaceSearchWidget extends GuiTextField {
     private static final int SUGGESTION_COUNT = 3;
     private static final int SUGGESTION_HEIGHT = 20;
 
+    private static final long MIN_SUGGEST_INTERVAL_MS = 500;
+
     private final Geocoder geocoder;
     private final SearchHandler searchHandler;
 
@@ -33,6 +35,7 @@ public class PlaceSearchWidget extends GuiTextField {
 
     private boolean pause;
     private String lastSearchText;
+    private long lastSearchTextTime;
 
     public PlaceSearchWidget(int id, int x, int y, int width, int height, Geocoder geocoder, SearchHandler searchHandler) {
         super(id, Minecraft.getMinecraft().fontRenderer, x, y, width, height);
@@ -64,13 +67,17 @@ public class PlaceSearchWidget extends GuiTextField {
         String text = this.getText().trim();
         if (!this.pause && !text.isEmpty()) {
             if (!text.equals(this.lastSearchText) && this.queriedSuggestions == null) {
-                this.suggestions.clear();
-                try {
-                    this.queriedSuggestions = this.executor.submit(() -> this.geocoder.suggest(text));
-                } catch (Exception e) {
-                    Terrarium.LOGGER.error("Failed to get geocoder suggestions", e);
+                long time = System.currentTimeMillis();
+                if (time - this.lastSearchTextTime > MIN_SUGGEST_INTERVAL_MS) {
+                    this.suggestions.clear();
+                    try {
+                        this.queriedSuggestions = this.executor.submit(() -> this.geocoder.suggest(text));
+                    } catch (Exception e) {
+                        Terrarium.LOGGER.error("Failed to get geocoder suggestions", e);
+                    }
+                    this.lastSearchText = text;
+                    this.lastSearchTextTime = time;
                 }
-                this.lastSearchText = text;
             }
         } else {
             this.suggestions.clear();

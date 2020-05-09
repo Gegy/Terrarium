@@ -48,6 +48,7 @@ public final class BiomeClassifier {
         }
 
         if (context.isDry()) {
+            // TODO: choose desert based on soil?
             return context.isBarren() ? Biomes.DESERT : Biomes.SAVANNA;
         }
 

@@ -7,7 +7,8 @@ import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.cover.CoverColors;
 import net.gegy1000.earth.server.world.ecology.GrowthIndicator;
 import net.gegy1000.earth.server.world.ecology.GrowthPredictors;
-import net.gegy1000.earth.server.world.ecology.soil.SoilClass;
+import net.gegy1000.earth.server.world.ecology.soil.SoilColors;
+import net.gegy1000.earth.server.world.ecology.soil.SoilSuborder;
 import net.gegy1000.earth.server.world.ecology.vegetation.Vegetation;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
@@ -111,6 +112,19 @@ public final class GeoDebugger {
         });
     }
 
+    public RasterSampler soilSuborder(String name, EnumRaster.Sampler<SoilSuborder> sampler) {
+        return new RasterSampler(name, (dataCache, view) -> {
+            BufferedImage image = new BufferedImage(view.getWidth(), view.getHeight(), BufferedImage.TYPE_INT_RGB);
+
+            EnumRaster<SoilSuborder> raster = sampler.sample(dataCache, view);
+            raster.iterate((cover, x, y) -> {
+                image.setRGB(x, y, SoilColors.get(cover));
+            });
+
+            return image;
+        });
+    }
+
     public DebugGeoProfile[] takeTestProfiles() {
         DebugProfileTestSet.Location[] testSet = DebugProfileTestSet.get();
 
@@ -140,7 +154,7 @@ public final class GeoDebugger {
         float minTemperature = FloatRaster.sampler(EarthDataKeys.MIN_TEMPERATURE).sample(data, bx, bz);
         short annualRainfall = ShortRaster.sampler(EarthDataKeys.ANNUAL_RAINFALL).sample(data, bx, bz);
 
-        SoilClass soilClass = EnumRaster.sampler(EarthDataKeys.SOIL_CLASS, SoilClass.NO).sample(data, bx, bz);
+        SoilSuborder soilSuborder = EnumRaster.sampler(EarthDataKeys.SOIL_SUBORDER, SoilSuborder.NO).sample(data, bx, bz);
         int siltContent = UByteRaster.sampler(EarthDataKeys.SILT_CONTENT).sample(data, bx, bz);
         int sandContent = UByteRaster.sampler(EarthDataKeys.SAND_CONTENT).sample(data, bx, bz);
         int clayContent = UByteRaster.sampler(EarthDataKeys.CLAY_CONTENT).sample(data, bx, bz);
@@ -152,7 +166,7 @@ public final class GeoDebugger {
                 name, latitude, longitude,
                 elevation, cover,
                 meanTemperature, minTemperature, annualRainfall,
-                soilClass,
+                soilSuborder,
                 siltContent, sandContent, clayContent,
                 organicCarbonContent, cationExchangeCapacity, soilPh / 10.0F
         );

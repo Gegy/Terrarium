@@ -14,10 +14,6 @@ import net.gegy1000.earth.server.message.EarthPanoramaMessage;
 import net.gegy1000.earth.server.message.ModifyDataDownloadMessage;
 import net.gegy1000.earth.server.message.StartDataDownloadMessage;
 import net.gegy1000.earth.server.message.UpdateDownloadMessage;
-import net.gegy1000.earth.server.shared.ApiKeyInitializer;
-import net.gegy1000.earth.server.shared.ClimateRasterInitializer;
-import net.gegy1000.earth.server.shared.DataIndex1Initializer;
-import net.gegy1000.earth.server.shared.SharedDataInitializers;
 import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.earth.server.world.EarthWorldType;
 import net.gegy1000.earth.server.world.cover.CoverMarkers;
@@ -49,7 +45,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.Map;
 
 @Mod.EventBusSubscriber
-@Mod(modid = TerrariumEarth.ID, name = "Terrarium: Earth", version = TerrariumEarth.VERSION, acceptedMinecraftVersions = "[1.12]", dependencies = "required-after:terrarium@[0.1.0,]")
+@Mod(modid = TerrariumEarth.ID, name = "Terrarium: Earth", version = TerrariumEarth.VERSION, acceptedMinecraftVersions = "[1.12]", dependencies = "required-after:terrarium")
 public class TerrariumEarth {
     public static final String ID = "earth";
     public static final String VERSION = "1.1.0";
@@ -79,12 +75,6 @@ public class TerrariumEarth {
         CapabilityManager.INSTANCE.register(EarthWorld.class, new VoidStorage<>(), EarthWorld.None::new);
 
         PROXY.onPreInit();
-
-        SharedDataInitializers.add(
-                new ApiKeyInitializer(),
-                new ClimateRasterInitializer(),
-                new DataIndex1Initializer()
-        );
 
         NETWORK.registerMessage(EarthOpenMapMessage.Handler.class, EarthOpenMapMessage.class, 0, Side.CLIENT);
         NETWORK.registerMessage(EarthPanoramaMessage.Handler.class, EarthPanoramaMessage.class, 1, Side.CLIENT);

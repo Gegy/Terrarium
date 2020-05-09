@@ -11,7 +11,7 @@ geotool.earth.locate.success=You are at %s
 container.earth.geodebug.name=Earth Debug Toolbox
 
 gui.earth.credits=Terrarium data:
-gui.earth.spawnpoint=Set Spawn
+gui.earth.spawnpoint=Set Spawnpoint
 gui.earth.locate=Locate Player
 gui.earth.teleport=Teleport Player
 gui.earth.preload=Preload World

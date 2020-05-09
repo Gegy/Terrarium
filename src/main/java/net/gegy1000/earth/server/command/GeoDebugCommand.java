@@ -7,6 +7,7 @@ import net.gegy1000.earth.server.command.debugger.DebugGeoProfile;
 import net.gegy1000.earth.server.command.debugger.GeoDebugger;
 import net.gegy1000.earth.server.world.EarthDataKeys;
 import net.gegy1000.earth.server.world.cover.Cover;
+import net.gegy1000.earth.server.world.ecology.soil.SoilSuborder;
 import net.gegy1000.earth.server.world.ecology.vegetation.Trees;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
@@ -98,6 +99,9 @@ public class GeoDebugCommand extends CommandBase {
             this.writeRaster(player, debug.scaledHeatmap("clay_content", UByteRaster.sampler(EarthDataKeys.CLAY_CONTENT)));
             this.writeRaster(player, debug.scaledHeatmap("silt_content", UByteRaster.sampler(EarthDataKeys.SILT_CONTENT)));
             this.writeRaster(player, debug.scaledHeatmap("sand_content", UByteRaster.sampler(EarthDataKeys.SAND_CONTENT)));
+
+            EnumRaster.Sampler<SoilSuborder> sampler = EnumRaster.sampler(EarthDataKeys.SOIL_SUBORDER, SoilSuborder.NO);
+            this.writeRaster(player, debug.soilSuborder("soil", sampler));
         });
 
         builder.addElement(Items.FILLED_MAP, "Cover", () -> {
@@ -140,7 +144,7 @@ public class GeoDebugCommand extends CommandBase {
                 writer.println("Name,Latitude,Longitude," +
                         "Surface Elevation,Cover," +
                         "Mean Temperature,Min Temperature,Annual Rainfall," +
-                        "Soil Class," +
+                        "Soil Suborder," +
                         "Silt Content,Sand Content,Clay Content," +
                         "Organic Carbon Content,Cation Exchange Capacity,Soil pH"
                 );
@@ -149,7 +153,7 @@ public class GeoDebugCommand extends CommandBase {
                     writer.print(profile.name + "," + profile.latitude + "," + profile.longitude + ",");
                     writer.print(profile.surfaceElevation + "," + profile.cover + ",");
                     writer.print(profile.meanTemperature + "," + profile.minTemperature + "," + profile.annualRainfall + ",");
-                    writer.print(profile.soilClass + ",");
+                    writer.print(profile.soilSuborder + ",");
                     writer.print(profile.siltContent + "," + profile.sandContent + "," + profile.clayContent + ",");
                     writer.print(profile.organicCarbonContent + "," + profile.cationExchangeCapacity + "," + profile.soilPh + ",");
                     writer.println();

@@ -3,6 +3,7 @@ package net.gegy1000.earth.server.world;
 import net.gegy1000.earth.server.capability.EarthWorld;
 import net.gegy1000.earth.server.util.ForZoom;
 import net.gegy1000.earth.server.world.data.source.StdSource;
+import net.gegy1000.earth.server.world.data.source.WorldClimateRaster;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 
@@ -24,7 +25,7 @@ public final class EarthInitContext {
         double metersPerDegree = EarthWorld.EQUATOR_CIRCUMFERENCE / 360.0;
         this.lngLatCrs = CoordinateReference.lngLat(metersPerDegree / worldScale);
 
-        this.climateRasterCrs = CoordinateReference.scale(CLIMATE_SCALE / worldScale);
+        this.climateRasterCrs = WorldClimateRaster.crs(worldScale);
 
         this.stdRasterCrs = zoom -> StdSource.crs(worldScale, zoom);
     }

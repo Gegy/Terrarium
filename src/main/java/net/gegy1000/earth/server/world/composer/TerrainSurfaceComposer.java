@@ -2,9 +2,9 @@ package net.gegy1000.earth.server.world.composer;
 
 import net.gegy1000.earth.server.world.EarthDataKeys;
 import net.gegy1000.earth.server.world.cover.Cover;
-import net.gegy1000.earth.server.world.ecology.soil.SoilClass;
 import net.gegy1000.earth.server.world.ecology.soil.SoilConfig;
 import net.gegy1000.earth.server.world.ecology.soil.SoilLayer;
+import net.gegy1000.earth.server.world.ecology.soil.SoilSuborder;
 import net.gegy1000.earth.server.world.ecology.soil.SoilTexture;
 import net.gegy1000.earth.server.world.geography.Landform;
 import net.gegy1000.gengen.api.CubicPos;
@@ -50,13 +50,14 @@ public class TerrainSurfaceComposer implements SurfaceComposer {
                 EarthDataKeys.TERRAIN_HEIGHT,
                 EarthDataKeys.SLOPE,
                 EarthDataKeys.ORGANIC_CARBON_CONTENT,
-                EarthDataKeys.SOIL_CLASS,
+                EarthDataKeys.SOIL_SUBORDER,
                 EarthDataKeys.COVER,
                 EarthDataKeys.LANDFORM
         ).ifPresent(with -> {
             ShortRaster heightRaster = with.get(EarthDataKeys.TERRAIN_HEIGHT);
             UByteRaster slopeRaster = with.get(EarthDataKeys.SLOPE);
-            EnumRaster<SoilClass> soilClassRaster = with.get(EarthDataKeys.SOIL_CLASS);
+            ShortRaster organicCarbonContentRaster = with.get(EarthDataKeys.ORGANIC_CARBON_CONTENT);
+            EnumRaster<SoilSuborder> soilClassRaster = with.get(EarthDataKeys.SOIL_SUBORDER);
             EnumRaster<Cover> coverRaster = with.get(EarthDataKeys.COVER);
             EnumRaster<Landform> landformRaster = with.get(EarthDataKeys.LANDFORM);
 
@@ -75,11 +76,12 @@ public class TerrainSurfaceComposer implements SurfaceComposer {
                     this.random.setSeed(x + minX, minY, z + minZ);
 
                     int slope = slopeRaster.get(x, z);
-                    SoilClass soilClass = soilClassRaster.get(x, z);
+                    int organicCarbonContent = organicCarbonContentRaster.get(x, z);
+                    SoilSuborder soilSuborder = soilClassRaster.get(x, z);
                     Cover cover = coverRaster.get(x, z);
                     Landform landform = landformRaster.get(x, z);
 
-                    SoilConfig texture = SoilTexture.select(soilClass, slope, cover, landform);
+                    SoilConfig texture = SoilTexture.select(soilSuborder, slope, organicCarbonContent, cover, landform);
 
                     double depthNoise = this.depthBuffer[x + z * 16];
                     this.coverColumn(texture, pos, writer, x, z, height, (depthNoise + 4.0) / 8.0);

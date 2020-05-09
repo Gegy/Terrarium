@@ -27,13 +27,11 @@ public class LoadingScreenOverlay {
     private static final Minecraft MC = Minecraft.getMinecraft();
 
     private static final String[] ATTRIBUTION = new String[] {
-            TextFormatting.GRAY + "NASADEM: Courtesy NASA/JPL-Caltech",
-            TextFormatting.GRAY + "Land Cover: ESA Climate Change Initiative",
-            TextFormatting.GRAY + "GEBCO Compilation Group (2019): GEBCO 2019 Grid",
+            TextFormatting.GRAY + "NASADEM: NASA/JPL-Caltech",
+            TextFormatting.GRAY + "LandCover: ESA Climate Change Initiative",
+            TextFormatting.GRAY + "GEBCO Compilation Group",
             TextFormatting.GRAY + "SoilGrids: ISRIC World Soil Info",
-            TextFormatting.GRAY + "WorldClim",
-            TextFormatting.GRAY + "iNaturalist",
-            TextFormatting.GRAY + "\u00a9 OpenStreetMap Contributors"
+            TextFormatting.GRAY + "WorldClim, iNaturalist, OpenStreetMap"
     };
 
     private static Field framebufferField;
