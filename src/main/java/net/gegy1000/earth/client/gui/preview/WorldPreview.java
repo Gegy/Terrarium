@@ -2,7 +2,7 @@ package net.gegy1000.earth.client.gui.preview;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.gegy1000.earth.client.terrain.TerrainMesh;
-import net.gegy1000.earth.server.world.EarthDataKeys;
+import net.gegy1000.earth.server.world.EarthData;
 import net.gegy1000.earth.server.world.EarthInitContext;
 import net.gegy1000.justnow.future.Future;
 import net.gegy1000.terrarium.server.world.TerrariumDataInitializer;
@@ -79,7 +79,7 @@ public class WorldPreview {
         int height = maxZ - minZ + 1;
         return sampleData(dataGenerator, minX, minZ, width, height)
                 .andThen(data -> Future.spawnBlocking(EXECUTOR, () -> {
-                    ShortRaster heightRaster = data.getOrDefault(EarthDataKeys.TERRAIN_HEIGHT);
+                    ShortRaster heightRaster = data.getOrDefault(EarthData.TERRAIN_HEIGHT);
 
                     Vec3d translation = new Vec3d(
                             -heightRaster.getWidth() / 2.0,

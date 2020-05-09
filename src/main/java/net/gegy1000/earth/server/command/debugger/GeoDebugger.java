@@ -2,7 +2,7 @@ package net.gegy1000.earth.server.command.debugger;
 
 import com.google.common.base.Preconditions;
 import net.gegy1000.earth.server.capability.EarthWorld;
-import net.gegy1000.earth.server.world.EarthDataKeys;
+import net.gegy1000.earth.server.world.EarthData;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.cover.CoverColors;
 import net.gegy1000.earth.server.world.ecology.GrowthIndicator;
@@ -148,19 +148,19 @@ public final class GeoDebugger {
         int bx = MathHelper.floor(x);
         int bz = MathHelper.floor(z);
 
-        float elevation = FloatRaster.sampler(EarthDataKeys.ELEVATION_METERS).sample(data, bx, bz);
-        Cover cover = EnumRaster.sampler(EarthDataKeys.COVER, Cover.NO).sample(data, bx, bz);
-        float meanTemperature = FloatRaster.sampler(EarthDataKeys.MEAN_TEMPERATURE).sample(data, bx, bz);
-        float minTemperature = FloatRaster.sampler(EarthDataKeys.MIN_TEMPERATURE).sample(data, bx, bz);
-        short annualRainfall = ShortRaster.sampler(EarthDataKeys.ANNUAL_RAINFALL).sample(data, bx, bz);
+        float elevation = FloatRaster.sampler(EarthData.ELEVATION_METERS).sample(data, bx, bz);
+        Cover cover = EnumRaster.sampler(EarthData.COVER, Cover.NO).sample(data, bx, bz);
+        float meanTemperature = FloatRaster.sampler(EarthData.MEAN_TEMPERATURE).sample(data, bx, bz);
+        float minTemperature = FloatRaster.sampler(EarthData.MIN_TEMPERATURE).sample(data, bx, bz);
+        short annualRainfall = ShortRaster.sampler(EarthData.ANNUAL_RAINFALL).sample(data, bx, bz);
 
-        SoilSuborder soilSuborder = EnumRaster.sampler(EarthDataKeys.SOIL_SUBORDER, SoilSuborder.NO).sample(data, bx, bz);
-        int siltContent = UByteRaster.sampler(EarthDataKeys.SILT_CONTENT).sample(data, bx, bz);
-        int sandContent = UByteRaster.sampler(EarthDataKeys.SAND_CONTENT).sample(data, bx, bz);
-        int clayContent = UByteRaster.sampler(EarthDataKeys.CLAY_CONTENT).sample(data, bx, bz);
-        short organicCarbonContent = ShortRaster.sampler(EarthDataKeys.ORGANIC_CARBON_CONTENT).sample(data, bx, bz);
-        int cationExchangeCapacity = UByteRaster.sampler(EarthDataKeys.CATION_EXCHANGE_CAPACITY).sample(data, bx, bz);
-        int soilPh = UByteRaster.sampler(EarthDataKeys.SOIL_PH).sample(data, bx, bz);
+        SoilSuborder soilSuborder = EnumRaster.sampler(EarthData.SOIL_SUBORDER, SoilSuborder.NO).sample(data, bx, bz);
+        int siltContent = UByteRaster.sampler(EarthData.SILT_CONTENT).sample(data, bx, bz);
+        int sandContent = UByteRaster.sampler(EarthData.SAND_CONTENT).sample(data, bx, bz);
+        int clayContent = UByteRaster.sampler(EarthData.CLAY_CONTENT).sample(data, bx, bz);
+        short organicCarbonContent = ShortRaster.sampler(EarthData.ORGANIC_CARBON_CONTENT).sample(data, bx, bz);
+        int cationExchangeCapacity = UByteRaster.sampler(EarthData.CATION_EXCHANGE_CAPACITY).sample(data, bx, bz);
+        int soilPh = UByteRaster.sampler(EarthData.SOIL_PH).sample(data, bx, bz);
 
         return new DebugGeoProfile(
                 name, latitude, longitude,

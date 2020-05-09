@@ -1,6 +1,6 @@
 package net.gegy1000.earth.server.world.composer;
 
-import net.gegy1000.earth.server.world.EarthDataKeys;
+import net.gegy1000.earth.server.world.EarthData;
 import net.gegy1000.earth.server.world.ores.OreConfig;
 import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.gengen.api.writer.ChunkPopulationWriter;
@@ -16,7 +16,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 public class OreDecorationComposer implements DecorationComposer {
-    private final ShortRaster.Sampler heightSampler = ShortRaster.sampler(EarthDataKeys.TERRAIN_HEIGHT);
+    private final ShortRaster.Sampler heightSampler = ShortRaster.sampler(EarthData.TERRAIN_HEIGHT);
     private final SpatialRandom random;
 
     private final Collection<OreConfig> ores = new ArrayList<>();

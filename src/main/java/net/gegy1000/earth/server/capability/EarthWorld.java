@@ -1,7 +1,7 @@
 package net.gegy1000.earth.server.capability;
 
 import net.gegy1000.earth.TerrariumEarth;
-import net.gegy1000.earth.server.world.EarthDataKeys;
+import net.gegy1000.earth.server.world.EarthData;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
@@ -88,7 +88,7 @@ public interface EarthWorld extends ICapabilityProvider {
 
             ColumnDataCache dataCache = terrarium.getDataCache();
 
-            ShortRaster.Sampler sampler = ShortRaster.sampler(EarthDataKeys.TERRAIN_HEIGHT);
+            ShortRaster.Sampler sampler = ShortRaster.sampler(EarthData.TERRAIN_HEIGHT);
 
             short height = sampler.sample(dataCache, blockX, blockZ);
             return new BlockPos(blockX, height + 1, blockZ);

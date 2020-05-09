@@ -1,7 +1,7 @@
 package net.gegy1000.earth.server.world.ecology;
 
 import net.gegy1000.earth.TerrariumEarth;
-import net.gegy1000.earth.server.world.EarthDataKeys;
+import net.gegy1000.earth.server.world.EarthData;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.raster.FloatRaster;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
@@ -53,16 +53,16 @@ public final class GrowthPredictors {
         private final UByteRaster.Sampler sandContent;
 
         Sampler() {
-            this.elevation = FloatRaster.sampler(EarthDataKeys.ELEVATION_METERS).defaultValue(0);
-            this.annualRainfall = ShortRaster.sampler(EarthDataKeys.ANNUAL_RAINFALL).defaultValue(300);
-            this.meanTemperature = FloatRaster.sampler(EarthDataKeys.MEAN_TEMPERATURE).defaultValue(14.0F);
-            this.minTemperature = FloatRaster.sampler(EarthDataKeys.MIN_TEMPERATURE).defaultValue(10.0F);
-            this.cationExchangeCapacity = UByteRaster.sampler(EarthDataKeys.CATION_EXCHANGE_CAPACITY).defaultValue(10);
-            this.organicCarbonContent = ShortRaster.sampler(EarthDataKeys.ORGANIC_CARBON_CONTENT).defaultValue(10);
-            this.pH = UByteRaster.sampler(EarthDataKeys.SOIL_PH).defaultValue(70);
-            this.clayContent = UByteRaster.sampler(EarthDataKeys.CLAY_CONTENT).defaultValue(33);
-            this.siltContent = UByteRaster.sampler(EarthDataKeys.SILT_CONTENT).defaultValue(33);
-            this.sandContent = UByteRaster.sampler(EarthDataKeys.SAND_CONTENT).defaultValue(33);
+            this.elevation = FloatRaster.sampler(EarthData.ELEVATION_METERS).defaultValue(0);
+            this.annualRainfall = ShortRaster.sampler(EarthData.ANNUAL_RAINFALL).defaultValue(300);
+            this.meanTemperature = FloatRaster.sampler(EarthData.MEAN_TEMPERATURE).defaultValue(14.0F);
+            this.minTemperature = FloatRaster.sampler(EarthData.MIN_TEMPERATURE).defaultValue(10.0F);
+            this.cationExchangeCapacity = UByteRaster.sampler(EarthData.CATION_EXCHANGE_CAPACITY).defaultValue(10);
+            this.organicCarbonContent = ShortRaster.sampler(EarthData.ORGANIC_CARBON_CONTENT).defaultValue(10);
+            this.pH = UByteRaster.sampler(EarthData.SOIL_PH).defaultValue(70);
+            this.clayContent = UByteRaster.sampler(EarthData.CLAY_CONTENT).defaultValue(33);
+            this.siltContent = UByteRaster.sampler(EarthData.SILT_CONTENT).defaultValue(33);
+            this.sandContent = UByteRaster.sampler(EarthData.SAND_CONTENT).defaultValue(33);
         }
 
         public GrowthPredictors sample(ColumnDataCache dataCache, int x, int z) {

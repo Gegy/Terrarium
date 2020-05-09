@@ -1,6 +1,6 @@
 package net.gegy1000.earth.server.world.composer;
 
-import net.gegy1000.earth.server.world.EarthDataKeys;
+import net.gegy1000.earth.server.world.EarthData;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.cover.CoverMarkers;
 import net.gegy1000.gengen.api.CubicPos;
@@ -37,9 +37,9 @@ public final class FloodedSurfaceComposer implements SurfaceComposer {
 
     @Override
     public void composeSurface(ColumnData data, CubicPos pos, ChunkPrimeWriter writer) {
-        data.with(EarthDataKeys.TERRAIN_HEIGHT, EarthDataKeys.COVER).ifPresent(with -> {
-            ShortRaster heightRaster = with.get(EarthDataKeys.TERRAIN_HEIGHT);
-            EnumRaster<Cover> coverRaster = with.get(EarthDataKeys.COVER);
+        data.with(EarthData.TERRAIN_HEIGHT, EarthData.COVER).ifPresent(with -> {
+            ShortRaster heightRaster = with.get(EarthData.TERRAIN_HEIGHT);
+            EnumRaster<Cover> coverRaster = with.get(EarthData.COVER);
 
             Cover cover = coverRaster.get(8, 8);
             if (cover.is(CoverMarkers.FLOODED)) {

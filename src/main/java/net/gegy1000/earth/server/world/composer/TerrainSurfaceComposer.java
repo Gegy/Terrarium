@@ -1,6 +1,6 @@
 package net.gegy1000.earth.server.world.composer;
 
-import net.gegy1000.earth.server.world.EarthDataKeys;
+import net.gegy1000.earth.server.world.EarthData;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.ecology.soil.SoilConfig;
 import net.gegy1000.earth.server.world.ecology.soil.SoilLayer;
@@ -47,19 +47,19 @@ public class TerrainSurfaceComposer implements SurfaceComposer {
     @Override
     public void composeSurface(ColumnData data, CubicPos pos, ChunkPrimeWriter writer) {
         data.with(
-                EarthDataKeys.TERRAIN_HEIGHT,
-                EarthDataKeys.SLOPE,
-                EarthDataKeys.ORGANIC_CARBON_CONTENT,
-                EarthDataKeys.SOIL_SUBORDER,
-                EarthDataKeys.COVER,
-                EarthDataKeys.LANDFORM
+                EarthData.TERRAIN_HEIGHT,
+                EarthData.SLOPE,
+                EarthData.ORGANIC_CARBON_CONTENT,
+                EarthData.SOIL_SUBORDER,
+                EarthData.COVER,
+                EarthData.LANDFORM
         ).ifPresent(with -> {
-            ShortRaster heightRaster = with.get(EarthDataKeys.TERRAIN_HEIGHT);
-            UByteRaster slopeRaster = with.get(EarthDataKeys.SLOPE);
-            ShortRaster organicCarbonContentRaster = with.get(EarthDataKeys.ORGANIC_CARBON_CONTENT);
-            EnumRaster<SoilSuborder> soilClassRaster = with.get(EarthDataKeys.SOIL_SUBORDER);
-            EnumRaster<Cover> coverRaster = with.get(EarthDataKeys.COVER);
-            EnumRaster<Landform> landformRaster = with.get(EarthDataKeys.LANDFORM);
+            ShortRaster heightRaster = with.get(EarthData.TERRAIN_HEIGHT);
+            UByteRaster slopeRaster = with.get(EarthData.SLOPE);
+            ShortRaster organicCarbonContentRaster = with.get(EarthData.ORGANIC_CARBON_CONTENT);
+            EnumRaster<SoilSuborder> soilClassRaster = with.get(EarthData.SOIL_SUBORDER);
+            EnumRaster<Cover> coverRaster = with.get(EarthData.COVER);
+            EnumRaster<Landform> landformRaster = with.get(EarthData.LANDFORM);
 
             if (!this.containsSurface(pos, heightRaster)) return;
 

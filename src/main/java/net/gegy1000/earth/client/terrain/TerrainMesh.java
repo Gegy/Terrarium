@@ -1,7 +1,7 @@
 package net.gegy1000.earth.client.terrain;
 
 import com.google.common.collect.Sets;
-import net.gegy1000.earth.server.world.EarthDataKeys;
+import net.gegy1000.earth.server.world.EarthData;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.terrarium.client.render.TerrariumVertexFormats;
 import net.gegy1000.terrarium.server.world.data.ColumnData;
@@ -22,10 +22,10 @@ import java.util.Set;
 
 public final class TerrainMesh {
     public static final Set<DataKey<?>> REQUIRED_DATA = Sets.newHashSet(
-            EarthDataKeys.TERRAIN_HEIGHT,
-            EarthDataKeys.SLOPE,
-            EarthDataKeys.MIN_TEMPERATURE,
-            EarthDataKeys.COVER
+            EarthData.TERRAIN_HEIGHT,
+            EarthData.SLOPE,
+            EarthData.MIN_TEMPERATURE,
+            EarthData.COVER
     );
 
     private static final Vector3f NORMAL_STORE = new Vector3f();
@@ -58,10 +58,10 @@ public final class TerrainMesh {
     public static TerrainMesh build(ColumnData data, BufferBuilder builder, int granularity) {
         builder.begin(GL11.GL_QUADS, TerrariumVertexFormats.POSITION_COLOR_NORMAL);
 
-        ShortRaster heightRaster = data.getOrDefault(EarthDataKeys.TERRAIN_HEIGHT);
-        UByteRaster slopeRaster = data.getOrDefault(EarthDataKeys.SLOPE);
-        FloatRaster minTemperatureRaster = data.getOrDefault(EarthDataKeys.MIN_TEMPERATURE);
-        EnumRaster<Cover> coverRaster = data.getOrDefault(EarthDataKeys.COVER);
+        ShortRaster heightRaster = data.getOrDefault(EarthData.TERRAIN_HEIGHT);
+        UByteRaster slopeRaster = data.getOrDefault(EarthData.SLOPE);
+        FloatRaster minTemperatureRaster = data.getOrDefault(EarthData.MIN_TEMPERATURE);
+        EnumRaster<Cover> coverRaster = data.getOrDefault(EarthData.COVER);
 
         int width = heightRaster.getWidth();
         int height = heightRaster.getHeight();

@@ -56,9 +56,9 @@ public final class EarthDataInitializer implements TerrariumDataInitializer {
     public static final Zoomable<StdSource<UByteRaster>> SAND_CONTENT_SOURCE = SoilSources.sandContent();
     public static final Zoomable<StdSource<EnumRaster<SoilSuborder>>> SOIL_CLASS_SOURCE = SoilSources.soilClass();
 
-    private static final NoiseGeneratorPerlin TEMPERATURE_NOISE = new NoiseGeneratorPerlin(new Random(12345), 1);
+    public static final OceanPolygonSource OCEAN_SOURCE = new OceanPolygonSource();
 
-    private static final OceanPolygonSource OCEAN_SOURCE = new OceanPolygonSource();
+    private static final NoiseGeneratorPerlin TEMPERATURE_NOISE = new NoiseGeneratorPerlin(new Random(12345), 1);
 
     private final EarthInitContext ctx;
 
@@ -197,21 +197,21 @@ public final class EarthDataInitializer implements TerrariumDataInitializer {
 
         DataOp<EnumRaster<SoilSuborder>> soilClass = this.soilClass(worldScale);
 
-        builder.put(EarthDataKeys.TERRAIN_HEIGHT, terrainHeight);
-        builder.put(EarthDataKeys.ELEVATION_METERS, elevation);
-        builder.put(EarthDataKeys.SLOPE, slope);
-        builder.put(EarthDataKeys.COVER, cover);
-        builder.put(EarthDataKeys.LANDFORM, landforms);
-        builder.put(EarthDataKeys.WATER_LEVEL, waterLevel);
-        builder.put(EarthDataKeys.MEAN_TEMPERATURE, meanTemperature);
-        builder.put(EarthDataKeys.MIN_TEMPERATURE, minTemperature);
-        builder.put(EarthDataKeys.ANNUAL_RAINFALL, annualRainfall);
-        builder.put(EarthDataKeys.CATION_EXCHANGE_CAPACITY, cationExchangeCapacity);
-        builder.put(EarthDataKeys.ORGANIC_CARBON_CONTENT, organicCarbonContent);
-        builder.put(EarthDataKeys.SOIL_PH, soilPh);
-        builder.put(EarthDataKeys.CLAY_CONTENT, clayContent);
-        builder.put(EarthDataKeys.SILT_CONTENT, siltContent);
-        builder.put(EarthDataKeys.SAND_CONTENT, sandContent);
-        builder.put(EarthDataKeys.SOIL_SUBORDER, soilClass);
+        builder.put(EarthData.TERRAIN_HEIGHT, terrainHeight);
+        builder.put(EarthData.ELEVATION_METERS, elevation);
+        builder.put(EarthData.SLOPE, slope);
+        builder.put(EarthData.COVER, cover);
+        builder.put(EarthData.LANDFORM, landforms);
+        builder.put(EarthData.WATER_LEVEL, waterLevel);
+        builder.put(EarthData.MEAN_TEMPERATURE, meanTemperature);
+        builder.put(EarthData.MIN_TEMPERATURE, minTemperature);
+        builder.put(EarthData.ANNUAL_RAINFALL, annualRainfall);
+        builder.put(EarthData.CATION_EXCHANGE_CAPACITY, cationExchangeCapacity);
+        builder.put(EarthData.ORGANIC_CARBON_CONTENT, organicCarbonContent);
+        builder.put(EarthData.SOIL_PH, soilPh);
+        builder.put(EarthData.CLAY_CONTENT, clayContent);
+        builder.put(EarthData.SILT_CONTENT, siltContent);
+        builder.put(EarthData.SAND_CONTENT, sandContent);
+        builder.put(EarthData.SOIL_SUBORDER, soilClass);
     }
 }

@@ -58,10 +58,10 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
     private void addSurfaceComposers(CompositeTerrariumGenerator.Builder builder) {
         int heightOffset = this.ctx.settings.getInteger(HEIGHT_OFFSET);
 
-        ShortRaster.Sampler surfaceSampler = ShortRaster.sampler(EarthDataKeys.TERRAIN_HEIGHT);
+        ShortRaster.Sampler surfaceSampler = ShortRaster.sampler(EarthData.TERRAIN_HEIGHT);
         HeightFunction surfaceFunction = (x, z) -> surfaceSampler.sample(this.dataCache, x, z);
 
-        builder.addSurfaceComposer(new HeightmapSurfaceComposer(EarthDataKeys.TERRAIN_HEIGHT, Blocks.STONE.getDefaultState()));
+        builder.addSurfaceComposer(new HeightmapSurfaceComposer(EarthData.TERRAIN_HEIGHT, Blocks.STONE.getDefaultState()));
         builder.addSurfaceComposer(new WaterFillSurfaceComposer(Blocks.WATER.getDefaultState()));
         builder.addSurfaceComposer(new TerrainSurfaceComposer(this.world, Blocks.STONE.getDefaultState()));
 

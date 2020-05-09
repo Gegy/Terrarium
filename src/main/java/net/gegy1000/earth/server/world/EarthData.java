@@ -14,7 +14,7 @@ import net.minecraft.util.ResourceLocation;
 
 import java.util.function.Function;
 
-public final class EarthDataKeys {
+public final class EarthData {
     public static final DataKey<ShortRaster> TERRAIN_HEIGHT = create("terrain_height", ShortRaster::create);
     public static final DataKey<UByteRaster> SLOPE = create("slope", UByteRaster::create);
     public static final DataKey<EnumRaster<Cover>> COVER = create("cover", view -> EnumRaster.create(Cover.NO, view));

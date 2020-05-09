@@ -1,6 +1,6 @@
 package net.gegy1000.earth.server.world.composer;
 
-import net.gegy1000.earth.server.world.EarthDataKeys;
+import net.gegy1000.earth.server.world.EarthData;
 import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.gengen.api.writer.ChunkPopulationWriter;
 import net.gegy1000.gengen.util.SpatialRandom;
@@ -22,8 +22,8 @@ public class FreezeSurfaceComposer implements DecorationComposer {
 
     private static final int MAX_SLOPE = 60;
 
-    private final ShortRaster.Sampler heightSampler = ShortRaster.sampler(EarthDataKeys.TERRAIN_HEIGHT);
-    private final UByteRaster.Sampler slopeSampler = UByteRaster.sampler(EarthDataKeys.SLOPE);
+    private final ShortRaster.Sampler heightSampler = ShortRaster.sampler(EarthData.TERRAIN_HEIGHT);
+    private final UByteRaster.Sampler slopeSampler = UByteRaster.sampler(EarthData.SLOPE);
 
     private final SpatialRandom random;
 

@@ -54,7 +54,7 @@ public final class TerrariumRasterReader {
 
     private static <T extends IntegerRaster<?>> void readChunkV0(
             InputStream input,
-            T destRaster,
+            T dstRaster,
             RasterFormat<T> rasterFormat
     ) throws IOException {
         DataInputStream dataIn = new DataInputStream(input);
@@ -65,12 +65,12 @@ public final class TerrariumRasterReader {
         RasterFilter filter = RasterFilter.byId(dataIn.readUnsignedByte());
 
         DataView srcView = DataView.rect(chunkX, chunkY, chunkWidth, chunkHeight);
-        DataView destView = destRaster.asView();
+        DataView dstView = dstRaster.asView();
 
         T rawRaster = rasterFormat.read(new SingleXZInputStream(input), chunkWidth, chunkHeight);
         T filteredRaster = rasterFormat.create(srcView);
         filter.apply(rawRaster, filteredRaster);
 
-        Raster.rasterCopy(filteredRaster, srcView, destRaster, destView);
+        Raster.rasterCopy(filteredRaster, srcView, dstRaster, dstView);
     }
 }

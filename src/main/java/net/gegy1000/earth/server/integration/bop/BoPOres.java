@@ -3,7 +3,7 @@ package net.gegy1000.earth.server.integration.bop;
 import biomesoplenty.api.block.BOPBlocks;
 import biomesoplenty.api.enums.BOPGems;
 import biomesoplenty.common.block.BlockBOPGem;
-import net.gegy1000.earth.server.world.EarthDataKeys;
+import net.gegy1000.earth.server.world.EarthData;
 import net.gegy1000.earth.server.world.composer.OreDecorationComposer;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.cover.CoverMarkers;
@@ -16,11 +16,11 @@ import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import static net.gegy1000.earth.server.world.Temperature.MIN_FREEZE;
 
 public final class BoPOres {
-    private static final FloatRaster.Sampler MEAN_TEMPERATURE = FloatRaster.sampler(EarthDataKeys.MEAN_TEMPERATURE);
-    private static final FloatRaster.Sampler MIN_TEMPERATURE = FloatRaster.sampler(EarthDataKeys.MIN_TEMPERATURE);
-    private static final ShortRaster.Sampler ANNUAL_RAINFALL = ShortRaster.sampler(EarthDataKeys.ANNUAL_RAINFALL);
-    private static final FloatRaster.Sampler ELEVATION = FloatRaster.sampler(EarthDataKeys.ELEVATION_METERS);
-    private static final EnumRaster.Sampler<Cover> COVER = EnumRaster.sampler(EarthDataKeys.COVER, Cover.NO);
+    private static final FloatRaster.Sampler MEAN_TEMPERATURE = FloatRaster.sampler(EarthData.MEAN_TEMPERATURE);
+    private static final FloatRaster.Sampler MIN_TEMPERATURE = FloatRaster.sampler(EarthData.MIN_TEMPERATURE);
+    private static final ShortRaster.Sampler ANNUAL_RAINFALL = ShortRaster.sampler(EarthData.ANNUAL_RAINFALL);
+    private static final FloatRaster.Sampler ELEVATION = FloatRaster.sampler(EarthData.ELEVATION_METERS);
+    private static final EnumRaster.Sampler<Cover> COVER = EnumRaster.sampler(EarthData.COVER, Cover.NO);
 
     public static final OreConfig TANZANITE = OreConfig.builder()
             .ore(BOPBlocks.gem_ore.getDefaultState().withProperty(BlockBOPGem.VARIANT, BOPGems.TANZANITE))

@@ -5,7 +5,7 @@ import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.capability.EarthWorld;
 import net.gegy1000.earth.server.command.debugger.DebugGeoProfile;
 import net.gegy1000.earth.server.command.debugger.GeoDebugger;
-import net.gegy1000.earth.server.world.EarthDataKeys;
+import net.gegy1000.earth.server.world.EarthData;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.ecology.soil.SoilSuborder;
 import net.gegy1000.earth.server.world.ecology.vegetation.Trees;
@@ -96,16 +96,16 @@ public class GeoDebugCommand extends CommandBase {
         });
 
         builder.addElement(Items.CLAY_BALL, "Soil", () -> {
-            this.writeRaster(player, debug.scaledHeatmap("clay_content", UByteRaster.sampler(EarthDataKeys.CLAY_CONTENT)));
-            this.writeRaster(player, debug.scaledHeatmap("silt_content", UByteRaster.sampler(EarthDataKeys.SILT_CONTENT)));
-            this.writeRaster(player, debug.scaledHeatmap("sand_content", UByteRaster.sampler(EarthDataKeys.SAND_CONTENT)));
+            this.writeRaster(player, debug.scaledHeatmap("clay_content", UByteRaster.sampler(EarthData.CLAY_CONTENT)));
+            this.writeRaster(player, debug.scaledHeatmap("silt_content", UByteRaster.sampler(EarthData.SILT_CONTENT)));
+            this.writeRaster(player, debug.scaledHeatmap("sand_content", UByteRaster.sampler(EarthData.SAND_CONTENT)));
 
-            EnumRaster.Sampler<SoilSuborder> sampler = EnumRaster.sampler(EarthDataKeys.SOIL_SUBORDER, SoilSuborder.NO);
+            EnumRaster.Sampler<SoilSuborder> sampler = EnumRaster.sampler(EarthData.SOIL_SUBORDER, SoilSuborder.NO);
             this.writeRaster(player, debug.soilSuborder("soil", sampler));
         });
 
         builder.addElement(Items.FILLED_MAP, "Cover", () -> {
-            EnumRaster.Sampler<Cover> sampler = EnumRaster.sampler(EarthDataKeys.COVER, Cover.NO);
+            EnumRaster.Sampler<Cover> sampler = EnumRaster.sampler(EarthData.COVER, Cover.NO);
             this.writeRaster(player, debug.cover("cover", sampler));
         });
 

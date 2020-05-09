@@ -1,6 +1,6 @@
 package net.gegy1000.earth.server.world.composer;
 
-import net.gegy1000.earth.server.world.EarthDataKeys;
+import net.gegy1000.earth.server.world.EarthData;
 import net.gegy1000.earth.server.world.biome.BiomeClassifier;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.geography.Landform;
@@ -22,17 +22,17 @@ public final class EarthBiomeComposer implements BiomeComposer {
     @Override
     public Biome[] composeBiomes(ColumnData data, ChunkPos columnPos) {
         return data.with(
-                EarthDataKeys.COVER,
-                EarthDataKeys.LANDFORM,
-                EarthDataKeys.MIN_TEMPERATURE,
-                EarthDataKeys.MEAN_TEMPERATURE,
-                EarthDataKeys.ANNUAL_RAINFALL
+                EarthData.COVER,
+                EarthData.LANDFORM,
+                EarthData.MIN_TEMPERATURE,
+                EarthData.MEAN_TEMPERATURE,
+                EarthData.ANNUAL_RAINFALL
         ).map(with -> {
-            EnumRaster<Cover> coverRaster = with.get(EarthDataKeys.COVER);
-            EnumRaster<Landform> landformRaster = with.get(EarthDataKeys.LANDFORM);
-            FloatRaster minTemperatureRaster = with.get(EarthDataKeys.MIN_TEMPERATURE);
-            FloatRaster meanTemperatureRaster = with.get(EarthDataKeys.MEAN_TEMPERATURE);
-            ShortRaster rainfallRaster = with.get(EarthDataKeys.ANNUAL_RAINFALL);
+            EnumRaster<Cover> coverRaster = with.get(EarthData.COVER);
+            EnumRaster<Landform> landformRaster = with.get(EarthData.LANDFORM);
+            FloatRaster minTemperatureRaster = with.get(EarthData.MIN_TEMPERATURE);
+            FloatRaster meanTemperatureRaster = with.get(EarthData.MEAN_TEMPERATURE);
+            ShortRaster rainfallRaster = with.get(EarthData.ANNUAL_RAINFALL);
 
             for (int z = 0; z < 16; z++) {
                 for (int x = 0; x < 16; x++) {

@@ -1,6 +1,6 @@
 package net.gegy1000.earth.server.world.composer;
 
-import net.gegy1000.earth.server.world.EarthDataKeys;
+import net.gegy1000.earth.server.world.EarthData;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.cover.CoverMarkers;
 import net.gegy1000.earth.server.world.cover.CoverSelectors;
@@ -26,7 +26,7 @@ public final class EarthGrassComposer implements DecorationComposer {
 
     private final SpatialRandom random;
 
-    private final EnumRaster.Sampler<Cover> coverSampler = EnumRaster.sampler(EarthDataKeys.COVER, Cover.NO);
+    private final EnumRaster.Sampler<Cover> coverSampler = EnumRaster.sampler(EarthData.COVER, Cover.NO);
 
     private final BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
 
