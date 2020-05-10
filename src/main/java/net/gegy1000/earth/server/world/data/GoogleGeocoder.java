@@ -8,6 +8,7 @@ import com.google.gson.JsonParser;
 import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.world.data.source.Geocoder;
+import org.apache.http.HttpHeaders;
 
 import javax.annotation.Nullable;
 import javax.vecmath.Vector2d;
@@ -38,8 +39,8 @@ public class GoogleGeocoder implements Geocoder {
         HttpURLConnection connection = (HttpURLConnection) new URL(String.format(GEOCODER_ADDRESS, URLEncoder.encode(place, "UTF-8"), key)).openConnection();
         connection.setRequestMethod("GET");
 
-        connection.setRequestProperty("User-Agent", "terrarium-earth");
-        connection.setRequestProperty("Referer", "https://github.com/gegy1000/Terrarium");
+        connection.setRequestProperty(HttpHeaders.USER_AGENT, "terrarium");
+        connection.setRequestProperty(HttpHeaders.REFERER, "https://github.com/gegy1000/Terrarium");
 
         connection.setConnectTimeout(4000);
         connection.setReadTimeout(30000);
@@ -79,8 +80,8 @@ public class GoogleGeocoder implements Geocoder {
         HttpURLConnection connection = (HttpURLConnection) new URL(String.format(SUGGESTION_ADDRESS, URLEncoder.encode(place, "UTF-8"), key)).openConnection();
         connection.setRequestMethod("GET");
 
-        connection.setRequestProperty("User-Agent", "terrarium-earth");
-        connection.setRequestProperty("Referer", "https://github.com/gegy1000/Terrarium");
+        connection.setRequestProperty(HttpHeaders.USER_AGENT, "terrarium");
+        connection.setRequestProperty(HttpHeaders.REFERER, "https://github.com/gegy1000/Terrarium");
 
         connection.setConnectTimeout(2000);
         connection.setReadTimeout(30000);

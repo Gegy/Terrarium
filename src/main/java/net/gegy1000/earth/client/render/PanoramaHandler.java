@@ -2,8 +2,8 @@ package net.gegy1000.earth.client.render;
 
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.config.TerrariumEarthConfig;
+import net.gegy1000.earth.server.world.data.GooglePanorama;
 import net.gegy1000.terrarium.server.util.FlipFlopTimer;
-import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
@@ -118,18 +118,20 @@ public class PanoramaHandler {
     }
 
     public static class Located implements State {
-        private final String id;
-        private final Coordinate coord;
+        private final GooglePanorama panorama;
+        private final double blockX;
+        private final double blockZ;
 
-        public Located(String id, Coordinate coord) {
-            this.id = id;
-            this.coord = coord;
+        public Located(GooglePanorama panorama, double blockX, double blockZ) {
+            this.panorama = panorama;
+            this.blockX = blockX;
+            this.blockZ = blockZ;
         }
 
         @Override
         public void renderWorld(Minecraft mc, float partialTicks, float deltaTicks) {
-            double deltaX = this.coord.getBlockX() - TileEntityRendererDispatcher.staticPlayerX;
-            double deltaZ = this.coord.getBlockZ() - TileEntityRendererDispatcher.staticPlayerZ;
+            double deltaX = this.blockX - TileEntityRendererDispatcher.staticPlayerX;
+            double deltaZ = this.blockZ - TileEntityRendererDispatcher.staticPlayerZ;
             double y = -TileEntityRendererDispatcher.staticPlayerY;
             long worldTime = mc.world.getTotalWorldTime();
 
@@ -145,10 +147,10 @@ public class PanoramaHandler {
         @Nullable
         @Override
         public State update(World world, EntityPlayer player) {
-            double deltaX = player.posX - this.coord.getBlockX();
-            double deltaZ = player.posZ - this.coord.getBlockZ();
+            double deltaX = player.posX - this.blockX;
+            double deltaZ = player.posZ - this.blockZ;
             if (deltaX * deltaX + deltaZ * deltaZ < IMMERSION_MIN_DISTANCE) {
-                return new Immersed(this.id, this.coord.getBlockX(), player.posY, this.coord.getBlockZ());
+                return new Immersed(this.panorama, this.blockX, player.posY, this.blockZ);
             }
             return this;
         }
@@ -158,14 +160,14 @@ public class PanoramaHandler {
         private static final int SPHERE_RESOLUTION = 32;
         private static final float SPHERE_RADIUS = 8.0F;
 
-        private final String id;
+        private final GooglePanorama panoramaId;
 
         private final double originX;
         private final double originY;
         private final double originZ;
 
         private Panorama basePanorama;
-        private Panorama panorama;
+        private Panorama fullPanorama;
 
         private final Sphere sphere;
         private int sphereDisplayList = Integer.MIN_VALUE;
@@ -173,12 +175,12 @@ public class PanoramaHandler {
         private final FlipFlopTimer fadeAnimation = new FlipFlopTimer(0.1F);
         private boolean loadedBase;
 
-        public Immersed(String id, double originX, double originY, double originZ) {
-            this.id = id;
+        public Immersed(GooglePanorama panoramaId, double originX, double originY, double originZ) {
+            this.panoramaId = panoramaId;
             this.originX = originX;
             this.originY = originY;
             this.originZ = originZ;
-            this.basePanorama = new Panorama(id, "base", 0);
+            this.basePanorama = new Panorama(panoramaId, "base", 0);
             this.sphere = new Sphere();
             this.sphere.setTextureFlag(true);
             this.sphere.setOrientation(GLU.GLU_INSIDE);
@@ -224,8 +226,8 @@ public class PanoramaHandler {
                 GlStateManager.callList(this.sphereDisplayList);
             }
 
-            if (this.panorama != null) {
-                mc.getTextureManager().bindTexture(this.panorama.getTextureLocation());
+            if (this.fullPanorama != null) {
+                mc.getTextureManager().bindTexture(this.fullPanorama.getTextureLocation());
                 GlStateManager.callList(this.sphereDisplayList);
             }
 
@@ -255,9 +257,9 @@ public class PanoramaHandler {
             }
 
             if (this.fadeAnimation.isRight() && this.loadedBase) {
-                if (this.panorama == null) {
-                    this.panorama = new Panorama(this.id, "full", TerrariumEarthConfig.streetViewZoom);
-                } else if (this.basePanorama != null && this.panorama.hasLoaded()) {
+                if (this.fullPanorama == null) {
+                    this.fullPanorama = new Panorama(this.panoramaId, "full", TerrariumEarthConfig.streetViewZoom);
+                } else if (this.basePanorama != null && this.fullPanorama.hasLoaded()) {
                     this.basePanorama.delete();
                     this.basePanorama = null;
                 }
@@ -289,8 +291,8 @@ public class PanoramaHandler {
             if (this.basePanorama != null) {
                 this.basePanorama.delete();
             }
-            if (this.panorama != null) {
-                this.panorama.delete();
+            if (this.fullPanorama != null) {
+                this.fullPanorama.delete();
             }
             GlStateManager.glDeleteLists(this.sphereDisplayList, 1);
         }

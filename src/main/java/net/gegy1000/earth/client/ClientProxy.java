@@ -6,10 +6,10 @@ import net.gegy1000.earth.client.gui.EarthPreloadGui;
 import net.gegy1000.earth.client.gui.EarthPreloadProgressGui;
 import net.gegy1000.earth.client.render.LoadingScreenOverlay;
 import net.gegy1000.earth.client.render.PanoramaHandler;
-import net.gegy1000.earth.client.render.PanoramaLookupHandler;
 import net.gegy1000.earth.server.ServerProxy;
 import net.gegy1000.earth.server.capability.EarthWorld;
 import net.gegy1000.earth.server.message.EarthOpenMapMessage;
+import net.gegy1000.earth.server.world.data.GooglePanorama;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
@@ -78,7 +78,7 @@ public class ClientProxy extends ServerProxy {
 
             Thread thread = new Thread(() -> {
                 try {
-                    PanoramaLookupHandler.Result result = PanoramaLookupHandler.queryPanorama(latitude, longitude);
+                    GooglePanorama result = GooglePanorama.lookup(latitude, longitude, 150.0);
                     if (result != null) {
                         Minecraft.getMinecraft().addScheduledTask(() -> this.setPanoramaState(earth, player, result));
                     } else {
@@ -95,8 +95,8 @@ public class ClientProxy extends ServerProxy {
         }
     }
 
-    private void setPanoramaState(EarthWorld earth, EntityPlayer player, PanoramaLookupHandler.Result result) {
-        Coordinate coord = new Coordinate(earth.getCrs(), result.getLongitude(), result.getLatitude());
+    private void setPanoramaState(EarthWorld earth, EntityPlayer player, GooglePanorama panorama) {
+        Coordinate coord = earth.getCrs().coord(panorama.getLongitude(), panorama.getLatitude());
         double blockX = coord.getBlockX();
         double blockZ = coord.getBlockZ();
 
@@ -104,10 +104,10 @@ public class ClientProxy extends ServerProxy {
         double deltaZ = player.posZ - blockZ;
         if (deltaX * deltaX + deltaZ * deltaZ < PanoramaHandler.IMMERSION_MIN_DISTANCE) {
             player.sendStatusMessage(new TextComponentTranslation("status.earth.panorama.immersed"), true);
-            PanoramaHandler.setState(new PanoramaHandler.Immersed(result.getId(), blockX, player.posY, blockZ));
+            PanoramaHandler.setState(new PanoramaHandler.Immersed(panorama, blockX, player.posY, blockZ));
         } else {
             player.sendStatusMessage(new TextComponentTranslation("status.earth.panorama.found"), true);
-            PanoramaHandler.setState(new PanoramaHandler.Located(result.getId(), coord));
+            PanoramaHandler.setState(new PanoramaHandler.Located(panorama, blockX, blockZ));
         }
     }
 }

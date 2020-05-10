@@ -1,10 +1,10 @@
-package net.gegy1000.earth.client.render;
+package net.gegy1000.earth.server.world.data;
 
 import com.google.common.base.Strings;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.gegy1000.earth.server.shared.SharedEarthData;
-import net.gegy1000.earth.server.world.data.EarthApiKeys;
+import org.apache.http.HttpHeaders;
 
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
@@ -16,27 +16,37 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class PanoramaLookupHandler {
-    private static final String METADATA_ADDRESS = "https://maps.googleapis.com/maps/api/streetview/metadata?location=%.5f,%.5f&radius=150&source=outdoor&key=%s";
+public final class GooglePanorama {
+    private static final String METADATA_ADDRESS = "https://maps.googleapis.com/maps/api/streetview/metadata?location=%.5f,%.5f&radius=%.5f&source=outdoor&key=%s";
     private static final String PANORAMA_ADDRESS = "https://geo0.ggpht.com/cbk?cb_client=maps_sv.tactile&panoid=%s&output=tile&x=%s&y=%s&zoom=%s&nbt&fover=2";
 
-    private static final String FAKE_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; …) Gecko/20100101 Firefox/61.0";
+    private static final String BROWSER_UA = "Mozilla/5.0 (Windows NT 10.0; …) Gecko/20100101 Firefox/61.0";
 
     private static final JsonParser JSON_PARSER = new JsonParser();
 
+    private final String id;
+    private final double latitude;
+    private final double longitude;
+
+    GooglePanorama(String id, double latitude, double longitude) {
+        this.id = id;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
+
     @Nullable
-    public static Result queryPanorama(double latitude, double longitude) throws IOException {
+    public static GooglePanorama lookup(double latitude, double longitude, double radius) throws IOException {
         EarthApiKeys keys = SharedEarthData.instance().get(SharedEarthData.API_KEYS);
         if (keys == null) return null;
 
         String key = keys.getStreetviewKey();
         if (Strings.isNullOrEmpty(key)) return null;
 
-        HttpURLConnection connection = (HttpURLConnection) new URL(String.format(METADATA_ADDRESS, latitude, longitude, key)).openConnection();
+        HttpURLConnection connection = (HttpURLConnection) new URL(String.format(METADATA_ADDRESS, latitude, longitude, radius, key)).openConnection();
         connection.setRequestMethod("GET");
 
-        connection.setRequestProperty("User-Agent", "terrarium-earth");
-        connection.setRequestProperty("Referer", "https://github.com/gegy1000/Terrarium");
+        connection.setRequestProperty(HttpHeaders.USER_AGENT, "terrarium");
+        connection.setRequestProperty(HttpHeaders.REFERER, "https://github.com/gegy1000/Terrarium");
 
         connection.setConnectTimeout(4000);
         connection.setReadTimeout(30000);
@@ -44,7 +54,7 @@ public class PanoramaLookupHandler {
         try (InputStreamReader input = new InputStreamReader(new BufferedInputStream(connection.getInputStream()))) {
             JsonObject root = (JsonObject) JSON_PARSER.parse(input);
 
-            PanoramaLookupHandler.handleResponseStatus(root);
+            handleResponseStatus(root);
 
             if (root.has("location")) {
                 JsonObject location = root.getAsJsonObject("location");
@@ -53,7 +63,7 @@ public class PanoramaLookupHandler {
 
                 String panoId = root.get("pano_id").getAsString();
 
-                return new Result(panoId, panoLat, panoLon);
+                return new GooglePanorama(panoId, panoLat, panoLon);
             }
         }
 
@@ -71,47 +81,36 @@ public class PanoramaLookupHandler {
         }
     }
 
-    public static BufferedImage loadPanoramaTile(String panoramaId, int tileX, int tileY, int zoom) throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) new URL(String.format(PANORAMA_ADDRESS, panoramaId, tileX, tileY, zoom)).openConnection();
+    public String getId() {
+        return this.id;
+    }
+
+    public double getLatitude() {
+        return this.latitude;
+    }
+
+    public double getLongitude() {
+        return this.longitude;
+    }
+
+    public BufferedImage loadTile(int tileX, int tileY, int zoom) throws IOException {
+        URL url = new URL(String.format(PANORAMA_ADDRESS, this.id, tileX, tileY, zoom));
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
 
-        connection.setRequestProperty("Accept", "*/*");
-        connection.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
-        connection.setRequestProperty("Connection", "keep-alive");
-        connection.setRequestProperty("Host", "geo0.ggpht.com");
+        connection.setRequestProperty(HttpHeaders.ACCEPT, "*/*");
+        connection.setRequestProperty(HttpHeaders.ACCEPT_LANGUAGE, "en-US,en;q=0.5");
+        connection.setRequestProperty(HttpHeaders.CONNECTION, "keep-alive");
+        connection.setRequestProperty(HttpHeaders.HOST, "geo0.ggpht.com");
         connection.setRequestProperty("Origin", "https://www.google.com");
-        connection.setRequestProperty("Referer", "https://www.google.com/");
-        connection.setRequestProperty("User-Agent", FAKE_USER_AGENT);
+        connection.setRequestProperty(HttpHeaders.REFERER, "https://www.google.com/");
+        connection.setRequestProperty(HttpHeaders.USER_AGENT, BROWSER_UA);
 
         connection.setConnectTimeout(4000);
         connection.setReadTimeout(30000);
 
         try (InputStream input = new BufferedInputStream(connection.getInputStream())) {
             return ImageIO.read(input);
-        }
-    }
-
-    public static class Result {
-        private final String id;
-        private final double latitude;
-        private final double longitude;
-
-        public Result(String id, double latitude, double longitude) {
-            this.id = id;
-            this.latitude = latitude;
-            this.longitude = longitude;
-        }
-
-        public String getId() {
-            return this.id;
-        }
-
-        public double getLatitude() {
-            return this.latitude;
-        }
-
-        public double getLongitude() {
-            return this.longitude;
         }
     }
 }

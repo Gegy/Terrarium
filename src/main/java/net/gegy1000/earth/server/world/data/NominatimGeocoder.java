@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.world.data.source.Geocoder;
+import org.apache.http.HttpHeaders;
 
 import javax.vecmath.Vector2d;
 import java.io.BufferedInputStream;
@@ -26,8 +27,8 @@ public class NominatimGeocoder implements Geocoder {
         HttpURLConnection connection = (HttpURLConnection) new URL(String.format(GEOCODER_ADDRESS, encodedPlace)).openConnection();
         connection.setRequestMethod("GET");
 
-        connection.setRequestProperty("User-Agent", "terrarium-earth");
-        connection.setRequestProperty("Referer", "https://github.com/gegy1000/Terrarium");
+        connection.setRequestProperty(HttpHeaders.USER_AGENT, "terrarium-earth");
+        connection.setRequestProperty(HttpHeaders.REFERER, "https://github.com/gegy1000/Terrarium");
 
         connection.setConnectTimeout(4000);
         connection.setReadTimeout(30000);

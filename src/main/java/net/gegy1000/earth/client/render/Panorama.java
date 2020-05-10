@@ -1,6 +1,7 @@
 package net.gegy1000.earth.client.render;
 
 import net.gegy1000.earth.TerrariumEarth;
+import net.gegy1000.earth.server.world.data.GooglePanorama;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.util.ResourceLocation;
@@ -14,7 +15,7 @@ public class Panorama {
     private static final int BASE_PANORAMA_WIDTH = 416;
     private static final int TILE_SIZE = 512;
 
-    private final String id;
+    private final GooglePanorama panorama;
     private final ResourceLocation textureLocation;
     private final DynamicTexture texture;
 
@@ -25,9 +26,9 @@ public class Panorama {
     private final AtomicBoolean textureDirty = new AtomicBoolean();
     private final AtomicBoolean loaded = new AtomicBoolean();
 
-    public Panorama(String id, String suffix, int zoom) {
-        this.id = id;
-        this.textureLocation = new ResourceLocation(TerrariumEarth.ID, "panorama_" + id.hashCode() + "_" + suffix);
+    public Panorama(GooglePanorama panorama, String suffix, int zoom) {
+        this.panorama = panorama;
+        this.textureLocation = new ResourceLocation(TerrariumEarth.ID, "panorama_" + panorama.getId() + "_" + suffix);
 
         this.zoom = zoom;
         this.stitchedWidth = (1 << this.zoom) * BASE_PANORAMA_WIDTH;
@@ -48,7 +49,7 @@ public class Panorama {
         for (int tileY = 0; tileY < tileCountY; tileY++) {
             for (int tileX = 0; tileX < tileCountX; tileX++) {
                 try {
-                    BufferedImage image = PanoramaLookupHandler.loadPanoramaTile(this.id, tileX, tileY, this.zoom);
+                    BufferedImage image = this.panorama.loadTile(tileX, tileY, this.zoom);
                     this.stitchTile(tileX, tileY, image);
                 } catch (Exception e) {
                     TerrariumEarth.LOGGER.error("Failed to load panorama tile at {} {}", tileX, tileY, e);
