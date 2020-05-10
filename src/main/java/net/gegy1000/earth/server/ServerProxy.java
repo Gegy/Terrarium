@@ -18,6 +18,9 @@ public class ServerProxy {
     public void displayPanorama() {
     }
 
-    public void updateDownload(int id, long count, long total) {
+    public void openDownload(long count, long total) {
+    }
+
+    public void updateDownload(long count) {
     }
 }

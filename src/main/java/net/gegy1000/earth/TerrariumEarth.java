@@ -9,10 +9,11 @@ import net.gegy1000.earth.server.command.GeoTeleportCommand;
 import net.gegy1000.earth.server.command.GeoToolCommand;
 import net.gegy1000.earth.server.config.TerrariumEarthConfig;
 import net.gegy1000.earth.server.integration.bop.BoPIntegration;
+import net.gegy1000.earth.server.message.DisplayDownloadMessage;
 import net.gegy1000.earth.server.message.EarthOpenMapMessage;
 import net.gegy1000.earth.server.message.EarthPanoramaMessage;
-import net.gegy1000.earth.server.message.ModifyDataDownloadMessage;
-import net.gegy1000.earth.server.message.StartDataDownloadMessage;
+import net.gegy1000.earth.server.message.ModifyDownloadMessage;
+import net.gegy1000.earth.server.message.OpenDownloadMessage;
 import net.gegy1000.earth.server.message.UpdateDownloadMessage;
 import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.earth.server.world.EarthWorldType;
@@ -79,9 +80,10 @@ public class TerrariumEarth {
         NETWORK.registerMessage(EarthOpenMapMessage.Handler.class, EarthOpenMapMessage.class, 0, Side.CLIENT);
         NETWORK.registerMessage(EarthPanoramaMessage.Handler.class, EarthPanoramaMessage.class, 1, Side.CLIENT);
 
-        NETWORK.registerMessage(StartDataDownloadMessage.Handler.class, StartDataDownloadMessage.class, 2, Side.SERVER);
-        NETWORK.registerMessage(ModifyDataDownloadMessage.Handler.class, ModifyDataDownloadMessage.class, 3, Side.SERVER);
-        NETWORK.registerMessage(UpdateDownloadMessage.Handler.class, UpdateDownloadMessage.class, 4, Side.CLIENT);
+        NETWORK.registerMessage(OpenDownloadMessage.Handler.class, OpenDownloadMessage.class, 2, Side.SERVER);
+        NETWORK.registerMessage(ModifyDownloadMessage.Handler.class, ModifyDownloadMessage.class, 3, Side.SERVER);
+        NETWORK.registerMessage(DisplayDownloadMessage.Handler.class, DisplayDownloadMessage.class, 4, Side.CLIENT);
+        NETWORK.registerMessage(UpdateDownloadMessage.Handler.class, UpdateDownloadMessage.class, 5, Side.CLIENT);
 
         if (Loader.isModLoaded("biomesoplenty")) {
             BoPIntegration.setup();

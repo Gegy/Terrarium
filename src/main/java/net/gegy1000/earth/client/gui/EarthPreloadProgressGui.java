@@ -1,7 +1,7 @@
 package net.gegy1000.earth.client.gui;
 
 import net.gegy1000.earth.TerrariumEarth;
-import net.gegy1000.earth.server.message.ModifyDataDownloadMessage;
+import net.gegy1000.earth.server.message.ModifyDownloadMessage;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -20,14 +20,14 @@ public class EarthPreloadProgressGui extends GuiScreen {
     private static final int BAR_BACKGROUND_COLOR = 0xFF000000;
     private static final int BAR_COLOR = 0xFF336622;
 
-    private final int id;
     private long count;
-    private long total;
+    private final long total;
 
     private GuiButton exitButton;
 
-    public EarthPreloadProgressGui(int id) {
-        this.id = id;
+    public EarthPreloadProgressGui(long count, long total) {
+        this.count= count;
+        this.total = total;
     }
 
     @Override
@@ -51,14 +51,10 @@ public class EarthPreloadProgressGui extends GuiScreen {
         return this.total > 0 && this.count >= this.total;
     }
 
-    public void update(int id, long count, long total) {
-        if (id == this.id) {
-            this.count = count;
-            this.total = total;
-
-            if (this.count >= this.total) {
-                this.exitButton.displayString = this.getExitText();
-            }
+    public void update(long count) {
+        this.count = count;
+        if (this.count >= this.total) {
+            this.exitButton.displayString = this.getExitText();
         }
     }
 
@@ -68,9 +64,9 @@ public class EarthPreloadProgressGui extends GuiScreen {
 
         if (!this.isComplete()) {
             if (button.id == EXIT_BUTTON) {
-                TerrariumEarth.NETWORK.sendToServer(new ModifyDataDownloadMessage(this.id, true, false));
+                TerrariumEarth.NETWORK.sendToServer(new ModifyDownloadMessage(true, false));
             } else if (button.id == RUN_IN_BACKGROUND_BUTTON) {
-                TerrariumEarth.NETWORK.sendToServer(new ModifyDataDownloadMessage(this.id, false, true));
+                TerrariumEarth.NETWORK.sendToServer(new ModifyDownloadMessage(false, true));
             }
         }
 

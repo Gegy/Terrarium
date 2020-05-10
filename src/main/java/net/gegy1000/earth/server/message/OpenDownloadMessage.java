@@ -1,7 +1,7 @@
 package net.gegy1000.earth.server.message;
 
 import io.netty.buffer.ByteBuf;
-import net.gegy1000.earth.server.world.data.DataPreloadManager;
+import net.gegy1000.earth.server.world.data.DataPreloader;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -11,14 +11,14 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-public final class StartDataDownloadMessage implements IMessage {
+public final class OpenDownloadMessage implements IMessage {
     private ChunkPos min;
     private ChunkPos max;
 
-    public StartDataDownloadMessage() {
+    public OpenDownloadMessage() {
     }
 
-    public StartDataDownloadMessage(ChunkPos min, ChunkPos max) {
+    public OpenDownloadMessage(ChunkPos min, ChunkPos max) {
         this.min = min;
         this.max = max;
     }
@@ -37,22 +37,23 @@ public final class StartDataDownloadMessage implements IMessage {
         buf.writeInt(this.max.z);
     }
 
-    public static class Handler implements IMessageHandler<StartDataDownloadMessage, IMessage> {
+    public static class Handler implements IMessageHandler<OpenDownloadMessage, IMessage> {
         @Override
-        public IMessage onMessage(StartDataDownloadMessage message, MessageContext ctx) {
+        public IMessage onMessage(OpenDownloadMessage message, MessageContext ctx) {
             if (ctx.side.isServer()) {
                 Terrarium.PROXY.scheduleTask(ctx, () -> {
                     EntityPlayerMP player = ctx.getServerHandler().player;
-                    if (!DataPreloadManager.checkPermission(player)) {
+                    if (!DataPreloader.checkPermission(player)) {
                         return;
                     }
 
                     World world = player.world;
                     TerrariumWorld terrarium = TerrariumWorld.get(world);
                     if (terrarium != null) {
-                        DataPreloadManager manager = DataPreloadManager.open(terrarium, message.min, message.max);
-                        manager.addWatcher(player);
-                        manager.start();
+                        DataPreloader preloader = DataPreloader.open(terrarium, message.min, message.max);
+                        preloader.addWatcher(player);
+
+                        DataPreloader.start(preloader);
                     }
                 });
             }

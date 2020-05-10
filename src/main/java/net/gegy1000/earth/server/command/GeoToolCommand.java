@@ -4,7 +4,7 @@ import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.capability.EarthWorld;
 import net.gegy1000.earth.server.message.EarthOpenMapMessage;
 import net.gegy1000.earth.server.message.EarthPanoramaMessage;
-import net.gegy1000.earth.server.world.data.DataPreloadManager;
+import net.gegy1000.earth.server.world.data.DataPreloader;
 import net.gegy1000.terrarium.server.TerrariumUserTracker;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.minecraft.command.CommandBase;
@@ -16,6 +16,8 @@ import net.minecraft.init.Items;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
+
+import java.util.Optional;
 
 public class GeoToolCommand extends CommandBase {
     @Override
@@ -49,7 +51,7 @@ public class GeoToolCommand extends CommandBase {
                 String displayPanorama = DeferredTranslator.translateString(sender, "commands.earth.geotool.display_panorama");
                 builder.addElement(Items.PAINTING, TextFormatting.BOLD + displayPanorama, () -> this.handlePanorama(player));
 
-                if (DataPreloadManager.checkPermission(player)) {
+                if (DataPreloader.checkPermission(player)) {
                     String preloadWorld = DeferredTranslator.translateString(sender, "commands.earth.geotool.preload_world");
                     builder.addElement(Blocks.COMMAND_BLOCK, TextFormatting.BOLD + preloadWorld, () -> this.handlePreload(player, earth));
                 }
@@ -80,7 +82,13 @@ public class GeoToolCommand extends CommandBase {
     }
 
     private void handlePreload(EntityPlayerMP player, EarthWorld earth) {
-        this.openMap(player, earth, EarthOpenMapMessage.Type.PRELOAD);
+        Optional<DataPreloader> activeOpt = DataPreloader.active();
+        if (activeOpt.isPresent()) {
+            DataPreloader active = activeOpt.get();
+            active.addWatcher(player);
+        } else {
+            this.openMap(player, earth, EarthOpenMapMessage.Type.PRELOAD);
+        }
     }
 
     private void openMap(EntityPlayerMP player, EarthWorld earth, EarthOpenMapMessage.Type type) {
