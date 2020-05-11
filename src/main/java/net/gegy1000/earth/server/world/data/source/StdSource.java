@@ -2,8 +2,8 @@ package net.gegy1000.earth.server.world.data.source;
 
 import net.gegy1000.earth.server.capability.EarthWorld;
 import net.gegy1000.earth.server.util.IoFunction;
-import net.gegy1000.earth.server.util.ZoomLevels;
-import net.gegy1000.earth.server.util.Zoomable;
+import net.gegy1000.earth.server.util.zoom.ZoomLevels;
+import net.gegy1000.earth.server.util.zoom.Zoomable;
 import net.gegy1000.earth.server.world.data.source.cache.CachingInput;
 import net.gegy1000.earth.server.world.data.source.cache.FileTileCache;
 import net.gegy1000.terrarium.server.util.Vec2i;

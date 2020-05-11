@@ -1,7 +1,7 @@
 package net.gegy1000.earth.server.world.data.source;
 
-import net.gegy1000.earth.server.util.ZoomLevels;
-import net.gegy1000.earth.server.util.Zoomable;
+import net.gegy1000.earth.server.util.zoom.ZoomLevels;
+import net.gegy1000.earth.server.util.zoom.Zoomable;
 import net.gegy1000.earth.server.world.data.source.reader.TerrariumRasterReader;
 import net.gegy1000.earth.server.world.ecology.soil.SoilSuborder;
 import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;

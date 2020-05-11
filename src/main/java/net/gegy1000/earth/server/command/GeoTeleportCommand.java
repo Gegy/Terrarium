@@ -165,7 +165,7 @@ public class GeoTeleportCommand extends CommandBase {
         Coordinate getCoordinate(ICommandSender sender, EarthWorld worldData) throws CommandException;
     }
 
-    private class CoordinateLocation implements CommandLocation {
+    private static class CoordinateLocation implements CommandLocation {
         private final double latitude;
         private final double longitude;
 
@@ -180,7 +180,7 @@ public class GeoTeleportCommand extends CommandBase {
         }
     }
 
-    private class GeocodeLocation implements CommandLocation {
+    private static class GeocodeLocation implements CommandLocation {
         private final String place;
 
         private GeocodeLocation(String place) {

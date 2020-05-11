@@ -1,4 +1,4 @@
-package net.gegy1000.earth.server.util;
+package net.gegy1000.earth.server.util.zoom;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;

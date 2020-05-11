@@ -1,8 +1,8 @@
 package net.gegy1000.earth.server.world.data.op;
 
 import com.google.common.base.Preconditions;
-import net.gegy1000.earth.server.util.ZoomLevels;
-import net.gegy1000.earth.server.util.Zoomable;
+import net.gegy1000.earth.server.util.zoom.ZoomLevels;
+import net.gegy1000.earth.server.util.zoom.Zoomable;
 import net.gegy1000.terrarium.server.world.coordinate.CoordReferenced;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.data.DataOp;

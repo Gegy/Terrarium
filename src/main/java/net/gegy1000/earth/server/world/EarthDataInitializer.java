@@ -1,7 +1,7 @@
 package net.gegy1000.earth.server.world;
 
 import net.gegy1000.earth.server.shared.SharedEarthData;
-import net.gegy1000.earth.server.util.Zoomable;
+import net.gegy1000.earth.server.util.zoom.Zoomable;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.data.PolygonData;
 import net.gegy1000.earth.server.world.data.op.AddNoiseOp;

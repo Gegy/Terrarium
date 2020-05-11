@@ -15,7 +15,7 @@ public interface SoilPredicate {
                 || soilBlock == Blocks.SAND || soilBlock == Blocks.CLAY;
     };
 
-    static SoilPredicate plantable(IPlantable plantable) {
+    static SoilPredicate forge(IPlantable plantable) {
         return (world, soilPos, soilState) -> {
             Block soilBlock = soilState.getBlock();
             return soilBlock.canSustainPlant(soilState, world, soilPos, EnumFacing.UP, plantable);

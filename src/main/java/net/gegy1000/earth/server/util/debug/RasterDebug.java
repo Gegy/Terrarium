@@ -1,7 +1,8 @@
-package net.gegy1000.earth.server.util;
+package net.gegy1000.earth.server.util.debug;
 
 import net.gegy1000.earth.server.integration.bop.BoPTrees;
 import net.gegy1000.earth.server.shared.SharedEarthData;
+import net.gegy1000.earth.server.util.zoom.Zoomable;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.cover.CoverColors;
 import net.gegy1000.earth.server.world.data.source.StdSource;
@@ -32,7 +33,7 @@ import java.util.function.ToIntFunction;
 
 import static net.gegy1000.earth.server.world.EarthDataInitializer.*;
 
-final class DataDebug {
+final class RasterDebug {
     private static final int TILE_SIZE = StdSource.TILE_SIZE;
     private static final Path OUTPUT = Paths.get("mods/terrarium/debug");
 
@@ -173,7 +174,7 @@ final class DataDebug {
         return dst;
     }
 
-    private static <R extends Raster<?>> R sampleGlobal(
+    static <R extends Raster<?>> R sampleGlobal(
             Zoomable<StdSource<R>> source,
             Function<DataView, R> createRaster
     ) throws IOException {

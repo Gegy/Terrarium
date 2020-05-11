@@ -1,4 +1,4 @@
-package net.gegy1000.earth.server.util;
+package net.gegy1000.earth.server.util.zoom;
 
 import java.util.function.IntFunction;
 import java.util.stream.IntStream;

@@ -1,7 +1,7 @@
 package net.gegy1000.earth.server.world;
 
 import net.gegy1000.earth.server.capability.EarthWorld;
-import net.gegy1000.earth.server.util.ForZoom;
+import net.gegy1000.earth.server.util.zoom.ForZoom;
 import net.gegy1000.earth.server.world.data.source.StdSource;
 import net.gegy1000.earth.server.world.data.source.WorldClimateRaster;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;

@@ -187,20 +187,21 @@ public class GenerationSettings {
             this.values.put(key, value);
         }
 
-        public <T> void putValue(PropertyKey<T> key, PropertyValue<T> value) {
+        public <T> Builder putValue(PropertyKey<T> key, PropertyValue<T> value) {
             this.putUnchecked(key, value);
+            return this;
         }
 
-        public void putDouble(PropertyKey<Number> key, double value) {
-            this.putValue(key, new NumberValue(value));
+        public Builder putDouble(PropertyKey<Number> key, double value) {
+            return this.putValue(key, new NumberValue(value));
         }
 
-        public void putInteger(PropertyKey<Number> key, int value) {
-            this.putValue(key, new NumberValue(value));
+        public Builder putInteger(PropertyKey<Number> key, int value) {
+            return this.putValue(key, new NumberValue(value));
         }
 
-        public void putBoolean(PropertyKey<Boolean> key, boolean value) {
-            this.putValue(key, new BooleanValue(value));
+        public Builder putBoolean(PropertyKey<Boolean> key, boolean value) {
+            return this.putValue(key, new BooleanValue(value));
         }
 
         public GenerationSettings build() {

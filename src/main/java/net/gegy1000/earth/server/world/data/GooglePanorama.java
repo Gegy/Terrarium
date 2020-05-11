@@ -17,7 +17,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public final class GooglePanorama {
-    private static final String METADATA_ADDRESS = "https://maps.googleapis.com/maps/api/streetview/metadata?location=%.5f,%.5f&radius=%.5f&source=outdoor&key=%s";
+    private static final String METADATA_ADDRESS = "https://maps.googleapis.com/maps/api/streetview/metadata?location=%.5f,%.5f&radius=%.0f&source=outdoor&key=%s";
     private static final String PANORAMA_ADDRESS = "https://geo0.ggpht.com/cbk?cb_client=maps_sv.tactile&panoid=%s&output=tile&x=%s&y=%s&zoom=%s&nbt&fover=2";
 
     private static final String BROWSER_UA = "Mozilla/5.0 (Windows NT 10.0; …) Gecko/20100101 Firefox/61.0";
