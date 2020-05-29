@@ -1,0 +1,98 @@
+# Generators
+
+generator.terrarium.earth=Земля
+generator.terrarium.earth_debug=Отладка генерации Земля
+
+# GUI
+
+container.earth.geotool.name=Набор инструментов Земля
+geotool.earth.locate.success=Вы на %s
+
+gui.earth.credits=Данные для Террариума предоставлены:
+gui.earth.spawnpoint=Установить место появления
+gui.earth.locate=Поиск игрока
+gui.earth.teleport=Телепортировать игрока
+
+gui.button.earth.teleport=Телепортироваться
+
+gui.copy_box.copied.name=Скопировано в буфер обмена!
+
+# Customization Categories
+
+category.terrarium.world.name=Свойства мира
+category.terrarium.features.name=Свойства функций
+category.terrarium.survival.name=Свойства выживания
+
+# World Properties
+
+property.terrarium.world_scale.name=Масштаб мира
+property.terrarium.height_scale.name=Уровень высоты
+property.terrarium.noise_scale.name=Уровень шума
+property.terrarium.ocean_depth.name=Глубина океана
+property.terrarium.height_origin.name=Происхождение высоты
+property.terrarium.beach_size.name=Размер пляжа
+
+property.terrarium.world_scale.tooltip=Кол-во метров в реальной жизни, представляющих один блок в игре.
+property.terrarium.height_scale.tooltip=Множитель высоты от метров до блоков.
+property.terrarium.noise_scale.tooltip=Множитель для эффекта генерации случайного шума по высоте, который будет применён к миру. 0 = нет шума, 1 = шум по умолчанию.
+property.terrarium.ocean_depth.tooltip=Глубина, на которой образуется дно океана.
+property.terrarium.height_origin.tooltip=Высота в игре, которая соответствует уровню моря.
+property.terrarium.beach_size.tooltip=Радиус в блоках для пляжей, которые будут генерироваться вокруг береговых линий.
+
+# Feature Properties
+
+property.terrarium.enable_decoration.name=Вкл декор
+property.terrarium.enable_default_decoration.name=Вкл декор по умолчанию
+property.terrarium.enable_buildings.name=Вкл строения
+property.terrarium.enable_streets.name=Вкл улицы
+
+property.terrarium.enable_default_features.name=Вкл функции по умолчанию
+property.terrarium.enable_cave_generation.name=Вкл генерацию пещер
+property.terrarium.enable_resource_generation.name=Вкл генерацию ресурсов
+property.terrarium.enable_lake_generation.name=Вкл генерацию озёр
+property.terrarium.enable_lava_generation.name=Вкл генерацию лавы
+property.terrarium.enable_mod_generation.name=Вкл генерацию из других модов
+
+property.terrarium.enable_decoration.tooltip=Если вкл, будут размещены декоративные элементы такие как: Растения и Деревья.
+property.terrarium.enable_default_decoration.tooltip=Если вкл, будут размещены ванильные и декоративные элементы из других модов.
+property.terrarium.enable_buildings.tooltip=Если вкл, будут сгенерированы строения из Открытой карты улицы.
+property.terrarium.enable_streets.tooltip=Если вкл, будут сгенерированы улицы из Открытой карты улицы.
+
+property.terrarium.enable_default_features.tooltip=Если вкл, будут сгенерированы все Ванильные и функции карты из других модов и Структуры.
+property.terrarium.enable_cave_generation.tooltip=Если вкл, будут случайно сгенерированы Пещеры и Ущелья.
+property.terrarium.enable_resource_generation.tooltip=Если вкл, будут генерироваться случайным образом Ресурсы по всему миру.
+property.terrarium.enable_lake_generation.tooltip=Если вкл, будут генерироваться случайным образом Водные озера.
+property.terrarium.enable_lava_generation.tooltip=Если вкл, будут генерироваться случайным образом Лавовые озера над и под землей
+property.terrarium.enable_mod_generation.tooltip=Если вкл, будут запущены генерации из других модов. Это может включать в себя как Руды, так и Структуры.
+
+# Presets
+
+preset.earth_default.name=Земля: По умолчанию
+preset.earth_default.desc=генерация земли по умолчанию
+preset.earth_survival.name=Земля: Выживание
+preset.earth_survival.desc=Генерация земли, оптимизирована для опыта выживания.
+
+# Commands
+
+commands.earth.wrong_world=Нельзя использовать команду в этом мире
+
+commands.earth.geotp.usage=Гео-телепортирование <широта> <долгота> ИЛИ Гео-телепортирование <место>
+commands.earth.geotp.not_found=Не найдена "%s"
+commands.earth.geotp.success=Успешно телепортированны в %s, %s
+commands.earth.geotp.error=При поиске произошла ошибка "%s": %s: %s
+
+commands.earth.geotool.usage=Гео-инструмент
+
+# Status
+
+status.earth.panorama.searching=Поиск ближайших панорам...
+status.earth.panorama.none_found=Не найдено поблизости панорам!
+status.earth.panorama.found=Найдена ближайшая панорама! Идите в отмеченную область, чтобы отобразить её!
+status.earth.panorama.error=Ошибка при определении местоположения близлежащих панорам
+status.earth.panorama.immersed=Погруженный в расположенную панораму!
+
+# Config
+
+config.earth.street_view_zoom=Просмотр масштабирования улицы
+config.earth.street_view_zoom.tooltip=Уровень масштабирования для загрузки изображений с улицы.. Более высокие значения означают более высокое разрешение.
+
