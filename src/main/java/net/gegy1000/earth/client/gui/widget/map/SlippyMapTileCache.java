@@ -5,7 +5,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.gegy1000.terrarium.Terrarium;
-import net.gegy1000.terrarium.server.world.data.source.TiledDataSource;
+import net.gegy1000.terrarium.server.world.data.source.TerrariumCacheDirs;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.io.IOUtils;
@@ -30,7 +30,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 @SideOnly(Side.CLIENT)
 public class SlippyMapTileCache {
-    private static final Path CACHE_ROOT = TiledDataSource.GLOBAL_CACHE_ROOT.resolve("carto");
+    private static final Path CACHE_ROOT = TerrariumCacheDirs.GLOBAL_ROOT.resolve("carto");
     private static final int CACHE_SIZE = 256;
 
     private final ExecutorService loadingService = Executors.newFixedThreadPool(2, new ThreadFactoryBuilder()

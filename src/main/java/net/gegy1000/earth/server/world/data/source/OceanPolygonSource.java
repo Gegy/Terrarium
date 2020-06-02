@@ -11,6 +11,7 @@ import net.gegy1000.earth.server.world.data.source.cache.AbstractRegionKey;
 import net.gegy1000.earth.server.world.data.source.cache.CachingInput;
 import net.gegy1000.earth.server.world.data.source.cache.FileTileCache;
 import net.gegy1000.terrarium.server.util.Vec2i;
+import net.gegy1000.terrarium.server.world.data.source.TerrariumCacheDirs;
 import net.gegy1000.terrarium.server.world.data.source.TiledDataSource;
 import org.tukaani.xz.SingleXZInputStream;
 
@@ -33,7 +34,7 @@ public class OceanPolygonSource extends TiledDataSource<PolygonData> {
 //            .sectorSize(2048)
 //            .build();
 
-    private static final Path CACHE_ROOT = GLOBAL_CACHE_ROOT.resolve("ocean");
+    private static final Path CACHE_ROOT = TerrariumCacheDirs.GLOBAL_ROOT.resolve("ocean");
     private static final FileTileCache<Vec2i> CACHE = new FileTileCache<>(pos -> CACHE_ROOT.resolve(pos.x + "/" + pos.y));
 
     private static final CachingInput<Vec2i> CACHING_INPUT = new CachingInput<>(CACHE);

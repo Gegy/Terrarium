@@ -8,6 +8,7 @@ import net.gegy1000.earth.server.world.data.source.cache.CachingInput;
 import net.gegy1000.earth.server.world.data.source.cache.FileTileCache;
 import net.gegy1000.terrarium.server.util.Vec2i;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
+import net.gegy1000.terrarium.server.world.data.source.TerrariumCacheDirs;
 import net.gegy1000.terrarium.server.world.data.source.TiledDataSource;
 import net.minecraft.util.math.MathHelper;
 
@@ -41,7 +42,7 @@ public final class StdSource<T> extends TiledDataSource<T> {
         this.endpoint = ENDPOINT + "/" + endpoint + "/" + zoom;
         this.zoom = zoom;
 
-        Path cacheRoot = GLOBAL_CACHE_ROOT.resolve(cacheName + "/" + zoom);
+        Path cacheRoot = TerrariumCacheDirs.GLOBAL_ROOT.resolve(cacheName + "/" + zoom);
         FileTileCache<Vec2i> cache = new FileTileCache<>(pos -> cacheRoot.resolve(pos.x + "/" + pos.y));
         this.cachingInput = new CachingInput<>(cache);
     }

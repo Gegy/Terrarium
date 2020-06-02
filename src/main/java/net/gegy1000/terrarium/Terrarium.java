@@ -7,7 +7,6 @@ import net.gegy1000.terrarium.server.message.TerrariumHandshakeMessage;
 import net.gegy1000.terrarium.server.world.chunk.tracker.SavedColumnTracker;
 import net.gegy1000.terrarium.server.world.chunk.tracker.SavedCubeTracker;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPresetRegistry;
-import net.gegy1000.terrarium.server.world.data.source.TiledDataSource;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
@@ -21,12 +20,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Comparator;
 import java.util.Map;
-import java.util.stream.Stream;
 
 @Mod(modid = Terrarium.ID, name = "Terrarium", version = Terrarium.VERSION, acceptedMinecraftVersions = "[1.12]", dependencies = "after:cubicchunks")
 public class Terrarium {
@@ -47,8 +41,6 @@ public class Terrarium {
 
     @Mod.EventHandler
     public static void onPreInit(FMLPreInitializationEvent event) {
-        setupCacheDirectory();
-
         TerrariumCapabilities.onPreInit();
 
         NETWORK.registerMessage(TerrariumHandshakeMessage.Handler.class, TerrariumHandshakeMessage.class, 0, Side.SERVER);
@@ -77,28 +69,5 @@ public class Terrarium {
             serverHasMod = mods.containsKey(Terrarium.ID);
         }
         return !mods.containsKey(Terrarium.ID) || mods.get(Terrarium.ID).equals(VERSION);
-    }
-
-    private static void setupCacheDirectory() {
-        try {
-            if (Files.exists(TiledDataSource.LEGACY_CACHE_ROOT)) {
-                Terrarium.LOGGER.info("Deleting legacy terrarium cache directory");
-
-                try (Stream<Path> walk = Files.walk(TiledDataSource.LEGACY_CACHE_ROOT)) {
-                    Stream<Path> stream = walk.sorted(Comparator.reverseOrder());
-                    for (Path child : (Iterable<Path>) stream::iterator) {
-                        Files.delete(child);
-                    }
-                }
-            }
-        } catch (IOException e) {
-            Terrarium.LOGGER.warn("Failed to delete legacy terrarium cache", e);
-        }
-
-        try {
-            Files.createDirectories(TiledDataSource.GLOBAL_CACHE_ROOT);
-        } catch (IOException e) {
-            Terrarium.LOGGER.warn("Failed to create cache directories", e);
-        }
     }
 }

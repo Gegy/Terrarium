@@ -29,6 +29,7 @@ public final class CoverMarkers {
 
     public static final CoverMarker DENSE_GRASS = create();
     public static final CoverMarker HARSH = create();
+    public static final CoverMarker CONSOLIDATED = create();
 
     public static CoverMarker create() {
         return new CoverMarker();
@@ -132,6 +133,8 @@ public final class CoverMarkers {
                 Cover.BARE, Cover.BARE_CONSOLIDATED, Cover.BARE_UNCONSOLIDATED,
                 Cover.SALINE_FLOODED_FOREST, Cover.SPARSE_VEGETATION
         );
+
+        CONSOLIDATED.add(Cover.BARE_CONSOLIDATED);
 
         MinecraftForge.EVENT_BUS.post(new AddCoverMarkersEvent());
     }

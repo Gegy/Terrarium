@@ -7,14 +7,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 
 public abstract class TiledDataSource<T> {
-    public static final Path LEGACY_CACHE_ROOT = Paths.get(".", "mods/terrarium/cache");
-    public static final Path GLOBAL_CACHE_ROOT = Paths.get(".", "mods/terrarium/cache2");
-
     protected final double tileWidth;
     protected final double tileHeight;
 
