@@ -42,10 +42,10 @@ public class ComposableChunkGenerator implements GenericChunkGenerator {
 
             try (ColumnDataEntry.Handle handle = terrarium.getDataCache().acquireEntry(columnPos)) {
                 ColumnData data = handle.join();
-                terrarium.getSurfaceComposer().composeSurface(data, pos, writer);
+                terrarium.getSurfaceComposer().composeSurface(terrarium, data, pos, writer);
             }
 
-            terrarium.getStructureComposer().primeStructures(pos, writer);
+            terrarium.getStructureComposer().primeStructures(terrarium, pos, writer);
         });
     }
 
@@ -55,8 +55,8 @@ public class ComposableChunkGenerator implements GenericChunkGenerator {
             ColumnDataCache dataCache = terrarium.getDataCache();
             ColumnDataEntry.Handle[] handles = this.acquirePopulationHandles(pos, dataCache);
 
-            terrarium.getDecorationComposer().composeDecoration(dataCache, pos, writer);
-            terrarium.getStructureComposer().populateStructures(pos, writer);
+            terrarium.getDecorationComposer().composeDecoration(terrarium, dataCache, pos, writer);
+            terrarium.getStructureComposer().populateStructures(terrarium, pos, writer);
 
             for (ColumnDataEntry.Handle handle : handles) {
                 handle.release();
@@ -81,7 +81,7 @@ public class ComposableChunkGenerator implements GenericChunkGenerator {
     @Override
     public void prepareStructures(CubicPos pos) {
         this.terrarium.get().ifPresent(terrarium -> {
-            terrarium.getStructureComposer().prepareStructures(pos);
+            terrarium.getStructureComposer().prepareStructures(terrarium, pos);
         });
     }
 
@@ -90,7 +90,7 @@ public class ComposableChunkGenerator implements GenericChunkGenerator {
     public BlockPos getClosestStructure(String name, BlockPos pos, boolean findUnexplored) {
         return this.terrarium.get().map(terrarium -> {
             StructureComposer composer = terrarium.getStructureComposer();
-            return composer.getClosestStructure(this.world, name, pos, findUnexplored);
+            return composer.getClosestStructure(terrarium, this.world, name, pos, findUnexplored);
         }).orElse(null);
     }
 
@@ -98,8 +98,9 @@ public class ComposableChunkGenerator implements GenericChunkGenerator {
     public boolean isInsideStructure(String name, BlockPos pos) {
         Optional<TerrariumWorld> terrariumOption = this.terrarium.get();
         if (terrariumOption.isPresent()) {
-            StructureComposer composer = terrariumOption.get().getStructureComposer();
-            return composer.isInsideStructure(this.world, name, pos);
+            TerrariumWorld terrarium = terrariumOption.get();
+            StructureComposer composer = terrarium.getStructureComposer();
+            return composer.isInsideStructure(terrarium, this.world, name, pos);
         }
         return false;
     }

@@ -2,6 +2,7 @@ package net.gegy1000.terrarium.server.world;
 
 import net.gegy1000.gengen.api.GenericWorldType;
 import net.gegy1000.terrarium.Terrarium;
+import net.gegy1000.terrarium.server.util.Lazy;
 import net.gegy1000.terrarium.server.world.chunk.ComposableBiomeProvider;
 import net.gegy1000.terrarium.server.world.chunk.ComposableChunkGenerator;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
@@ -31,13 +32,13 @@ public abstract class TerrariumWorldType implements GenericWorldType {
     private final ResourceLocation identifier;
     private final ResourceLocation presetIdentifier;
 
-    private final TerrariumCustomization customization;
+    private final Lazy<TerrariumCustomization> customization;
 
     public TerrariumWorldType(String name, ResourceLocation identifier, ResourceLocation presetIdentifier) {
         this.name = Terrarium.ID + "." + name;
         this.identifier = identifier;
         this.presetIdentifier = presetIdentifier;
-        this.customization = this.buildCustomization();
+        this.customization = Lazy.of(this::buildCustomization);
     }
 
     public abstract TerrariumGeneratorInitializer createGeneratorInitializer(World world, GenerationSettings settings, ColumnDataCache dataCache);
@@ -74,7 +75,7 @@ public abstract class TerrariumWorldType implements GenericWorldType {
 
     @Override
     public final boolean isCustomizable() {
-        return !this.customization.getCategories().isEmpty();
+        return !this.customization.get().getCategories().isEmpty();
     }
 
     @Override
@@ -99,7 +100,7 @@ public abstract class TerrariumWorldType implements GenericWorldType {
     }
 
     public TerrariumCustomization getCustomization() {
-        return this.customization;
+        return this.customization.get();
     }
 
     public boolean isHidden() {

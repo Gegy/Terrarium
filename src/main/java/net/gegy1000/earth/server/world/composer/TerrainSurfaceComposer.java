@@ -10,6 +10,7 @@ import net.gegy1000.earth.server.world.geography.Landform;
 import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.gengen.api.writer.ChunkPrimeWriter;
 import net.gegy1000.gengen.util.SpatialRandom;
+import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.composer.surface.SurfaceComposer;
 import net.gegy1000.terrarium.server.world.data.ColumnData;
 import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
@@ -45,7 +46,7 @@ public class TerrainSurfaceComposer implements SurfaceComposer {
     }
 
     @Override
-    public void composeSurface(ColumnData data, CubicPos pos, ChunkPrimeWriter writer) {
+    public void composeSurface(TerrariumWorld terrarium, ColumnData data, CubicPos pos, ChunkPrimeWriter writer) {
         data.with(
                 EarthData.TERRAIN_HEIGHT,
                 EarthData.SLOPE,

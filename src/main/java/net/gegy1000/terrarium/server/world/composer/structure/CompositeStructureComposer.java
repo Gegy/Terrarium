@@ -3,6 +3,7 @@ package net.gegy1000.terrarium.server.world.composer.structure;
 import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.gengen.api.writer.ChunkPopulationWriter;
 import net.gegy1000.gengen.api.writer.ChunkPrimeWriter;
+import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -25,30 +26,30 @@ public final class CompositeStructureComposer implements StructureComposer {
     }
 
     @Override
-    public void prepareStructures(CubicPos pos) {
+    public void prepareStructures(TerrariumWorld terrarium, CubicPos pos) {
         for (StructureComposer composer : this.composers) {
-            composer.prepareStructures(pos);
+            composer.prepareStructures(terrarium, pos);
         }
     }
 
     @Override
-    public void primeStructures(CubicPos pos, ChunkPrimeWriter writer) {
+    public void primeStructures(TerrariumWorld terrarium, CubicPos pos, ChunkPrimeWriter writer) {
         for (StructureComposer composer : this.composers) {
-            composer.primeStructures(pos, writer);
+            composer.primeStructures(terrarium, pos, writer);
         }
     }
 
     @Override
-    public void populateStructures(CubicPos pos, ChunkPopulationWriter writer) {
+    public void populateStructures(TerrariumWorld terrarium, CubicPos pos, ChunkPopulationWriter writer) {
         for (StructureComposer composer : this.composers) {
-            composer.populateStructures(pos, writer);
+            composer.populateStructures(terrarium, pos, writer);
         }
     }
 
     @Override
-    public boolean isInsideStructure(World world, String name, BlockPos pos) {
+    public boolean isInsideStructure(TerrariumWorld terrarium, World world, String name, BlockPos pos) {
         for (StructureComposer composer : this.composers) {
-            if (composer.isInsideStructure(world, name, pos)) {
+            if (composer.isInsideStructure(terrarium, world, name, pos)) {
                 return true;
             }
         }
@@ -57,12 +58,12 @@ public final class CompositeStructureComposer implements StructureComposer {
 
     @Nullable
     @Override
-    public BlockPos getClosestStructure(World world, String name, BlockPos pos, boolean findUnexplored) {
+    public BlockPos getClosestStructure(TerrariumWorld terrarium, World world, String name, BlockPos pos, boolean findUnexplored) {
         BlockPos nearest = null;
         double nearestDistance = Integer.MAX_VALUE;
 
         for (StructureComposer composer : this.composers) {
-            BlockPos structure = composer.getClosestStructure(world, name, pos, findUnexplored);
+            BlockPos structure = composer.getClosestStructure(terrarium, world, name, pos, findUnexplored);
             if (structure != null) {
                 double distance = structure.distanceSq(pos);
                 if (distance < nearestDistance) {

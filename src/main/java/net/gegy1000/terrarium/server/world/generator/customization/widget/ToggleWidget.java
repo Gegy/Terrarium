@@ -20,13 +20,13 @@ public class ToggleWidget implements CustomizationWidget {
     @SideOnly(Side.CLIENT)
     public GuiButton createWidget(GenerationSettings settings, Runnable onPropertyChange) {
         ToggleGuiWidget widget = new ToggleGuiWidget(PropertyPair.of(this.propertyKey, settings.getValue(this.propertyKey)));
-        widget.setLocked(this.locked);
         widget.addListener(onPropertyChange);
+        widget.setLocked(this.locked);
         return widget;
     }
 
-    public CustomizationWidget locked() {
-        this.locked = true;
+    public ToggleWidget locked(boolean locked) {
+        this.locked = locked;
         return this;
     }
 }

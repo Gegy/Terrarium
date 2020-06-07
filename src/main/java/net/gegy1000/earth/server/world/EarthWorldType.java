@@ -66,6 +66,9 @@ public class EarthWorldType extends TerrariumWorldType {
     public static final PropertyKey<Boolean> RAVINE_GENERATION = new BooleanKey("ravine_generation");
     public static final PropertyKey<Boolean> ORE_GENERATION = new BooleanKey("ore_generation");
 
+    public static final PropertyKey<Boolean> COMPATIBILITY_MODE = new BooleanKey("compatibility_mode");
+    public static final PropertyKey<Boolean> BOP_INTEGRATION = new BooleanKey("bop_integration");
+
     public EarthWorldType() {
         super("earth", IDENTIFIER, PRESET);
     }
@@ -100,6 +103,7 @@ public class EarthWorldType extends TerrariumWorldType {
                 .withProperties(HEIGHT_OFFSET)
                 .withProperties(ADD_TREES, ADD_GRASS, ADD_FLOWERS, ADD_CACTI, ADD_SUGAR_CANE, ADD_GOURDS)
                 .withProperties(CAVE_GENERATION, RAVINE_GENERATION, ORE_GENERATION)
+                .withProperties(COMPATIBILITY_MODE, BOP_INTEGRATION)
                 .build();
     }
 
@@ -141,6 +145,10 @@ public class EarthWorldType extends TerrariumWorldType {
                         new ToggleWidget(CAVE_GENERATION),
                         new ToggleWidget(RAVINE_GENERATION),
                         new ToggleWidget(ORE_GENERATION)
+                )
+                .withCategory("compatibility",
+                        new ToggleWidget(COMPATIBILITY_MODE),
+                        new ToggleWidget(BOP_INTEGRATION).locked(!TerrariumEarth.hasBiomesOPlenty)
                 )
                 .build();
     }

@@ -2,6 +2,7 @@ package net.gegy1000.terrarium.server.world.composer.surface;
 
 import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.gengen.api.writer.ChunkPrimeWriter;
+import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.data.ColumnData;
 import net.gegy1000.terrarium.server.world.data.DataKey;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
@@ -19,7 +20,7 @@ public class OceanFillSurfaceComposer implements SurfaceComposer {
     }
 
     @Override
-    public void composeSurface(ColumnData data, CubicPos pos, ChunkPrimeWriter writer) {
+    public void composeSurface(TerrariumWorld terrarium, ColumnData data, CubicPos pos, ChunkPrimeWriter writer) {
         data.get(this.heightKey).ifPresent(heightRaster -> {
             int minY = pos.getMinY();
             int maxY = pos.getMaxY();

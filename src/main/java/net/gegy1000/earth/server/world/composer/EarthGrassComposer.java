@@ -7,6 +7,7 @@ import net.gegy1000.earth.server.world.cover.CoverSelectors;
 import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.gengen.api.writer.ChunkPopulationWriter;
 import net.gegy1000.gengen.util.SpatialRandom;
+import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.composer.decoration.DecorationComposer;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
@@ -48,7 +49,7 @@ public final class EarthGrassComposer implements DecorationComposer {
     }
 
     @Override
-    public void composeDecoration(ColumnDataCache dataCache, CubicPos pos, ChunkPopulationWriter writer) {
+    public void composeDecoration(TerrariumWorld terrarium, ColumnDataCache dataCache, CubicPos pos, ChunkPopulationWriter writer) {
         int dataX = pos.getMaxX();
         int dataZ = pos.getMaxZ();
         Cover cover = this.coverSampler.sample(dataCache, dataX, dataZ);

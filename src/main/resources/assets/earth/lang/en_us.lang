@@ -36,9 +36,10 @@ gui.earth.preparing.errored.desc.2=Please check your internet connection and try
 
 # Customization Categories
 
-category.terrarium.world.name=World Properties
-category.terrarium.ecological.name=Ecological Properties
-category.terrarium.geological.name=Geological Properties
+category.terrarium.world.name=World Settings
+category.terrarium.ecological.name=Ecological Settings
+category.terrarium.geological.name=Geological Settings
+category.terrarium.compatibility.name=Compatibility Settings
 
 # World Properties
 
@@ -77,6 +78,14 @@ property.terrarium.ore_generation.name=Ore Generation
 property.terrarium.cave_generation.tooltip=If enabled, caves will be generated randomly
 property.terrarium.ravine_generation.tooltip=If enabled, ravines will be generated randomly
 property.terrarium.ore_generation.tooltip=If enabled, ores will be generated randomly
+
+# Compatibility Properties
+
+property.terrarium.compatibility_mode.name=Compatibility Mode (Experimental)
+property.terrarium.bop_integration.name=Biomes O' Plenty Integration
+
+property.terrarium.compatibility_mode.tooltip=Experimental modded compatibility mode: may slow down generation or break altogether!
+property.terrarium.bop_integration.tooltip=Enable dedicated integration with Biomes O' Plenty content (not complete)
 
 # Presets
 

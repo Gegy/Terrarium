@@ -17,6 +17,8 @@
     "add_gourds": true,
     "cave_generation": true,
     "ravine_generation": true,
-    "ore_generation": true
+    "ore_generation": true,
+    "compatibility_mode": false,
+    "bop_integration": true
   }
 }

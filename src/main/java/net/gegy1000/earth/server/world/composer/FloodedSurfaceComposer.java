@@ -5,6 +5,7 @@ import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.cover.CoverMarkers;
 import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.gengen.api.writer.ChunkPrimeWriter;
+import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.composer.surface.SurfaceComposer;
 import net.gegy1000.terrarium.server.world.data.ColumnData;
 import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
@@ -36,7 +37,7 @@ public final class FloodedSurfaceComposer implements SurfaceComposer {
     }
 
     @Override
-    public void composeSurface(ColumnData data, CubicPos pos, ChunkPrimeWriter writer) {
+    public void composeSurface(TerrariumWorld terrarium, ColumnData data, CubicPos pos, ChunkPrimeWriter writer) {
         data.with(EarthData.TERRAIN_HEIGHT, EarthData.COVER).ifPresent(with -> {
             ShortRaster heightRaster = with.get(EarthData.TERRAIN_HEIGHT);
             EnumRaster<Cover> coverRaster = with.get(EarthData.COVER);

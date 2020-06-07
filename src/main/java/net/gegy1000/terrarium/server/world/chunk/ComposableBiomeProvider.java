@@ -105,7 +105,7 @@ public class ComposableBiomeProvider extends BiomeProvider {
             ChunkPos columnPos = new ChunkPos(x >> 4, z >> 4);
             try (ColumnDataEntry.Handle handle = terrarium.getDataCache().acquireEntry(columnPos)) {
                 ColumnData data = handle.join();
-                Biome[] biomeBuffer = terrarium.getBiomeComposer().composeBiomes(data, columnPos);
+                Biome[] biomeBuffer = terrarium.getBiomeComposer().composeBiomes(terrarium, data, columnPos);
                 System.arraycopy(biomeBuffer, 0, resultBiomes, 0, biomeBuffer.length);
             }
             return;
@@ -127,7 +127,7 @@ public class ComposableBiomeProvider extends BiomeProvider {
             for (ColumnDataEntry.Handle handle : columnHandles) {
                 ColumnData data = handle.join();
                 ChunkPos columnPos = handle.getColumnPos();
-                Biome[] biomeBuffer = terrarium.getBiomeComposer().composeBiomes(data, columnPos);
+                Biome[] biomeBuffer = terrarium.getBiomeComposer().composeBiomes(terrarium, data, columnPos);
 
                 int minColumnX = columnPos.getXStart();
                 int minColumnZ = columnPos.getZStart();

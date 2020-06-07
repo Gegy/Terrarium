@@ -16,6 +16,7 @@ import net.gegy1000.earth.server.world.cover.CoverSelectors;
 import net.gegy1000.earth.server.world.ecology.GrowthPredictors;
 import net.gegy1000.earth.server.world.ecology.vegetation.FlowerDecorator;
 import net.gegy1000.earth.server.world.ecology.vegetation.TreeDecorator;
+import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.event.TerrariumInitializeGeneratorEvent;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.minecraft.world.World;
@@ -30,6 +31,11 @@ public final class BoPIntegration {
 
     @SubscribeEvent
     public static void onConfigureTrees(ConfigureTreesEvent event) {
+        TerrariumWorld terrarium = event.getTerrarium();
+        if (!terrarium.getSettings().getBoolean(EarthWorldType.BOP_INTEGRATION)) {
+            return;
+        }
+
         Cover cover = event.getCover();
         TreeDecorator.Builder trees = event.getBuilder();
 
@@ -52,6 +58,11 @@ public final class BoPIntegration {
 
     @SubscribeEvent
     public static void onConfigureFlowers(ConfigureFlowersEvent event) {
+        TerrariumWorld terrarium = event.getTerrarium();
+        if (!terrarium.getSettings().getBoolean(EarthWorldType.BOP_INTEGRATION)) {
+            return;
+        }
+
         Cover cover = event.getCover();
         GrowthPredictors predictors = event.getPredictors();
         FlowerDecorator flowers = event.getFlowers();
@@ -114,6 +125,11 @@ public final class BoPIntegration {
 
     @SubscribeEvent
     public static void onClassifyBiome(ClassifyBiomeEvent event) {
+        TerrariumWorld terrarium = event.getTerrarium();
+        if (!terrarium.getSettings().getBoolean(EarthWorldType.BOP_INTEGRATION)) {
+            return;
+        }
+
         BiomeClassifier.Context ctx = event.getContext();
 
         if (ctx.isFrozen()) {
@@ -137,6 +153,10 @@ public final class BoPIntegration {
 
         World world = event.getWorld();
         GenerationSettings settings = event.getSettings();
+
+        if (!settings.getBoolean(EarthWorldType.BOP_INTEGRATION)) {
+            return;
+        }
 
         if (settings.getBoolean(EarthWorldType.ORE_GENERATION)) {
             OreDecorationComposer oreComposer = new OreDecorationComposer(world);

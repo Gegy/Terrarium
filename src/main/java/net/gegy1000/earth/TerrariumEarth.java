@@ -69,6 +69,8 @@ public class TerrariumEarth {
 
     private static boolean deobfuscatedEnvironment;
 
+    public static boolean hasBiomesOPlenty;
+
     @Mod.EventHandler
     public static void onPreInit(FMLPreInitializationEvent event) {
         deobfuscatedEnvironment = (boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
@@ -86,6 +88,7 @@ public class TerrariumEarth {
         NETWORK.registerMessage(UpdateDownloadMessage.Handler.class, UpdateDownloadMessage.class, 5, Side.CLIENT);
 
         if (Loader.isModLoaded("biomesoplenty")) {
+            hasBiomesOPlenty = true;
             BoPIntegration.setup();
         }
     }

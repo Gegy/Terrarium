@@ -16,7 +16,7 @@ options.terrarium.preview_world_title.name=Preview World Generation
 
 property.terrarium.slider_range.name=Range: [%.2f-%.2f]
 property.terrarium.slider_fine.name=Hold SHIFT to fine tune
-property.terrarium.locked.name=Coming in a future version!
+property.terrarium.locked.name=This feature is not currently available
 
 # Toasts
 

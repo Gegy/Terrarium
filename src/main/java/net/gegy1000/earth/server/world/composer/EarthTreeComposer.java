@@ -11,6 +11,7 @@ import net.gegy1000.earth.server.world.ecology.vegetation.Trees;
 import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.gengen.api.writer.ChunkPopulationWriter;
 import net.gegy1000.gengen.util.SpatialRandom;
+import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.composer.decoration.DecorationComposer;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
@@ -32,7 +33,7 @@ public final class EarthTreeComposer implements DecorationComposer {
     }
 
     @Override
-    public void composeDecoration(ColumnDataCache dataCache, CubicPos pos, ChunkPopulationWriter writer) {
+    public void composeDecoration(TerrariumWorld terrarium, ColumnDataCache dataCache, CubicPos pos, ChunkPopulationWriter writer) {
         this.random.setSeed(pos.getCenterX(), pos.getCenterY(), pos.getCenterZ());
 
         int dataX = pos.getMaxX();
@@ -58,7 +59,7 @@ public final class EarthTreeComposer implements DecorationComposer {
 
         this.addTreeCandidates(cover, trees);
 
-        MinecraftForge.TERRAIN_GEN_BUS.post(new ConfigureTreesEvent(cover, this.predictors, trees));
+        MinecraftForge.TERRAIN_GEN_BUS.post(new ConfigureTreesEvent(terrarium, cover, this.predictors, trees));
 
         trees.build().decorate(writer, pos, this.random);
     }

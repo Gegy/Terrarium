@@ -1,6 +1,5 @@
 package net.gegy1000.earth.server.world.biome;
 
-import net.gegy1000.earth.server.event.ClassifyBiomeEvent;
 import net.gegy1000.earth.server.world.Rainfall;
 import net.gegy1000.earth.server.world.Temperature;
 import net.gegy1000.earth.server.world.cover.Cover;
@@ -8,18 +7,9 @@ import net.gegy1000.earth.server.world.cover.CoverMarkers;
 import net.gegy1000.earth.server.world.geography.Landform;
 import net.minecraft.init.Biomes;
 import net.minecraft.world.biome.Biome;
-import net.minecraftforge.common.MinecraftForge;
 
 public final class BiomeClassifier {
     public static Biome classify(Context context) {
-        ClassifyBiomeEvent event = new ClassifyBiomeEvent(context);
-        if (MinecraftForge.TERRAIN_GEN_BUS.post(event)) {
-            Biome biome = event.getBiome();
-            if (biome != null) {
-                return biome;
-            }
-        }
-
         if (context.isLand()) {
             return classifyLand(context);
         } else {

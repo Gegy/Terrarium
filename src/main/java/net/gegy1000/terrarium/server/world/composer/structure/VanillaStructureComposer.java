@@ -6,6 +6,7 @@ import net.gegy1000.gengen.api.writer.ChunkPrimeWriter;
 import net.gegy1000.gengen.util.SpatialRandom;
 import net.gegy1000.gengen.util.wrapper.OverworldGeneratorWrapper;
 import net.gegy1000.terrarium.Terrarium;
+import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunkProvider;
@@ -72,7 +73,7 @@ public class VanillaStructureComposer implements StructureComposer {
     }
 
     @Override
-    public void prepareStructures(CubicPos pos) {
+    public void prepareStructures(TerrariumWorld terrarium, CubicPos pos) {
         /*int chunkX = pos.getX();
         int chunkZ = pos.getZ();
 
@@ -85,7 +86,7 @@ public class VanillaStructureComposer implements StructureComposer {
     }
 
     @Override
-    public void primeStructures(CubicPos pos, ChunkPrimeWriter writer) {
+    public void primeStructures(TerrariumWorld terrarium, CubicPos pos, ChunkPrimeWriter writer) {
         /*int chunkX = pos.getX();
         int chunkZ = pos.getZ();
 
@@ -98,7 +99,7 @@ public class VanillaStructureComposer implements StructureComposer {
     }
 
     @Override
-    public void populateStructures(CubicPos pos, ChunkPopulationWriter writer) {
+    public void populateStructures(TerrariumWorld terrarium, CubicPos pos, ChunkPopulationWriter writer) {
         /*this.randomMap.initPosSeed(pos.getMinX(), pos.getMinZ());
         this.random.setSeed(this.randomMap.next());
 
@@ -113,14 +114,14 @@ public class VanillaStructureComposer implements StructureComposer {
     }
 
     @Override
-    public boolean isInsideStructure(World world, String name, BlockPos pos) {
+    public boolean isInsideStructure(TerrariumWorld terrarium, World world, String name, BlockPos pos) {
         MapGenStructure structure = this.getStructureGenerator(name);
         return structure != null && structure.isInsideStructure(pos);
     }
 
     @Nullable
     @Override
-    public BlockPos getClosestStructure(World world, String name, BlockPos pos, boolean findUnexplored) {
+    public BlockPos getClosestStructure(TerrariumWorld terrarium, World world, String name, BlockPos pos, boolean findUnexplored) {
         MapGenStructure structure = this.getStructureGenerator(name);
         return structure != null ? structure.getNearestStructurePos(world, pos, findUnexplored) : null;
     }

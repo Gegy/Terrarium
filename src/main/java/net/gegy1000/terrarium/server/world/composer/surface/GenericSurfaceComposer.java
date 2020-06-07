@@ -3,6 +3,7 @@ package net.gegy1000.terrarium.server.world.composer.surface;
 import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.gengen.api.generator.GenericChunkPrimer;
 import net.gegy1000.gengen.api.writer.ChunkPrimeWriter;
+import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.data.ColumnData;
 
 public class GenericSurfaceComposer implements SurfaceComposer {
@@ -17,7 +18,7 @@ public class GenericSurfaceComposer implements SurfaceComposer {
     }
 
     @Override
-    public void composeSurface(ColumnData data, CubicPos pos, ChunkPrimeWriter writer) {
+    public void composeSurface(TerrariumWorld terrarium, ColumnData data, CubicPos pos, ChunkPrimeWriter writer) {
         this.primer.primeChunk(pos, writer);
     }
 }
