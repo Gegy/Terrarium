@@ -1,4 +1,6 @@
-package net.gegy1000.earth.server.world.cover;
+package net.gegy1000.earth.server.util.debug;
+
+import net.gegy1000.earth.server.world.cover.Cover;
 
 public final class CoverColors {
     public static int get(Cover cover) {

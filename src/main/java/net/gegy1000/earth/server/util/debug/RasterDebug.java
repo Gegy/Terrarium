@@ -3,15 +3,16 @@ package net.gegy1000.earth.server.util.debug;
 import net.gegy1000.earth.server.integration.bop.BoPTrees;
 import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.earth.server.util.zoom.Zoomable;
+import net.gegy1000.earth.server.world.biome.BiomeClassifier;
 import net.gegy1000.earth.server.world.cover.Cover;
-import net.gegy1000.earth.server.world.cover.CoverColors;
+import net.gegy1000.earth.server.world.cover.CoverMarkers;
 import net.gegy1000.earth.server.world.data.source.StdSource;
 import net.gegy1000.earth.server.world.data.source.WorldClimateRaster;
 import net.gegy1000.earth.server.world.ecology.GrowthIndicator;
 import net.gegy1000.earth.server.world.ecology.GrowthPredictors;
-import net.gegy1000.earth.server.world.ecology.soil.SoilColors;
 import net.gegy1000.earth.server.world.ecology.soil.SoilSuborder;
 import net.gegy1000.earth.server.world.ecology.vegetation.Trees;
+import net.gegy1000.earth.server.world.geography.Landform;
 import net.gegy1000.terrarium.server.util.Vec2i;
 import net.gegy1000.terrarium.server.world.data.DataView;
 import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
@@ -19,6 +20,7 @@ import net.gegy1000.terrarium.server.world.data.raster.FloatRaster;
 import net.gegy1000.terrarium.server.world.data.raster.Raster;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.data.raster.UByteRaster;
+import net.minecraft.world.biome.Biome;
 
 import javax.imageio.ImageIO;
 import java.awt.Color;
@@ -55,6 +57,8 @@ final class RasterDebug {
     public static void main(String[] args) throws IOException {
         Files.createDirectories(OUTPUT);
 
+        DebugBootstrap.run();
+
         System.out.println("loading rasters");
         Rasters rasters = new Rasters();
 
@@ -69,6 +73,9 @@ final class RasterDebug {
 
         System.out.println("rendering dominant tree layer");
         renderDominantTrees(rasters);
+
+        System.out.println("rendering biome layer");
+        renderBiomes(rasters);
     }
 
     private static <E extends Enum<E>> void renderEnumRaster(String name, EnumRaster<E> raster, ToIntFunction<E> color) throws IOException {
@@ -142,6 +149,32 @@ final class RasterDebug {
         });
 
         ImageIO.write(dominantTreeImage, "png", OUTPUT.resolve("dominant_tree.png").toFile());
+    }
+
+    private static void renderBiomes(Rasters rasters) throws IOException {
+        int width = rasters.elevation.getWidth();
+        int height = rasters.elevation.getHeight();
+
+        BufferedImage biomeImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+
+        BiomeClassifier.Context ctx = new BiomeClassifier.Context();
+
+        rasters.elevation.iterate((elevation, x, y) -> {
+            ctx.cover = rasters.cover.get(x, y);
+            ctx.annualRainfall = rasters.annualRainfall.get(x, y);
+            ctx.minTemperature = rasters.minTemperature.get(x, y);
+            ctx.meanTemperature = rasters.meanTemperature.get(x, y);
+
+            ctx.landform = elevation <= 0.0F ? Landform.SEA : Landform.LAND;
+            if (ctx.landform.isLand() && ctx.cover.is(CoverMarkers.WATER)) {
+                ctx.landform = Landform.LAKE_OR_RIVER;
+            }
+
+            Biome biome = BiomeClassifier.classify(ctx);
+            biomeImage.setRGB(x, y, BiomeColors.get(biome));
+        });
+
+        ImageIO.write(biomeImage, "png", OUTPUT.resolve("biomes.png").toFile());
     }
 
     private static FloatRaster sampleMinTemperature(WorldClimateRaster source) {

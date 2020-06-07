@@ -1,4 +1,6 @@
-package net.gegy1000.earth.server.world.ecology.soil;
+package net.gegy1000.earth.server.util.debug;
+
+import net.gegy1000.earth.server.world.ecology.soil.SoilSuborder;
 
 public final class SoilColors {
     public static int get(SoilSuborder soil) {
