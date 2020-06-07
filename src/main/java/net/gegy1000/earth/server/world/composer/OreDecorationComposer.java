@@ -32,7 +32,8 @@ public class OreDecorationComposer implements DecorationComposer {
     }
 
     @Override
-    public void composeDecoration(TerrariumWorld terrarium, ColumnDataCache dataCache, CubicPos cubePos, ChunkPopulationWriter writer) {
+    public void composeDecoration(TerrariumWorld terrarium, CubicPos cubePos, ChunkPopulationWriter writer) {
+        ColumnDataCache dataCache = terrarium.getDataCache();
         int x = cubePos.getMaxX();
         int z = cubePos.getMaxZ();
 

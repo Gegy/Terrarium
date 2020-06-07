@@ -41,7 +41,7 @@ public class TerrariumUserTracker {
         TerrariumAuxCaps aux = world.getCapability(TerrariumCapabilities.aux(), null);
         if (aux == null) return;
 
-        Collection<ICapabilityProvider> capabilities = worldType.createCapabilities(providedSettings);
+        Collection<ICapabilityProvider> capabilities = worldType.createCapabilities(world, providedSettings);
         for (ICapabilityProvider provider : capabilities) {
             aux.addAux(provider);
         }

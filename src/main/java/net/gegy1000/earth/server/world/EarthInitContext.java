@@ -7,7 +7,7 @@ import net.gegy1000.earth.server.world.data.source.WorldClimateRaster;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 
-import static net.gegy1000.earth.server.world.EarthWorldType.*;
+import static net.gegy1000.earth.server.world.EarthWorldType.WORLD_SCALE;
 
 public final class EarthInitContext {
     public final GenerationSettings settings;
@@ -20,7 +20,7 @@ public final class EarthInitContext {
     private EarthInitContext(GenerationSettings settings) {
         this.settings = settings;
 
-        double worldScale = settings.getDouble(WORLD_SCALE);
+        double worldScale = this.settings.getDouble(WORLD_SCALE);
 
         double metersPerDegree = EarthWorld.EQUATOR_CIRCUMFERENCE / 360.0;
         this.lngLatCrs = CoordinateReference.lngLat(metersPerDegree / worldScale);

@@ -3,7 +3,6 @@ package net.gegy1000.terrarium.server.world.composer.decoration;
 import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.gengen.api.writer.ChunkPopulationWriter;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
-import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 
 import java.util.Collection;
 
@@ -23,9 +22,9 @@ public final class CompositeDecorationComposer implements DecorationComposer {
     }
 
     @Override
-    public void composeDecoration(TerrariumWorld terrarium, ColumnDataCache dataCache, CubicPos pos, ChunkPopulationWriter writer) {
+    public void composeDecoration(TerrariumWorld terrarium, CubicPos pos, ChunkPopulationWriter writer) {
         for (DecorationComposer composer : this.composers) {
-            composer.composeDecoration(terrarium, dataCache, pos, writer);
+            composer.composeDecoration(terrarium, pos, writer);
         }
     }
 }

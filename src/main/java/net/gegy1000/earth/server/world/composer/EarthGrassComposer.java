@@ -9,7 +9,6 @@ import net.gegy1000.gengen.api.writer.ChunkPopulationWriter;
 import net.gegy1000.gengen.util.SpatialRandom;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.composer.decoration.DecorationComposer;
-import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
 import net.minecraft.block.BlockDoublePlant;
 import net.minecraft.block.BlockTallGrass;
@@ -49,13 +48,13 @@ public final class EarthGrassComposer implements DecorationComposer {
     }
 
     @Override
-    public void composeDecoration(TerrariumWorld terrarium, ColumnDataCache dataCache, CubicPos pos, ChunkPopulationWriter writer) {
+    public void composeDecoration(TerrariumWorld terrarium, CubicPos pos, ChunkPopulationWriter writer) {
+        this.random.setSeed(pos.getCenterX(), pos.getCenterY(), pos.getCenterZ());
+
         int dataX = pos.getMaxX();
         int dataZ = pos.getMaxZ();
-        Cover cover = this.coverSampler.sample(dataCache, dataX, dataZ);
+        Cover cover = this.coverSampler.sample(terrarium.getDataCache(), dataX, dataZ);
         if (cover.is(CoverMarkers.NO_VEGETATION)) return;
-
-        this.random.setSeed(pos.getCenterX(), pos.getCenterY(), pos.getCenterZ());
 
         int grassPerChunk = this.getGrassPerChunk(this.random, cover);
         int fernsPerChunk = this.getFernsPerChunk(cover);

@@ -32,15 +32,17 @@ public final class EarthFlowerComposer implements DecorationComposer {
     }
 
     @Override
-    public void composeDecoration(TerrariumWorld terrarium, ColumnDataCache dataCache, CubicPos pos, ChunkPopulationWriter writer) {
+    public void composeDecoration(TerrariumWorld terrarium, CubicPos pos, ChunkPopulationWriter writer) {
+        this.random.setSeed(pos.getCenterX(), pos.getCenterY(), pos.getCenterZ());
+
+        ColumnDataCache dataCache = terrarium.getDataCache();
         int dataX = pos.getMaxX();
         int dataZ = pos.getMaxZ();
+
         Cover cover = this.coverSampler.sample(dataCache, dataX, dataZ);
         if (cover.is(CoverMarkers.NO_VEGETATION)) {
             return;
         }
-
-        this.random.setSeed(pos.getCenterX(), pos.getCenterY(), pos.getCenterZ());
 
         this.predictorSampler.sampleTo(dataCache, dataX, dataZ, this.predictors);
 

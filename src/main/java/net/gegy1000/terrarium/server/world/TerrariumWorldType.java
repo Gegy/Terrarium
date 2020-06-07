@@ -45,7 +45,7 @@ public abstract class TerrariumWorldType implements GenericWorldType {
 
     public abstract TerrariumDataInitializer createDataInitializer(GenerationSettings settings);
 
-    public abstract Collection<ICapabilityProvider> createCapabilities(GenerationSettings settings);
+    public abstract Collection<ICapabilityProvider> createCapabilities(World world, GenerationSettings settings);
 
     public abstract PropertyPrototype buildPropertyPrototype();
 

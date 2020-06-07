@@ -2,6 +2,7 @@ package net.gegy1000.earth.server.world;
 
 import net.gegy1000.earth.server.world.composer.EarthBiomeComposer;
 import net.gegy1000.earth.server.world.composer.EarthCactusComposer;
+import net.gegy1000.earth.server.world.composer.EarthCompatComposer;
 import net.gegy1000.earth.server.world.composer.EarthFlowerComposer;
 import net.gegy1000.earth.server.world.composer.EarthGourdComposer;
 import net.gegy1000.earth.server.world.composer.EarthGrassComposer;
@@ -115,5 +116,9 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
 
         builder.addDecorationComposer(new FreezeSurfaceComposer(this.world));
         builder.addDecorationComposer(new VanillaEntitySpawnComposer(this.world));
+
+        if (this.ctx.settings.getBoolean(COMPATIBILITY_MODE)) {
+            builder.addDecorationComposer(new EarthCompatComposer(this.world));
+        }
     }
 }

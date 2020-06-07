@@ -2,11 +2,13 @@ package net.gegy1000.earth.server.capability;
 
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.world.EarthData;
+import net.gegy1000.earth.server.world.EarthInitContext;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.data.source.Geocoder;
+import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -65,8 +67,8 @@ public interface EarthWorld extends ICapabilityProvider {
         private final CoordinateReference crs;
         private final Geocoder geocoder;
 
-        public Impl(CoordinateReference crs) {
-            this.crs = crs;
+        public Impl(GenerationSettings settings) {
+            this.crs = EarthInitContext.from(settings).lngLatCrs;
             this.geocoder = TerrariumEarth.getPreferredGeocoder();
         }
 

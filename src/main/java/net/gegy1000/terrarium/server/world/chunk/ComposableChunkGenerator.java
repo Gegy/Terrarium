@@ -43,9 +43,8 @@ public class ComposableChunkGenerator implements GenericChunkGenerator {
             try (ColumnDataEntry.Handle handle = terrarium.getDataCache().acquireEntry(columnPos)) {
                 ColumnData data = handle.join();
                 terrarium.getSurfaceComposer().composeSurface(terrarium, data, pos, writer);
+                terrarium.getStructureComposer().primeStructures(terrarium, pos, writer);
             }
-
-            terrarium.getStructureComposer().primeStructures(terrarium, pos, writer);
         });
     }
 
@@ -55,7 +54,7 @@ public class ComposableChunkGenerator implements GenericChunkGenerator {
             ColumnDataCache dataCache = terrarium.getDataCache();
             ColumnDataEntry.Handle[] handles = this.acquirePopulationHandles(pos, dataCache);
 
-            terrarium.getDecorationComposer().composeDecoration(terrarium, dataCache, pos, writer);
+            terrarium.getDecorationComposer().composeDecoration(terrarium, pos, writer);
             terrarium.getStructureComposer().populateStructures(terrarium, pos, writer);
 
             for (ColumnDataEntry.Handle handle : handles) {
@@ -64,7 +63,7 @@ public class ComposableChunkGenerator implements GenericChunkGenerator {
         });
     }
 
-    private ColumnDataEntry.Handle[] acquirePopulationHandles(CubicPos pos, ColumnDataCache dataCache) {
+    protected ColumnDataEntry.Handle[] acquirePopulationHandles(CubicPos pos, ColumnDataCache dataCache) {
         return new ColumnDataEntry.Handle[] {
                 dataCache.acquireEntry(new ChunkPos(pos.getX(), pos.getZ())),
                 dataCache.acquireEntry(new ChunkPos(pos.getX() + 1, pos.getZ())),

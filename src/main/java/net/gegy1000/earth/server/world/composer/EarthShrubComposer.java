@@ -32,7 +32,8 @@ public final class EarthShrubComposer implements DecorationComposer {
     }
 
     @Override
-    public void composeDecoration(TerrariumWorld terrarium, ColumnDataCache dataCache, CubicPos pos, ChunkPopulationWriter writer) {
+    public void composeDecoration(TerrariumWorld terrarium, CubicPos pos, ChunkPopulationWriter writer) {
+        ColumnDataCache dataCache = terrarium.getDataCache();
         int dataX = pos.getMaxX();
         int dataZ = pos.getMaxZ();
 

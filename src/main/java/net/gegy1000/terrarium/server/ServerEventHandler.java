@@ -64,14 +64,14 @@ public class ServerEventHandler {
             TerrariumAuxCaps aux = new TerrariumAuxCaps.Implementation();
 
             if (!world.isRemote) {
-                TerrariumWorld worldData = new TerrariumWorld.Impl(world, worldType);
+                TerrariumWorld terrarium = new TerrariumWorld.Impl(world, worldType);
 
-                Collection<ICapabilityProvider> capabilities = worldType.createCapabilities(worldData.getSettings());
+                Collection<ICapabilityProvider> capabilities = worldType.createCapabilities(world, terrarium.getSettings());
                 for (ICapabilityProvider provider : capabilities) {
                     aux.addAux(provider);
                 }
 
-                event.addCapability(TerrariumCapabilities.WORLD_DATA_ID, worldData);
+                event.addCapability(TerrariumCapabilities.WORLD_DATA_ID, terrarium);
             }
 
             event.addCapability(TerrariumCapabilities.AUX_DATA_ID, aux);

@@ -1,6 +1,5 @@
 package net.gegy1000.terrarium.server.world.data;
 
-import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.gengen.core.GenGen;
 import net.gegy1000.terrarium.server.world.chunk.tracker.ChunkTrackerAccess;
 import net.gegy1000.terrarium.server.world.chunk.tracker.ColumnTrackerAccess;
@@ -75,10 +74,6 @@ public class ColumnDataCache implements AutoCloseable {
 
     public ColumnDataEntry.Handle acquireEntry(ChunkPos columnPos) {
         return this.getEntry(columnPos).acquire();
-    }
-
-    public <T> Optional<T> joinData(CubicPos cubicPos, DataKey<T> key) {
-        return this.joinData(new ChunkPos(cubicPos.getX(), cubicPos.getZ()), key);
     }
 
     public <T> Optional<T> joinData(ChunkPos columnPos, DataKey<T> key) {

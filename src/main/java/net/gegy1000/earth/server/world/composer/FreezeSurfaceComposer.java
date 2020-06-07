@@ -33,8 +33,11 @@ public class FreezeSurfaceComposer implements DecorationComposer {
     }
 
     @Override
-    public void composeDecoration(TerrariumWorld terrarium, ColumnDataCache dataCache, CubicPos pos, ChunkPopulationWriter writer) {
+    public void composeDecoration(TerrariumWorld terrarium, CubicPos pos, ChunkPopulationWriter writer) {
+        this.random.setSeed(pos.getX(), pos.getZ());
+
         World world = writer.getGlobal();
+        ColumnDataCache dataCache = terrarium.getDataCache();
 
         int minX = pos.getCenterX();
         int minZ = pos.getCenterZ();
@@ -45,8 +48,6 @@ public class FreezeSurfaceComposer implements DecorationComposer {
 
         ShortRaster heightRaster = this.heightSampler.sample(dataCache, view);
         UByteRaster slopeRaster = this.slopeSampler.sample(dataCache, view);
-
-        this.random.setSeed(pos.getX(), pos.getZ());
 
         for (int z = 0; z < 16; z++) {
             for (int x = 0; x < 16; x++) {

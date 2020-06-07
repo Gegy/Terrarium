@@ -15,7 +15,6 @@ import net.gegy1000.terrarium.server.world.TerrariumDataInitializer;
 import net.gegy1000.terrarium.server.world.TerrariumGeneratorInitializer;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.chunk.ComposableChunkGenerator;
-import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.generator.customization.PropertyPrototype;
@@ -90,9 +89,8 @@ public class EarthWorldType extends TerrariumWorldType {
     }
 
     @Override
-    public Collection<ICapabilityProvider> createCapabilities(GenerationSettings settings) {
-        CoordinateReference crs = EarthInitContext.from(settings).lngLatCrs;
-        return Lists.newArrayList(new EarthWorld.Impl(crs));
+    public Collection<ICapabilityProvider> createCapabilities(World world, GenerationSettings settings) {
+        return Lists.newArrayList(new EarthWorld.Impl(settings));
     }
 
     @Override
