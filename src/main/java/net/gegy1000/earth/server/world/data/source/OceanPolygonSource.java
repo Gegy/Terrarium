@@ -1,5 +1,6 @@
 package net.gegy1000.earth.server.world.data.source;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.MultiPolygon;
@@ -7,7 +8,6 @@ import com.vividsolutions.jts.geom.Polygon;
 import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.earth.server.world.data.PolygonData;
 import net.gegy1000.earth.server.world.data.index.DataIndex1;
-import net.gegy1000.earth.server.world.data.source.cache.AbstractRegionKey;
 import net.gegy1000.earth.server.world.data.source.cache.CachingInput;
 import net.gegy1000.earth.server.world.data.source.cache.FileTileCache;
 import net.gegy1000.terrarium.server.util.Vec2i;
@@ -27,12 +27,6 @@ import java.util.Optional;
 
 public class OceanPolygonSource extends TiledDataSource<PolygonData> {
     private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
-
-//    private static final TileCache<Key> CACHE = RegionTileCache.<Key>builder()
-//            .keyProvider(new KeyProvider())
-//            .inDirectory(GLOBAL_CACHE_ROOT.resolve("ocean"))
-//            .sectorSize(2048)
-//            .build();
 
     private static final Path CACHE_ROOT = TerrariumCacheDirs.GLOBAL_ROOT.resolve("ocean");
     private static final FileTileCache<Vec2i> CACHE = new FileTileCache<>(pos -> CACHE_ROOT.resolve(pos.x + "/" + pos.y));
@@ -115,7 +109,7 @@ public class OceanPolygonSource extends TiledDataSource<PolygonData> {
         double lastX = minX;
         double lastY = minY;
 
-        com.vividsolutions.jts.geom.Coordinate[] coordinates = new com.vividsolutions.jts.geom.Coordinate[coordinateCount];
+        Coordinate[] coordinates = new Coordinate[coordinateCount];
         for (int i = 0; i < coordinateCount; i++) {
             short packedX = input.readShort();
             short packedY = input.readShort();
@@ -129,37 +123,12 @@ public class OceanPolygonSource extends TiledDataSource<PolygonData> {
             lastX = x;
             lastY = y;
 
-            coordinates[i] = new com.vividsolutions.jts.geom.Coordinate(x, y);
+            coordinates[i] = new Coordinate(x, y);
         }
 
         // precision is lost through delta-encoding, causing an error to be thrown
         coordinates[coordinates.length - 1] = coordinates[0];
 
         return GEOMETRY_FACTORY.createLinearRing(coordinates);
-    }
-
-    private static final int LOC_BITS = 4;
-
-    private static class Key extends AbstractRegionKey<Key> {
-        Key(int x, int z) {
-            super(x, z);
-        }
-
-        @Override
-        protected int bits() {
-            return LOC_BITS;
-        }
-    }
-
-    private static class KeyProvider extends AbstractRegionKey.Provider<Key> {
-        @Override
-        protected Key create(int x, int z) {
-            return new Key(x, z);
-        }
-
-        @Override
-        protected int bits() {
-            return LOC_BITS;
-        }
     }
 }
