@@ -17,14 +17,17 @@ import java.util.function.Consumer;
 
 public final class ColumnCompatibility {
     private static final ShortRaster.Sampler HEIGHT_SAMPLER = ShortRaster.sampler(EarthData.TERRAIN_HEIGHT);
+    private static final int COMPAT_SURFACE_Y = 74;
 
     private final World world;
+    private final boolean cubic;
     private final ColumnCompatibilityWorld compatibilityWorld;
 
     private boolean recursing;
 
     public ColumnCompatibility(World world) {
         this.world = world;
+        this.cubic = GenGen.isCubic(world);
         this.compatibilityWorld = new ColumnCompatibilityWorld(world);
     }
 
@@ -55,7 +58,7 @@ public final class ColumnCompatibility {
             this.recursing = true;
 
             // in a vanilla world, we know the full column should be already populated
-            if (GenGen.isCubic(this.world)) {
+            if (this.cubic) {
                 this.prepareCubes(columnPos, minCubeY, maxCubeY);
             }
 
@@ -94,8 +97,13 @@ public final class ColumnCompatibility {
     private int getMinCompatibilityY(TerrariumWorld terrarium, ChunkPos columnPos) {
         int x = columnPos.getXStart() + 8;
         int z = columnPos.getZStart() + 8;
-        int surfaceY = HEIGHT_SAMPLER.sample(terrarium.getDataCache(), x, z);
 
-        return surfaceY - 74;
+        int surfaceY = HEIGHT_SAMPLER.sample(terrarium.getDataCache(), x, z);
+        if (!this.cubic) {
+            // when cubic chunks is not enabled, all generation still needs space within the world
+            surfaceY = Math.max(surfaceY, COMPAT_SURFACE_Y);
+        }
+
+        return surfaceY - COMPAT_SURFACE_Y;
     }
 }
