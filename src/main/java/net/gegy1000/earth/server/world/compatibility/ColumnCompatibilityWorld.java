@@ -6,13 +6,17 @@ import net.gegy1000.terrarium.Terrarium;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.village.VillageCollection;
+import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.EnumSkyBlock;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.IWorldEventListener;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
@@ -23,6 +27,9 @@ import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.gen.feature.WorldGenerator;
+import net.minecraft.world.storage.ISaveHandler;
+import net.minecraft.world.storage.MapStorage;
+import net.minecraft.world.storage.loot.LootTableManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.event.terraingen.DecorateBiomeEvent;
@@ -223,6 +230,58 @@ public final class ColumnCompatibilityWorld extends World implements AutoCloseab
     @Override
     public ChunkProvider getChunkProvider() {
         return (ChunkProvider) super.getChunkProvider();
+    }
+
+    @Nullable
+    @Override
+    public MinecraftServer getMinecraftServer() {
+        return this.parent.getMinecraftServer();
+    }
+
+    @Override
+    public VillageCollection getVillageCollection() {
+        return this.parent.getVillageCollection();
+    }
+
+    @Override
+    public BiomeProvider getBiomeProvider() {
+        return this.parent.getBiomeProvider();
+    }
+
+    @Override
+    public BlockPos getSpawnPoint() {
+        return this.parent.getSpawnPoint();
+    }
+
+    @Override
+    public EnumDifficulty getDifficulty() {
+        return this.parent.getDifficulty();
+    }
+
+    @Override
+    public GameRules getGameRules() {
+        return this.parent.getGameRules();
+    }
+
+    @Override
+    public LootTableManager getLootTableManager() {
+        return this.parent.getLootTableManager();
+    }
+
+    @Override
+    public ISaveHandler getSaveHandler() {
+        return this.parent.getSaveHandler();
+    }
+
+    @Nullable
+    @Override
+    public MapStorage getMapStorage() {
+        return this.parent.getMapStorage();
+    }
+
+    @Override
+    public MapStorage getPerWorldStorage() {
+        return this.parent.getPerWorldStorage();
     }
 
     @Override
