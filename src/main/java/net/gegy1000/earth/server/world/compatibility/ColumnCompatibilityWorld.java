@@ -138,19 +138,31 @@ public final class ColumnCompatibilityWorld extends World implements AutoCloseab
 
     @Override
     public int getHeight(int x, int z) {
-        return this.parent.getHeight(x, z) - this.minY;
+        return this.untranslateY(this.parent.getHeight(x, z));
+    }
+
+    @Override
+    public int getHeight() {
+        return this.untranslateY(this.parent.getHeight());
+    }
+
+    @Override
+    public int getActualHeight() {
+        return this.untranslateY(this.parent.getActualHeight());
     }
 
     @Override
     public BlockPos getPrecipitationHeight(BlockPos pos) {
         BlockPos result = this.parent.getPrecipitationHeight(this.translatePos(pos));
-        return result.down(this.minY);
+        int y = this.untranslateY(result.getY());
+        return new BlockPos(pos.getX(), y, pos.getZ());
     }
 
     @Override
     public BlockPos getTopSolidOrLiquidBlock(BlockPos pos) {
         BlockPos result = this.parent.getTopSolidOrLiquidBlock(this.translatePos(pos));
-        return result.down(this.minY);
+        int y = this.untranslateY(result.getY());
+        return new BlockPos(pos.getX(), y, pos.getZ());
     }
 
     @Override
@@ -170,17 +182,18 @@ public final class ColumnCompatibilityWorld extends World implements AutoCloseab
 
     @Override
     public int getSeaLevel() {
-        return this.parent.getSeaLevel() + this.minY;
+        return this.untranslateY(this.parent.getSeaLevel());
     }
 
     @Override
     public boolean spawnEntity(Entity entity) {
-        entity.posY += this.minY;
+        this.translateEntity(entity);
         return this.parent.spawnEntity(entity);
     }
 
     @Override
     public void onEntityAdded(Entity entity) {
+        this.translateEntity(entity);
         this.parent.onEntityAdded(entity);
     }
 
@@ -234,6 +247,17 @@ public final class ColumnCompatibilityWorld extends World implements AutoCloseab
         return this.mutablePos;
     }
 
+    private int untranslateY(int y) {
+        return MathHelper.clamp(y - this.minY, 0, 255);
+    }
+
+    private void translateEntity(Entity entity) {
+        if (entity.world != this.parent) {
+            entity.setWorld(this.parent);
+            entity.setPosition(entity.posX, entity.posY + this.minY, entity.posZ);
+        }
+    }
+
     class ChunkProvider implements IChunkProvider {
         private final Long2ObjectOpenHashMap<OffsetChunk> chunks = new Long2ObjectOpenHashMap<>(9);
 
@@ -280,16 +304,14 @@ public final class ColumnCompatibilityWorld extends World implements AutoCloseab
         }
     }
 
-    static class OffsetChunk extends Chunk {
+    class OffsetChunk extends Chunk {
         private final Chunk parent;
-        private final int minY;
 
         private final BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
 
         OffsetChunk(Chunk parent, int minY) {
             super(parent.getWorld(), parent.x, parent.z);
             this.parent = parent;
-            this.minY = minY;
         }
 
         @Override
@@ -342,7 +364,7 @@ public final class ColumnCompatibilityWorld extends World implements AutoCloseab
         @Nullable
         @Override
         public IBlockState setBlockState(BlockPos pos, IBlockState state) {
-            return this.parent.setBlockState(this.translatePos(pos), state);
+            return this.parent.setBlockState(ColumnCompatibilityWorld.this.translatePos(pos), state);
         }
 
         @Override
@@ -350,30 +372,30 @@ public final class ColumnCompatibilityWorld extends World implements AutoCloseab
             if (y < 0 || y >= 256) {
                 return Blocks.AIR.getDefaultState();
             }
-            return this.parent.getBlockState(x, y + this.minY, z);
+            return this.parent.getBlockState(x, y + ColumnCompatibilityWorld.this.minY, z);
         }
 
         @Nullable
         @Override
         public TileEntity getTileEntity(BlockPos pos, EnumCreateEntityType mode) {
-            return this.parent.getTileEntity(this.translatePos(pos), mode);
+            return this.parent.getTileEntity(ColumnCompatibilityWorld.this.translatePos(pos), mode);
         }
 
         @Override
         public void addTileEntity(TileEntity tileEntity) {
-            tileEntity.setPos(this.translatePos(tileEntity.getPos()).toImmutable());
+            tileEntity.setPos(ColumnCompatibilityWorld.this.translatePos(tileEntity.getPos()).toImmutable());
             this.parent.addTileEntity(tileEntity);
         }
 
         @Override
         public void addTileEntity(BlockPos pos, TileEntity tileEntity) {
-            pos = this.translatePos(pos).toImmutable();
+            pos = ColumnCompatibilityWorld.this.translatePos(pos).toImmutable();
             this.parent.addTileEntity(pos, tileEntity);
         }
 
         @Override
         public void removeTileEntity(BlockPos pos) {
-            this.parent.removeTileEntity(this.translatePos(pos));
+            this.parent.removeTileEntity(ColumnCompatibilityWorld.this.translatePos(pos));
         }
 
         @Override
@@ -383,33 +405,34 @@ public final class ColumnCompatibilityWorld extends World implements AutoCloseab
 
         @Override
         public int getHeightValue(int x, int z) {
-            return this.parent.getHeightValue(x, z) - this.minY;
+            return ColumnCompatibilityWorld.this.untranslateY(this.parent.getHeightValue(x, z));
         }
 
         @Override
         public BlockPos getPrecipitationHeight(BlockPos pos) {
             BlockPos parent = this.parent.getPrecipitationHeight(pos);
-            return parent.down(this.minY);
+            int y = ColumnCompatibilityWorld.this.untranslateY(parent.getY());
+            return new BlockPos(parent.getX(), y, parent.getZ());
         }
 
         @Override
         public boolean canSeeSky(BlockPos pos) {
-            return this.parent.canSeeSky(this.translatePos(pos));
+            return this.parent.canSeeSky(ColumnCompatibilityWorld.this.translatePos(pos));
         }
 
         @Override
         public int getLightFor(EnumSkyBlock type, BlockPos pos) {
-            return this.parent.getLightFor(type, this.translatePos(pos));
+            return this.parent.getLightFor(type, ColumnCompatibilityWorld.this.translatePos(pos));
         }
 
         @Override
         public int getLightSubtracted(BlockPos pos, int amount) {
-            return this.parent.getLightSubtracted(this.translatePos(pos), amount);
+            return this.parent.getLightSubtracted(ColumnCompatibilityWorld.this.translatePos(pos), amount);
         }
 
         @Override
         public Biome getBiome(BlockPos pos, BiomeProvider provider) {
-            return this.parent.getBiome(this.translatePos(pos), provider);
+            return this.parent.getBiome(ColumnCompatibilityWorld.this.translatePos(pos), provider);
         }
 
         @Override
@@ -422,7 +445,7 @@ public final class ColumnCompatibilityWorld extends World implements AutoCloseab
 
         @Override
         public void addEntity(Entity entity) {
-            entity.posY += this.minY;
+            ColumnCompatibilityWorld.this.translateEntity(entity);
             this.parent.addEntity(entity);
         }
 
@@ -433,7 +456,7 @@ public final class ColumnCompatibilityWorld extends World implements AutoCloseab
 
         @Override
         public void removeEntityAtIndex(Entity entity, int index) {
-            index -= MathHelper.floor(this.minY / 16.0);
+            index -= MathHelper.floor(ColumnCompatibilityWorld.this.minY / 16.0);
             if (index < 0 || index >= 16) {
                 return;
             }
@@ -442,13 +465,13 @@ public final class ColumnCompatibilityWorld extends World implements AutoCloseab
 
         @Override
         public <T extends Entity> void getEntitiesOfTypeWithinAABB(Class<? extends T> entityClass, AxisAlignedBB aabb, List<T> listToFill, Predicate<? super T> filter) {
-            aabb = aabb.offset(0.0, this.minY, 0.0);
+            aabb = aabb.offset(0.0, ColumnCompatibilityWorld.this.minY, 0.0);
             this.parent.getEntitiesOfTypeWithinAABB(entityClass, aabb, listToFill, filter);
         }
 
         @Override
         public void getEntitiesWithinAABBForEntity(@Nullable Entity entity, AxisAlignedBB aabb, List<Entity> listToFill, Predicate<? super Entity> filter) {
-            aabb = aabb.offset(0.0, this.minY, 0.0);
+            aabb = aabb.offset(0.0, ColumnCompatibilityWorld.this.minY, 0.0);
             this.parent.getEntitiesWithinAABBForEntity(entity, aabb, listToFill, filter);
         }
 
@@ -459,7 +482,7 @@ public final class ColumnCompatibilityWorld extends World implements AutoCloseab
 
         @Override
         public boolean isEmptyBetween(int startY, int endY) {
-            return this.parent.isEmptyBetween(startY + this.minY, endY + this.minY);
+            return this.parent.isEmptyBetween(startY + ColumnCompatibilityWorld.this.minY, endY + ColumnCompatibilityWorld.this.minY);
         }
 
         @Override
@@ -496,12 +519,6 @@ public final class ColumnCompatibilityWorld extends World implements AutoCloseab
         @Override
         public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing) {
             return this.parent.getCapability(capability, facing);
-        }
-
-        private BlockPos translatePos(BlockPos pos) {
-            this.mutablePos.setPos(pos);
-            this.mutablePos.setY(pos.getY() + this.minY);
-            return this.mutablePos;
         }
     }
 }
