@@ -13,6 +13,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.EnumSkyBlock;
+import net.minecraft.world.IWorldEventListener;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeProvider;
@@ -29,7 +30,6 @@ import net.minecraftforge.event.terraingen.OreGenEvent;
 import net.minecraftforge.event.terraingen.OreGenEvent.GenerateMinable;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
 import net.minecraftforge.event.terraingen.TerrainGen;
-import net.minecraftforge.fml.common.registry.GameRegistry;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -102,7 +102,7 @@ public final class ColumnCompatibilityWorld extends World implements AutoCloseab
         if (this.generator == null) return;
 
         IChunkProvider chunkProvider = this.parent.getChunkProvider();
-        GameRegistry.generateWorld(this.columnPos.x, this.columnPos.z, this, this.generator, chunkProvider);
+        ModGeneratorCompatibility.runGeneratorsSafely(this, this.columnPos, this.generator, chunkProvider);
     }
 
     @Override
@@ -137,8 +137,74 @@ public final class ColumnCompatibilityWorld extends World implements AutoCloseab
     }
 
     @Override
+    public int getHeight(int x, int z) {
+        return this.parent.getHeight(x, z) - this.minY;
+    }
+
+    @Override
+    public BlockPos getPrecipitationHeight(BlockPos pos) {
+        BlockPos result = this.parent.getPrecipitationHeight(this.translatePos(pos));
+        return result.down(this.minY);
+    }
+
+    @Override
+    public BlockPos getTopSolidOrLiquidBlock(BlockPos pos) {
+        BlockPos result = this.parent.getTopSolidOrLiquidBlock(this.translatePos(pos));
+        return result.down(this.minY);
+    }
+
+    @Override
+    public void setLightFor(EnumSkyBlock type, BlockPos pos, int lightValue) {
+        this.parent.setLightFor(type, this.translatePos(pos), lightValue);
+    }
+
+    @Override
+    public int getLightFor(EnumSkyBlock type, BlockPos pos) {
+        return this.parent.getLightFor(type, this.translatePos(pos));
+    }
+
+    @Override
+    public float getLightBrightness(BlockPos pos) {
+        return this.parent.getLightBrightness(this.translatePos(pos));
+    }
+
+    @Override
     public int getSeaLevel() {
         return this.parent.getSeaLevel() + this.minY;
+    }
+
+    @Override
+    public boolean spawnEntity(Entity entity) {
+        entity.posY += this.minY;
+        return this.parent.spawnEntity(entity);
+    }
+
+    @Override
+    public void onEntityAdded(Entity entity) {
+        this.parent.onEntityAdded(entity);
+    }
+
+    @Override
+    public void onEntityRemoved(Entity entity) {
+        this.parent.onEntityRemoved(entity);
+    }
+
+    @Override
+    public void addEventListener(IWorldEventListener listener) {
+        this.parent.addEventListener(listener);
+        super.addEventListener(listener);
+    }
+
+    @Override
+    public void removeEventListener(IWorldEventListener listener) {
+        this.parent.removeEventListener(listener);
+        super.removeEventListener(listener);
+    }
+
+    @Override
+    public List<AxisAlignedBB> getCollisionBoxes(@Nullable Entity entity, AxisAlignedBB aabb) {
+        aabb = aabb.offset(0.0, this.minY, 0.0);
+        return this.parent.getCollisionBoxes(entity, aabb);
     }
 
     @Override
