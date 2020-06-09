@@ -5,9 +5,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
-import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.earth.server.world.data.PolygonData;
-import net.gegy1000.earth.server.world.data.index.DataIndex1;
 import net.gegy1000.earth.server.world.data.source.cache.CachingInput;
 import net.gegy1000.earth.server.world.data.source.cache.FileTileCache;
 import net.gegy1000.terrarium.server.util.Vec2i;
@@ -39,37 +37,35 @@ public class OceanPolygonSource extends TiledDataSource<PolygonData> {
 
     @Override
     public Optional<PolygonData> load(Vec2i pos) throws IOException {
-        SharedEarthData sharedData = SharedEarthData.instance();
-        DataIndex1 remoteIndex = sharedData.get(SharedEarthData.REMOTE_INDEX);
-        if (remoteIndex == null) {
+        if (pos.x < -180 || pos.y < -90 || pos.x >= 180 || pos.y >= 90) {
             return Optional.empty();
         }
 
-        String url = remoteIndex.oceans.getUrlFor(pos);
-        if (url == null) {
-            return Optional.empty();
-        }
+        String url = StdSource.ENDPOINT + "/ocean/" + pos.x + "/" + pos.y;
 
         InputStream sourceInput = CACHING_INPUT.getInputStream(pos, p -> {
             return httpGet(new URL(url));
         });
 
         try (InputStream input = new SingleXZInputStream(new BufferedInputStream(sourceInput))) {
-            return Optional.of(this.parseStream(input));
+            return this.parseStream(input);
         }
     }
 
-    private PolygonData parseStream(InputStream input) throws IOException {
+    private Optional<PolygonData> parseStream(InputStream input) throws IOException {
         DataInputStream data = new DataInputStream(input);
 
         int polygonCount = data.readInt();
+        if (polygonCount == 0) {
+            return Optional.empty();
+        }
 
         Collection<MultiPolygon> polygons = new ArrayList<>(polygonCount);
         for (int i = 0; i < polygonCount; i++) {
             polygons.add(readMultiPolygon(data));
         }
 
-        return new PolygonData(polygons);
+        return Optional.of(new PolygonData(polygons));
     }
 
     private static MultiPolygon readMultiPolygon(DataInputStream input) throws IOException {
@@ -106,28 +102,16 @@ public class OceanPolygonSource extends TiledDataSource<PolygonData> {
         double width = maxX - minX;
         double height = maxY - minY;
 
-        double lastX = minX;
-        double lastY = minY;
-
         Coordinate[] coordinates = new Coordinate[coordinateCount];
         for (int i = 0; i < coordinateCount; i++) {
-            short packedX = input.readShort();
-            short packedY = input.readShort();
+            int packedX = input.readShort() & 0xFFFF;
+            int packedY = input.readShort() & 0xFFFF;
 
-            double deltaX = (double) packedX / Short.MAX_VALUE * width;
-            double deltaY = (double) packedY / Short.MAX_VALUE * height;
-
-            double x = deltaX + lastX;
-            double y = deltaY + lastY;
-
-            lastX = x;
-            lastY = y;
-
-            coordinates[i] = new Coordinate(x, y);
+            coordinates[i] = new Coordinate(
+                    minX + (double) packedX / 0xFFFF * width,
+                    minY + (double) packedY / 0xFFFF * height
+            );
         }
-
-        // precision is lost through delta-encoding, causing an error to be thrown
-        coordinates[coordinates.length - 1] = coordinates[0];
 
         return GEOMETRY_FACTORY.createLinearRing(coordinates);
     }

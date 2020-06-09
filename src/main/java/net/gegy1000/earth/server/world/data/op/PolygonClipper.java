@@ -73,8 +73,7 @@ public final class PolygonClipper {
         }
 
         Coordinate[] coordinates = ring.getCoordinates();
-
-        Collection<Coordinate> uniqueCoordinates = Arrays.asList(ring.getCoordinates())
+        Collection<Coordinate> uniqueCoordinates = Arrays.asList(coordinates)
                 .subList(0, coordinates.length - 1);
 
         List<Coordinate> result = new ArrayList<>(uniqueCoordinates);

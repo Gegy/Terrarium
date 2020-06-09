@@ -93,6 +93,10 @@ public class DataView {
                 && view.getMaxX() <= this.getMaxX() && view.getMaxY() <= this.getMaxY();
     }
 
+    public boolean contains(int x, int y) {
+        return x >= this.x && y >= this.y && x < this.getMaxX() && y < this.getMaxY();
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof DataView) {

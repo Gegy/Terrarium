@@ -26,8 +26,7 @@ public final class SharedDataInitializers {
     static {
         SharedDataInitializers.add(
                 new ApiKeyInitializer(),
-                new ClimateRasterInitializer(),
-                new DataIndex1Initializer()
+                new ClimateRasterInitializer()
         );
     }
 

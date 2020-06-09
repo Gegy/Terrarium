@@ -7,7 +7,7 @@ import net.gegy1000.earth.server.world.data.PolygonData;
 import net.gegy1000.earth.server.world.data.op.AddNoiseOp;
 import net.gegy1000.earth.server.world.data.op.ClimateSampler;
 import net.gegy1000.earth.server.world.data.op.PolygonSampler;
-import net.gegy1000.earth.server.world.data.op.PolygonToAreaOp;
+import net.gegy1000.earth.server.world.data.op.PolygonToLocalAreaOp;
 import net.gegy1000.earth.server.world.data.op.ProduceLandformsOp;
 import net.gegy1000.earth.server.world.data.op.RasterizeAreaOp;
 import net.gegy1000.earth.server.world.data.op.ResampleZoomRasters;
@@ -133,7 +133,7 @@ public final class EarthDataInitializer implements TerrariumDataInitializer {
         double sampleExpand = coastDeviationMeters / worldScaleMeters;
 
         DataOp<PolygonData> oceanPolygons = PolygonSampler.sample(OCEAN_SOURCE, this.ctx.lngLatCrs, sampleExpand);
-        DataOp<Area> oceanArea = PolygonToAreaOp.apply(oceanPolygons, this.ctx.lngLatCrs);
+        DataOp<Area> oceanArea = PolygonToLocalAreaOp.apply(oceanPolygons, this.ctx.lngLatCrs);
         return RasterizeAreaOp.apply(oceanArea);
     }
 

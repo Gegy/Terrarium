@@ -11,7 +11,7 @@ public final class RasterizeAreaOp {
         return areaOp.mapBlocking((area, view) -> {
             BitRaster raster = BitRaster.create(view);
 
-            RasterCanvas canvas = RasterCanvas.of(view);
+            RasterCanvas canvas = new RasterCanvas(view.getWidth(), view.getHeight());
             canvas.setColor(1);
             canvas.fill(area);
 

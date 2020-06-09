@@ -1,8 +1,6 @@
 package net.gegy1000.earth.server.world.data.op;
 
-import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.MultiPolygon;
-import com.vividsolutions.jts.geom.Polygon;
 import net.gegy1000.earth.server.world.data.PolygonData;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.data.DataOp;
@@ -10,18 +8,25 @@ import net.gegy1000.terrarium.server.world.rasterization.PolygonShapeProducer;
 
 import java.awt.geom.Area;
 
-public final class PolygonToAreaOp {
+public final class PolygonToLocalAreaOp {
     public static DataOp<Area> apply(DataOp<PolygonData> polygons, CoordinateReference crs) {
         return polygons.mapBlocking((polygonData, view) -> {
+            PolygonShapeProducer.Transform transform = new PolygonShapeProducer.Transform() {
+                @Override
+                public double x(double x) {
+                    return crs.blockX(x) - view.getMinX();
+                }
+
+                @Override
+                public double y(double y) {
+                    return crs.blockZ(y) - view.getMinY();
+                }
+            };
+
             Area area = new Area();
 
             for (MultiPolygon polygon : polygonData.getPolygons()) {
-                for (int i = 0; i < polygon.getNumGeometries(); i++) {
-                    Geometry geometry = polygon.getGeometryN(i);
-                    if (geometry instanceof Polygon) {
-                        area.add(PolygonShapeProducer.toShape((Polygon) geometry, crs));
-                    }
-                }
+                area.add(PolygonShapeProducer.toShape(polygon, transform));
             }
 
             return area;
