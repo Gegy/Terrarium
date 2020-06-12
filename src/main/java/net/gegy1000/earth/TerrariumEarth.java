@@ -9,6 +9,7 @@ import net.gegy1000.earth.server.command.GeoTeleportCommand;
 import net.gegy1000.earth.server.command.GeoToolCommand;
 import net.gegy1000.earth.server.config.TerrariumEarthConfig;
 import net.gegy1000.earth.server.integration.bop.BoPIntegration;
+import net.gegy1000.earth.server.integration.dyntrees.DynamicTreesIntegration;
 import net.gegy1000.earth.server.message.DisplayDownloadMessage;
 import net.gegy1000.earth.server.message.EarthOpenMapMessage;
 import net.gegy1000.earth.server.message.EarthPanoramaMessage;
@@ -91,6 +92,10 @@ public class TerrariumEarth {
         if (Loader.isModLoaded("biomesoplenty")) {
             hasBiomesOPlenty = true;
             BoPIntegration.setup();
+        }
+
+        if (Loader.isModLoaded("dynamictrees")) {
+            DynamicTreesIntegration.setup();
         }
     }
 

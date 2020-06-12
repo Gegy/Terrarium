@@ -23,4 +23,8 @@ public interface SoilPredicate {
     }
 
     boolean canGrowOn(World world, BlockPos soilPos, IBlockState soilState);
+
+    default boolean canGrowOn(World world, BlockPos soilPos) {
+        return this.canGrowOn(world, soilPos, world.getBlockState(soilPos));
+    }
 }

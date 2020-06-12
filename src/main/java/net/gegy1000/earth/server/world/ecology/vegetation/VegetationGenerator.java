@@ -11,5 +11,9 @@ public interface VegetationGenerator {
         return generator::generate;
     }
 
+    static VegetationGenerator noop() {
+        return (world, random, pos) -> {};
+    }
+
     void generate(World world, Random random, BlockPos pos);
 }
