@@ -109,7 +109,7 @@ public final class ColumnCompatibilityWorld extends World implements AutoCloseab
         if (this.generator == null) return;
 
         IChunkProvider chunkProvider = this.parent.getChunkProvider();
-        ModGeneratorCompatibility.runGeneratorsSafely(this, this.columnPos, this.generator, chunkProvider);
+        ModGeneratorCompatibility.runGenerators(this, this.columnPos, this.generator, chunkProvider);
     }
 
     @Override

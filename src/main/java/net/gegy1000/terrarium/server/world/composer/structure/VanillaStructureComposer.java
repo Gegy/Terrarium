@@ -128,18 +128,12 @@ public class VanillaStructureComposer implements StructureComposer {
 
     private MapGenStructure getStructureGenerator(String structureName) {
         switch (structureName) {
-            case "Stronghold":
-                return this.strongholdGenerator;
-            case "Mansion":
-                return this.woodlandMansionGenerator;
-            case "Monument":
-                return this.oceanMonumentGenerator;
-            case "Village":
-                return this.villageGenerator;
-            case "Mineshaft":
-                return this.mineshaftGenerator;
-            case "Temple":
-                return this.templeGenerator;
+            case "Stronghold": return this.strongholdGenerator;
+            case "Mansion": return this.woodlandMansionGenerator;
+            case "Monument": return this.oceanMonumentGenerator;
+            case "Village": return this.villageGenerator;
+            case "Mineshaft": return this.mineshaftGenerator;
+            case "Temple": return this.templeGenerator;
         }
         return null;
     }

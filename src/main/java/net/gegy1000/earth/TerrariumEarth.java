@@ -105,7 +105,7 @@ public class TerrariumEarth {
     public static void onPostInit(FMLPostInitializationEvent event) {
         PROXY.onPostInit();
 
-        ModGeneratorCompatibility.hookGenerators();
+        ModGeneratorCompatibility.collectGeneratorExclusions();
     }
 
     @NetworkCheckHandler
