@@ -157,19 +157,12 @@ final class RasterDebug {
 
         BufferedImage biomeImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 
-        BiomeClassifier.Context ctx = new BiomeClassifier.Context();
+        GrowthPredictors predictors = new GrowthPredictors();
 
         rasters.elevation.iterate((elevation, x, y) -> {
-            ctx.cover = rasters.cover.get(x, y);
-            ctx.soilSuborder = rasters.soil.get(x, y);
-            rasters.samplePredictorsTo(ctx.predictors, x, y);
+            rasters.samplePredictorsTo(predictors, x, y);
 
-            ctx.landform = elevation <= 0.0F ? Landform.SEA : Landform.LAND;
-            if (ctx.landform.isLand() && ctx.cover.is(CoverMarkers.WATER)) {
-                ctx.landform = Landform.LAKE_OR_RIVER;
-            }
-
-            Biome biome = BiomeClassifier.classify(ctx);
+            Biome biome = BiomeClassifier.classify(predictors);
             biomeImage.setRGB(x, y, BiomeColors.get(biome));
         });
 
@@ -267,6 +260,14 @@ final class RasterDebug {
             predictors.clayContent = this.clay.get(x, y);
             predictors.siltContent = this.silt.get(x, y);
             predictors.sandContent = this.sand.get(x, y);
+            predictors.slope = 0;
+            predictors.cover = this.cover.get(x, y);
+            predictors.soilSuborder = this.soil.get(x, y);
+
+            predictors.landform = predictors.elevation <= 0.0F ? Landform.SEA : Landform.LAND;
+            if (predictors.landform.isLand() && predictors.cover.is(CoverMarkers.WATER)) {
+                predictors.landform = Landform.LAKE_OR_RIVER;
+            }
         }
     }
 

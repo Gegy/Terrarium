@@ -26,7 +26,7 @@ public final class EarthBiomeComposer implements BiomeComposer {
 
     private final GrowthPredictors.Sampler predictorSampler = GrowthPredictors.sampler();
 
-    private final BiomeClassifier.Context context = new BiomeClassifier.Context();
+    private final GrowthPredictors predictors = new GrowthPredictors();
 
     @Override
     public Biome[] composeBiomes(TerrariumWorld terrarium, ColumnData data, ChunkPos columnPos) {
@@ -38,12 +38,7 @@ public final class EarthBiomeComposer implements BiomeComposer {
                 int x = localX + minX;
                 int z = localZ + minZ;
 
-                this.predictorSampler.sampleTo(data, x, z, this.context.predictors);
-                this.context.cover = this.coverSampler.sample(data, x, z);
-                this.context.landform = this.landformSampler.sample(data, x, z);
-                this.context.soilSuborder = this.soilSampler.sample(data, x, z);
-                this.context.slope = this.slopeSampler.sample(data, x, z);
-
+                this.predictorSampler.sampleTo(data, x, z, this.predictors);
                 this.biomeBuffer[localX + localZ * 16] = this.classify(terrarium);
             }
         }
@@ -52,7 +47,7 @@ public final class EarthBiomeComposer implements BiomeComposer {
     }
 
     private Biome classify(TerrariumWorld terrarium) {
-        ClassifyBiomeEvent event = new ClassifyBiomeEvent(terrarium, this.context);
+        ClassifyBiomeEvent event = new ClassifyBiomeEvent(terrarium, this.predictors);
         if (MinecraftForge.TERRAIN_GEN_BUS.post(event)) {
             Biome biome = event.getBiome();
             if (biome != null) {
@@ -60,6 +55,6 @@ public final class EarthBiomeComposer implements BiomeComposer {
             }
         }
 
-        return BiomeClassifier.classify(this.context);
+        return BiomeClassifier.classify(this.predictors);
     }
 }

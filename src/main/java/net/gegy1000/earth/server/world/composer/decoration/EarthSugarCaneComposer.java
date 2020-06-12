@@ -1,4 +1,4 @@
-package net.gegy1000.earth.server.world.composer;
+package net.gegy1000.earth.server.world.composer.decoration;
 
 import net.gegy1000.earth.server.world.EarthData;
 import net.gegy1000.earth.server.world.cover.Cover;

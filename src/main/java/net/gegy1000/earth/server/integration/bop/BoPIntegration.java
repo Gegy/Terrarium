@@ -8,12 +8,12 @@ import net.gegy1000.earth.server.event.ConfigureTreesEvent;
 import net.gegy1000.earth.server.world.EarthWorldType;
 import net.gegy1000.earth.server.world.Rainfall;
 import net.gegy1000.earth.server.world.Temperature;
-import net.gegy1000.earth.server.world.biome.BiomeClassifier;
-import net.gegy1000.earth.server.world.composer.OreDecorationComposer;
+import net.gegy1000.earth.server.world.composer.decoration.OreDecorationComposer;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.cover.CoverMarkers;
 import net.gegy1000.earth.server.world.cover.CoverSelectors;
 import net.gegy1000.earth.server.world.ecology.GrowthPredictors;
+import net.gegy1000.earth.server.world.ecology.soil.SoilSelector;
 import net.gegy1000.earth.server.world.ecology.vegetation.FlowerDecorator;
 import net.gegy1000.earth.server.world.ecology.vegetation.TreeDecorator;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
@@ -148,37 +148,40 @@ public final class BoPIntegration {
             return;
         }
 
-        BiomeClassifier.Context ctx = event.getContext();
+        GrowthPredictors predictors = event.getPredictors();
 
-        if (ctx.isFrozen()) {
+        if (predictors.isFrozen()) {
             return;
         }
 
-        if (ctx.cover == Cover.LICHENS_AND_MOSSES) {
+        if (predictors.cover == Cover.LICHENS_AND_MOSSES) {
             event.setCanceled(true);
             event.setBiome(BOPBiomes.tundra.orNull());
         }
 
-        if (ctx.cover == Cover.GRASSLAND) {
+        if (predictors.cover == Cover.GRASSLAND) {
             event.setCanceled(true);
             event.setBiome(BOPBiomes.grassland.orNull());
         }
 
-        if (ctx.cover.is(CoverMarkers.DENSE_SHRUBS) && ctx.isDry()) {
+        if (predictors.cover.is(CoverMarkers.DENSE_SHRUBS) && predictors.isDry()) {
             event.setCanceled(true);
-            // TODO: xeric shrubland if desert-like
-            event.setBiome(BOPBiomes.brushland.orNull());
+            if (predictors.isBarren() || SoilSelector.isDesertLike(predictors)) {
+                event.setBiome(BOPBiomes.brushland.orNull());
+            } else {
+                event.setBiome(BOPBiomes.xeric_shrubland.orNull());
+            }
         }
 
-        if (ctx.isLand() && !ctx.cover.is(CoverMarkers.NO_VEGETATION)) {
-            double mangroveSuitability = BoPTrees.Indicators.MANGROVE.evaluate(ctx.predictors);
+        if (predictors.isLand() && !predictors.cover.is(CoverMarkers.NO_VEGETATION)) {
+            double mangroveSuitability = BoPTrees.Indicators.MANGROVE.evaluate(predictors);
             if (mangroveSuitability > 0.85) {
                 event.setCanceled(true);
                 event.setBiome(BOPBiomes.mangrove.orNull());
             }
         }
 
-        if (ctx.slope >= 60 && !ctx.isCold() && ctx.cover.is(CoverMarkers.FOREST)) {
+        if (predictors.slope >= 60 && !predictors.isCold() && predictors.cover.is(CoverMarkers.FOREST)) {
             event.setCanceled(true);
             event.setBiome(BOPBiomes.overgrown_cliffs.orNull());
         }

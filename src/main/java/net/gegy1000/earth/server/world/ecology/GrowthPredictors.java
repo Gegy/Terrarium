@@ -2,8 +2,15 @@ package net.gegy1000.earth.server.world.ecology;
 
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.world.EarthData;
+import net.gegy1000.earth.server.world.Rainfall;
+import net.gegy1000.earth.server.world.Temperature;
+import net.gegy1000.earth.server.world.cover.Cover;
+import net.gegy1000.earth.server.world.cover.CoverMarkers;
+import net.gegy1000.earth.server.world.ecology.soil.SoilSuborder;
+import net.gegy1000.earth.server.world.geography.Landform;
 import net.gegy1000.terrarium.server.world.data.ColumnData;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
+import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.data.raster.FloatRaster;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.data.raster.UByteRaster;
@@ -20,6 +27,11 @@ public final class GrowthPredictors {
     public int clayContent;
     public int siltContent;
     public int sandContent;
+    public int slope;
+
+    public Cover cover = Cover.NO;
+    public SoilSuborder soilSuborder = SoilSuborder.NO;
+    public Landform landform = Landform.LAND;
 
     public static Sampler sampler() {
         return new Sampler();
@@ -36,10 +48,51 @@ public final class GrowthPredictors {
             case "clay_content": return p -> p.clayContent;
             case "silt_content": return p -> p.siltContent;
             case "sand_content": return p -> p.sandContent;
+            case "slope": return p -> p.slope;
             default:
                 TerrariumEarth.LOGGER.warn("invalid predictor id: {}", id);
                 return p -> 0.0;
         }
+    }
+
+    public boolean isSea() {
+        return this.landform == Landform.SEA;
+    }
+
+    public boolean isRiverOrLake() {
+        return this.landform == Landform.LAKE_OR_RIVER;
+    }
+
+    public boolean isLand() {
+        return this.landform.isLand();
+    }
+
+    public boolean isFrozen() {
+        return Temperature.isFrozen(this.minTemperature, this.meanTemperature) || this.cover.is(CoverMarkers.FROZEN);
+    }
+
+    public boolean isCold() {
+        return Temperature.isCold(this.meanTemperature) || this.isFrozen();
+    }
+
+    public boolean isForested() {
+        return this.cover.is(CoverMarkers.FOREST);
+    }
+
+    public boolean isFlooded() {
+        return this.cover.is(CoverMarkers.FLOODED);
+    }
+
+    public boolean isBarren() {
+        return this.cover.is(CoverMarkers.BARREN);
+    }
+
+    public boolean isWet() {
+        return Rainfall.isWet(this.annualRainfall);
+    }
+
+    public boolean isDry() {
+        return Rainfall.isDry(this.annualRainfall);
     }
 
     public static class Sampler {
@@ -53,6 +106,11 @@ public final class GrowthPredictors {
         private final UByteRaster.Sampler clayContent;
         private final UByteRaster.Sampler siltContent;
         private final UByteRaster.Sampler sandContent;
+        private final UByteRaster.Sampler slope;
+
+        private final EnumRaster.Sampler<Cover> cover;
+        private final EnumRaster.Sampler<SoilSuborder> soilSuborder;
+        private final EnumRaster.Sampler<Landform> landform;
 
         Sampler() {
             this.elevation = FloatRaster.sampler(EarthData.ELEVATION_METERS).defaultValue(0);
@@ -65,6 +123,10 @@ public final class GrowthPredictors {
             this.clayContent = UByteRaster.sampler(EarthData.CLAY_CONTENT).defaultValue(33);
             this.siltContent = UByteRaster.sampler(EarthData.SILT_CONTENT).defaultValue(33);
             this.sandContent = UByteRaster.sampler(EarthData.SAND_CONTENT).defaultValue(33);
+            this.slope = UByteRaster.sampler(EarthData.SLOPE).defaultValue(0);
+            this.cover = EnumRaster.sampler(EarthData.COVER, Cover.NO);
+            this.soilSuborder = EnumRaster.sampler(EarthData.SOIL_SUBORDER, SoilSuborder.NO);
+            this.landform = EnumRaster.sampler(EarthData.LANDFORM, Landform.LAND);
         }
 
         public GrowthPredictors sample(ColumnDataCache dataCache, int x, int z) {
@@ -95,6 +157,10 @@ public final class GrowthPredictors {
             predictors.clayContent = this.clayContent.sample(data, x, z);
             predictors.siltContent = this.siltContent.sample(data, x, z);
             predictors.sandContent = this.sandContent.sample(data, x, z);
+            predictors.slope = this.slope.sample(data, x, z);
+            predictors.cover = this.cover.sample(data, x, z);
+            predictors.soilSuborder = this.soilSuborder.sample(data, x, z);
+            predictors.landform = this.landform.sample(data, x, z);
         }
     }
 }

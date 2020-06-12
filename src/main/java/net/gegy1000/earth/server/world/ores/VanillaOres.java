@@ -1,6 +1,6 @@
 package net.gegy1000.earth.server.world.ores;
 
-import net.gegy1000.earth.server.world.composer.OreDecorationComposer;
+import net.gegy1000.earth.server.world.composer.decoration.OreDecorationComposer;
 import net.minecraft.block.BlockStone;
 import net.minecraft.init.Blocks;
 

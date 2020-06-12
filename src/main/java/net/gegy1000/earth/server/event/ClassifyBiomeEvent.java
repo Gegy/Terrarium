@@ -1,6 +1,6 @@
 package net.gegy1000.earth.server.event;
 
-import net.gegy1000.earth.server.world.biome.BiomeClassifier;
+import net.gegy1000.earth.server.world.ecology.GrowthPredictors;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.fml.common.eventhandler.Cancelable;
@@ -11,21 +11,21 @@ import javax.annotation.Nullable;
 @Cancelable
 public final class ClassifyBiomeEvent extends Event {
     private final TerrariumWorld terrarium;
-    private final BiomeClassifier.Context context;
+    private final GrowthPredictors predictors;
 
     private Biome biome;
 
-    public ClassifyBiomeEvent(TerrariumWorld terrarium, BiomeClassifier.Context context) {
+    public ClassifyBiomeEvent(TerrariumWorld terrarium, GrowthPredictors predictors) {
         this.terrarium = terrarium;
-        this.context = context;
+        this.predictors = predictors;
     }
 
     public TerrariumWorld getTerrarium() {
         return this.terrarium;
     }
 
-    public BiomeClassifier.Context getContext() {
-        return this.context;
+    public GrowthPredictors getPredictors() {
+        return this.predictors;
     }
 
     public void setBiome(Biome biome) {

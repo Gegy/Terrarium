@@ -20,6 +20,7 @@ import javax.annotation.Nullable;
 
 public interface EarthWorld extends ICapabilityProvider {
     double EQUATOR_CIRCUMFERENCE = 40075017.0;
+    int LOWEST_POINT_METERS = -11100;
     int HIGHEST_POINT_METERS = 8900;
 
     @Nullable

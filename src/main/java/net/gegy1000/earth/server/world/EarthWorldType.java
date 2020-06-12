@@ -196,13 +196,21 @@ public class EarthWorldType extends TerrariumWorldType {
     }
 
     @Override
-    protected int calculateMaxGenerationHeight(WorldServer world, GenerationSettings settings) {
+    protected int getMinGenerationHeight(WorldServer world, GenerationSettings settings) {
+        double height = this.transformHeight(settings, EarthWorld.LOWEST_POINT_METERS);
+        return MathHelper.floor(height) - 1;
+    }
+
+    @Override
+    protected int getMaxGenerationHeight(WorldServer world, GenerationSettings settings) {
         double height = this.transformHeight(settings, EarthWorld.HIGHEST_POINT_METERS);
         return MathHelper.ceil(height) + 1;
     }
 
     private double transformHeight(GenerationSettings settings, double height) {
-        double scale = settings.getDouble(TERRESTRIAL_HEIGHT_SCALE) / settings.getDouble(WORLD_SCALE);
+        double heightScale = height >= 0.0 ? settings.getDouble(TERRESTRIAL_HEIGHT_SCALE) : settings.getDouble(OCEANIC_HEIGHT_SCALE);
+
+        double scale = heightScale / settings.getDouble(WORLD_SCALE);
         double offset = settings.getDouble(HEIGHT_OFFSET);
         return height * scale + offset;
     }

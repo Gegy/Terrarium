@@ -4,7 +4,7 @@ import biomesoplenty.api.block.BOPBlocks;
 import biomesoplenty.api.enums.BOPGems;
 import biomesoplenty.common.block.BlockBOPGem;
 import net.gegy1000.earth.server.world.EarthData;
-import net.gegy1000.earth.server.world.composer.OreDecorationComposer;
+import net.gegy1000.earth.server.world.composer.decoration.OreDecorationComposer;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.cover.CoverMarkers;
 import net.gegy1000.earth.server.world.ores.OreConfig;
