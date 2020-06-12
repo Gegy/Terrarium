@@ -163,6 +163,25 @@ public final class BoPIntegration {
             event.setCanceled(true);
             event.setBiome(BOPBiomes.grassland.orNull());
         }
+
+        if (ctx.cover.is(CoverMarkers.DENSE_SHRUBS) && ctx.isDry()) {
+            event.setCanceled(true);
+            // TODO: xeric shrubland if desert-like
+            event.setBiome(BOPBiomes.brushland.orNull());
+        }
+
+        if (ctx.isLand() && !ctx.cover.is(CoverMarkers.NO_VEGETATION)) {
+            double mangroveSuitability = BoPTrees.Indicators.MANGROVE.evaluate(ctx.predictors);
+            if (mangroveSuitability > 0.85) {
+                event.setCanceled(true);
+                event.setBiome(BOPBiomes.mangrove.orNull());
+            }
+        }
+
+        if (ctx.slope >= 60 && !ctx.isCold() && ctx.cover.is(CoverMarkers.FOREST)) {
+            event.setCanceled(true);
+            event.setBiome(BOPBiomes.overgrown_cliffs.orNull());
+        }
     }
 
     @SubscribeEvent

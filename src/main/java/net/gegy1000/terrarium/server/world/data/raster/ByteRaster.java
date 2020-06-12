@@ -1,6 +1,7 @@
 package net.gegy1000.terrarium.server.world.data.raster;
 
 import com.google.common.base.Preconditions;
+import net.gegy1000.terrarium.server.world.data.ColumnData;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.DataKey;
 import net.gegy1000.terrarium.server.world.data.DataView;
@@ -113,8 +114,12 @@ public final class ByteRaster extends AbstractRaster<byte[]> implements IntegerR
         }
 
         public byte sample(ColumnDataCache dataCache, int x, int z) {
-            ChunkPos columnPos = new ChunkPos(x >> 4, z >> 4);
-            Optional<ByteRaster> optional = dataCache.joinData(columnPos, this.key);
+            ColumnData data = dataCache.joinData(new ChunkPos(x >> 4, z >> 4));
+            return this.sample(data, x, z);
+        }
+
+        public byte sample(ColumnData data, int x, int z) {
+            Optional<ByteRaster> optional = data.get(this.key);
             if (optional.isPresent()) {
                 ByteRaster raster = optional.get();
                 return raster.get(x & 0xF, z & 0xF);

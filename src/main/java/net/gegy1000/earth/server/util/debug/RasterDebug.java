@@ -161,9 +161,8 @@ final class RasterDebug {
 
         rasters.elevation.iterate((elevation, x, y) -> {
             ctx.cover = rasters.cover.get(x, y);
-            ctx.annualRainfall = rasters.annualRainfall.get(x, y);
-            ctx.minTemperature = rasters.minTemperature.get(x, y);
-            ctx.meanTemperature = rasters.meanTemperature.get(x, y);
+            ctx.soilSuborder = rasters.soil.get(x, y);
+            rasters.samplePredictorsTo(ctx.predictors, x, y);
 
             ctx.landform = elevation <= 0.0F ? Landform.SEA : Landform.LAND;
             if (ctx.landform.isLand() && ctx.cover.is(CoverMarkers.WATER)) {

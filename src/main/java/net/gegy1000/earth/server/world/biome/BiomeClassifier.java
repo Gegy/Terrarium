@@ -4,6 +4,8 @@ import net.gegy1000.earth.server.world.Rainfall;
 import net.gegy1000.earth.server.world.Temperature;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.cover.CoverMarkers;
+import net.gegy1000.earth.server.world.ecology.GrowthPredictors;
+import net.gegy1000.earth.server.world.ecology.soil.SoilSuborder;
 import net.gegy1000.earth.server.world.geography.Landform;
 import net.minecraft.init.Biomes;
 import net.minecraft.world.biome.Biome;
@@ -47,18 +49,18 @@ public final class BiomeClassifier {
 
     private static Biome classifyWater(Context context) {
         if (context.isSea()) {
-            return context.meanTemperature < -10 ? Biomes.FROZEN_OCEAN : Biomes.OCEAN;
+            return context.predictors.meanTemperature < -10 ? Biomes.FROZEN_OCEAN : Biomes.OCEAN;
         }
 
         return context.isFrozen() ? Biomes.FROZEN_RIVER : Biomes.RIVER;
     }
 
     public static class Context {
+        public final GrowthPredictors predictors = new GrowthPredictors();
         public Landform landform;
-        public float minTemperature;
-        public float meanTemperature;
-        public int annualRainfall;
+        public SoilSuborder soilSuborder;
         public Cover cover;
+        public int slope;
 
         public boolean isSea() {
             return this.landform == Landform.SEA;
@@ -73,11 +75,11 @@ public final class BiomeClassifier {
         }
 
         public boolean isFrozen() {
-            return Temperature.isFrozen(this.minTemperature, this.meanTemperature) || this.cover.is(CoverMarkers.FROZEN);
+            return Temperature.isFrozen(this.predictors.minTemperature, this.predictors.meanTemperature) || this.cover.is(CoverMarkers.FROZEN);
         }
 
         public boolean isCold() {
-            return Temperature.isCold(this.meanTemperature) || this.isFrozen();
+            return Temperature.isCold(this.predictors.meanTemperature) || this.isFrozen();
         }
 
         public boolean isForested() {
@@ -93,11 +95,11 @@ public final class BiomeClassifier {
         }
 
         public boolean isWet() {
-            return Rainfall.isWet(this.annualRainfall);
+            return Rainfall.isWet(this.predictors.annualRainfall);
         }
 
         public boolean isDry() {
-            return Rainfall.isDry(this.annualRainfall);
+            return Rainfall.isDry(this.predictors.annualRainfall);
         }
     }
 }

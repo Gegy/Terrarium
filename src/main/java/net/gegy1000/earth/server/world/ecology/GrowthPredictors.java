@@ -2,10 +2,12 @@ package net.gegy1000.earth.server.world.ecology;
 
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.world.EarthData;
+import net.gegy1000.terrarium.server.world.data.ColumnData;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.raster.FloatRaster;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.data.raster.UByteRaster;
+import net.minecraft.util.math.ChunkPos;
 
 public final class GrowthPredictors {
     public float elevation;
@@ -71,17 +73,28 @@ public final class GrowthPredictors {
             return predictors;
         }
 
+        public GrowthPredictors sample(ColumnData data, int x, int z) {
+            GrowthPredictors predictors = new GrowthPredictors();
+            this.sampleTo(data, x, z, predictors);
+            return predictors;
+        }
+
         public void sampleTo(ColumnDataCache dataCache, int x, int z, GrowthPredictors predictors) {
-            predictors.elevation = this.elevation.sample(dataCache, x, z);
-            predictors.annualRainfall = this.annualRainfall.sample(dataCache, x, z);
-            predictors.meanTemperature = this.meanTemperature.sample(dataCache, x, z);
-            predictors.minTemperature = this.minTemperature.sample(dataCache, x, z);
-            predictors.cationExchangeCapacity = this.cationExchangeCapacity.sample(dataCache, x, z);
-            predictors.organicCarbonContent = this.organicCarbonContent.sample(dataCache, x, z);
-            predictors.pH = this.pH.sample(dataCache, x, z);
-            predictors.clayContent = this.clayContent.sample(dataCache, x, z);
-            predictors.siltContent = this.siltContent.sample(dataCache, x, z);
-            predictors.sandContent = this.sandContent.sample(dataCache, x, z);
+            ColumnData data = dataCache.joinData(new ChunkPos(x >> 4, z >> 4));
+            this.sampleTo(data, x & 0xF, z & 0xF, predictors);
+        }
+
+        public void sampleTo(ColumnData data, int x, int z, GrowthPredictors predictors) {
+            predictors.elevation = this.elevation.sample(data, x, z);
+            predictors.annualRainfall = this.annualRainfall.sample(data, x, z);
+            predictors.meanTemperature = this.meanTemperature.sample(data, x, z);
+            predictors.minTemperature = this.minTemperature.sample(data, x, z);
+            predictors.cationExchangeCapacity = this.cationExchangeCapacity.sample(data, x, z);
+            predictors.organicCarbonContent = this.organicCarbonContent.sample(data, x, z);
+            predictors.pH = this.pH.sample(data, x, z);
+            predictors.clayContent = this.clayContent.sample(data, x, z);
+            predictors.siltContent = this.siltContent.sample(data, x, z);
+            predictors.sandContent = this.sandContent.sample(data, x, z);
         }
     }
 }
