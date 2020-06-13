@@ -7,6 +7,7 @@ import net.gegy1000.earth.server.command.debugger.DebugGeoProfile;
 import net.gegy1000.earth.server.command.debugger.GeoDebugger;
 import net.gegy1000.earth.server.world.EarthData;
 import net.gegy1000.earth.server.world.cover.Cover;
+import net.gegy1000.earth.server.world.ecology.GrowthPredictors;
 import net.gegy1000.earth.server.world.ecology.soil.SoilSuborder;
 import net.gegy1000.earth.server.world.ecology.vegetation.Trees;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
@@ -107,6 +108,8 @@ public class GeoDebugCommand extends CommandBase {
         builder.addElement(Items.FILLED_MAP, "Cover", () -> {
             EnumRaster.Sampler<Cover> sampler = EnumRaster.sampler(EarthData.COVER, Cover.NO);
             this.writeRaster(player, debug.cover("cover", sampler));
+
+            this.writeRaster(player, debug.biomes("biomes", GrowthPredictors.sampler()));
         });
 
         ContainerUi ui = builder.build();

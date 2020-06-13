@@ -4,6 +4,7 @@ import net.gegy1000.earth.server.world.Climate;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.ecology.GrowthPredictors;
 import net.gegy1000.earth.server.world.ecology.soil.SoilSelector;
+import net.gegy1000.earth.server.world.ecology.vegetation.Trees;
 import net.gegy1000.earth.server.world.geography.Landform;
 import net.minecraft.init.Biomes;
 import net.minecraft.world.biome.Biome;
@@ -49,7 +50,7 @@ public final class BiomeClassifier {
             return Biomes.SAVANNA;
         }
 
-        return predictors.isForested() ? Biomes.FOREST : Biomes.PLAINS;
+        return predictors.isForested() ? classifyForest(predictors) : Biomes.PLAINS;
     }
 
     private static Biome classifyFrozen(GrowthPredictors predictors) {
@@ -62,6 +63,13 @@ public final class BiomeClassifier {
         } else {
             return predictors.isForested() ? Biomes.JUNGLE : Biomes.JUNGLE_EDGE;
         }
+    }
+
+    private static Biome classifyForest(GrowthPredictors predictors) {
+        double oak = Trees.Indicators.OAK.evaluate(predictors);
+        double birch = Trees.Indicators.BIRCH.evaluate(predictors);
+
+        return oak > birch ? Biomes.FOREST : Biomes.BIRCH_FOREST;
     }
 
     private static Biome classifyWater(GrowthPredictors predictors) {

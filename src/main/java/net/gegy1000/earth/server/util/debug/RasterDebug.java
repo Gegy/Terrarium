@@ -148,7 +148,7 @@ final class RasterDebug {
             }
         });
 
-        ImageIO.write(dominantTreeImage, "png", OUTPUT.resolve("dominant_tree.png").toFile());
+        ImageIO.write(dominantTreeImage, "png", OUTPUT.resolve("global_dominant_tree.png").toFile());
     }
 
     private static void renderBiomes(Rasters rasters) throws IOException {
@@ -166,7 +166,7 @@ final class RasterDebug {
             biomeImage.setRGB(x, y, BiomeColors.get(biome));
         });
 
-        ImageIO.write(biomeImage, "png", OUTPUT.resolve("biomes.png").toFile());
+        ImageIO.write(biomeImage, "png", OUTPUT.resolve("global_biomes.png").toFile());
     }
 
     private static FloatRaster sampleMinTemperature(WorldClimateRaster source) {

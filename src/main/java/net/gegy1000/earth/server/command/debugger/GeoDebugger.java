@@ -2,12 +2,14 @@ package net.gegy1000.earth.server.command.debugger;
 
 import com.google.common.base.Preconditions;
 import net.gegy1000.earth.server.capability.EarthWorld;
-import net.gegy1000.earth.server.world.EarthData;
-import net.gegy1000.earth.server.world.cover.Cover;
+import net.gegy1000.earth.server.util.debug.BiomeColors;
 import net.gegy1000.earth.server.util.debug.CoverColors;
+import net.gegy1000.earth.server.util.debug.SoilColors;
+import net.gegy1000.earth.server.world.EarthData;
+import net.gegy1000.earth.server.world.biome.BiomeClassifier;
+import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.ecology.GrowthIndicator;
 import net.gegy1000.earth.server.world.ecology.GrowthPredictors;
-import net.gegy1000.earth.server.util.debug.SoilColors;
 import net.gegy1000.earth.server.world.ecology.soil.SoilSuborder;
 import net.gegy1000.earth.server.world.ecology.vegetation.Vegetation;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
@@ -22,6 +24,7 @@ import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.data.raster.UByteRaster;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
 
 import java.awt.image.BufferedImage;
 
@@ -120,6 +123,24 @@ public final class GeoDebugger {
             raster.iterate((cover, x, y) -> {
                 image.setRGB(x, y, SoilColors.get(cover));
             });
+
+            return image;
+        });
+    }
+
+    public RasterSampler biomes(String name, GrowthPredictors.Sampler sampler) {
+        return new RasterSampler(name, (dataCache, view) -> {
+            BufferedImage image = new BufferedImage(view.getWidth(), view.getHeight(), BufferedImage.TYPE_INT_RGB);
+
+            GrowthPredictors predictors = new GrowthPredictors();
+            for (int y = 0; y < view.getHeight(); y++) {
+                for (int x = 0; x < view.getWidth(); x++) {
+                    sampler.sampleTo(dataCache, x + view.getMinX(), y + view.getMinY(), predictors);
+
+                    Biome biome = BiomeClassifier.classify(predictors);
+                    image.setRGB(x, y, BiomeColors.get(biome));
+                }
+            }
 
             return image;
         });
