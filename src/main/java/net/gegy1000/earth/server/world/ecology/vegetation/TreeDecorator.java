@@ -60,6 +60,7 @@ public final class TreeDecorator {
     }
 
     public static class Builder {
+        private static final double MIN_SUITABILITY_THRESHOLD = 0.1;
         private static final double SUITABILITY_THRESHOLD = 0.85;
 
         private final GrowthPredictors predictors;
@@ -79,6 +80,7 @@ public final class TreeDecorator {
 
         public Builder addCandidate(Vegetation vegetation) {
             double indicator = vegetation.getGrowthIndicator().evaluate(this.predictors);
+
             if (indicator > SUITABILITY_THRESHOLD) {
                 this.pool.add(vegetation.getGenerator(), (float) indicator);
             }
@@ -109,7 +111,9 @@ public final class TreeDecorator {
 
         public TreeDecorator build() {
             if (this.pool.isEmpty() && this.mostSuitable != null) {
-                this.pool.add(this.mostSuitable, (float) this.mostSuitableIndicator);
+                if (this.mostSuitableIndicator > MIN_SUITABILITY_THRESHOLD) {
+                    this.pool.add(this.mostSuitable, (float) this.mostSuitableIndicator);
+                }
             }
 
             TreeDecorator decorator = new TreeDecorator(this.pool);

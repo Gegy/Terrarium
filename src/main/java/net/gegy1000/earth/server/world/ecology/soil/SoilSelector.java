@@ -52,7 +52,7 @@ public final class SoilSelector {
         }
 
         // TODO: in future use some form of vegetation index?
-        boolean grassy = predictors.organicCarbonContent > GRASSY_OCC && !predictors.isDry();
+        boolean grassy = predictors.organicCarbonContent > GRASSY_OCC && !predictors.isVeryDry();
 
         if (grassy) {
             return selectGrassy(predictors);

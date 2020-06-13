@@ -1,6 +1,6 @@
 package net.gegy1000.earth.client.terrain;
 
-import net.gegy1000.earth.server.world.Temperature;
+import net.gegy1000.earth.server.world.Climate;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.cover.CoverMarkers;
 
@@ -25,7 +25,7 @@ public final class TerrainColorizer {
             return SLOPE_COLOR;
         }
 
-        if (cover == Cover.PERMANENT_SNOW || minTemperature < Temperature.MIN_FREEZE) {
+        if (cover == Cover.PERMANENT_SNOW || minTemperature < Climate.MIN_FREEZE) {
             return SNOW_COLOR;
         }
 

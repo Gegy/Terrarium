@@ -13,7 +13,7 @@ import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.data.raster.FloatRaster;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 
-import static net.gegy1000.earth.server.world.Temperature.MIN_FREEZE;
+import static net.gegy1000.earth.server.world.Climate.MIN_FREEZE;
 
 public final class BoPOres {
     private static final FloatRaster.Sampler MEAN_TEMPERATURE = FloatRaster.sampler(EarthData.MEAN_TEMPERATURE);

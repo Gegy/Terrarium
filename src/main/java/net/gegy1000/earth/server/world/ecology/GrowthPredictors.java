@@ -2,8 +2,7 @@ package net.gegy1000.earth.server.world.ecology;
 
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.world.EarthData;
-import net.gegy1000.earth.server.world.Rainfall;
-import net.gegy1000.earth.server.world.Temperature;
+import net.gegy1000.earth.server.world.Climate;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.cover.CoverMarkers;
 import net.gegy1000.earth.server.world.ecology.soil.SoilSuborder;
@@ -68,11 +67,11 @@ public final class GrowthPredictors {
     }
 
     public boolean isFrozen() {
-        return Temperature.isFrozen(this.minTemperature, this.meanTemperature) || this.cover.is(CoverMarkers.FROZEN);
+        return Climate.isFrozen(this.minTemperature, this.meanTemperature) || this.cover.is(CoverMarkers.FROZEN);
     }
 
     public boolean isCold() {
-        return Temperature.isCold(this.meanTemperature) || this.isFrozen();
+        return Climate.isCold(this.meanTemperature) || this.isFrozen();
     }
 
     public boolean isForested() {
@@ -88,11 +87,11 @@ public final class GrowthPredictors {
     }
 
     public boolean isWet() {
-        return Rainfall.isWet(this.annualRainfall);
+        return Climate.isWet(this.annualRainfall);
     }
 
-    public boolean isDry() {
-        return Rainfall.isDry(this.annualRainfall);
+    public boolean isVeryDry() {
+        return Climate.isVeryDry(this.annualRainfall);
     }
 
     public static class Sampler {

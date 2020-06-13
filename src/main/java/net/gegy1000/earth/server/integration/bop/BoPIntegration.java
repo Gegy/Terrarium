@@ -6,8 +6,7 @@ import net.gegy1000.earth.server.event.ClassifyBiomeEvent;
 import net.gegy1000.earth.server.event.ConfigureFlowersEvent;
 import net.gegy1000.earth.server.event.ConfigureTreesEvent;
 import net.gegy1000.earth.server.world.EarthWorldType;
-import net.gegy1000.earth.server.world.Rainfall;
-import net.gegy1000.earth.server.world.Temperature;
+import net.gegy1000.earth.server.world.Climate;
 import net.gegy1000.earth.server.world.composer.decoration.OreDecorationComposer;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.cover.CoverMarkers;
@@ -85,12 +84,12 @@ public final class BoPIntegration {
         GrowthPredictors predictors = event.getPredictors();
         FlowerDecorator flowers = event.getFlowers();
 
-        boolean hot = Temperature.isHot(predictors.meanTemperature);
-        boolean warm = Temperature.isWarm(predictors.meanTemperature);
-        boolean cold = Temperature.isCold(predictors.meanTemperature);
-        boolean frozen = Temperature.isFrozen(predictors.minTemperature, predictors.meanTemperature);
+        boolean hot = Climate.isHot(predictors.meanTemperature);
+        boolean warm = Climate.isWarm(predictors.meanTemperature);
+        boolean cold = Climate.isCold(predictors.meanTemperature);
+        boolean frozen = Climate.isFrozen(predictors.minTemperature, predictors.meanTemperature);
 
-        boolean wet = Rainfall.isWet(predictors.annualRainfall);
+        boolean wet = Climate.isWet(predictors.annualRainfall);
 
         if (cover.is(CoverMarkers.NEEDLELEAF) && cover.is(CoverMarkers.DECIDUOUS)) {
             flowers.add(BoPFlowers.LILY_OF_THE_VALLEY, 1.0F);
@@ -164,7 +163,7 @@ public final class BoPIntegration {
             event.setBiome(BOPBiomes.grassland.orNull());
         }
 
-        if (predictors.cover.is(CoverMarkers.DENSE_SHRUBS) && predictors.isDry()) {
+        if (predictors.cover.is(CoverMarkers.DENSE_SHRUBS) && predictors.isVeryDry()) {
             event.setCanceled(true);
             if (predictors.isBarren() || SoilSelector.isDesertLike(predictors)) {
                 event.setBiome(BOPBiomes.brushland.orNull());

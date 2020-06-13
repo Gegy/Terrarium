@@ -1,5 +1,6 @@
 package net.gegy1000.earth.server.world.biome;
 
+import net.gegy1000.earth.server.world.Climate;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.ecology.GrowthPredictors;
 import net.gegy1000.earth.server.world.ecology.soil.SoilSelector;
@@ -21,35 +22,51 @@ public final class BiomeClassifier {
             return predictors.isFrozen() ? Biomes.COLD_BEACH : Biomes.BEACH;
         }
 
-        if (predictors.isFrozen()) {
-            return predictors.isForested() ? Biomes.COLD_TAIGA : Biomes.ICE_PLAINS;
-        }
-        if (predictors.isCold()) {
-            return Biomes.TAIGA;
+        if (predictors.isFrozen()) return classifyFrozen(predictors);
+        if (predictors.isFlooded()) return classifyFlooded(predictors);
+
+        float annualRainfall = predictors.annualRainfall;
+        float meanTemperature = predictors.meanTemperature;
+
+        if (Climate.isDesert(annualRainfall) && SoilSelector.isDesertLike(predictors)) {
+            return Biomes.DESERT;
         }
 
-        if (predictors.isWet() || predictors.isFlooded()) {
-            if (predictors.cover == Cover.SALINE_FLOODED_FOREST) {
-                return Biomes.SWAMPLAND;
-            } else {
+        if (!predictors.isBarren()) {
+            if (Climate.isJungle(annualRainfall, meanTemperature)) {
                 return predictors.isForested() ? Biomes.JUNGLE : Biomes.JUNGLE_EDGE;
             }
+
+            if (Climate.isTaiga(annualRainfall, meanTemperature) && predictors.isForested()) {
+                return Biomes.TAIGA;
+            }
         }
 
-        if (predictors.isDry()) {
-            if (predictors.isBarren() || SoilSelector.isDesertLike(predictors)) {
-                return Biomes.DESERT;
-            } else {
-                return Biomes.SAVANNA;
-            }
+        // non-specific selection
+        if (Climate.isCold(meanTemperature)) {
+            return Biomes.TAIGA;
+        } else if (Climate.isDry(annualRainfall)) {
+            return Biomes.SAVANNA;
         }
 
         return predictors.isForested() ? Biomes.FOREST : Biomes.PLAINS;
     }
 
+    private static Biome classifyFrozen(GrowthPredictors predictors) {
+        return predictors.isForested() ? Biomes.COLD_TAIGA : Biomes.ICE_PLAINS;
+    }
+
+    private static Biome classifyFlooded(GrowthPredictors predictors) {
+        if (predictors.cover == Cover.SALINE_FLOODED_FOREST) {
+            return Biomes.SWAMPLAND;
+        } else {
+            return predictors.isForested() ? Biomes.JUNGLE : Biomes.JUNGLE_EDGE;
+        }
+    }
+
     private static Biome classifyWater(GrowthPredictors predictors) {
         if (predictors.isSea()) {
-            return predictors.meanTemperature < -10 ? Biomes.FROZEN_OCEAN : Biomes.OCEAN;
+            return Biomes.OCEAN;
         }
 
         return predictors.isFrozen() ? Biomes.FROZEN_RIVER : Biomes.RIVER;
