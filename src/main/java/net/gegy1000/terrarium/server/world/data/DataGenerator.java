@@ -13,10 +13,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public final class DataGenerator {
-    public static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor(
+    public static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(2,
             new ThreadFactoryBuilder()
                     .setDaemon(true)
-                    .setNameFormat("terrarium-data-worker")
+                    .setNameFormat("terrarium-data-worker-%d")
                     .build()
     );
 

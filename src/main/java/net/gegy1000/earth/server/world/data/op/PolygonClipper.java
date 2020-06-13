@@ -8,7 +8,6 @@ import com.vividsolutions.jts.geom.Polygon;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -32,18 +31,19 @@ public final class PolygonClipper {
 
     @Nullable
     public MultiPolygon clip(MultiPolygon multiPolygon) {
-        Collection<Polygon> polygons = new ArrayList<>(multiPolygon.getNumGeometries());
+        Collection<Polygon> polygons = null;
 
         for (int i = 0; i < multiPolygon.getNumGeometries(); i++) {
             Polygon polygon = this.clip((Polygon) multiPolygon.getGeometryN(i));
             if (polygon != null) {
+                if (polygons == null) {
+                    polygons = new ArrayList<>(multiPolygon.getNumGeometries());
+                }
                 polygons.add(polygon);
             }
         }
 
-        if (polygons.isEmpty()) {
-            return null;
-        }
+        if (polygons == null) return null;
 
         return GEOMETRY_FACTORY.createMultiPolygon(polygons.toArray(new Polygon[0]));
     }
@@ -51,17 +51,20 @@ public final class PolygonClipper {
     @Nullable
     public Polygon clip(Polygon polygon) {
         LinearRing exteriorRing = this.clip((LinearRing) polygon.getExteriorRing());
-        if (exteriorRing == null) {
-            return null;
-        }
+        if (exteriorRing == null) return null;
 
-        Collection<LinearRing> interiorRings = new ArrayList<>(polygon.getNumInteriorRing());
+        Collection<LinearRing> interiorRings = null;
         for (int i = 0; i < polygon.getNumInteriorRing(); i++) {
             LinearRing clippedRing = this.clip((LinearRing) polygon.getInteriorRingN(i));
             if (clippedRing != null) {
+                if (interiorRings == null) {
+                    interiorRings = new ArrayList<>(polygon.getNumInteriorRing());
+                }
                 interiorRings.add(clippedRing);
             }
         }
+
+        if (interiorRings == null) return null;
 
         return GEOMETRY_FACTORY.createPolygon(exteriorRing, interiorRings.toArray(new LinearRing[0]));
     }
@@ -73,22 +76,39 @@ public final class PolygonClipper {
         }
 
         Coordinate[] coordinates = ring.getCoordinates();
-        Collection<Coordinate> uniqueCoordinates = Arrays.asList(coordinates)
-                .subList(0, coordinates.length - 1);
 
-        List<Coordinate> result = new ArrayList<>(uniqueCoordinates);
-
-        for (Segment clipEdge : this.clipEdges) {
-            result = this.clipEdge(result, clipEdge);
-            if (result.isEmpty()) {
-                return null;
-            }
+        // double-buffered setup to minimise allocation
+        List<Coordinate> clipped = new ArrayList<>(coordinates.length - 1);
+        for (int i = 0; i < coordinates.length - 1; i++) {
+            clipped.add(coordinates[i]);
         }
 
-        Coordinate closePoint = result.get(0);
-        result.add(closePoint);
+        List<Coordinate> output = new ArrayList<>(clipped.size() / 4);
 
-        return GEOMETRY_FACTORY.createLinearRing(result.toArray(new Coordinate[0]));
+        for (Segment clipEdge : this.clipEdges) {
+            output.clear();
+            this.clipEdge(clipped, clipEdge, output);
+
+            // we don't have enough points to form a line
+            if (output.size() < 2) {
+                return null;
+            }
+
+            // swap the clipped and output buffers
+            List<Coordinate> swap = clipped;
+            clipped = output;
+            output = swap;
+        }
+
+        Coordinate[] clippedArray = new Coordinate[clipped.size() + 1];
+        for (int i = 0; i < clipped.size(); i++) {
+            clippedArray[i] = clipped.get(i);
+        }
+
+        // close the line
+        clippedArray[clippedArray.length - 1] = clipped.get(0);
+
+        return GEOMETRY_FACTORY.createLinearRing(clippedArray);
     }
 
     private boolean isInside(Coordinate p, Segment clip) {
@@ -109,27 +129,23 @@ public final class PolygonClipper {
         );
     }
 
-    private List<Coordinate> clipEdge(List<Coordinate> coordinates, Segment clipEdge) {
-        List<Coordinate> result = new ArrayList<>(coordinates.size());
-
-        Coordinate startCoord = coordinates.get(coordinates.size() - 1);
-        for (Coordinate endCoord : coordinates) {
+    private void clipEdge(List<Coordinate> input, Segment clipEdge, List<Coordinate> output) {
+        Coordinate startCoord = input.get(input.size() - 1);
+        for (Coordinate endCoord : input) {
             boolean startInside = this.isInside(startCoord, clipEdge);
             boolean endInside = this.isInside(endCoord, clipEdge);
 
             if (endInside) {
                 if (!startInside) {
-                    result.add(this.intersection(clipEdge, startCoord, endCoord));
+                    output.add(this.intersection(clipEdge, startCoord, endCoord));
                 }
-                result.add(endCoord);
+                output.add(endCoord);
             } else if (startInside) {
-                result.add(this.intersection(clipEdge, startCoord, endCoord));
+                output.add(this.intersection(clipEdge, startCoord, endCoord));
             }
 
             startCoord = endCoord;
         }
-
-        return result;
     }
 
     private static class Segment {
