@@ -64,9 +64,8 @@ public final class PolygonClipper {
             }
         }
 
-        if (interiorRings == null) return null;
-
-        return GEOMETRY_FACTORY.createPolygon(exteriorRing, interiorRings.toArray(new LinearRing[0]));
+        LinearRing[] interiorRingsArray = interiorRings != null ? interiorRings.toArray(new LinearRing[0]) : null;
+        return GEOMETRY_FACTORY.createPolygon(exteriorRing, interiorRingsArray);
     }
 
     @Nullable

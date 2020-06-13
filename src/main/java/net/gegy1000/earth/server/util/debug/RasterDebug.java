@@ -62,17 +62,17 @@ final class RasterDebug {
         System.out.println("loading rasters");
         Rasters rasters = new Rasters();
 
-//        System.out.println("rendering soil suborder masks");
-//        renderSoilMasks(rasters);
-//
-//        System.out.println("rendering merged soils");
-//        renderEnumRaster("global_soil", rasters.soil, SoilColors::get);
-//
-//        System.out.println("rendering merged cover");
-//        renderEnumRaster("global_cover", rasters.cover, CoverColors::get);
-//
-//        System.out.println("rendering dominant tree layer");
-//        renderDominantTrees(rasters);
+        System.out.println("rendering soil suborder masks");
+        renderSoilMasks(rasters);
+
+        System.out.println("rendering merged soils");
+        renderEnumRaster("global_soil", rasters.soil, SoilColors::get);
+
+        System.out.println("rendering merged cover");
+        renderEnumRaster("global_cover", rasters.cover, CoverColors::get);
+
+        System.out.println("rendering dominant tree layer");
+        renderDominantTrees(rasters);
 
         System.out.println("rendering biome layer");
         renderBiomes(rasters);
