@@ -88,6 +88,15 @@ public final class ColumnCompatibilityWorld extends World implements AutoCloseab
         return TerrainGen.decorate(this, random, this.columnPos, type);
     }
 
+    public boolean firePopulateEvent(Random random, boolean pre) {
+        if (this.generator == null) return false;
+        if (pre) {
+            return MinecraftForge.EVENT_BUS.post(new PopulateChunkEvent.Pre(this.generator, this, random, this.columnPos.x, this.columnPos.z, false));
+        } else {
+            return MinecraftForge.EVENT_BUS.post(new PopulateChunkEvent.Post(this.generator, this, random, this.columnPos.x, this.columnPos.z, false));
+        }
+    }
+
     public boolean firePopulateEvent(Random random, PopulateChunkEvent.Populate.EventType type) {
         if (this.generator == null) return false;
         return TerrainGen.populate(this.generator, this, random, this.columnPos.x, this.columnPos.z, false, type);

@@ -31,6 +31,8 @@ public final class EarthCompatComposer implements DecorationComposer {
 
             this.random.setSeed(pos.getX(), pos.getZ());
 
+            world.firePopulateEvent(this.random, true);
+
             world.firePopulateEvent(this.random, PopulateChunkEvent.Populate.EventType.DUNGEON);
             world.firePopulateEvent(this.random, PopulateChunkEvent.Populate.EventType.ICE);
             world.firePopulateEvent(this.random, PopulateChunkEvent.Populate.EventType.LAKE);
@@ -70,6 +72,8 @@ public final class EarthCompatComposer implements DecorationComposer {
             MinecraftForge.EVENT_BUS.post(new DecorateBiomeEvent.Post(world, this.random, columnPos));
 
             world.runModdedGenerators();
+
+            world.firePopulateEvent(this.random, false);
         });
     }
 }

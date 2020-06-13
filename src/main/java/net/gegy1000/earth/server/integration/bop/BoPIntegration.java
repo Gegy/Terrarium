@@ -5,8 +5,8 @@ import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.event.ClassifyBiomeEvent;
 import net.gegy1000.earth.server.event.ConfigureFlowersEvent;
 import net.gegy1000.earth.server.event.ConfigureTreesEvent;
-import net.gegy1000.earth.server.world.EarthWorldType;
 import net.gegy1000.earth.server.world.Climate;
+import net.gegy1000.earth.server.world.EarthWorldType;
 import net.gegy1000.earth.server.world.composer.decoration.OreDecorationComposer;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.cover.CoverMarkers;
@@ -20,30 +20,12 @@ import net.gegy1000.terrarium.server.event.TerrariumInitializeGeneratorEvent;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public final class BoPIntegration {
     public static void setup() {
         MinecraftForge.TERRAIN_GEN_BUS.register(BoPIntegration.class);
         MinecraftForge.EVENT_BUS.register(BoPIntegration.class);
-    }
-
-    @SubscribeEvent
-    public static void onWorldLoad(WorldEvent.Load event) {
-        World world = event.getWorld();
-
-        if (world.getWorldType() == TerrariumEarth.WORLD_TYPE) {
-            TerrariumWorld terrarium = TerrariumWorld.get(world);
-            if (terrarium == null) return;
-
-            GenerationSettings settings = terrarium.getSettings();
-            if (settings.getBoolean(EarthWorldType.BOP_INTEGRATION)) {
-                BOPBiomes.excludedDecoratedWorldTypes.add(TerrariumEarth.WORLD_TYPE);
-            } else {
-                BOPBiomes.excludedDecoratedWorldTypes.remove(TerrariumEarth.WORLD_TYPE);
-            }
-        }
     }
 
     @SubscribeEvent
@@ -75,6 +57,10 @@ public final class BoPIntegration {
 
     @SubscribeEvent
     public static void onConfigureFlowers(ConfigureFlowersEvent event) {
+        // TODO: disabling to only have flower generation in compatibility mode
+        //  otherwise the integration mode would have to be fully featured which it is not yet
+        if (true) return;
+
         TerrariumWorld terrarium = event.getTerrarium();
         if (!terrarium.getSettings().getBoolean(EarthWorldType.BOP_INTEGRATION)) {
             return;
@@ -188,6 +174,10 @@ public final class BoPIntegration {
 
     @SubscribeEvent
     public static void onInitializeTerrariumGenerator(TerrariumInitializeGeneratorEvent event) {
+        // TODO: disabling to only have ore generation in compatibility mode
+        //  otherwise the integration mode would have to be fully featured which it is not yet
+        if (true) return;
+
         if (event.getWorldType() != TerrariumEarth.GENERIC_WORLD_TYPE) return;
 
         World world = event.getWorld();
