@@ -1,28 +1,17 @@
 package net.gegy1000.earth.server.world.composer;
 
 import net.gegy1000.earth.server.event.ClassifyBiomeEvent;
-import net.gegy1000.earth.server.world.EarthData;
 import net.gegy1000.earth.server.world.biome.BiomeClassifier;
-import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.ecology.GrowthPredictors;
-import net.gegy1000.earth.server.world.ecology.soil.SoilSuborder;
-import net.gegy1000.earth.server.world.geography.Landform;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.composer.biome.BiomeComposer;
 import net.gegy1000.terrarium.server.world.data.ColumnData;
-import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
-import net.gegy1000.terrarium.server.world.data.raster.UByteRaster;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.MinecraftForge;
 
 public final class EarthBiomeComposer implements BiomeComposer {
     private final Biome[] biomeBuffer = new Biome[16 * 16];
-
-    private final EnumRaster.Sampler<Cover> coverSampler = EnumRaster.sampler(EarthData.COVER, Cover.NO);
-    private final EnumRaster.Sampler<Landform> landformSampler = EnumRaster.sampler(EarthData.LANDFORM, Landform.LAND);
-    private final EnumRaster.Sampler<SoilSuborder> soilSampler = EnumRaster.sampler(EarthData.SOIL_SUBORDER, SoilSuborder.NO);
-    private final UByteRaster.Sampler slopeSampler = UByteRaster.sampler(EarthData.SLOPE);
 
     private final GrowthPredictors.Sampler predictorSampler = GrowthPredictors.sampler();
 

@@ -2,7 +2,7 @@ package net.gegy1000.terrarium.server.world.generator.customization.property;
 
 import javax.annotation.Nonnull;
 
-public class EnumValue<T extends Enum & CycleEnumProperty> implements PropertyValue<T> {
+public class EnumValue<T extends Enum<T> & CycleEnumProperty> implements PropertyValue<T> {
     private final Class<T> type;
     private T value;
 

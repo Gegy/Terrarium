@@ -3,12 +3,6 @@ package net.gegy1000.earth.server;
 import net.gegy1000.earth.server.message.EarthOpenMapMessage;
 
 public class ServerProxy {
-    public void onPreInit() {
-    }
-
-    public void onInit() {
-    }
-
     public void onPostInit() {
     }
 

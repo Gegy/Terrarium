@@ -1,6 +1,5 @@
 package net.gegy1000.terrarium.server.util;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
@@ -25,10 +24,6 @@ public class JsonDiscoverer<T> {
 
     public JsonDiscoverer(Function<JsonObject, T> parser) {
         this.parser = parser;
-    }
-
-    public JsonDiscoverer(Class<T> parseType) {
-        this(root -> new Gson().fromJson(root, parseType));
     }
 
     public List<Result<T>> discoverFiles(String dataRoot, String basePath) {

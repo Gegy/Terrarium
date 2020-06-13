@@ -86,14 +86,6 @@ public final class GrowthPredictors {
         return this.cover.is(CoverMarkers.BARREN);
     }
 
-    public boolean isWet() {
-        return Climate.isWet(this.annualRainfall);
-    }
-
-    public boolean isVeryDry() {
-        return Climate.isVeryDry(this.annualRainfall);
-    }
-
     public static class Sampler {
         private final FloatRaster.Sampler elevation;
         private final ShortRaster.Sampler annualRainfall;

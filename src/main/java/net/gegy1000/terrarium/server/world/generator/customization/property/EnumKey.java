@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class EnumKey<T extends Enum & CycleEnumProperty> extends PropertyKey<T> {
+public class EnumKey<T extends Enum<T> & CycleEnumProperty> extends PropertyKey<T> {
     private final Map<String, T> lookup = new HashMap<>();
 
     public EnumKey(String identifier, Class<T> type) {

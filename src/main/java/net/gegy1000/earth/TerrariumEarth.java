@@ -79,8 +79,6 @@ public class TerrariumEarth {
 
         CapabilityManager.INSTANCE.register(EarthWorld.class, new VoidStorage<>(), EarthWorld.None::new);
 
-        PROXY.onPreInit();
-
         NETWORK.registerMessage(EarthOpenMapMessage.Handler.class, EarthOpenMapMessage.class, 0, Side.CLIENT);
         NETWORK.registerMessage(EarthPanoramaMessage.Handler.class, EarthPanoramaMessage.class, 1, Side.CLIENT);
 
@@ -101,8 +99,6 @@ public class TerrariumEarth {
 
     @Mod.EventHandler
     public static void onInit(FMLInitializationEvent event) {
-        PROXY.onInit();
-
         CoverMarkers.register();
     }
 

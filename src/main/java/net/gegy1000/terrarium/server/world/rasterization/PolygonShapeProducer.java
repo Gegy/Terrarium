@@ -34,14 +34,7 @@ public class PolygonShapeProducer {
     }
 
     public static Area getArea(LineString ring, Transform transform) {
-        Path2D.Double path = new Path2D.Double();
-
-        Coordinate coordinate = ring.getCoordinateN(0);
-        path.moveTo(transform.x(coordinate.x), transform.y(coordinate.y));
-        for (int i = 1; i < ring.getNumPoints(); i++) {
-            coordinate = ring.getCoordinateN(i);
-            path.lineTo(transform.x(coordinate.x), transform.y(coordinate.y));
-        }
+        Path2D path = toPath(ring, transform);
         path.closePath();
 
         return new Area(path);

@@ -335,7 +335,7 @@ public final class ColumnCompatibilityWorld extends World implements AutoCloseab
 
         private OffsetChunk loadChunk(int x, int z) {
             Chunk parentChunk = ColumnCompatibilityWorld.this.parent.getChunk(x, z);
-            return new OffsetChunk(parentChunk, ColumnCompatibilityWorld.this.minY);
+            return new OffsetChunk(parentChunk);
         }
 
         @Nullable
@@ -375,9 +375,7 @@ public final class ColumnCompatibilityWorld extends World implements AutoCloseab
     class OffsetChunk extends Chunk {
         private final Chunk parent;
 
-        private final BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
-
-        OffsetChunk(Chunk parent, int minY) {
+        OffsetChunk(Chunk parent) {
             super(parent.getWorld(), parent.x, parent.z);
             this.parent = parent;
         }

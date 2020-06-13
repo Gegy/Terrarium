@@ -1,5 +1,6 @@
 package net.gegy1000.earth.server.world.ecology.soil;
 
+import net.gegy1000.earth.server.world.Climate;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.cover.CoverMarkers;
 import net.gegy1000.earth.server.world.ecology.GrowthPredictors;
@@ -56,7 +57,7 @@ public final class SoilSelector {
         }
 
         // TODO: in future use some form of vegetation index?
-        boolean grassy = predictors.organicCarbonContent > GRASSY_OCC && !predictors.isVeryDry();
+        boolean grassy = predictors.organicCarbonContent > GRASSY_OCC && !Climate.isVeryDry(predictors.annualRainfall);
 
         if (grassy) {
             return selectGrassy(predictors);

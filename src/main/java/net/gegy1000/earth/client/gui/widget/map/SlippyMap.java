@@ -112,7 +112,7 @@ public class SlippyMap {
         this.cache.shutdown();
     }
 
-    private class Camera {
+    private static class Camera {
         private SlippyMapPoint origin;
         private int zoom = MIN_ZOOM;
 

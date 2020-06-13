@@ -3,11 +3,11 @@ package net.gegy1000.terrarium.server.world.coordinate;
 public final class CoordinateReference {
     private static final CoordinateReference BLOCK = new CoordinateReference(1.0, 1.0, 0.0, 0.0);
 
-    private double scaleX;
-    private double scaleZ;
+    private final double scaleX;
+    private final double scaleZ;
 
-    private double offsetX;
-    private double offsetZ;
+    private final double offsetX;
+    private final double offsetZ;
 
     private CoordinateReference(double scaleX, double scaleZ, double offsetX, double offsetZ) {
         this.scaleX = scaleX;

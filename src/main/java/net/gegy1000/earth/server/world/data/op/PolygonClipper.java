@@ -148,10 +148,10 @@ public final class PolygonClipper {
     }
 
     private static class Segment {
-        double startX;
-        double startY;
-        double endX;
-        double endY;
+        final double startX;
+        final double startY;
+        final double endX;
+        final double endY;
 
         Segment(double startX, double startY, double endX, double endY) {
             this.startX = startX;

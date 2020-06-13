@@ -149,7 +149,7 @@ public final class BoPIntegration {
             event.setBiome(BOPBiomes.grassland.orNull());
         }
 
-        if (predictors.cover.is(CoverMarkers.DENSE_SHRUBS) && predictors.isVeryDry()) {
+        if (predictors.cover.is(CoverMarkers.DENSE_SHRUBS) && Climate.isVeryDry(predictors.annualRainfall)) {
             event.setCanceled(true);
             if (predictors.isBarren() || SoilSelector.isDesertLike(predictors)) {
                 event.setBiome(BOPBiomes.brushland.orNull());
