@@ -37,6 +37,10 @@ public final class SoilSelector {
             texture = consolidate(texture);
         }
 
+        if (predictors.soilSuborder.order == SoilOrder.SPODOSOL && texture == SoilTextures.GRASS) {
+            texture = SoilTextures.GRASS_AND_PODZOL;
+        }
+
         if (predictors.cover.is(CoverMarkers.BARREN)) {
             if (texture == SoilTextures.SAND) return SoilTextures.DESERT_SAND;
             if (texture == SoilTextures.RED_SAND) return SoilTextures.DESERT_RED_SAND;

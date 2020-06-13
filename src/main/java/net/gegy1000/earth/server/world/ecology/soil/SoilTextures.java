@@ -30,6 +30,7 @@ public final class SoilTextures {
 
     public static final SoilTexture GRASS = grass(GRASS_BLOCK);
     public static final SoilTexture PODZOL = grass(PODZOL_BLOCK);
+    public static final SoilTexture CLAY = homogenous(CLAY_BLOCK);
     public static final SoilTexture COARSE_DIRT = grass(COARSE_DIRT_BLOCK);
 
     public static final SoilTexture DESERT_SAND = sand(SAND_BLOCK, SANDSTONE_BLOCK);
@@ -55,6 +56,8 @@ public final class SoilTextures {
 
     public static final SoilTexture GRASS_AND_DIRT = binaryPatches(GRASS, COARSE_DIRT, -0.2);
     public static final SoilTexture GRASS_AND_SAND = binaryPatches(GRASS, DESERT_SAND, -0.2);
+    public static final SoilTexture GRASS_AND_PODZOL = binaryPatches(GRASS, PODZOL, -0.2);
+    public static final SoilTexture GRASS_AND_CLAY = binaryPatches(GRASS, CLAY, -0.2);
 
     private static SoilTexture grass(IBlockState grassBlock) {
         return (random, pos, slope, depth) -> {
@@ -85,7 +88,7 @@ public final class SoilTextures {
             int x = pos.getX();
             int z = pos.getZ();
             double noise = NOISE.getValue(x / 24.0, z / 24.0);
-            noise += (random.nextDouble() - random.nextDouble()) * 0.5;
+            noise += (random.nextDouble() - random.nextDouble()) * 0.4;
             if (noise > bias) {
                 return a.sample(random, pos, slope, depth);
             } else {
