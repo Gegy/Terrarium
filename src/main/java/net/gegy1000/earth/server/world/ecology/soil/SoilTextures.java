@@ -50,11 +50,11 @@ public final class SoilTextures {
     public static final SoilTexture MESA = new MesaSoilTexture(new Random(1521));
 
     public static final SoilTexture BEACH = homogenous(SAND_BLOCK);
-    public static final SoilTexture RIVER_BED = homogenous(DIRT_BLOCK);
+    public static final SoilTexture RIVER_BED = binaryPatches(homogenous(DIRT_BLOCK), homogenous(CLAY_BLOCK), -0.5);
     public static final SoilTexture OCEAN_FLOOR = homogenous(GRAVEL_BLOCK);
 
     public static final SoilTexture GRASS_AND_DIRT = binaryPatches(GRASS, COARSE_DIRT, -0.2);
-    public static final SoilTexture GRASS_AND_SAND = binaryPatches(GRASS, SAND, -0.2);
+    public static final SoilTexture GRASS_AND_SAND = binaryPatches(GRASS, DESERT_SAND, -0.2);
 
     private static SoilTexture grass(IBlockState grassBlock) {
         return (random, pos, slope, depth) -> {

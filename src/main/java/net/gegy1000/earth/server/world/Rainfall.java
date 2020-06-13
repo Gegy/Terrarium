@@ -7,6 +7,6 @@ public final class Rainfall {
     }
 
     public static boolean isDry(float annualRainfall) {
-        return annualRainfall < 360;
+        return annualRainfall < 380;
     }
 }
