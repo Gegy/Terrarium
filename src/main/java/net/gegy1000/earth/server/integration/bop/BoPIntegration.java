@@ -15,9 +15,11 @@ import net.gegy1000.earth.server.world.ecology.GrowthPredictors;
 import net.gegy1000.earth.server.world.ecology.soil.SoilSelector;
 import net.gegy1000.earth.server.world.ecology.vegetation.FlowerDecorator;
 import net.gegy1000.earth.server.world.ecology.vegetation.TreeDecorator;
+import net.gegy1000.earth.server.world.ecology.vegetation.Trees;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.event.TerrariumInitializeGeneratorEvent;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
+import net.minecraft.init.Biomes;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -135,40 +137,101 @@ public final class BoPIntegration {
 
         GrowthPredictors predictors = event.getPredictors();
 
-        if (predictors.isFrozen()) {
+        if (!predictors.isFrozen()) {
+            if (predictors.cover == Cover.LICHENS_AND_MOSSES) {
+                event.setBiome(BOPBiomes.tundra.orNull());
+                return;
+            }
+
+            if (predictors.cover == Cover.GRASSLAND) {
+                event.setBiome(BOPBiomes.grassland.orNull());
+                return;
+            }
+
+            if (predictors.cover.is(CoverMarkers.DENSE_SHRUBS) && Climate.isVeryDry(predictors.annualRainfall)) {
+                if (predictors.isBarren() || SoilSelector.isDesertLike(predictors)) {
+                    event.setBiome(BOPBiomes.brushland.orNull());
+                } else {
+                    event.setBiome(BOPBiomes.xeric_shrubland.orNull());
+                }
+                return;
+            }
+
+            if (predictors.isLand() && !predictors.cover.is(CoverMarkers.NO_VEGETATION)) {
+                double mangrove = BoPTrees.Indicators.MANGROVE.evaluate(predictors);
+                if (mangrove > 0.85) {
+                    event.setBiome(BOPBiomes.mangrove.orNull());
+                    return;
+                }
+            }
+
+            if (predictors.slope >= 60 && !predictors.isCold() && predictors.cover.is(CoverMarkers.FOREST)) {
+                event.setBiome(BOPBiomes.overgrown_cliffs.orNull());
+                return;
+            }
+
+            if (predictors.isFlooded() && event.getBiome() == Biomes.SWAMPLAND) {
+                double spruce = Trees.Indicators.SPRUCE.evaluate(predictors);
+                if (spruce > 0.85) {
+                    event.setBiome(BOPBiomes.wetland.orNull());
+                    return;
+                }
+            }
+
+            if (predictors.isForested() && event.getBiome() == Biomes.JUNGLE) {
+                double jungle = Trees.Indicators.JUNGLE_LIKE.evaluate(predictors);
+                double oak = Trees.Indicators.OAK.evaluate(predictors);
+                double spruce = Trees.Indicators.SPRUCE.evaluate(predictors);
+                double mahogany = BoPTrees.Indicators.MAHOGANY.evaluate(predictors);
+
+                if (oak > jungle && oak > spruce && oak > mahogany) {
+                    event.setBiome(BOPBiomes.rainforest.orNull());
+                    return;
+                } else if (spruce > jungle && spruce > oak && spruce > mahogany) {
+                    event.setBiome(BOPBiomes.temperate_rainforest.orNull());
+                    return;
+                } else if (mahogany > jungle && mahogany > spruce && mahogany > oak) {
+                    event.setBiome(BOPBiomes.tropical_rainforest.orNull());
+                    return;
+                }
+            }
+        }
+
+        if (predictors.isForested()) {
+            classifyForest(event, predictors);
+            return;
+        }
+    }
+
+    private static void classifyForest(ClassifyBiomeEvent event, GrowthPredictors predictors) {
+        if (event.getBiome() == Biomes.FOREST && predictors.isFrozen()) {
+            event.setBiome(BOPBiomes.snowy_forest.orNull());
             return;
         }
 
-        if (predictors.cover == Cover.LICHENS_AND_MOSSES) {
-            event.setCanceled(true);
-            event.setBiome(BOPBiomes.tundra.orNull());
+        if (!predictors.isFrozen()) {
+            double eucalyptus = BoPTrees.Indicators.EUCALYPTUS.evaluate(predictors);
+            if (eucalyptus > 0.85) {
+                event.setBiome(BOPBiomes.eucalyptus_forest.orNull());
+                return;
+            }
+
+            double birch = Trees.Indicators.BIRCH.evaluate(predictors);
+            double spruce = Trees.Indicators.SPRUCE.evaluate(predictors);
+            if (birch > 0.85 && spruce > 0.85) {
+                event.setBiome(BOPBiomes.boreal_forest.orNull());
+                return;
+            }
         }
 
-        if (predictors.cover == Cover.GRASSLAND) {
-            event.setCanceled(true);
-            event.setBiome(BOPBiomes.grassland.orNull());
-        }
-
-        if (predictors.cover.is(CoverMarkers.DENSE_SHRUBS) && Climate.isVeryDry(predictors.annualRainfall)) {
-            event.setCanceled(true);
-            if (predictors.isBarren() || SoilSelector.isDesertLike(predictors)) {
-                event.setBiome(BOPBiomes.brushland.orNull());
+        double fir = BoPTrees.Indicators.FIR.evaluate(predictors);
+        if (fir > 0.85) {
+            if (predictors.isFrozen()) {
+                event.setBiome(BOPBiomes.snowy_coniferous_forest.orNull());
             } else {
-                event.setBiome(BOPBiomes.xeric_shrubland.orNull());
+                event.setBiome(BOPBiomes.coniferous_forest.orNull());
             }
-        }
-
-        if (predictors.isLand() && !predictors.cover.is(CoverMarkers.NO_VEGETATION)) {
-            double mangroveSuitability = BoPTrees.Indicators.MANGROVE.evaluate(predictors);
-            if (mangroveSuitability > 0.85) {
-                event.setCanceled(true);
-                event.setBiome(BOPBiomes.mangrove.orNull());
-            }
-        }
-
-        if (predictors.slope >= 60 && !predictors.isCold() && predictors.cover.is(CoverMarkers.FOREST)) {
-            event.setCanceled(true);
-            event.setBiome(BOPBiomes.overgrown_cliffs.orNull());
+            return;
         }
     }
 

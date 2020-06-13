@@ -34,7 +34,7 @@ public final class BiomeClassifier {
         }
 
         if (!predictors.isBarren()) {
-            if (Climate.isJungle(annualRainfall, meanTemperature)) {
+            if (Climate.isTropicalRainforest(annualRainfall, meanTemperature)) {
                 return predictors.isForested() ? Biomes.JUNGLE : Biomes.JUNGLE_EDGE;
             }
 

@@ -36,14 +36,11 @@ public final class EarthBiomeComposer implements BiomeComposer {
     }
 
     private Biome classify(TerrariumWorld terrarium) {
-        ClassifyBiomeEvent event = new ClassifyBiomeEvent(terrarium, this.predictors);
-        if (MinecraftForge.TERRAIN_GEN_BUS.post(event)) {
-            Biome biome = event.getBiome();
-            if (biome != null) {
-                return biome;
-            }
-        }
+        Biome biome = BiomeClassifier.classify(this.predictors);
 
-        return BiomeClassifier.classify(this.predictors);
+        ClassifyBiomeEvent event = new ClassifyBiomeEvent(terrarium, this.predictors, biome);
+        MinecraftForge.TERRAIN_GEN_BUS.post(event);
+
+        return event.getBiome();
     }
 }

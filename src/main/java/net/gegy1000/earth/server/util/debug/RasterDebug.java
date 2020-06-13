@@ -50,6 +50,7 @@ final class RasterDebug {
             new Vegetation(BoPTrees.Indicators.FIR, new Color(44, 116, 109)),
             new Vegetation(BoPTrees.Indicators.MAHOGANY, new Color(116, 76, 80)),
             new Vegetation(BoPTrees.Indicators.PALM, new Color(141, 199, 50)),
+            new Vegetation(BoPTrees.Indicators.EUCALYPTUS, new Color(255, 111, 0)),
             new Vegetation(BoPTrees.Indicators.MANGROVE, new Color(78, 199, 183)),
             new Vegetation(BoPTrees.Indicators.WILLOW, new Color(32, 84, 84)),
     };

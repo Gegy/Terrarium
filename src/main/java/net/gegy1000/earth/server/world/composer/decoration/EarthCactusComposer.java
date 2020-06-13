@@ -17,7 +17,6 @@ import net.minecraft.world.gen.feature.WorldGenerator;
 
 public final class EarthCactusComposer implements DecorationComposer {
     private static final long DECORATION_SEED = 2492037454623254033L;
-    private static final double THRESHOLD = 0.95;
 
     private static final GrowthIndicator INDICATOR = MaxentGrowthIndicator.tryParse(new ResourceLocation(TerrariumEarth.ID, "vegetation/models/cactus.lambdas"))
             .orElse(GrowthIndicator.no());
@@ -45,7 +44,7 @@ public final class EarthCactusComposer implements DecorationComposer {
         this.predictorSampler.sampleTo(terrarium.getDataCache(), dataX, dataZ, this.predictors);
         double indicator = INDICATOR.evaluate(this.predictors);
 
-        if (indicator > THRESHOLD) {
+        if (indicator > 0.6) {
             this.generateCacti(writer, pos);
         }
     }

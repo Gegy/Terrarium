@@ -108,6 +108,7 @@ public final class CoverMarkers {
                 Cover.FLOODED_VEGETATION, Cover.HERBACEOUS_COVER
         );
         SPARSE_SHRUBS.addAll(OPEN_FOREST);
+        SPARSE_SHRUBS.addAll(CLOSED_TO_OPEN_FOREST);
 
         MODERATE_TREES.add(
                 Cover.TREE_OR_SHRUB_COVER,

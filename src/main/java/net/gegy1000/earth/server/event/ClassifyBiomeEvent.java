@@ -15,9 +15,10 @@ public final class ClassifyBiomeEvent extends Event {
 
     private Biome biome;
 
-    public ClassifyBiomeEvent(TerrariumWorld terrarium, GrowthPredictors predictors) {
+    public ClassifyBiomeEvent(TerrariumWorld terrarium, GrowthPredictors predictors, Biome biome) {
         this.terrarium = terrarium;
         this.predictors = predictors;
+        this.biome = biome;
     }
 
     public TerrariumWorld getTerrarium() {
@@ -29,7 +30,9 @@ public final class ClassifyBiomeEvent extends Event {
     }
 
     public void setBiome(Biome biome) {
-        this.biome = biome;
+        if (biome != null) {
+            this.biome = biome;
+        }
     }
 
     @Nullable

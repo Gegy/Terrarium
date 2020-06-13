@@ -37,8 +37,12 @@ public final class Climate {
         return annualRainfall < 250;
     }
 
-    public static boolean isJungle(float annualRainfall, float meanTemperature) {
-        return annualRainfall >= 1800 && meanTemperature >= 20;
+    public static boolean isRainforest(float annualRainfall) {
+        return annualRainfall >= 1800;
+    }
+
+    public static boolean isTropicalRainforest(float annualRainfall, float meanTemperature) {
+        return Climate.isRainforest(annualRainfall) && meanTemperature >= 20;
     }
 
     public static boolean isTaiga(float annualRainfall, float meanTemperature) {

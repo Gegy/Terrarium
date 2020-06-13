@@ -55,7 +55,7 @@ public final class EarthShrubComposer implements DecorationComposer {
             shrubs.setDensity(0.0F, 0.0125F);
         }
 
-        if (cover.is(CoverMarkers.CLOSED_FOREST)) {
+        if (cover.is(CoverMarkers.CLOSED_FOREST) || cover.is(CoverMarkers.CLOSED_TO_OPEN_FOREST)) {
             this.addFloorShrubCandidates(shrubs);
         } else {
             this.addTallShrubCandidates(shrubs);
