@@ -1,4 +1,4 @@
-package net.gegy1000.earth.server.world.composer.structure;
+package net.gegy1000.earth.server.world.composer.structure.placement;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;

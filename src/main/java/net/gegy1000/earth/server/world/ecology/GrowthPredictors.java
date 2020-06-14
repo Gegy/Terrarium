@@ -104,7 +104,7 @@ public final class GrowthPredictors {
         private final EnumRaster.Sampler<Landform> landform;
 
         Sampler() {
-            this.elevation = FloatRaster.sampler(EarthData.ELEVATION_METERS).defaultValue(0);
+            this.elevation = FloatRaster.sampler(EarthData.ELEVATION_METERS).defaultValue(-Float.MAX_VALUE);
             this.annualRainfall = ShortRaster.sampler(EarthData.ANNUAL_RAINFALL).defaultValue(300);
             this.meanTemperature = FloatRaster.sampler(EarthData.MEAN_TEMPERATURE).defaultValue(14.0F);
             this.minTemperature = FloatRaster.sampler(EarthData.MIN_TEMPERATURE).defaultValue(10.0F);

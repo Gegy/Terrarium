@@ -1,4 +1,4 @@
-package net.gegy1000.earth.server.world.composer.structure;
+package net.gegy1000.earth.server.world.composer.structure.placement;
 
 import net.gegy1000.terrarium.server.util.SpiralIterator;
 import net.minecraft.util.math.BlockPos;

@@ -93,10 +93,26 @@ public class ComposableBiomeProvider extends BiomeProvider {
         return true;
     }
 
-    // TODO: Implement properly
     @Override
     public BlockPos findBiomePosition(int originX, int originZ, int radius, List<Biome> allowed, Random random) {
-        return new BlockPos(originX, 0, originZ);
+        if (radius == 0) return null;
+
+        int minX = originX - radius;
+        int minZ = originZ - radius;
+        int size = (radius * 2) + 1;
+
+        Biome[] biomes = new Biome[size * size];
+        this.populateArea(biomes, minX, minZ, size, size);
+
+        for (int z = 0; z < size; z++) {
+            for (int x = 0; x < size; x++) {
+                if (allowed.contains(biomes[x + z * size])) {
+                    return new BlockPos(x + minX, 0, z + minZ);
+                }
+            }
+        }
+
+        return null;
     }
 
     private void populateArea(Biome[] resultBiomes, int x, int z, int width, int height) {

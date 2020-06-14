@@ -11,6 +11,10 @@ import net.minecraft.world.biome.Biome;
 
 public final class BiomeClassifier {
     public static Biome classify(GrowthPredictors predictors) {
+        if (predictors.elevation == -Float.MAX_VALUE) {
+            return Biomes.VOID;
+        }
+
         if (predictors.isLand()) {
             return classifyLand(predictors);
         } else {

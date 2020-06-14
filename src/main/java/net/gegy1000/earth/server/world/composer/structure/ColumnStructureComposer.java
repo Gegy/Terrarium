@@ -5,6 +5,7 @@ import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.world.compatibility.ColumnCompatibilityWorld;
 import net.gegy1000.earth.server.world.composer.structure.data.LossyColumnCache;
 import net.gegy1000.earth.server.world.composer.structure.data.StructureStartMap;
+import net.gegy1000.earth.server.world.composer.structure.placement.StructurePlacement;
 import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.gengen.api.HeightFunction;
 import net.gegy1000.gengen.api.writer.ChunkPopulationWriter;

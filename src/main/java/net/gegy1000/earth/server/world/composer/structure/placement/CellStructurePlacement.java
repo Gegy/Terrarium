@@ -1,4 +1,4 @@
-package net.gegy1000.earth.server.world.composer.structure;
+package net.gegy1000.earth.server.world.composer.structure.placement;
 
 import net.gegy1000.terrarium.server.util.SpiralIterator;
 import net.minecraft.util.math.BlockPos;
@@ -30,6 +30,10 @@ public final class CellStructurePlacement implements StructurePlacement {
         return this;
     }
 
+    protected boolean canSpawnAt(World world, Point2i columnPos) {
+        return this.predicate.canSpawnAt(world, columnPos.x, columnPos.y);
+    }
+
     @Override
     @Nullable
     public BlockPos getClosestTo(World world, BlockPos origin, boolean findUnexplored) {
@@ -43,7 +47,7 @@ public final class CellStructurePlacement implements StructurePlacement {
             Point2i cell = this.getCellFor(chunkX, chunkZ);
             Point2i spawnChunk = this.getSpawnChunkForCell(world, cell.x, cell.y);
 
-            if (this.predicate.canSpawnAt(world, spawnChunk.x, spawnChunk.y)) {
+            if (this.canSpawnAt(world, spawnChunk)) {
                 if (!findUnexplored || !world.isChunkGeneratedAt(spawnChunk.x, spawnChunk.y)) {
                     return new BlockPos((spawnChunk.x << 4) + 8, world.getSeaLevel(), (spawnChunk.y << 4) + 8);
                 }
@@ -59,7 +63,7 @@ public final class CellStructurePlacement implements StructurePlacement {
         Point2i spawnChunk = this.getSpawnChunkForCell(world, cell.x, cell.y);
 
         if (chunkX == spawnChunk.x && chunkZ == spawnChunk.y) {
-            return this.predicate.canSpawnAt(world, spawnChunk.x, spawnChunk.y);
+            return this.canSpawnAt(world, spawnChunk);
         }
 
         return false;
