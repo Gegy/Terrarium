@@ -62,13 +62,13 @@ public final class BoPTrees {
             .build();
 
     public static class Indicators {
-        public static final GrowthIndicator MAHOGANY = maxentIndicator("mahogany").pow(1.8);
-        public static final GrowthIndicator PALM = maxentIndicator("palm").pow(3.0);
-        public static final GrowthIndicator EUCALYPTUS = maxentIndicator("eucalyptus").pow(3.0);
+        public static final GrowthIndicator MAHOGANY = maxentIndicator("mahogany").pow(1.8F);
+        public static final GrowthIndicator PALM = maxentIndicator("palm").pow(3.0F);
+        public static final GrowthIndicator EUCALYPTUS = maxentIndicator("eucalyptus").pow(3.0F);
 
         public static final GrowthIndicator MANGROVE = maxentIndicator("mangrove");
-        public static final GrowthIndicator WILLOW = maxentIndicator("willow").pow(2.0);
-        public static final GrowthIndicator EBONY = maxentIndicator("ebony").pow(1.6);
+        public static final GrowthIndicator WILLOW = maxentIndicator("willow").pow(2.0F);
+        public static final GrowthIndicator EBONY = maxentIndicator("ebony").pow(1.6F);
         public static final GrowthIndicator FIR = maxentIndicator("fir");
 
         private static GrowthIndicator maxentIndicator(String path) {

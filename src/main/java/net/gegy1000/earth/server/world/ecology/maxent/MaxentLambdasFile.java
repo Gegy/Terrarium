@@ -1,11 +1,12 @@
 package net.gegy1000.earth.server.world.ecology.maxent;
 
 import com.google.common.collect.ImmutableList;
-import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
-import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2FloatMap;
+import it.unimi.dsi.fastutil.objects.Object2FloatOpenHashMap;
 import net.gegy1000.earth.TerrariumEarth;
-import net.gegy1000.earth.server.world.ecology.GrowthIndicator;
 import net.gegy1000.earth.server.world.ecology.GrowthPredictors;
+import net.gegy1000.earth.server.world.ecology.maxent.feature.MaxentFeature;
+import net.gegy1000.earth.server.world.ecology.maxent.feature.MaxentFeatures;
 import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.Nullable;
@@ -15,10 +16,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public final class MaxentLambdasFile {
-    private final ImmutableList<GrowthIndicator> features;
-    private final Object2DoubleMap<String> fields;
+    private final ImmutableList<MaxentFeature> features;
+    private final Object2FloatMap<String> fields;
 
-    private MaxentLambdasFile(ImmutableList<GrowthIndicator> features, Object2DoubleMap<String> fields) {
+    private MaxentLambdasFile(ImmutableList<MaxentFeature> features, Object2FloatMap<String> fields) {
         this.features = features;
         this.fields = fields;
     }
@@ -32,9 +33,9 @@ public final class MaxentLambdasFile {
 
     // TODO: Clamp predictors based on range specified by linear features?
     public static MaxentLambdasFile parse(InputStream input) throws IOException, MaxentParseException {
-        Object2DoubleMap<String> fields = new Object2DoubleOpenHashMap<>();
+        Object2FloatMap<String> fields = new Object2FloatOpenHashMap<>();
 
-        ImmutableList.Builder<GrowthIndicator> features = ImmutableList.builder();
+        ImmutableList.Builder<MaxentFeature> features = ImmutableList.builder();
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 
@@ -43,10 +44,10 @@ public final class MaxentLambdasFile {
             String[] tokens = line.split(", ");
             if (tokens.length == 2) {
                 String key = tokens[0];
-                double value = Double.parseDouble(tokens[1]);
+                float value = Float.parseFloat(tokens[1]);
                 fields.put(key, value);
             } else if (tokens.length == 4) {
-                GrowthIndicator feature = MaxentLambdasFile.parseFeature(tokens);
+                MaxentFeature feature = MaxentLambdasFile.parseFeature(tokens);
                 if (feature != null) features.add(feature);
             } else {
                 throw new MaxentParseException("Unexpected line format: " + line);
@@ -57,66 +58,66 @@ public final class MaxentLambdasFile {
     }
 
     @Nullable
-    public static GrowthIndicator parseFeature(String line) throws MaxentParseException {
+    public static MaxentFeature parseFeature(String line) throws MaxentParseException {
         return parseFeature(line.split(", "));
     }
 
     @Nullable
-    public static GrowthIndicator parseFeature(String[] tokens) throws MaxentParseException {
+    public static MaxentFeature parseFeature(String[] tokens) throws MaxentParseException {
         if (tokens.length != 4) throw new MaxentParseException("Invalid number of tokens for feature");
 
         try {
             String ident = tokens[0];
 
-            double lambda = Double.parseDouble(tokens[1]);
-            if (Math.abs(lambda) <= 1e-6) return null;
+            float lambda = Float.parseFloat(tokens[1]);
+            if (Math.abs(lambda) <= 1e-6F) return null;
 
-            double min = Double.parseDouble(tokens[2]);
-            double max = Double.parseDouble(tokens[3]);
+            float min = Float.parseFloat(tokens[2]);
+            float max = Float.parseFloat(tokens[3]);
 
             if (ident.startsWith("(") && ident.endsWith(")")) {
                 String expression = ident.substring(1, ident.length() - 1);
                 return parseExpressionFeature(expression, lambda, min, max);
             } else if (ident.startsWith("'")) {
-                GrowthIndicator predictor = GrowthPredictors.byId(ident.substring(1));
-                return MaxentFeatures.hinge(predictor, lambda, min, max);
+                MaxentFeature feature = GrowthPredictors.featureById(ident.substring(1));
+                return MaxentFeatures.hinge(feature, lambda, min, max);
             } else if (ident.startsWith("`")) {
-                GrowthIndicator predictor = GrowthPredictors.byId(ident.substring(1));
-                return MaxentFeatures.reverseHinge(predictor, lambda, min, max);
+                MaxentFeature feature = GrowthPredictors.featureById(ident.substring(1));
+                return MaxentFeatures.reverseHinge(feature, lambda, min, max);
             } else if (ident.contains("*")) {
                 int idx = ident.indexOf('*');
-                GrowthIndicator left = GrowthPredictors.byId(ident.substring(0, idx));
-                GrowthIndicator right = GrowthPredictors.byId(ident.substring(idx + 1));
+                MaxentFeature left = GrowthPredictors.featureById(ident.substring(0, idx));
+                MaxentFeature right = GrowthPredictors.featureById(ident.substring(idx + 1));
                 return MaxentFeatures.product(left, right, lambda, min, max);
             } else if (ident.contains("^2")) {
-                GrowthIndicator predictor = GrowthPredictors.byId(ident.substring(0, ident.length() - 2));
-                return MaxentFeatures.quadratic(predictor, lambda, min, max);
+                MaxentFeature feature = GrowthPredictors.featureById(ident.substring(0, ident.length() - 2));
+                return MaxentFeatures.quadratic(feature, lambda, min, max);
             } else {
-                GrowthIndicator predictor = GrowthPredictors.byId(ident);
-                return MaxentFeatures.raw(predictor, lambda, min, max);
+                MaxentFeature feature = GrowthPredictors.featureById(ident);
+                return MaxentFeatures.raw(feature, lambda, min, max);
             }
         } catch (NumberFormatException e) {
             throw new MaxentParseException("Malformed number", e);
         }
     }
 
-    private static GrowthIndicator parseExpressionFeature(String expression, double lambda, double min, double max) throws MaxentParseException {
+    private static MaxentFeature parseExpressionFeature(String expression, float lambda, float min, float max) throws MaxentParseException {
         int idxEq = expression.indexOf('=');
         int idxLt = expression.indexOf('<');
         if (idxEq != -1) {
-            GrowthIndicator predictor = GrowthPredictors.byId(expression.substring(0, idxEq));
-            double value = Double.parseDouble(expression.substring(idxEq));
-            return MaxentFeatures.equal(predictor, lambda, min, max, value);
+            MaxentFeature feature = GrowthPredictors.featureById(expression.substring(0, idxEq));
+            float value = Float.parseFloat(expression.substring(idxEq));
+            return MaxentFeatures.equal(feature, lambda, min, max, value);
         } else if (idxLt != -1) {
-            GrowthIndicator predictor = GrowthPredictors.byId(expression.substring(idxLt));
-            double threshold = Double.parseDouble(expression.substring(0, idxLt));
-            return MaxentFeatures.threshold(predictor, lambda, min, max, threshold);
+            MaxentFeature feature = GrowthPredictors.featureById(expression.substring(idxLt));
+            float threshold = Float.parseFloat(expression.substring(0, idxLt));
+            return MaxentFeatures.threshold(feature, lambda, min, max, threshold);
         } else {
             throw new MaxentParseException("Invalid expression operator");
         }
     }
 
-    public ImmutableList<GrowthIndicator> getFeatures() {
+    public ImmutableList<MaxentFeature> getFeatures() {
         return this.features;
     }
 
@@ -124,9 +125,9 @@ public final class MaxentLambdasFile {
         return this.features.isEmpty();
     }
 
-    public double getFieldOr(String key, double or) {
+    public float getFieldOr(String key, float or) {
         if (this.fields.containsKey(key)) {
-            return this.fields.getDouble(key);
+            return this.fields.getFloat(key);
         } else {
             return or;
         }

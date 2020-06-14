@@ -233,6 +233,7 @@ public final class ColumnStructureComposer implements StructureComposer {
                 // here we have to call addComponentParts with an 'impossible' bounding box so that it will solve its
                 // bounding box while not generating anything
                 if (!this.preparedStartBoundsCache.set(startColumnPos.x, startColumnPos.z)) {
+                    // FIXME: not working without cubicchunks!
                     this.hookedBounds.set(start.getBoundingBox());
                     this.hookedBounds.minY = Integer.MIN_VALUE;
                     this.hookedBounds.maxY = Integer.MIN_VALUE;

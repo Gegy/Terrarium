@@ -1,27 +1,27 @@
 package net.gegy1000.earth.server.world.ecology.maxent;
 
-import com.google.common.collect.ImmutableList;
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.world.ecology.GrowthIndicator;
 import net.gegy1000.earth.server.world.ecology.GrowthPredictors;
+import net.gegy1000.earth.server.world.ecology.maxent.feature.SumFeature;
 import net.minecraft.util.ResourceLocation;
 
 import java.io.IOException;
 import java.util.Optional;
 
 public final class MaxentGrowthIndicator implements GrowthIndicator {
-    private final ImmutableList<GrowthIndicator> features;
+    private final GrowthIndicator sum;
     private final double linearPredictorNormalizer;
     private final double densityNormalizer;
     private final double entropyExp;
     private final MaxentOutput output;
 
     private MaxentGrowthIndicator(
-            ImmutableList<GrowthIndicator> features,
-            double linearPredictorNormalizer, double densityNormalizer, double entropy,
+            GrowthIndicator sum,
+            float linearPredictorNormalizer, float densityNormalizer, float entropy,
             MaxentOutput output
     ) {
-        this.features = features;
+        this.sum = sum;
         this.linearPredictorNormalizer = linearPredictorNormalizer;
         this.densityNormalizer = densityNormalizer;
         this.entropyExp = Math.exp(entropy);
@@ -39,29 +39,28 @@ public final class MaxentGrowthIndicator implements GrowthIndicator {
     }
 
     public static GrowthIndicator from(MaxentLambdasFile lambdasFile, MaxentOutput output) {
-        ImmutableList<GrowthIndicator> features = lambdasFile.getFeatures();
-        double linearPredictorNormalizer = lambdasFile.getFieldOr("linearPredictorNormalizer", 0.0);
-        double densityNormalizer = lambdasFile.getFieldOr("densityNormalizer", 1.0);
-        double entropy = lambdasFile.getFieldOr("entropy", 0.0);
-        return new MaxentGrowthIndicator(features, linearPredictorNormalizer, densityNormalizer, entropy, output);
+        SumFeature feature = new SumFeature(lambdasFile.getFeatures());
+        GrowthIndicator sum = MaxentCompiler.compileFeature(feature);
+
+        float linearPredictorNormalizer = lambdasFile.getFieldOr("linearPredictorNormalizer", 0.0F);
+        float densityNormalizer = lambdasFile.getFieldOr("densityNormalizer", 1.0F);
+        float entropy = lambdasFile.getFieldOr("entropy", 0.0F);
+        return new MaxentGrowthIndicator(sum, linearPredictorNormalizer, densityNormalizer, entropy, output);
     }
 
     @Override
-    public double evaluate(GrowthPredictors predictors) {
-        double sum = 0.0;
-        for (GrowthIndicator feature : this.features) {
-            sum += feature.evaluate(predictors);
-        }
+    public float evaluate(GrowthPredictors predictors) {
+        float sum = this.sum.evaluate(predictors);
 
-        double raw = Math.exp(sum - this.linearPredictorNormalizer) / this.densityNormalizer;
+        double raw = (Math.exp(sum - this.linearPredictorNormalizer) / this.densityNormalizer);
         switch (this.output) {
             case LOGISTIC:
-                return 1.0 - 1.0 / (raw * this.entropyExp + 1.0);
+                return (float) (1.0 - 1.0 / (raw * this.entropyExp + 1.0));
             case CLOGLOG:
-                return 1.0 - Math.exp(raw * -this.entropyExp);
+                return (float) (1.0 - Math.exp(raw * -this.entropyExp));
             case RAW:
             default:
-                return raw;
+                return (float) raw;
         }
     }
 }

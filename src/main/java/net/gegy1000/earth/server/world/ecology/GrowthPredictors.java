@@ -1,10 +1,13 @@
 package net.gegy1000.earth.server.world.ecology;
 
 import net.gegy1000.earth.TerrariumEarth;
-import net.gegy1000.earth.server.world.EarthData;
 import net.gegy1000.earth.server.world.Climate;
+import net.gegy1000.earth.server.world.EarthData;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.cover.CoverMarkers;
+import net.gegy1000.earth.server.world.ecology.maxent.feature.ConstFeature;
+import net.gegy1000.earth.server.world.ecology.maxent.feature.GetPredictorFeature;
+import net.gegy1000.earth.server.world.ecology.maxent.feature.MaxentFeature;
 import net.gegy1000.earth.server.world.ecology.soil.SoilSuborder;
 import net.gegy1000.earth.server.world.geography.Landform;
 import net.gegy1000.terrarium.server.world.data.ColumnData;
@@ -36,21 +39,21 @@ public final class GrowthPredictors {
         return new Sampler();
     }
 
-    public static GrowthIndicator byId(String id) {
+    public static MaxentFeature featureById(String id) {
         switch (id) {
-            case "elevation": return p -> p.elevation;
-            case "annual_precipitation": return p -> p.annualRainfall;
-            case "average_temperature": return p -> p.meanTemperature;
-            case "cation_exchange_capacity": return p -> p.cationExchangeCapacity;
-            case "organic_carbon_content": return p -> p.organicCarbonContent;
-            case "ph": return p -> p.pH;
-            case "clay_content": return p -> p.clayContent;
-            case "silt_content": return p -> p.siltContent;
-            case "sand_content": return p -> p.sandContent;
-            case "slope": return p -> p.slope;
+            case "elevation": return new GetPredictorFeature("elevation", float.class);
+            case "annual_precipitation": return new GetPredictorFeature("annualRainfall", float.class);
+            case "average_temperature": return new GetPredictorFeature("meanTemperature", float.class);
+            case "cation_exchange_capacity": return new GetPredictorFeature("cationExchangeCapacity", int.class);
+            case "organic_carbon_content": return new GetPredictorFeature("organicCarbonContent", int.class);
+            case "ph": return new GetPredictorFeature("pH", int.class);
+            case "clay_content": return new GetPredictorFeature("clayContent", int.class);
+            case "silt_content": return new GetPredictorFeature("siltContent", int.class);
+            case "sand_content": return new GetPredictorFeature("sandContent", int.class);
+            case "slope": return new GetPredictorFeature("sloe", int.class);
             default:
                 TerrariumEarth.LOGGER.warn("invalid predictor id: {}", id);
-                return p -> 0.0;
+                return new ConstFeature(0.0F);
         }
     }
 
