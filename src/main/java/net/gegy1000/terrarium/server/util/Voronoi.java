@@ -19,42 +19,38 @@ public class Voronoi {
         this.random = new SpatialRandom(seed, DISPLACEMENT_SEED);
     }
 
-    public <T> void scale(T src, T dest, DataView srcView, DataView destView,
-                          double scaleX, double scaleY, double offsetX, double offsetY
-    ) {
-        int width = destView.getWidth();
-        int height = destView.getHeight();
-
-        for (int y = 0; y < height; y++) {
-            double srcY = y * scaleY + offsetX;
-
-            for (int x = 0; x < width; x++) {
-                double srcX = x * scaleX + offsetY;
-
-                int srcIndex = this.getCellIndex(srcView, srcX, srcY);
-                int destIndex = x + y * width;
-
-                System.arraycopy(src, srcIndex, dest, destIndex, 1);
-            }
-        }
-    }
-
-    public void scaleBytes(byte[] src, byte[] dest, DataView srcView, DataView destView,
+    public void scaleBytes(byte[] src, byte[] dst, DataView srcView, DataView dstView,
                            double scaleX, double scaleY, double offsetX, double offsetY
     ) {
-        int width = destView.getWidth();
-        int height = destView.getHeight();
+        int dstWidth = dstView.getWidth();
+        int dstHeight = dstView.getHeight();
 
-        for (int y = 0; y < height; y++) {
+        int srcWidth = srcView.getWidth();
+        int srcHeight = srcView.getHeight();
+
+        if (dstWidth <= srcWidth && dstHeight <= srcHeight) {
+            // nearest-neighbor sampling
+            for (int dstY = 0; dstY < dstHeight; dstY++) {
+                int srcY = MathHelper.floor(dstY * scaleY + offsetY);
+                for (int dstX = 0; dstX < dstWidth; dstX++) {
+                    int srcX = MathHelper.floor(dstX * scaleX + offsetX);
+                    dst[dstX + dstY * dstWidth] = src[srcX + srcY * srcWidth];
+                }
+            }
+
+            return;
+        }
+
+        for (int y = 0; y < dstHeight; y++) {
             double srcY = y * scaleY + offsetY;
 
-            for (int x = 0; x < width; x++) {
+            for (int x = 0; x < dstWidth; x++) {
                 double srcX = x * scaleX + offsetX;
 
                 int srcIndex = this.getCellIndex(srcView, srcX, srcY);
-                int destIndex = x + y * width;
+                int dstIndex = x + y * dstWidth;
 
-                dest[destIndex] = src[srcIndex];
+                dst[dstIndex] = src[srcIndex];
             }
         }
     }

@@ -27,11 +27,11 @@ public final class WorldClimateRaster {
     private static final float RAIN_RANGE = 7200.0F;
     private static final float RAIN_CURVE = 2.3F;
 
-    private final byte[] meanTemperature;
-    private final byte[] minTemperature;
-    private final byte[] annualRainfall;
+    private final float[] meanTemperature;
+    private final float[] minTemperature;
+    private final short[] annualRainfall;
 
-    private WorldClimateRaster(byte[] meanTemperature, byte[] minTemperature, byte[] annualRainfall) {
+    private WorldClimateRaster(float[] meanTemperature, float[] minTemperature, short[] annualRainfall) {
         this.meanTemperature = meanTemperature;
         this.minTemperature = minTemperature;
         this.annualRainfall = annualRainfall;
@@ -40,15 +40,47 @@ public final class WorldClimateRaster {
     public static WorldClimateRaster parse(InputStream in) throws IOException {
         DataInputStream data = new DataInputStream(new SingleXZInputStream(in));
 
-        byte[] meanTemperature = new byte[WIDTH * HEIGHT];
-        data.readFully(meanTemperature);
-        byte[] minTemperature = new byte[WIDTH * HEIGHT];
-        data.readFully(minTemperature);
+        byte[] meanTemperaturePacked = new byte[WIDTH * HEIGHT];
+        data.readFully(meanTemperaturePacked);
+        float[] meanTemperature = unpackTemperature(meanTemperaturePacked);
 
-        byte[] annualRainfall = new byte[WIDTH * HEIGHT];
-        data.readFully(annualRainfall);
+        byte[] minTemperaturePacked = new byte[WIDTH * HEIGHT];
+        data.readFully(minTemperaturePacked);
+        float[] minTemperature = unpackTemperature(minTemperaturePacked);
+
+        byte[] annualRainfallPacked = new byte[WIDTH * HEIGHT];
+        data.readFully(annualRainfallPacked);
+        short[] annualRainfall = unpackRainfall(annualRainfallPacked);
 
         return new WorldClimateRaster(meanTemperature, minTemperature, annualRainfall);
+    }
+
+    private static float[] unpackTemperature(byte[] packed) {
+        float[] unpacked = new float[packed.length];
+        for (int i = 0; i < unpacked.length; i++) {
+            unpacked[i] = unpackTemperature(packed[i]);
+        }
+        return unpacked;
+    }
+
+    private static float unpackTemperature(byte packed) {
+        float shifted = (float) (packed & 0xFF);
+        double unpacked = TEMP_RANGE * Math.pow(shifted / PACK_RANGE, TEMP_CURVE);
+        return (float) (TEMP_MIN + unpacked);
+    }
+
+    private static short[] unpackRainfall(byte[] packed) {
+        short[] unpacked = new short[packed.length];
+        for (int i = 0; i < unpacked.length; i++) {
+            unpacked[i] = unpackRainfall(packed[i]);
+        }
+        return unpacked;
+    }
+
+    private static short unpackRainfall(byte packed) {
+        float shifted = (float) (packed & 0xFF);
+        double unpacked = RAIN_RANGE * Math.pow(shifted / PACK_RANGE, RAIN_CURVE);
+        return (short) (RAIN_MIN + unpacked);
     }
 
     public static CoordinateReference crs(double worldScale) {
@@ -58,35 +90,17 @@ public final class WorldClimateRaster {
 
     public float getMeanTemperature(int x, int y) {
         if (outOfBounds(x, y)) return STANDARD_TEMPERATURE;
-
-        byte packed = this.meanTemperature[index(x, y)];
-        return this.unpackTemperature(packed);
+        return this.meanTemperature[index(x, y)];
     }
 
     public float getMinTemperature(int x, int y) {
         if (outOfBounds(x, y)) return STANDARD_TEMPERATURE;
-
-        byte packed = this.minTemperature[index(x, y)];
-        return this.unpackTemperature(packed);
+        return this.minTemperature[index(x, y)];
     }
 
     public short getAnnualRainfall(int x, int y) {
         if (outOfBounds(x, y)) return STANDARD_RAINFALL;
-
-        byte packed = this.annualRainfall[index(x, y)];
-        return this.unpackRainfall(packed);
-    }
-
-    private float unpackTemperature(byte packed) {
-        float shifted = (float) (packed & 0xFF);
-        double unpacked = TEMP_RANGE * Math.pow(shifted / PACK_RANGE, TEMP_CURVE);
-        return (float) (TEMP_MIN + unpacked);
-    }
-
-    private short unpackRainfall(byte packed) {
-        float shifted = (float) (packed & 0xFF);
-        double unpacked = RAIN_RANGE * Math.pow(shifted / PACK_RANGE, RAIN_CURVE);
-        return (short) (RAIN_MIN + unpacked);
+        return this.annualRainfall[index(x, y)];
     }
 
     private static int index(int x, int y) {
