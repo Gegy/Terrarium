@@ -73,6 +73,11 @@ public class ComposableBiomeProvider extends BiomeProvider {
 
     @Override
     public boolean areBiomesViable(int originX, int originZ, int radius, List<Biome> allowed) {
+        if (radius == 0) {
+            Biome biome = this.biomeCache.getBiome(originX, originZ, null);
+            return allowed.contains(biome);
+        }
+
         int minX = originX - radius;
         int minZ = originZ - radius;
         int size = (radius * 2) + 1;

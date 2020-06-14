@@ -18,9 +18,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
+import net.minecraft.world.gen.structure.ComponentScatteredFeaturePieces;
 import net.minecraft.world.gen.structure.MapGenStructureData;
 import net.minecraft.world.gen.structure.MapGenStructureIO;
 import net.minecraft.world.gen.structure.StructureBoundingBox;
+import net.minecraft.world.gen.structure.StructureComponent;
 import net.minecraft.world.gen.structure.StructureStart;
 import net.minecraft.world.gen.structure.StructureVillagePieces;
 import net.minecraft.world.storage.MapStorage;
@@ -31,7 +33,7 @@ import java.util.Random;
 
 // behaviour is largely cloned from MapGenStructure and MapGenBase
 public final class ColumnStructureComposer implements StructureComposer {
-    private static final long SEED = 5805869966374122221L;
+    public static final long SEED = 5805869966374122221L;
 
     private static final int COLUMN_RANGE = 8;
     private static final int COMPAT_SURFACE_Y = 64;
@@ -49,6 +51,7 @@ public final class ColumnStructureComposer implements StructureComposer {
     private MapGenStructureData structureData;
 
     private final LossyColumnCache preparedColumnCache = new LossyColumnCache(256);
+    private final LossyColumnCache preparedStartBoundsCache = new LossyColumnCache(64);
 
     private final StructureBoundingBox mutableBounds = new StructureBoundingBox();
     private final HookedBoundingBox hookedBounds = new HookedBoundingBox();
@@ -68,7 +71,7 @@ public final class ColumnStructureComposer implements StructureComposer {
 
         this.compatibilityWorld = new ColumnCompatibilityWorld(world);
 
-        this.random = new SpatialRandom(world, SEED ^ structureName.hashCode());
+        this.random = new SpatialRandom(world, SEED);
     }
 
     public static Builder builder() {
@@ -127,15 +130,11 @@ public final class ColumnStructureComposer implements StructureComposer {
 
     @Override
     public final void prepareStructures(TerrariumWorld terrarium, CubicPos pos) {
-        // generate(World, int, int, ChunkPrimer = null)
-
         this.prepareColumns(pos);
     }
 
     @Override
     public final void primeStructures(TerrariumWorld terrarium, CubicPos pos, ChunkPrimeWriter writer) {
-        // generate(World, int, int, ChunkPrimer)
-
         this.prepareColumns(pos);
     }
 
@@ -192,16 +191,11 @@ public final class ColumnStructureComposer implements StructureComposer {
 
     private int getColumnOffsetFor(ChunkPos columnPos) {
         int surfaceY = this.surfaceFunction.apply(columnPos.getXStart() + 8, columnPos.getZStart() + 8);
-        int offsetY = surfaceY - COMPAT_SURFACE_Y;
-
-        int minChunkY = offsetY >> 4;
-        return minChunkY << 4;
+        return surfaceY - COMPAT_SURFACE_Y;
     }
 
     @Override
     public final void populateStructures(TerrariumWorld terrarium, CubicPos pos, ChunkPopulationWriter writer) {
-        // generateStructure(World, Random, ChunkPos)
-
         this.prepareStructureData();
 
         this.random.setSeed(pos.getCenterX(), pos.getCenterZ());
@@ -217,6 +211,22 @@ public final class ColumnStructureComposer implements StructureComposer {
             // TODO: isValidForPostProcess (how do? how is it used in vanilla?)
             if (start.isSizeableStructure() /*&& start.isValidForPostProcess(columnPos)*/ && start.getBoundingBox().intersectsWith(cubeBounds)) {
                 ColumnCompatibilityWorld compatibilityWorld = this.getCompatibilityWorldFor(startColumnPos, columnOffsetY);
+
+                // village generation only sets its components' correct bounding boxes when addComponentParts is called
+                // this is usually fine, however when we're generating cubes: the bounds intersection check needs to
+                // consider y-values, which means the component needs to know the y-coordinate that it will generate at.
+
+                // here we have to call addComponentParts with an 'impossible' bounding box so that it will solve its
+                // bounding box while not generating anything
+                if (!this.preparedStartBoundsCache.set(startColumnPos.x, startColumnPos.z)) {
+                    this.hookedBounds.set(start.getBoundingBox());
+                    this.hookedBounds.minY = Integer.MIN_VALUE;
+                    this.hookedBounds.maxY = Integer.MIN_VALUE;
+
+                    for (StructureComponent component : start.getComponents()) {
+                        component.addComponentParts(compatibilityWorld, this.random, this.hookedBounds);
+                    }
+                }
 
                 this.hookedBounds.set(cubeBounds);
                 start.generateStructure(compatibilityWorld, this.random, this.hookedBounds);
@@ -303,18 +313,32 @@ public final class ColumnStructureComposer implements StructureComposer {
     static class HookedBoundingBox extends StructureBoundingBox {
         @Override
         public boolean isVecInside(Vec3i vec) {
-            // village generation does a check to see if an x, z is within the bounds; however it hardcodes y=64
+            // some structure generation does a check to see if an x, z is within the bounds; however it hardcodes y=64
             // this is a horrible hack, but the best option I could find that is not asm
             if (vec.getY() == 64) {
-                Class caller = GetCaller.INSTANCE.getCaller();
+                boolean horizontalCheck = vec.getX() >= this.minX && vec.getZ() >= this.minZ
+                        && vec.getX() <= this.maxX && vec.getZ() <= this.maxZ;
 
-                if (caller == StructureVillagePieces.Path.class || caller == StructureVillagePieces.Village.class) {
-                    return vec.getX() >= this.minX && vec.getZ() >= this.minZ
-                            && vec.getX() <= this.maxX && vec.getZ() <= this.maxZ;
+                if (!horizontalCheck) return false;
+
+                Class caller = GetCaller.INSTANCE.getCaller();
+                if (isBoundCheckSpecialCase(caller)) {
+                    return true;
                 }
             }
 
             return super.isVecInside(vec);
+        }
+
+        private static boolean isBoundCheckSpecialCase(Class caller) {
+            if (caller == StructureVillagePieces.Path.class || caller == StructureVillagePieces.Village.class) {
+                return true;
+            }
+
+            // target ComponentScatteredFeaturePieces$Feature
+            return caller.isMemberClass()
+                    && caller.getEnclosingClass() == ComponentScatteredFeaturePieces.class
+                    && caller != ComponentScatteredFeaturePieces.SwampHut.class;
         }
 
         public void set(StructureBoundingBox from) {

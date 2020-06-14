@@ -70,7 +70,7 @@ public class EarthWorldType extends TerrariumWorldType {
     public static final PropertyKey<Boolean> ADD_MINESHAFTS = new BooleanKey("add_mineshafts");
     public static final PropertyKey<Boolean> ADD_TEMPLES = new BooleanKey("add_temples");
     public static final PropertyKey<Boolean> ADD_OCEAN_MONUMENTS = new BooleanKey("add_ocean_monuments");
-    public static final PropertyKey<Boolean> ADD_WOODLAND_MANSIONS = new BooleanKey("add_ocean_monuments");
+    public static final PropertyKey<Boolean> ADD_WOODLAND_MANSIONS = new BooleanKey("add_woodland_mansions");
 
     public static final PropertyKey<Boolean> COMPATIBILITY_MODE = new BooleanKey("compatibility_mode");
     public static final PropertyKey<Boolean> BOP_INTEGRATION = new BooleanKey("bop_integration");

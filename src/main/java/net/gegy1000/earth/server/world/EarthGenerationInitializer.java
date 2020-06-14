@@ -123,8 +123,16 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
     }
 
     private void addStructureComposers(CompositeTerrariumGenerator.Builder builder, HeightFunction surfaceFunction) {
+        if (this.ctx.settings.getBoolean(ADD_MINESHAFTS)) {
+            builder.addStructureComposer(VanillaStructureComposers.mineshaft(this.world, surfaceFunction));
+        }
+
         if (this.ctx.settings.getBoolean(ADD_VILLAGES)) {
             builder.addStructureComposer(VanillaStructureComposers.village(this.world, surfaceFunction));
+        }
+
+        if (this.ctx.settings.getBoolean(ADD_TEMPLES)) {
+            builder.addStructureComposer(VanillaStructureComposers.temple(this.world, surfaceFunction));
         }
     }
 }
