@@ -125,14 +125,14 @@ public final class UByteRaster extends AbstractRaster<byte[]> implements Integer
 
         public int sample(ColumnDataCache dataCache, int x, int z) {
             ColumnData data = dataCache.joinData(new ChunkPos(x >> 4, z >> 4));
-            return this.sample(data, x, z);
+            return this.sample(data, x & 0xF, z & 0xF);
         }
 
         public int sample(ColumnData data, int x, int z) {
             Optional<UByteRaster> optional = data.get(this.key);
             if (optional.isPresent()) {
                 UByteRaster raster = optional.get();
-                return raster.get(x & 0xF, z & 0xF);
+                return raster.get(x, z);
             }
             return this.defaultValue;
         }

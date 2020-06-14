@@ -111,14 +111,14 @@ public final class ByteRaster extends AbstractRaster<byte[]> implements IntegerR
 
         public byte sample(ColumnDataCache dataCache, int x, int z) {
             ColumnData data = dataCache.joinData(new ChunkPos(x >> 4, z >> 4));
-            return this.sample(data, x, z);
+            return this.sample(data, x & 0xF, z & 0xF);
         }
 
         public byte sample(ColumnData data, int x, int z) {
             Optional<ByteRaster> optional = data.get(this.key);
             if (optional.isPresent()) {
                 ByteRaster raster = optional.get();
-                return raster.get(x & 0xF, z & 0xF);
+                return raster.get(x, z);
             }
             return this.defaultValue;
         }

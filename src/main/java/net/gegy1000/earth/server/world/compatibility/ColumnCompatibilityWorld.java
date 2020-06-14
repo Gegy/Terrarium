@@ -5,7 +5,6 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.gegy1000.terrarium.Terrarium;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.init.Blocks;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -435,9 +434,6 @@ public final class ColumnCompatibilityWorld extends World implements AutoCloseab
 
         @Override
         public IBlockState getBlockState(int x, int y, int z) {
-            if (y < 0 || y >= 256) {
-                return Blocks.AIR.getDefaultState();
-            }
             return this.parent.getBlockState(x, y + ColumnCompatibilityWorld.this.minY, z);
         }
 

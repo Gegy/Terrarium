@@ -34,14 +34,9 @@ gui.earth.preparing.errored=An error occurred
 gui.earth.preparing.errored.desc.1=Failed to prepare Terrarium for use!
 gui.earth.preparing.errored.desc.2=Please check your internet connection and try again
 
-# Customization Categories
+# World Properties
 
 category.terrarium.world.name=World Settings
-category.terrarium.ecological.name=Ecological Settings
-category.terrarium.geological.name=Geological Settings
-category.terrarium.compatibility.name=Compatibility Settings
-
-# World Properties
 
 property.terrarium.world_scale.name=World Scale
 property.terrarium.terrestrial_height_scale.name=Terrestrial Height Scale
@@ -54,6 +49,8 @@ property.terrarium.oceanic_height_scale.tooltip=Elevation multiplier from meters
 property.terrarium.height_offset.tooltip=The height in-game that corresponds to sea-level
 
 # Ecological Properties
+
+category.terrarium.ecological.name=Ecological Settings
 
 property.terrarium.add_trees.name=Add Trees
 property.terrarium.add_grass.name=Add Grass
@@ -71,6 +68,8 @@ property.terrarium.add_gourd.tooltip=If enabled, pumpkins and melons will be gen
 
 # Geological Properties
 
+category.terrarium.geological.name=Geological Settings
+
 property.terrarium.cave_generation.name=Cave Generation
 property.terrarium.ravine_generation.name=Ravine Generation
 property.terrarium.ore_generation.name=Ore Generation
@@ -79,7 +78,27 @@ property.terrarium.cave_generation.tooltip=If enabled, caves will be generated r
 property.terrarium.ravine_generation.tooltip=If enabled, ravines will be generated randomly
 property.terrarium.ore_generation.tooltip=If enabled, ores will be generated randomly
 
+# Structure Properties
+
+category.terrarium.structure.name=Structure Settings
+
+property.terrarium.add_strongholds.name=Add Strongholds
+property.terrarium.add_villages.name=Add Villages
+property.terrarium.add_mineshafts.name=Add Mineshafts
+property.terrarium.add_temples.name=Add Temples
+property.terrarium.add_ocean_monuments.name=Add Ocean Monuments
+property.terrarium.add_woodland_mansions.name=Add Woodland Mansions
+
+property.terrarium.add_strongholds.tooltip=If enabled, strongholds will be generated randomly
+property.terrarium.add_villages.tooltip=If enabled, villages will be generated randomly
+property.terrarium.add_mineshafts.tooltip=If enabled, mineshafts will be generated randomly
+property.terrarium.add_temples.tooltip=If enabled, temples will be generated randomly
+property.terrarium.add_ocean_monuments.tooltip=If enabled, ocean monuments will be generated randomly
+property.terrarium.add_woodland_mansions.tooltip=If enabled, woodland mansions will be generated randomly
+
 # Compatibility Properties
+
+category.terrarium.compatibility.name=Compatibility Settings
 
 property.terrarium.compatibility_mode.name=Compatibility Mode (Experimental)
 property.terrarium.bop_integration.name=Add Biomes O' Plenty Biomes and Trees

@@ -115,14 +115,14 @@ public final class ShortRaster extends AbstractRaster<short[]> implements Intege
 
         public short sample(ColumnDataCache dataCache, int x, int z) {
             ColumnData data = dataCache.joinData(new ChunkPos(x >> 4, z >> 4));
-            return this.sample(data, x, z);
+            return this.sample(data, x & 0xF, z & 0xF);
         }
 
         public short sample(ColumnData data, int x, int z) {
             Optional<ShortRaster> optional = data.get(this.key);
             if (optional.isPresent()) {
                 ShortRaster raster = optional.get();
-                return raster.get(x & 0xF, z & 0xF);
+                return raster.get(x, z);
             }
             return this.defaultValue;
         }

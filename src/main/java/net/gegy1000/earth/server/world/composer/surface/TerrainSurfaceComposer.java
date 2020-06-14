@@ -66,7 +66,7 @@ public class TerrainSurfaceComposer implements SurfaceComposer {
 
                     this.random.setSeed(x, minY, z);
 
-                    this.predictorSampler.sampleTo(data, x, z, this.predictors);
+                    this.predictorSampler.sampleTo(data, localX, localZ, this.predictors);
 
                     int height = heightRaster.get(localX, localZ);
                     int slope = this.predictors.slope;

@@ -19,6 +19,12 @@
     "ravine_generation": true,
     "ore_generation": true,
     "compatibility_mode": false,
-    "bop_integration": true
+    "bop_integration": true,
+    "add_strongholds": true,
+    "add_villages": true,
+    "add_mineshafts": true,
+    "add_temples": true,
+    "add_ocean_monuments": true,
+    "add_woodland_mansions": true
   }
 }

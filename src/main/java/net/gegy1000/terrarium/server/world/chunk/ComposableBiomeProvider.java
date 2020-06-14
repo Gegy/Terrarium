@@ -1,10 +1,14 @@
 package net.gegy1000.terrarium.server.world.chunk;
 
+import net.gegy1000.justnow.executor.CurrentThreadExecutor;
+import net.gegy1000.justnow.future.Future;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.util.Lazy;
+import net.gegy1000.terrarium.server.world.composer.biome.BiomeComposer;
 import net.gegy1000.terrarium.server.world.data.ColumnData;
 import net.gegy1000.terrarium.server.world.data.ColumnDataEntry;
+import net.gegy1000.terrarium.server.world.data.DataView;
 import net.minecraft.init.Biomes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -13,9 +17,7 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeCache;
 import net.minecraft.world.biome.BiomeProvider;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -94,64 +96,29 @@ public class ComposableBiomeProvider extends BiomeProvider {
 
     private void populateArea(Biome[] resultBiomes, int x, int z, int width, int height) {
         Optional<TerrariumWorld> terrariumOption = this.terrarium.get();
-        if (!terrariumOption.isPresent() ) {
+        if (!terrariumOption.isPresent()) {
             Arrays.fill(resultBiomes, Biomes.PLAINS);
             return;
         }
 
         TerrariumWorld terrarium = terrariumOption.get();
+        BiomeComposer biomeComposer = terrarium.getBiomeComposer();
+
+        DataView view = DataView.rect(x, z, width, height);
 
         if (this.isChunk(x, z, width, height)) {
             ChunkPos columnPos = new ChunkPos(x >> 4, z >> 4);
             try (ColumnDataEntry.Handle handle = terrarium.getDataCache().acquireEntry(columnPos)) {
                 ColumnData data = handle.join();
-                Biome[] biomeBuffer = terrarium.getBiomeComposer().composeBiomes(terrarium, data, columnPos);
-                System.arraycopy(biomeBuffer, 0, resultBiomes, 0, biomeBuffer.length);
+                biomeComposer.composeBiomes(resultBiomes, terrarium, data, view);
             }
             return;
         }
 
-        int chunkMinX = x >> 4;
-        int chunkMinZ = z >> 4;
-        int chunkMaxX = (x + width) >> 4;
-        int chunkMaxZ = (z + height) >> 4;
+        Future<ColumnData> future = terrarium.getDataGenerator().generate(view);
+        ColumnData data = CurrentThreadExecutor.blockOn(future);
 
-        Collection<ColumnDataEntry.Handle> columnHandles = new ArrayList<>();
-        for (int chunkZ = chunkMinZ; chunkZ <= chunkMaxZ; chunkZ++) {
-            for (int chunkX = chunkMinX; chunkX <= chunkMaxX; chunkX++) {
-                columnHandles.add(terrarium.getDataCache().acquireEntry(new ChunkPos(chunkX, chunkZ)));
-            }
-        }
-
-        try {
-            for (ColumnDataEntry.Handle handle : columnHandles) {
-                ColumnData data = handle.join();
-                ChunkPos columnPos = handle.getColumnPos();
-                Biome[] biomeBuffer = terrarium.getBiomeComposer().composeBiomes(terrarium, data, columnPos);
-
-                int minColumnX = columnPos.getXStart();
-                int minColumnZ = columnPos.getZStart();
-
-                int minX = Math.max(0, x - minColumnX);
-                int minZ = Math.max(0, z - minColumnZ);
-                int maxX = Math.min(16, (x + width) - minColumnX);
-                int maxZ = Math.min(16, (x + height) - minColumnZ);
-
-                for (int localZ = minZ; localZ < maxZ; localZ++) {
-                    int resultZ = (localZ + minColumnZ) - z;
-
-                    int localX = minX;
-                    int resultX = (localX + minColumnX) - x;
-
-                    int sourceIndex = localX + localZ * 16;
-                    int resultIndex = resultX + resultZ * width;
-
-                    System.arraycopy(biomeBuffer, sourceIndex, resultBiomes, resultIndex, maxX - minX);
-                }
-            }
-        } finally {
-            columnHandles.forEach(ColumnDataEntry.Handle::release);
-        }
+        biomeComposer.composeBiomes(resultBiomes, terrarium, data, view);
     }
 
     private boolean isChunk(int x, int z, int width, int height) {

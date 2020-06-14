@@ -95,14 +95,14 @@ public final class FloatRaster extends AbstractRaster<float[]> implements Number
 
         public float sample(ColumnDataCache dataCache, int x, int z) {
             ColumnData data = dataCache.joinData(new ChunkPos(x >> 4, z >> 4));
-            return this.sample(data, x, z);
+            return this.sample(data, x & 0xF, z & 0xF);
         }
 
         public float sample(ColumnData data, int x, int z) {
             Optional<FloatRaster> optional = data.get(this.key);
             if (optional.isPresent()) {
                 FloatRaster raster = optional.get();
-                return raster.get(x & 0xF, z & 0xF);
+                return raster.get(x, z);
             }
             return this.defaultValue;
         }

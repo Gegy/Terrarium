@@ -54,8 +54,8 @@ public class ComposableChunkGenerator implements GenericChunkGenerator {
             ColumnDataCache dataCache = terrarium.getDataCache();
             ColumnDataEntry.Handle[] handles = this.acquirePopulationHandles(pos, dataCache);
 
-            terrarium.getDecorationComposer().composeDecoration(terrarium, pos, writer);
             terrarium.getStructureComposer().populateStructures(terrarium, pos, writer);
+            terrarium.getDecorationComposer().composeDecoration(terrarium, pos, writer);
 
             for (ColumnDataEntry.Handle handle : handles) {
                 handle.release();
