@@ -13,12 +13,14 @@ import net.gegy1000.gengen.api.writer.ChunkPrimeWriter;
 import net.gegy1000.gengen.util.SpatialRandom;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.composer.structure.StructureComposer;
+import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.structure.ComponentScatteredFeaturePieces;
 import net.minecraft.world.gen.structure.MapGenStructureData;
 import net.minecraft.world.gen.structure.MapGenStructureIO;
@@ -30,6 +32,11 @@ import net.minecraft.world.storage.MapStorage;
 import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 // behaviour is largely cloned from MapGenStructure and MapGenBase, with the addition of much disgusting hackery
@@ -45,6 +52,7 @@ public final class ColumnStructureComposer implements StructureComposer {
     private final StructurePlacement placement;
     private final StartConstructor startConstructor;
     private final HeightFunction surfaceFunction;
+    private final Map<EnumCreatureType, List<Biome.SpawnListEntry>> creatures;
 
     private final SpatialRandom random;
     private final ColumnCompatibilityWorld compatibilityWorld;
@@ -63,7 +71,8 @@ public final class ColumnStructureComposer implements StructureComposer {
             String structureName,
             StructurePlacement placement,
             StartConstructor startConstructor,
-            HeightFunction surfaceFunction
+            HeightFunction surfaceFunction,
+            Map<EnumCreatureType, List<Biome.SpawnListEntry>> creatures
     ) {
         this.world = world;
         this.structureName = structureName;
@@ -74,6 +83,7 @@ public final class ColumnStructureComposer implements StructureComposer {
         this.compatibilityWorld = new ColumnCompatibilityWorld(world);
 
         this.random = new SpatialRandom(world, SEED);
+        this.creatures = creatures;
     }
 
     public static Builder builder() {
@@ -253,11 +263,14 @@ public final class ColumnStructureComposer implements StructureComposer {
 
     @Override
     public final boolean isInsideStructure(TerrariumWorld terrarium, World world, String name, BlockPos pos) {
+        if (!this.structureName.equals(name)) return false;
+
         for (StructureStart start : this.structureStarts) {
             if (start.isSizeableStructure() && start.getBoundingBox().isVecInside(pos)) {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -266,6 +279,15 @@ public final class ColumnStructureComposer implements StructureComposer {
     public BlockPos getClosestStructure(TerrariumWorld terrarium, World world, String name, BlockPos pos, boolean findUnexplored) {
         if (this.structureName.equals(name)) {
             return this.placement.getClosestTo(world, pos, findUnexplored);
+        }
+        return null;
+    }
+
+    @Nullable
+    @Override
+    public List<Biome.SpawnListEntry> getPossibleCreatures(TerrariumWorld terrarium, World world, EnumCreatureType type, BlockPos pos) {
+        if (this.isInsideStructure(terrarium, world, this.structureName, pos)) {
+            return this.creatures.get(type);
         }
         return null;
     }
@@ -279,6 +301,8 @@ public final class ColumnStructureComposer implements StructureComposer {
         private StructurePlacement placement;
         private StartConstructor startConstructor;
         private HeightFunction surfaceFunction = (x, z) -> 64;
+
+        private final Map<EnumCreatureType, List<Biome.SpawnListEntry>> creatures = new EnumMap<>(EnumCreatureType.class);
 
         Builder() {
         }
@@ -303,13 +327,20 @@ public final class ColumnStructureComposer implements StructureComposer {
             return this;
         }
 
+        public Builder addCreatures(EnumCreatureType type, Biome.SpawnListEntry... entries) {
+            List<Biome.SpawnListEntry> creatures = this.creatures.computeIfAbsent(type, t -> new ArrayList<>());
+            Collections.addAll(creatures, entries);
+            return this;
+        }
+
         public ColumnStructureComposer build(World world) {
             return new ColumnStructureComposer(
                     world,
                     Preconditions.checkNotNull(this.structureName, "no structure name"),
                     Preconditions.checkNotNull(this.placement, "no placement"),
                     Preconditions.checkNotNull(this.startConstructor, "no start constructor"),
-                    this.surfaceFunction
+                    this.surfaceFunction,
+                    this.creatures
             );
         }
     }

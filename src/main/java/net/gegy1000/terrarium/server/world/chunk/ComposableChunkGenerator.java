@@ -74,7 +74,9 @@ public class ComposableChunkGenerator implements GenericChunkGenerator {
 
     @Override
     public List<Biome.SpawnListEntry> getPossibleCreatures(EnumCreatureType type, BlockPos pos) {
-        return this.world.getBiome(pos).getSpawnableList(type);
+        return this.terrarium.get()
+                .map(terrarium -> terrarium.getStructureComposer().getPossibleCreatures(terrarium, this.world, type, pos))
+                .orElseGet(() -> this.world.getBiome(pos).getSpawnableList(type));
     }
 
     @Override

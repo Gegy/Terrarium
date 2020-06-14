@@ -11,7 +11,12 @@ import net.gegy1000.earth.server.world.composer.decoration.EarthSugarCaneCompose
 import net.gegy1000.earth.server.world.composer.decoration.EarthTreeComposer;
 import net.gegy1000.earth.server.world.composer.decoration.FreezeSurfaceComposer;
 import net.gegy1000.earth.server.world.composer.decoration.OreDecorationComposer;
-import net.gegy1000.earth.server.world.composer.structure.VanillaStructureComposers;
+import net.gegy1000.earth.server.world.composer.structure.MansionStructureComposer;
+import net.gegy1000.earth.server.world.composer.structure.MineshaftStructureComposer;
+import net.gegy1000.earth.server.world.composer.structure.OceanMonumentStructureComposer;
+import net.gegy1000.earth.server.world.composer.structure.StrongholdStructureComposer;
+import net.gegy1000.earth.server.world.composer.structure.TempleStructureComposer;
+import net.gegy1000.earth.server.world.composer.structure.VillageStructureComposer;
 import net.gegy1000.earth.server.world.composer.surface.FloodedSurfaceComposer;
 import net.gegy1000.earth.server.world.composer.surface.TerrainSurfaceComposer;
 import net.gegy1000.earth.server.world.composer.surface.WaterFillSurfaceComposer;
@@ -124,23 +129,27 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
 
     private void addStructureComposers(CompositeTerrariumGenerator.Builder builder, HeightFunction surfaceFunction) {
         if (this.ctx.settings.getBoolean(ADD_STRONGHOLDS)) {
-            builder.addStructureComposer(VanillaStructureComposers.stronghold(this.world, surfaceFunction));
+            builder.addStructureComposer(StrongholdStructureComposer.create(this.world, surfaceFunction));
         }
 
         if (this.ctx.settings.getBoolean(ADD_MINESHAFTS)) {
-            builder.addStructureComposer(VanillaStructureComposers.mineshaft(this.world, surfaceFunction));
+            builder.addStructureComposer(MineshaftStructureComposer.create(this.world, surfaceFunction));
         }
 
         if (this.ctx.settings.getBoolean(ADD_VILLAGES)) {
-            builder.addStructureComposer(VanillaStructureComposers.village(this.world, surfaceFunction));
+            builder.addStructureComposer(VillageStructureComposer.create(this.world, surfaceFunction));
         }
 
         if (this.ctx.settings.getBoolean(ADD_TEMPLES)) {
-            builder.addStructureComposer(VanillaStructureComposers.temple(this.world, surfaceFunction));
+            builder.addStructureComposer(TempleStructureComposer.create(this.world, surfaceFunction));
         }
 
         if (this.ctx.settings.getBoolean(ADD_OCEAN_MONUMENTS)) {
-            builder.addStructureComposer(VanillaStructureComposers.oceanMonument(this.world, surfaceFunction));
+            builder.addStructureComposer(OceanMonumentStructureComposer.create(this.world, surfaceFunction));
+        }
+
+        if (this.ctx.settings.getBoolean(ADD_WOODLAND_MANSIONS)) {
+            builder.addStructureComposer(MansionStructureComposer.create(this.world, surfaceFunction));
         }
     }
 }

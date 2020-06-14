@@ -83,6 +83,10 @@ public final class ColumnCompatibilityWorld extends World implements AutoCloseab
         this.minY = minY;
     }
 
+    public int getMinY() {
+        return this.minY;
+    }
+
     public boolean fireDecorateEvent(Random random, DecorateBiomeEvent.Decorate.EventType type) {
         return TerrainGen.decorate(this, random, this.columnPos, type);
     }

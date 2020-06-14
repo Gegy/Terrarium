@@ -26,6 +26,7 @@ public final class BiomeColors {
         if (biome == Biomes.COLD_TAIGA_HILLS) return 0x243F36;
         if (biome == Biomes.BIRCH_FOREST) return 0x307444;
         if (biome == Biomes.BIRCH_FOREST_HILLS) return 0x1F5F32;
+        if (biome == Biomes.ROOFED_FOREST) return 0x40511A;
         if (biome == Biomes.JUNGLE) return 0x537B09;
         if (biome == Biomes.JUNGLE_HILLS) return 0x2C4205;
         if (biome == Biomes.JUNGLE_EDGE) return 0x628B17;

@@ -2,6 +2,7 @@ package net.gegy1000.earth.server.world.biome;
 
 import net.gegy1000.earth.server.world.Climate;
 import net.gegy1000.earth.server.world.cover.Cover;
+import net.gegy1000.earth.server.world.cover.CoverMarkers;
 import net.gegy1000.earth.server.world.ecology.GrowthPredictors;
 import net.gegy1000.earth.server.world.ecology.soil.SoilSelector;
 import net.gegy1000.earth.server.world.ecology.vegetation.Trees;
@@ -72,6 +73,10 @@ public final class BiomeClassifier {
     private static Biome classifyForest(GrowthPredictors predictors) {
         double oak = Trees.Indicators.OAK.evaluate(predictors);
         double birch = Trees.Indicators.BIRCH.evaluate(predictors);
+
+        if (oak > birch && predictors.cover.is(CoverMarkers.CLOSED_FOREST)) {
+            return Biomes.ROOFED_FOREST;
+        }
 
         return oak > birch ? Biomes.FOREST : Biomes.BIRCH_FOREST;
     }

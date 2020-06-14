@@ -4,11 +4,15 @@ import net.gegy1000.gengen.api.CubicPos;
 import net.gegy1000.gengen.api.writer.ChunkPopulationWriter;
 import net.gegy1000.gengen.api.writer.ChunkPrimeWriter;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
+import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public final class CompositeStructureComposer implements StructureComposer {
     private final StructureComposer[] composers;
@@ -60,19 +64,38 @@ public final class CompositeStructureComposer implements StructureComposer {
     @Override
     public BlockPos getClosestStructure(TerrariumWorld terrarium, World world, String name, BlockPos pos, boolean findUnexplored) {
         BlockPos nearest = null;
-        double nearestDistance = Integer.MAX_VALUE;
+        double nearestDistanceSq = Double.MAX_VALUE;
 
         for (StructureComposer composer : this.composers) {
             BlockPos structure = composer.getClosestStructure(terrarium, world, name, pos, findUnexplored);
             if (structure != null) {
-                double distance = structure.distanceSq(pos);
-                if (distance < nearestDistance) {
-                    nearestDistance = distance;
+                double distanceSq = structure.distanceSq(pos);
+                if (distanceSq < nearestDistanceSq) {
+                    nearestDistanceSq = distanceSq;
                     nearest = structure;
                 }
             }
         }
 
         return nearest;
+    }
+
+    @Nullable
+    @Override
+    public List<Biome.SpawnListEntry> getPossibleCreatures(TerrariumWorld terrarium, World world, EnumCreatureType type, BlockPos pos) {
+        List<Biome.SpawnListEntry> result = null;
+
+        for (StructureComposer composer : this.composers) {
+            List<Biome.SpawnListEntry> creatures = composer.getPossibleCreatures(terrarium, world, type, pos);
+            if (creatures == null) continue;
+
+            if (result == null) {
+                result = new ArrayList<>(creatures.size());
+            }
+
+            result.addAll(creatures);
+        }
+
+        return result;
     }
 }
