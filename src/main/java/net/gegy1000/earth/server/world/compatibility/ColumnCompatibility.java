@@ -69,29 +69,7 @@ public final class ColumnCompatibility {
     }
 
     private void prepareCubes(ChunkPos columnPos, int minCubeY, int maxCubeY) {
-        ICubicWorld cubicWorld = (ICubicWorld) this.world;
-
-        if (cubicWorld.getCubeCache() instanceof CubeProviderServer) {
-            CubeProviderServer cache = (CubeProviderServer) cubicWorld.getCubeCache();
-            ICubeGenerator generator = cache.getCubeGenerator();
-
-            for (int cubeY = minCubeY; cubeY <= maxCubeY; cubeY++) {
-                Cube cube = cache.getCube(columnPos.x, cubeY, columnPos.z);
-                this.populateCube(cache, generator, cube);
-            }
-        }
-    }
-
-    private void populateCube(CubeProviderServer cache, ICubeGenerator generator, Cube cube) {
-        Box requirements = generator.getPopulationPregenerationRequirements(cube);
-        requirements.forEachPoint((x, y, z) -> {
-            cache.getCube(cube.getX() + x, cube.getY() + y, cube.getZ() + z);
-        });
-
-        if (!cube.isPopulated()) {
-            generator.populate(cube);
-            cube.setPopulated(true);
-        }
+        Cubic.prepareCubes(this.world, columnPos, minCubeY, maxCubeY);
     }
 
     private int getMinCompatibilityY(TerrariumWorld terrarium, ChunkPos columnPos) {
@@ -105,5 +83,33 @@ public final class ColumnCompatibility {
         }
 
         return surfaceY - COMPAT_SURFACE_Y;
+    }
+
+    static class Cubic {
+        static void prepareCubes(World world, ChunkPos columnPos, int minCubeY, int maxCubeY) {
+            ICubicWorld cubicWorld = (ICubicWorld) world;
+
+            if (cubicWorld.getCubeCache() instanceof CubeProviderServer) {
+                CubeProviderServer cache = (CubeProviderServer) cubicWorld.getCubeCache();
+                ICubeGenerator generator = cache.getCubeGenerator();
+
+                for (int cubeY = minCubeY; cubeY <= maxCubeY; cubeY++) {
+                    Cube cube = cache.getCube(columnPos.x, cubeY, columnPos.z);
+                    populateCube(cache, generator, cube);
+                }
+            }
+        }
+
+        static void populateCube(CubeProviderServer cache, ICubeGenerator generator, Cube cube) {
+            Box requirements = generator.getPopulationPregenerationRequirements(cube);
+            requirements.forEachPoint((x, y, z) -> {
+                cache.getCube(cube.getX() + x, cube.getY() + y, cube.getZ() + z);
+            });
+
+            if (!cube.isPopulated()) {
+                generator.populate(cube);
+                cube.setPopulated(true);
+            }
+        }
     }
 }
