@@ -31,7 +31,8 @@ import net.minecraftforge.common.util.Constants;
 import javax.annotation.Nullable;
 import java.util.Random;
 
-// behaviour is largely cloned from MapGenStructure and MapGenBase
+// behaviour is largely cloned from MapGenStructure and MapGenBase, with the addition of much disgusting hackery
+// to make generation work in a cube-based context
 public final class ColumnStructureComposer implements StructureComposer {
     public static final long SEED = 5805869966374122221L;
 
@@ -191,6 +192,8 @@ public final class ColumnStructureComposer implements StructureComposer {
 
     private int getColumnOffsetFor(ChunkPos columnPos) {
         int surfaceY = this.surfaceFunction.apply(columnPos.getXStart() + 8, columnPos.getZStart() + 8);
+        surfaceY = Math.max(surfaceY, this.world.getSeaLevel());
+
         return surfaceY - COMPAT_SURFACE_Y;
     }
 

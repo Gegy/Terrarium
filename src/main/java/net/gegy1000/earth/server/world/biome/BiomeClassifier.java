@@ -74,7 +74,11 @@ public final class BiomeClassifier {
 
     private static Biome classifyWater(GrowthPredictors predictors) {
         if (predictors.isSea()) {
-            return Biomes.OCEAN;
+            if (predictors.elevation < -500) {
+                return Biomes.DEEP_OCEAN;
+            } else {
+                return Biomes.OCEAN;
+            }
         }
 
         return predictors.isFrozen() ? Biomes.FROZEN_RIVER : Biomes.RIVER;

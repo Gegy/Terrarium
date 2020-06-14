@@ -134,5 +134,9 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
         if (this.ctx.settings.getBoolean(ADD_TEMPLES)) {
             builder.addStructureComposer(VanillaStructureComposers.temple(this.world, surfaceFunction));
         }
+
+        if (this.ctx.settings.getBoolean(ADD_OCEAN_MONUMENTS)) {
+            builder.addStructureComposer(VanillaStructureComposers.oceanMonument(this.world, surfaceFunction));
+        }
     }
 }
