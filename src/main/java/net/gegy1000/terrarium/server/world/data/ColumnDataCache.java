@@ -2,7 +2,10 @@ package net.gegy1000.terrarium.server.world.data;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.longs.LongIterator;
+import it.unimi.dsi.fastutil.longs.LongSortedSet;
 import net.gegy1000.gengen.core.GenGen;
+import net.gegy1000.terrarium.server.util.UnpackChunkPos;
 import net.gegy1000.terrarium.server.world.chunk.tracker.ChunkTrackerAccess;
 import net.gegy1000.terrarium.server.world.chunk.tracker.ColumnTrackerAccess;
 import net.gegy1000.terrarium.server.world.chunk.tracker.CubeTrackerAccess;
@@ -11,7 +14,6 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -46,15 +48,21 @@ public class ColumnDataCache implements AutoCloseable {
         this.loader.advanceUntil(endNanoTime);
     }
 
-    private void setTrackedColumns(Collection<ChunkPos> columns) {
+    private void setTrackedColumns(LongSortedSet columns) {
         for (ColumnDataEntry entry : this.entries.values()) {
-            if (!columns.contains(entry.getColumnPos())) {
+            ChunkPos pos = entry.getColumnPos();
+            if (!columns.contains(ChunkPos.asLong(pos.x, pos.z))) {
                 entry.untrack();
             }
         }
 
-        for (ChunkPos column : columns) {
-            ColumnDataEntry entry = this.getEntry(column.x, column.z);
+        LongIterator iterator = columns.iterator();
+        while (iterator.hasNext()) {
+            long key = iterator.nextLong();
+            int x = UnpackChunkPos.unpackX(key);
+            int z = UnpackChunkPos.unpackZ(key);
+
+            ColumnDataEntry entry = this.getEntry(x, z);
             entry.track();
         }
     }

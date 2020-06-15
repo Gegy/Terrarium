@@ -1,39 +1,30 @@
 package net.gegy1000.terrarium.server.world.chunk.tracker;
 
 import io.github.opencubicchunks.cubicchunks.api.util.CubePos;
-import io.github.opencubicchunks.cubicchunks.api.util.XYZMap;
 import io.github.opencubicchunks.cubicchunks.core.server.CubeWatcher;
 import io.github.opencubicchunks.cubicchunks.core.server.PlayerCubeMap;
+import io.github.opencubicchunks.cubicchunks.core.util.WatchersSortingList;
+import it.unimi.dsi.fastutil.longs.LongLinkedOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSortedSet;
 import net.gegy1000.terrarium.Terrarium;
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.WorldServer;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class CubeTrackerAccess implements ChunkTrackerAccess {
-    public static Field cubeWatchersField;
-    private static Method closestPlayerMethod;
+    private static final LongSortedSet EMPTY = new LongLinkedOpenHashSet();
+
+    private static Field cubesToGenerateField;
 
     static {
         try {
-            cubeWatchersField = PlayerCubeMap.class.getDeclaredField("cubeWatchers");
-            cubeWatchersField.setAccessible(true);
+            cubesToGenerateField = PlayerCubeMap.class.getDeclaredField("cubesToGenerate");
+            cubesToGenerateField.setAccessible(true);
         } catch (NoSuchFieldException e) {
-            Terrarium.LOGGER.error("Failed to find cube watchers field", e);
-        }
-        try {
-            closestPlayerMethod = CubeWatcher.class.getDeclaredMethod("getClosestPlayerDistance");
-            closestPlayerMethod.setAccessible(true);
-        } catch (ReflectiveOperationException e) {
-            Terrarium.LOGGER.error("Failed to find closets player distance method", e);
+            Terrarium.LOGGER.error("Failed to find cube to generate field", e);
         }
     }
 
@@ -44,88 +35,55 @@ public class CubeTrackerAccess implements ChunkTrackerAccess {
     }
 
     @Override
-    public LinkedHashSet<ChunkPos> getSortedQueuedColumns() {
+    public LongSortedSet getSortedQueuedColumns() {
         PlayerChunkMap chunkTracker = this.world.getPlayerChunkMap();
         if (chunkTracker instanceof PlayerCubeMap) {
-            XYZMap<CubeWatcher> watchers = getWatchers((PlayerCubeMap) chunkTracker);
-
-            Map<ChunkPos, ColumnState> columnStates = new HashMap<>();
-            for (CubeWatcher watcher : watchers) {
-                ChunkPos columnPos = new ChunkPos(watcher.getX(), watcher.getZ());
-                ColumnState state = columnStates.get(columnPos);
-
-                double distance = getClosestPlayerDistance(watcher);
-                boolean queued = watcher.getCube() == null;
-                if (queued) {
-                    CubePos cubePos = new CubePos(watcher.getX(), watcher.getY(), watcher.getZ());
-                    queued = !SavedCubeTracker.isSaved(this.world, cubePos);
-                }
-
-                if (state == null) {
-                    columnStates.put(columnPos, new ColumnState(distance, queued));
-                } else {
-                    state.merge(distance, queued);
-                }
+            WatchersSortingList<CubeWatcher> cubesToGenerate = getCubesToGenerate((PlayerCubeMap) chunkTracker);
+            if (cubesToGenerate == null) {
+                return EMPTY;
             }
 
-            LinkedHashSet<ChunkPos> queuedColumns = columnStates.entrySet().stream()
-                    .filter(e -> e.getValue().queued)
-                    .sorted(Comparator.comparingDouble(e -> e.getValue().distance))
-                    .map(Map.Entry::getKey)
-                    .collect(Collectors.toCollection(LinkedHashSet::new));
+            LongSortedSet queuedColumns = new LongLinkedOpenHashSet();
+            LongSortedSet bufferColumns = new LongLinkedOpenHashSet();
 
-            // cubic chunks requires surrounding chunks to be loaded for diffuse lighting
-            for (ChunkPos column : columnStates.keySet()) {
-                for (int z = -2; z <= 2; z++) {
-                    for (int x = -2; x <= 2; x++) {
-                        queuedColumns.add(new ChunkPos(column.x + x, column.z + z));
+            // the cubesToGenerate list is already sorted
+            for (CubeWatcher watcher : cubesToGenerate) {
+                long key = ChunkPos.asLong(watcher.getX(), watcher.getZ());
+
+                if (queuedColumns.contains(key)) continue;
+
+                CubePos cubePos = new CubePos(watcher.getX(), watcher.getY(), watcher.getZ());
+                boolean queued = !SavedCubeTracker.isSaved(this.world, cubePos);
+
+                if (queued) {
+                    queuedColumns.add(key);
+
+                    for (int z = -5; z <= 5; z++) {
+                        for (int x = -5; x <= 5; x++) {
+                            bufferColumns.add(ChunkPos.asLong(x + watcher.getX(), z + watcher.getZ()));
+                        }
                     }
                 }
             }
 
+            queuedColumns.addAll(bufferColumns);
+
             return queuedColumns;
         }
 
-        return new LinkedHashSet<>();
+        return EMPTY;
     }
 
+    @Nullable
     @SuppressWarnings("unchecked")
-    private static XYZMap<CubeWatcher> getWatchers(PlayerCubeMap cubeTracker) {
-        if (cubeWatchersField != null) {
+    private static WatchersSortingList<CubeWatcher> getCubesToGenerate(PlayerCubeMap cubeTracker) {
+        if (cubesToGenerateField != null) {
             try {
-                return (XYZMap<CubeWatcher>) cubeWatchersField.get(cubeTracker);
-            } catch (Exception e) {
-                Terrarium.LOGGER.error("Failed to get player cube entries", e);
+                return (WatchersSortingList<CubeWatcher>) cubesToGenerateField.get(cubeTracker);
+            } catch (ReflectiveOperationException e) {
+                Terrarium.LOGGER.error("Failed to get cubes to generate", e);
             }
         }
-        return new XYZMap<>(0.0F, 0);
-    }
-
-    private static double getClosestPlayerDistance(CubeWatcher watcher) {
-        try {
-            return (double) closestPlayerMethod.invoke(watcher);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            Terrarium.LOGGER.error("Failed to get closest player distance", e);
-        }
-        return 0.0;
-    }
-
-    private static class ColumnState {
-        private double distance;
-        private boolean queued;
-
-        ColumnState(double distance, boolean queued) {
-            this.distance = distance;
-            this.queued = queued;
-        }
-
-        void merge(double distance, boolean queued) {
-            if (distance < this.distance) {
-                this.distance = distance;
-            }
-            if (queued) {
-                this.queued = true;
-            }
-        }
+        return null;
     }
 }

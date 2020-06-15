@@ -1,19 +1,18 @@
 package net.gegy1000.terrarium.server.world.chunk.tracker;
 
-import net.minecraft.util.math.ChunkPos;
-
-import java.util.LinkedHashSet;
+import it.unimi.dsi.fastutil.longs.LongLinkedOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSortedSet;
 
 public final class FallbackTrackerAccess implements ChunkTrackerAccess {
     public static final ChunkTrackerAccess INSTANCE = new FallbackTrackerAccess();
 
-    private static final LinkedHashSet<ChunkPos> EMPTY = new LinkedHashSet<>();
+    private static final LongSortedSet EMPTY = new LongLinkedOpenHashSet();
 
     private FallbackTrackerAccess() {
     }
 
     @Override
-    public LinkedHashSet<ChunkPos> getSortedQueuedColumns() {
+    public LongSortedSet getSortedQueuedColumns() {
         return EMPTY;
     }
 }

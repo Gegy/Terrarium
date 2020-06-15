@@ -1,5 +1,7 @@
 package net.gegy1000.terrarium.server.world.chunk.tracker;
 
+import it.unimi.dsi.fastutil.longs.LongLinkedOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSortedSet;
 import net.gegy1000.terrarium.Terrarium;
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerChunkMapEntry;
@@ -9,21 +11,17 @@ import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.relauncher.ReflectionHelper.UnableToFindFieldException;
 
 import java.lang.reflect.Field;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ColumnTrackerAccess implements ChunkTrackerAccess {
-    private static Field chunkMapEntriesField;
+    private static Field entriesWithoutChunksField;
 
     static {
         try {
-            chunkMapEntriesField = ObfuscationReflectionHelper.findField(PlayerChunkMap.class, "field_111193_e");
+            entriesWithoutChunksField = ObfuscationReflectionHelper.findField(PlayerChunkMap.class, "field_187311_h");
         } catch (UnableToFindFieldException e) {
-            Terrarium.LOGGER.error("Failed to find chunk entries field", e);
+            Terrarium.LOGGER.error("Failed to find entriesWithoutChunks field", e);
         }
     }
 
@@ -34,41 +32,42 @@ public class ColumnTrackerAccess implements ChunkTrackerAccess {
     }
 
     @Override
-    public LinkedHashSet<ChunkPos> getSortedQueuedColumns() {
-        List<PlayerChunkMapEntry> entries = getEntries(this.world.getPlayerChunkMap());
-        Collection<PlayerChunkMapEntry> queuedEntries = entries.stream()
-                .filter(this::shouldQueue)
-                .collect(Collectors.toList());
+    public LongSortedSet getSortedQueuedColumns() {
+        LongSortedSet queuedColumns = new LongLinkedOpenHashSet();
+        LongSortedSet bufferColumns = new LongLinkedOpenHashSet();
 
-        LinkedHashSet<ChunkPos> sortedColumns = queuedEntries.stream()
-                .sorted(Comparator.comparingDouble(PlayerChunkMapEntry::getClosestPlayerDistance))
-                .map(PlayerChunkMapEntry::getPos)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+        List<PlayerChunkMapEntry> entriesWithoutChunks = getEntriesWithoutChunks(this.world.getPlayerChunkMap());
 
-        // require surrounding chunks to be loaded for decoration and lighting
-        for (PlayerChunkMapEntry entry : queuedEntries) {
-            ChunkPos column = entry.getPos();
-            for (int z = -5; z <= 5; z++) {
-                for (int x = -5; x <= 5; x++) {
-                    sortedColumns.add(new ChunkPos(column.x + x, column.z + z));
+        // the entries list already sorted
+        for (PlayerChunkMapEntry entry : entriesWithoutChunks) {
+            ChunkPos pos = entry.getPos();
+
+            boolean queued = !SavedColumnTracker.isSaved(this.world, pos);
+
+            if (queued) {
+                queuedColumns.add(ChunkPos.asLong(pos.x, pos.z));
+
+                // require surrounding chunks to be loaded for decoration and lighting
+                for (int z = -5; z <= 5; z++) {
+                    for (int x = -5; x <= 5; x++) {
+                        bufferColumns.add(ChunkPos.asLong(x + pos.x, z + pos.z));
+                    }
                 }
             }
         }
 
-        return sortedColumns;
-    }
+        queuedColumns.addAll(bufferColumns);
 
-    private boolean shouldQueue(PlayerChunkMapEntry entry) {
-        return entry.getChunk() == null && !SavedColumnTracker.isSaved(this.world, entry.getPos());
+        return queuedColumns;
     }
 
     @SuppressWarnings("unchecked")
-    private static List<PlayerChunkMapEntry> getEntries(PlayerChunkMap chunkTracker) {
-        if (chunkMapEntriesField != null) {
+    private static List<PlayerChunkMapEntry> getEntriesWithoutChunks(PlayerChunkMap chunkTracker) {
+        if (entriesWithoutChunksField != null) {
             try {
-                return (List<PlayerChunkMapEntry>) chunkMapEntriesField.get(chunkTracker);
-            } catch (Exception e) {
-                Terrarium.LOGGER.error("Failed to get player chunk entries", e);
+                return (List<PlayerChunkMapEntry>) entriesWithoutChunksField.get(chunkTracker);
+            } catch (ReflectiveOperationException e) {
+                Terrarium.LOGGER.error("Failed to get entriesWithoutChunks", e);
             }
         }
 

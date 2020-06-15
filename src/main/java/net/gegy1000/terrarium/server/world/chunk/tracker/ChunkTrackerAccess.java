@@ -1,9 +1,7 @@
 package net.gegy1000.terrarium.server.world.chunk.tracker;
 
-import net.minecraft.util.math.ChunkPos;
-
-import java.util.LinkedHashSet;
+import it.unimi.dsi.fastutil.longs.LongSortedSet;
 
 public interface ChunkTrackerAccess {
-    LinkedHashSet<ChunkPos> getSortedQueuedColumns();
+    LongSortedSet getSortedQueuedColumns();
 }
