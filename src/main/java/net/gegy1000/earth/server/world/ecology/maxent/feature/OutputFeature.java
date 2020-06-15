@@ -43,8 +43,8 @@ public final class OutputFeature implements MaxentFeature {
         this.emitExp(visitor);
 
         // x / densityNormalizer
-        visitor.visitLdcInsn(this.densityNormalizer);
-        visitor.visitInsn(Opcodes.FDIV);
+        visitor.visitLdcInsn(1.0F / this.densityNormalizer);
+        visitor.visitInsn(Opcodes.FMUL);
 
         switch (this.output) {
             case LOGISTIC:
