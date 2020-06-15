@@ -1,26 +1,45 @@
 package net.gegy1000.terrarium.server.util;
 
-import net.gegy1000.gengen.util.SpatialRandom;
 import net.gegy1000.terrarium.server.world.data.DataView;
 import net.minecraft.util.math.MathHelper;
 
-public class Voronoi {
-    private static final long DISPLACEMENT_SEED = 2016969737595986194L;
+import java.util.Random;
 
-    private final SpatialRandom random;
+public final class Voronoi {
+    private static final int FUZZ_SIZE = 64;
+    private static final int FUZZ_MASK = FUZZ_SIZE - 1;
 
-    private final DistanceFunc distanceFunc;
-    private final double fuzzRange;
+    private final float[] fuzzTable;
 
-    public Voronoi(DistanceFunc distanceFunc, double fuzzRange, long seed) {
-        this.distanceFunc = distanceFunc;
-        this.fuzzRange = fuzzRange;
+    public Voronoi(float fuzzRadius, long seed) {
+        Random random = new Random(seed);
+        this.fuzzTable = makeFuzzTable(random, fuzzRadius);
+    }
 
-        this.random = new SpatialRandom(seed, DISPLACEMENT_SEED);
+    private static float[] makeFuzzTable(Random random, float radius) {
+        float[] table = new float[FUZZ_SIZE * FUZZ_SIZE * 2];
+
+        for (int y = 0; y < FUZZ_SIZE; y++) {
+            for (int x = 0; x < FUZZ_SIZE; x++) {
+                float fx = fuzz(random, radius);
+                float fy = fuzz(random, radius);
+
+                int idx = (x + y * FUZZ_SIZE) * 2;
+                table[idx] = fx;
+                table[idx + 1] = fy;
+            }
+        }
+
+        return table;
+    }
+
+    private static float fuzz(Random random, float fuzzRange) {
+        float offset = 2 * random.nextFloat() - 1;
+        return 0.5F + offset * fuzzRange;
     }
 
     public void scaleBytes(byte[] src, byte[] dst, DataView srcView, DataView dstView,
-                           double scaleX, double scaleY, double offsetX, double offsetY
+                           float scaleX, float scaleY, float offsetX, float offsetY
     ) {
         int dstWidth = dstView.getWidth();
         int dstHeight = dstView.getHeight();
@@ -42,10 +61,10 @@ public class Voronoi {
         }
 
         for (int y = 0; y < dstHeight; y++) {
-            double srcY = y * scaleY + offsetY;
+            float srcY = y * scaleY + offsetY;
 
             for (int x = 0; x < dstWidth; x++) {
-                double srcX = x * scaleX + offsetX;
+                float srcX = x * scaleX + offsetX;
 
                 int srcIndex = this.getCellIndex(srcView, srcX, srcY);
                 int dstIndex = x + y * dstWidth;
@@ -55,55 +74,39 @@ public class Voronoi {
         }
     }
 
-    private int getCellIndex(DataView srcView, double x, double y) {
+    private int getCellIndex(DataView srcView, float x, float y) {
         int originX = MathHelper.floor(x);
         int originY = MathHelper.floor(y);
 
-        int srcWidth = srcView.getWidth();
-        int srcHeight = srcView.getHeight();
+        int minX = Math.max(originX - 1, 0);
+        int minY = Math.max(originY - 1, 0);
+
+        int maxX = Math.min(originX + 1, srcView.getWidth() - 1);
+        int maxY = Math.min(originY + 1, srcView.getHeight() - 1);
 
         int cellIndex = 0;
-        double selectionDistance = Double.MAX_VALUE;
+        float selectionDistance = Float.MAX_VALUE;
 
-        for (int srcY = originY - 1; srcY <= originY + 1; srcY++) {
-            for (int srcX = originX - 1; srcX <= originX + 1; srcX++) {
-                if (srcX < 0 || srcY < 0 || srcX >= srcWidth || srcY >= srcHeight) {
-                    continue;
-                }
+        for (int srcY = minY; srcY <= maxY; srcY++) {
+            for (int srcX = minX; srcX <= maxX; srcX++) {
+                int tx = (srcX + srcView.getX()) & FUZZ_MASK;
+                int ty = (srcY + srcView.getY()) & FUZZ_MASK;
+                int ti = tx + ty * FUZZ_SIZE;
 
-                this.random.setSeed(srcX + srcView.getX(), srcY + srcView.getY());
-                double distance = this.distanceFunc.get(x, y, this.fuzz(srcX), this.fuzz(srcY));
+                float fuzzX = this.fuzzTable[ti];
+                float fuzzY = this.fuzzTable[ti + 1];
+
+                float deltaX = x - (srcX + fuzzX);
+                float deltaY = y - (srcY + fuzzY);
+                float distance = deltaX * deltaX + deltaY * deltaY;
+
                 if (distance < selectionDistance) {
                     selectionDistance = distance;
-                    cellIndex = srcX + srcY * srcWidth;
+                    cellIndex = srcX + srcY * srcView.getWidth();
                 }
             }
         }
 
         return cellIndex;
-    }
-
-    private double fuzz(double x) {
-        double offset = this.random.nextInt(4) / 4.0 - 0.5;
-        return (x + 0.5) + (offset * this.fuzzRange);
-    }
-
-    public enum DistanceFunc {
-        EUCLIDEAN {
-            @Override
-            public double get(double originX, double originY, double targetX, double targetY) {
-                double deltaX = originX - targetX;
-                double deltaY = originY - targetY;
-                return deltaX * deltaX + deltaY * deltaY;
-            }
-        },
-        MANHATTAN {
-            @Override
-            public double get(double originX, double originY, double targetX, double targetY) {
-                return Math.abs(originX - targetX) + Math.abs(originY - targetY);
-            }
-        };
-
-        public abstract double get(double originX, double originY, double targetX, double targetY);
     }
 }
