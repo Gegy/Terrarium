@@ -20,20 +20,18 @@ public final class SlopeOp {
     }
 
     public static DataOp<UByteRaster> from(DataOp<FloatRaster> heights, float heightScale) {
-        return DataOp.of((view, executor) -> {
+        return DataOp.of((view, ctx) -> {
             DataView sourceView = view.grow(1);
-            return heights.apply(sourceView, executor)
-                    .andThen(opt -> executor.spawnBlocking(() -> {
-                        return opt.map(source -> {
-                            UByteRaster result = UByteRaster.create(view);
-                            for (int localY = 0; localY < view.getHeight(); localY++) {
-                                for (int localX = 0; localX < view.getWidth(); localX++) {
-                                    int slope = computeSlope(source, localX + 1, localY + 1, heightScale);
-                                    result.set(localX, localY, slope);
-                                }
+            return heights.apply(sourceView, ctx)
+                    .map(opt -> opt.map(source -> {
+                        UByteRaster result = UByteRaster.create(view);
+                        for (int localY = 0; localY < view.getHeight(); localY++) {
+                            for (int localX = 0; localX < view.getWidth(); localX++) {
+                                int slope = computeSlope(source, localX + 1, localY + 1, heightScale);
+                                result.set(localX, localY, slope);
                             }
-                            return result;
-                        });
+                        }
+                        return result;
                     }));
         });
     }

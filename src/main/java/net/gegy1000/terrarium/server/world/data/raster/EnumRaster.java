@@ -4,7 +4,6 @@ import net.gegy1000.terrarium.server.world.data.ColumnData;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.DataKey;
 import net.gegy1000.terrarium.server.world.data.DataView;
-import net.minecraft.util.math.ChunkPos;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -92,7 +91,7 @@ public final class EnumRaster<T extends Enum<T>> extends AbstractRaster<byte[]> 
         }
 
         public T sample(ColumnDataCache dataCache, int x, int z) {
-            ColumnData data = dataCache.joinData(new ChunkPos(x >> 4, z >> 4));
+            ColumnData data = dataCache.joinData(x >> 4, z >> 4);
             return this.sample(data, x & 0xF, z & 0xF);
         }
 

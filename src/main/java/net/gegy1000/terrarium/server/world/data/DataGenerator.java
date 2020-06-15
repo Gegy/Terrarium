@@ -1,7 +1,6 @@
 package net.gegy1000.terrarium.server.world.data;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.gegy1000.justnow.future.Future;
 import net.gegy1000.terrarium.Terrarium;
 
@@ -9,19 +8,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public final class DataGenerator {
-    public static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(2,
-            new ThreadFactoryBuilder()
-                    .setDaemon(true)
-                    .setNameFormat("terrarium-data-worker-%d")
-                    .build()
-    );
-
-    private static final DataExecutor DATA_EXECUTOR = EXECUTOR::execute;
-
     private final ImmutableMap<DataKey<?>, DataOp<?>> attachedData;
 
     public DataGenerator(ImmutableMap<DataKey<?>, DataOp<?>> attachedData) {
@@ -32,12 +20,12 @@ public final class DataGenerator {
         return new Builder();
     }
 
-    public Future<ColumnData> generateOnly(DataView view, Collection<DataKey<?>> keys) {
+    public Future<ColumnData> generate(DataView view, Collection<DataKey<?>> keys) {
         ImmutableMap.Builder<DataKey<?>, Future<Optional<?>>> futures = ImmutableMap.builder();
         for (DataKey<?> key : keys) {
             DataOp<?> op = this.attachedData.get(key);
             if (op != null) {
-                Future<Optional<?>> future = op.apply(view, DATA_EXECUTOR).handle((result, throwable) -> {
+                Future<Optional<?>> future = op.apply(view, DataContext.INSTANCE).handle((result, throwable) -> {
                     if (throwable != null) {
                         Terrarium.LOGGER.error("Failed to load DataOp result", throwable);
                         return Optional.empty();
@@ -51,26 +39,17 @@ public final class DataGenerator {
 
         return Future.joinAll(futures.build())
                 .map(result -> {
+                    DataStore<Optional<?>> store = new DataStore<>();
                     for (DataKey<?> key : keys) {
-                        if (!result.containsKey(key)) {
-                            result.put(key, Optional.empty());
-                        }
+                        Optional<?> value = result.getOrDefault(key, Optional.empty());
+                        store.put(key, value);
                     }
-                    return new ColumnData(view, result);
+                    return new ColumnData(view, store);
                 });
     }
 
     public Future<ColumnData> generate(DataView view) {
-        return this.generateOnly(view, this.attachedData.keySet());
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T> Future<Optional<T>> generateOne(DataView view, DataKey<T> key) {
-        DataOp<?> op = this.attachedData.get(key);
-        if (op != null) {
-            return op.apply(view, DATA_EXECUTOR).map(o -> (Optional<T>) o);
-        }
-        return Future.ready(Optional.empty());
+        return this.generate(view, this.attachedData.keySet());
     }
 
     public static class Builder {

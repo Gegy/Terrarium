@@ -24,7 +24,6 @@ public final class PolygonToLocalAreaOp {
             };
 
             Area area = new Area();
-
             for (MultiPolygon polygon : polygonData.getPolygons()) {
                 area.add(PolygonShapeProducer.toShape(polygon, transform));
             }

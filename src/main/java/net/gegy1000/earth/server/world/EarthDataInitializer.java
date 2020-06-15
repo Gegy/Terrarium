@@ -4,7 +4,8 @@ import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.earth.server.util.zoom.Zoomable;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.data.PolygonData;
-import net.gegy1000.earth.server.world.data.op.AddNoiseOp;
+import net.gegy1000.earth.server.world.data.op.AddOp;
+import net.gegy1000.earth.server.world.data.op.NoiseOp;
 import net.gegy1000.earth.server.world.data.op.ClimateSampler;
 import net.gegy1000.earth.server.world.data.op.PolygonSampler;
 import net.gegy1000.earth.server.world.data.op.PolygonToLocalAreaOp;
@@ -36,7 +37,7 @@ import net.gegy1000.terrarium.server.world.data.raster.FloatRaster;
 import net.gegy1000.terrarium.server.world.data.raster.NumberRaster;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.data.raster.UByteRaster;
-import net.minecraft.world.gen.NoiseGeneratorPerlin;
+import net.minecraft.world.gen.NoiseGeneratorSimplex;
 
 import java.awt.geom.Area;
 import java.util.Random;
@@ -58,7 +59,7 @@ public final class EarthDataInitializer implements TerrariumDataInitializer {
 
     public static final OceanPolygonSource OCEAN_SOURCE = new OceanPolygonSource();
 
-    private static final NoiseGeneratorPerlin TEMPERATURE_NOISE = new NoiseGeneratorPerlin(new Random(12345), 1);
+    private static final NoiseGeneratorSimplex TEMPERATURE_NOISE = new NoiseGeneratorSimplex(new Random(12345));
 
     private final EarthInitContext ctx;
 
@@ -137,8 +138,8 @@ public final class EarthDataInitializer implements TerrariumDataInitializer {
         return RasterizeAreaOp.apply(oceanArea);
     }
 
-    private AddNoiseOp temperatureNoise() {
-        return new AddNoiseOp(TEMPERATURE_NOISE, 0.05, 1.5);
+    private DataOp<FloatRaster> temperatureNoise() {
+        return new NoiseOp(TEMPERATURE_NOISE).sample(0.05, 1.5);
     }
 
     @Override
@@ -179,13 +180,16 @@ public final class EarthDataInitializer implements TerrariumDataInitializer {
         DataOp<ShortRaster> annualRainfall = climateSampler.annualRainfall();
         annualRainfall = InterpolationScaleOp.LINEAR.scaleShortsFrom(annualRainfall, this.ctx.climateRasterCrs);
 
+        DataOp<FloatRaster> temperatureNoise = this.temperatureNoise()
+                .cached(FloatRaster::copy);
+
         DataOp<FloatRaster> meanTemperature = climateSampler.meanTemperature();
         meanTemperature = InterpolationScaleOp.LINEAR.scaleFloatsFrom(meanTemperature, this.ctx.climateRasterCrs);
-        meanTemperature = this.temperatureNoise().applyFloats(meanTemperature);
+        meanTemperature = AddOp.applyFloats(meanTemperature, temperatureNoise);
 
         DataOp<FloatRaster> minTemperature = climateSampler.minTemperature();
         minTemperature = InterpolationScaleOp.LINEAR.scaleFloatsFrom(minTemperature, this.ctx.climateRasterCrs);
-        minTemperature = this.temperatureNoise().applyFloats(minTemperature);
+        minTemperature = AddOp.applyFloats(minTemperature, temperatureNoise);
 
         DataOp<UByteRaster> cationExchangeCapacity = this.soilShort(worldScale, CATION_EXCHANGE_CAPACITY_SOURCE)
                 .map((raster, view) -> UByteRaster.copyFrom(raster));

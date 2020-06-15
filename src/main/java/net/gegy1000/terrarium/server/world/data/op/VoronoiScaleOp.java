@@ -14,7 +14,7 @@ public final class VoronoiScaleOp {
     public static <T extends Enum<T>> DataOp<EnumRaster<T>> scaleEnumsFrom(DataOp<EnumRaster<T>> data, CoordinateReference src, T defaultValue) {
         Voronoi voronoi = new Voronoi(0.45F, SEED);
 
-        return DataOp.of((view) -> {
+        return DataOp.of((view, ctx) -> {
             DataView srcView = getSourceView(view, src);
 
             float dstToSrcX = (float) (1.0 / src.scaleX());
@@ -28,11 +28,15 @@ public final class VoronoiScaleOp {
             float offsetX = (float) (minCoordinate.getX() - srcView.getX());
             float offsetY = (float) (minCoordinate.getZ() - srcView.getY());
 
-            return data.apply(srcView).map(opt -> opt.map(source -> {
-                EnumRaster<T> result = EnumRaster.create(defaultValue, view);
-                voronoi.scaleBytes(source.getData(), result.getData(), srcView, view, dstToSrcX, dstToSrcY, offsetX, offsetY);
-                return result;
-            }));
+            return data.apply(srcView, ctx).andThen(opt -> {
+                return ctx.spawnBlocking(() -> {
+                    return opt.map(source -> {
+                        EnumRaster<T> result = EnumRaster.create(defaultValue, view);
+                        voronoi.scaleBytes(source.getData(), result.getData(), srcView, view, dstToSrcX, dstToSrcY, offsetX, offsetY);
+                        return result;
+                    });
+                });
+            });
         });
     }
 

@@ -5,7 +5,6 @@ import net.gegy1000.terrarium.server.world.data.ColumnData;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.DataKey;
 import net.gegy1000.terrarium.server.world.data.DataView;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.Arrays;
@@ -64,13 +63,13 @@ public final class ByteRaster extends AbstractRaster<byte[]> implements IntegerR
     }
 
     @Override
-    public void setDouble(int x, int y, double value) {
+    public void setFloat(int x, int y, float value) {
         int rounded = (int) value;
         this.set(x, y, (byte) MathHelper.clamp(rounded, Byte.MIN_VALUE, Byte.MAX_VALUE));
     }
 
     @Override
-    public double getDouble(int x, int y) {
+    public float getFloat(int x, int y) {
         return this.get(x, y);
     }
 
@@ -110,7 +109,7 @@ public final class ByteRaster extends AbstractRaster<byte[]> implements IntegerR
         }
 
         public byte sample(ColumnDataCache dataCache, int x, int z) {
-            ColumnData data = dataCache.joinData(new ChunkPos(x >> 4, z >> 4));
+            ColumnData data = dataCache.joinData(x >> 4, z >> 4);
             return this.sample(data, x & 0xF, z & 0xF);
         }
 

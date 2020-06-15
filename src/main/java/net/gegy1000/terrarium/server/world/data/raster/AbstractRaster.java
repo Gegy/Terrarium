@@ -46,8 +46,7 @@ public abstract class AbstractRaster<T> implements Raster<T> {
 
         for (int chunkY = chunkMinY; chunkY <= chunkMaxY; chunkY++) {
             for (int chunkX = chunkMinX; chunkX <= chunkMaxX; chunkX++) {
-                ChunkPos columnPos = new ChunkPos(chunkX, chunkY);
-                columnHandles.add(dataCache.acquireEntry(columnPos));
+                columnHandles.add(dataCache.acquireEntry(chunkX, chunkY));
             }
         }
 

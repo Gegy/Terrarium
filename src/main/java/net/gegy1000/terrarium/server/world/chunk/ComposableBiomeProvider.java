@@ -7,11 +7,9 @@ import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.util.Lazy;
 import net.gegy1000.terrarium.server.world.composer.biome.BiomeComposer;
 import net.gegy1000.terrarium.server.world.data.ColumnData;
-import net.gegy1000.terrarium.server.world.data.ColumnDataEntry;
 import net.gegy1000.terrarium.server.world.data.DataView;
 import net.minecraft.init.Biomes;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeCache;
@@ -128,11 +126,8 @@ public class ComposableBiomeProvider extends BiomeProvider {
         DataView view = DataView.rect(x, z, width, height);
 
         if (this.isChunk(x, z, width, height)) {
-            ChunkPos columnPos = new ChunkPos(x >> 4, z >> 4);
-            try (ColumnDataEntry.Handle handle = terrarium.getDataCache().acquireEntry(columnPos)) {
-                ColumnData data = handle.join();
-                biomeComposer.composeBiomes(resultBiomes, terrarium, data, view);
-            }
+            ColumnData data = terrarium.getDataCache().joinData(x >> 4, z >> 4);
+            biomeComposer.composeBiomes(resultBiomes, terrarium, data, view);
             return;
         }
 

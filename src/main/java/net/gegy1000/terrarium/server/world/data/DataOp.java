@@ -26,9 +26,13 @@ public final class DataOp<T> implements DataFunction<T> {
         return new DataOp<>(function);
     }
 
+    public static <T> DataOp<T> ofLazy(Function<DataView, T> function) {
+        return new DataOp<>((view, ctx) -> Future.lazy(() -> Optional.of(function.apply(view))));
+    }
+
     public static <T> DataOp<T> ofBlocking(Function<DataView, T> function) {
-        return new DataOp<>((view, executor) -> {
-            return executor.spawnBlocking(() -> {
+        return new DataOp<>((view, ctx) -> {
+            return ctx.spawnBlocking(() -> {
                 T result = function.apply(view);
                 return Optional.of(result);
             });
@@ -36,7 +40,7 @@ public final class DataOp<T> implements DataFunction<T> {
     }
 
     public static <T> DataOp<T> ready(Optional<T> result) {
-        return new DataOp<>((view, executor) -> Future.ready(result));
+        return new DataOp<>((view, ctx) -> Future.ready(result));
     }
 
     public DataOp<T> cached(Function<T, T> copy) {
@@ -49,12 +53,12 @@ public final class DataOp<T> implements DataFunction<T> {
     }
 
     @Override
-    public Future<Optional<T>> apply(DataView view, DataExecutor executor) {
-        if (this.cache == null) return this.function.apply(view, executor);
+    public Future<Optional<T>> apply(DataView view, DataContext ctx) {
+        if (this.cache == null) return this.function.apply(view, ctx);
 
         try {
             MaybeDone<Optional<T>> maybeDone = this.cache.get(view, () -> {
-                return Future.maybeDone(this.function.apply(view, executor));
+                return Future.maybeDone(this.function.apply(view, ctx));
             });
             return maybeDone.map(u -> {
                 if (!maybeDone.isDone()) return Optional.empty();
@@ -66,8 +70,8 @@ public final class DataOp<T> implements DataFunction<T> {
     }
 
     public <U> DataOp<U> map(BiFunction<T, DataView, U> map) {
-        return DataOp.of((view, executor) -> {
-            Future<Optional<T>> future = this.apply(view, executor);
+        return DataOp.of((view, ctx) -> {
+            Future<Optional<T>> future = this.apply(view, ctx);
             return future.map(opt -> {
                 return opt.map(result -> map.apply(result, view));
             });
@@ -75,10 +79,10 @@ public final class DataOp<T> implements DataFunction<T> {
     }
 
     public <U> DataOp<U> mapBlocking(BiFunction<T, DataView, U> map) {
-        return DataOp.of((view, executor) -> {
-            Future<Optional<T>> future = this.apply(view, executor);
+        return DataOp.of((view, ctx) -> {
+            Future<Optional<T>> future = this.apply(view, ctx);
             return future.andThen(opt -> {
-                return executor.spawnBlocking(() -> {
+                return ctx.spawnBlocking(() -> {
                     return opt.map(result -> map.apply(result, view));
                 });
             });
@@ -86,8 +90,8 @@ public final class DataOp<T> implements DataFunction<T> {
     }
 
     public static <A, B, R> DataOp<R> map2(DataOp<A> a, DataOp<B> b, Map2<A, B, R> map) {
-        return DataOp.of((view, executor) -> {
-            return Future.map2(a.apply(view, executor), b.apply(view, executor), (aOption, bOption) -> {
+        return DataOp.of((view, ctx) -> {
+            return Future.map2(a.apply(view, ctx), b.apply(view, ctx), (aOption, bOption) -> {
                 if (aOption.isPresent() && bOption.isPresent()) {
                     return Optional.of(map.apply(view, aOption.get(), bOption.get()));
                 }

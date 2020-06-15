@@ -4,7 +4,6 @@ import net.gegy1000.terrarium.server.world.data.ColumnData;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.DataKey;
 import net.gegy1000.terrarium.server.world.data.DataView;
-import net.minecraft.util.math.ChunkPos;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -59,12 +58,12 @@ public final class FloatRaster extends AbstractRaster<float[]> implements Number
     }
 
     @Override
-    public void setDouble(int x, int y, double value) {
-        this.set(x, y, (float) value);
+    public void setFloat(int x, int y, float value) {
+        this.set(x, y, value);
     }
 
     @Override
-    public double getDouble(int x, int y) {
+    public float getFloat(int x, int y) {
         return this.get(x, y);
     }
 
@@ -94,7 +93,7 @@ public final class FloatRaster extends AbstractRaster<float[]> implements Number
         }
 
         public float sample(ColumnDataCache dataCache, int x, int z) {
-            ColumnData data = dataCache.joinData(new ChunkPos(x >> 4, z >> 4));
+            ColumnData data = dataCache.joinData(x >> 4, z >> 4);
             return this.sample(data, x & 0xF, z & 0xF);
         }
 

@@ -5,6 +5,7 @@ import net.gegy1000.terrarium.Terrarium;
 import net.minecraft.util.math.ChunkPos;
 
 import javax.annotation.Nullable;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public final class ColumnDataEntry {
     private static final long LEAK_TIME_THRESHOLD = 60 * 1000;
@@ -12,7 +13,7 @@ public final class ColumnDataEntry {
     private final ChunkPos columnPos;
     private final ColumnDataLoader loader;
 
-    private int handleCount;
+    private final AtomicInteger handleCount = new AtomicInteger();
     private boolean tracked;
 
     private boolean dropped;
@@ -47,7 +48,7 @@ public final class ColumnDataEntry {
     }
 
     Handle acquire() {
-        this.handleCount++;
+        this.handleCount.getAndIncrement();
         this.spawnIfNotLoaded();
         return new Handle();
     }
@@ -56,7 +57,7 @@ public final class ColumnDataEntry {
         return this.columnPos;
     }
 
-    private ColumnData join() {
+    ColumnData join() {
         this.touch();
 
         this.future = null;
@@ -89,7 +90,7 @@ public final class ColumnDataEntry {
     }
 
     private boolean shouldDrop() {
-        return !this.tracked && this.handleCount <= 0 || this.checkLeaked();
+        return !this.tracked && this.handleCount.get() <= 0 || this.checkLeaked();
     }
 
     boolean tryDrop() {
@@ -118,7 +119,7 @@ public final class ColumnDataEntry {
 
         public void release() {
             this.checkValid();
-            ColumnDataEntry.this.handleCount--;
+            ColumnDataEntry.this.handleCount.getAndDecrement();
             this.released = true;
         }
 

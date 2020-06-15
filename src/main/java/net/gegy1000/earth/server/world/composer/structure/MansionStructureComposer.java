@@ -9,8 +9,8 @@ import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.util.Lazy;
 import net.gegy1000.terrarium.server.world.composer.structure.StructureComposer;
+import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.minecraft.init.Biomes;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.ChunkPrimer;
@@ -74,19 +74,18 @@ public final class MansionStructureComposer {
         public void setBlocksInChunk(int x, int z, ChunkPrimer primer) {
             // the mansion generator only uses findGroundBlockIdx: so we only need to set blocks at the surface
 
-            this.terrarium.get().ifPresent(terrarium -> {
-                ChunkPos columnPos = new ChunkPos(x, z);
+            Optional<ShortRaster> heightOpt = this.terrarium.get()
+                    .flatMap(terrarium -> terrarium.getDataCache().joinData(x, z, EarthData.TERRAIN_HEIGHT));
 
-                terrarium.getDataCache().joinData(columnPos, EarthData.TERRAIN_HEIGHT).ifPresent(heightRaster -> {
-                    for (int localZ = 0; localZ < 16; localZ++) {
-                        for (int localX = 0; localX < 16; localX++) {
-                            int height = heightRaster.get(localX, localZ) - this.minY;
-                            if (height >= 0 && height < 255) {
-                                primer.setBlockState(localX, height, localZ, STONE);
-                            }
+            heightOpt.ifPresent(heightRaster -> {
+                for (int localZ = 0; localZ < 16; localZ++) {
+                    for (int localX = 0; localX < 16; localX++) {
+                        int height = heightRaster.get(localX, localZ) - this.minY;
+                        if (height >= 0 && height < 255) {
+                            primer.setBlockState(localX, height, localZ, STONE);
                         }
                     }
-                });
+                }
             });
         }
     }

@@ -29,7 +29,6 @@ public final class Interpolate {
     }
 
     public double evaluate(double[] kernel, double x) {
-        if (!this.kernel.fits(kernel)) throw new IllegalStateException("wrong kernel size");
         return this.function.evaluate(kernel, x);
     }
 
@@ -59,10 +58,6 @@ public final class Interpolate {
         public Kernel offset(int offset) {
             this.offset = offset;
             return this;
-        }
-
-        public boolean fits(double[] buffer) {
-            return this.width == buffer.length;
         }
 
         public int getWidth() {

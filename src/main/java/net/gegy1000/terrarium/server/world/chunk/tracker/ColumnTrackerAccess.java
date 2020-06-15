@@ -45,11 +45,11 @@ public class ColumnTrackerAccess implements ChunkTrackerAccess {
                 .map(PlayerChunkMapEntry::getPos)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
-        // requires surrounding chunks to be loaded for decoration and lighting
+        // require surrounding chunks to be loaded for decoration and lighting
         for (PlayerChunkMapEntry entry : queuedEntries) {
             ChunkPos column = entry.getPos();
-            for (int z = -1; z <= 1; z++) {
-                for (int x = -1; x <= 1; x++) {
+            for (int z = -5; z <= 5; z++) {
+                for (int x = -5; x <= 5; x++) {
                     sortedColumns.add(new ChunkPos(column.x + x, column.z + z));
                 }
             }

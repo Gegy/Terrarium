@@ -78,6 +78,9 @@ public final class Voronoi {
         int originX = MathHelper.floor(x);
         int originY = MathHelper.floor(y);
 
+        int offsetX = srcView.getX();
+        int offsetY = srcView.getY();
+
         int minX = Math.max(originX - 1, 0);
         int minY = Math.max(originY - 1, 0);
 
@@ -89,8 +92,8 @@ public final class Voronoi {
 
         for (int srcY = minY; srcY <= maxY; srcY++) {
             for (int srcX = minX; srcX <= maxX; srcX++) {
-                int tx = (srcX + srcView.getX()) & FUZZ_MASK;
-                int ty = (srcY + srcView.getY()) & FUZZ_MASK;
+                int tx = (srcX + offsetX) & FUZZ_MASK;
+                int ty = (srcY + offsetY) & FUZZ_MASK;
                 int ti = tx + ty * FUZZ_SIZE;
 
                 float fuzzX = this.fuzzTable[ti];

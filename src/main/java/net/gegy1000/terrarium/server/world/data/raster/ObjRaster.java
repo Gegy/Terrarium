@@ -3,7 +3,6 @@ package net.gegy1000.terrarium.server.world.data.raster;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.DataKey;
 import net.gegy1000.terrarium.server.world.data.DataView;
-import net.minecraft.util.math.ChunkPos;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -79,8 +78,7 @@ public final class ObjRaster<T> extends AbstractRaster<T[]> {
         }
 
         public T sample(ColumnDataCache dataCache, int x, int z) {
-            ChunkPos columnPos = new ChunkPos(x >> 4, z >> 4);
-            Optional<ObjRaster<T>> optional = dataCache.joinData(columnPos, this.key);
+            Optional<ObjRaster<T>> optional = dataCache.joinData(x >> 4, z >> 4, this.key);
             if (optional.isPresent()) {
                 ObjRaster<T> raster = optional.get();
                 return raster.get(x & 0xF, z & 0xF);

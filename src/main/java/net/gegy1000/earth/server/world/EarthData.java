@@ -33,6 +33,6 @@ public final class EarthData {
     public static final DataKey<EnumRaster<SoilSuborder>> SOIL_SUBORDER = create("soil_class", view -> EnumRaster.create(SoilSuborder.NO, view));
 
     private static <T> DataKey<T> create(String name, Function<DataView, T> createDefault) {
-        return new DataKey<>(new ResourceLocation(TerrariumEarth.ID, name), createDefault);
+        return DataKey.create(new ResourceLocation(TerrariumEarth.ID, name), createDefault);
     }
 }

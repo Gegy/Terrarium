@@ -6,14 +6,14 @@ import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
 public interface NumberRaster<T> extends Raster<T> {
-    void setDouble(int x, int y, double value);
+    void setFloat(int x, int y, float value);
 
-    double getDouble(int x, int y);
+    float getFloat(int x, int y);
 
     default DoubleStream stream() {
         return IntStream.range(0, this.getHeight())
                 .mapToObj(y -> IntStream.range(0, this.getWidth())
-                        .mapToDouble(x -> this.getDouble(x, y))
+                        .mapToDouble(x -> this.getFloat(x, y))
                 )
                 .flatMapToDouble(Functions.identity());
     }

@@ -6,15 +6,24 @@ import javax.annotation.Nonnull;
 import java.util.function.Function;
 
 public final class DataKey<T> {
+    private static int keyId;
+
+    public final int id;
     private final ResourceLocation identifier;
     private final Function<DataView, T> createDefault;
 
-    public DataKey(ResourceLocation identifier, Function<DataView, T> createDefault) {
+    private DataKey(int id, ResourceLocation identifier, Function<DataView, T> createDefault) {
+        this.id = id;
         this.identifier = identifier;
         this.createDefault = createDefault;
     }
 
-    public final ResourceLocation getIdentifier() {
+    public static <T> DataKey<T> create(ResourceLocation identifier, Function<DataView, T> createDefault) {
+        int id = keyId++;
+        return new DataKey<>(id, identifier, createDefault);
+    }
+
+    public ResourceLocation getIdentifier() {
         return this.identifier;
     }
 
@@ -24,20 +33,22 @@ public final class DataKey<T> {
     }
 
     @Override
-    public final int hashCode() {
+    public int hashCode() {
         return this.identifier.hashCode();
     }
 
     @Override
-    public final boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        return obj instanceof DataKey && ((DataKey) obj).getIdentifier().equals(this.identifier);
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        return obj instanceof DataKey && ((DataKey) obj).id == this.id;
     }
 
     @Override
     public String toString() {
         return this.identifier.toString();
+    }
+
+    public static int keyCount() {
+        return keyId;
     }
 }

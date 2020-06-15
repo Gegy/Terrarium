@@ -50,7 +50,7 @@ public enum InterpolationScaleOp {
     }
 
     public <T extends NumberRaster<?>> DataOp<T> scaleFrom(DataOp<T> data, CoordinateReference src, Function<DataView, T> function) {
-        return DataOp.of((view, executor) -> {
+        return DataOp.of((view, ctx) -> {
             DataView srcView = this.getSourceView(view, src);
 
             double dstToSrcX = 1.0 / src.scaleX();
@@ -64,16 +64,13 @@ public enum InterpolationScaleOp {
             double offsetX = minCoordinate.getX() - srcView.getMinX();
             double offsetY = minCoordinate.getZ() - srcView.getMinY();
 
-            return data.apply(srcView, executor).andThen(opt -> {
-                return executor.spawnBlocking(() -> opt.map(source -> {
-                    double[][] kernel2 = this.kernel2.get();
-                    double[] kernel1 = this.kernel1.get();
+            return data.apply(srcView, ctx).andThen(opt -> {
+                return ctx.spawnBlocking(() -> opt.map(source -> {
                     T result = function.apply(view);
-                    for (int y = 0; y < view.getHeight(); y++) {
-                        for (int x = 0; x < view.getWidth(); x++) {
-                            double value = this.evaluate(kernel1, kernel2, source, x * dstToSrcX + offsetX - 0.5, y * dstToSrcY + offsetY - 0.5);
-                            result.setDouble(x, y, value);
-                        }
+                    if (this == NEAREST) {
+                        this.scaleIntoNearest(source, result, dstToSrcX, dstToSrcY, offsetX, offsetY);
+                    } else {
+                        this.scaleInto(source, result, dstToSrcX, dstToSrcY, offsetX, offsetY);
                     }
                     return result;
                 }));
@@ -81,14 +78,39 @@ public enum InterpolationScaleOp {
         });
     }
 
-    private <T extends NumberRaster<?>> double evaluate(double[] kernel1, double[][] kernel2, T source, double x, double y) {
+    private <T extends NumberRaster<?>> void scaleInto(T src, T dst, double dstToSrcX, double dstToSrcY, double offsetX, double offsetY) {
+        double[][] kernel2 = this.kernel2.get();
+        double[] kernel1 = this.kernel1.get();
+        for (int y = 0; y < dst.getHeight(); y++) {
+            for (int x = 0; x < dst.getWidth(); x++) {
+                float value = this.evaluate(
+                        kernel1, kernel2, src,
+                        x * dstToSrcX + offsetX - 0.5,
+                        y * dstToSrcY + offsetY - 0.5
+                );
+                dst.setFloat(x, y, value);
+            }
+        }
+    }
+
+    private <T extends NumberRaster<?>> void scaleIntoNearest(T src, T dst, double dstToSrcX, double dstToSrcY, double offsetX, double offsetY) {
+        for (int y = 0; y < dst.getHeight(); y++) {
+            for (int x = 0; x < dst.getWidth(); x++) {
+                int srcX = MathHelper.floor(x * dstToSrcX + offsetX - 0.5);
+                int srcY = MathHelper.floor(y * dstToSrcY + offsetY - 0.5);
+                dst.setFloat(x, y, src.getFloat(srcX, srcY));
+            }
+        }
+    }
+
+    private <T extends NumberRaster<?>> float evaluate(double[] kernel1, double[][] kernel2, T source, double x, double y) {
         int originX = MathHelper.floor(x);
         int originY = MathHelper.floor(y);
         this.sampleKernel(source, kernel2, originX, originY);
 
         double intermediateX = x - originX;
         double intermediateY = y - originY;
-        return this.interpolate.evaluate(kernel2, intermediateX, intermediateY, kernel1);
+        return (float) this.interpolate.evaluate(kernel2, intermediateX, intermediateY, kernel1);
     }
 
     private <T extends NumberRaster<?>> void sampleKernel(T source, double[][] buffer, int x, int y) {
@@ -100,7 +122,7 @@ public enum InterpolationScaleOp {
             int sourceY = y + kernelY + kernelOffset;
             for (int kernelX = 0; kernelX < kernelWidth; kernelX++) {
                 int sourceX = x + kernelX + kernelOffset;
-                buffer[kernelX][kernelY] = source.getDouble(sourceX, sourceY);
+                buffer[kernelX][kernelY] = source.getFloat(sourceX, sourceY);
             }
         }
     }

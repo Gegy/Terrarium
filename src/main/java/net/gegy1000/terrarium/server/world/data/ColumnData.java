@@ -3,15 +3,14 @@ package net.gegy1000.terrarium.server.world.data;
 import com.google.common.collect.Sets;
 
 import javax.annotation.Nonnull;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 public final class ColumnData {
     private final DataView view;
-    private final Map<DataKey<?>, Optional<?>> store;
+    private final DataStore<Optional<?>> store;
 
-    ColumnData(DataView view, Map<DataKey<?>, Optional<?>> store) {
+    ColumnData(DataView view, DataStore<Optional<?>> store) {
         this.view = view;
         this.store = store;
     }
@@ -32,10 +31,6 @@ public final class ColumnData {
 
     public <T> T getOrDefault(DataKey<T> key) {
         return this.get(key).orElseGet(() -> key.createDefault(this.view));
-    }
-
-    public Set<DataKey<?>> keys() {
-        return this.store.keySet();
     }
 
     public Optional<With> with(DataKey<?>... keys) {

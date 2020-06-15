@@ -8,7 +8,7 @@ import java.awt.geom.Area;
 
 public final class RasterizeAreaOp {
     public static DataOp<BitRaster> apply(DataOp<Area> areaOp) {
-        return areaOp.mapBlocking((area, view) -> {
+        return areaOp.map((area, view) -> {
             BitRaster raster = BitRaster.create(view);
 
             RasterCanvas canvas = new RasterCanvas(view.getWidth(), view.getHeight());

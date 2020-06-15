@@ -101,7 +101,7 @@ public class WorldPreview {
 
     private static Future<ColumnData> sampleData(DataGenerator dataGenerator, int x, int z, int width, int height) {
         DataView view = DataView.rect(x, z, width, height);
-        return dataGenerator.generateOnly(view, TerrainMesh.REQUIRED_DATA);
+        return dataGenerator.generate(view, TerrainMesh.REQUIRED_DATA);
     }
 
     public void upload() {

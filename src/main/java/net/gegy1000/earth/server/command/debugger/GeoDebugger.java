@@ -82,7 +82,7 @@ public final class GeoDebugger {
             UByteRaster result = UByteRaster.create(view);
             for (int y = 0; y < view.getHeight(); y++) {
                 for (int x = 0; x < view.getWidth(); x++) {
-                    double value = source.getDouble(x, y);
+                    double value = source.getFloat(x, y);
                     result.set(x, y, MathHelper.floor((value - min) / (max - min) * 255.0));
                 }
             }

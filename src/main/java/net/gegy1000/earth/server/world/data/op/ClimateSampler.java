@@ -5,6 +5,8 @@ import net.gegy1000.terrarium.server.world.data.DataOp;
 import net.gegy1000.terrarium.server.world.data.raster.FloatRaster;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 
+import java.util.Optional;
+
 public final class ClimateSampler {
     private final WorldClimateRaster source;
 
@@ -13,7 +15,7 @@ public final class ClimateSampler {
     }
 
     public DataOp<ShortRaster> annualRainfall() {
-        return DataOp.ofBlocking(view -> {
+        return DataOp.ofLazy(view -> {
             ShortRaster annualRainfall = ShortRaster.create(view);
             for (int y = 0; y < view.getHeight(); y++) {
                 for (int x = 0; x < view.getWidth(); x++) {
@@ -26,7 +28,7 @@ public final class ClimateSampler {
 
     // TODO: Can probably make a byte raster
     public DataOp<FloatRaster> meanTemperature() {
-        return DataOp.ofBlocking(view -> {
+        return DataOp.ofLazy(view -> {
             FloatRaster temperatureRaster = FloatRaster.create(view);
             for (int y = 0; y < view.getHeight(); y++) {
                 for (int x = 0; x < view.getWidth(); x++) {
@@ -38,7 +40,7 @@ public final class ClimateSampler {
     }
 
     public DataOp<FloatRaster> minTemperature() {
-        return DataOp.ofBlocking(view -> {
+        return DataOp.ofLazy(view -> {
             FloatRaster temperatureRaster = FloatRaster.create(view);
             for (int y = 0; y < view.getHeight(); y++) {
                 for (int x = 0; x < view.getWidth(); x++) {

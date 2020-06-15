@@ -39,33 +39,31 @@ public final class SampleRaster {
     }
 
     public static <T extends Raster<?>> DataOp<T> sample(TiledDataSource<T> source, Function<DataView, T> function) {
-        return DataOp.of((view, executor) -> {
+        return DataOp.of((view, ctx) -> {
             int tileWidth = MathHelper.floor(source.getTileWidth());
             int tileHeight = MathHelper.floor(source.getTileHeight());
 
-            return DataSourceReader.INSTANCE.getTiles(source, view).andThen(tiles -> {
-                return executor.spawnBlocking(() -> {
-                    for (DataTileResult<T> tileResult : tiles) {
-                        if (!tileResult.data.isPresent()) {
-                            return Optional.empty();
-                        }
+            return DataSourceReader.INSTANCE.getTiles(source, view).map(tiles -> {
+                for (DataTileResult<T> tileResult : tiles) {
+                    if (!tileResult.data.isPresent()) {
+                        return Optional.empty();
                     }
+                }
 
-                    T resultRaster = function.apply(view);
+                T resultRaster = function.apply(view);
 
-                    for (DataTileResult<T> tileResult : tiles) {
-                        T sourceRaster = tileResult.data.get();
-                        Vec2i tilePos = tileResult.pos;
+                for (DataTileResult<T> tileResult : tiles) {
+                    T sourceRaster = tileResult.data.get();
+                    Vec2i tilePos = tileResult.pos;
 
-                        DataView sourceView = DataView.rect(
-                                tilePos.x * tileWidth, tilePos.y * tileHeight,
-                                tileWidth, tileHeight
-                        );
-                        Raster.rasterCopy(sourceRaster, sourceView, resultRaster, view);
-                    }
+                    DataView sourceView = DataView.rect(
+                            tilePos.x * tileWidth, tilePos.y * tileHeight,
+                            tileWidth, tileHeight
+                    );
+                    Raster.rasterCopy(sourceRaster, sourceView, resultRaster, view);
+                }
 
-                    return Optional.of(resultRaster);
-                });
+                return Optional.of(resultRaster);
             });
         });
     }

@@ -8,6 +8,7 @@ import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
+import net.gegy1000.terrarium.server.world.data.DataGenerator;
 import net.gegy1000.terrarium.server.world.data.source.DataSourceReader;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
@@ -85,9 +86,11 @@ public class ServerEventHandler {
             TerrariumWorld terrarium = TerrariumWorld.get(world);
             if (terrarium == null) return;
 
-            // advance loading for up to 2ms
             ColumnDataCache dataCache = terrarium.getDataCache();
-            dataCache.advanceLoadingFor(2 * 1000000);
+
+            // advance loading for up to 2ms
+            long allocation = 2 * 1000000;
+            dataCache.advanceUntil(System.nanoTime() + allocation);
 
             long time = System.currentTimeMillis();
             if (time - lastDataTrackTime > DATA_TRACK_INTERVAL) {

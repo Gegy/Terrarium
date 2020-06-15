@@ -140,6 +140,7 @@ public final class DataPreloader {
 
         for (Collection<BlockPos> chunk : chunks) {
             for (BlockPos column : chunk) {
+                // TODO: ensure the preloading isn't actually doing any work
                 DataView view = DataView.square(column.getX() << 4, column.getZ() << 4, 16);
                 this.generator.generate(view);
             }

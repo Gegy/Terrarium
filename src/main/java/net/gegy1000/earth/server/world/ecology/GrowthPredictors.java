@@ -16,7 +16,6 @@ import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.data.raster.FloatRaster;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.data.raster.UByteRaster;
-import net.minecraft.util.math.ChunkPos;
 
 public final class GrowthPredictors {
     public float elevation;
@@ -136,7 +135,7 @@ public final class GrowthPredictors {
         }
 
         public void sampleTo(ColumnDataCache dataCache, int x, int z, GrowthPredictors predictors) {
-            ColumnData data = dataCache.joinData(new ChunkPos(x >> 4, z >> 4));
+            ColumnData data = dataCache.joinData(x >> 4, z >> 4);
             this.sampleTo(data, x & 0xF, z & 0xF, predictors);
         }
 

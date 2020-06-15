@@ -13,8 +13,8 @@ public final class WaterOps {
             DataOp<EnumRaster<Landform>> landforms,
             DataOp<BitRaster> ocean
     ) {
-        return DataOp.of((view, executor) -> {
-            return Future.map2(landforms.apply(view, executor), ocean.apply(view, executor), (landformOption, oceanOption) -> {
+        return DataOp.of((view, ctx) -> {
+            return Future.map2(landforms.apply(view, ctx), ocean.apply(view, ctx), (landformOption, oceanOption) -> {
                 return landformOption.map(landformRaster -> {
                     if (oceanOption.isPresent()) {
                         BitRaster oceanMask = oceanOption.get();

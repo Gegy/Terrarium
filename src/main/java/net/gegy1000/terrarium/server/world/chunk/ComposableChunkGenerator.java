@@ -14,7 +14,6 @@ import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.ColumnDataEntry;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 
@@ -38,9 +37,7 @@ public class ComposableChunkGenerator implements GenericChunkGenerator {
     @Override
     public void primeChunk(CubicPos pos, ChunkPrimeWriter writer) {
         this.terrarium.get().ifPresent(terrarium -> {
-            ChunkPos columnPos = new ChunkPos(pos.getX(), pos.getZ());
-
-            try (ColumnDataEntry.Handle handle = terrarium.getDataCache().acquireEntry(columnPos)) {
+            try (ColumnDataEntry.Handle handle = terrarium.getDataCache().acquireEntry(pos.getX(), pos.getZ())) {
                 ColumnData data = handle.join();
                 terrarium.getSurfaceComposer().composeSurface(terrarium, data, pos, writer);
                 terrarium.getStructureComposer().primeStructures(terrarium, pos, writer);
@@ -65,10 +62,10 @@ public class ComposableChunkGenerator implements GenericChunkGenerator {
 
     protected ColumnDataEntry.Handle[] acquirePopulationHandles(CubicPos pos, ColumnDataCache dataCache) {
         return new ColumnDataEntry.Handle[] {
-                dataCache.acquireEntry(new ChunkPos(pos.getX(), pos.getZ())),
-                dataCache.acquireEntry(new ChunkPos(pos.getX() + 1, pos.getZ())),
-                dataCache.acquireEntry(new ChunkPos(pos.getX(), pos.getZ() + 1)),
-                dataCache.acquireEntry(new ChunkPos(pos.getX() + 1, pos.getZ() + 1)),
+                dataCache.acquireEntry(pos.getX(), pos.getZ()),
+                dataCache.acquireEntry(pos.getX() + 1, pos.getZ()),
+                dataCache.acquireEntry(pos.getX(), pos.getZ() + 1),
+                dataCache.acquireEntry(pos.getX() + 1, pos.getZ() + 1),
         };
     }
 
