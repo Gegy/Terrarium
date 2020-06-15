@@ -9,9 +9,14 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public final class MaxentCompiler {
+    private static final Path DEBUG_ROOT = Paths.get("mods/terrarium/debug/maxent");
     private static final AtomicInteger COUNTER = new AtomicInteger(0);
 
     private static String nextClassName() {
@@ -31,6 +36,10 @@ public final class MaxentCompiler {
     }
 
     private static Class<?> defineClass(String className, byte[] bytes) throws ClassNotFoundException {
+        if (TerrariumEarth.isDeobfuscatedEnvironment()) {
+            debugWriteClass(className, bytes);
+        }
+
         ClassLoader classLoader = new ClassLoader(TerrariumEarth.class.getClassLoader()) {
             @Override
             public Class<?> loadClass(String name) throws ClassNotFoundException {
@@ -86,5 +95,18 @@ public final class MaxentCompiler {
         evaluate.visitMaxs(0, 0);
 
         return writer.toByteArray();
+    }
+
+    private static void debugWriteClass(String className, byte[] bytes) {
+        try {
+            if (!Files.exists(DEBUG_ROOT)) {
+                Files.createDirectories(DEBUG_ROOT);
+            }
+
+            Path path = DEBUG_ROOT.resolve(className + ".class");
+            Files.write(path, bytes);
+        } catch (IOException e) {
+            TerrariumEarth.LOGGER.warn("Failed to write compiled maxent class", e);
+        }
     }
 }
