@@ -61,7 +61,7 @@ public final class ColumnStructureComposer implements StructureComposer {
     private MapGenStructureData structureData;
 
     private final LossyColumnCache preparedColumnCache = new LossyColumnCache(256);
-    private final LossyColumnCache preparedStartBoundsCache = new LossyColumnCache(64);
+    private final LossyColumnCache preparedBoundsCache = new LossyColumnCache(64);
 
     private final StructureBoundingBox mutableBounds = new StructureBoundingBox();
     private final HookedBoundingBox hookedBounds = new HookedBoundingBox();
@@ -230,11 +230,9 @@ public final class ColumnStructureComposer implements StructureComposer {
                 // this is usually fine, however when we're generating cubes: the bounds intersection check needs to
                 // consider y-values, which means the component needs to know the y-coordinate that it will generate at.
 
-                // here we have to call addComponentParts with an 'impossible' bounding box so that it will solve its
-                // bounding box while not generating anything
-                if (!this.preparedStartBoundsCache.set(startColumnPos.x, startColumnPos.z)) {
-                    // FIXME: not working without cubicchunks!
-                    this.hookedBounds.set(start.getBoundingBox());
+                // here we call addComponentParts while disabling any updates to the world
+                if (!this.preparedBoundsCache.set(pos.getX(), pos.getZ())) {
+                    this.hookedBounds.set(cubeBounds);
                     this.hookedBounds.minY = Integer.MIN_VALUE;
                     this.hookedBounds.maxY = Integer.MIN_VALUE;
 
