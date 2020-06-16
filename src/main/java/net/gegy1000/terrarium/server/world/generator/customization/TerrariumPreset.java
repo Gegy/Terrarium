@@ -16,7 +16,7 @@ public class TerrariumPreset {
     public TerrariumPreset(String name, ResourceLocation worldType, ResourceLocation icon, JsonObject properties) {
         this.name = name;
         this.worldType = worldType;
-        this.icon = new ResourceLocation(icon.getNamespace(), "textures/preset/" + icon.getNamespace() + ".png");
+        this.icon = new ResourceLocation(icon.getNamespace(), "textures/preset/" + icon.getPath() + ".png");
         this.properties = properties;
     }
 

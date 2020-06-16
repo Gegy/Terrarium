@@ -31,12 +31,10 @@ public class SelectPresetGui extends GuiScreen {
 
     @Override
     public void initGui() {
-        this.presetList = new PresetList(this.mc, this, this.worldType);
-
         this.selectButton = this.addButton(new GuiButton(SELECT_BUTTON, this.width / 2 - 154, this.height - 28, 150, 20, I18n.format("gui.done")));
         this.addButton(new GuiButton(CANCEL_BUTTON, this.width / 2 + 4, this.height - 28, 150, 20, I18n.format("gui.cancel")));
 
-        this.selectButton.enabled = false;
+        this.presetList = new PresetList(this.mc, this, this.worldType);
     }
 
     @Override

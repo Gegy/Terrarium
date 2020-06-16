@@ -108,10 +108,21 @@ property.terrarium.bop_integration.tooltip=Generate biomes and trees from the Bo
 
 # Presets
 
-preset.terrarium.earth.global_scenic.name=Global Scenic
-preset.terrarium.earth.global_scenic.desc=Global generator for a scenic creative experience
-preset.terrarium.earth.global_playable.name=Global Playable
-preset.terrarium.earth.global_playable.desc=Global generator for a playable survival experience
+preset.terrarium.earth.barren.name=Barren Earth
+preset.terrarium.earth.barren.desc=The bare surface of the earth at 1:40m scale with no additional generation
+
+preset.terrarium.earth.intercontinental.name=Intercontinental
+preset.terrarium.earth.intercontinental.desc=Survival-friendly earth at 1:2000m scale where continents are fairly small
+preset.terrarium.earth.intercontinental_modded.name=Modded Intercontinental
+preset.terrarium.earth.intercontinental_modded.desc=Survival & mod-friendly earth at 1:2000m where continents are fairly small
+
+preset.terrarium.earth.playable.name=Playable Earth
+preset.terrarium.earth.playable.desc=Survival-friendly earth at 1:70m scale with all vanilla generation
+preset.terrarium.earth.playable_modded.name=Modded Playable Earth
+preset.terrarium.earth.playable_modded.desc=Survival & mod-friendly earth at 1:70m scale with all vanilla & modded generation
+
+preset.terrarium.earth.scenic.name=Scenic Earth
+preset.terrarium.earth.scenic.desc=A scenic, but not survival-friendly representation of the Earth
 
 # Commands
 

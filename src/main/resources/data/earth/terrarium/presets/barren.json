@@ -1,0 +1,30 @@
+{
+  "world_type": "earth:earth",
+  "name": "barren",
+  "icon": "earth:barren",
+  "properties": {
+    "spawn_latitude": 27.988350,
+    "spawn_longitude": 86.923641,
+    "world_scale": 40.0,
+    "terrestrial_height_scale": 1.0,
+    "oceanic_height_scale": 1.0,
+    "height_offset": 35,
+    "add_trees": false,
+    "add_grass": false,
+    "add_flowers": false,
+    "add_cacti": false,
+    "add_sugar_cane": false,
+    "add_gourds": false,
+    "cave_generation": false,
+    "ravine_generation": false,
+    "ore_generation": false,
+    "compatibility_mode": false,
+    "bop_integration": false,
+    "add_strongholds": false,
+    "add_villages": false,
+    "add_mineshafts": false,
+    "add_temples": false,
+    "add_ocean_monuments": false,
+    "add_woodland_mansions": false
+  }
+}

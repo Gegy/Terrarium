@@ -26,7 +26,6 @@ public class PresetList extends GuiListExtended {
 
     private final SelectPresetGui parent;
 
-    private final ImmutableList<TerrariumPreset> presets;
     private final ImmutableList<PresetEntry> entries;
 
     private int selectedIndex = -1;
@@ -35,20 +34,30 @@ public class PresetList extends GuiListExtended {
         super(mc, parent.width, parent.height, 32, parent.height - 64, 36);
         this.parent = parent;
 
-        this.presets = ImmutableList.copyOf(TerrariumPresetRegistry.getPresets());
+        TerrariumPreset defaultPreset = worldType.getPreset();
 
         ImmutableList.Builder<PresetEntry> entryBuilder = ImmutableList.builder();
-        for (TerrariumPreset preset : this.presets) {
-            if (preset.getWorldType().equals(worldType.getIdentifier())) {
+        entryBuilder.add(new PresetEntry(mc, defaultPreset));
+
+        for (TerrariumPreset preset : TerrariumPresetRegistry.getPresets()) {
+            if (preset != defaultPreset && preset.getWorldType().equals(worldType.getIdentifier())) {
                 entryBuilder.add(new PresetEntry(mc, preset));
             }
         }
+
         this.entries = entryBuilder.build();
+
+        this.selectPreset(0);
     }
 
     public void selectPreset(int index) {
-        this.parent.selectPreset(this.presets.get(index));
-        this.selectedIndex = index;
+        if (index >= 0 && index < this.entries.size()) {
+            PresetEntry entry = this.entries.get(index);
+            this.parent.selectPreset(entry.preset);
+            this.selectedIndex = index;
+        } else {
+            this.selectedIndex = -1;
+        }
     }
 
     public void applyPreset() {
@@ -83,7 +92,7 @@ public class PresetList extends GuiListExtended {
     public class PresetEntry implements IGuiListEntry {
         private final Minecraft mc;
 
-        private final TerrariumPreset preset;
+        final TerrariumPreset preset;
         private final ResourceLocation icon;
 
         private long lastClickTime;
@@ -102,8 +111,9 @@ public class PresetList extends GuiListExtended {
         @Override
         public void drawEntry(int slotIndex, int x, int y, int listWidth, int slotHeight, int mouseX, int mouseY, boolean isSelected, float partialTicks) {
             this.mc.fontRenderer.drawString(this.preset.getLocalizedName(), x + 32 + 3, y + 1, 0xFFFFFF);
+
             String description = TextFormatting.DARK_GRAY + this.preset.getLocalizedDescription();
-            this.mc.fontRenderer.drawString(description, x + 32 + 3, y + this.mc.fontRenderer.FONT_HEIGHT + 3, 0xFFFFFF);
+            this.mc.fontRenderer.drawSplitString(description, x + 32 + 3, y + this.mc.fontRenderer.FONT_HEIGHT + 3, listWidth - 40, 0xFFFFFF);
 
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 

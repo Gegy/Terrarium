@@ -1,7 +1,7 @@
 {
   "world_type": "earth:earth",
-  "name": "global_scenic",
-  "icon": "earth:earth_default",
+  "name": "scenic",
+  "icon": "earth:default",
   "properties": {
     "spawn_latitude": 27.988350,
     "spawn_longitude": 86.923641,

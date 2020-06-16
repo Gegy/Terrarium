@@ -44,7 +44,7 @@ public class EarthWorldType extends TerrariumWorldType {
     public static final double CLIMATE_SCALE = EarthWorld.EQUATOR_CIRCUMFERENCE / WorldClimateRaster.WIDTH;
 
     private static final ResourceLocation IDENTIFIER = new ResourceLocation(TerrariumEarth.ID, "earth");
-    private static final ResourceLocation PRESET = new ResourceLocation(TerrariumEarth.ID, "global_scenic");
+    private static final ResourceLocation PRESET = new ResourceLocation(TerrariumEarth.ID, "scenic");
 
     public EarthWorldType() {
         super("earth", IDENTIFIER, PRESET);
