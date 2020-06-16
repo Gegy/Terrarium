@@ -1,6 +1,7 @@
 package net.gegy1000.terrarium.server.world.data.raster;
 
 import com.google.common.base.Preconditions;
+import it.unimi.dsi.fastutil.HashCommon;
 import net.gegy1000.terrarium.server.world.data.ColumnData;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.DataKey;
@@ -103,6 +104,8 @@ public final class ShortRaster extends AbstractRaster<short[]> implements Intege
         private final DataKey<ShortRaster> key;
         private short defaultValue;
 
+        private SampleCache cache;
+
         Sampler(DataKey<ShortRaster> key) {
             this.key = key;
         }
@@ -112,9 +115,27 @@ public final class ShortRaster extends AbstractRaster<short[]> implements Intege
             return this;
         }
 
+        public Sampler cached() {
+            this.cache = new SampleCache();
+            return this;
+        }
+
         public short sample(ColumnDataCache dataCache, int x, int z) {
+            if (this.cache == null) {
+                ColumnData data = dataCache.joinData(x >> 4, z >> 4);
+                return this.sample(data, x & 0xF, z & 0xF);
+            }
+
+            short cached = this.cache.get(x, z);
+            if (cached != SampleCache.NULL) {
+                return cached;
+            }
+
             ColumnData data = dataCache.joinData(x >> 4, z >> 4);
-            return this.sample(data, x & 0xF, z & 0xF);
+            short sample = this.sample(data, x & 0xF, z & 0xF);
+            this.cache.set(x, z, sample);
+
+            return sample;
         }
 
         public short sample(ColumnData data, int x, int z) {
@@ -134,6 +155,49 @@ public final class ShortRaster extends AbstractRaster<short[]> implements Intege
             }
             AbstractRaster.sampleInto(raster, dataCache, view, this.key);
             return raster;
+        }
+    }
+
+    static class SampleCache {
+        private static final int CAPACITY = 64;
+        private static final int MASK = CAPACITY - 1;
+
+        static final short NULL = Short.MIN_VALUE;
+
+        private final long[] keys;
+        private final short[] values;
+
+        SampleCache() {
+            this.keys = new long[CAPACITY];
+            Arrays.fill(this.keys, Long.MIN_VALUE);
+            this.values = new short[CAPACITY];
+        }
+
+        private static long key(int x, int z) {
+            return (long) x << 32 | (long) z;
+        }
+
+        private static int hash(long key) {
+            return HashCommon.long2int(HashCommon.mix(key));
+        }
+
+        void set(int x, int z, short value) {
+            long key = key(x, z);
+            int idx = hash(key) & MASK;
+
+            this.values[idx] = value;
+            this.keys[idx] = key;
+        }
+
+        short get(int x, int z) {
+            long key = key(x, z);
+            int idx = hash(key) & MASK;
+
+            if (this.keys[idx] == key) {
+                return this.values[idx];
+            }
+
+            return NULL;
         }
     }
 }

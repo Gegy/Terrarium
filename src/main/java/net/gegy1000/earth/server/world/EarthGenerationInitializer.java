@@ -52,7 +52,7 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
 
     @Override
     public void setup(CompositeTerrariumGenerator.Builder builder) {
-        ShortRaster.Sampler surfaceSampler = ShortRaster.sampler(EarthData.TERRAIN_HEIGHT);
+        ShortRaster.Sampler surfaceSampler = ShortRaster.sampler(EarthData.TERRAIN_HEIGHT).cached();
         HeightFunction surfaceFunction = (x, z) -> surfaceSampler.sample(this.dataCache, x, z);
 
         this.addSurfaceComposers(builder, surfaceFunction);
