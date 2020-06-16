@@ -43,7 +43,7 @@ public class TerrariumPreset {
         return this.icon;
     }
 
-    public GenerationSettings createProperties(PropertyPrototype prototype) {
+    public GenerationSettings createProperties(PropertySchema prototype) {
         return GenerationSettings.parse(prototype, this.properties);
     }
 

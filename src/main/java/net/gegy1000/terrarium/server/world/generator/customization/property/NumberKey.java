@@ -15,6 +15,11 @@ public class NumberKey extends PropertyKey<Number> {
         return new JsonPrimitive(value.get());
     }
 
+    @Override
+    public PropertyValue<Number> makeValue(Number value) {
+        return new NumberValue(value.doubleValue());
+    }
+
     @Nullable
     @Override
     public PropertyValue<Number> parseValue(JsonElement element) {

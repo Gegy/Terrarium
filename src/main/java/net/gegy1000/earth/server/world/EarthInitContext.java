@@ -7,7 +7,7 @@ import net.gegy1000.earth.server.world.data.source.WorldClimateRaster;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 
-import static net.gegy1000.earth.server.world.EarthWorldType.WORLD_SCALE;
+import static net.gegy1000.earth.server.world.EarthProperties.WORLD_SCALE;
 
 public final class EarthInitContext {
     public final GenerationSettings settings;

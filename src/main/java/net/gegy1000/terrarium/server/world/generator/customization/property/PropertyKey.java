@@ -18,6 +18,8 @@ public abstract class PropertyKey<T> {
 
     public abstract JsonElement serializeValue(PropertyValue<T> value);
 
+    public abstract PropertyValue<T> makeValue(T value);
+
     @Nullable
     public abstract PropertyValue<T> parseValue(JsonElement element);
 
@@ -47,5 +49,10 @@ public abstract class PropertyKey<T> {
     @SideOnly(Side.CLIENT)
     public String getLocalizedTooltip() {
         return I18n.format("property.terrarium." + this.identifier + ".tooltip");
+    }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "(" + this.identifier + ")";
     }
 }

@@ -21,7 +21,9 @@ public final class ColumnDataLoader implements AutoCloseable {
 
     public void advanceUntil(long endNanoTime) {
         while (System.nanoTime() < endNanoTime) {
-            this.executor.advanceAll();
+            if (!this.executor.advanceAll()) {
+                break;
+            }
         }
     }
 

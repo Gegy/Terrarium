@@ -23,8 +23,8 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static net.gegy1000.earth.server.world.EarthWorldType.SPAWN_LATITUDE;
-import static net.gegy1000.earth.server.world.EarthWorldType.SPAWN_LONGITUDE;
+import static net.gegy1000.earth.server.world.EarthProperties.SPAWN_LATITUDE;
+import static net.gegy1000.earth.server.world.EarthProperties.SPAWN_LONGITUDE;
 
 @SideOnly(Side.CLIENT)
 public class WorldPreview {

@@ -17,12 +17,9 @@ import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.chunk.ComposableChunkGenerator;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
-import net.gegy1000.terrarium.server.world.generator.customization.PropertyPrototype;
+import net.gegy1000.terrarium.server.world.generator.customization.PropertySchema;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumCustomization;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPreset;
-import net.gegy1000.terrarium.server.world.generator.customization.property.BooleanKey;
-import net.gegy1000.terrarium.server.world.generator.customization.property.NumberKey;
-import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.SliderScale;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.SliderWidget;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.ToggleWidget;
@@ -41,39 +38,13 @@ import java.util.Collection;
 import java.util.Random;
 import java.util.function.Consumer;
 
-// TODO: Upgrade old terrarium worlds
+import static net.gegy1000.earth.server.world.EarthProperties.*;
+
 public class EarthWorldType extends TerrariumWorldType {
     public static final double CLIMATE_SCALE = EarthWorld.EQUATOR_CIRCUMFERENCE / WorldClimateRaster.WIDTH;
 
     private static final ResourceLocation IDENTIFIER = new ResourceLocation(TerrariumEarth.ID, "earth");
     private static final ResourceLocation PRESET = new ResourceLocation(TerrariumEarth.ID, "global_scenic");
-
-    public static final PropertyKey<Number> SPAWN_LATITUDE = new NumberKey("spawn_latitude");
-    public static final PropertyKey<Number> SPAWN_LONGITUDE = new NumberKey("spawn_longitude");
-    public static final PropertyKey<Boolean> ADD_TREES = new BooleanKey("add_trees");
-    public static final PropertyKey<Boolean> ADD_GRASS = new BooleanKey("add_grass");
-    public static final PropertyKey<Boolean> ADD_FLOWERS = new BooleanKey("add_flowers");
-    public static final PropertyKey<Boolean> ADD_CACTI = new BooleanKey("add_cacti");
-    public static final PropertyKey<Boolean> ADD_SUGAR_CANE = new BooleanKey("add_sugar_cane");
-    public static final PropertyKey<Boolean> ADD_GOURDS = new BooleanKey("add_gourds");
-    public static final PropertyKey<Number> WORLD_SCALE = new NumberKey("world_scale");
-    public static final PropertyKey<Number> TERRESTRIAL_HEIGHT_SCALE = new NumberKey("terrestrial_height_scale");
-    public static final PropertyKey<Number> OCEANIC_HEIGHT_SCALE = new NumberKey("oceanic_height_scale");
-    public static final PropertyKey<Number> HEIGHT_OFFSET = new NumberKey("height_offset");
-
-    public static final PropertyKey<Boolean> CAVE_GENERATION = new BooleanKey("cave_generation");
-    public static final PropertyKey<Boolean> RAVINE_GENERATION = new BooleanKey("ravine_generation");
-    public static final PropertyKey<Boolean> ORE_GENERATION = new BooleanKey("ore_generation");
-
-    public static final PropertyKey<Boolean> ADD_STRONGHOLDS = new BooleanKey("add_strongholds");
-    public static final PropertyKey<Boolean> ADD_VILLAGES = new BooleanKey("add_villages");
-    public static final PropertyKey<Boolean> ADD_MINESHAFTS = new BooleanKey("add_mineshafts");
-    public static final PropertyKey<Boolean> ADD_TEMPLES = new BooleanKey("add_temples");
-    public static final PropertyKey<Boolean> ADD_OCEAN_MONUMENTS = new BooleanKey("add_ocean_monuments");
-    public static final PropertyKey<Boolean> ADD_WOODLAND_MANSIONS = new BooleanKey("add_woodland_mansions");
-
-    public static final PropertyKey<Boolean> COMPATIBILITY_MODE = new BooleanKey("compatibility_mode");
-    public static final PropertyKey<Boolean> BOP_INTEGRATION = new BooleanKey("bop_integration");
 
     public EarthWorldType() {
         super("earth", IDENTIFIER, PRESET);
@@ -101,16 +72,8 @@ public class EarthWorldType extends TerrariumWorldType {
     }
 
     @Override
-    public PropertyPrototype buildPropertyPrototype() {
-        return PropertyPrototype.builder()
-                .withProperties(SPAWN_LATITUDE, SPAWN_LONGITUDE)
-                .withProperties(WORLD_SCALE, TERRESTRIAL_HEIGHT_SCALE, OCEANIC_HEIGHT_SCALE)
-                .withProperties(HEIGHT_OFFSET)
-                .withProperties(ADD_TREES, ADD_GRASS, ADD_FLOWERS, ADD_CACTI, ADD_SUGAR_CANE, ADD_GOURDS)
-                .withProperties(CAVE_GENERATION, RAVINE_GENERATION, ORE_GENERATION)
-                .withProperties(ADD_STRONGHOLDS, ADD_VILLAGES, ADD_MINESHAFTS, ADD_TEMPLES, ADD_OCEAN_MONUMENTS, ADD_WOODLAND_MANSIONS)
-                .withProperties(COMPATIBILITY_MODE, BOP_INTEGRATION)
-                .build();
+    public PropertySchema buildPropertySchema() {
+        return EarthPropertySchema.INSTANCE;
     }
 
     @Override

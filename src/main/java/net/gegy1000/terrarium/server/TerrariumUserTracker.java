@@ -6,7 +6,7 @@ import net.gegy1000.terrarium.server.capability.TerrariumAuxCaps;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
-import net.gegy1000.terrarium.server.world.generator.customization.PropertyPrototype;
+import net.gegy1000.terrarium.server.world.generator.customization.PropertySchema;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -35,8 +35,8 @@ public class TerrariumUserTracker {
         TerrariumWorldType worldType = GenericWorldType.unwrapAs(world.getWorldType(), TerrariumWorldType.class);
         if (worldType == null) return;
 
-        PropertyPrototype prototype = worldType.buildPropertyPrototype();
-        providedSettings = GenerationSettings.parse(prototype, settings);
+        PropertySchema schema = worldType.buildPropertySchema();
+        providedSettings = GenerationSettings.parse(schema, settings);
 
         TerrariumAuxCaps aux = world.getCapability(TerrariumCapabilities.aux(), null);
         if (aux == null) return;

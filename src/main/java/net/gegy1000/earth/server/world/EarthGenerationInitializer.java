@@ -37,7 +37,7 @@ import net.gegy1000.terrarium.server.world.generator.CompositeTerrariumGenerator
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 
-import static net.gegy1000.earth.server.world.EarthWorldType.*;
+import static net.gegy1000.earth.server.world.EarthProperties.*;
 
 final class EarthGenerationInitializer implements TerrariumGeneratorInitializer {
     private final EarthInitContext ctx;

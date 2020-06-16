@@ -2,14 +2,14 @@ package net.gegy1000.earth.client.gui;
 
 import com.google.common.base.Strings;
 import com.google.gson.JsonSyntaxException;
-import net.gegy1000.justnow.executor.CurrentThreadExecutor;
-import net.gegy1000.justnow.future.Cancelable;
-import net.gegy1000.justnow.future.Future;
 import net.gegy1000.earth.client.gui.preview.LargePreviewGui;
 import net.gegy1000.earth.client.gui.preview.PreviewController;
 import net.gegy1000.earth.client.gui.preview.PreviewRenderer;
 import net.gegy1000.earth.client.gui.preview.WorldPreview;
-import net.gegy1000.earth.server.world.EarthWorldType;
+import net.gegy1000.earth.server.world.EarthProperties;
+import net.gegy1000.justnow.executor.CurrentThreadExecutor;
+import net.gegy1000.justnow.future.Cancelable;
+import net.gegy1000.justnow.future.Future;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.client.gui.customization.SelectPresetGui;
 import net.gegy1000.terrarium.client.gui.widget.ActionButtonWidget;
@@ -17,7 +17,7 @@ import net.gegy1000.terrarium.client.gui.widget.CustomizationList;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.data.source.DataSourceReader;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
-import net.gegy1000.terrarium.server.world.generator.customization.PropertyPrototype;
+import net.gegy1000.terrarium.server.world.generator.customization.PropertySchema;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPreset;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.CustomizationCategory;
 import net.gegy1000.terrarium.server.world.generator.customization.widget.CustomizationWidget;
@@ -70,11 +70,11 @@ public class EarthCustomizationGui extends GuiScreen {
         this.parent = parent;
         this.worldType = worldType;
 
-        PropertyPrototype prototype = worldType.buildPropertyPrototype();
+        PropertySchema schema = worldType.buildPropertySchema();
         String settingsString = parent.chunkProviderSettingsJson;
         if (!Strings.isNullOrEmpty(settingsString)) {
             try {
-                this.setSettings(GenerationSettings.parse(prototype, settingsString));
+                this.setSettings(GenerationSettings.parse(schema, settingsString));
             } catch (JsonSyntaxException e) {
                 Terrarium.LOGGER.error("Failed to parse settings: {}", settingsString, e);
             }
@@ -274,7 +274,7 @@ public class EarthCustomizationGui extends GuiScreen {
     }
 
     public void applyPreset(TerrariumPreset preset) {
-        this.setSettings(preset.createProperties(this.worldType.buildPropertyPrototype()));
+        this.setSettings(preset.createProperties(this.worldType.buildPropertySchema()));
         this.previewDirty = true;
     }
 
@@ -289,8 +289,8 @@ public class EarthCustomizationGui extends GuiScreen {
     }
 
     public void applySpawnpoint(double latitude, double longitude) {
-        this.settings.setDouble(EarthWorldType.SPAWN_LATITUDE, latitude);
-        this.settings.setDouble(EarthWorldType.SPAWN_LONGITUDE, longitude);
+        this.settings.setDouble(EarthProperties.SPAWN_LATITUDE, latitude);
+        this.settings.setDouble(EarthProperties.SPAWN_LONGITUDE, longitude);
         this.rebuildPreview();
     }
 

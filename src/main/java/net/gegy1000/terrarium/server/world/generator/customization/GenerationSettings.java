@@ -5,11 +5,11 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.gegy1000.gengen.api.GenericWorldType;
-import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.generator.customization.property.BooleanValue;
 import net.gegy1000.terrarium.server.world.generator.customization.property.NumberValue;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyKey;
+import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyPair;
 import net.gegy1000.terrarium.server.world.generator.customization.property.PropertyValue;
 import net.minecraft.world.World;
 
@@ -38,46 +38,34 @@ public class GenerationSettings {
 
         TerrariumWorldType worldType = GenericWorldType.unwrapAs(world.getWorldType(), TerrariumWorldType.class);
         if (worldType != null) {
-            PropertyPrototype prototype = worldType.buildPropertyPrototype();
+            PropertySchema schema = worldType.buildPropertySchema();
 
-            GenerationSettings parsedSettings = GenerationSettings.parse(prototype, generatorOptions);
-            GenerationSettings defaultSettings = worldType.getPreset().createProperties(prototype);
+            GenerationSettings parsedSettings = GenerationSettings.parse(schema, generatorOptions);
+            GenerationSettings defaultSettings = worldType.getPreset().createProperties(schema);
             return defaultSettings.union(parsedSettings);
         }
 
         throw new IllegalArgumentException("Cannot parse settings for non-terrarium world type");
     }
 
-    public static GenerationSettings parse(PropertyPrototype prototype, String json) {
+    public static GenerationSettings parse(PropertySchema schema, String json) {
         JsonElement element = new JsonParser().parse(json);
         if (element instanceof JsonObject) {
-            return GenerationSettings.parse(prototype, element.getAsJsonObject());
+            return GenerationSettings.parse(schema, element.getAsJsonObject());
         } else {
             return new GenerationSettings(ImmutableMap.of(), ImmutableMap.of());
         }
     }
 
-    public static GenerationSettings parse(PropertyPrototype prototype, JsonObject root) {
+    public static GenerationSettings parse(PropertySchema schema, JsonObject root) {
         Builder builder = new Builder();
 
-        for (Map.Entry<String, JsonElement> propertyEntry : root.entrySet()) {
-            String identifier = propertyEntry.getKey();
-            JsonElement propertyElement = propertyEntry.getValue();
-
-            PropertyKey<?> key = prototype.getKey(identifier);
-            if (key == null) {
-                Terrarium.LOGGER.error("Ignored invalid property key '{}'", identifier);
-                continue;
-            }
-
-            PropertyValue<?> value = key.parseValue(propertyElement);
-            if (value == null) {
-                Terrarium.LOGGER.error("Failed to parse invalid property with key '{}'", identifier);
-                continue;
-            }
-
-            builder.putUnchecked(key, value);
+        Map<String, JsonElement> entries = new HashMap<>(root.size());
+        for (Map.Entry<String, JsonElement> entry : root.entrySet()) {
+            entries.put(entry.getKey(), entry.getValue());
         }
+
+        schema.parse(entries, builder::put);
 
         return builder.build();
     }
@@ -185,6 +173,11 @@ public class GenerationSettings {
         void putUnchecked(PropertyKey<?> key, PropertyValue<?> value) {
             this.keys.put(key.getIdentifier(), key);
             this.values.put(key, value);
+        }
+
+        public Builder put(PropertyPair<?> pair) {
+            this.putUnchecked(pair.key, pair.value);
+            return this;
         }
 
         public <T> Builder putValue(PropertyKey<T> key, PropertyValue<T> value) {

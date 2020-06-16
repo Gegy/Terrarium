@@ -43,7 +43,7 @@ import java.awt.geom.Area;
 import java.util.Random;
 import java.util.function.Function;
 
-import static net.gegy1000.earth.server.world.EarthWorldType.*;
+import static net.gegy1000.earth.server.world.EarthProperties.*;
 
 public final class EarthDataInitializer implements TerrariumDataInitializer {
     public static final Zoomable<StdSource<FloatRaster>> ELEVATION_SOURCE = ElevationSource.source();

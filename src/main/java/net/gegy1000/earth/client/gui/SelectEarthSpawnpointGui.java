@@ -5,7 +5,7 @@ import net.gegy1000.earth.client.gui.widget.map.PlaceSearchWidget;
 import net.gegy1000.earth.client.gui.widget.map.SlippyMapPoint;
 import net.gegy1000.earth.client.gui.widget.map.SlippyMapWidget;
 import net.gegy1000.earth.client.gui.widget.map.component.MarkerMapComponent;
-import net.gegy1000.earth.server.world.EarthWorldType;
+import net.gegy1000.earth.server.world.EarthProperties;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -41,8 +41,8 @@ public class SelectEarthSpawnpointGui extends GuiScreen {
 
         GenerationSettings settings = this.parent.getSettings();
 
-        double latitude = settings.getDouble(EarthWorldType.SPAWN_LATITUDE);
-        double longitude = settings.getDouble(EarthWorldType.SPAWN_LONGITUDE);
+        double latitude = settings.getDouble(EarthProperties.SPAWN_LATITUDE);
+        double longitude = settings.getDouble(EarthProperties.SPAWN_LONGITUDE);
         this.markerComponent = new MarkerMapComponent(new SlippyMapPoint(latitude, longitude)).allowMovement();
         this.mapWidget.addComponent(this.markerComponent);
 

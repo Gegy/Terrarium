@@ -22,6 +22,11 @@ public class EnumKey<T extends Enum<T> & CycleEnumProperty> extends PropertyKey<
         return new JsonPrimitive(value.get().getKey());
     }
 
+    @Override
+    public PropertyValue<T> makeValue(T value) {
+        return new EnumValue<T>(this.getType(), value);
+    }
+
     @Nullable
     @Override
     public PropertyValue<T> parseValue(JsonElement element) {

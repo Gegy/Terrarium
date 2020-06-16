@@ -15,6 +15,11 @@ public class BooleanKey extends PropertyKey<Boolean> {
         return new JsonPrimitive(value.get());
     }
 
+    @Override
+    public PropertyValue<Boolean> makeValue(Boolean value) {
+        return new BooleanValue(value);
+    }
+
     @Nullable
     @Override
     public PropertyValue<Boolean> parseValue(JsonElement element) {

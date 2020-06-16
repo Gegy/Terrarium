@@ -20,7 +20,6 @@ public final class Climate {
         return meanTemperature > 22;
     }
 
-    // TODO: These values?
     public static boolean isWet(float annualRainfall) {
         return annualRainfall > 2400;
     }
