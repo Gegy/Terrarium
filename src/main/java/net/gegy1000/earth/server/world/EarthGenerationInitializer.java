@@ -82,7 +82,7 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
         }
 
         if (!GenGen.isCubic(this.world)) {
-            builder.addSurfaceComposer(new BedrockSurfaceComposer(this.world, Blocks.BEDROCK.getDefaultState(), Math.min(heightOffset - 1, 5)));
+            builder.addSurfaceComposer(new BedrockSurfaceComposer(this.world, EarthData.TERRAIN_HEIGHT, Math.min(heightOffset - 1, 5)));
         }
     }
 

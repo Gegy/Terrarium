@@ -20,6 +20,11 @@ public final class ColumnData {
         return this.view;
     }
 
+    public boolean contains(DataKey<?> key) {
+        Optional<?> optional = this.store.get(key);
+        return optional != null && optional.isPresent();
+    }
+
     @SuppressWarnings({ "unchecked", "OptionalAssignedToNull" })
     public <T> Optional<T> get(DataKey<T> key) {
         Optional<?> data = this.store.get(key);
