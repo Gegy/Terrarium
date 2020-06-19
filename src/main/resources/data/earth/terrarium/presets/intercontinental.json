@@ -4,7 +4,7 @@
   "icon": "earth:default",
   "properties": {
     "spawn_latitude": 0.0,
-    "spawn_longitude": 0.0,
+    "spawn_longitude": 23.0,
     "world_scale": 2000.0,
     "terrestrial_height_scale": 15.0,
     "oceanic_height_scale": 15.0,
