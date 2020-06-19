@@ -1,6 +1,7 @@
 package net.gegy1000.earth.server.shared;
 
 import com.google.gson.Gson;
+import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.util.ProcessTracker;
 import net.gegy1000.earth.server.util.TrackedInputStream;
 import net.gegy1000.earth.server.world.data.EarthApiKeys;
@@ -24,7 +25,7 @@ public final class ApiKeyInitializer implements SharedDataInitializer {
             EarthApiKeys keys = loadKeys(input);
             data.put(SharedEarthData.API_KEYS, keys);
         } catch (IOException e) {
-            processTracker.raiseException(e);
+            TerrariumEarth.LOGGER.warn("Failed to get API keys", e);
         }
     }
 
