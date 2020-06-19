@@ -135,6 +135,10 @@ public final class BoPIntegration {
             return;
         }
 
+        if (event.getBiome() == Biomes.BEACH) {
+            return;
+        }
+
         GrowthPredictors predictors = event.getPredictors();
 
         if (!predictors.isFrozen()) {
@@ -171,18 +175,18 @@ public final class BoPIntegration {
             }
 
             if (predictors.isFlooded() && event.getBiome() == Biomes.SWAMPLAND) {
-                double spruce = Trees.Indicators.SPRUCE.evaluate(predictors);
-                if (spruce > 0.85) {
+                float spruce = Trees.Indicators.SPRUCE.evaluate(predictors);
+                if (spruce > 0.85F) {
                     event.setBiome(BOPBiomes.wetland.orNull());
                     return;
                 }
             }
 
             if (predictors.isForested() && event.getBiome() == Biomes.JUNGLE) {
-                double jungle = Trees.Indicators.JUNGLE_LIKE.evaluate(predictors);
-                double oak = Trees.Indicators.OAK.evaluate(predictors);
-                double spruce = Trees.Indicators.SPRUCE.evaluate(predictors);
-                double mahogany = BoPTrees.Indicators.MAHOGANY.evaluate(predictors);
+                float jungle = Trees.Indicators.JUNGLE_LIKE.evaluate(predictors);
+                float oak = Trees.Indicators.OAK.evaluate(predictors);
+                float spruce = Trees.Indicators.SPRUCE.evaluate(predictors);
+                float mahogany = BoPTrees.Indicators.MAHOGANY.evaluate(predictors);
 
                 if (oak > jungle && oak > spruce && oak > mahogany) {
                     event.setBiome(BOPBiomes.rainforest.orNull());
@@ -210,22 +214,22 @@ public final class BoPIntegration {
         }
 
         if (!predictors.isFrozen()) {
-            double eucalyptus = BoPTrees.Indicators.EUCALYPTUS.evaluate(predictors);
-            if (eucalyptus > 0.85) {
+            float eucalyptus = BoPTrees.Indicators.EUCALYPTUS.evaluate(predictors);
+            if (eucalyptus > 0.85F) {
                 event.setBiome(BOPBiomes.eucalyptus_forest.orNull());
                 return;
             }
 
-            double birch = Trees.Indicators.BIRCH.evaluate(predictors);
-            double spruce = Trees.Indicators.SPRUCE.evaluate(predictors);
-            if (birch > 0.85 && spruce > 0.85) {
+            float birch = Trees.Indicators.BIRCH.evaluate(predictors);
+            float spruce = Trees.Indicators.SPRUCE.evaluate(predictors);
+            if (birch > 0.85F && spruce > 0.85F) {
                 event.setBiome(BOPBiomes.boreal_forest.orNull());
                 return;
             }
         }
 
         double fir = BoPTrees.Indicators.FIR.evaluate(predictors);
-        if (fir > 0.85) {
+        if (fir > 0.85F) {
             if (predictors.isFrozen()) {
                 event.setBiome(BOPBiomes.snowy_coniferous_forest.orNull());
             } else {

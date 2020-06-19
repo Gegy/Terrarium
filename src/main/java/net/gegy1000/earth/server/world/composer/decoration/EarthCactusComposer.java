@@ -9,6 +9,7 @@ import net.gegy1000.gengen.api.writer.ChunkPopulationWriter;
 import net.gegy1000.gengen.util.SpatialRandom;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.composer.decoration.DecorationComposer;
+import net.minecraft.init.Biomes;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -41,10 +42,15 @@ public final class EarthCactusComposer implements DecorationComposer {
         int dataX = pos.getMaxX();
         int dataZ = pos.getMaxZ();
 
+        // TODO: a better solution?
+        if (writer.getCenterBiome() == Biomes.BEACH) {
+            return;
+        }
+
         this.predictorSampler.sampleTo(terrarium.getDataCache(), dataX, dataZ, this.predictors);
         double indicator = INDICATOR.evaluate(this.predictors);
 
-        if (indicator > 0.6) {
+        if (indicator > 0.65) {
             this.generateCacti(writer, pos);
         }
     }
