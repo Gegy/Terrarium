@@ -8,6 +8,8 @@ import net.gegy1000.gengen.api.writer.ChunkPrimeWriter;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.util.Lazy;
+import net.gegy1000.terrarium.server.util.Profiler;
+import net.gegy1000.terrarium.server.util.ThreadedProfiler;
 import net.gegy1000.terrarium.server.world.composer.structure.StructureComposer;
 import net.gegy1000.terrarium.server.world.data.ColumnData;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
@@ -37,10 +39,23 @@ public class ComposableChunkGenerator implements GenericChunkGenerator {
     @Override
     public void primeChunk(CubicPos pos, ChunkPrimeWriter writer) {
         this.terrarium.get().ifPresent(terrarium -> {
-            try (ColumnDataEntry.Handle handle = terrarium.getDataCache().acquireEntry(pos.getX(), pos.getZ())) {
-                ColumnData data = handle.join();
-                terrarium.getSurfaceComposer().composeSurface(terrarium, data, pos, writer);
-                terrarium.getStructureComposer().primeStructures(terrarium, pos, writer);
+            Profiler profiler = ThreadedProfiler.get();
+
+            try (
+                    Profiler.Handle generate = profiler.push("generate");
+                    Profiler.Handle prime = profiler.push("prime");
+            ) {
+                try (ColumnDataEntry.Handle handle = terrarium.getDataCache().acquireEntry(pos.getX(), pos.getZ())) {
+                    ColumnData data = handle.join();
+
+                    try (Profiler.Handle surface = profiler.push("surface")) {
+                        terrarium.getSurfaceComposer().composeSurface(terrarium, data, pos, writer);
+                    }
+
+                    try (Profiler.Handle structures = profiler.push("structures")) {
+                        terrarium.getStructureComposer().primeStructures(terrarium, pos, writer);
+                    }
+                }
             }
         });
     }
@@ -48,14 +63,26 @@ public class ComposableChunkGenerator implements GenericChunkGenerator {
     @Override
     public void populateChunk(CubicPos pos, ChunkPopulationWriter writer) {
         this.terrarium.get().ifPresent(terrarium -> {
-            ColumnDataCache dataCache = terrarium.getDataCache();
-            ColumnDataEntry.Handle[] handles = this.acquirePopulationHandles(pos, dataCache);
+            Profiler profiler = ThreadedProfiler.get();
 
-            terrarium.getStructureComposer().populateStructures(terrarium, pos, writer);
-            terrarium.getDecorationComposer().composeDecoration(terrarium, pos, writer);
+            try (
+                    Profiler.Handle generate = profiler.push("generate");
+                    Profiler.Handle populate = profiler.push("populate");
+            ) {
+                ColumnDataCache dataCache = terrarium.getDataCache();
+                ColumnDataEntry.Handle[] handles = this.acquirePopulationHandles(pos, dataCache);
 
-            for (ColumnDataEntry.Handle handle : handles) {
-                handle.release();
+                try (Profiler.Handle structures = profiler.push("structures")) {
+                    terrarium.getStructureComposer().populateStructures(terrarium, pos, writer);
+                }
+
+                try (Profiler.Handle decoration = profiler.push("decoration")) {
+                    terrarium.getDecorationComposer().composeDecoration(terrarium, pos, writer);
+                }
+
+                for (ColumnDataEntry.Handle handle : handles) {
+                    handle.release();
+                }
             }
         });
     }
@@ -79,7 +106,14 @@ public class ComposableChunkGenerator implements GenericChunkGenerator {
     @Override
     public void prepareStructures(CubicPos pos) {
         this.terrarium.get().ifPresent(terrarium -> {
-            terrarium.getStructureComposer().prepareStructures(terrarium, pos);
+            Profiler profiler = ThreadedProfiler.get();
+
+            try (
+                    Profiler.Handle generate = profiler.push("generate");
+                    Profiler.Handle prepare = profiler.push("prepare_structures");
+            ) {
+                terrarium.getStructureComposer().prepareStructures(terrarium, pos);
+            }
         });
     }
 

@@ -1,5 +1,7 @@
 package net.gegy1000.terrarium.server.world.data.op;
 
+import net.gegy1000.terrarium.server.util.Profiler;
+import net.gegy1000.terrarium.server.util.ThreadedProfiler;
 import net.gegy1000.terrarium.server.util.Voronoi;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
@@ -31,9 +33,12 @@ public final class VoronoiScaleOp {
             return data.apply(srcView, ctx).andThen(opt -> {
                 return ctx.spawnBlocking(() -> {
                     return opt.map(source -> {
-                        EnumRaster<T> result = EnumRaster.create(defaultValue, view);
-                        voronoi.scaleBytes(source.getData(), result.getData(), srcView, view, dstToSrcX, dstToSrcY, offsetX, offsetY);
-                        return result;
+                        Profiler profiler = ThreadedProfiler.get();
+                        try (Profiler.Handle scaleRaster = profiler.push("voronoi_raster")) {
+                            EnumRaster<T> result = EnumRaster.create(defaultValue, view);
+                            voronoi.scaleBytes(source.getData(), result.getData(), srcView, view, dstToSrcX, dstToSrcY, offsetX, offsetY);
+                            return result;
+                        }
                     });
                 });
             });

@@ -3,7 +3,7 @@ package net.gegy1000.earth.server.world.composer.structure;
 import com.google.common.base.Preconditions;
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.server.world.compatibility.ColumnCompatibilityWorld;
-import net.gegy1000.earth.server.world.composer.structure.data.LossyColumnCache;
+import net.gegy1000.earth.server.world.composer.structure.data.LossyColumnSet;
 import net.gegy1000.earth.server.world.composer.structure.data.StructureStartMap;
 import net.gegy1000.earth.server.world.composer.structure.placement.StructurePlacement;
 import net.gegy1000.gengen.api.CubicPos;
@@ -12,6 +12,8 @@ import net.gegy1000.gengen.api.writer.ChunkPopulationWriter;
 import net.gegy1000.gengen.api.writer.ChunkPrimeWriter;
 import net.gegy1000.gengen.util.SpatialRandom;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
+import net.gegy1000.terrarium.server.util.Profiler;
+import net.gegy1000.terrarium.server.util.ThreadedProfiler;
 import net.gegy1000.terrarium.server.world.composer.structure.StructureComposer;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.nbt.NBTBase;
@@ -60,8 +62,8 @@ public final class ColumnStructureComposer implements StructureComposer {
     private final StructureStartMap structureStarts = new StructureStartMap(1024, 0.75F);
     private MapGenStructureData structureData;
 
-    private final LossyColumnCache preparedColumnCache = new LossyColumnCache(256);
-    private final LossyColumnCache preparedBoundsCache = new LossyColumnCache(64);
+    private final LossyColumnSet preparedColumnCache = new LossyColumnSet(128);
+    private final LossyColumnSet preparedBoundsCache = new LossyColumnSet(128);
 
     private final StructureBoundingBox mutableBounds = new StructureBoundingBox();
     private final HookedBoundingBox hookedBounds = new HookedBoundingBox();
@@ -142,27 +144,30 @@ public final class ColumnStructureComposer implements StructureComposer {
 
     @Override
     public final void prepareStructures(TerrariumWorld terrarium, CubicPos pos) {
-        this.prepareColumns(pos);
+        this.prepareColumns(terrarium, pos);
     }
 
     @Override
     public final void primeStructures(TerrariumWorld terrarium, CubicPos pos, ChunkPrimeWriter writer) {
-        this.prepareColumns(pos);
+        this.prepareColumns(terrarium, pos);
     }
 
-    private void prepareColumns(CubicPos pos) {
-        int originX = pos.getX();
-        int originZ = pos.getZ();
+    private void prepareColumns(TerrariumWorld terrarium, CubicPos pos) {
+        Profiler profiler = ThreadedProfiler.get();
 
-        for (int x = originX - COLUMN_RANGE; x <= originX + COLUMN_RANGE; x++) {
-            for (int z = originZ - COLUMN_RANGE; z <= originZ + COLUMN_RANGE; z++) {
-                this.random.setSeed(x, z);
-                this.prepareColumn(x, z);
+        try (Profiler.Handle prepareColumns = profiler.push("prepare_columns")) {
+            int originX = pos.getX();
+            int originZ = pos.getZ();
+
+            for (int x = originX - COLUMN_RANGE; x <= originX + COLUMN_RANGE; x++) {
+                for (int z = originZ - COLUMN_RANGE; z <= originZ + COLUMN_RANGE; z++) {
+                    this.prepareColumn(profiler, x, z);
+                }
             }
         }
     }
 
-    private void prepareColumn(int chunkX, int chunkZ) {
+    private void prepareColumn(Profiler profiler, int chunkX, int chunkZ) {
         // skip checking this column for structures if it has already been checked
         if (this.preparedColumnCache.set(chunkX, chunkZ)) {
             return;
@@ -174,8 +179,18 @@ public final class ColumnStructureComposer implements StructureComposer {
             return;
         }
 
-        if (this.placement.canSpawnAt(this.world, chunkX, chunkZ)) {
-            StructureStart start = this.makeStart(chunkX, chunkZ);
+        boolean canSpawn;
+        try (Profiler.Handle testSpawn = profiler.push("test_spawn")) {
+            canSpawn = this.placement.canSpawnAt(this.world, chunkX, chunkZ);
+        }
+
+        if (canSpawn) {
+            StructureStart start;
+            try (Profiler.Handle makeStart = profiler.push("make_start")) {
+                this.random.setSeed(chunkX, chunkZ);
+                start = this.makeStart(chunkX, chunkZ);
+            }
+
             this.structureStarts.put(start);
 
             if (start.isSizeableStructure()) {
@@ -211,6 +226,8 @@ public final class ColumnStructureComposer implements StructureComposer {
     @Override
     public final void populateStructures(TerrariumWorld terrarium, CubicPos pos, ChunkPopulationWriter writer) {
         this.prepareStructureData();
+
+        Profiler profiler = ThreadedProfiler.get();
 
         this.random.setSeed(pos.getCenterX(), pos.getCenterZ());
 

@@ -6,13 +6,13 @@ import net.minecraft.util.math.MathHelper;
 
 import java.util.Arrays;
 
-public final class LossyColumnCache {
+public final class LossyColumnSet {
     private final long[] table;
 
     private final int capacity;
     private final int mask;
 
-    public LossyColumnCache(int capacity) {
+    public LossyColumnSet(int capacity) {
         this.capacity = MathHelper.smallestEncompassingPowerOfTwo(capacity);
         this.mask = this.capacity - 1;
 
@@ -33,6 +33,13 @@ public final class LossyColumnCache {
         this.table[idx] = key;
 
         return existing == key;
+    }
+
+    public boolean contains(int x, int z) {
+        long key = ChunkPos.asLong(x, z);
+        int idx = hash(key) & this.mask;
+
+        return this.table[idx] == key;
     }
 
     public void clear() {

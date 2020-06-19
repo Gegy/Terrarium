@@ -1,5 +1,7 @@
 package net.gegy1000.earth.server.world.data.source.reader;
 
+import net.gegy1000.terrarium.server.util.Profiler;
+import net.gegy1000.terrarium.server.util.ThreadedProfiler;
 import net.gegy1000.terrarium.server.world.data.DataView;
 import net.gegy1000.terrarium.server.world.data.raster.IntegerRaster;
 import net.gegy1000.terrarium.server.world.data.raster.Raster;
@@ -15,18 +17,21 @@ public final class TerrariumRasterReader {
     private static final String SIGNATURE = "TERRARIUM/RASTER";
 
     public static <T extends IntegerRaster<?>> T read(InputStream input, Class<T> rasterType) throws IOException {
-        DataInputStream dataIn = new DataInputStream(input);
+        Profiler profiler = ThreadedProfiler.get();
+        try (Profiler.Handle read = profiler.push("read_terrarium_raster")) {
+            DataInputStream dataIn = new DataInputStream(input);
 
-        byte[] signature = new byte[SIGNATURE.length()];
-        dataIn.readFully(signature);
+            byte[] signature = new byte[SIGNATURE.length()];
+            dataIn.readFully(signature);
 
-        if (!Arrays.equals(signature, SIGNATURE.getBytes())) throw new IOException("Invalid signature");
+            if (!Arrays.equals(signature, SIGNATURE.getBytes())) throw new IOException("Invalid signature");
 
-        int version = dataIn.readUnsignedByte();
-        if (version == 0) {
-            return readV0(dataIn, rasterType);
-        } else {
-            throw new IOException("Unknown data version " + version);
+            int version = dataIn.readUnsignedByte();
+            if (version == 0) {
+                return readV0(dataIn, rasterType);
+            } else {
+                throw new IOException("Unknown data version " + version);
+            }
         }
     }
 

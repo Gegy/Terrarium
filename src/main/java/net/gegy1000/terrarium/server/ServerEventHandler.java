@@ -5,10 +5,11 @@ import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.capability.TerrariumAuxCaps;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
+import net.gegy1000.terrarium.server.util.Profiler;
+import net.gegy1000.terrarium.server.util.ThreadedProfiler;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
-import net.gegy1000.terrarium.server.world.data.DataGenerator;
 import net.gegy1000.terrarium.server.world.data.source.DataSourceReader;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
@@ -86,17 +87,24 @@ public class ServerEventHandler {
             TerrariumWorld terrarium = TerrariumWorld.get(world);
             if (terrarium == null) return;
 
-            ColumnDataCache dataCache = terrarium.getDataCache();
+            Profiler profiler = ThreadedProfiler.get();
+            try (Profiler.Handle tick = profiler.push("tick")) {
+                ColumnDataCache dataCache = terrarium.getDataCache();
 
-            // advance loading for up to 2ms
-            long allocation = 2 * 1000000;
-            dataCache.advanceUntil(System.nanoTime() + allocation);
+                try (Profiler.Handle advance = profiler.push("advance")) {
+                    // advance loading for up to 2ms
+                    long allocation = 2 * 1000000;
+                    dataCache.advanceUntil(System.nanoTime() + allocation);
+                }
 
-            long time = System.currentTimeMillis();
-            if (time - lastDataTrackTime > DATA_TRACK_INTERVAL) {
-                dataCache.dropColumns();
-                dataCache.trackColumns();
-                lastDataTrackTime = time;
+                long time = System.currentTimeMillis();
+                if (time - lastDataTrackTime > DATA_TRACK_INTERVAL) {
+                    try (Profiler.Handle track = profiler.push("track_columns")) {
+                        dataCache.dropColumns();
+                        dataCache.trackColumns();
+                        lastDataTrackTime = time;
+                    }
+                }
             }
         }
     }

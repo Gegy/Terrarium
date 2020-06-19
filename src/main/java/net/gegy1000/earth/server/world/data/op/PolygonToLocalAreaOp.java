@@ -2,6 +2,8 @@ package net.gegy1000.earth.server.world.data.op;
 
 import com.vividsolutions.jts.geom.MultiPolygon;
 import net.gegy1000.earth.server.world.data.PolygonData;
+import net.gegy1000.terrarium.server.util.Profiler;
+import net.gegy1000.terrarium.server.util.ThreadedProfiler;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.data.DataOp;
 import net.gegy1000.terrarium.server.world.rasterization.PolygonShapeProducer;
@@ -23,12 +25,14 @@ public final class PolygonToLocalAreaOp {
                 }
             };
 
-            Area area = new Area();
-            for (MultiPolygon polygon : polygonData.getPolygons()) {
-                area.add(PolygonShapeProducer.toShape(polygon, transform));
+            Profiler profiler = ThreadedProfiler.get();
+            try (Profiler.Handle polygonToArea = profiler.push("polygon_to_area")) {
+                Area area = new Area();
+                for (MultiPolygon polygon : polygonData.getPolygons()) {
+                    area.add(PolygonShapeProducer.toShape(polygon, transform));
+                }
+                return area;
             }
-
-            return area;
         });
     }
 }

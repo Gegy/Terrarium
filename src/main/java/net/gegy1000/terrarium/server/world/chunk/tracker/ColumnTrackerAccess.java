@@ -26,6 +26,7 @@ public class ColumnTrackerAccess implements ChunkTrackerAccess {
     }
 
     private final WorldServer world;
+    private final LongSortedSet bufferColumns = new LongLinkedOpenHashSet();
 
     public ColumnTrackerAccess(WorldServer world) {
         this.world = world;
@@ -34,7 +35,7 @@ public class ColumnTrackerAccess implements ChunkTrackerAccess {
     @Override
     public LongSortedSet getSortedQueuedColumns() {
         LongSortedSet queuedColumns = new LongLinkedOpenHashSet();
-        LongSortedSet bufferColumns = new LongLinkedOpenHashSet();
+        this.bufferColumns.clear();
 
         List<PlayerChunkMapEntry> entriesWithoutChunks = getEntriesWithoutChunks(this.world.getPlayerChunkMap());
 
@@ -50,13 +51,13 @@ public class ColumnTrackerAccess implements ChunkTrackerAccess {
                 // require surrounding chunks to be loaded for decoration and lighting
                 for (int z = -5; z <= 5; z++) {
                     for (int x = -5; x <= 5; x++) {
-                        bufferColumns.add(ChunkPos.asLong(x + pos.x, z + pos.z));
+                        this.bufferColumns.add(ChunkPos.asLong(x + pos.x, z + pos.z));
                     }
                 }
             }
         }
 
-        queuedColumns.addAll(bufferColumns);
+        queuedColumns.addAll(this.bufferColumns);
 
         return queuedColumns;
     }

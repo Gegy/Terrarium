@@ -5,6 +5,8 @@ import net.gegy1000.justnow.future.Future;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.util.Lazy;
+import net.gegy1000.terrarium.server.util.Profiler;
+import net.gegy1000.terrarium.server.util.ThreadedProfiler;
 import net.gegy1000.terrarium.server.world.composer.biome.BiomeComposer;
 import net.gegy1000.terrarium.server.world.data.ColumnData;
 import net.gegy1000.terrarium.server.world.data.DataView;
@@ -24,6 +26,9 @@ public class ComposableBiomeProvider extends BiomeProvider {
     private final Lazy<Optional<TerrariumWorld>> terrarium;
 
     private final BiomeCache biomeCache = new BiomeCache(this);
+
+    private DataView viableCacheView;
+    private boolean viableCacheResult;
 
     public ComposableBiomeProvider(World world) {
         this.terrarium = Lazy.ofCapability(world, TerrariumCapabilities.world());
@@ -63,7 +68,7 @@ public class ComposableBiomeProvider extends BiomeProvider {
         if (cache && fillsChunk) {
             System.arraycopy(this.biomeCache.getCachedBiomes(x, z), 0, biomes, 0, width * height);
         } else {
-            this.populateArea(biomes, x, z, width, height);
+            this.populateArea(biomes, DataView.rect(x, z, width, height));
         }
 
         return biomes;
@@ -79,16 +84,27 @@ public class ComposableBiomeProvider extends BiomeProvider {
         int minX = originX - radius;
         int minZ = originZ - radius;
         int size = (radius * 2) + 1;
+        DataView view = DataView.rect(minX, minZ, size, size);
+
+        if (view.equals(this.viableCacheView)) {
+            return this.viableCacheResult;
+        }
+
+        boolean result = true;
 
         Biome[] biomes = new Biome[size * size];
-        this.populateArea(biomes, minX, minZ, size, size);
+        this.populateArea(biomes, view);
         for (Biome biome : biomes) {
             if (!allowed.contains(biome)) {
-                return false;
+                result = false;
+                break;
             }
         }
 
-        return true;
+        this.viableCacheView = view;
+        this.viableCacheResult = result;
+
+        return result;
     }
 
     @Override
@@ -98,9 +114,10 @@ public class ComposableBiomeProvider extends BiomeProvider {
         int minX = originX - radius;
         int minZ = originZ - radius;
         int size = (radius * 2) + 1;
+        DataView view = DataView.rect(minX, minZ, size, size);
 
         Biome[] biomes = new Biome[size * size];
-        this.populateArea(biomes, minX, minZ, size, size);
+        this.populateArea(biomes, view);
 
         for (int z = 0; z < size; z++) {
             for (int x = 0; x < size; x++) {
@@ -113,7 +130,7 @@ public class ComposableBiomeProvider extends BiomeProvider {
         return null;
     }
 
-    private void populateArea(Biome[] resultBiomes, int x, int z, int width, int height) {
+    private void populateArea(Biome[] resultBiomes, DataView view) {
         Optional<TerrariumWorld> terrariumOption = this.terrarium.get();
         if (!terrariumOption.isPresent()) {
             Arrays.fill(resultBiomes, Biomes.PLAINS);
@@ -121,24 +138,29 @@ public class ComposableBiomeProvider extends BiomeProvider {
         }
 
         TerrariumWorld terrarium = terrariumOption.get();
-        BiomeComposer biomeComposer = terrarium.getBiomeComposer();
 
-        DataView view = DataView.rect(x, z, width, height);
+        Profiler profiler = ThreadedProfiler.get();
+        try (
+                Profiler.Handle biomes = profiler.push("biomes");
+                Profiler.Handle sampleArea = profiler.push("sample_area")
+        ) {
+            BiomeComposer biomeComposer = terrarium.getBiomeComposer();
 
-        if (this.isChunk(x, z, width, height)) {
-            ColumnData data = terrarium.getDataCache().joinData(x >> 4, z >> 4);
+            if (this.isChunk(view.getX(), view.getY(), view.getWidth(), view.getHeight())) {
+                ColumnData data = terrarium.getDataCache().joinData(view.getX() >> 4, view.getY() >> 4);
+                biomeComposer.composeBiomes(resultBiomes, terrarium, data, view);
+                return;
+            }
+
+            Future<ColumnData> future = terrarium.getDataGenerator().generate(view);
+            ColumnData data = CurrentThreadExecutor.blockOn(future);
+
             biomeComposer.composeBiomes(resultBiomes, terrarium, data, view);
-            return;
         }
-
-        Future<ColumnData> future = terrarium.getDataGenerator().generate(view);
-        ColumnData data = CurrentThreadExecutor.blockOn(future);
-
-        biomeComposer.composeBiomes(resultBiomes, terrarium, data, view);
     }
 
-    private boolean isChunk(int x, int z, int width, int height) {
-        return width == 16 && height == 16 && (x & 15) == 0 && (z & 15) == 0;
+    private boolean isChunk(int x, int y, int width, int height) {
+        return width == 16 && height == 16 && (x & 15) == 0 && (y & 15) == 0;
     }
 
     @Override

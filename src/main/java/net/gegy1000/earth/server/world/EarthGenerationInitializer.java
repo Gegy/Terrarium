@@ -74,7 +74,7 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
         builder.addSurfaceComposer(new FloodedSurfaceComposer());
 
         if (this.ctx.settings.get(CAVE_GENERATION)) {
-            builder.addSurfaceComposer(GenericSurfaceComposer.of(new GenericCavePrimer(this.world)));
+            builder.addSurfaceComposer(GenericSurfaceComposer.of(new GenericCavePrimer(this.world, surfaceFunction)));
         }
 
         if (this.ctx.settings.get(RAVINE_GENERATION)) {

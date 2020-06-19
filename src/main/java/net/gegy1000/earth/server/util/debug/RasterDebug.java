@@ -98,8 +98,11 @@ final class RasterDebug {
         int width = rasters.soil.getWidth();
         int height = rasters.soil.getHeight();
 
+        Path root = OUTPUT.resolve("suborder_masks");
+        Files.createDirectories(root);
+
         for (SoilSuborder maskClass : SoilSuborder.values()) {
-            Path path = OUTPUT.resolve(maskClass.name().toLowerCase(Locale.ROOT) + ".png");
+            Path path = root.resolve(maskClass.name().toLowerCase(Locale.ROOT) + ".png");
             if (Files.exists(path)) {
                 continue;
             }

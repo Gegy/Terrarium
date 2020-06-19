@@ -8,6 +8,8 @@ import net.gegy1000.justnow.future.Future;
 import net.gegy1000.justnow.future.JoinHandle;
 import net.gegy1000.justnow.tuple.Unit;
 import net.gegy1000.terrarium.Terrarium;
+import net.gegy1000.terrarium.server.util.Profiler;
+import net.gegy1000.terrarium.server.util.ThreadedProfiler;
 import net.gegy1000.terrarium.server.util.Vec2i;
 import net.gegy1000.terrarium.server.world.data.DataView;
 import net.minecraft.util.math.MathHelper;
@@ -17,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -127,17 +130,13 @@ public final class DataSourceReader {
             Vec2i min,
             Vec2i max
     ) {
-        Collection<Vec2i> tiles = new ArrayList<>((max.x - min.x + 1) * (max.y - min.y + 1));
+        Collection<Future<DataTileResult<T>>> futures = new ArrayList<>((max.x - min.x + 1) * (max.y - min.y + 1));
         for (int y = min.y; y <= max.y; y++) {
             for (int x = min.x; x <= max.x; x++) {
-                tiles.add(new Vec2i(x, y));
+                futures.add(this.getTile(source, new Vec2i(x, y)));
             }
         }
-        return this.getTiles(source, tiles);
-    }
-
-    public <T> Future<Collection<DataTileResult<T>>> getTiles(TiledDataSource<T> source, Collection<Vec2i> tiles) {
-        return Future.joinAll(tiles.stream().map(pos -> this.getTile(source, pos)));
+        return Future.joinAll(futures);
     }
 
     private <T> void handleResult(TileKey<T> key, DataTileResult<T> result) {
@@ -152,7 +151,15 @@ public final class DataSourceReader {
 
     private <T> DataTileResult<T> loadTile(TileKey<T> key) throws IOException {
         Vec2i pos = key.asVec2();
-        return new DataTileResult<>(pos, key.source.load(pos));
+
+        Optional<T> result;
+
+        Profiler profiler = ThreadedProfiler.get();
+        try (Profiler.Handle load = profiler.push("load_tile")) {
+            result = key.source.load(pos);
+        }
+
+        return new DataTileResult<>(pos, result);
     }
 
     private <T> void logError(TileKey<T> key, Throwable throwable) {

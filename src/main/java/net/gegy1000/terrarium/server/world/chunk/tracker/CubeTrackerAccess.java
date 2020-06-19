@@ -29,6 +29,7 @@ public class CubeTrackerAccess implements ChunkTrackerAccess {
     }
 
     private final WorldServer world;
+    private final LongSortedSet bufferColumns = new LongLinkedOpenHashSet();
 
     public CubeTrackerAccess(WorldServer world) {
         this.world = world;
@@ -44,7 +45,7 @@ public class CubeTrackerAccess implements ChunkTrackerAccess {
             }
 
             LongSortedSet queuedColumns = new LongLinkedOpenHashSet();
-            LongSortedSet bufferColumns = new LongLinkedOpenHashSet();
+            this.bufferColumns.clear();
 
             // the cubesToGenerate list is already sorted
             for (CubeWatcher watcher : cubesToGenerate) {
@@ -60,13 +61,13 @@ public class CubeTrackerAccess implements ChunkTrackerAccess {
 
                     for (int z = -5; z <= 5; z++) {
                         for (int x = -5; x <= 5; x++) {
-                            bufferColumns.add(ChunkPos.asLong(x + watcher.getX(), z + watcher.getZ()));
+                            this.bufferColumns.add(ChunkPos.asLong(x + watcher.getX(), z + watcher.getZ()));
                         }
                     }
                 }
             }
 
-            queuedColumns.addAll(bufferColumns);
+            queuedColumns.addAll(this.bufferColumns);
 
             return queuedColumns;
         }

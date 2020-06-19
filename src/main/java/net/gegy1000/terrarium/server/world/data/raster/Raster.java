@@ -21,23 +21,23 @@ public interface Raster<T> {
     }
 
     @SuppressWarnings({ "SuspiciousSystemArraycopy" })
-    static <R extends Raster<?>> void rasterCopy(R src, DataView srcView, R dest, DataView destView) {
-        int minX = Math.max(0, destView.getMinX() - srcView.getMinX());
-        int minY = Math.max(0, destView.getMinY() - srcView.getMinY());
-        int maxX = Math.min(srcView.getWidth(), destView.getMaxX() - srcView.getMinX());
-        int maxY = Math.min(srcView.getHeight(), destView.getMaxY() - srcView.getMinY());
+    static <R extends Raster<?>> void rasterCopy(R src, DataView srcView, R dst, DataView dstView) {
+        int minX = Math.max(0, dstView.getMinX() - srcView.getMinX());
+        int minY = Math.max(0, dstView.getMinY() - srcView.getMinY());
+        int maxX = Math.min(srcView.getWidth(), dstView.getMaxX() - srcView.getMinX());
+        int maxY = Math.min(srcView.getHeight(), dstView.getMaxY() - srcView.getMinY());
 
         Object srcData = src.getData();
-        Object destData = dest.getData();
+        Object destData = dst.getData();
 
         for (int localY = minY; localY < maxY; localY++) {
-            int resultY = (localY + srcView.getMinY()) - destView.getMinY();
+            int resultY = (localY + srcView.getMinY()) - dstView.getMinY();
 
             int localX = minX;
-            int resultX = (localX + srcView.getMinX()) - destView.getMinX();
+            int resultX = (localX + srcView.getMinX()) - dstView.getMinX();
 
             int sourceIndex = localX + localY * src.getWidth();
-            int resultIndex = resultX + resultY * dest.getWidth();
+            int resultIndex = resultX + resultY * dst.getWidth();
 
             System.arraycopy(srcData, sourceIndex, destData, resultIndex, maxX - minX);
         }

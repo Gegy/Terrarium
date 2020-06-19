@@ -1,5 +1,6 @@
 package net.gegy1000.earth.server.world.composer.structure.placement;
 
+import net.gegy1000.earth.server.world.composer.structure.data.LossyColumnMap;
 import net.gegy1000.terrarium.server.util.SpiralIterator;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -18,6 +19,7 @@ public final class CellStructurePlacement implements StructurePlacement {
     private Predicate predicate = (world, chunkX, chunkZ) -> true;
 
     private final Point2i mutablePoint = new Point2i();
+    private final LossyColumnMap<Point2i> cellToChunkCache = new LossyColumnMap<>(64);
 
     public CellStructurePlacement(int cellSize, int cellBorder, int seed) {
         this.cellSize = cellSize;
@@ -76,15 +78,24 @@ public final class CellStructurePlacement implements StructurePlacement {
     }
 
     private Point2i getSpawnChunkForCell(World world, int cellX, int cellZ) {
+        Point2i cachedChunk = this.cellToChunkCache.get(cellX, cellZ);
+        if (cachedChunk != null) {
+            return cachedChunk;
+        }
+
         Random random = world.setRandomSeed(cellX, cellZ, this.seed);
 
         int minCellX = cellX * this.cellSize;
         int minCellZ = cellZ * this.cellSize;
 
-        this.mutablePoint.x = minCellX + random.nextInt(this.cellSize - this.cellBorder);
-        this.mutablePoint.y = minCellZ + random.nextInt(this.cellSize - this.cellBorder);
+        Point2i spawnChunk = new Point2i(
+                minCellX + random.nextInt(this.cellSize - this.cellBorder),
+                minCellZ + random.nextInt(this.cellSize - this.cellBorder)
+        );
 
-        return this.mutablePoint;
+        this.cellToChunkCache.put(cellX, cellZ, spawnChunk);
+
+        return spawnChunk;
     }
 
     public interface Predicate {

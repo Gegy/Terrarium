@@ -70,7 +70,7 @@ public final class MaxentLambdasFile {
             String ident = tokens[0];
 
             float lambda = Float.parseFloat(tokens[1]);
-            if (Math.abs(lambda) <= 1e-6F) return null;
+            if (Math.abs(lambda) <= 1e-2F) return null;
 
             float min = Float.parseFloat(tokens[2]);
             float max = Float.parseFloat(tokens[3]);

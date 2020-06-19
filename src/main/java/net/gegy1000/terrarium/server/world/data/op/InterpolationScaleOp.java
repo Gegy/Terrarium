@@ -1,6 +1,8 @@
 package net.gegy1000.terrarium.server.world.data.op;
 
 import net.gegy1000.terrarium.server.util.Interpolate;
+import net.gegy1000.terrarium.server.util.Profiler;
+import net.gegy1000.terrarium.server.util.ThreadedProfiler;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.data.DataOp;
@@ -67,12 +69,15 @@ public enum InterpolationScaleOp {
             return data.apply(srcView, ctx).andThen(opt -> {
                 return ctx.spawnBlocking(() -> opt.map(source -> {
                     T result = function.apply(view);
-                    if (this == NEAREST) {
-                        this.scaleIntoNearest(source, result, dstToSrcX, dstToSrcY, offsetX, offsetY);
-                    } else {
-                        this.scaleInto(source, result, dstToSrcX, dstToSrcY, offsetX, offsetY);
+                    Profiler profiler = ThreadedProfiler.get();
+                    try (Profiler.Handle scaleRaster = profiler.push("interpolate_raster")) {
+                        if (this == NEAREST) {
+                            this.scaleIntoNearest(source, result, dstToSrcX, dstToSrcY, offsetX, offsetY);
+                        } else {
+                            this.scaleInto(source, result, dstToSrcX, dstToSrcY, offsetX, offsetY);
+                        }
+                        return result;
                     }
-                    return result;
                 }));
             });
         });
