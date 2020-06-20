@@ -186,6 +186,11 @@ public class EarthWorldType extends TerrariumWorldType {
         return MathHelper.ceil(height) + 1;
     }
 
+    @Override
+    public int getMinSpawnHeight(World world) {
+        return world.getSeaLevel() - 1;
+    }
+
     private double transformHeight(GenerationSettings settings, double height) {
         double heightScale = height >= 0.0 ? settings.getDouble(TERRESTRIAL_HEIGHT_SCALE) : settings.getDouble(OCEANIC_HEIGHT_SCALE);
 

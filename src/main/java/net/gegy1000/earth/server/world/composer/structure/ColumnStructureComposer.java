@@ -193,8 +193,10 @@ public final class ColumnStructureComposer implements StructureComposer {
 
             this.structureStarts.put(start);
 
-            if (start.isSizeableStructure()) {
-                this.writeStructureStart(start);
+            try (Profiler.Handle writeStart = profiler.push("write_start")) {
+                if (start.isSizeableStructure()) {
+                    this.writeStructureStart(start);
+                }
             }
         }
     }
