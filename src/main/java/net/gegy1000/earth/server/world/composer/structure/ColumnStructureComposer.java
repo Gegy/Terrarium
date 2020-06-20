@@ -232,38 +232,63 @@ public final class ColumnStructureComposer implements StructureComposer {
         this.random.setSeed(pos.getCenterX(), pos.getCenterZ());
 
         ChunkPos columnPos = new ChunkPos(pos.getX(), pos.getZ());
+        int minColumnX = columnPos.getXStart() + 8;
+        int minColumnZ = columnPos.getZStart() + 8;
+        int maxColumnX = minColumnX + 15;
+        int maxColumnZ = minColumnZ + 15;
 
         for (StructureStart start : this.structureStarts) {
-            ChunkPos startColumnPos = new ChunkPos(start.getChunkPosX(), start.getChunkPosZ());
-            int columnOffsetY = this.getColumnOffsetFor(startColumnPos);
+            if (!start.isSizeableStructure()) continue;
 
-            StructureBoundingBox cubeBounds = this.getCubeBounds(pos, columnOffsetY);
-
-            // TODO: isValidForPostProcess (how do? how is it used in vanilla?)
-            if (start.isSizeableStructure() /*&& start.isValidForPostProcess(columnPos)*/ && start.getBoundingBox().intersectsWith(cubeBounds)) {
-                ColumnCompatibilityWorld compatibilityWorld = this.getCompatibilityWorldFor(startColumnPos, columnOffsetY);
-
-                // village generation only sets its components' correct bounding boxes when addComponentParts is called
-                // this is usually fine, however when we're generating cubes: the bounds intersection check needs to
-                // consider y-values, which means the component needs to know the y-coordinate that it will generate at.
-
-                // here we call addComponentParts while disabling any updates to the world
-                if (!this.preparedBoundsCache.set(pos.getX(), pos.getZ())) {
-                    this.hookedBounds.set(cubeBounds);
-                    this.hookedBounds.minY = Integer.MIN_VALUE;
-                    this.hookedBounds.maxY = Integer.MIN_VALUE;
-
-                    for (StructureComponent component : start.getComponents()) {
-                        component.addComponentParts(compatibilityWorld, this.random, this.hookedBounds);
-                    }
-                }
-
-                this.hookedBounds.set(cubeBounds);
-                start.generateStructure(compatibilityWorld, this.random, this.hookedBounds);
-                start.notifyPostProcessAt(columnPos);
-
-                this.writeStructureStart(start);
+            // quickly exclude any structures that don't intersect with the column before testing with the cube
+            if (!start.getBoundingBox().intersectsWith(minColumnX, minColumnZ, maxColumnX, maxColumnZ)) {
+                continue;
             }
+
+            this.tryPopulateStructure(start, pos, columnPos, profiler);
+        }
+    }
+
+    private void tryPopulateStructure(StructureStart start, CubicPos cubePos, ChunkPos columnPos, Profiler profiler) {
+        ChunkPos startColumnPos = new ChunkPos(start.getChunkPosX(), start.getChunkPosZ());
+        int columnOffsetY = this.getColumnOffsetFor(startColumnPos);
+
+        StructureBoundingBox cubeBounds = this.getCubeBounds(cubePos, columnOffsetY);
+
+        if (start.getBoundingBox().intersectsWith(cubeBounds)) {
+            ColumnCompatibilityWorld compatibilityWorld = this.getCompatibilityWorldFor(startColumnPos, columnOffsetY);
+
+            if (!this.preparedBoundsCache.set(columnPos.x, columnPos.z)) {
+                try (Profiler.Handle prepareBounds = profiler.push("prepare_bounds")) {
+                    this.prepareStructureBounds(start, cubeBounds, compatibilityWorld);
+                }
+            }
+
+            this.hookedBounds.set(cubeBounds);
+
+            try (Profiler.Handle generate = profiler.push("generate")) {
+                start.generateStructure(compatibilityWorld, this.random, this.hookedBounds);
+            }
+
+            start.notifyPostProcessAt(columnPos);
+
+            this.writeStructureStart(start);
+        }
+    }
+
+    private void prepareStructureBounds(StructureStart start, StructureBoundingBox cubeBounds, World world) {
+        // village generation only sets its components' correct bounding boxes when addComponentParts is called
+        // this is usually fine, however when we're generating cubes: the bounds intersection check needs to
+        // consider y-values, which means the component needs to know the y-coordinate that it will generate at.
+
+        // here we call addComponentParts with an impossible bounding box such that nothing generates
+
+        this.hookedBounds.set(cubeBounds);
+        this.hookedBounds.minY = Integer.MIN_VALUE;
+        this.hookedBounds.maxY = Integer.MIN_VALUE;
+
+        for (StructureComponent component : start.getComponents()) {
+            component.addComponentParts(world, this.random, this.hookedBounds);
         }
     }
 
