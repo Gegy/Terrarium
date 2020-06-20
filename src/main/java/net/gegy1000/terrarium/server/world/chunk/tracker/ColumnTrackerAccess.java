@@ -49,8 +49,9 @@ public class ColumnTrackerAccess implements ChunkTrackerAccess {
                 queuedColumns.add(ChunkPos.asLong(pos.x, pos.z));
 
                 // require surrounding chunks to be loaded for decoration and lighting
-                for (int z = -5; z <= 5; z++) {
-                    for (int x = -5; x <= 5; x++) {
+                for (int z = -6; z <= 6; z++) {
+                    for (int x = -6; x <= 6; x++) {
+                        if (x == 0 && z == 0) continue;
                         this.bufferColumns.add(ChunkPos.asLong(x + pos.x, z + pos.z));
                     }
                 }

@@ -59,9 +59,10 @@ public class CubeTrackerAccess implements ChunkTrackerAccess {
                 if (queued) {
                     queuedColumns.add(key);
 
-                    for (int z = -5; z <= 5; z++) {
-                        for (int x = -5; x <= 5; x++) {
-                            this.bufferColumns.add(ChunkPos.asLong(x + watcher.getX(), z + watcher.getZ()));
+                    for (int z = -6; z <= 6; z++) {
+                        for (int x = -6; x <= 6; x++) {
+                            if (x == 0 && z == 0) continue;
+                            this.bufferColumns.add(ChunkPos.asLong(x + cubePos.getX(), z + cubePos.getZ()));
                         }
                     }
                 }
