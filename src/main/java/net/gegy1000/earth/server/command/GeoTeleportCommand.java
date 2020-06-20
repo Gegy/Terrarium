@@ -14,13 +14,13 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
+import javax.annotation.Nullable;
 import javax.vecmath.Vector2d;
 import java.io.IOException;
 
@@ -53,7 +53,7 @@ public class GeoTeleportCommand extends CommandBase {
                 try {
                     CommandLocation location = this.parseLocation(sender, locationInput);
                     Coordinate coordinate = location.getCoordinate(sender, earth);
-                    server.addScheduledTask(() -> this.teleport(entity, earth, coordinate));
+                    this.teleport(server, entity, earth, coordinate);
                 } catch (CommandException e) {
                     TextComponentTranslation message = new TextComponentTranslation(e.getMessage(), e.getErrorObjects());
                     message.getStyle().setColor(TextFormatting.RED);
@@ -122,40 +122,40 @@ public class GeoTeleportCommand extends CommandBase {
         return null;
     }
 
-    private void teleport(Entity entity, EarthWorld earthData, Coordinate coordinate) {
+    private void teleport(MinecraftServer server, Entity entity, EarthWorld earthData, Coordinate coordinate) {
         int blockX = MathHelper.floor(coordinate.getBlockX());
         int blockZ = MathHelper.floor(coordinate.getBlockZ());
 
-        int height = this.getHeight(entity.world, earthData, blockX, blockZ);
+        World world = entity.world;
+        BlockPos surface = earthData.estimateSurface(world, blockX, blockZ);
 
-        entity.dismountRidingEntity();
+        server.addScheduledTask(() -> {
+            int height = this.resolveHeight(world, blockX, blockZ, surface);
 
-        entity.lastTickPosX = entity.posX;
-        entity.lastTickPosY = entity.posY;
-        entity.lastTickPosZ = entity.posZ;
+            entity.dismountRidingEntity();
 
-        entity.motionX = 0.0;
-        entity.motionY = 0.0;
-        entity.motionZ = 0.0;
+            entity.lastTickPosX = entity.posX;
+            entity.lastTickPosY = entity.posY;
+            entity.lastTickPosZ = entity.posZ;
 
-        entity.onGround = true;
+            entity.motionX = 0.0;
+            entity.motionY = 0.0;
+            entity.motionZ = 0.0;
 
-        if (entity instanceof EntityPlayerMP) {
-            NetHandlerPlayServer connection = ((EntityPlayerMP) entity).connection;
-            connection.setPlayerLocation(coordinate.getBlockX(), height + 0.5, coordinate.getBlockZ(), 180.0F, 0.0F);
-        }
+            entity.onGround = true;
 
-        entity.sendMessage(DeferredTranslator.translate(entity, new TextComponentTranslation("commands.earth.geotp.success", entity.getName(), coordinate.getZ(), coordinate.getX())));
+            if (entity instanceof EntityPlayerMP) {
+                NetHandlerPlayServer connection = ((EntityPlayerMP) entity).connection;
+                connection.setPlayerLocation(coordinate.getBlockX(), height + 0.5, coordinate.getBlockZ(), 180.0F, 0.0F);
+            }
+
+            entity.sendMessage(DeferredTranslator.translate(entity, new TextComponentTranslation("commands.earth.geotp.success", entity.getName(), coordinate.getZ(), coordinate.getX())));
+        });
     }
 
-    private int getHeight(World world, EarthWorld earthData, int x, int z) {
-        BlockPos surface = earthData.estimateSurface(world, x, z);
-        if (surface != null) {
-            BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos(surface);
-            while (world.getBlockState(pos).getMaterial().blocksMovement()) {
-                pos.move(EnumFacing.UP);
-            }
-            return pos.getY();
+    private int resolveHeight(World world, int x, int z, @Nullable BlockPos terrainSurface) {
+        if (terrainSurface != null && !world.isChunkGeneratedAt(x, z)) {
+            return terrainSurface.getY();
         }
 
         return world.getTopSolidOrLiquidBlock(new BlockPos(x, 0, z)).getY();
