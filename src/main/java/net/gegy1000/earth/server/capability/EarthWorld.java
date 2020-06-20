@@ -1,8 +1,11 @@
 package net.gegy1000.earth.server.capability;
 
 import net.gegy1000.earth.TerrariumEarth;
+import net.gegy1000.earth.server.event.InitBiomeClassifierEvent;
 import net.gegy1000.earth.server.world.EarthData;
 import net.gegy1000.earth.server.world.EarthInitContext;
+import net.gegy1000.earth.server.world.biome.BiomeClassifier;
+import net.gegy1000.earth.server.world.biome.StandardBiomeClassifier;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
@@ -12,6 +15,7 @@ import net.gegy1000.terrarium.server.world.generator.customization.GenerationSet
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 
@@ -31,6 +35,8 @@ public interface EarthWorld extends ICapabilityProvider {
     Geocoder getGeocoder();
 
     CoordinateReference getCrs();
+
+    BiomeClassifier getBiomeClassifier();
 
     @Nullable
     BlockPos estimateSurface(World world, int blockX, int blockZ);
@@ -57,6 +63,11 @@ public interface EarthWorld extends ICapabilityProvider {
             return CoordinateReference.block();
         }
 
+        @Override
+        public BiomeClassifier getBiomeClassifier() {
+            return BiomeClassifier.DEFAULT;
+        }
+
         @Nullable
         @Override
         public BlockPos estimateSurface(World world, int blockX, int blockZ) {
@@ -67,10 +78,18 @@ public interface EarthWorld extends ICapabilityProvider {
     class Impl implements EarthWorld {
         private final CoordinateReference crs;
         private final Geocoder geocoder;
+        private final BiomeClassifier classifier;
 
         public Impl(GenerationSettings settings) {
             this.crs = EarthInitContext.from(settings).lngLatCrs;
             this.geocoder = TerrariumEarth.getPreferredGeocoder();
+
+            StandardBiomeClassifier classifier = new StandardBiomeClassifier();
+
+            InitBiomeClassifierEvent event = new InitBiomeClassifierEvent(settings, classifier);
+            MinecraftForge.EVENT_BUS.post(event);
+
+            this.classifier = event.getClassifier();
         }
 
         @Override
@@ -81,6 +100,11 @@ public interface EarthWorld extends ICapabilityProvider {
         @Override
         public CoordinateReference getCrs() {
             return this.crs;
+        }
+
+        @Override
+        public BiomeClassifier getBiomeClassifier() {
+            return this.classifier;
         }
 
         @Nullable

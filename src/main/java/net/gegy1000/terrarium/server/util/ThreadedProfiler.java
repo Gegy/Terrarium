@@ -64,7 +64,7 @@ public final class ThreadedProfiler implements Profiler {
     public Handle push(String name) {
         String path = name;
         if (!this.stack.isEmpty()) {
-            path = this.stack.peek() + "/" + name;
+            path = this.stack.peek() + "/" + path;
         }
 
         this.stack.push(path);
@@ -81,20 +81,16 @@ public final class ThreadedProfiler implements Profiler {
         long start = this.stackStartTime.popLong();
 
         long duration = time - start;
-        synchronized (this.accumulator) {
-            long accumulator = this.accumulator.getLong(path);
-            this.accumulator.put(path, accumulator + duration);
-        }
+        long accumulator = this.accumulator.getLong(path);
+        this.accumulator.put(path, accumulator + duration);
     }
 
     void collectTo(Node root) {
-        synchronized (this.accumulator) {
-            for (Object2LongMap.Entry<String> entry : this.accumulator.object2LongEntrySet()) {
-                String path = entry.getKey();
+        for (Object2LongMap.Entry<String> entry : this.accumulator.object2LongEntrySet()) {
+            String path = entry.getKey();
 
-                Node node = root.getOrCreate(path);
-                node.time = entry.getLongValue();
-            }
+            Node node = root.getOrCreate(path);
+            node.time = entry.getLongValue();
         }
 
         for (Node child : root.children.values()) {

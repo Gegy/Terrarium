@@ -7,6 +7,7 @@ import net.gegy1000.earth.server.util.debug.CoverColors;
 import net.gegy1000.earth.server.util.debug.SoilColors;
 import net.gegy1000.earth.server.world.EarthData;
 import net.gegy1000.earth.server.world.biome.BiomeClassifier;
+import net.gegy1000.earth.server.world.biome.StandardBiomeClassifier;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.ecology.GrowthIndicator;
 import net.gegy1000.earth.server.world.ecology.GrowthPredictors;
@@ -132,12 +133,14 @@ public final class GeoDebugger {
         return new RasterSampler(name, (dataCache, view) -> {
             BufferedImage image = new BufferedImage(view.getWidth(), view.getHeight(), BufferedImage.TYPE_INT_RGB);
 
+            BiomeClassifier classifier = new StandardBiomeClassifier();
             GrowthPredictors predictors = new GrowthPredictors();
+
             for (int y = 0; y < view.getHeight(); y++) {
                 for (int x = 0; x < view.getWidth(); x++) {
                     sampler.sampleTo(dataCache, x + view.getMinX(), y + view.getMinY(), predictors);
 
-                    Biome biome = BiomeClassifier.classify(predictors);
+                    Biome biome = classifier.classify(predictors);
                     image.setRGB(x, y, BiomeColors.get(biome));
                 }
             }

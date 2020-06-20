@@ -29,6 +29,8 @@ public interface TerrariumWorld extends ICapabilityProvider {
         return world.getCapability(TerrariumCapabilities.world(), null);
     }
 
+    World getWorld();
+
     GenerationSettings getSettings();
 
     DataGenerator getDataGenerator();
@@ -56,13 +58,15 @@ public interface TerrariumWorld extends ICapabilityProvider {
     }
 
     class Impl implements TerrariumWorld {
+        private final World world;
         private final GenerationSettings settings;
         private final TerrariumGenerator generator;
         private final DataGenerator dataGenerator;
         private final ColumnDataCache dataCache;
 
         public Impl(World world, TerrariumWorldType worldType) {
-            this.settings = GenerationSettings.parse(world);
+            this.world = world;
+            this.settings = GenerationSettings.parseFrom(world);
 
             DataGenerator.Builder dataGenerator = DataGenerator.builder();
 
@@ -82,6 +86,11 @@ public interface TerrariumWorld extends ICapabilityProvider {
             MinecraftForge.EVENT_BUS.post(new TerrariumInitializeGeneratorEvent(world, worldType, this.settings, generator, this.dataCache));
 
             this.generator = generator.build();
+        }
+
+        @Override
+        public World getWorld() {
+            return this.world;
         }
 
         @Override

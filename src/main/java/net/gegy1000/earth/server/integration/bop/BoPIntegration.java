@@ -2,9 +2,9 @@ package net.gegy1000.earth.server.integration.bop;
 
 import biomesoplenty.api.biome.BOPBiomes;
 import net.gegy1000.earth.TerrariumEarth;
-import net.gegy1000.earth.server.event.ClassifyBiomeEvent;
 import net.gegy1000.earth.server.event.ConfigureFlowersEvent;
 import net.gegy1000.earth.server.event.ConfigureTreesEvent;
+import net.gegy1000.earth.server.event.InitBiomeClassifierEvent;
 import net.gegy1000.earth.server.world.Climate;
 import net.gegy1000.earth.server.world.EarthProperties;
 import net.gegy1000.earth.server.world.composer.decoration.OreDecorationComposer;
@@ -21,6 +21,7 @@ import net.gegy1000.terrarium.server.event.TerrariumInitializeGeneratorEvent;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.minecraft.init.Biomes;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -129,114 +130,109 @@ public final class BoPIntegration {
     }
 
     @SubscribeEvent
-    public static void onClassifyBiome(ClassifyBiomeEvent event) {
-        TerrariumWorld terrarium = event.getTerrarium();
-        if (!terrarium.getSettings().getBoolean(EarthProperties.BOP_INTEGRATION)) {
+    public static void onInitBiomeClassifier(InitBiomeClassifierEvent event) {
+        GenerationSettings settings = event.getSettings();
+        if (!settings.getBoolean(EarthProperties.BOP_INTEGRATION)) {
             return;
         }
 
-        if (event.getBiome() == Biomes.BEACH) {
-            return;
-        }
+        event.modifyClassifier(standard -> {
+            return predictors -> {
+                Biome biome = standard.classify(predictors);
+                return classifyBiome(predictors, biome);
+            };
+        });
+    }
 
-        GrowthPredictors predictors = event.getPredictors();
+    private static Biome classifyBiome(GrowthPredictors predictors, Biome biome) {
+        if (biome == Biomes.BEACH) return biome;
 
         if (!predictors.isFrozen()) {
             if (predictors.cover == Cover.LICHENS_AND_MOSSES) {
-                event.setBiome(BOPBiomes.tundra.orNull());
-                return;
+                return BOPBiomes.tundra.or(biome);
             }
 
             if (predictors.cover == Cover.GRASSLAND) {
-                event.setBiome(BOPBiomes.grassland.orNull());
-                return;
+                return BOPBiomes.grassland.or(biome);
             }
 
             if (predictors.cover.is(CoverMarkers.DENSE_SHRUBS) && Climate.isVeryDry(predictors.annualRainfall)) {
                 if (predictors.isBarren() || SoilSelector.isDesertLike(predictors)) {
-                    event.setBiome(BOPBiomes.brushland.orNull());
+                    return BOPBiomes.brushland.or(biome);
                 } else {
-                    event.setBiome(BOPBiomes.xeric_shrubland.orNull());
+                    return BOPBiomes.xeric_shrubland.or(biome);
                 }
-                return;
             }
 
             if (predictors.isLand() && !predictors.cover.is(CoverMarkers.NO_VEGETATION)) {
                 double mangrove = BoPTrees.Indicators.MANGROVE.evaluate(predictors);
                 if (mangrove > 0.85) {
-                    event.setBiome(BOPBiomes.mangrove.orNull());
-                    return;
+                    return BOPBiomes.mangrove.or(biome);
                 }
             }
 
             if (predictors.slope >= 60 && !predictors.isCold() && predictors.cover.is(CoverMarkers.FOREST)) {
-                event.setBiome(BOPBiomes.overgrown_cliffs.orNull());
-                return;
+                return BOPBiomes.overgrown_cliffs.or(biome);
             }
 
-            if (predictors.isFlooded() && event.getBiome() == Biomes.SWAMPLAND) {
+            if (predictors.isFlooded() && biome == Biomes.SWAMPLAND) {
                 float spruce = Trees.Indicators.SPRUCE.evaluate(predictors);
                 if (spruce > 0.85F) {
-                    event.setBiome(BOPBiomes.wetland.orNull());
-                    return;
+                    return BOPBiomes.wetland.or(biome);
                 }
             }
 
-            if (predictors.isForested() && event.getBiome() == Biomes.JUNGLE) {
+            if (predictors.isForested() && biome == Biomes.JUNGLE) {
                 float jungle = Trees.Indicators.JUNGLE_LIKE.evaluate(predictors);
                 float oak = Trees.Indicators.OAK.evaluate(predictors);
                 float spruce = Trees.Indicators.SPRUCE.evaluate(predictors);
                 float mahogany = BoPTrees.Indicators.MAHOGANY.evaluate(predictors);
 
                 if (oak > jungle && oak > spruce && oak > mahogany) {
-                    event.setBiome(BOPBiomes.rainforest.orNull());
-                    return;
+                    return BOPBiomes.rainforest.or(biome);
                 } else if (spruce > jungle && spruce > oak && spruce > mahogany) {
-                    event.setBiome(BOPBiomes.temperate_rainforest.orNull());
-                    return;
+                    return BOPBiomes.temperate_rainforest.or(biome);
                 } else if (mahogany > jungle && mahogany > spruce && mahogany > oak) {
-                    event.setBiome(BOPBiomes.tropical_rainforest.orNull());
-                    return;
+                    return BOPBiomes.tropical_rainforest.or(biome);
                 }
             }
         }
 
         if (predictors.isForested()) {
-            classifyForest(event, predictors);
-            return;
+            return classifyForest(predictors, biome);
         }
+
+        return biome;
     }
 
-    private static void classifyForest(ClassifyBiomeEvent event, GrowthPredictors predictors) {
-        if (event.getBiome() == Biomes.FOREST && predictors.isFrozen()) {
-            event.setBiome(BOPBiomes.snowy_forest.orNull());
-            return;
+    private static Biome classifyForest(GrowthPredictors predictors, Biome biome) {
+        if (biome == Biomes.FOREST && predictors.isFrozen()) {
+            return BOPBiomes.snowy_forest.or(biome);
         }
 
         if (!predictors.isFrozen()) {
             float eucalyptus = BoPTrees.Indicators.EUCALYPTUS.evaluate(predictors);
             if (eucalyptus > 0.85F) {
-                event.setBiome(BOPBiomes.eucalyptus_forest.orNull());
-                return;
+                return BOPBiomes.eucalyptus_forest.or(biome);
             }
 
             float birch = Trees.Indicators.BIRCH.evaluate(predictors);
             float spruce = Trees.Indicators.SPRUCE.evaluate(predictors);
             if (birch > 0.85F && spruce > 0.85F) {
-                event.setBiome(BOPBiomes.boreal_forest.orNull());
-                return;
+                return BOPBiomes.boreal_forest.or(biome);
             }
         }
 
         double fir = BoPTrees.Indicators.FIR.evaluate(predictors);
         if (fir > 0.85F) {
             if (predictors.isFrozen()) {
-                event.setBiome(BOPBiomes.snowy_coniferous_forest.orNull());
+                return BOPBiomes.snowy_coniferous_forest.or(biome);
             } else {
-                event.setBiome(BOPBiomes.coniferous_forest.orNull());
+                return BOPBiomes.coniferous_forest.or(biome);
             }
-            return;
         }
+
+        return biome;
     }
 
     @SubscribeEvent

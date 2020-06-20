@@ -33,7 +33,7 @@ public class GenerationSettings {
         return new Builder();
     }
 
-    public static GenerationSettings parse(World world) {
+    public static GenerationSettings parseFrom(World world) {
         String generatorOptions = world.getWorldInfo().getGeneratorOptions();
 
         TerrariumWorldType worldType = GenericWorldType.unwrapAs(world.getWorldType(), TerrariumWorldType.class);

@@ -81,7 +81,7 @@ public abstract class TerrariumWorldType implements GenericWorldType {
     @Override
     public final int getMinGenerationHeight(WorldServer world) {
         if (world.provider.getDimensionType() == DimensionType.OVERWORLD) {
-            return this.getMinGenerationHeight(world, GenerationSettings.parse(world));
+            return this.getMinGenerationHeight(world, GenerationSettings.parseFrom(world));
         }
         return 0;
     }
@@ -89,7 +89,7 @@ public abstract class TerrariumWorldType implements GenericWorldType {
     @Override
     public final int getMaxGenerationHeight(WorldServer world) {
         if (world.provider.getDimensionType() == DimensionType.OVERWORLD) {
-            return this.getMaxGenerationHeight(world, GenerationSettings.parse(world));
+            return this.getMaxGenerationHeight(world, GenerationSettings.parseFrom(world));
         }
         return 256;
     }

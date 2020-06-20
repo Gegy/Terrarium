@@ -4,6 +4,7 @@ import net.gegy1000.earth.server.integration.bop.BoPTrees;
 import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.earth.server.util.zoom.Zoomable;
 import net.gegy1000.earth.server.world.biome.BiomeClassifier;
+import net.gegy1000.earth.server.world.biome.StandardBiomeClassifier;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.cover.CoverMarkers;
 import net.gegy1000.earth.server.world.data.source.StdSource;
@@ -161,12 +162,13 @@ final class RasterDebug {
 
         BufferedImage biomeImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 
+        BiomeClassifier classifier = new StandardBiomeClassifier();
         GrowthPredictors predictors = new GrowthPredictors();
 
         rasters.elevation.iterate((elevation, x, y) -> {
             rasters.samplePredictorsTo(predictors, x, y);
 
-            Biome biome = BiomeClassifier.classify(predictors);
+            Biome biome = classifier.classify(predictors);
             biomeImage.setRGB(x, y, BiomeColors.get(biome));
         });
 
