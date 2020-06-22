@@ -43,7 +43,7 @@ public final class EarthCactusComposer implements DecorationComposer {
         int dataZ = pos.getMaxZ();
 
         // TODO: a better solution?
-        if (writer.getCenterBiome() == Biomes.BEACH) {
+        if (writer.getCenterBiome() != Biomes.DESERT) {
             return;
         }
 
