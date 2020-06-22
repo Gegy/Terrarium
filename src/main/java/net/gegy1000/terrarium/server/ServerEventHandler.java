@@ -30,14 +30,15 @@ public class ServerEventHandler {
     private static long lastDataTrackTime;
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void onWorldLoad(WorldEvent.Load event) {
+    public static void onSetWorldSpawn(WorldEvent.CreateSpawnPosition event) {
         World world = event.getWorld();
         if (!world.isRemote && ServerEventHandler.shouldHandle(world)) {
-            TerrariumWorld worldData = TerrariumWorld.get(world);
-            if (worldData != null) {
-                Coordinate spawnPosition = worldData.getSpawnPosition();
+            TerrariumWorld terrarium = TerrariumWorld.get(world);
+            if (terrarium != null) {
+                Coordinate spawnPosition = terrarium.getSpawnPosition();
                 if (spawnPosition != null) {
                     world.setSpawnPoint(spawnPosition.toBlockPos());
+                    event.setCanceled(true);
                 }
             }
         }
