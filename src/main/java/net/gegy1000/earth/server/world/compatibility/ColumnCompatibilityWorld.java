@@ -1,13 +1,16 @@
 package net.gegy1000.earth.server.world.compatibility;
 
-import com.google.common.base.Predicate;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import net.gegy1000.terrarium.Terrarium;
+import net.gegy1000.earth.server.world.compatibility.hooks.DimensionManagerHooks;
+import net.minecraft.advancements.AdvancementManager;
+import net.minecraft.advancements.FunctionManager;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityTracker;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -17,15 +20,16 @@ import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.IWorldEventListener;
+import net.minecraft.world.Teleporter;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeProvider;
-import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
-import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.gen.feature.WorldGenerator;
+import net.minecraft.world.gen.structure.template.TemplateManager;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.MapStorage;
 import net.minecraft.world.storage.loot.LootTableManager;
@@ -38,12 +42,12 @@ import net.minecraftforge.event.terraingen.PopulateChunkEvent;
 import net.minecraftforge.event.terraingen.TerrainGen;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
+import java.io.File;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 
-public final class ColumnCompatibilityWorld extends World implements AutoCloseable {
+public final class ColumnCompatibilityWorld extends WorldServer implements AutoCloseable {
     private static final WorldGenerator NOOP_GENERATOR = new WorldGenerator() {
         @Override
         public boolean generate(World world, Random rand, BlockPos position) {
@@ -51,21 +55,33 @@ public final class ColumnCompatibilityWorld extends World implements AutoCloseab
         }
     };
 
-    private final World parent;
-    private final IChunkGenerator generator;
+    static final ThreadLocal<WorldServer> CONSTRUCTION_PARENT = new ThreadLocal<>();
 
-    private ChunkPos columnPos;
-    private BlockPos columnDecoratePos;
-    private int minY;
+    final WorldServer parent;
+    final IChunkGenerator generator;
 
-    private final BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
+    ChunkPos columnPos;
+    BlockPos columnDecoratePos;
+    int minY;
 
-    public ColumnCompatibilityWorld(World parent) {
-        super(parent.getSaveHandler(), parent.getWorldInfo(), parent.provider, parent.profiler, parent.isRemote);
+    final BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
+
+    private ColumnCompatibilityWorld(WorldServer parent) {
+        super(parent.getMinecraftServer(), new CompatibilitySaveHandler(parent), parent.getWorldInfo(), parent.provider.getDimension(), parent.profiler);
         this.parent = parent;
         this.generator = getChunkGenerator(parent);
 
         this.chunkProvider = this.createChunkProvider();
+    }
+
+    public static ColumnCompatibilityWorld create(WorldServer parent) {
+        MinecraftServer server = parent.getMinecraftServer();
+        try (DimensionManagerHooks.Freeze freeze = DimensionManagerHooks.freeze(server)) {
+            CONSTRUCTION_PARENT.set(parent);
+            return new ColumnCompatibilityWorld(parent);
+        } finally {
+            CONSTRUCTION_PARENT.remove();
+        }
     }
 
     private static IChunkGenerator getChunkGenerator(World world) {
@@ -125,8 +141,20 @@ public final class ColumnCompatibilityWorld extends World implements AutoCloseab
     }
 
     @Override
+    public World init() {
+        this.mapStorage = this.parent.getMapStorage();
+        this.villageCollection = this.parent.getVillageCollection();
+        this.perWorldStorage = this.parent.getPerWorldStorage();
+        this.worldScoreboard = this.parent.getScoreboard();
+        this.lootTable = this.parent.getLootTableManager();
+        this.functionManager = this.parent.getFunctionManager();
+        this.advancementManager = this.parent.getAdvancementManager();
+        return this;
+    }
+
+    @Override
     protected IChunkProvider createChunkProvider() {
-        return new ChunkProvider();
+        return new CompatibilityChunkProvider(this);
     }
 
     @Override
@@ -148,6 +176,12 @@ public final class ColumnCompatibilityWorld extends World implements AutoCloseab
     @Override
     public IBlockState getBlockState(BlockPos pos) {
         return this.parent.getBlockState(this.translatePos(pos));
+    }
+
+    @Nullable
+    @Override
+    public TileEntity getTileEntity(BlockPos pos) {
+        return this.parent.getTileEntity(this.translatePos(pos));
     }
 
     @Override
@@ -221,6 +255,18 @@ public final class ColumnCompatibilityWorld extends World implements AutoCloseab
         this.parent.onEntityRemoved(entity);
     }
 
+    @Nullable
+    @Override
+    public Entity getEntityByID(int id) {
+        return this.parent.getEntityByID(id);
+    }
+
+    @Nullable
+    @Override
+    public Entity getEntityFromUuid(UUID uuid) {
+        return this.parent.getEntityFromUuid(uuid);
+    }
+
     @Override
     public void addEventListener(IWorldEventListener listener) {
         this.parent.addEventListener(listener);
@@ -239,15 +285,27 @@ public final class ColumnCompatibilityWorld extends World implements AutoCloseab
         return this.parent.getCollisionBoxes(entity, aabb);
     }
 
+    @Nullable
     @Override
-    public ChunkProvider getChunkProvider() {
-        return (ChunkProvider) super.getChunkProvider();
+    public BlockPos getSpawnCoordinate() {
+        BlockPos parent = this.parent.getSpawnCoordinate();
+        if (parent == null) return null;
+
+        return new BlockPos(parent.getX(), this.untranslateY(parent.getY()), parent.getZ());
     }
 
     @Nullable
     @Override
-    public MinecraftServer getMinecraftServer() {
-        return this.parent.getMinecraftServer();
+    public BlockPos findNearestStructure(String name, BlockPos origin, boolean findUnexplored) {
+        BlockPos parent = this.parent.findNearestStructure(name, origin, findUnexplored);
+        if (parent == null) return null;
+
+        return new BlockPos(parent.getX(), this.untranslateY(parent.getY()), parent.getZ());
+    }
+
+    @Override
+    public CompatibilityChunkProvider getChunkProvider() {
+        return (CompatibilityChunkProvider) super.getChunkProvider();
     }
 
     @Override
@@ -292,8 +350,63 @@ public final class ColumnCompatibilityWorld extends World implements AutoCloseab
     }
 
     @Override
+    public TemplateManager getStructureTemplateManager() {
+        return this.parent.getStructureTemplateManager();
+    }
+
+    @Override
+    public EntityTracker getEntityTracker() {
+        return this.parent.getEntityTracker();
+    }
+
+    @Override
     public MapStorage getPerWorldStorage() {
         return this.parent.getPerWorldStorage();
+    }
+
+    @Override
+    public PlayerChunkMap getPlayerChunkMap() {
+        return this.parent.getPlayerChunkMap();
+    }
+
+    @Override
+    public Teleporter getDefaultTeleporter() {
+        return this.parent.getDefaultTeleporter();
+    }
+
+    @Override
+    public AdvancementManager getAdvancementManager() {
+        return this.parent.getAdvancementManager();
+    }
+
+    @Override
+    public FunctionManager getFunctionManager() {
+        return this.parent.getFunctionManager();
+    }
+
+    @Override
+    public File getChunkSaveLocation() {
+        if (this.parent == null) {
+            // this is called during WorldServer.<init>, so we have to use this hacky solution
+            return CONSTRUCTION_PARENT.get().getChunkSaveLocation();
+        }
+        return this.parent.getChunkSaveLocation();
+    }
+
+    @Override
+    public void saveAllChunks(boolean all, @Nullable IProgressUpdate callback) {
+    }
+
+    @Override
+    public void flushToDisk() {
+    }
+
+    @Override
+    public void flush() {
+    }
+
+    @Override
+    protected void saveLevel() {
     }
 
     @Override
@@ -312,279 +425,20 @@ public final class ColumnCompatibilityWorld extends World implements AutoCloseab
         this.getChunkProvider().clear();
     }
 
-    private BlockPos translatePos(BlockPos pos) {
+    BlockPos translatePos(BlockPos pos) {
         this.mutablePos.setPos(pos);
         this.mutablePos.setY(pos.getY() + this.minY);
         return this.mutablePos;
     }
 
-    private int untranslateY(int y) {
+    int untranslateY(int y) {
         return MathHelper.clamp(y - this.minY, 0, 255);
     }
 
-    private void translateEntity(Entity entity) {
+    void translateEntity(Entity entity) {
         if (entity.world != this.parent) {
             entity.setWorld(this.parent);
             entity.setPosition(entity.posX, entity.posY + this.minY, entity.posZ);
-        }
-    }
-
-    class ChunkProvider implements IChunkProvider {
-        private final Long2ObjectOpenHashMap<OffsetChunk> chunks = new Long2ObjectOpenHashMap<>(9);
-
-        void clear() {
-            this.chunks.clear();
-        }
-
-        private OffsetChunk loadChunk(int x, int z) {
-            Chunk parentChunk = ColumnCompatibilityWorld.this.parent.getChunk(x, z);
-            return new OffsetChunk(parentChunk);
-        }
-
-        @Nullable
-        @Override
-        public Chunk getLoadedChunk(int x, int z) {
-            return this.chunks.get(ChunkPos.asLong(x, z));
-        }
-
-        @Override
-        public Chunk provideChunk(int x, int z) {
-            Chunk loadedChunk = this.getLoadedChunk(x, z);
-            if (loadedChunk != null) {
-                return loadedChunk;
-            }
-
-            OffsetChunk chunk = this.loadChunk(x, z);
-            this.chunks.put(ChunkPos.asLong(x, z), chunk);
-            return chunk;
-        }
-
-        @Override
-        public boolean tick() {
-            return false;
-        }
-
-        @Override
-        public boolean isChunkGeneratedAt(int x, int z) {
-            return ColumnCompatibilityWorld.this.parent.isChunkGeneratedAt(x, z);
-        }
-
-        @Override
-        public String makeString() {
-            return "ColumnCompatibilityChunkProvider";
-        }
-    }
-
-    class OffsetChunk extends Chunk {
-        private final Chunk parent;
-
-        OffsetChunk(Chunk parent) {
-            super(parent.getWorld(), parent.x, parent.z);
-            this.parent = parent;
-        }
-
-        @Override
-        protected void populate(IChunkGenerator generator) {
-        }
-
-        @Override
-        public void populate(IChunkProvider chunkProvider, IChunkGenerator chunkGenrator) {
-        }
-
-        @Override
-        protected void generateHeightMap() {
-        }
-
-        @Override
-        public void generateSkylightMap() {
-        }
-
-        @Override
-        public void checkLight() {
-        }
-
-        @Override
-        public void enqueueRelightChecks() {
-        }
-
-        @Override
-        public void resetRelightChecks() {
-        }
-
-        @Override
-        public void onTick(boolean skipRecheckGaps) {
-        }
-
-        @Override
-        public void setStorageArrays(ExtendedBlockStorage[] newStorageArrays) {
-            Terrarium.LOGGER.warn("Unsupported setStorageArrays on compatibility chunk");
-        }
-
-        @Override
-        public void setBiomeArray(byte[] biomeArray) {
-            Terrarium.LOGGER.warn("Unsupported setBiomeArray on compatibility chunk");
-        }
-
-        @Override
-        public void setHeightMap(int[] newHeightMap) {
-            Terrarium.LOGGER.warn("Unsupported setHeightMap on compatibility chunk");
-        }
-
-        @Nullable
-        @Override
-        public IBlockState setBlockState(BlockPos pos, IBlockState state) {
-            return this.parent.setBlockState(ColumnCompatibilityWorld.this.translatePos(pos), state);
-        }
-
-        @Override
-        public IBlockState getBlockState(int x, int y, int z) {
-            return this.parent.getBlockState(x, y + ColumnCompatibilityWorld.this.minY, z);
-        }
-
-        @Nullable
-        @Override
-        public TileEntity getTileEntity(BlockPos pos, EnumCreateEntityType mode) {
-            return this.parent.getTileEntity(ColumnCompatibilityWorld.this.translatePos(pos), mode);
-        }
-
-        @Override
-        public void addTileEntity(TileEntity tileEntity) {
-            tileEntity.setPos(ColumnCompatibilityWorld.this.translatePos(tileEntity.getPos()).toImmutable());
-            this.parent.addTileEntity(tileEntity);
-        }
-
-        @Override
-        public void addTileEntity(BlockPos pos, TileEntity tileEntity) {
-            pos = ColumnCompatibilityWorld.this.translatePos(pos).toImmutable();
-            this.parent.addTileEntity(pos, tileEntity);
-        }
-
-        @Override
-        public void removeTileEntity(BlockPos pos) {
-            this.parent.removeTileEntity(ColumnCompatibilityWorld.this.translatePos(pos));
-        }
-
-        @Override
-        public Map<BlockPos, TileEntity> getTileEntityMap() {
-            return Collections.emptyMap();
-        }
-
-        @Override
-        public int getHeightValue(int x, int z) {
-            return ColumnCompatibilityWorld.this.untranslateY(this.parent.getHeightValue(x, z));
-        }
-
-        @Override
-        public BlockPos getPrecipitationHeight(BlockPos pos) {
-            BlockPos parent = this.parent.getPrecipitationHeight(pos);
-            int y = ColumnCompatibilityWorld.this.untranslateY(parent.getY());
-            return new BlockPos(parent.getX(), y, parent.getZ());
-        }
-
-        @Override
-        public boolean canSeeSky(BlockPos pos) {
-            return this.parent.canSeeSky(ColumnCompatibilityWorld.this.translatePos(pos));
-        }
-
-        @Override
-        public int getLightFor(EnumSkyBlock type, BlockPos pos) {
-            return this.parent.getLightFor(type, ColumnCompatibilityWorld.this.translatePos(pos));
-        }
-
-        @Override
-        public int getLightSubtracted(BlockPos pos, int amount) {
-            return this.parent.getLightSubtracted(ColumnCompatibilityWorld.this.translatePos(pos), amount);
-        }
-
-        @Override
-        public Biome getBiome(BlockPos pos, BiomeProvider provider) {
-            return this.parent.getBiome(ColumnCompatibilityWorld.this.translatePos(pos), provider);
-        }
-
-        @Override
-        public byte[] getBiomeArray() {
-            // CubicChunks calls getBiomeArray on initialization before parent is set
-            if (this.parent == null) return super.getBiomeArray();
-
-            return this.parent.getBiomeArray();
-        }
-
-        @Override
-        public void addEntity(Entity entity) {
-            ColumnCompatibilityWorld.this.translateEntity(entity);
-            this.parent.addEntity(entity);
-        }
-
-        @Override
-        public void removeEntity(Entity entity) {
-            this.parent.removeEntity(entity);
-        }
-
-        @Override
-        public void removeEntityAtIndex(Entity entity, int index) {
-            index -= MathHelper.floor(ColumnCompatibilityWorld.this.minY / 16.0);
-            if (index < 0 || index >= 16) {
-                return;
-            }
-            this.parent.removeEntityAtIndex(entity, index);
-        }
-
-        @Override
-        public <T extends Entity> void getEntitiesOfTypeWithinAABB(Class<? extends T> entityClass, AxisAlignedBB aabb, List<T> listToFill, Predicate<? super T> filter) {
-            aabb = aabb.offset(0.0, ColumnCompatibilityWorld.this.minY, 0.0);
-            this.parent.getEntitiesOfTypeWithinAABB(entityClass, aabb, listToFill, filter);
-        }
-
-        @Override
-        public void getEntitiesWithinAABBForEntity(@Nullable Entity entity, AxisAlignedBB aabb, List<Entity> listToFill, Predicate<? super Entity> filter) {
-            aabb = aabb.offset(0.0, ColumnCompatibilityWorld.this.minY, 0.0);
-            this.parent.getEntitiesWithinAABBForEntity(entity, aabb, listToFill, filter);
-        }
-
-        @Override
-        public boolean isEmpty() {
-            return this.parent.isEmpty();
-        }
-
-        @Override
-        public boolean isEmptyBetween(int startY, int endY) {
-            return this.parent.isEmptyBetween(startY + ColumnCompatibilityWorld.this.minY, endY + ColumnCompatibilityWorld.this.minY);
-        }
-
-        @Override
-        public boolean isPopulated() {
-            return this.parent.isPopulated();
-        }
-
-        @Override
-        public boolean isTerrainPopulated() {
-            return this.parent.isTerrainPopulated();
-        }
-
-        @Override
-        public boolean isLightPopulated() {
-            return this.parent.isLightPopulated();
-        }
-
-        @Override
-        public boolean wasTicked() {
-            return this.parent.wasTicked();
-        }
-
-        @Override
-        public void markDirty() {
-            this.parent.markDirty();
-        }
-
-        @Override
-        public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing) {
-            return this.parent.hasCapability(capability, facing);
-        }
-
-        @Nullable
-        @Override
-        public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing) {
-            return this.parent.getCapability(capability, facing);
         }
     }
 }

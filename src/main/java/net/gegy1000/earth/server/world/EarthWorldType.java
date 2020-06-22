@@ -56,7 +56,7 @@ public class EarthWorldType extends TerrariumWorldType {
     }
 
     @Override
-    public TerrariumGeneratorInitializer createGeneratorInitializer(World world, GenerationSettings settings, ColumnDataCache dataCache) {
+    public TerrariumGeneratorInitializer createGeneratorInitializer(WorldServer world, GenerationSettings settings, ColumnDataCache dataCache) {
         world.setSeaLevel(settings.getInteger(HEIGHT_OFFSET) + 2);
         return new EarthGenerationInitializer(EarthInitContext.from(settings), world, dataCache);
     }

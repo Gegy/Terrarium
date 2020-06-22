@@ -66,8 +66,8 @@ public class ServerEventHandler {
 
             TerrariumAuxCaps aux = new TerrariumAuxCaps.Implementation();
 
-            if (!world.isRemote) {
-                TerrariumWorld terrarium = new TerrariumWorld.Impl(world, worldType);
+            if (!world.isRemote && world instanceof WorldServer) {
+                TerrariumWorld terrarium = new TerrariumWorld.Impl((WorldServer) world, worldType);
 
                 Collection<ICapabilityProvider> capabilities = worldType.createCapabilities(world, terrarium.getSettings());
                 for (ICapabilityProvider provider : capabilities) {

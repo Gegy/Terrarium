@@ -5,13 +5,14 @@ import net.gegy1000.earth.server.world.composer.structure.placement.StructurePla
 import net.gegy1000.gengen.api.HeightFunction;
 import net.gegy1000.terrarium.server.world.composer.structure.StructureComposer;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.gen.structure.MapGenVillage;
 import net.minecraft.world.gen.structure.StructureStart;
 
 import java.util.Random;
 
 public final class VillageStructureComposer {
-    public static StructureComposer create(World world, HeightFunction surfaceFunction) {
+    public static StructureComposer create(WorldServer world, HeightFunction surfaceFunction) {
         StructurePlacement placement = new CellStructurePlacement(32, 8, 10387312)
                 .setPredicate(VillageStructureComposer::canSpawnAt);
 

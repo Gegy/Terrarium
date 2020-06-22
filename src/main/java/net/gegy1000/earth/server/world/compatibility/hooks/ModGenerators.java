@@ -1,4 +1,4 @@
-package net.gegy1000.earth.server.world.compatibility;
+package net.gegy1000.earth.server.world.compatibility.hooks;
 
 import net.gegy1000.earth.TerrariumEarth;
 import net.minecraftforge.fml.common.IWorldGenerator;

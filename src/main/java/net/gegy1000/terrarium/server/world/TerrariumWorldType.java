@@ -41,7 +41,7 @@ public abstract class TerrariumWorldType implements GenericWorldType {
         this.customization = Lazy.of(this::buildCustomization);
     }
 
-    public abstract TerrariumGeneratorInitializer createGeneratorInitializer(World world, GenerationSettings settings, ColumnDataCache dataCache);
+    public abstract TerrariumGeneratorInitializer createGeneratorInitializer(WorldServer world, GenerationSettings settings, ColumnDataCache dataCache);
 
     public abstract TerrariumDataInitializer createDataInitializer(GenerationSettings settings);
 

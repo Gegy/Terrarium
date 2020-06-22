@@ -22,6 +22,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.structure.ComponentScatteredFeaturePieces;
 import net.minecraft.world.gen.structure.MapGenStructureData;
@@ -69,7 +70,7 @@ public final class ColumnStructureComposer implements StructureComposer {
     private final HookedBoundingBox hookedBounds = new HookedBoundingBox();
 
     private ColumnStructureComposer(
-            World world,
+            WorldServer world,
             String structureName,
             StructurePlacement placement,
             StartConstructor startConstructor,
@@ -82,7 +83,7 @@ public final class ColumnStructureComposer implements StructureComposer {
         this.startConstructor = startConstructor;
         this.surfaceFunction = surfaceFunction;
 
-        this.compatibilityWorld = new ColumnCompatibilityWorld(world);
+        this.compatibilityWorld = ColumnCompatibilityWorld.create(world);
 
         this.random = new SpatialRandom(world, SEED);
         this.creatures = creatures;
@@ -376,7 +377,7 @@ public final class ColumnStructureComposer implements StructureComposer {
             return this;
         }
 
-        public ColumnStructureComposer build(World world) {
+        public ColumnStructureComposer build(WorldServer world) {
             return new ColumnStructureComposer(
                     world,
                     Preconditions.checkNotNull(this.structureName, "no structure name"),

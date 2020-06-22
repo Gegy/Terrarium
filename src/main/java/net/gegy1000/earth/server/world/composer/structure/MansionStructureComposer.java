@@ -12,6 +12,7 @@ import net.gegy1000.terrarium.server.world.composer.structure.StructureComposer;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.minecraft.init.Biomes;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.gen.ChunkGeneratorOverworld;
@@ -30,17 +31,17 @@ public final class MansionStructureComposer {
             Biomes.ROOFED_FOREST
     );
 
-    public static StructureComposer create(World world, HeightFunction surfaceFunction) {
+    public static StructureComposer create(WorldServer world, HeightFunction surfaceFunction) {
         StructurePlacement placement = new CellStructurePlacement(80, 20, 10387319)
                 .setPredicate(MansionStructureComposer::canSpawnAt);
 
-        CompatChunkGenerator overworld = new CompatChunkGenerator(world);
+        Lazy<CompatChunkGenerator> overworld = Lazy.of(() -> new CompatChunkGenerator(world));
 
         return ColumnStructureComposer.builder()
                 .setStructureName("Mansion")
                 .setPlacement(placement)
                 .setSurfaceFunction(surfaceFunction)
-                .setStartConstructor((w, r, x, z) -> makeStart(overworld, w, r, x, z))
+                .setStartConstructor((w, r, x, z) -> makeStart(overworld.get(), w, r, x, z))
                 .build(world);
     }
 

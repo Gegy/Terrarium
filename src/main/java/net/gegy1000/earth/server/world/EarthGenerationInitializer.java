@@ -35,16 +35,16 @@ import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.generator.CompositeTerrariumGenerator;
 import net.minecraft.init.Blocks;
-import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 
 import static net.gegy1000.earth.server.world.EarthProperties.*;
 
 final class EarthGenerationInitializer implements TerrariumGeneratorInitializer {
     private final EarthInitContext ctx;
-    private final World world;
+    private final WorldServer world;
     private final ColumnDataCache dataCache;
 
-    EarthGenerationInitializer(EarthInitContext ctx, World world, ColumnDataCache dataCache) {
+    EarthGenerationInitializer(EarthInitContext ctx, WorldServer world, ColumnDataCache dataCache) {
         this.ctx = ctx;
         this.world = world;
         this.dataCache = dataCache;

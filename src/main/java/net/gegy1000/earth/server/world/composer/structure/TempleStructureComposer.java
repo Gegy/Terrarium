@@ -6,6 +6,7 @@ import net.gegy1000.gengen.api.HeightFunction;
 import net.gegy1000.terrarium.server.world.composer.structure.StructureComposer;
 import net.minecraft.init.Biomes;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.structure.MapGenScatteredFeature;
 import net.minecraft.world.gen.structure.StructureStart;
@@ -23,7 +24,7 @@ public final class TempleStructureComposer {
             Biomes.COLD_TAIGA
     );
 
-    public static StructureComposer create(World world, HeightFunction surfaceFunction) {
+    public static StructureComposer create(WorldServer world, HeightFunction surfaceFunction) {
         StructurePlacement placement = new CellStructurePlacement(32, 8, 14357617)
                 .setPredicate(TempleStructureComposer::canSpawnAt);
 

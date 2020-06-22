@@ -8,6 +8,7 @@ import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.monster.EntityGuardian;
 import net.minecraft.init.Biomes;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.structure.StructureOceanMonument;
 import net.minecraft.world.gen.structure.StructureStart;
@@ -21,7 +22,7 @@ public final class OceanMonumentStructureComposer {
 
     private static final Biome.SpawnListEntry GUARDIAN = new Biome.SpawnListEntry(EntityGuardian.class, 1, 2, 4);
 
-    public static StructureComposer create(World world, HeightFunction surfaceFunction) {
+    public static StructureComposer create(WorldServer world, HeightFunction surfaceFunction) {
         StructurePlacement placement = new CellStructurePlacement(32, 5, 10387313)
                 .setPredicate(OceanMonumentStructureComposer::canSpawnAt);
 

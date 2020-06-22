@@ -12,6 +12,7 @@ import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 
 import java.util.function.Consumer;
 
@@ -25,10 +26,10 @@ public final class ColumnCompatibility {
 
     private boolean recursing;
 
-    public ColumnCompatibility(World world) {
+    public ColumnCompatibility(WorldServer world) {
         this.world = world;
         this.cubic = GenGen.isCubic(world);
-        this.compatibilityWorld = new ColumnCompatibilityWorld(world);
+        this.compatibilityWorld = ColumnCompatibilityWorld.create(world);
     }
 
     public void generateInColumn(TerrariumWorld terrarium, CubicPos pos, Consumer<ColumnCompatibilityWorld> generator) {

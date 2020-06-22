@@ -1,6 +1,7 @@
 package net.gegy1000.earth.server.world.compatibility;
 
 import net.gegy1000.earth.TerrariumEarth;
+import net.gegy1000.earth.server.world.compatibility.hooks.ModGenerators;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunkProvider;

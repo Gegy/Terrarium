@@ -17,6 +17,7 @@ import net.gegy1000.terrarium.server.world.generator.TerrariumGenerator;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -64,7 +65,7 @@ public interface TerrariumWorld extends ICapabilityProvider {
         private final DataGenerator dataGenerator;
         private final ColumnDataCache dataCache;
 
-        public Impl(World world, TerrariumWorldType worldType) {
+        public Impl(WorldServer world, TerrariumWorldType worldType) {
             this.world = world;
             this.settings = GenerationSettings.parseFrom(world);
 
