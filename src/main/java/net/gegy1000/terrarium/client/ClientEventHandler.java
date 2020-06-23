@@ -1,6 +1,5 @@
 package net.gegy1000.terrarium.client;
 
-import net.gegy1000.earth.client.gui.RemoteDataWarningGui;
 import net.gegy1000.gengen.api.GenericWorldType;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.message.TerrariumHandshakeMessage;
@@ -11,7 +10,6 @@ import net.minecraft.client.gui.GuiCreateWorld;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
-import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -43,15 +41,6 @@ public class ClientEventHandler {
         World world = event.getWorld();
         if (world.isRemote && Terrarium.serverHasMod) {
             handshakeQueued = true;
-        }
-    }
-
-    @SubscribeEvent
-    public static void onGuiChange(GuiOpenEvent event) {
-        GuiScreen currentScreen = MC.currentScreen;
-        if (currentScreen instanceof RemoteDataWarningGui && !((RemoteDataWarningGui) currentScreen).isComplete()) {
-            event.setCanceled(true);
-            ((RemoteDataWarningGui) currentScreen).setParent(event.getGui());
         }
     }
 

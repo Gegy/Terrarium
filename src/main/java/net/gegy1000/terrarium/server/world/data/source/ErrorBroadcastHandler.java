@@ -1,6 +1,5 @@
 package net.gegy1000.terrarium.server.world.data.source;
 
-import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.TerrariumUserTracker;
 import net.gegy1000.terrarium.server.message.DataFailWarningMessage;
@@ -13,10 +12,9 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Mod.EventBusSubscriber(modid = TerrariumEarth.ID)
+@Mod.EventBusSubscriber(modid = Terrarium.ID)
 public class ErrorBroadcastHandler {
-    private static final long FAIL_NOTIFICATION_INTERVAL = 8000;
-    private static final int FAIL_NOTIFICATION_THRESHOLD = 5;
+    private static final long FAIL_NOTIFICATION_INTERVAL = 10000;
 
     private static final AtomicInteger FAIL_COUNT = new AtomicInteger();
     private static long lastFailNotificationTime;
@@ -32,7 +30,7 @@ public class ErrorBroadcastHandler {
 
         if (time - lastFailNotificationTime > FAIL_NOTIFICATION_INTERVAL) {
             int failCount = FAIL_COUNT.get();
-            if (failCount > FAIL_NOTIFICATION_THRESHOLD) {
+            if (failCount > 0) {
                 broadcastFailNotification(failCount);
                 FAIL_COUNT.set(0);
             }
