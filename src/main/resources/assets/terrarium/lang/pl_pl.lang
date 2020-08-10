@@ -1,0 +1,24 @@
+# GUI
+
+gui.terrarium.accept=Zatwierdź
+gui.terrarium.preset=Ustaw ustawienie wstępne
+
+gui.terrarium.remote_data_warning.1=Uwaga: Terrarium pobiera dane z Internetu!
+gui.terrarium.remote_data_warning.2=Do generowania chunków mogą być wymagane różne dane.
+gui.terrarium.remote_data_warning.3=Może to prowadzić do dużego wykorzystania danych, w zależności od wygenerowanych chunków.
+gui.terrarium.remote_data_warning.4=Dane są wymagane tylko w przypadku chunków wyświetlanych przez graczy, a następnie są zapisywane w pamięci podręcznej.
+gui.terrarium.remote_data_warning.5=Jeśli korzystasz z ograniczonego połączenia, obserwuj wykorzystanie danych!
+
+gui.terrarium.select_preset.name=Wybierz ustawienia świata
+
+options.terrarium.customize_world_title.name=Dostosuj generowanie świata
+options.terrarium.preview_world_title.name=Podgląd generowania świata
+
+property.terrarium.slider_range.name=Zasięg: [%.2f-%.2f]
+property.terrarium.slider_fine.name=Przytrzymaj SHIFT, żeby dostroić
+property.terrarium.locked.name=Ta funkcja nie jest obecnie dostępna
+
+# Toasts
+
+toast.terrarium.data_failure.title=Terrarium awarie danych
+toast.terrarium.data_failure.desc=Nie udało się załadować %s kafelków danych
