@@ -1,0 +1,169 @@
+# Generators
+
+generator.terrarium.earth=Ziemia
+generator.terrarium.earth_debug=Debug Ziemi
+
+# GUI
+
+container.earth.geotool.name=Przybornik Ziemi
+geotool.earth.locate.success=Jesteś w %s
+
+container.earth.geodebug.name=Przybornij debugu Ziemi
+
+gui.earth.credits=Data Terrarium:
+gui.earth.spawnpoint=Ustaw spawnpoint
+gui.earth.locate=Zlokalizuj gracza
+gui.earth.teleport=Teleportuj gracza
+gui.earth.preload=Wstępne ładowanie świata
+gui.earth.preload.downloading=Pobieranie chunków
+
+gui.earth.retry=Ponów
+gui.earth.download=Pobierz
+gui.earth.run_in_background=Uruchom w tle
+gui.earth.initializing=Inicjowanie
+
+gui.button.earth.teleport=Teleportuj
+
+gui.copy_box.copied.name=Skopiowane do schowka!
+
+gui.earth.preparing=Proszę czekać
+gui.earth.preparing.desc.1=Przygotowywanie Terrarium do użycia...
+gui.earth.preparing.desc.2=Może to chwilę potrwać
+
+gui.earth.preparing.errored=Wystąpił błąd
+gui.earth.preparing.errored.desc.1=Nie udało się przygotować Terrarium do użycia!
+gui.earth.preparing.errored.desc.2=Sprawdź połączenie internetowe i spróbuj ponownie
+
+# Właściwości świata
+
+category.terrarium.world.name=Ustawienia świata
+
+property.terrarium.world_scale.name=Skala świata
+property.terrarium.terrestrial_height_scale.name=Skala wysokości ziemskiej
+property.terrarium.oceanic_height_scale.name=Oceaniczna skala wysokości
+property.terrarium.height_offset.name=Odsunięcie wysokości
+
+property.terrarium.world_scale.tooltip=Liczba metrów w rzeczywistości odpowiadająca jednemu blokowi w grze
+property.terrarium.terrestrial_height_scale.tooltip=Mnożnik wysokości z metrów na bloki dla terenu nad poziomem morza
+property.terrarium.oceanic_height_scale.tooltip=Mnożnik wysokości z metrów na bloki dla terenu poniżej poziomu morza
+property.terrarium.height_offset.tooltip=Wysokość w grze odpowiadająca poziomowi morza
+
+# Właściwości ekologiczne
+
+category.terrarium.ecological.name=Ustawienia ekologiczne
+
+property.terrarium.add_trees.name=Dodaj drzewa
+property.terrarium.add_grass.name=Dodaj trawę
+property.terrarium.add_flowers.name=Dodaj kwiaty
+property.terrarium.add_cacti.name=Dodaj kaktusy
+property.terrarium.add_sugar_cane.name=Dodaj trzcinę cukrową
+property.terrarium.add_gourds.name=Dodaj dynie i arbuzy
+
+property.terrarium.add_trees.tooltip=Jeśli włączone, zostaną wygenerowane drzewa
+property.terrarium.add_grass.tooltip=Jeśli włączone, zostanie wygenerowana trawa
+property.terrarium.add_flowers.tooltip=Jeśli włączone, zostaną wygenerowane kwiaty
+property.terrarium.add_cacti.tooltip=Jeśli włączone, zostaną wygenerowe kaktusy
+property.terrarium.add_sugar_cane.tooltip=Jeśli włączone, zostanie wygenerowana trzcina cukrowa
+property.terrarium.add_gourd.tooltip=Jeśli włączone, zostaną wygenerowane dynie i arbuzy
+
+# Właściwości geologiczne
+
+category.terrarium.geological.name=Ustawienia geologiczne
+
+property.terrarium.cave_generation.name=Generacja jaskiń
+property.terrarium.ravine_generation.name=Generacja wąwozów
+property.terrarium.ore_generation.name=Generacja rud
+
+property.terrarium.cave_generation.tooltip=Jeśli ta opcja jest włączona, jaskinie będą generowane losowo
+property.terrarium.ravine_generation.tooltip=Jeśli ta opcja jest włączona, wąwozy będą generowane losowo
+property.terrarium.ore_generation.tooltip=Jeśli ta opcja jest włączona, rudy będą generowane losowo
+
+# Właściwości struktur
+
+category.terrarium.structure.name=Ustawienia struktur
+
+property.terrarium.add_strongholds.name=Dodaj twierdze
+property.terrarium.add_villages.name=Dodaj wioski	
+property.terrarium.add_mineshafts.name=Dodaj kopalnie	
+property.terrarium.add_temples.name=Dodaj świątynie				
+property.terrarium.add_ocean_monuments.name=Dodaj podwodne świątynie
+property.terrarium.add_woodland_mansions.name=Dodaj leśne posiadłości
+
+property.terrarium.add_strongholds.tooltip=Jeśli ta opcja jest włączona, twierdze będą generowane losowo
+property.terrarium.add_villages.tooltip=Jeśli ta opcja jest włączona, wioski będą generowane losowo
+property.terrarium.add_mineshafts.tooltip=Jeśli jest włączona, kopalnie będą generowane losowo
+property.terrarium.add_temples.tooltip=Jeśli ta opcja jest włączona, świątynie będą generowane losowo
+property.terrarium.add_ocean_monuments.tooltip=Jeśli ta opcja jest włączona, podwodne świątynie będą generowane losowo
+property.terrarium.add_woodland_mansions.tooltip=Jeśli ta opcja jest włączona, leśne posiadłości będą generowane losowo
+
+# Właściwości zgodności
+
+category.terrarium.compatibility.name=Compatibility Settings
+
+property.terrarium.compatibility_mode.name=Tryb zgodności (Eksperymentalny)
+property.terrarium.bop_integration.name=Dodaj biomy i drzewa z Biomes O 'Plenty
+
+property.terrarium.compatibility_mode.tooltip=Eksperymentalny zmodyfikowany tryb kompatybilności: może spowolnić generowanie lub całkowicie się zepsuć!
+property.terrarium.bop_integration.tooltip=Generuj biomy i drzewa z moda BoP. Powinno być prawdopodobnie używane wraz z trybem zgodności
+
+# Ustawienia wstępne
+
+preset.terrarium.earth.barren.name=Goła Ziemia
+preset.terrarium.earth.barren.desc=Goła powierzchnia ziemi w skali 1:40 m bez dodatkowej generacji
+
+preset.terrarium.earth.intercontinental.name=Międzykontynentalny
+preset.terrarium.earth.intercontinental.desc=Przyjazna dla przetrwania ziemia w skali 1: 2000 m, gdzie kontynenty są dość małe
+preset.terrarium.earth.intercontinental_modded.name=Międzykontynentalny z modami
+preset.terrarium.earth.intercontinental_modded.desc=Ziemia przyjazna dla przetrwania i modów w skali 1: 2000 m, gdzie kontynenty są dość małe
+
+preset.terrarium.earth.playable.name=Grywalna Ziemia
+preset.terrarium.earth.playable.desc=Przyjazna dla przetrwania ziemia w skali 1:70 m ze wszystkimi generacjami z vanilli
+preset.terrarium.earth.playable_modded.name=Grywalna Ziemia z modami
+preset.terrarium.earth.playable_modded.desc=Ziemia przyjazna dla przetrwania i modów w skali 1:70 z całą generacją z vanilli i modów
+
+preset.terrarium.earth.scenic.name=Malownicza Ziemia
+preset.terrarium.earth.scenic.desc=Malownicze, ale nie sprzyjające przetrwaniu przedstawienie Ziemi
+
+# Komendy
+
+commands.earth.wrong_world=Nie można używać tej komendy na tym świecie
+
+commands.earth.geotp.usage=geotp <szerokość geograficzna> <długość geograficzna> ALBO geotp <miejsce>
+commands.earth.geotp.not_found=Nie można znaleźć "%s"
+commands.earth.geotp.success=Przeteleportowano %s do %.5f, %.5f
+commands.earth.geotp.error=Wystąpił błąd podczas wyszukiwania "%s": %s: %s
+
+commands.earth.geotool.usage=geotool
+commands.earth.geotool.locate=Mapa
+commands.earth.geotool.display_panorama=Wyświetl panoramę
+commands.earth.geotool.preload_world=Wstępne ładowanie świata
+
+commands.earth.geodebug.usage=geodebug
+
+# Status
+
+status.earth.panorama.searching=Szukam okolicznych panoram...
+status.earth.panorama.none_found=Nie znaleziono żadnych panoram w pobliżu!
+status.earth.panorama.found=Znaleziono w pobliżu panoramę! Przejdź do zaznaczonego obszaru, aby ją wyświetlić!
+status.earth.panorama.error=Wystąpił błąd podczas lokalizowania pobliskich panoram
+status.earth.panorama.immersed=Zanurzony w zlokalizowanej panoramie!
+
+# Konfiguracja
+
+config.earth.street_view_zoom=Powiększenie Street View
+config.earth.street_view_zoom.tooltip=Poziom powiększenia, przy którym ładowane są obrazy Street View. Wyższe wartości oznaczają wyższą rozdzielczość
+
+config.earth.osm_geocoder=Użyj OpenStreetMap Geocoder
+config.earth.osm_geocoder.tooltip=Jeśli tak, zostanie użyty Geocoder Nominatim OpenStreetMap zamiast Google
+
+config.earth.accept_remote_data=Zaakceptowano ostrzeżenie o zdalnych danych
+config.earth.accept_remote_data.tooltip=Jeśli tak, nie będziesz już otrzymywać ostrzeżeń o zdalnym wykorzystaniu danych. (Automatycznie ustawiane przez GUI)
+
+# Inicjatory
+
+initializer.terrarium.api_keys=Ładowanie kluczy API...
+
+initializer.terrarium.climate_raster=Ładowanie rastra klimatycznego...
+
+initializer.terrarium.remote_index=Ładowanie zdalnego indeksu...
+initializer.terrarium.remote_index.downloading=Pobieranie
