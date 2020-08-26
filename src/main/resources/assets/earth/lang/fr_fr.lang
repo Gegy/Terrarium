@@ -1,0 +1,170 @@
+# Generators
+
+generator.terrarium.earth=La Terre
+generator.terrarium.earth_debug=Déboguer la Terre
+
+# GUI
+
+container.earth.geotool.name=Outils
+geotool.earth.locate.success=Vous êtes en %s
+
+container.earth.geodebug.name=Outils de Déboguage
+
+gui.earth.credits=Les données de Terrarium proviennent de:
+gui.earth.spawnpoint=Mettre le point de Spawn
+gui.earth.locate=Localiser le Joueur
+gui.earth.teleport=Téléporter le Joueur
+gui.earth.preload=Précharger le Monde
+gui.earth.preload.downloading=Téléchargement des Chunks
+
+gui.earth.retry=Réessaye
+gui.earth.download=Télécharger
+gui.earth.run_in_background=Faire fonctionner en arrière-plan
+gui.earth.initializing=Initialisation en cours
+
+gui.button.earth.teleport=Téléporter
+
+gui.copy_box.copied.name=Copiage des données dans le presse-papier terminer avec succès!
+
+gui.earth.preparing=Veuillez attendre s'il vous plait
+gui.earth.preparing.desc.1=En train de préparer Terrarium pour l'utilisation...
+gui.earth.preparing.desc.2=Cela peut prendre une minute
+
+gui.earth.preparing.errored=Une érreur c'est manifesté
+gui.earth.preparing.errored.desc.1=La préparation de Terrarium pour l'utilisation a échoué !
+gui.earth.preparing.errored.desc.2=S'il vous plait, verifier votre connection internet et réessayer
+
+# World Properties
+
+category.terrarium.world.name=Options du Monde
+
+property.terrarium.world_scale.name=Échelle du Monde
+property.terrarium.terrestrial_height_scale.name=Échelle de la Hauteur Terrestre
+property.terrarium.oceanic_height_scale.name=Échelle de la hauteur Océanique
+property.terrarium.height_offset.name=Décalage de l'Échelle
+
+property.terrarium.world_scale.tooltip=La quantité de mètres dans la vrai vie qui représentent un bloc en jeu
+property.terrarium.terrestrial_height_scale.tooltip=Le multiplicateur de l'élevation du terrain de mètres jusqu'en blocs au dessus du niveau de la mer
+property.terrarium.oceanic_height_scale.tooltip=Le multiplicateur de l'élevation du terrain de mètres jusqu'en blocs en dessous du niveau de la mer
+property.terrarium.height_offset.tooltip=L'hauteur (y) en jeu qui correspond au niveau de la mer
+
+# Ecological Properties
+
+category.terrarium.ecological.name=Options Écologiques
+
+property.terrarium.add_trees.name=Génération d'Arbres
+property.terrarium.add_grass.name=Génération d'Herbe
+property.terrarium.add_flowers.name=Génération de Fleurs
+property.terrarium.add_cacti.name=Génération Ajout de Cactus
+property.terrarium.add_sugar_cane.name=Génération de Canne à sucre
+property.terrarium.add_gourds.name=Génération de Citrouilles et de Pastèques
+
+property.terrarium.add_trees.tooltip=Si activé, les arbres vont se générer
+property.terrarium.add_grass.tooltip=Si activé, l'herbe va se générer
+property.terrarium.add_flowers.tooltip=Si activé, les fleurs vont se générer
+property.terrarium.add_cacti.tooltip=Si activé, les cactus vont se générer
+property.terrarium.add_sugar_cane.tooltip=Si activé, la canne à sucre va se générer
+property.terrarium.add_gourd.tooltip=Si activé, les citrouilles et les pastèques vont se générer
+
+
+# Geological Properties
+
+category.terrarium.geological.name=Options Géologiques
+
+property.terrarium.cave_generation.name=Génération de Cavernes
+property.terrarium.ravine_generation.name=Génération de Ravins
+property.terrarium.ore_generation.name=Génération de Minerais
+
+property.terrarium.cave_generation.tooltip=Si activé, les Cavernes vont se générer dans le monde
+property.terrarium.ravine_generation.tooltip=Si activé, les Ravins vont se générer dans le monde
+property.terrarium.ore_generation.tooltip=Si activé, les Minerais vont se générer dans le monde
+
+# Structure Properties
+
+category.terrarium.structure.name=Options des Structures
+
+property.terrarium.add_strongholds.name=Génération des Strongholds
+property.terrarium.add_villages.name=Génération des Villages
+property.terrarium.add_mineshafts.name=Génération des Mineshafts
+property.terrarium.add_temples.name=Génération des Temples du Desert
+property.terrarium.add_ocean_monuments.name=Génération des Temples de l'Océan
+property.terrarium.add_woodland_mansions.name=Génération des Manoirs
+
+property.terrarium.add_strongholds.tooltip=Si activé, les Strongholds vont se générer dans le monde
+property.terrarium.add_villages.tooltip=Si activé, les Villages vont se générer dans le monde
+property.terrarium.add_mineshafts.tooltip=Si activé, les Mineshafts vont se générer dans le monde
+property.terrarium.add_temples.tooltip=Si activé, les Temples du Desert vont se générer dans le monde
+property.terrarium.add_ocean_monuments.tooltip=Si activé, les Temples de l'Océan vont se générer dans le monde
+property.terrarium.add_woodland_mansions.tooltip=Si activé, les Manoirs vont se générer dans le monde
+
+# Compatibility Properties
+
+category.terrarium.compatibility.name=Options de Compatibilité
+
+property.terrarium.compatibility_mode.name=Mode de Compatibilité (Expérimental)
+property.terrarium.bop_integration.name=Génération des biomes et des arbres Biome O' Plenty
+
+property.terrarium.compatibility_mode.tooltip=Mode de Compatibilité Moddé Expérimental: peut ralentir la génération ou l'empêcher complètement!
+property.terrarium.bop_integration.tooltip=Génère des biomes et des arbres à partir du mod BoP. Cela devrait être utilisé en plus du Mode de Compatibilité
+
+# Presets
+
+preset.terrarium.earth.barren.name=Terre stérile
+preset.terrarium.earth.barren.desc=La surface nue de la terre à l'échelle 1:40m sans génération supplémentaire
+
+preset.terrarium.earth.intercontinental.name=Intercontinentale
+preset.terrarium.earth.intercontinental.desc=Terre favorable à la survie à l'échelle 1:2000m où les continents sont assez petits
+preset.terrarium.earth.intercontinental_modded.name=Intercontinental Moddé
+preset.terrarium.earth.intercontinental_modded.desc=Terre favorable aux mods et à la survie à l'échelle 1:2000m où les continents sont assez petits
+
+preset.terrarium.earth.playable.name=Terre Jouable
+preset.terrarium.earth.playable.desc=Terre favorable à la survie à l'échelle 1:70m avec toute la génération Vanilla
+preset.terrarium.earth.playable_modded.name=Terre Jouable Moddé
+preset.terrarium.earth.playable_modded.desc=Terre favorable aux mods et à la survie à l'échelle 1:70m avec toute la génération Vanilla et Moddé
+
+preset.terrarium.earth.scenic.name=Terre Pittoresque
+preset.terrarium.earth.scenic.desc=Une représentation scénique, mais pas favorable à la survie de la Terre
+
+# Commands
+
+commands.earth.wrong_world=Tu ne peux pas utiliser cette commande dans ce monde
+
+commands.earth.geotp.usage=geotp <latitude> <longitude> OU geotp <endroit>
+commands.earth.geotp.not_found=Impossible de trouver "%s"
+commands.earth.geotp.success=Téléportation de %s en %.5f, %.5f effectué avec succès
+commands.earth.geotp.error=Une erreur s'est produite lors de la recherche de l'endroit de Téléportation "%s": %s: %s
+
+commands.earth.geotool.usage=geotool
+commands.earth.geotool.locate=Carte
+commands.earth.geotool.display_panorama=Afficher le panorama
+commands.earth.geotool.preload_world=Prégénerer le monde
+
+commands.earth.geodebug.usage=geodebug
+
+# Status
+
+status.earth.panorama.searching=Recherche de panoramas à proximité...
+status.earth.panorama.none_found=Aucun panorama n'a été trouvé à proximité!
+status.earth.panorama.found=Un panorama à proximité vient d'être trouvé! Déplacez-vous dans la zone marquée pour l'afficher!
+status.earth.panorama.error=Une erreur s'est produite lors de la localisation des panoramas à proximité
+status.earth.panorama.immersed=Immergé dans un panorama localisé!
+
+# Config
+
+config.earth.street_view_zoom=Zoom de Street View
+config.earth.street_view_zoom.tooltip=Le niveau de zoom auquel charger les images Street View . Des valeurs plus élevées signifient une résolution plus élevée
+
+config.earth.osm_geocoder=Utiliser OpenStreetMap Geocoder
+config.earth.osm_geocoder.tooltip=Si activé, le géocodeur Nominatim OpenStreetMap sera utilisé à la place de Google
+
+config.earth.accept_remote_data=Avertissement relatif aux données à distance acceptées
+config.earth.accept_remote_data.tooltip=Si activé, vous ne serez plus averti du téléchargement des données de génération à distance. (Défini automatiquement via un GUI)
+
+# Initializers
+
+initializer.terrarium.api_keys=Chargement des clés API...
+
+initializer.terrarium.climate_raster=Chargement du raster climatique...
+
+initializer.terrarium.remote_index=Chargement de l'index distant...
+initializer.terrarium.remote_index.downloading=Téléchargement en cours
