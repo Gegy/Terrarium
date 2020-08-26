@@ -15,7 +15,7 @@ gui.earth.spawnpoint=Mettre le point d'apparition
 gui.earth.locate=Localiser le Joueur
 gui.earth.teleport=Téléporter le Joueur
 gui.earth.preload=Précharger le Monde
-gui.earth.preload.downloading=Téléchargement des Chunks
+gui.earth.preload.downloading=Téléchargement des Tronçons
 
 gui.earth.retry=Réessayer
 gui.earth.download=Télécharger
@@ -154,7 +154,7 @@ status.earth.panorama.immersed=Immergé dans un panorama localisé !
 config.earth.street_view_zoom=Zoom de Street View
 config.earth.street_view_zoom.tooltip=Le niveau de zoom auquel charger les images de Street View. Des valeurs plus élevées signifient une résolution plus élevée
 
-config.earth.osm_geocoder=Utiliser le Géo-codeur de OpenStreetMap
+config.earth.osm_geocoder=Utiliser le géocodeur de OpenStreetMap
 config.earth.osm_geocoder.tooltip=Si activé, le géocodeur Nominatim OpenStreetMap sera utilisé à la place de celui de Google
 
 config.earth.accept_remote_data=Avertissement relatif aux données à distance accepté
