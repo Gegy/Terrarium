@@ -4,14 +4,14 @@ gui.terrarium.accept=Accepter
 gui.terrarium.preset=Définir les préréglages
 
 gui.terrarium.remote_data_warning.1=Attention: Terrarium télécharge des données d'Internet!
-gui.terrarium.remote_data_warning.2=Diverses données peuvent être requis pour la génération de chunks.
-gui.terrarium.remote_data_warning.3=Cela peut entraîner une utilisation importante de données, en fonction des chunks générés.
-gui.terrarium.remote_data_warning.4=Les données ne sont demandées que pour les chunks que les joueurs voient puis, sont mises en cache.
+gui.terrarium.remote_data_warning.2=Diverses données peuvent être requises pour la génération de tronçons.
+gui.terrarium.remote_data_warning.3=Cela peut entraîner une utilisation importante de données, en fonction des tronçons générés.
+gui.terrarium.remote_data_warning.4=Les données ne sont demandées que pour les tronçons que les joueurs voient et sont ensuite mises en cache.
 gui.terrarium.remote_data_warning.5=Si vous êtes sur une connexion limitée, veuillez surveiller votre consommation de données!
 
 gui.terrarium.select_preset.name=Sélectionnez un préréglage
 
-options.terrarium.customize_world_title.name=Personnalisez la Generation du monde
+options.terrarium.customize_world_title.name=Personnalisez la géneration du monde
 options.terrarium.preview_world_title.name=Aperçu de la génération du monde
 
 property.terrarium.slider_range.name=Distance: [%.2f-%.2f]
