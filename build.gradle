@@ -29,7 +29,7 @@ repositories {
   mavenCentral()
   jcenter()
   maven { url = "http://mvn.topobyte.de" }
-  maven { url = "https://maven.gegy1000.net" }
+  maven { url = "https://maven.gegy.dev" }
   maven { url = "https://oss.sonatype.org/content/repositories/public/" }
   maven { url = "https://repo.spongepowered.org/maven/" }
 }

@@ -14,7 +14,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 
 public final class ApiKeyInitializer implements SharedDataInitializer {
-    private final static String KEYS_URL = "https://gist.githubusercontent.com/gegy1000/07de90970dbb502f9b544481e090a081/raw/terrarium_keys.json";
+    private final static String KEYS_URL = "https://terrariumearth.azureedge.net/geo3/keys.json";
 
     private final static Gson GSON = new Gson();
 
