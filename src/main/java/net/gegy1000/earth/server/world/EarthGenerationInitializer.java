@@ -14,6 +14,7 @@ import net.gegy1000.earth.server.world.composer.decoration.EarthShrubComposer;
 import net.gegy1000.earth.server.world.composer.decoration.EarthSugarCaneComposer;
 import net.gegy1000.earth.server.world.composer.decoration.EarthTreeComposer;
 import net.gegy1000.earth.server.world.composer.decoration.FreezeSurfaceComposer;
+import net.gegy1000.earth.server.world.composer.decoration.LavaPoolComposer;
 import net.gegy1000.earth.server.world.composer.decoration.OreDecorationComposer;
 import net.gegy1000.earth.server.world.composer.structure.MansionStructureComposer;
 import net.gegy1000.earth.server.world.composer.structure.MineshaftStructureComposer;
@@ -117,6 +118,10 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
             VanillaOres.addTo(oreComposer);
 
             builder.addDecorationComposer(oreComposer);
+        }
+
+        if (this.ctx.settings.getBoolean(ADD_LAVA_POOLS)) {
+            builder.addDecorationComposer(new LavaPoolComposer(this.world));
         }
 
         builder.addDecorationComposer(new FreezeSurfaceComposer(this.world));

@@ -22,6 +22,7 @@ public final class EarthProperties {
     public static final PropertyKey<Boolean> CAVE_GENERATION = new BooleanKey("cave_generation");
     public static final PropertyKey<Boolean> RAVINE_GENERATION = new BooleanKey("ravine_generation");
     public static final PropertyKey<Boolean> ORE_GENERATION = new BooleanKey("ore_generation");
+    public static final PropertyKey<Boolean> ADD_LAVA_POOLS = new BooleanKey("add_lava_pools");
 
     public static final PropertyKey<Boolean> ADD_STRONGHOLDS = new BooleanKey("add_strongholds");
     public static final PropertyKey<Boolean> ADD_VILLAGES = new BooleanKey("add_villages");
@@ -38,7 +39,7 @@ public final class EarthProperties {
             WORLD_SCALE, TERRESTRIAL_HEIGHT_SCALE, OCEANIC_HEIGHT_SCALE,
             HEIGHT_OFFSET,
             ADD_TREES, ADD_GRASS, ADD_FLOWERS, ADD_CACTI, ADD_SUGAR_CANE, ADD_GOURDS,
-            CAVE_GENERATION, RAVINE_GENERATION, ORE_GENERATION,
+            CAVE_GENERATION, RAVINE_GENERATION, ORE_GENERATION, ADD_LAVA_POOLS,
             ADD_STRONGHOLDS, ADD_VILLAGES, ADD_MINESHAFTS, ADD_TEMPLES, ADD_OCEAN_MONUMENTS, ADD_WOODLAND_MANSIONS,
             COMPATIBILITY_MODE, BOP_INTEGRATION,
     };

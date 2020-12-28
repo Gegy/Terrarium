@@ -18,6 +18,7 @@
     "cave_generation": false,
     "ravine_generation": false,
     "ore_generation": true,
+    "add_lava_pools": false,
     "compatibility_mode": false,
     "bop_integration": true,
     "add_strongholds": false,

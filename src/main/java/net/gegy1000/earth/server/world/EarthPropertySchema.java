@@ -99,6 +99,9 @@ public final class EarthPropertySchema implements PropertySchema {
             boolean modGeneration = legacy.getBoolean(Legacy.ENABLE_MOD_GENERATION);
             consumer.accept(PropertyPair.of(COMPATIBILITY_MODE, modGeneration));
 
+            boolean lavaGeneration = legacy.getBoolean(Legacy.ENABLE_LAVA_GENERATION);
+            consumer.accept(PropertyPair.of(ADD_LAVA_POOLS, lavaGeneration));
+
             consumer.accept(PropertyPair.of(BOP_INTEGRATION, false));
 
             return true;

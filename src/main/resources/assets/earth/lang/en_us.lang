@@ -73,10 +73,12 @@ category.terrarium.geological.name=Geological Settings
 property.terrarium.cave_generation.name=Cave Generation
 property.terrarium.ravine_generation.name=Ravine Generation
 property.terrarium.ore_generation.name=Ore Generation
+property.terrarium.add_lava_pools.name=Add Lava Pools
 
 property.terrarium.cave_generation.tooltip=If enabled, caves will be generated randomly
 property.terrarium.ravine_generation.tooltip=If enabled, ravines will be generated randomly
 property.terrarium.ore_generation.tooltip=If enabled, ores will be generated randomly
+property.terrarium.add_lava_pools.tooltip=If enabled, lava pools will be generated underground randomly
 
 # Structure Properties
 

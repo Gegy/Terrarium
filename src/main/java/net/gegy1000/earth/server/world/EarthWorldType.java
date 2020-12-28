@@ -113,7 +113,8 @@ public class EarthWorldType extends TerrariumWorldType {
                 .withCategory("geological",
                         new ToggleWidget(CAVE_GENERATION),
                         new ToggleWidget(RAVINE_GENERATION),
-                        new ToggleWidget(ORE_GENERATION)
+                        new ToggleWidget(ORE_GENERATION),
+                        new ToggleWidget(ADD_LAVA_POOLS)
                 )
                 .withCategory("structure",
                         new ToggleWidget(ADD_STRONGHOLDS),
