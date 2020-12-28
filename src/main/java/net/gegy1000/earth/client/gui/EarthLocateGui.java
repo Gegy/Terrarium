@@ -2,10 +2,10 @@ package net.gegy1000.earth.client.gui;
 
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.client.gui.widget.map.PlaceSearchWidget;
-import net.gegy1000.terrarium.client.gui.widget.CopyBoxWidget;
 import net.gegy1000.earth.client.gui.widget.map.SlippyMapPoint;
 import net.gegy1000.earth.client.gui.widget.map.SlippyMapWidget;
 import net.gegy1000.earth.client.gui.widget.map.component.MarkerMapComponent;
+import net.gegy1000.terrarium.client.gui.widget.CopyBoxWidget;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;

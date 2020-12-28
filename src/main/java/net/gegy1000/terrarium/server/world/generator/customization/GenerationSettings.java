@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import net.gegy1000.gengen.api.GenericWorldType;
+import dev.gegy.gengen.api.GenericWorldType;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.generator.customization.property.BooleanValue;
 import net.gegy1000.terrarium.server.world.generator.customization.property.NumberValue;

@@ -1,10 +1,10 @@
 package net.gegy1000.terrarium.server.world.chunk;
 
+import dev.gegy.gengen.api.CubicPos;
+import dev.gegy.gengen.api.generator.GenericChunkGenerator;
+import dev.gegy.gengen.api.writer.ChunkPopulationWriter;
+import dev.gegy.gengen.api.writer.ChunkPrimeWriter;
 import mcp.MethodsReturnNonnullByDefault;
-import net.gegy1000.gengen.api.CubicPos;
-import net.gegy1000.gengen.api.generator.GenericChunkGenerator;
-import net.gegy1000.gengen.api.writer.ChunkPopulationWriter;
-import net.gegy1000.gengen.api.writer.ChunkPrimeWriter;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.util.Lazy;

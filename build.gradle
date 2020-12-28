@@ -48,7 +48,7 @@ dependencies {
   deobfCompile 'curse.maven:dynamictrees:2822231'
 
   // embedded dependencies
-  embed 'net.gegy1000:gengen:0.1.0-SNAPSHOT'
+  embed 'dev.gegy:gengen:0.1.0-SNAPSHOT'
   embed 'net.gegy1000:just-now:0.1.0-SNAPSHOT'
   embed 'com.vividsolutions:jts:1.13'
   embed 'org.tukaani:xz-fork:1.8'

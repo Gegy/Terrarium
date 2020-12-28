@@ -1,9 +1,9 @@
 package net.gegy1000.terrarium.server.world.composer.decoration;
 
-import net.gegy1000.gengen.api.CubicPos;
-import net.gegy1000.gengen.api.writer.ChunkPopulationWriter;
-import net.gegy1000.gengen.core.GenGen;
-import net.gegy1000.gengen.util.SpatialRandom;
+import dev.gegy.gengen.api.CubicPos;
+import dev.gegy.gengen.api.writer.ChunkPopulationWriter;
+import dev.gegy.gengen.core.GenGen;
+import dev.gegy.gengen.util.SpatialRandom;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.minecraft.world.World;
 

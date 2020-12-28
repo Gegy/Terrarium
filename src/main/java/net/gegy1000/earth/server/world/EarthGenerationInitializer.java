@@ -1,5 +1,9 @@
 package net.gegy1000.earth.server.world;
 
+import dev.gegy.gengen.api.HeightFunction;
+import dev.gegy.gengen.core.GenGen;
+import dev.gegy.gengen.util.primer.GenericCavePrimer;
+import dev.gegy.gengen.util.primer.GenericRavinePrimer;
 import net.gegy1000.earth.server.world.composer.EarthBiomeComposer;
 import net.gegy1000.earth.server.world.composer.decoration.EarthCactusComposer;
 import net.gegy1000.earth.server.world.composer.decoration.EarthCompatComposer;
@@ -21,10 +25,6 @@ import net.gegy1000.earth.server.world.composer.surface.FloodedSurfaceComposer;
 import net.gegy1000.earth.server.world.composer.surface.TerrainSurfaceComposer;
 import net.gegy1000.earth.server.world.composer.surface.WaterFillSurfaceComposer;
 import net.gegy1000.earth.server.world.ores.VanillaOres;
-import net.gegy1000.gengen.api.HeightFunction;
-import net.gegy1000.gengen.core.GenGen;
-import net.gegy1000.gengen.util.primer.GenericCavePrimer;
-import net.gegy1000.gengen.util.primer.GenericRavinePrimer;
 import net.gegy1000.terrarium.server.world.TerrariumGeneratorInitializer;
 import net.gegy1000.terrarium.server.world.composer.decoration.VanillaEntitySpawnComposer;
 import net.gegy1000.terrarium.server.world.composer.surface.BedrockSurfaceComposer;

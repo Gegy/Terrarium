@@ -1,10 +1,10 @@
 package net.gegy1000.earth.server.world.composer.surface;
 
+import dev.gegy.gengen.api.CubicPos;
+import dev.gegy.gengen.api.writer.ChunkPrimeWriter;
 import net.gegy1000.earth.server.world.EarthData;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.earth.server.world.cover.CoverMarkers;
-import net.gegy1000.gengen.api.CubicPos;
-import net.gegy1000.gengen.api.writer.ChunkPrimeWriter;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.composer.surface.SurfaceComposer;
 import net.gegy1000.terrarium.server.world.data.ColumnData;

@@ -1,6 +1,6 @@
 package net.gegy1000.terrarium.client;
 
-import net.gegy1000.gengen.api.GenericWorldType;
+import dev.gegy.gengen.api.GenericWorldType;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.message.TerrariumHandshakeMessage;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;

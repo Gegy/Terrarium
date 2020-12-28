@@ -1,7 +1,6 @@
 package net.gegy1000.terrarium.server.world.generator;
 
 import com.google.common.collect.ImmutableList;
-import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.composer.biome.BiomeComposer;
 import net.gegy1000.terrarium.server.world.composer.decoration.CompositeDecorationComposer;
 import net.gegy1000.terrarium.server.world.composer.decoration.DecorationComposer;
@@ -9,6 +8,7 @@ import net.gegy1000.terrarium.server.world.composer.structure.CompositeStructure
 import net.gegy1000.terrarium.server.world.composer.structure.StructureComposer;
 import net.gegy1000.terrarium.server.world.composer.surface.CompositeSurfaceComposer;
 import net.gegy1000.terrarium.server.world.composer.surface.SurfaceComposer;
+import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 
 public class CompositeTerrariumGenerator implements TerrariumGenerator {
     private final SurfaceComposer surfaceComposer;

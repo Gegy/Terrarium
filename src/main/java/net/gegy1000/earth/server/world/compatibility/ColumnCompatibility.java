@@ -1,13 +1,13 @@
 package net.gegy1000.earth.server.world.compatibility;
 
+import dev.gegy.gengen.api.CubicPos;
+import dev.gegy.gengen.core.GenGen;
 import io.github.opencubicchunks.cubicchunks.api.util.Box;
 import io.github.opencubicchunks.cubicchunks.api.world.ICubicWorld;
 import io.github.opencubicchunks.cubicchunks.api.worldgen.ICubeGenerator;
 import io.github.opencubicchunks.cubicchunks.core.server.CubeProviderServer;
 import io.github.opencubicchunks.cubicchunks.core.world.cube.Cube;
 import net.gegy1000.earth.server.world.EarthData;
-import net.gegy1000.gengen.api.CubicPos;
-import net.gegy1000.gengen.core.GenGen;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.minecraft.util.math.ChunkPos;

@@ -1,10 +1,10 @@
 package net.gegy1000.earth.server.world.composer.structure;
 
+import dev.gegy.gengen.api.HeightFunction;
 import net.gegy1000.earth.server.world.EarthData;
 import net.gegy1000.earth.server.world.compatibility.ColumnCompatibilityWorld;
 import net.gegy1000.earth.server.world.composer.structure.placement.CellStructurePlacement;
 import net.gegy1000.earth.server.world.composer.structure.placement.StructurePlacement;
-import net.gegy1000.gengen.api.HeightFunction;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.util.Lazy;

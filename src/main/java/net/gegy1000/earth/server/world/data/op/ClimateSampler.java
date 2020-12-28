@@ -5,8 +5,6 @@ import net.gegy1000.terrarium.server.world.data.DataOp;
 import net.gegy1000.terrarium.server.world.data.raster.FloatRaster;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 
-import java.util.Optional;
-
 public final class ClimateSampler {
     private final WorldClimateRaster source;
 

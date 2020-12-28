@@ -1,8 +1,8 @@
 package net.gegy1000.earth.server.world.ecology.vegetation;
 
+import dev.gegy.gengen.api.CubicPos;
+import dev.gegy.gengen.api.writer.ChunkPopulationWriter;
 import net.gegy1000.earth.server.world.ecology.GrowthPredictors;
-import net.gegy1000.gengen.api.CubicPos;
-import net.gegy1000.gengen.api.writer.ChunkPopulationWriter;
 import net.gegy1000.terrarium.server.util.WeightedPool;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;

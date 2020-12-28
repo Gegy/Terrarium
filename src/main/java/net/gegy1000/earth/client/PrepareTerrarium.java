@@ -1,11 +1,11 @@
 package net.gegy1000.earth.client;
 
+import dev.gegy.gengen.api.GenericWorldType;
 import net.gegy1000.earth.TerrariumEarth;
 import net.gegy1000.earth.client.gui.RemoteDataWarningGui;
 import net.gegy1000.earth.client.gui.SharedInitializingGui;
 import net.gegy1000.earth.server.config.TerrariumEarthConfig;
 import net.gegy1000.earth.server.shared.SharedEarthData;
-import net.gegy1000.gengen.api.GenericWorldType;
 import net.gegy1000.terrarium.client.ClientProxy;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.minecraft.client.Minecraft;

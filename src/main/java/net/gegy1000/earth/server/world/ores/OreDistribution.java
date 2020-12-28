@@ -1,6 +1,6 @@
 package net.gegy1000.earth.server.world.ores;
 
-import net.gegy1000.gengen.api.CubicPos;
+import dev.gegy.gengen.api.CubicPos;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 

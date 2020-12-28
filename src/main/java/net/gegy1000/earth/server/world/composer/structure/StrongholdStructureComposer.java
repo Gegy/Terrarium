@@ -1,8 +1,8 @@
 package net.gegy1000.earth.server.world.composer.structure;
 
+import dev.gegy.gengen.api.HeightFunction;
 import net.gegy1000.earth.server.world.composer.structure.placement.CellStructurePlacement;
 import net.gegy1000.earth.server.world.composer.structure.placement.StructurePlacement;
-import net.gegy1000.gengen.api.HeightFunction;
 import net.gegy1000.terrarium.server.world.composer.structure.StructureComposer;
 import net.minecraft.init.Biomes;
 import net.minecraft.world.World;

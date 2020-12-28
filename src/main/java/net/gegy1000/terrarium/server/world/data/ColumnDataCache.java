@@ -1,10 +1,10 @@
 package net.gegy1000.terrarium.server.world.data;
 
+import dev.gegy.gengen.core.GenGen;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.longs.LongSortedSet;
-import net.gegy1000.gengen.core.GenGen;
 import net.gegy1000.terrarium.server.util.UnpackChunkPos;
 import net.gegy1000.terrarium.server.world.chunk.tracker.ChunkTrackerAccess;
 import net.gegy1000.terrarium.server.world.chunk.tracker.ColumnTrackerAccess;

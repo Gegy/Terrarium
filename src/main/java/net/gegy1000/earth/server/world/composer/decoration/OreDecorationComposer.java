@@ -1,11 +1,11 @@
 package net.gegy1000.earth.server.world.composer.decoration;
 
+import dev.gegy.gengen.api.CubicPos;
+import dev.gegy.gengen.api.writer.ChunkPopulationWriter;
+import dev.gegy.gengen.core.GenGen;
+import dev.gegy.gengen.util.SpatialRandom;
 import net.gegy1000.earth.server.world.EarthData;
 import net.gegy1000.earth.server.world.ores.OreConfig;
-import net.gegy1000.gengen.api.CubicPos;
-import net.gegy1000.gengen.api.writer.ChunkPopulationWriter;
-import net.gegy1000.gengen.core.GenGen;
-import net.gegy1000.gengen.util.SpatialRandom;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.composer.decoration.DecorationComposer;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;

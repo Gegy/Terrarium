@@ -1,8 +1,8 @@
 package net.gegy1000.terrarium.server.world.composer.surface;
 
-import net.gegy1000.gengen.api.CubicPos;
-import net.gegy1000.gengen.api.generator.GenericChunkPrimer;
-import net.gegy1000.gengen.api.writer.ChunkPrimeWriter;
+import dev.gegy.gengen.api.CubicPos;
+import dev.gegy.gengen.api.generator.GenericChunkPrimer;
+import dev.gegy.gengen.api.writer.ChunkPrimeWriter;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.data.ColumnData;
 

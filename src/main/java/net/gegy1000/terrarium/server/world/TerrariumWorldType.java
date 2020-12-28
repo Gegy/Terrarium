@@ -1,6 +1,6 @@
 package net.gegy1000.terrarium.server.world;
 
-import net.gegy1000.gengen.api.GenericWorldType;
+import dev.gegy.gengen.api.GenericWorldType;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.util.Lazy;
 import net.gegy1000.terrarium.server.world.chunk.ComposableBiomeProvider;
