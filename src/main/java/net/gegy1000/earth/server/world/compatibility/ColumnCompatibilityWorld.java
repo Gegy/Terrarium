@@ -1,6 +1,7 @@
 package net.gegy1000.earth.server.world.compatibility;
 
 import net.gegy1000.earth.server.world.compatibility.hooks.DimensionManagerHooks;
+import net.gegy1000.terrarium.Terrarium;
 import net.minecraft.advancements.AdvancementManager;
 import net.minecraft.advancements.FunctionManager;
 import net.minecraft.block.state.IBlockState;
@@ -33,6 +34,7 @@ import net.minecraft.world.gen.structure.template.TemplateManager;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.MapStorage;
 import net.minecraft.world.storage.loot.LootTableManager;
+import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.event.terraingen.DecorateBiomeEvent;
@@ -92,6 +94,14 @@ public final class ColumnCompatibilityWorld extends WorldServer implements AutoC
             return ((ChunkProviderServer) provider).chunkGenerator;
         }
         return null;
+    }
+
+    @Override
+    public void tick() {
+        Terrarium.LOGGER.error("Tried to tick Terrarium compatibility world implementation! Trying to reset Forge dimension list...");
+
+        DimensionManager.setWorld(this.parent.provider.getDimension(), this.parent, this.parent.getMinecraftServer());
+        this.parent.tick();
     }
 
     public void setupAt(ChunkPos columnPos, int minY) {
