@@ -72,6 +72,8 @@ public final class ColumnCompatibilityWorld extends WorldServer implements AutoC
         this.generator = getChunkGenerator(parent);
 
         this.chunkProvider = this.createChunkProvider();
+
+        this.init();
     }
 
     public static ColumnCompatibilityWorld create(WorldServer parent) {
