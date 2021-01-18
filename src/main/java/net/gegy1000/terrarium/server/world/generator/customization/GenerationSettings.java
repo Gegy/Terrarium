@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.gegy.gengen.api.GenericWorldType;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.generator.customization.property.BooleanValue;
 import net.gegy1000.terrarium.server.world.generator.customization.property.NumberValue;
@@ -14,7 +15,6 @@ import net.gegy1000.terrarium.server.world.generator.customization.property.Prop
 import net.minecraft.world.World;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 
 public class GenerationSettings {
@@ -60,7 +60,7 @@ public class GenerationSettings {
     public static GenerationSettings parse(PropertySchema schema, JsonObject root) {
         Builder builder = new Builder();
 
-        Map<String, JsonElement> entries = new HashMap<>(root.size());
+        Map<String, JsonElement> entries = new Object2ObjectOpenHashMap<>(root.size());
         for (Map.Entry<String, JsonElement> entry : root.entrySet()) {
             entries.put(entry.getKey(), entry.getValue());
         }
@@ -155,8 +155,8 @@ public class GenerationSettings {
     }
 
     public GenerationSettings union(GenerationSettings other) {
-        Map<String, PropertyKey<?>> keys = new HashMap<>(this.keys);
-        Map<PropertyKey<?>, PropertyValue<?>> values = new HashMap<>(this.values);
+        Map<String, PropertyKey<?>> keys = new Object2ObjectOpenHashMap<>(this.keys);
+        Map<PropertyKey<?>, PropertyValue<?>> values = new Object2ObjectOpenHashMap<>(this.values);
         keys.putAll(other.keys);
         values.putAll(other.values);
 

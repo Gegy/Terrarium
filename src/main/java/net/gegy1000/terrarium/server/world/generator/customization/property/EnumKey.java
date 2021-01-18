@@ -2,13 +2,13 @@ package net.gegy1000.terrarium.server.world.generator.customization.property;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
 import java.util.Map;
 
 public class EnumKey<T extends Enum<T> & CycleEnumProperty> extends PropertyKey<T> {
-    private final Map<String, T> lookup = new HashMap<>();
+    private final Map<String, T> lookup = new Object2ObjectOpenHashMap<>();
 
     public EnumKey(String identifier, Class<T> type) {
         super(identifier, type);

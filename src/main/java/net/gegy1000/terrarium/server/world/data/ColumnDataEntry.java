@@ -96,7 +96,7 @@ public final class ColumnDataEntry {
     boolean tryDrop() {
         if (this.shouldDrop()) {
             this.dropped = true;
-            this.loader.cancel(this.columnPos);
+            this.loader.cancel(ChunkPos.asLong(this.columnPos.x, this.columnPos.z));
             this.future = null;
             this.data = null;
             return true;

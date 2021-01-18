@@ -3,6 +3,7 @@ package net.gegy1000.terrarium.server.world.data.source;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.gegy1000.justnow.Waker;
 import net.gegy1000.justnow.future.Future;
 import net.gegy1000.justnow.future.JoinHandle;
@@ -17,7 +18,6 @@ import net.minecraft.util.math.MathHelper;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -35,7 +35,7 @@ public final class DataSourceReader {
             .expireAfterAccess(60, TimeUnit.SECONDS)
             .build();
 
-    private final Map<TileKey<?>, JoinHandle<DataTileResult<?>>> queuedTiles = new HashMap<>();
+    private final Map<TileKey<?>, JoinHandle<DataTileResult<?>>> queuedTiles = new Object2ObjectOpenHashMap<>();
 
     private final LinkedBlockingDeque<Waker> queueEmpty = new LinkedBlockingDeque<>();
 

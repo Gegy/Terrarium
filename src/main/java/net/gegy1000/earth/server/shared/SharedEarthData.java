@@ -1,11 +1,11 @@
 package net.gegy1000.earth.server.shared;
 
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.gegy1000.earth.server.util.ProcessTracker;
 import net.gegy1000.earth.server.world.data.EarthApiKeys;
 import net.gegy1000.earth.server.world.data.source.WorldClimateRaster;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
 import java.util.Map;
 
 public final class SharedEarthData {
@@ -14,7 +14,7 @@ public final class SharedEarthData {
 
     private static SharedEarthData loaded;
 
-    private final Map<Key<?>, Object> data = new HashMap<>();
+    private final Map<Key<?>, Object> data = new Reference2ObjectOpenHashMap<>();
 
     SharedEarthData() {
     }

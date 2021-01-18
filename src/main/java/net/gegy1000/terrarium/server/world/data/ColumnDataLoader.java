@@ -1,17 +1,16 @@
 package net.gegy1000.terrarium.server.world.data;
 
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.gegy1000.justnow.executor.CurrentThreadExecutor;
 import net.gegy1000.justnow.executor.LocalExecutor;
 import net.gegy1000.justnow.executor.TaskHandle;
 import net.gegy1000.justnow.future.Future;
 import net.minecraft.util.math.ChunkPos;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public final class ColumnDataLoader implements AutoCloseable {
     private final DataGenerator generator;
-    private final Map<ChunkPos, TaskHandle<ColumnData>> taskMap = new HashMap<>();
+    private final Long2ObjectMap<TaskHandle<ColumnData>> taskMap = new Long2ObjectOpenHashMap<>();
 
     private final LocalExecutor executor = new LocalExecutor();
 
@@ -30,13 +29,13 @@ public final class ColumnDataLoader implements AutoCloseable {
     public Future<ColumnData> spawn(ChunkPos columnPos) {
         TaskHandle<ColumnData> handle = this.executor.spawn(this.generate(columnPos));
         synchronized (this.taskMap) {
-            this.taskMap.put(columnPos, handle);
+            this.taskMap.put(ChunkPos.asLong(columnPos.x, columnPos.z), handle);
         }
         return handle;
     }
 
     public ColumnData getNow(ChunkPos columnPos) {
-        Future<ColumnData> future = this.stealTask(columnPos);
+        Future<ColumnData> future = this.stealTask(ChunkPos.asLong(columnPos.x, columnPos.z));
         if (future == null) {
             future = this.generate(columnPos);
         }
@@ -48,7 +47,7 @@ public final class ColumnDataLoader implements AutoCloseable {
         return this.generator.generate(DataView.of(columnPos));
     }
 
-    private Future<ColumnData> stealTask(ChunkPos columnPos) {
+    private Future<ColumnData> stealTask(long columnPos) {
         TaskHandle<ColumnData> task;
         synchronized (this.taskMap) {
             task = this.taskMap.remove(columnPos);
@@ -57,7 +56,7 @@ public final class ColumnDataLoader implements AutoCloseable {
         return task != null ? this.executor.steal(task) : null;
     }
 
-    public void cancel(ChunkPos columnPos) {
+    public void cancel(long columnPos) {
         synchronized (this.taskMap) {
             TaskHandle<ColumnData> handle = this.taskMap.remove(columnPos);
             if (handle != null) {

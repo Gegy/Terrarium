@@ -3,12 +3,13 @@ package net.gegy1000.terrarium.server.util;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,7 +36,7 @@ public final class ThreadedProfiler implements Profiler {
     }
 
     public static void start() {
-        profilers = new HashMap<>();
+        profilers = new Reference2ObjectOpenHashMap<>();
     }
 
     public static List<Node> stop() {
@@ -100,7 +101,7 @@ public final class ThreadedProfiler implements Profiler {
 
     public static class Node {
         public final String name;
-        public final Map<String, Node> children = new HashMap<>();
+        public final Map<String, Node> children = new Object2ObjectOpenHashMap<>();
         public long time;
 
         Node(String name) {

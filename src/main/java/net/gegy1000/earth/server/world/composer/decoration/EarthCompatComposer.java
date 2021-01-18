@@ -51,40 +51,46 @@ public final class EarthCompatComposer implements DecorationComposer {
                 world.firePopulateEvent(this.random, PopulateChunkEvent.Populate.EventType.LAKE);
                 world.firePopulateEvent(this.random, PopulateChunkEvent.Populate.EventType.LAVA);
 
-                MinecraftForge.EVENT_BUS.post(new DecorateBiomeEvent.Pre(world, this.random, columnPos));
+                try (Profiler.Handle decorate = profiler.push("decorate")) {
+                    MinecraftForge.EVENT_BUS.post(new DecorateBiomeEvent.Pre(world, this.random, columnPos));
 
-                world.fireOreGenEvent(this.random, true);
-                world.fireOreGenEvent(this.random, OreGenEvent.GenerateMinable.EventType.DIRT);
-                world.fireOreGenEvent(this.random, OreGenEvent.GenerateMinable.EventType.GRAVEL);
-                world.fireOreGenEvent(this.random, OreGenEvent.GenerateMinable.EventType.DIORITE);
-                world.fireOreGenEvent(this.random, OreGenEvent.GenerateMinable.EventType.GRANITE);
-                world.fireOreGenEvent(this.random, OreGenEvent.GenerateMinable.EventType.ANDESITE);
-                world.fireOreGenEvent(this.random, OreGenEvent.GenerateMinable.EventType.COAL);
-                world.fireOreGenEvent(this.random, OreGenEvent.GenerateMinable.EventType.IRON);
-                world.fireOreGenEvent(this.random, OreGenEvent.GenerateMinable.EventType.GOLD);
-                world.fireOreGenEvent(this.random, OreGenEvent.GenerateMinable.EventType.REDSTONE);
-                world.fireOreGenEvent(this.random, OreGenEvent.GenerateMinable.EventType.DIAMOND);
-                world.fireOreGenEvent(this.random, OreGenEvent.GenerateMinable.EventType.LAPIS);
-                world.fireOreGenEvent(this.random, false);
+                    try (Profiler.Handle ores = profiler.push("ores")) {
+                        world.fireOreGenEvent(this.random, true);
+                        world.fireOreGenEvent(this.random, OreGenEvent.GenerateMinable.EventType.DIRT);
+                        world.fireOreGenEvent(this.random, OreGenEvent.GenerateMinable.EventType.GRAVEL);
+                        world.fireOreGenEvent(this.random, OreGenEvent.GenerateMinable.EventType.DIORITE);
+                        world.fireOreGenEvent(this.random, OreGenEvent.GenerateMinable.EventType.GRANITE);
+                        world.fireOreGenEvent(this.random, OreGenEvent.GenerateMinable.EventType.ANDESITE);
+                        world.fireOreGenEvent(this.random, OreGenEvent.GenerateMinable.EventType.COAL);
+                        world.fireOreGenEvent(this.random, OreGenEvent.GenerateMinable.EventType.IRON);
+                        world.fireOreGenEvent(this.random, OreGenEvent.GenerateMinable.EventType.GOLD);
+                        world.fireOreGenEvent(this.random, OreGenEvent.GenerateMinable.EventType.REDSTONE);
+                        world.fireOreGenEvent(this.random, OreGenEvent.GenerateMinable.EventType.DIAMOND);
+                        world.fireOreGenEvent(this.random, OreGenEvent.GenerateMinable.EventType.LAPIS);
+                        world.fireOreGenEvent(this.random, false);
+                    }
 
-                world.fireDecorateEvent(this.random, DecorateBiomeEvent.Decorate.EventType.SAND);
-                world.fireDecorateEvent(this.random, DecorateBiomeEvent.Decorate.EventType.CLAY);
-                world.fireDecorateEvent(this.random, DecorateBiomeEvent.Decorate.EventType.SAND_PASS2);
-                world.fireDecorateEvent(this.random, DecorateBiomeEvent.Decorate.EventType.TREE);
-                world.fireDecorateEvent(this.random, DecorateBiomeEvent.Decorate.EventType.BIG_SHROOM);
-                world.fireDecorateEvent(this.random, DecorateBiomeEvent.Decorate.EventType.FLOWERS);
-                world.fireDecorateEvent(this.random, DecorateBiomeEvent.Decorate.EventType.GRASS);
-                world.fireDecorateEvent(this.random, DecorateBiomeEvent.Decorate.EventType.DEAD_BUSH);
-                world.fireDecorateEvent(this.random, DecorateBiomeEvent.Decorate.EventType.LILYPAD);
-                world.fireDecorateEvent(this.random, DecorateBiomeEvent.Decorate.EventType.SHROOM);
-                world.fireDecorateEvent(this.random, DecorateBiomeEvent.Decorate.EventType.PUMPKIN);
-                world.fireDecorateEvent(this.random, DecorateBiomeEvent.Decorate.EventType.CACTUS);
-                world.fireDecorateEvent(this.random, DecorateBiomeEvent.Decorate.EventType.LAKE_WATER);
-                world.fireDecorateEvent(this.random, DecorateBiomeEvent.Decorate.EventType.LAKE_LAVA);
+                    world.fireDecorateEvent(this.random, DecorateBiomeEvent.Decorate.EventType.SAND);
+                    world.fireDecorateEvent(this.random, DecorateBiomeEvent.Decorate.EventType.CLAY);
+                    world.fireDecorateEvent(this.random, DecorateBiomeEvent.Decorate.EventType.SAND_PASS2);
+                    world.fireDecorateEvent(this.random, DecorateBiomeEvent.Decorate.EventType.TREE);
+                    world.fireDecorateEvent(this.random, DecorateBiomeEvent.Decorate.EventType.BIG_SHROOM);
+                    world.fireDecorateEvent(this.random, DecorateBiomeEvent.Decorate.EventType.FLOWERS);
+                    world.fireDecorateEvent(this.random, DecorateBiomeEvent.Decorate.EventType.GRASS);
+                    world.fireDecorateEvent(this.random, DecorateBiomeEvent.Decorate.EventType.DEAD_BUSH);
+                    world.fireDecorateEvent(this.random, DecorateBiomeEvent.Decorate.EventType.LILYPAD);
+                    world.fireDecorateEvent(this.random, DecorateBiomeEvent.Decorate.EventType.SHROOM);
+                    world.fireDecorateEvent(this.random, DecorateBiomeEvent.Decorate.EventType.PUMPKIN);
+                    world.fireDecorateEvent(this.random, DecorateBiomeEvent.Decorate.EventType.CACTUS);
+                    world.fireDecorateEvent(this.random, DecorateBiomeEvent.Decorate.EventType.LAKE_WATER);
+                    world.fireDecorateEvent(this.random, DecorateBiomeEvent.Decorate.EventType.LAKE_LAVA);
 
-                MinecraftForge.EVENT_BUS.post(new DecorateBiomeEvent.Post(world, this.random, columnPos));
+                    MinecraftForge.EVENT_BUS.post(new DecorateBiomeEvent.Post(world, this.random, columnPos));
+                }
 
-                world.runModdedGenerators();
+                try (Profiler.Handle modded = profiler.push("modded_generators")) {
+                    world.runModdedGenerators();
+                }
 
                 world.firePopulateEvent(this.random, false);
             });

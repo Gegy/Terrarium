@@ -1,11 +1,11 @@
 package net.gegy1000.terrarium.server.world.data;
 
 import com.google.common.collect.ImmutableMap;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import net.gegy1000.justnow.future.Future;
 import net.gegy1000.terrarium.Terrarium;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -53,7 +53,7 @@ public final class DataGenerator {
     }
 
     public static class Builder {
-        private final Map<DataKey<?>, DataOp<?>> attachedData = new HashMap<>();
+        private final Map<DataKey<?>, DataOp<?>> attachedData = new Reference2ObjectOpenHashMap<>();
 
         private Builder() {
         }
