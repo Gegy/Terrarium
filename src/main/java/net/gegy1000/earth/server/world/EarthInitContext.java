@@ -1,8 +1,6 @@
 package net.gegy1000.earth.server.world;
 
 import net.gegy1000.earth.server.capability.EarthWorld;
-import net.gegy1000.earth.server.util.zoom.ForZoom;
-import net.gegy1000.earth.server.world.data.source.StdSource;
 import net.gegy1000.earth.server.world.data.source.WorldClimateRaster;
 import net.gegy1000.terrarium.server.world.coordinate.CoordinateReference;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
@@ -15,8 +13,6 @@ public final class EarthInitContext {
     public final CoordinateReference lngLatCrs;
     public final CoordinateReference climateRasterCrs;
 
-    public final ForZoom<CoordinateReference> stdRasterCrs;
-
     private EarthInitContext(GenerationSettings settings) {
         this.settings = settings;
 
@@ -26,8 +22,6 @@ public final class EarthInitContext {
         this.lngLatCrs = CoordinateReference.lngLat(metersPerDegree / worldScale);
 
         this.climateRasterCrs = WorldClimateRaster.crs(worldScale);
-
-        this.stdRasterCrs = zoom -> StdSource.crs(worldScale, zoom);
     }
 
     public static EarthInitContext from(GenerationSettings settings) {

@@ -3,7 +3,7 @@ package net.gegy1000.terrarium.server.world.data;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.minecraft.util.math.ChunkPos;
 
-public class DataView {
+public final class DataView {
     private final int x;
     private final int y;
     private final int width;
@@ -86,11 +86,6 @@ public class DataView {
 
     public DataView offset(int x, int y) {
         return new DataView(this.x + x, this.y + y, this.width, this.height);
-    }
-
-    public boolean contains(DataView view) {
-        return view.getX() >= this.x && view.getY() >= this.y
-                && view.getMaxX() <= this.getMaxX() && view.getMaxY() <= this.getMaxY();
     }
 
     public boolean contains(int x, int y) {

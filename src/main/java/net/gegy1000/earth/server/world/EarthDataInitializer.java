@@ -46,8 +46,8 @@ import java.util.function.Function;
 import static net.gegy1000.earth.server.world.EarthProperties.*;
 
 public final class EarthDataInitializer implements TerrariumDataInitializer {
-    public static final Zoomable<StdSource<FloatRaster>> ELEVATION_SOURCE = ElevationSource.source();
-    public static final Zoomable<StdSource<EnumRaster<Cover>>> LAND_COVER_SOURCE = LandCoverSource.source();
+    public static final Zoomable<StdSource<FloatRaster>> ELEVATION_SOURCE = ElevationSource.create();
+    public static final Zoomable<StdSource<EnumRaster<Cover>>> LAND_COVER_SOURCE = LandCoverSource.create();
 
     public static final Zoomable<StdSource<ShortRaster>> CATION_EXCHANGE_CAPACITY_SOURCE = SoilSources.cationExchangeCapacity();
     public static final Zoomable<StdSource<ShortRaster>> ORGANIC_CARBON_CONTENT_SOURCE = SoilSources.organicCarbonContent();
@@ -72,7 +72,7 @@ public final class EarthDataInitializer implements TerrariumDataInitializer {
         return Math.max((int) Math.round(zoom), 0);
     }
 
-    private <T extends NumberRaster<?>> DataOp<T> sampleStdInterpolated(
+    private <T extends NumberRaster<?>> DataOp<T> sampleContinuous(
             double worldScale,
             Zoomable<StdSource<T>> zoomableSource,
             Function<DataView, T> createRaster
@@ -80,7 +80,7 @@ public final class EarthDataInitializer implements TerrariumDataInitializer {
         int maxZoom = this.selectStandardZoom(worldScale);
         return new ResampleZoomRasters<T>()
                 .from(zoomableSource.map((zoom, source) -> {
-                    CoordinateReference crs = this.ctx.stdRasterCrs.forZoom(zoom);
+                    CoordinateReference crs = StdSource.crs(worldScale, zoom);
                     return new CoordReferenced<>(source, crs);
                 }))
                 .sample(source -> SampleRaster.sample(source, createRaster))
@@ -92,7 +92,7 @@ public final class EarthDataInitializer implements TerrariumDataInitializer {
                 .create();
     }
 
-    private <E extends Enum<E>> DataOp<EnumRaster<E>> sampleStdEnum(
+    private <E extends Enum<E>> DataOp<EnumRaster<E>> sampleDiscrete(
             double worldScale,
             Zoomable<StdSource<EnumRaster<E>>> zoomableSource,
             E defaultValue
@@ -100,7 +100,7 @@ public final class EarthDataInitializer implements TerrariumDataInitializer {
         int maxZoom = this.selectStandardZoom(worldScale);
         return new ResampleZoomRasters<EnumRaster<E>>()
                 .from(zoomableSource.map((zoom, source) -> {
-                    CoordinateReference crs = this.ctx.stdRasterCrs.forZoom(zoom);
+                    CoordinateReference crs = StdSource.crs(worldScale, zoom);
                     return new CoordReferenced<>(source, crs);
                 }))
                 .sample(source -> SampleRaster.sampleEnum(source, defaultValue))
@@ -110,23 +110,23 @@ public final class EarthDataInitializer implements TerrariumDataInitializer {
     }
 
     private DataOp<FloatRaster> elevation(double worldScale) {
-        return this.sampleStdInterpolated(worldScale, ELEVATION_SOURCE, FloatRaster::create);
+        return this.sampleContinuous(worldScale, ELEVATION_SOURCE, FloatRaster::create);
     }
 
     private DataOp<EnumRaster<Cover>> landcover(double worldScale) {
-        return this.sampleStdEnum(worldScale, LAND_COVER_SOURCE, Cover.NO);
+        return this.sampleDiscrete(worldScale, LAND_COVER_SOURCE, Cover.NO);
     }
 
     private DataOp<ShortRaster> soilShort(double worldScale, Zoomable<StdSource<ShortRaster>> source) {
-        return this.sampleStdInterpolated(worldScale, source, ShortRaster::create);
+        return this.sampleContinuous(worldScale, source, ShortRaster::create);
     }
 
     private DataOp<UByteRaster> soilUByte(double worldScale, Zoomable<StdSource<UByteRaster>> source) {
-        return this.sampleStdInterpolated(worldScale, source, UByteRaster::create);
+        return this.sampleContinuous(worldScale, source, UByteRaster::create);
     }
 
     private DataOp<EnumRaster<SoilSuborder>> soilClass(double worldScale) {
-        return this.sampleStdEnum(worldScale, SOIL_CLASS_SOURCE, SoilSuborder.NO);
+        return this.sampleDiscrete(worldScale, SOIL_CLASS_SOURCE, SoilSuborder.NO);
     }
 
     private DataOp<BitRaster> oceanMask(double worldScaleMeters) {
@@ -180,8 +180,7 @@ public final class EarthDataInitializer implements TerrariumDataInitializer {
         DataOp<ShortRaster> annualRainfall = climateSampler.annualRainfall();
         annualRainfall = InterpolationScaleOp.LINEAR.scaleShortsFrom(annualRainfall, this.ctx.climateRasterCrs);
 
-        DataOp<FloatRaster> temperatureNoise = this.temperatureNoise()
-                .cached(FloatRaster::copy);
+        DataOp<FloatRaster> temperatureNoise = this.temperatureNoise().cached(FloatRaster::copy);
 
         DataOp<FloatRaster> meanTemperature = climateSampler.meanTemperature();
         meanTemperature = InterpolationScaleOp.LINEAR.scaleFloatsFrom(meanTemperature, this.ctx.climateRasterCrs);

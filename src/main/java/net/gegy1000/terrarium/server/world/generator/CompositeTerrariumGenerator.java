@@ -1,6 +1,7 @@
 package net.gegy1000.terrarium.server.world.generator;
 
 import com.google.common.collect.ImmutableList;
+import net.gegy1000.terrarium.server.world.composer.RoughHeightmapComposer;
 import net.gegy1000.terrarium.server.world.composer.biome.BiomeComposer;
 import net.gegy1000.terrarium.server.world.composer.decoration.CompositeDecorationComposer;
 import net.gegy1000.terrarium.server.world.composer.decoration.DecorationComposer;
@@ -10,11 +11,14 @@ import net.gegy1000.terrarium.server.world.composer.surface.CompositeSurfaceComp
 import net.gegy1000.terrarium.server.world.composer.surface.SurfaceComposer;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 
+import javax.annotation.Nullable;
+
 public class CompositeTerrariumGenerator implements TerrariumGenerator {
     private final SurfaceComposer surfaceComposer;
     private final DecorationComposer decorationComposer;
     private final StructureComposer structureComposer;
     private final BiomeComposer biomeComposer;
+    private final RoughHeightmapComposer roughHeightmapComposer;
 
     private final Coordinate spawnPosition;
 
@@ -23,12 +27,14 @@ public class CompositeTerrariumGenerator implements TerrariumGenerator {
             DecorationComposer decorationComposer,
             StructureComposer structureComposer,
             BiomeComposer biomeComposer,
+            RoughHeightmapComposer roughHeightmapComposer,
             Coordinate spawnPosition
     ) {
         this.surfaceComposer = surfaceComposer;
         this.decorationComposer = decorationComposer;
         this.structureComposer = structureComposer;
         this.biomeComposer = biomeComposer;
+        this.roughHeightmapComposer = roughHeightmapComposer;
         this.spawnPosition = spawnPosition;
     }
 
@@ -56,6 +62,12 @@ public class CompositeTerrariumGenerator implements TerrariumGenerator {
         return this.biomeComposer;
     }
 
+    @Nullable
+    @Override
+    public RoughHeightmapComposer getRoughHeightmapComposer() {
+        return this.roughHeightmapComposer;
+    }
+
     @Override
     public Coordinate getSpawnPosition() {
         return this.spawnPosition;
@@ -66,6 +78,7 @@ public class CompositeTerrariumGenerator implements TerrariumGenerator {
         private final ImmutableList.Builder<StructureComposer> structureComposers = new ImmutableList.Builder<>();
         private final ImmutableList.Builder<DecorationComposer> decorationComposers = new ImmutableList.Builder<>();
         private BiomeComposer biomeComposer = BiomeComposer.Default.INSTANCE;
+        private RoughHeightmapComposer roughHeightmapComposer;
 
         private Coordinate spawnPosition;
 
@@ -92,6 +105,11 @@ public class CompositeTerrariumGenerator implements TerrariumGenerator {
             return this;
         }
 
+        public Builder setRoughHeightmapComposer(RoughHeightmapComposer roughHeightmapComposer) {
+            this.roughHeightmapComposer = roughHeightmapComposer;
+            return this;
+        }
+
         public Builder setSpawnPosition(Coordinate coordinate) {
             this.spawnPosition = coordinate;
             return this;
@@ -103,6 +121,7 @@ public class CompositeTerrariumGenerator implements TerrariumGenerator {
                     CompositeDecorationComposer.of(this.decorationComposers.build()),
                     CompositeStructureComposer.of(this.structureComposers.build()),
                     this.biomeComposer,
+                    this.roughHeightmapComposer,
                     this.spawnPosition
             );
         }

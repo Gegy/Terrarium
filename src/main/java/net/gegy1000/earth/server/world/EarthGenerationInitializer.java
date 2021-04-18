@@ -5,6 +5,7 @@ import dev.gegy.gengen.core.GenGen;
 import dev.gegy.gengen.util.primer.GenericCavePrimer;
 import dev.gegy.gengen.util.primer.GenericRavinePrimer;
 import net.gegy1000.earth.server.world.composer.EarthBiomeComposer;
+import net.gegy1000.earth.server.world.composer.EarthRoughHeightmapComposer;
 import net.gegy1000.earth.server.world.composer.decoration.EarthCactusComposer;
 import net.gegy1000.earth.server.world.composer.decoration.EarthCompatComposer;
 import net.gegy1000.earth.server.world.composer.decoration.EarthFlowerComposer;
@@ -60,6 +61,9 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
         this.addDecorationComposers(builder);
 
         this.addStructureComposers(builder, surfaceFunction);
+
+        int seaLevel = this.ctx.settings.getInteger(HEIGHT_OFFSET) + 1;
+        builder.setRoughHeightmapComposer(new EarthRoughHeightmapComposer(seaLevel));
 
         builder.setBiomeComposer(new EarthBiomeComposer());
         builder.setSpawnPosition(new Coordinate(this.ctx.lngLatCrs, this.ctx.settings.getDouble(SPAWN_LONGITUDE), this.ctx.settings.getDouble(SPAWN_LATITUDE)));

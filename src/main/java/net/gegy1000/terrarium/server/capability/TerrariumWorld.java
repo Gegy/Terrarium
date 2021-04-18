@@ -5,6 +5,7 @@ import net.gegy1000.terrarium.server.event.TerrariumInitializeGeneratorEvent;
 import net.gegy1000.terrarium.server.world.TerrariumDataInitializer;
 import net.gegy1000.terrarium.server.world.TerrariumGeneratorInitializer;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
+import net.gegy1000.terrarium.server.world.composer.RoughHeightmapComposer;
 import net.gegy1000.terrarium.server.world.composer.biome.BiomeComposer;
 import net.gegy1000.terrarium.server.world.composer.decoration.DecorationComposer;
 import net.gegy1000.terrarium.server.world.composer.structure.StructureComposer;
@@ -45,6 +46,9 @@ public interface TerrariumWorld extends ICapabilityProvider {
     StructureComposer getStructureComposer();
 
     BiomeComposer getBiomeComposer();
+
+    @Nullable
+    RoughHeightmapComposer getRoughHeightmapComposer();
 
     Coordinate getSpawnPosition();
 
@@ -127,6 +131,12 @@ public interface TerrariumWorld extends ICapabilityProvider {
         @Override
         public BiomeComposer getBiomeComposer() {
             return this.generator.getBiomeComposer();
+        }
+
+        @Nullable
+        @Override
+        public RoughHeightmapComposer getRoughHeightmapComposer() {
+            return this.generator.getRoughHeightmapComposer();
         }
 
         @Override

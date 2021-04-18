@@ -6,26 +6,26 @@ import net.gegy1000.terrarium.server.world.data.raster.IntegerRaster;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.data.raster.UByteRaster;
 
+import javax.annotation.Nullable;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Optional;
 import java.util.function.Function;
 
-class RasterFormat<T extends IntegerRaster<?>> {
-    static final RasterFormat<UByteRaster> UBYTE = new RasterFormat<>(UByteRaster.class, UByteRaster::create, (input, width, height) -> {
+public final class RasterFormat<T extends IntegerRaster<?>> {
+    public static final RasterFormat<UByteRaster> UBYTE = new RasterFormat<>(UByteRaster::create, (input, width, height) -> {
         byte[] bytes = new byte[width * height];
         new DataInputStream(input).readFully(bytes);
         return UByteRaster.wrap(bytes, width, height);
     });
 
-    static final RasterFormat<ByteRaster> BYTE = new RasterFormat<>(ByteRaster.class, ByteRaster::create, (input, width, height) -> {
+    public static final RasterFormat<ByteRaster> BYTE = new RasterFormat<>(ByteRaster::create, (input, width, height) -> {
         byte[] bytes = new byte[width * height];
         new DataInputStream(input).readFully(bytes);
         return ByteRaster.wrap(bytes, width, height);
     });
 
-    static final RasterFormat<ShortRaster> SHORT = new RasterFormat<>(ShortRaster.class, ShortRaster::create, (input, width, height) -> {
+    public static final RasterFormat<ShortRaster> SHORT = new RasterFormat<>(ShortRaster::create, (input, width, height) -> {
         DataInputStream dataIn = new DataInputStream(input);
         short[] values = new short[width * height];
         for (int i = 0; i < values.length; i++) {
@@ -34,12 +34,10 @@ class RasterFormat<T extends IntegerRaster<?>> {
         return ShortRaster.wrap(values, width, height);
     });
 
-    private final Class<T> type;
     private final Function<DataView, T> constructor;
-    private final RasterReader<T> reader;
+    private final Reader<T> reader;
 
-    private RasterFormat(Class<T> type, Function<DataView, T> constructor, RasterReader<T> reader) {
-        this.type = type;
+    private RasterFormat(Function<DataView, T> constructor, Reader<T> reader) {
         this.constructor = constructor;
         this.reader = reader;
     }
@@ -52,22 +50,17 @@ class RasterFormat<T extends IntegerRaster<?>> {
         return this.reader.read(input, width, height);
     }
 
-    @SuppressWarnings("unchecked")
-    <R extends IntegerRaster<?>> Optional<RasterFormat<R>> tryCast(Class<R> type) {
-        if (!type.isAssignableFrom(this.type)) return Optional.empty();
-        return Optional.of((RasterFormat<R>) this);
-    }
-
-    static Optional<RasterFormat<?>> byId(int id) {
+    @Nullable
+    static RasterFormat<?> byId(int id) {
         switch (id) {
-            case 0: return Optional.of(RasterFormat.UBYTE);
-            case 1: return Optional.of(RasterFormat.BYTE);
-            case 2: return Optional.of(RasterFormat.SHORT);
-            default: return Optional.empty();
+            case 0: return RasterFormat.UBYTE;
+            case 1: return RasterFormat.BYTE;
+            case 2: return RasterFormat.SHORT;
+            default: return null;
         }
     }
 
-    interface RasterReader<T extends IntegerRaster<?>> {
+    interface Reader<T extends IntegerRaster<?>> {
         T read(InputStream input, int width, int height) throws IOException;
     }
 }

@@ -3,6 +3,7 @@ package net.gegy1000.terrarium;
 import net.gegy1000.terrarium.server.ServerProxy;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.command.TerrariumCommand;
+import net.gegy1000.terrarium.server.integration.Fp2Integration;
 import net.gegy1000.terrarium.server.message.DataFailWarningMessage;
 import net.gegy1000.terrarium.server.message.TerrariumHandshakeMessage;
 import net.gegy1000.terrarium.server.world.chunk.tracker.SavedColumnTracker;
@@ -54,10 +55,18 @@ public class Terrarium {
         if (Loader.isModLoaded("cubicchunks")) {
             registerCubicChunksEvents();
         }
+
+        if (Loader.isModLoaded("fp2")) {
+            registerFp2Events();
+        }
     }
 
     private static void registerCubicChunksEvents() {
         MinecraftForge.EVENT_BUS.register(SavedCubeTracker.class);
+    }
+
+    private static void registerFp2Events() {
+        MinecraftForge.EVENT_BUS.register(Fp2Integration.class);
     }
 
     @Mod.EventHandler

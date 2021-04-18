@@ -60,13 +60,13 @@ public final class Coordinate {
         return new Coordinate(this.crs, this.x + x, this.z + z);
     }
 
-    public Coordinate add(CoordinateReference state, double x, double z) {
-        return this.add(new Coordinate(state, x, z));
+    public Coordinate add(Coordinate coordinate) {
+        return this.add(coordinate.crs, coordinate.x, coordinate.z);
     }
 
-    public Coordinate add(Coordinate coordinate) {
-        double blockX = coordinate.getBlockX();
-        double blockZ = coordinate.getBlockZ();
+    public Coordinate add(CoordinateReference crs, double x, double z) {
+        double blockX = crs.blockX(x);
+        double blockZ = crs.blockZ(z);
 
         if (this.crs == null) {
             return Coordinate.atBlock(this.x + blockX, this.z + blockZ);
@@ -85,20 +85,20 @@ public final class Coordinate {
         return new BlockPos(this.getBlockX(), 0, this.getBlockZ());
     }
 
-    public boolean is(CoordinateReference state) {
-        return Objects.equals(this.crs, state);
+    public boolean is(CoordinateReference crs) {
+        return Objects.equals(this.crs, crs);
     }
 
     public static Coordinate min(Coordinate left, Coordinate right) {
         if (!left.is(right.crs)) {
-            throw new IllegalArgumentException("Cannot get minimum coordinate between coordinates of different state");
+            throw new IllegalArgumentException("Cannot get minimum coordinate between coordinates of different CRS");
         }
         return new Coordinate(left.crs, Math.min(left.getX(), right.getX()), Math.min(left.getZ(), right.getZ()));
     }
 
     public static Coordinate max(Coordinate left, Coordinate right) {
         if (!left.is(right.crs)) {
-            throw new IllegalArgumentException("Cannot get maximum coordinate between coordinates of different state");
+            throw new IllegalArgumentException("Cannot get maximum coordinate between coordinates of different CRS");
         }
         return new Coordinate(left.crs, Math.max(left.getX(), right.getX()), Math.max(left.getZ(), right.getZ()));
     }

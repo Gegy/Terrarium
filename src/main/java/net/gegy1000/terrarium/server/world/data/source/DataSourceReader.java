@@ -125,11 +125,7 @@ public final class DataSourceReader {
         return this.getTiles(source, minTile, maxTile);
     }
 
-    public <T> Future<Collection<DataTileResult<T>>> getTiles(
-            TiledDataSource<T> source,
-            Vec2i min,
-            Vec2i max
-    ) {
+    public <T> Future<Collection<DataTileResult<T>>> getTiles(TiledDataSource<T> source, Vec2i min, Vec2i max) {
         Collection<Future<DataTileResult<T>>> futures = new ArrayList<>((max.x - min.x + 1) * (max.y - min.y + 1));
         for (int y = min.y; y <= max.y; y++) {
             for (int x = min.x; x <= max.x; x++) {

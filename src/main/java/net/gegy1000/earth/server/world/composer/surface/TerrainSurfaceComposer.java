@@ -19,7 +19,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
 
 public class TerrainSurfaceComposer implements SurfaceComposer {
-    private static final long SEED = 6035435416693430887L;
+    public static final long SEED = 6035435416693430887L;
     private static final int MAX_SOIL_DEPTH = 6;
 
     private static final IBlockState AIR = Blocks.AIR.getDefaultState();

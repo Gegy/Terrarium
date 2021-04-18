@@ -87,7 +87,7 @@ public final class StdSource<T> extends TiledDataSource<T> {
     }
 
     public static double zoomForScale(double meters) {
-        return Math.log(EarthWorld.EQUATOR_CIRCUMFERENCE / (2 * TILE_SIZE * meters)) / Math.log(3);
+        return Math.log(EarthWorld.EQUATOR_CIRCUMFERENCE / (2 * TILE_SIZE * meters)) / Math.log(ZOOM_BASE);
     }
 
     public static boolean containsTile(Vec2i pos, int zoom) {

@@ -2,6 +2,7 @@ package net.gegy1000.earth.server.world.data.source;
 
 import net.gegy1000.earth.server.util.zoom.ZoomLevels;
 import net.gegy1000.earth.server.util.zoom.Zoomable;
+import net.gegy1000.earth.server.world.data.source.reader.RasterFormat;
 import net.gegy1000.earth.server.world.data.source.reader.TerrariumRasterReader;
 import net.gegy1000.earth.server.world.ecology.soil.SoilSuborder;
 import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
@@ -17,7 +18,7 @@ public final class SoilSources {
         return StdSource.<ShortRaster>builder(zoomLevels())
                 .cacheName("soil/" + name)
                 .endpoint(name)
-                .read(input -> TerrariumRasterReader.read(input, ShortRaster.class))
+                .read(input -> TerrariumRasterReader.read(input, RasterFormat.SHORT))
                 .build();
     }
 
@@ -25,7 +26,7 @@ public final class SoilSources {
         return StdSource.<UByteRaster>builder(zoomLevels())
                 .cacheName("soil/" + name)
                 .endpoint(name)
-                .read(input -> UByteRaster.copyFrom(TerrariumRasterReader.read(input, ShortRaster.class)))
+                .read(input -> UByteRaster.copyFrom(TerrariumRasterReader.read(input, RasterFormat.SHORT)))
                 .build();
     }
 
@@ -58,7 +59,7 @@ public final class SoilSources {
                 .cacheName("soil/usda")
                 .endpoint("usda")
                 .read(input -> {
-                    UByteRaster raw = TerrariumRasterReader.read(input, UByteRaster.class);
+                    UByteRaster raw = TerrariumRasterReader.read(input, RasterFormat.UBYTE);
 
                     int width = raw.getWidth();
                     int height = raw.getHeight();
