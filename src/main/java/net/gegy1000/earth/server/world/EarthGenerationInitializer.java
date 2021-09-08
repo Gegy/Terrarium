@@ -62,8 +62,7 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
 
         this.addStructureComposers(builder, surfaceFunction);
 
-        int seaLevel = this.ctx.settings.getInteger(HEIGHT_OFFSET) + 1;
-        builder.setRoughHeightmapComposer(new EarthRoughHeightmapComposer(seaLevel));
+        builder.setRoughHeightmapComposer(new EarthRoughHeightmapComposer());
 
         builder.setBiomeComposer(new EarthBiomeComposer());
         builder.setSpawnPosition(new Coordinate(this.ctx.lngLatCrs, this.ctx.settings.getDouble(SPAWN_LONGITUDE), this.ctx.settings.getDouble(SPAWN_LATITUDE)));

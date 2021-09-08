@@ -22,7 +22,7 @@ public final class StdSource<T> extends TiledDataSource<T> {
     public static final int TILE_SIZE = 1000;
     private static final int ZOOM_BASE = 3;
 
-    public static final String ENDPOINT = "https://terrariumearth.azureedge.net/geo3";
+    public static final String ENDPOINT = "https://terrarium.gegy.dev/geo3";
 
     private final IoFunction<InputStream, T> read;
     private final String endpoint;

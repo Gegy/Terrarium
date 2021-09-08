@@ -18,8 +18,8 @@ import net.gegy1000.terrarium.server.world.composer.RoughHeightmapComposer;
 import net.gegy1000.terrarium.server.world.data.ColumnData;
 import net.gegy1000.terrarium.server.world.data.DataKey;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.biome.Biome;
@@ -28,12 +28,6 @@ import java.util.Collection;
 
 public final class EarthRoughHeightmapComposer implements RoughHeightmapComposer {
     private final GrowthPredictors.Sampler predictorSampler = GrowthPredictors.sampler();
-
-    private final int seaLevel;
-
-    public EarthRoughHeightmapComposer(int seaLevel) {
-        this.seaLevel = seaLevel;
-    }
 
     @Override
     public void compose(TerrariumWorld terrarium, ColumnData data, HeightmapPos pos, HeightmapTile tile) {
@@ -45,8 +39,14 @@ public final class EarthRoughHeightmapComposer implements RoughHeightmapComposer
         BiomeClassifier biomeClassifier = earth.getBiomeClassifier();
 
         ShortRaster heightRaster = data.getOrDefault(EarthData.TERRAIN_HEIGHT);
+        ShortRaster waterLevelRaster = data.getOrDefault(EarthData.WATER_LEVEL);
 
-        HeightmapData value = new HeightmapData();
+        HeightmapData terrain = new HeightmapData();
+
+        HeightmapData water = new HeightmapData();
+        water.light = Constants.packCombinedLight(15 << 20);
+        water.state = Blocks.WATER.getDefaultState();
+
         GrowthPredictors predictors = new GrowthPredictors();
         SpatialRandom random = new SpatialRandom(terrarium.getWorld(), TerrainSurfaceComposer.SEED);
 
@@ -62,6 +62,10 @@ public final class EarthRoughHeightmapComposer implements RoughHeightmapComposer
                 int z = tileZ << level;
 
                 int worldY = heightRaster.get(x, z);
+                int waterY = waterLevelRaster.get(x, z);
+
+                boolean hasWater = waterY != Short.MIN_VALUE;
+
                 int worldX = x + blockX;
                 int worldZ = z + blockZ;
                 mutablePos.setPos(worldX, worldY, worldZ);
@@ -74,17 +78,20 @@ public final class EarthRoughHeightmapComposer implements RoughHeightmapComposer
                 SoilTexture soilTexture = SoilSelector.select(predictors);
                 IBlockState block = soilTexture.sample(random, mutablePos, predictors.slope, 0);
 
-                int skyLight = 15 - MathHelper.clamp(this.seaLevel - worldY, 0, 5) * 3;
-                int biomeId = Biome.getIdForBiome(biome);
+                int skyLight = hasWater ? 15 - MathHelper.clamp(waterY - worldY, 0, 5) * 3 : 15;
 
-                value.height = worldY;
-                value.state = Block.getStateId(block);
-                value.light = skyLight << 4;
-                value.biome = biomeId;
-                value.waterLight = Constants.packCombinedLight(15 << 20);
-                value.waterBiome = biomeId;
+                terrain.height_int = worldY;
+                terrain.state = block;
+                terrain.light = skyLight << 4;
+                terrain.biome = biome;
 
-                tile.set(tileX, tileZ, value);
+                tile.setLayer(tileX, tileZ, 0, terrain);
+
+                if (hasWater) {
+                    water.height_int = waterY;
+                    water.biome = biome;
+                    tile.setLayer(tileX, tileZ, 1, water);
+                }
             }
         }
     }
@@ -92,8 +99,8 @@ public final class EarthRoughHeightmapComposer implements RoughHeightmapComposer
     @Override
     public Collection<DataKey<?>> getRequiredData() {
         return ImmutableSet.of(
-                EarthData.TERRAIN_HEIGHT,
-                EarthData.ELEVATION_METERS,
+                EarthData.TERRAIN_HEIGHT, EarthData.ELEVATION_METERS,
+                EarthData.WATER_LEVEL,
                 EarthData.ANNUAL_RAINFALL, EarthData.MEAN_TEMPERATURE, EarthData.MIN_TEMPERATURE,
                 EarthData.CATION_EXCHANGE_CAPACITY, EarthData.ORGANIC_CARBON_CONTENT, EarthData.SOIL_PH,
                 EarthData.CLAY_CONTENT, EarthData.SILT_CONTENT, EarthData.SAND_CONTENT,
