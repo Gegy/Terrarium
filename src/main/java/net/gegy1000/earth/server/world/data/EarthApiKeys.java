@@ -8,11 +8,11 @@ import java.util.Base64;
 
 public class EarthApiKeys {
     @SerializedName("geocoder_key")
-    private final String geocoderKey = "";
+    private String geocoderKey = "";
     @SerializedName("autocomplete_key")
-    private final String autocompleteKey = "";
+    private String autocompleteKey = "";
     @SerializedName("streetview_key")
-    private final String streetviewKey = "";
+    private String streetviewKey = "";
 
     @Nullable
     public String getGeocoderKey() {
