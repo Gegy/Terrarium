@@ -15,6 +15,7 @@ import net.minecraftforge.fml.relauncher.ReflectionHelper.UnableToFindMethodExce
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -23,12 +24,19 @@ import java.lang.reflect.Method;
 public class ClientProxy extends ServerProxy {
     private static Method actionPerformed;
     private static Field selectedWorldType;
+    private static Field structuresButton;
 
     static {
         try {
             selectedWorldType = ObfuscationReflectionHelper.findField(GuiCreateWorld.class, "field_146331_K");
         } catch (UnableToFindFieldException e) {
             Terrarium.LOGGER.warn("Failed to reflect selected world type", e);
+        }
+
+        try {
+            structuresButton = ObfuscationReflectionHelper.findField(GuiCreateWorld.class, "field_146325_B");
+        } catch (UnableToFindMethodException e) {
+            Terrarium.LOGGER.warn("Failed to reflect structures button", e);
         }
 
         try {
@@ -71,14 +79,26 @@ public class ClientProxy extends ServerProxy {
         }
     }
 
+    @Nullable
+    public static GuiButton getStructuresButton(GuiCreateWorld gui) {
+        if (structuresButton != null) {
+            try {
+                return (GuiButton) structuresButton.get(gui);
+            } catch (IllegalAccessException e) {
+                return null;
+            }
+        }
+        return null;
+    }
+
     public static int getSelectedWorldType(GuiCreateWorld gui) {
-        if (selectedWorldType == null) {
-            return 0;
+        if (selectedWorldType != null) {
+            try {
+                return (int) selectedWorldType.get(gui);
+            } catch (IllegalAccessException e) {
+                return 0;
+            }
         }
-        try {
-            return (int) selectedWorldType.get(gui);
-        } catch (IllegalAccessException e) {
-            return 0;
-        }
+        return 0;
     }
 }

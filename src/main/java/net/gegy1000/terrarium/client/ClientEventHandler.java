@@ -18,11 +18,13 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import javax.annotation.Nullable;
+
 @SideOnly(Side.CLIENT)
 @Mod.EventBusSubscriber(modid = Terrarium.ID, value = Side.CLIENT)
 public class ClientEventHandler {
     private static final Minecraft MC = Minecraft.getMinecraft();
-    private static final int STRUCTURES_BUTTON_ID = 4;
+    private static final int WORLD_TYPE_BUTTON_ID = 5;
 
     private static boolean handshakeQueued;
 
@@ -48,11 +50,10 @@ public class ClientEventHandler {
     public static void onGuiPostInit(GuiScreenEvent.InitGuiEvent.Post event) {
         GuiScreen currentScreen = event.getGui();
         if (currentScreen instanceof GuiCreateWorld) {
-            GuiButton structuresButton = event.getButtonList().get(STRUCTURES_BUTTON_ID);
-            int selectedWorldIndex = ClientProxy.getSelectedWorldType((GuiCreateWorld) currentScreen);
-            GenericWorldType worldType = GenericWorldType.unwrap(WorldType.WORLD_TYPES[selectedWorldIndex]);
-            if (worldType instanceof TerrariumWorldType) {
-                structuresButton.visible = false;
+            GuiCreateWorld createWorld = (GuiCreateWorld) currentScreen;
+            GenericWorldType worldType = getSelectedWorldType(createWorld);
+            if (worldType != null) {
+                hideStructuresButton(createWorld);
             }
         }
     }
@@ -60,17 +61,29 @@ public class ClientEventHandler {
     @SubscribeEvent
     public static void onGuiButton(GuiScreenEvent.ActionPerformedEvent.Post event) {
         GuiScreen currentScreen = event.getGui();
-        if (currentScreen instanceof GuiCreateWorld && event.getButton().id == 5) {
-            GuiButton structuresButton = event.getButtonList().get(STRUCTURES_BUTTON_ID);
-            int selectedWorldIndex = ClientProxy.getSelectedWorldType((GuiCreateWorld) currentScreen);
-            TerrariumWorldType worldType = GenericWorldType.unwrapAs(WorldType.WORLD_TYPES[selectedWorldIndex], TerrariumWorldType.class);
+        if (currentScreen instanceof GuiCreateWorld && event.getButton().id == WORLD_TYPE_BUTTON_ID) {
+            GuiCreateWorld createWorld = (GuiCreateWorld) currentScreen;
+            TerrariumWorldType worldType = getSelectedWorldType(createWorld);
             if (worldType != null) {
                 if (worldType.isHidden() && !GuiScreen.isShiftKeyDown()) {
                     ClientProxy.actionPerformed(currentScreen, event.getButton());
                 } else {
-                    structuresButton.visible = false;
+                    hideStructuresButton(createWorld);
                 }
             }
+        }
+    }
+
+    @Nullable
+    private static TerrariumWorldType getSelectedWorldType(GuiCreateWorld createWorld) {
+        int selectedWorldIndex = ClientProxy.getSelectedWorldType(createWorld);
+        return GenericWorldType.unwrapAs(WorldType.WORLD_TYPES[selectedWorldIndex], TerrariumWorldType.class);
+    }
+
+    private static void hideStructuresButton(GuiCreateWorld createWorld) {
+        GuiButton structuresButton = ClientProxy.getStructuresButton(createWorld);
+        if (structuresButton != null) {
+            structuresButton.visible = false;
         }
     }
 }
