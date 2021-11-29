@@ -7,6 +7,7 @@ import net.minecraft.advancements.FunctionManager;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityTracker;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.tileentity.TileEntity;
@@ -190,10 +191,34 @@ public final class ColumnCompatibilityWorld extends WorldServer implements AutoC
         return this.parent.getBlockState(this.translatePos(pos));
     }
 
+    @Override
+    public void setTileEntity(BlockPos pos, @Nullable TileEntity entity) {
+        BlockPos worldPos = this.translatePos(pos);
+        if (entity != null) {
+            entity.setPos(worldPos);
+            this.parent.setTileEntity(worldPos, entity);
+        } else {
+            this.parent.setTileEntity(worldPos, null);
+        }
+    }
+
     @Nullable
     @Override
     public TileEntity getTileEntity(BlockPos pos) {
-        return this.parent.getTileEntity(this.translatePos(pos));
+        BlockPos worldPos = this.translatePos(pos);
+        TileEntity entity = this.parent.getTileEntity(worldPos);
+        if (entity == null) {
+            return null;
+        }
+
+        NBTTagCompound nbt = entity.serializeNBT();
+        nbt.setInteger("x", pos.getX());
+        nbt.setInteger("y", pos.getY());
+        nbt.setInteger("z", pos.getZ());
+
+        entity = TileEntity.create(this, nbt);
+
+        return entity;
     }
 
     @Override

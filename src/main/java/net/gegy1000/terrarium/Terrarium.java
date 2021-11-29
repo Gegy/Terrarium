@@ -27,7 +27,7 @@ import java.util.Map;
 @Mod(modid = Terrarium.ID, name = "Terrarium", version = Terrarium.VERSION, acceptedMinecraftVersions = "[1.12]", dependencies = "after:cubicchunks")
 public class Terrarium {
     public static final String ID = "terrarium";
-    public static final String VERSION = "1.1.4";
+    public static final String VERSION = "1.1.5";
 
     public static final String CLIENT_PROXY = "net.gegy1000.terrarium.client.ClientProxy";
     public static final String SERVER_PROXY = "net.gegy1000.terrarium.server.ServerProxy";

@@ -27,11 +27,11 @@ minecraft {
 
 repositories {
   mavenCentral()
-  jcenter()
-  maven { url = "http://mvn.topobyte.de" }
-  maven { url = "https://maven.gegy.dev" }
   maven { url = "https://oss.sonatype.org/content/repositories/public/" }
   maven { url = "https://repo.spongepowered.org/maven/" }
+  maven { url = "https://maven.gegy.dev" }
+  maven { url = "https://www.cursemaven.com" }
+  maven { url = "http://mvn.topobyte.de" }
 }
 
 configurations {
@@ -45,7 +45,7 @@ dependencies {
   deobfCompile 'io.github.opencubicchunks:cubicchunks:1.12.2-0.0-SNAPSHOT'
 
   deobfCompile 'com.github.glitchfiend.biomesoplenty:BiomesOPlenty:1.12.2-7.0.1.2399:universal'
-  deobfCompile 'curse.maven:dynamictrees:2822231'
+  deobfCompile 'curse.maven:dynamictrees-252818:2822231'
 
   // embedded dependencies
   embed 'dev.gegy:gengen:0.1.0-SNAPSHOT'
