@@ -1,5 +1,7 @@
 package net.gegy1000.earth.server.world.compatibility;
 
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.gegy1000.earth.server.world.compatibility.hooks.DimensionManagerHooks;
 import net.gegy1000.terrarium.Terrarium;
 import net.minecraft.advancements.AdvancementManager;
@@ -69,6 +71,8 @@ public final class ColumnCompatibilityWorld extends WorldServer implements AutoC
 
     final BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
 
+    private final Long2ObjectMap<TileEntity> accessedBlockEntities = new Long2ObjectOpenHashMap<>();
+
     private ColumnCompatibilityWorld(WorldServer parent) {
         super(parent.getMinecraftServer(), new CompatibilitySaveHandler(parent), parent.getWorldInfo(), parent.provider.getDimension(), parent.profiler);
         this.parent = parent;
@@ -107,6 +111,8 @@ public final class ColumnCompatibilityWorld extends WorldServer implements AutoC
 
     public void setupAt(ChunkPos columnPos, int minY) {
         this.getChunkProvider().clear();
+        this.accessedBlockEntities.clear();
+
         this.columnPos = columnPos;
         this.columnDecoratePos = new BlockPos(this.columnPos.getXStart(), 0, this.columnPos.getZStart());
         this.minY = minY;
@@ -193,8 +199,11 @@ public final class ColumnCompatibilityWorld extends WorldServer implements AutoC
 
     @Override
     public void setTileEntity(BlockPos pos, @Nullable TileEntity entity) {
+        this.accessedBlockEntities.remove(pos.toLong());
+
         BlockPos worldPos = this.translatePos(pos);
         if (entity != null) {
+            entity.setWorld(this.parent);
             entity.setPos(worldPos);
             this.parent.setTileEntity(worldPos, entity);
         } else {
@@ -206,19 +215,26 @@ public final class ColumnCompatibilityWorld extends WorldServer implements AutoC
     @Override
     public TileEntity getTileEntity(BlockPos pos) {
         BlockPos worldPos = this.translatePos(pos);
-        TileEntity entity = this.parent.getTileEntity(worldPos);
-        if (entity == null) {
+        TileEntity worldEntity = this.parent.getTileEntity(worldPos);
+        if (worldEntity == null) {
             return null;
         }
 
-        NBTTagCompound nbt = entity.serializeNBT();
+        TileEntity entity = this.accessedBlockEntities.get(pos.toLong());
+        if (entity == null) {
+            entity = this.createCompatibilityBlockEntity(pos, worldEntity);
+            this.accessedBlockEntities.put(pos.toLong(), entity);
+        }
+
+        return entity;
+    }
+
+    private TileEntity createCompatibilityBlockEntity(BlockPos pos, TileEntity worldEntity) {
+        NBTTagCompound nbt = worldEntity.serializeNBT();
         nbt.setInteger("x", pos.getX());
         nbt.setInteger("y", pos.getY());
         nbt.setInteger("z", pos.getZ());
-
-        entity = TileEntity.create(this, nbt);
-
-        return entity;
+        return TileEntity.create(this, nbt);
     }
 
     @Override
@@ -460,6 +476,19 @@ public final class ColumnCompatibilityWorld extends WorldServer implements AutoC
     @Override
     public void close() {
         this.getChunkProvider().clear();
+
+        for (TileEntity entity : this.accessedBlockEntities.values()) {
+            this.updateAccessedBlockEntity(entity);
+        }
+
+        this.accessedBlockEntities.clear();
+    }
+
+    private void updateAccessedBlockEntity(TileEntity entity) {
+        BlockPos worldPos = this.translatePos(entity.getPos());
+        entity.setWorld(this.parent);
+        entity.setPos(worldPos);
+        this.parent.setTileEntity(worldPos, entity);
     }
 
     BlockPos translatePos(BlockPos pos) {

@@ -144,12 +144,12 @@ public final class ColumnStructureComposer implements StructureComposer {
     }
 
     @Override
-    public final void prepareStructures(TerrariumWorld terrarium, CubicPos pos) {
+    public void prepareStructures(TerrariumWorld terrarium, CubicPos pos) {
         this.prepareColumns(terrarium, pos);
     }
 
     @Override
-    public final void primeStructures(TerrariumWorld terrarium, CubicPos pos, ChunkPrimeWriter writer) {
+    public void primeStructures(TerrariumWorld terrarium, CubicPos pos, ChunkPrimeWriter writer) {
         this.prepareColumns(terrarium, pos);
     }
 
@@ -259,23 +259,23 @@ public final class ColumnStructureComposer implements StructureComposer {
         StructureBoundingBox cubeBounds = this.getCubeBounds(cubePos, columnOffsetY);
 
         if (start.getBoundingBox().intersectsWith(cubeBounds)) {
-            ColumnCompatibilityWorld compatibilityWorld = this.getCompatibilityWorldFor(startColumnPos, columnOffsetY);
-
-            if (!this.preparedBoundsCache.set(columnPos.x, columnPos.z)) {
-                try (Profiler.Handle prepareBounds = profiler.push("prepare_bounds")) {
-                    this.prepareStructureBounds(start, cubeBounds, compatibilityWorld);
+            try (ColumnCompatibilityWorld compatibilityWorld = this.getCompatibilityWorldFor(startColumnPos, columnOffsetY)) {
+                if (!this.preparedBoundsCache.set(columnPos.x, columnPos.z)) {
+                    try (Profiler.Handle prepareBounds = profiler.push("prepare_bounds")) {
+                        this.prepareStructureBounds(start, cubeBounds, compatibilityWorld);
+                    }
                 }
+
+                this.hookedBounds.set(cubeBounds);
+
+                try (Profiler.Handle generate = profiler.push("generate")) {
+                    start.generateStructure(compatibilityWorld, this.random, this.hookedBounds);
+                }
+
+                start.notifyPostProcessAt(columnPos);
+
+                this.writeStructureStart(start);
             }
-
-            this.hookedBounds.set(cubeBounds);
-
-            try (Profiler.Handle generate = profiler.push("generate")) {
-                start.generateStructure(compatibilityWorld, this.random, this.hookedBounds);
-            }
-
-            start.notifyPostProcessAt(columnPos);
-
-            this.writeStructureStart(start);
         }
     }
 
