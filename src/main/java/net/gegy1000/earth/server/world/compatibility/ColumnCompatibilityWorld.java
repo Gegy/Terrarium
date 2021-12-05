@@ -110,8 +110,7 @@ public final class ColumnCompatibilityWorld extends WorldServer implements AutoC
     }
 
     public void setupAt(ChunkPos columnPos, int minY) {
-        this.getChunkProvider().clear();
-        this.accessedBlockEntities.clear();
+        this.close();
 
         this.columnPos = columnPos;
         this.columnDecoratePos = new BlockPos(this.columnPos.getXStart(), 0, this.columnPos.getZStart());
