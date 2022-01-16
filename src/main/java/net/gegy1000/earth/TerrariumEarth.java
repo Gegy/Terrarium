@@ -19,14 +19,17 @@ import net.gegy1000.earth.server.message.UpdateDownloadMessage;
 import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.earth.server.world.EarthWorldType;
 import net.gegy1000.earth.server.world.compatibility.ModGeneratorCompatibility;
+import net.gegy1000.earth.server.world.compatibility.capability.ColumnCompatibilityMetadata;
 import net.gegy1000.earth.server.world.cover.CoverMarkers;
 import net.gegy1000.earth.server.world.data.EarthApiKeys;
 import net.gegy1000.earth.server.world.data.GoogleGeocoder;
 import net.gegy1000.earth.server.world.data.NominatimGeocoder;
+import net.gegy1000.terrarium.server.capability.DelegatingStorage;
 import net.gegy1000.terrarium.server.capability.VoidStorage;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.data.source.Geocoder;
 import net.minecraft.launchwrapper.Launch;
+import net.minecraft.nbt.NBTTagByte;
 import net.minecraft.world.WorldType;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
@@ -69,6 +72,9 @@ public class TerrariumEarth {
     @CapabilityInject(EarthWorld.class)
     private static Capability<EarthWorld> worldCap;
 
+    @CapabilityInject(ColumnCompatibilityMetadata.class)
+    private static Capability<ColumnCompatibilityMetadata> compatibilityGenerationCap;
+
     private static boolean deobfuscatedEnvironment;
 
     public static boolean hasBiomesOPlenty;
@@ -78,6 +84,7 @@ public class TerrariumEarth {
         deobfuscatedEnvironment = (boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
 
         CapabilityManager.INSTANCE.register(EarthWorld.class, new VoidStorage<>(), EarthWorld.None::new);
+        CapabilityManager.INSTANCE.register(ColumnCompatibilityMetadata.class, new DelegatingStorage<>(NBTTagByte.class), ColumnCompatibilityMetadata::new);
 
         NETWORK.registerMessage(EarthOpenMapMessage.Handler.class, EarthOpenMapMessage.class, 0, Side.CLIENT);
         NETWORK.registerMessage(EarthPanoramaMessage.Handler.class, EarthPanoramaMessage.class, 1, Side.CLIENT);
@@ -140,5 +147,10 @@ public class TerrariumEarth {
     public static Capability<EarthWorld> worldCap() {
         Preconditions.checkNotNull(worldCap, "earth world capability not yet initialized");
         return worldCap;
+    }
+
+    public static Capability<ColumnCompatibilityMetadata> compatibilityGenerationCap() {
+        Preconditions.checkNotNull(compatibilityGenerationCap, "compatibility generation capability not yet initialized");
+        return compatibilityGenerationCap;
     }
 }

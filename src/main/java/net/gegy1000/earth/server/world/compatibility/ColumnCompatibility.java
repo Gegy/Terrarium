@@ -8,11 +8,13 @@ import io.github.opencubicchunks.cubicchunks.api.worldgen.ICubeGenerator;
 import io.github.opencubicchunks.cubicchunks.core.server.CubeProviderServer;
 import io.github.opencubicchunks.cubicchunks.core.world.cube.Cube;
 import net.gegy1000.earth.server.world.EarthData;
+import net.gegy1000.earth.server.world.compatibility.capability.ColumnCompatibilityMetadata;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.chunk.Chunk;
 
 import java.util.function.Consumer;
 
@@ -42,13 +44,25 @@ public final class ColumnCompatibility {
         int cubeY = pos.getY();
         if (cubeY < minCubeY || cubeY > maxCubeY) return;
 
-        if (this.prepareColumn(columnPos, minCubeY, maxCubeY)) {
-            try {
-                this.compatibilityWorld.setupAt(columnPos, minCubeY << 4);
-                generator.accept(this.compatibilityWorld);
-            } finally {
-                this.compatibilityWorld.close();
+        if (this.tryRunInColumn(columnPos)) {
+            if (this.prepareColumn(columnPos, minCubeY, maxCubeY)) {
+                try {
+                    this.compatibilityWorld.setupAt(columnPos, minCubeY << 4);
+                    generator.accept(this.compatibilityWorld);
+                } finally {
+                    this.compatibilityWorld.close();
+                }
             }
+        }
+    }
+
+    private boolean tryRunInColumn(ChunkPos pos) {
+        Chunk chunk = this.world.getChunk(pos.x, pos.z);
+        ColumnCompatibilityMetadata metadata = ColumnCompatibilityMetadata.get(chunk);
+        if (metadata != null) {
+            return metadata.tryRunGenerator();
+        } else {
+            return false;
         }
     }
 
