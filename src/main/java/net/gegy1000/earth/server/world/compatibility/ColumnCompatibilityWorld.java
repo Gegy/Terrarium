@@ -10,7 +10,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -37,7 +36,6 @@ import net.minecraft.world.gen.structure.template.TemplateManager;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.MapStorage;
 import net.minecraft.world.storage.loot.LootTableManager;
-import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.event.terraingen.DecorateBiomeEvent;
@@ -73,6 +71,8 @@ public final class ColumnCompatibilityWorld extends WorldServer implements AutoC
 
     private final Long2ObjectMap<TileEntity> accessedBlockEntities = new Long2ObjectOpenHashMap<>();
 
+    private boolean tickWarning;
+
     private ColumnCompatibilityWorld(WorldServer parent) {
         super(parent.getMinecraftServer(), new CompatibilitySaveHandler(parent), parent.getWorldInfo(), parent.provider.getDimension(), parent.profiler);
         this.parent = parent;
@@ -84,11 +84,11 @@ public final class ColumnCompatibilityWorld extends WorldServer implements AutoC
     }
 
     public static ColumnCompatibilityWorld create(WorldServer parent) {
-        MinecraftServer server = parent.getMinecraftServer();
-        try (DimensionManagerHooks.Freeze freeze = DimensionManagerHooks.freeze(server)) {
+        try {
             CONSTRUCTION_PARENT.set(parent);
             return new ColumnCompatibilityWorld(parent);
         } finally {
+            DimensionManagerHooks.restoreWorldMapping(parent);
             CONSTRUCTION_PARENT.remove();
         }
     }
@@ -103,10 +103,12 @@ public final class ColumnCompatibilityWorld extends WorldServer implements AutoC
 
     @Override
     public void tick() {
-        Terrarium.LOGGER.error("Tried to tick Terrarium compatibility world implementation! Trying to reset Forge dimension list...");
+        if (this.tickWarning) return;
 
-        DimensionManager.setWorld(this.parent.provider.getDimension(), this.parent, this.parent.getMinecraftServer());
-        this.parent.tick();
+        this.tickWarning = true;
+
+        Terrarium.LOGGER.error("Tried to tick Terrarium compatibility world implementation! Trying to reset Forge dimension list...", new IllegalAccessException());
+        DimensionManagerHooks.restoreWorldMapping(this.parent);
     }
 
     public void setupAt(ChunkPos columnPos, int minY) {
