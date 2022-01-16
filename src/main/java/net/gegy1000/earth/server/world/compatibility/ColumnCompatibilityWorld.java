@@ -103,12 +103,12 @@ public final class ColumnCompatibilityWorld extends WorldServer implements AutoC
 
     @Override
     public void tick() {
-        if (this.tickWarning) return;
+        DimensionManagerHooks.restoreWorldMapping(this.parent);
 
+        if (this.tickWarning) return;
         this.tickWarning = true;
 
         Terrarium.LOGGER.error("Tried to tick Terrarium compatibility world implementation! Trying to reset Forge dimension list...", new IllegalAccessException());
-        DimensionManagerHooks.restoreWorldMapping(this.parent);
     }
 
     public void setupAt(ChunkPos columnPos, int minY) {
