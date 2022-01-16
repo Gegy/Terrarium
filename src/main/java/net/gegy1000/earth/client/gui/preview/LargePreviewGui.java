@@ -37,6 +37,7 @@ public class LargePreviewGui extends GuiScreen {
 
     @Override
     protected void actionPerformed(GuiButton button) {
+        this.preview.retain();
         this.mc.displayGuiScreen(this.parent);
     }
 
@@ -91,7 +92,14 @@ public class LargePreviewGui extends GuiScreen {
     @Override
     protected void keyTyped(char typedChar, int keyCode) {
         if (keyCode == Keyboard.KEY_ESCAPE) {
+            this.preview.retain();
             this.mc.displayGuiScreen(this.parent);
         }
+    }
+
+    @Override
+    public void onGuiClosed() {
+        super.onGuiClosed();
+        this.preview.release();
     }
 }

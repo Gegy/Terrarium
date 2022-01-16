@@ -7,15 +7,11 @@ import net.gegy1000.earth.client.gui.preview.PreviewController;
 import net.gegy1000.earth.client.gui.preview.PreviewRenderer;
 import net.gegy1000.earth.client.gui.preview.WorldPreview;
 import net.gegy1000.earth.server.world.EarthProperties;
-import net.gegy1000.justnow.executor.CurrentThreadExecutor;
-import net.gegy1000.justnow.future.Cancelable;
-import net.gegy1000.justnow.future.Future;
 import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.client.gui.customization.SelectPresetGui;
 import net.gegy1000.terrarium.client.gui.widget.ActionButtonWidget;
 import net.gegy1000.terrarium.client.gui.widget.CustomizationList;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
-import net.gegy1000.terrarium.server.world.data.source.DataSourceReader;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
 import net.gegy1000.terrarium.server.world.generator.customization.PropertySchema;
 import net.gegy1000.terrarium.server.world.generator.customization.TerrariumPreset;
@@ -63,8 +59,7 @@ public class EarthCustomizationGui extends GuiScreen {
     private boolean previewDirty = true;
     private long lastPreviewUpdateTime;
 
-    private WorldPreview preview;
-    private Cancelable<WorldPreview> previewFuture;
+    private final WorldPreview preview = new WorldPreview();
 
     public EarthCustomizationGui(GuiCreateWorld parent, TerrariumWorldType worldType) {
         this.parent = parent;
@@ -163,9 +158,7 @@ public class EarthCustomizationGui extends GuiScreen {
                     this.mc.displayGuiScreen(new SelectEarthSpawnpointGui(this));
                     break;
                 case PREVIEW_BUTTON:
-                    if (this.preview != null) {
-                        this.mc.displayGuiScreen(new LargePreviewGui(this.preview, this, this.settings.serializeString()));
-                    }
+                    this.mc.displayGuiScreen(new LargePreviewGui(this.preview.retain(), this, this.settings.serializeString()));
                     break;
             }
         }
@@ -222,7 +215,7 @@ public class EarthCustomizationGui extends GuiScreen {
 
             boolean previewExpired = time - this.lastPreviewUpdateTime > PREVIEW_UPDATE_INTERVAL;
 
-            boolean generateInactive = this.previewFuture == null;
+            boolean generateInactive = this.preview.isGenerateInactive();
             if (previewExpired || generateInactive) {
                 this.rebuildPreview();
                 this.previewDirty = false;
@@ -252,21 +245,6 @@ public class EarthCustomizationGui extends GuiScreen {
     }
 
     private void drawPreview(float partialTicks) {
-        if (this.previewFuture != null) {
-            WorldPreview step = CurrentThreadExecutor.advance(this.previewFuture);
-
-            if (step != null) {
-                if (this.preview != null) {
-                    this.preview.delete();
-                }
-
-                this.preview = step;
-                this.preview.upload();
-
-                this.previewFuture = null;
-            }
-        }
-
         float zoom = this.previewController.getZoom(partialTicks);
         float rotationX = this.previewController.getRotationX(partialTicks);
         float rotationY = this.previewController.getRotationY(partialTicks);
@@ -282,10 +260,7 @@ public class EarthCustomizationGui extends GuiScreen {
     public void onGuiClosed() {
         super.onGuiClosed();
 
-        this.deletePreview();
-        this.cancelPreview();
-
-        DataSourceReader.INSTANCE.clear();
+        this.preview.release();
     }
 
     public void applySpawnpoint(double latitude, double longitude) {
@@ -295,22 +270,7 @@ public class EarthCustomizationGui extends GuiScreen {
     }
 
     private void rebuildPreview() {
-        this.cancelPreview();
-        this.previewFuture = Future.cancelable(WorldPreview.generate(this.worldType, this.settings));
-    }
-
-    private void deletePreview() {
-        if (this.preview != null) {
-            this.preview.delete();
-            this.preview = null;
-        }
-    }
-
-    private void cancelPreview() {
-        if (this.previewFuture != null) {
-            this.previewFuture.cancel();
-        }
-        DataSourceReader.INSTANCE.cancelLoading();
+        this.preview.rebuild(this.worldType, this.settings);
     }
 
     protected void setSettings(GenerationSettings settings) {
