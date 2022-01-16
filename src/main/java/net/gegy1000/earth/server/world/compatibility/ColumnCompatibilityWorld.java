@@ -190,7 +190,12 @@ public final class ColumnCompatibilityWorld extends WorldServer implements AutoC
 
     @Override
     public boolean setBlockState(BlockPos pos, IBlockState newState, int flags) {
-        return this.parent.setBlockState(this.translatePos(pos), newState, flags);
+        if (this.parent.setBlockState(this.translatePos(pos), newState, flags)) {
+            this.accessedBlockEntities.remove(pos.toLong());
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override
