@@ -46,11 +46,8 @@ public final class ColumnCompatibility {
 
         if (this.tryRunInColumn(columnPos)) {
             if (this.prepareColumn(columnPos, minCubeY, maxCubeY)) {
-                try {
-                    this.compatibilityWorld.setupAt(columnPos, minCubeY << 4);
-                    generator.accept(this.compatibilityWorld);
-                } finally {
-                    this.compatibilityWorld.close();
+                try (ColumnCompatibilityWorld world = this.compatibilityWorld.setupAt(columnPos, minCubeY << 4)) {
+                    generator.accept(world);
                 }
             }
         }

@@ -15,6 +15,7 @@ import net.gegy1000.earth.server.world.composer.decoration.EarthSugarCaneCompose
 import net.gegy1000.earth.server.world.composer.decoration.EarthTreeComposer;
 import net.gegy1000.earth.server.world.composer.decoration.FreezeSurfaceComposer;
 import net.gegy1000.earth.server.world.composer.decoration.LavaPoolComposer;
+import net.gegy1000.earth.server.world.composer.decoration.ModGeneratorDisableComposer;
 import net.gegy1000.earth.server.world.composer.decoration.OreDecorationComposer;
 import net.gegy1000.earth.server.world.composer.structure.MansionStructureComposer;
 import net.gegy1000.earth.server.world.composer.structure.MineshaftStructureComposer;
@@ -88,6 +89,8 @@ final class EarthGenerationInitializer implements TerrariumGeneratorInitializer 
     }
 
     private void addDecorationComposers(CompositeTerrariumGenerator.Builder builder) {
+        builder.addDecorationComposer(new ModGeneratorDisableComposer());
+
         if (this.ctx.settings.getBoolean(ADD_TREES)) {
             builder.addDecorationComposer(new EarthTreeComposer(this.world));
             builder.addDecorationComposer(new EarthShrubComposer(this.world));

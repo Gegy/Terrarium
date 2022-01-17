@@ -111,12 +111,14 @@ public final class ColumnCompatibilityWorld extends WorldServer implements AutoC
         Terrarium.LOGGER.error("Tried to tick Terrarium compatibility world implementation! Trying to reset Forge dimension list...", new IllegalAccessException());
     }
 
-    public void setupAt(ChunkPos columnPos, int minY) {
+    public ColumnCompatibilityWorld setupAt(ChunkPos columnPos, int minY) {
         this.close();
 
         this.columnPos = columnPos;
         this.columnDecoratePos = new BlockPos(this.columnPos.getXStart(), 0, this.columnPos.getZStart());
         this.minY = minY;
+
+        return this;
     }
 
     public int getMinY() {
@@ -157,7 +159,7 @@ public final class ColumnCompatibilityWorld extends WorldServer implements AutoC
         if (this.generator == null) return;
 
         IChunkProvider chunkProvider = this.parent.getChunkProvider();
-        ModGeneratorCompatibility.runGenerators(this, this.columnPos, this.generator, chunkProvider);
+        ModGeneratorInvoker.runGenerators(this, this.columnPos, this.generator, chunkProvider);
     }
 
     @Override

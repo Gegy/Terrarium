@@ -18,7 +18,7 @@ import net.gegy1000.earth.server.message.OpenDownloadMessage;
 import net.gegy1000.earth.server.message.UpdateDownloadMessage;
 import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.earth.server.world.EarthWorldType;
-import net.gegy1000.earth.server.world.compatibility.ModGeneratorCompatibility;
+import net.gegy1000.earth.server.world.compatibility.ModGeneratorInvoker;
 import net.gegy1000.earth.server.world.compatibility.capability.ColumnCompatibilityMetadata;
 import net.gegy1000.earth.server.world.cover.CoverMarkers;
 import net.gegy1000.earth.server.world.data.EarthApiKeys;
@@ -113,7 +113,7 @@ public class TerrariumEarth {
     public static void onPostInit(FMLPostInitializationEvent event) {
         PROXY.onPostInit();
 
-        ModGeneratorCompatibility.collectGeneratorExclusions();
+        ModGeneratorInvoker.collectGeneratorExclusions();
     }
 
     @NetworkCheckHandler

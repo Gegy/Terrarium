@@ -1,21 +1,37 @@
 package net.gegy1000.earth.server.world.compatibility.hooks;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import dev.gegy.gengen.api.GenericWorldType;
 import net.gegy1000.earth.TerrariumEarth;
+import net.gegy1000.earth.server.world.EarthWorldType;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.IWorldGenerator;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/*
+    This is the site of terrible, terrible hacks. Do not look too closely.
+ */
+@Mod.EventBusSubscriber(modid = TerrariumEarth.ID)
 public final class ModGenerators {
-    private static Set<IWorldGenerator> worldGenerators = new HashSet<>();
+    private static Set<IWorldGenerator> worldGenerators = ImmutableSet.of();
 
-    private static Field sortedGeneratorListField;
-    private static Method computeSortedGeneratorListMethod;
+    private static final MethodHandle GET_SORTED_GENERATOR_LIST;
+    private static final MethodHandle SET_SORTED_GENERATOR_LIST;
+    private static final MethodHandle COMPUTE_SORTED_GENERATORS;
+
+    private static final List<IWorldGenerator> HIDDEN_GENERATORS = ImmutableList.of();
+    private static List<IWorldGenerator> sortedGenerators;
 
     static {
         try {
@@ -27,17 +43,18 @@ public final class ModGenerators {
         }
 
         try {
-            sortedGeneratorListField = GameRegistry.class.getDeclaredField("sortedGeneratorList");
+            Field sortedGeneratorListField = GameRegistry.class.getDeclaredField("sortedGeneratorList");
             sortedGeneratorListField.setAccessible(true);
-        } catch (ReflectiveOperationException e) {
-            TerrariumEarth.LOGGER.error("Failed to find sortedGeneratorList field", e);
-        }
 
-        try {
-            computeSortedGeneratorListMethod = GameRegistry.class.getDeclaredMethod("computeSortedGeneratorList");
-            computeSortedGeneratorListMethod.setAccessible(true);
+            GET_SORTED_GENERATOR_LIST = MethodHandles.lookup().unreflectGetter(sortedGeneratorListField);
+            SET_SORTED_GENERATOR_LIST = MethodHandles.lookup().unreflectSetter(sortedGeneratorListField);
+
+            Method computeSortedGeneratorsMethod = GameRegistry.class.getDeclaredMethod("computeSortedGeneratorList");
+            computeSortedGeneratorsMethod.setAccessible(true);
+
+            COMPUTE_SORTED_GENERATORS = MethodHandles.lookup().unreflect(computeSortedGeneratorsMethod);
         } catch (ReflectiveOperationException e) {
-            TerrariumEarth.LOGGER.error("Failed to find computeSortedGeneratorList method", e);
+            throw new RuntimeException("Failed to reflect GameRegistry generator lists", e);
         }
     }
 
@@ -45,22 +62,47 @@ public final class ModGenerators {
         return worldGenerators;
     }
 
-    @SuppressWarnings("unchecked")
-    public static List<IWorldGenerator> getSortedGenerators() {
-        if (sortedGeneratorListField == null || computeSortedGeneratorListMethod == null) {
+    public static List<IWorldGenerator> getAndHookSortedGenerators() {
+        try {
+            List<IWorldGenerator> forgeGenerators = getOrComputeSortedGenerators();
+            if (!areGeneratorsHooked(forgeGenerators)) {
+                SET_SORTED_GENERATOR_LIST.invokeExact(HIDDEN_GENERATORS);
+                sortedGenerators = forgeGenerators;
+            }
+            return sortedGenerators;
+        } catch (Throwable t) {
+            TerrariumEarth.LOGGER.warn("Failed to hook sorted modded world generators", t);
             return Collections.emptyList();
         }
+    }
 
+    public static void restoreSortedGenerators() {
         try {
-            if (sortedGeneratorListField.get(null) == null) {
-                computeSortedGeneratorListMethod.invoke(null);
-            }
-
-            return (List<IWorldGenerator>) sortedGeneratorListField.get(null);
-        } catch (ReflectiveOperationException e) {
-            TerrariumEarth.LOGGER.warn("Failed to get sorted modded world generators", e);
+            SET_SORTED_GENERATOR_LIST.invokeExact((List<IWorldGenerator>) null);
+        } catch (Throwable t) {
+            TerrariumEarth.LOGGER.warn("Failed to restore sorted modded world generators", t);
         }
+    }
 
-        return Collections.emptyList();
+    @SuppressWarnings("unchecked")
+    private static List<IWorldGenerator> getOrComputeSortedGenerators() throws Throwable {
+        List<IWorldGenerator> generators = (List<IWorldGenerator>) GET_SORTED_GENERATOR_LIST.invokeExact();
+        if (generators == null) {
+            COMPUTE_SORTED_GENERATORS.invokeExact();
+            generators = (List<IWorldGenerator>) GET_SORTED_GENERATOR_LIST.invokeExact();
+        }
+        return generators;
+    }
+
+    private static boolean areGeneratorsHooked(List<IWorldGenerator> forgeGenerators) {
+        return forgeGenerators == HIDDEN_GENERATORS;
+    }
+
+    @SubscribeEvent
+    public static void onWorldUnload(WorldEvent.Unload event) {
+        EarthWorldType earth = GenericWorldType.unwrapAs(event.getWorld().getWorldType(), EarthWorldType.class);
+        if (earth != null) {
+            ModGenerators.restoreSortedGenerators();
+        }
     }
 }
