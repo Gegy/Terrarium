@@ -1,9 +1,11 @@
 package net.gegy1000.earth.server.world.compatibility.capability;
 
+import dev.gegy.gengen.core.GenGen;
 import net.gegy1000.earth.TerrariumEarth;
 import net.minecraft.nbt.NBTTagByte;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
@@ -15,8 +17,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 @Mod.EventBusSubscriber(modid = TerrariumEarth.ID)
-public final class ColumnCompatibilityMetadata implements ICapabilitySerializable<NBTTagByte> {
-    public static final ResourceLocation ID = new ResourceLocation(TerrariumEarth.ID, "compat_meta");
+public final class CcColumnCompatibilityMetadata implements ICapabilitySerializable<NBTTagByte> {
+    public static final ResourceLocation ID = new ResourceLocation(TerrariumEarth.ID, "cc_compat_meta");
 
     private boolean runGenerator;
 
@@ -30,24 +32,27 @@ public final class ColumnCompatibilityMetadata implements ICapabilitySerializabl
     }
 
     @Nullable
-    public static ColumnCompatibilityMetadata get(Chunk chunk) {
-        return chunk.getCapability(TerrariumEarth.compatibilityGenerationCap(), null);
+    public static CcColumnCompatibilityMetadata get(Chunk chunk) {
+        return chunk.getCapability(TerrariumEarth.ccCompatibilityGenerationCap(), null);
     }
 
     @Override
     public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing facing) {
-        return capability == TerrariumEarth.compatibilityGenerationCap();
+        return capability == TerrariumEarth.ccCompatibilityGenerationCap();
     }
 
     @Nullable
     @Override
     public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing) {
-        return capability == TerrariumEarth.compatibilityGenerationCap() ? TerrariumEarth.compatibilityGenerationCap().cast(this) : null;
+        return capability == TerrariumEarth.ccCompatibilityGenerationCap() ? TerrariumEarth.ccCompatibilityGenerationCap().cast(this) : null;
     }
 
     @SubscribeEvent
     public static void onAttachCapabilities(AttachCapabilitiesEvent<Chunk> event) {
-        event.addCapability(ID, new ColumnCompatibilityMetadata());
+        World world = event.getObject().getWorld();
+        if (GenGen.isCubic(world)) {
+            event.addCapability(ID, new CcColumnCompatibilityMetadata());
+        }
     }
 
     @Override

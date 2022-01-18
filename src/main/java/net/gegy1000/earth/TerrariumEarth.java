@@ -19,7 +19,7 @@ import net.gegy1000.earth.server.message.UpdateDownloadMessage;
 import net.gegy1000.earth.server.shared.SharedEarthData;
 import net.gegy1000.earth.server.world.EarthWorldType;
 import net.gegy1000.earth.server.world.compatibility.ModGeneratorInvoker;
-import net.gegy1000.earth.server.world.compatibility.capability.ColumnCompatibilityMetadata;
+import net.gegy1000.earth.server.world.compatibility.capability.CcColumnCompatibilityMetadata;
 import net.gegy1000.earth.server.world.cover.CoverMarkers;
 import net.gegy1000.earth.server.world.data.EarthApiKeys;
 import net.gegy1000.earth.server.world.data.GoogleGeocoder;
@@ -72,8 +72,8 @@ public class TerrariumEarth {
     @CapabilityInject(EarthWorld.class)
     private static Capability<EarthWorld> worldCap;
 
-    @CapabilityInject(ColumnCompatibilityMetadata.class)
-    private static Capability<ColumnCompatibilityMetadata> compatibilityGenerationCap;
+    @CapabilityInject(CcColumnCompatibilityMetadata.class)
+    private static Capability<CcColumnCompatibilityMetadata> ccCompatibilityGenerationCap;
 
     private static boolean deobfuscatedEnvironment;
 
@@ -84,7 +84,7 @@ public class TerrariumEarth {
         deobfuscatedEnvironment = (boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
 
         CapabilityManager.INSTANCE.register(EarthWorld.class, new VoidStorage<>(), EarthWorld.None::new);
-        CapabilityManager.INSTANCE.register(ColumnCompatibilityMetadata.class, new DelegatingStorage<>(NBTTagByte.class), ColumnCompatibilityMetadata::new);
+        CapabilityManager.INSTANCE.register(CcColumnCompatibilityMetadata.class, new DelegatingStorage<>(NBTTagByte.class), CcColumnCompatibilityMetadata::new);
 
         NETWORK.registerMessage(EarthOpenMapMessage.Handler.class, EarthOpenMapMessage.class, 0, Side.CLIENT);
         NETWORK.registerMessage(EarthPanoramaMessage.Handler.class, EarthPanoramaMessage.class, 1, Side.CLIENT);
@@ -149,8 +149,8 @@ public class TerrariumEarth {
         return worldCap;
     }
 
-    public static Capability<ColumnCompatibilityMetadata> compatibilityGenerationCap() {
-        Preconditions.checkNotNull(compatibilityGenerationCap, "compatibility generation capability not yet initialized");
-        return compatibilityGenerationCap;
+    public static Capability<CcColumnCompatibilityMetadata> ccCompatibilityGenerationCap() {
+        Preconditions.checkNotNull(ccCompatibilityGenerationCap, "cubic chunks compatibility generation capability not yet initialized");
+        return ccCompatibilityGenerationCap;
     }
 }
