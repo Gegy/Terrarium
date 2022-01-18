@@ -1,19 +1,20 @@
 package net.gegy1000.terrarium.server.world.data;
 
-public final class DataStore<T> {
+public final class DataStore {
     private final Object[] table = new Object[DataKey.keyCount()];
 
-    public void put(DataKey<?> key, T value) {
+    public <T> void put(DataKey<T> key, T value) {
         this.table[key.id] = value;
     }
 
     @SuppressWarnings("unchecked")
-    public T get(DataKey<?> key) {
-        return (T) this.table[key.id];
+    public <T> void putUnchecked(DataKey<T> key, Object value) {
+        this.put(key, (T) value);
     }
 
-    public boolean containsKey(DataKey<?> key) {
-        return this.table[key.id] != null;
+    @SuppressWarnings("unchecked")
+    public <T> T get(DataKey<T> key) {
+        return (T) this.table[key.id];
     }
 
     public void remove(DataKey<?> key) {

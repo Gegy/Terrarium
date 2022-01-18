@@ -1,16 +1,16 @@
 package net.gegy1000.terrarium.server.world.data;
 
-import com.google.common.collect.Sets;
+import org.apache.commons.lang3.ArrayUtils;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Optional;
-import java.util.Set;
 
 public final class ColumnData {
     private final DataView view;
-    private final DataStore<Optional<?>> store;
+    private final DataStore store;
 
-    ColumnData(DataView view, DataStore<Optional<?>> store) {
+    ColumnData(DataView view, DataStore store) {
         this.view = view;
         this.store = store;
     }
@@ -20,42 +20,50 @@ public final class ColumnData {
         return this.view;
     }
 
-    public boolean contains(DataKey<?> key) {
-        Optional<?> optional = this.store.get(key);
-        return optional != null && optional.isPresent();
+    public <T> boolean contains(DataKey<T> key) {
+        return this.store.get(key) != null;
     }
 
-    @SuppressWarnings({ "unchecked", "OptionalAssignedToNull" })
     public <T> Optional<T> get(DataKey<T> key) {
-        Optional<?> data = this.store.get(key);
-        if (data == null) {
-            return Optional.empty();
-        }
-        return (Optional<T>) data;
+        return Optional.ofNullable(this.store.get(key));
+    }
+
+    @Nullable
+    public  <T> T getOrNull(DataKey<T> key) {
+        return this.store.get(key);
     }
 
     public <T> T getOrDefault(DataKey<T> key) {
-        return this.get(key).orElseGet(() -> key.createDefault(this.view));
+        T value = this.store.get(key);
+        if (value != null) {
+            return value;
+        } else {
+            return key.createDefault(this.view);
+        }
     }
 
     public Optional<With> with(DataKey<?>... keys) {
         for (DataKey<?> key : keys) {
-            Optional<?> value = this.store.get(key);
-            if (value == null || !value.isPresent()) return Optional.empty();
+            Object value = this.store.get(key);
+            if (value == null) return Optional.empty();
         }
-        return Optional.of(new With(Sets.newHashSet(keys)));
+        return Optional.of(new With(keys));
     }
 
     public final class With {
-        private final Set<DataKey<?>> keys;
+        private final DataKey<?>[] keys;
 
-        private With(Set<DataKey<?>> keys) {
+        private With(DataKey<?>[] keys) {
             this.keys = keys;
         }
 
         public <T> T get(DataKey<T> key) {
-            if (!this.keys.contains(key)) throw new IllegalArgumentException();
-            return ColumnData.this.get(key).orElseThrow(IllegalStateException::new);
+            T value = ColumnData.this.getOrNull(key);
+            if (value != null && ArrayUtils.contains(this.keys, key)) {
+                return value;
+            } else {
+                throw new IllegalStateException("tried to access missing data with key " + key);
+            }
         }
     }
 }

@@ -12,7 +12,7 @@ import java.util.Optional;
 public final class DataGenerator {
     private final ImmutableMap<DataKey<?>, DataOp<?>> attachedData;
 
-    public DataGenerator(ImmutableMap<DataKey<?>, DataOp<?>> attachedData) {
+    private DataGenerator(ImmutableMap<DataKey<?>, DataOp<?>> attachedData) {
         this.attachedData = attachedData;
     }
 
@@ -39,13 +39,21 @@ public final class DataGenerator {
 
         return Future.joinAll(futures.build())
                 .map(result -> {
-                    DataStore<Optional<?>> store = new DataStore<>();
-                    for (DataKey<?> key : keys) {
-                        Optional<?> value = result.getOrDefault(key, Optional.empty());
-                        store.put(key, value);
-                    }
+                    DataStore store = this.buildDataStore(result);
                     return new ColumnData(view, store);
                 });
+    }
+
+    private DataStore buildDataStore(Map<DataKey<?>, Optional<?>> result) {
+        DataStore store = new DataStore();
+        for (Map.Entry<DataKey<?>, Optional<?>> entry : result.entrySet()) {
+            DataKey<?> key = entry.getKey();
+            Optional<?> value = entry.getValue();
+            if (value != null && value.isPresent()) {
+                store.putUnchecked(key, value.get());
+            }
+        }
+        return store;
     }
 
     public Future<ColumnData> generate(DataView view) {
