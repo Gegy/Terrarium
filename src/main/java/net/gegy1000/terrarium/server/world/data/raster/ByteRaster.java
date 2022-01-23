@@ -1,7 +1,7 @@
 package net.gegy1000.terrarium.server.world.data.raster;
 
 import com.google.common.base.Preconditions;
-import net.gegy1000.terrarium.server.world.data.ColumnData;
+import net.gegy1000.terrarium.server.world.data.DataSample;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.DataKey;
 import net.gegy1000.terrarium.server.world.data.DataView;
@@ -21,7 +21,7 @@ public final class ByteRaster extends AbstractRaster<byte[]> implements IntegerR
     }
 
     public static ByteRaster create(DataView view) {
-        return create(view.getWidth(), view.getHeight());
+        return create(view.width(), view.height());
     }
 
     public static ByteRaster wrap(byte[] data, int width, int height) {
@@ -34,22 +34,22 @@ public final class ByteRaster extends AbstractRaster<byte[]> implements IntegerR
     }
 
     public void set(int x, int y, byte value) {
-        this.data[this.index(x, y)] = value;
+        this.rawData[this.index(x, y)] = value;
     }
 
     public byte get(int x, int y) {
-        return this.data[this.index(x, y)];
+        return this.rawData[this.index(x, y)];
     }
 
     public void fill(byte value) {
-        Arrays.fill(this.data, value);
+        Arrays.fill(this.rawData, value);
     }
 
     public void transform(Transformer transformer) {
         for (int y = 0; y < this.height; y++) {
             for (int x = 0; x < this.width; x++) {
                 int index = this.index(x, y);
-                this.data[index] = transformer.apply(this.data[index], x, y);
+                this.rawData[index] = transformer.apply(this.rawData[index], x, y);
             }
         }
     }
@@ -57,7 +57,7 @@ public final class ByteRaster extends AbstractRaster<byte[]> implements IntegerR
     public void iterate(Iterator iterator) {
         for (int y = 0; y < this.height; y++) {
             for (int x = 0; x < this.width; x++) {
-                iterator.accept(this.data[this.index(x, y)], x, y);
+                iterator.accept(this.rawData[this.index(x, y)], x, y);
             }
         }
     }
@@ -84,7 +84,7 @@ public final class ByteRaster extends AbstractRaster<byte[]> implements IntegerR
     }
 
     public ByteRaster copy() {
-        return new ByteRaster(Arrays.copyOf(this.data, this.data.length), this.width, this.height);
+        return new ByteRaster(Arrays.copyOf(this.rawData, this.rawData.length), this.width, this.height);
     }
 
     public interface Transformer {
@@ -109,11 +109,11 @@ public final class ByteRaster extends AbstractRaster<byte[]> implements IntegerR
         }
 
         public byte sample(ColumnDataCache dataCache, int x, int z) {
-            ColumnData data = dataCache.joinData(x >> 4, z >> 4);
+            DataSample data = dataCache.joinData(x >> 4, z >> 4);
             return this.sample(data, x & 0xF, z & 0xF);
         }
 
-        public byte sample(ColumnData data, int x, int z) {
+        public byte sample(DataSample data, int x, int z) {
             Optional<ByteRaster> optional = data.get(this.key);
             if (optional.isPresent()) {
                 ByteRaster raster = optional.get();
@@ -126,7 +126,7 @@ public final class ByteRaster extends AbstractRaster<byte[]> implements IntegerR
         public ByteRaster sample(ColumnDataCache dataCache, DataView view) {
             ByteRaster raster = ByteRaster.create(view);
             if (this.defaultValue != 0) {
-                Arrays.fill(raster.data, this.defaultValue);
+                Arrays.fill(raster.rawData, this.defaultValue);
             }
             AbstractRaster.sampleInto(raster, dataCache, view, this.key);
             return raster;

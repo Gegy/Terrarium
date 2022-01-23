@@ -9,7 +9,7 @@ import net.gegy1000.earth.server.world.ecology.soil.SoilSelector;
 import net.gegy1000.earth.server.world.ecology.soil.SoilTexture;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
 import net.gegy1000.terrarium.server.world.composer.surface.SurfaceComposer;
-import net.gegy1000.terrarium.server.world.data.ColumnData;
+import net.gegy1000.terrarium.server.world.data.DataSample;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -47,7 +47,7 @@ public class TerrainSurfaceComposer implements SurfaceComposer {
     }
 
     @Override
-    public void composeSurface(TerrariumWorld terrarium, ColumnData data, CubicPos pos, ChunkPrimeWriter writer) {
+    public void composeSurface(TerrariumWorld terrarium, DataSample data, CubicPos pos, ChunkPrimeWriter writer) {
         data.with(EarthData.TERRAIN_HEIGHT).ifPresent(with -> {
             ShortRaster heightRaster = with.get(EarthData.TERRAIN_HEIGHT);
 

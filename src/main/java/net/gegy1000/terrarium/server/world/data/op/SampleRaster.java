@@ -43,7 +43,7 @@ public final class SampleRaster {
             int tileWidth = MathHelper.floor(source.getTileWidth());
             int tileHeight = MathHelper.floor(source.getTileHeight());
 
-            return DataSourceReader.INSTANCE.getTiles(source, view).map(tiles -> {
+            return DataSourceReader.INSTANCE.getTilesIntersecting(source, view).map(tiles -> {
                 for (DataTileResult<T> tileResult : tiles) {
                     if (!tileResult.data.isPresent()) {
                         return Optional.empty();
@@ -56,7 +56,7 @@ public final class SampleRaster {
                     T sourceRaster = tileResult.data.get();
                     Vec2i tilePos = tileResult.pos;
 
-                    DataView sourceView = DataView.rect(
+                    DataView sourceView = DataView.of(
                             tilePos.x * tileWidth, tilePos.y * tileHeight,
                             tileWidth, tileHeight
                     );

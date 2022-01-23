@@ -1,6 +1,6 @@
 package net.gegy1000.terrarium.server.world.data.raster;
 
-import net.gegy1000.terrarium.server.world.data.ColumnData;
+import net.gegy1000.terrarium.server.world.data.DataSample;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.ColumnDataEntry;
 import net.gegy1000.terrarium.server.world.data.DataKey;
@@ -11,36 +11,36 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public abstract class AbstractRaster<T> implements Raster<T> {
-    protected final T data;
+    protected final T rawData;
     protected final int width;
     protected final int height;
 
-    protected AbstractRaster(T data, int width, int height) {
-        this.data = data;
+    protected AbstractRaster(T rawData, int width, int height) {
+        this.rawData = rawData;
         this.width = width;
         this.height = height;
     }
 
     @Override
-    public final T getData() {
-        return this.data;
+    public final T asRawData() {
+        return this.rawData;
     }
 
     @Override
-    public final int getWidth() {
+    public final int width() {
         return this.width;
     }
 
     @Override
-    public final int getHeight() {
+    public final int height() {
         return this.height;
     }
 
     protected static <R extends Raster<?>> void sampleInto(R resultRaster, ColumnDataCache dataCache, DataView view, DataKey<R> key) {
-        int chunkMinX = view.getX() >> 4;
-        int chunkMinY = view.getY() >> 4;
-        int chunkMaxX = view.getMaxX() >> 4;
-        int chunkMaxY = view.getMaxY() >> 4;
+        int chunkMinX = view.minX() >> 4;
+        int chunkMinY = view.minY() >> 4;
+        int chunkMaxX = view.maxX() >> 4;
+        int chunkMaxY = view.maxY() >> 4;
 
         Collection<ColumnDataEntry.Handle> columnHandles = new ArrayList<>();
 
@@ -54,7 +54,7 @@ public abstract class AbstractRaster<T> implements Raster<T> {
             for (ColumnDataEntry.Handle handle : columnHandles) {
                 ChunkPos columnPos = handle.getColumnPos();
 
-                ColumnData data = handle.join();
+                DataSample data = handle.join();
                 data.get(key).ifPresent(sourceRaster -> {
                     DataView srcView = DataView.of(columnPos);
                     Raster.rasterCopy(sourceRaster, srcView, resultRaster, view);

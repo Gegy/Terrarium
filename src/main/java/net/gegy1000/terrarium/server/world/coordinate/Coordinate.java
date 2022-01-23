@@ -20,22 +20,22 @@ public final class Coordinate {
         return new Coordinate(null, blockX, blockZ);
     }
 
-    public double getX() {
+    public double x() {
         return this.x;
     }
 
-    public double getZ() {
+    public double z() {
         return this.z;
     }
 
-    public double getBlockX() {
+    public double blockX() {
         if (this.crs == null) {
             return this.x;
         }
         return this.crs.blockX(this.x);
     }
 
-    public double getBlockZ() {
+    public double blockZ() {
         if (this.crs == null) {
             return this.z;
         }
@@ -47,8 +47,8 @@ public final class Coordinate {
             return this;
         }
 
-        double blockX = this.getBlockX();
-        double blockZ = this.getBlockZ();
+        double blockX = this.blockX();
+        double blockZ = this.blockZ();
         return new Coordinate(to, to.x(blockX), to.z(blockZ));
     }
 
@@ -65,8 +65,8 @@ public final class Coordinate {
     }
 
     public Coordinate add(Coordinate coordinate) {
-        double blockX = coordinate.getBlockX();
-        double blockZ = coordinate.getBlockZ();
+        double blockX = coordinate.blockX();
+        double blockZ = coordinate.blockZ();
 
         if (this.crs == null) {
             return Coordinate.atBlock(this.x + blockX, this.z + blockZ);
@@ -78,11 +78,11 @@ public final class Coordinate {
     }
 
     public Coordinate toBlock() {
-        return new Coordinate(null, this.getBlockX(), this.getBlockZ());
+        return new Coordinate(null, this.blockX(), this.blockZ());
     }
 
     public BlockPos toBlockPos() {
-        return new BlockPos(this.getBlockX(), 0, this.getBlockZ());
+        return new BlockPos(this.blockX(), 0, this.blockZ());
     }
 
     public boolean is(CoordinateReference state) {
@@ -93,14 +93,14 @@ public final class Coordinate {
         if (!left.is(right.crs)) {
             throw new IllegalArgumentException("Cannot get minimum coordinate between coordinates of different state");
         }
-        return new Coordinate(left.crs, Math.min(left.getX(), right.getX()), Math.min(left.getZ(), right.getZ()));
+        return new Coordinate(left.crs, Math.min(left.x(), right.x()), Math.min(left.z(), right.z()));
     }
 
     public static Coordinate max(Coordinate left, Coordinate right) {
         if (!left.is(right.crs)) {
             throw new IllegalArgumentException("Cannot get maximum coordinate between coordinates of different state");
         }
-        return new Coordinate(left.crs, Math.max(left.getX(), right.getX()), Math.max(left.getZ(), right.getZ()));
+        return new Coordinate(left.crs, Math.max(left.x(), right.x()), Math.max(left.z(), right.z()));
     }
 
     @Override

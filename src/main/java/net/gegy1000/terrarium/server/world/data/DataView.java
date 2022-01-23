@@ -4,27 +4,27 @@ import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.minecraft.util.math.ChunkPos;
 
 public class DataView {
-    private final int x;
-    private final int y;
+    private final int minX;
+    private final int minY;
     private final int width;
     private final int height;
 
-    private DataView(int x, int y, int width, int height) {
-        this.x = x;
-        this.y = y;
+    private DataView(int minX, int minY, int width, int height) {
+        this.minX = minX;
+        this.minY = minY;
         this.width = width;
         this.height = height;
     }
 
-    public static DataView rect(int width, int height) {
+    public static DataView of(int width, int height) {
         return new DataView(0, 0, width, height);
     }
 
-    public static DataView rect(int x, int y, int width, int height) {
+    public static DataView of(int x, int y, int width, int height) {
         return new DataView(x, y, width, height);
     }
 
-    public static DataView square(int x, int y, int size) {
+    public static DataView ofSquare(int x, int y, int size) {
         return new DataView(x, y, size, size);
     }
 
@@ -32,84 +32,76 @@ public class DataView {
         return new DataView(columnPos.getXStart(), columnPos.getZStart(), 16, 16);
     }
 
-    public static DataView fromCorners(int minX, int minY, int maxX, int maxY) {
-        return new DataView(minX, minY, maxX - minX, maxY - minY);
+    public static DataView ofCorners(int minX, int minY, int maxX, int maxY) {
+        return new DataView(minX, minY, maxX - minX + 1, maxY - minY + 1);
     }
 
-    public int getX() {
-        return this.x;
+    public int minX() {
+        return this.minX;
     }
 
-    public int getY() {
-        return this.y;
+    public int minY() {
+        return this.minY;
     }
 
-    public int getMinX() {
-        return this.x;
+    public int maxX() {
+        return this.minX + this.width - 1;
     }
 
-    public int getMinY() {
-        return this.y;
+    public int maxY() {
+        return this.minY + this.height - 1;
     }
 
-    public int getMaxX() {
-        return this.x + this.width;
-    }
-
-    public int getMaxY() {
-        return this.y + this.height;
-    }
-
-    public int getWidth() {
+    public int width() {
         return this.width;
     }
 
-    public int getHeight() {
+    public int height() {
         return this.height;
     }
 
-    public Coordinate getMinCoordinate() {
-        return Coordinate.atBlock(this.x, this.y);
+    public Coordinate minCoordinate() {
+        return Coordinate.atBlock(this.minX(), this.minY());
     }
 
-    public Coordinate getMaxCoordinate() {
-        return Coordinate.atBlock(this.x + this.width, this.y + this.height);
+    public Coordinate maxCoordinate() {
+        return Coordinate.atBlock(this.maxX(), this.maxY());
     }
 
     public DataView grow(int lowerX, int lowerY, int upperX, int upperY) {
-        return new DataView(this.x - lowerX, this.y - lowerY, this.width + upperX + lowerX, this.height + upperY + lowerY);
+        return new DataView(this.minX - lowerX, this.minY - lowerY, this.width + upperX + lowerX, this.height + upperY + lowerY);
     }
 
     public DataView grow(int amount) {
-        return new DataView(this.x - amount, this.y - amount, this.width + amount * 2, this.height + amount * 2);
+        return new DataView(this.minX - amount, this.minY - amount, this.width + amount * 2, this.height + amount * 2);
     }
 
     public DataView offset(int x, int y) {
-        return new DataView(this.x + x, this.y + y, this.width, this.height);
+        return new DataView(this.minX + x, this.minY + y, this.width, this.height);
     }
 
     public boolean contains(DataView view) {
-        return view.getX() >= this.x && view.getY() >= this.y
-                && view.getMaxX() <= this.getMaxX() && view.getMaxY() <= this.getMaxY();
+        return view.minX() >= this.minX() && view.minY() >= this.minY()
+                && view.maxX() <= this.maxX() && view.maxY() <= this.maxY();
     }
 
     public boolean contains(int x, int y) {
-        return x >= this.x && y >= this.y && x < this.getMaxX() && y < this.getMaxY();
+        return x >= this.minX() && y >= this.minY() && x <= this.maxX() && y <= this.maxY();
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof DataView) {
             DataView dataView = (DataView) obj;
-            return this.x == dataView.x && this.y == dataView.y && this.width == dataView.height && this.height == dataView.height;
+            return this.minX == dataView.minX && this.minY == dataView.minY && this.width == dataView.height && this.height == dataView.height;
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        int result = this.x;
-        result = 31 * result + this.y;
+        int result = this.minX;
+        result = 31 * result + this.minY;
         result = 31 * result + this.width;
         result = 31 * result + this.height;
         return result;
@@ -117,6 +109,6 @@ public class DataView {
 
     @Override
     public String toString() {
-        return "DataView{" + "x=" + this.x + ", y=" + this.y + ", width=" + this.width + ", height=" + this.height + '}';
+        return "DataView{" + "x=" + this.minX + ", y=" + this.minY + ", width=" + this.width + ", height=" + this.height + '}';
     }
 }

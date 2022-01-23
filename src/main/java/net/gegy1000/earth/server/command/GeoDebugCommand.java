@@ -125,7 +125,7 @@ public class GeoDebugCommand extends CommandBase {
         int x = MathHelper.floor(player.posX);
         int z = MathHelper.floor(player.posZ);
 
-        DataView view = DataView.rect(x - RASTER_RADIUS, z - RASTER_RADIUS, RASTER_SIZE, RASTER_SIZE);
+        DataView view = DataView.of(x - RASTER_RADIUS, z - RASTER_RADIUS, RASTER_SIZE, RASTER_SIZE);
 
         BufferedImage image = sampler.sample(dataCache, view);
 

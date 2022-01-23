@@ -16,7 +16,7 @@ import java.util.Arrays;
 public final class TerrariumRasterReader {
     private static final String SIGNATURE = "TERRARIUM/RASTER";
 
-    public static <T extends IntegerRaster<?>> T read(InputStream input, Class<T> rasterType) throws IOException {
+    public static <T extends IntegerRaster<?>> T read(InputStream input, RasterFormat<T> rasterType) throws IOException {
         Profiler profiler = ThreadedProfiler.get();
         try (Profiler.Handle read = profiler.push("read_terrarium_raster")) {
             DataInputStream dataIn = new DataInputStream(input);
@@ -35,23 +35,24 @@ public final class TerrariumRasterReader {
         }
     }
 
-    private static <T extends IntegerRaster<?>> T readV0(InputStream input, Class<T> expectedRasterType) throws IOException {
+    private static <T extends IntegerRaster<?>> T readV0(InputStream input, RasterFormat<T> format) throws IOException {
         DataInputStream dataIn = new DataInputStream(input);
         int width = dataIn.readInt();
         int height = dataIn.readInt();
 
-        RasterFormat<T> byteFormat = RasterFormat.byId(dataIn.readUnsignedByte())
-                .flatMap(format -> format.tryCast(expectedRasterType))
-                .orElseThrow(() -> new IOException("Expected raster of type " + expectedRasterType));
+        RasterFormat<?> dataFormat = RasterFormat.byId(dataIn.readUnsignedByte());
+        if (dataFormat != format) {
+            throw new IOException("Expected raster of type " + format);
+        }
 
-        T raster = byteFormat.create(DataView.rect(width, height));
+        T raster = format.create(DataView.of(width, height));
 
         while (dataIn.available() > 0) {
             int chunkLength = dataIn.readInt();
             byte[] chunkBytes = new byte[chunkLength];
             dataIn.readFully(chunkBytes);
 
-            readChunkV0(new ByteArrayInputStream(chunkBytes), raster, byteFormat);
+            readChunkV0(new ByteArrayInputStream(chunkBytes), raster, format);
         }
 
         return raster;
@@ -69,8 +70,8 @@ public final class TerrariumRasterReader {
         int chunkHeight = dataIn.readInt();
         RasterFilter filter = RasterFilter.byId(dataIn.readUnsignedByte());
 
-        DataView srcView = DataView.rect(chunkX, chunkY, chunkWidth, chunkHeight);
-        DataView dstView = dstRaster.asView();
+        DataView srcView = DataView.of(chunkX, chunkY, chunkWidth, chunkHeight);
+        DataView dstView = DataView.of(dstRaster.width(), dstRaster.height());
 
         T rawRaster = rasterFormat.read(new SingleXZInputStream(input), chunkWidth, chunkHeight);
         T filteredRaster = rasterFormat.create(srcView);

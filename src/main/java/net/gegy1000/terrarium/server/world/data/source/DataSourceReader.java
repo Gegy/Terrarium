@@ -83,14 +83,14 @@ public final class DataSourceReader {
                 return tile;
             } catch (Throwable t) {
                 this.logError(key, t);
-                return DataTileResult.empty(key.asVec2());
+                return DataTileResult.empty(key.getPos());
             }
         });
     }
 
     @SuppressWarnings("unchecked")
-    public <T> Future<DataTileResult<T>> getTile(TiledDataSource<T> source, Vec2i pos) {
-        TileKey<T> key = new TileKey<>(source, pos.x, pos.y);
+    public <T> Future<DataTileResult<T>> getTile(TiledDataSource<T> source, int x, int y) {
+        TileKey<T> key = new TileKey<>(source, x, y);
         try {
             DataTileResult<T> result = (DataTileResult<T>) this.tileCache.getIfPresent(key);
             if (result != null) {
@@ -102,38 +102,35 @@ public final class DataSourceReader {
                 return (Future<DataTileResult<T>>) (Future) handle;
             }
         } catch (Exception e) {
-            Terrarium.LOGGER.warn("Unexpected error occurred at {} from {}", pos, source.getClass().getSimpleName(), e);
+            Terrarium.LOGGER.warn("Unexpected error occurred at ({}; {}) from {}", x, y, source.getClass().getSimpleName(), e);
             ErrorBroadcastHandler.recordFailure();
         }
 
-        return Future.ready(DataTileResult.empty(pos));
+        return Future.ready(DataTileResult.empty(key.getPos()));
     }
 
-    public <T> Future<Collection<DataTileResult<T>>> getTiles(TiledDataSource<T> source, DataView view) {
+    public <T> Future<Collection<DataTileResult<T>>> getTilesIntersecting(TiledDataSource<T> source, DataView view) {
+        return this.getTilesIntersecting(source, view.minX(), view.minY(), view.maxX(), view.maxY());
+    }
+
+    public <T> Future<Collection<DataTileResult<T>>> getTilesIntersecting(TiledDataSource<T> source, double minX, double minY, double maxX, double maxY) {
         double tileWidth = source.getTileWidth();
         double tileHeight = source.getTileHeight();
 
-        Vec2i minTile = new Vec2i(
-                MathHelper.floor(view.getX() / tileWidth),
-                MathHelper.floor(view.getY() / tileHeight)
+        return this.getTiles(
+                source,
+                MathHelper.floor(minX / tileWidth),
+                MathHelper.floor(minY / tileHeight),
+                MathHelper.floor(maxX / tileWidth),
+                MathHelper.floor(maxY / tileHeight)
         );
-        Vec2i maxTile = new Vec2i(
-                MathHelper.floor(view.getMaxX() / tileWidth),
-                MathHelper.floor(view.getMaxY() / tileHeight)
-        );
-
-        return this.getTiles(source, minTile, maxTile);
     }
 
-    public <T> Future<Collection<DataTileResult<T>>> getTiles(
-            TiledDataSource<T> source,
-            Vec2i min,
-            Vec2i max
-    ) {
-        Collection<Future<DataTileResult<T>>> futures = new ArrayList<>((max.x - min.x + 1) * (max.y - min.y + 1));
-        for (int y = min.y; y <= max.y; y++) {
-            for (int x = min.x; x <= max.x; x++) {
-                futures.add(this.getTile(source, new Vec2i(x, y)));
+    private <T> Future<Collection<DataTileResult<T>>> getTiles(TiledDataSource<T> source, int minX, int minY, int maxX, int maxY) {
+        Collection<Future<DataTileResult<T>>> futures = new ArrayList<>((maxX - minX + 1) * (maxY - minY + 1));
+        for (int y = minY; y <= maxY; y++) {
+            for (int x = minX; x <= maxX; x++) {
+                futures.add(this.getTile(source, x, y));
             }
         }
         return Future.joinAll(futures);
@@ -150,7 +147,7 @@ public final class DataSourceReader {
     }
 
     private <T> DataTileResult<T> loadTile(TileKey<T> key) throws IOException {
-        Vec2i pos = key.asVec2();
+        Vec2i pos = key.getPos();
 
         Optional<T> result;
 
@@ -164,7 +161,7 @@ public final class DataSourceReader {
 
     private <T> void logError(TileKey<T> key, Throwable throwable) {
         String sourceName = key.source.getClass().getSimpleName();
-        Terrarium.LOGGER.warn("[{}] Loading tile at {} raised error", sourceName, key.asVec2(), throwable);
+        Terrarium.LOGGER.warn("[{}] Loading tile at {} raised error", sourceName, key.getPos(), throwable);
         ErrorBroadcastHandler.recordFailure();
     }
 
@@ -196,7 +193,7 @@ public final class DataSourceReader {
             return 31 * this.x + this.y;
         }
 
-        Vec2i asVec2() {
+        Vec2i getPos() {
             return new Vec2i(this.x, this.y);
         }
 

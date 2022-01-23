@@ -11,7 +11,7 @@ import net.gegy1000.terrarium.server.util.Lazy;
 import net.gegy1000.terrarium.server.util.Profiler;
 import net.gegy1000.terrarium.server.util.ThreadedProfiler;
 import net.gegy1000.terrarium.server.world.composer.structure.StructureComposer;
-import net.gegy1000.terrarium.server.world.data.ColumnData;
+import net.gegy1000.terrarium.server.world.data.DataSample;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.ColumnDataEntry;
 import net.minecraft.entity.EnumCreatureType;
@@ -46,7 +46,7 @@ public class ComposableChunkGenerator implements GenericChunkGenerator {
                     Profiler.Handle prime = profiler.push("prime");
             ) {
                 try (ColumnDataEntry.Handle handle = terrarium.getDataCache().acquireEntry(pos.getX(), pos.getZ())) {
-                    ColumnData data = handle.join();
+                    DataSample data = handle.join();
 
                     try (Profiler.Handle surface = profiler.push("surface")) {
                         terrarium.getSurfaceComposer().composeSurface(terrarium, data, pos, writer);

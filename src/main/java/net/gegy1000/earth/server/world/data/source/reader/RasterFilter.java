@@ -53,8 +53,8 @@ public enum RasterFilter {
     public abstract int apply(int x, int a, int b, int c);
 
     public <T extends IntegerRaster<?>> void apply(T input, T output) {
-        for (int y = 0; y < input.getHeight(); y++) {
-            for (int x = 0; x < input.getWidth(); x++) {
+        for (int y = 0; y < input.height(); y++) {
+            for (int x = 0; x < input.width(); x++) {
                 int value = input.getInt(x, y);
                 int a = x > 0 ? output.getInt(x - 1, y) : 0;
                 int b = y > 0 ? output.getInt(x, y - 1) : 0;

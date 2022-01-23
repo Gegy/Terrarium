@@ -86,7 +86,7 @@ final class RasterDebug {
             return;
         }
 
-        BufferedImage maskImage = new BufferedImage(raster.getWidth(), raster.getHeight(), BufferedImage.TYPE_INT_RGB);
+        BufferedImage maskImage = new BufferedImage(raster.width(), raster.height(), BufferedImage.TYPE_INT_RGB);
 
         raster.iterate((value, x, y) -> {
             maskImage.setRGB(x, y, color.applyAsInt(value));
@@ -96,8 +96,8 @@ final class RasterDebug {
     }
 
     private static void renderSoilMasks(Rasters rasters) throws IOException {
-        int width = rasters.soil.getWidth();
-        int height = rasters.soil.getHeight();
+        int width = rasters.soil.width();
+        int height = rasters.soil.height();
 
         Path root = OUTPUT.resolve("suborder_masks");
         Files.createDirectories(root);
@@ -124,8 +124,8 @@ final class RasterDebug {
     }
 
     private static void renderDominantTrees(Rasters rasters) throws IOException {
-        int width = rasters.elevation.getWidth();
-        int height = rasters.elevation.getHeight();
+        int width = rasters.elevation.width();
+        int height = rasters.elevation.height();
 
         BufferedImage dominantTreeImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 
@@ -157,8 +157,8 @@ final class RasterDebug {
     }
 
     private static void renderBiomes(Rasters rasters) throws IOException {
-        int width = rasters.elevation.getWidth();
-        int height = rasters.elevation.getHeight();
+        int width = rasters.elevation.width();
+        int height = rasters.elevation.height();
 
         BufferedImage biomeImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 
@@ -176,30 +176,30 @@ final class RasterDebug {
     }
 
     private static FloatRaster sampleMinTemperature(WorldClimateRaster source) {
-        FloatRaster dst = FloatRaster.create(DataView.rect(TILE_SIZE * 2, TILE_SIZE));
+        FloatRaster dst = FloatRaster.create(DataView.of(TILE_SIZE * 2, TILE_SIZE));
         dst.transform((value, x, y) -> {
-            int climateX = x * source.getWidth() / dst.getWidth();
-            int climateY = y * source.getHeight() / dst.getHeight();
+            int climateX = x * source.getWidth() / dst.width();
+            int climateY = y * source.getHeight() / dst.height();
             return source.getMinTemperature(climateX, climateY);
         });
         return dst;
     }
 
     private static FloatRaster sampleMeanTemperature(WorldClimateRaster source) {
-        FloatRaster dst = FloatRaster.create(DataView.rect(TILE_SIZE * 2, TILE_SIZE));
+        FloatRaster dst = FloatRaster.create(DataView.of(TILE_SIZE * 2, TILE_SIZE));
         dst.transform((value, x, y) -> {
-            int climateX = x * source.getWidth() / dst.getWidth();
-            int climateY = y * source.getHeight() / dst.getHeight();
+            int climateX = x * source.getWidth() / dst.width();
+            int climateY = y * source.getHeight() / dst.height();
             return source.getMeanTemperature(climateX, climateY);
         });
         return dst;
     }
 
     private static ShortRaster sampleAnnualRainfall(WorldClimateRaster source) {
-        ShortRaster dst = ShortRaster.create(DataView.rect(TILE_SIZE * 2, TILE_SIZE));
+        ShortRaster dst = ShortRaster.create(DataView.of(TILE_SIZE * 2, TILE_SIZE));
         dst.transform((value, x, y) -> {
-            int climateX = x * source.getWidth() / dst.getWidth();
-            int climateY = y * source.getHeight() / dst.getHeight();
+            int climateX = x * source.getWidth() / dst.width();
+            int climateY = y * source.getHeight() / dst.height();
             return source.getAnnualRainfall(climateX, climateY);
         });
         return dst;
@@ -209,10 +209,10 @@ final class RasterDebug {
             Zoomable<StdSource<R>> source,
             Function<DataView, R> createRaster
     ) throws IOException {
-        R global = createRaster.apply(DataView.rect(TILE_SIZE * 2, TILE_SIZE));
+        R global = createRaster.apply(DataView.of(TILE_SIZE * 2, TILE_SIZE));
 
         for (int x = 0; x < 2; x++) {
-            DataView srcView = DataView.square(x * TILE_SIZE, 0, TILE_SIZE);
+            DataView srcView = DataView.ofSquare(x * TILE_SIZE, 0, TILE_SIZE);
             source.forZoom(0).load(new Vec2i(x, 0)).ifPresent(tile -> {
                 Raster.rasterCopy(tile, srcView, global, global.asView());
             });

@@ -44,7 +44,7 @@ public class FreezeSurfaceComposer implements DecorationComposer {
 
         BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
 
-        DataView view = DataView.square(minX, minZ, 16);
+        DataView view = DataView.ofSquare(minX, minZ, 16);
 
         ShortRaster heightRaster = this.heightSampler.sample(dataCache, view);
         UByteRaster slopeRaster = this.slopeSampler.sample(dataCache, view);

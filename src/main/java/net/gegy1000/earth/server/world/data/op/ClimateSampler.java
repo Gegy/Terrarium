@@ -15,9 +15,9 @@ public final class ClimateSampler {
     public DataOp<ShortRaster> annualRainfall() {
         return DataOp.ofLazy(view -> {
             ShortRaster annualRainfall = ShortRaster.create(view);
-            for (int y = 0; y < view.getHeight(); y++) {
-                for (int x = 0; x < view.getWidth(); x++) {
-                    annualRainfall.set(x, y, this.source.getAnnualRainfall(view.getX() + x, view.getY() + y));
+            for (int y = 0; y < view.height(); y++) {
+                for (int x = 0; x < view.width(); x++) {
+                    annualRainfall.set(x, y, this.source.getAnnualRainfall(view.minX() + x, view.minY() + y));
                 }
             }
             return annualRainfall;
@@ -28,9 +28,9 @@ public final class ClimateSampler {
     public DataOp<FloatRaster> meanTemperature() {
         return DataOp.ofLazy(view -> {
             FloatRaster temperatureRaster = FloatRaster.create(view);
-            for (int y = 0; y < view.getHeight(); y++) {
-                for (int x = 0; x < view.getWidth(); x++) {
-                    temperatureRaster.set(x, y, this.source.getMeanTemperature(view.getX() + x, view.getY() + y));
+            for (int y = 0; y < view.height(); y++) {
+                for (int x = 0; x < view.width(); x++) {
+                    temperatureRaster.set(x, y, this.source.getMeanTemperature(view.minX() + x, view.minY() + y));
                 }
             }
             return temperatureRaster;
@@ -40,9 +40,9 @@ public final class ClimateSampler {
     public DataOp<FloatRaster> minTemperature() {
         return DataOp.ofLazy(view -> {
             FloatRaster temperatureRaster = FloatRaster.create(view);
-            for (int y = 0; y < view.getHeight(); y++) {
-                for (int x = 0; x < view.getWidth(); x++) {
-                    temperatureRaster.set(x, y, this.source.getMinTemperature(view.getX() + x, view.getY() + y));
+            for (int y = 0; y < view.height(); y++) {
+                for (int x = 0; x < view.width(); x++) {
+                    temperatureRaster.set(x, y, this.source.getMinTemperature(view.minX() + x, view.minY() + y));
                 }
             }
             return temperatureRaster;

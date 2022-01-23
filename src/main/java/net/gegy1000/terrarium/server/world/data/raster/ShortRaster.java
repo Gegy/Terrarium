@@ -2,7 +2,7 @@ package net.gegy1000.terrarium.server.world.data.raster;
 
 import com.google.common.base.Preconditions;
 import it.unimi.dsi.fastutil.HashCommon;
-import net.gegy1000.terrarium.server.world.data.ColumnData;
+import net.gegy1000.terrarium.server.world.data.DataSample;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.DataKey;
 import net.gegy1000.terrarium.server.world.data.DataView;
@@ -25,12 +25,12 @@ public final class ShortRaster extends AbstractRaster<short[]> implements Intege
     }
 
     public static ShortRaster create(DataView view) {
-        return create(view.getWidth(), view.getHeight());
+        return create(view.width(), view.height());
     }
 
     public static ShortRaster create(DataView view, int value) {
-        ShortRaster raster = create(view.getWidth(), view.getHeight());
-        Arrays.fill(raster.data, (short) value);
+        ShortRaster raster = create(view.width(), view.height());
+        Arrays.fill(raster.rawData, (short) value);
         return raster;
     }
 
@@ -44,18 +44,18 @@ public final class ShortRaster extends AbstractRaster<short[]> implements Intege
     }
 
     public void set(int x, int y, short value) {
-        this.data[this.index(x, y)] = value;
+        this.rawData[this.index(x, y)] = value;
     }
 
     public short get(int x, int y) {
-        return this.data[this.index(x, y)];
+        return this.rawData[this.index(x, y)];
     }
 
     public void transform(Transformer transformer) {
         for (int y = 0; y < this.height; y++) {
             for (int x = 0; x < this.width; x++) {
                 int index = this.index(x, y);
-                this.data[index] = transformer.apply(this.data[index], x, y);
+                this.rawData[index] = transformer.apply(this.rawData[index], x, y);
             }
         }
     }
@@ -63,7 +63,7 @@ public final class ShortRaster extends AbstractRaster<short[]> implements Intege
     public void iterate(Iterator iterator) {
         for (int y = 0; y < this.height; y++) {
             for (int x = 0; x < this.width; x++) {
-                iterator.accept(this.data[this.index(x, y)], x, y);
+                iterator.accept(this.rawData[this.index(x, y)], x, y);
             }
         }
     }
@@ -89,7 +89,7 @@ public final class ShortRaster extends AbstractRaster<short[]> implements Intege
     }
 
     public ShortRaster copy() {
-        return new ShortRaster(Arrays.copyOf(this.data, this.data.length), this.width, this.height);
+        return new ShortRaster(Arrays.copyOf(this.rawData, this.rawData.length), this.width, this.height);
     }
 
     public interface Transformer {
@@ -122,7 +122,7 @@ public final class ShortRaster extends AbstractRaster<short[]> implements Intege
 
         public short sample(ColumnDataCache dataCache, int x, int z) {
             if (this.cache == null) {
-                ColumnData data = dataCache.joinData(x >> 4, z >> 4);
+                DataSample data = dataCache.joinData(x >> 4, z >> 4);
                 return this.sample(data, x & 0xF, z & 0xF);
             }
 
@@ -131,14 +131,14 @@ public final class ShortRaster extends AbstractRaster<short[]> implements Intege
                 return cached;
             }
 
-            ColumnData data = dataCache.joinData(x >> 4, z >> 4);
+            DataSample data = dataCache.joinData(x >> 4, z >> 4);
             short sample = this.sample(data, x & 0xF, z & 0xF);
             this.cache.set(x, z, sample);
 
             return sample;
         }
 
-        public short sample(ColumnData data, int x, int z) {
+        public short sample(DataSample data, int x, int z) {
             Optional<ShortRaster> optional = data.get(this.key);
             if (optional.isPresent()) {
                 ShortRaster raster = optional.get();
@@ -151,7 +151,7 @@ public final class ShortRaster extends AbstractRaster<short[]> implements Intege
         public ShortRaster sample(ColumnDataCache dataCache, DataView view) {
             ShortRaster raster = ShortRaster.create(view);
             if (this.defaultValue != 0) {
-                Arrays.fill(raster.data, this.defaultValue);
+                Arrays.fill(raster.rawData, this.defaultValue);
             }
             AbstractRaster.sampleInto(raster, dataCache, view, this.key);
             return raster;

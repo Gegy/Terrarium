@@ -6,47 +6,47 @@ import net.gegy1000.terrarium.server.world.data.DataView;
 import java.util.function.BiFunction;
 
 public interface Raster<T> {
-    int getWidth();
+    int width();
 
-    int getHeight();
+    int height();
 
-    T getData();
+    T asRawData();
 
     default int index(int x, int y) {
-        return x + y * this.getWidth();
+        return x + y * this.width();
     }
 
     default DataView asView() {
-        return DataView.rect(this.getWidth(), this.getHeight());
+        return DataView.of(this.width(), this.height());
     }
 
     @SuppressWarnings({ "SuspiciousSystemArraycopy" })
     static <R extends Raster<?>> void rasterCopy(R src, DataView srcView, R dst, DataView dstView) {
-        int minX = Math.max(0, dstView.getMinX() - srcView.getMinX());
-        int minY = Math.max(0, dstView.getMinY() - srcView.getMinY());
-        int maxX = Math.min(srcView.getWidth(), dstView.getMaxX() - srcView.getMinX());
-        int maxY = Math.min(srcView.getHeight(), dstView.getMaxY() - srcView.getMinY());
+        int minX = Math.max(0, dstView.minX() - srcView.minX());
+        int minY = Math.max(0, dstView.minY() - srcView.minY());
+        int maxX = Math.min(srcView.width(), dstView.maxX() - srcView.minX() + 1);
+        int maxY = Math.min(srcView.height(), dstView.maxY() - srcView.minY() + 1);
 
-        Object srcData = src.getData();
-        Object destData = dst.getData();
+        Object srcRaw = src.asRawData();
+        Object dstRaw = dst.asRawData();
 
         for (int localY = minY; localY < maxY; localY++) {
-            int resultY = (localY + srcView.getMinY()) - dstView.getMinY();
+            int resultY = (localY + srcView.minY()) - dstView.minY();
 
             int localX = minX;
-            int resultX = (localX + srcView.getMinX()) - dstView.getMinX();
+            int resultX = (localX + srcView.minX()) - dstView.minX();
 
-            int sourceIndex = localX + localY * src.getWidth();
-            int resultIndex = resultX + resultY * dst.getWidth();
+            int sourceIndex = localX + localY * src.width();
+            int resultIndex = resultX + resultY * dst.width();
 
-            System.arraycopy(srcData, sourceIndex, destData, resultIndex, maxX - minX);
+            System.arraycopy(srcRaw, sourceIndex, dstRaw, resultIndex, maxX - minX);
         }
     }
 
     @SuppressWarnings({ "SuspiciousSystemArraycopy" })
     static <R extends Raster<?>> void rasterCopy(R src, R dest) {
-        int length = src.getWidth() * src.getHeight();
-        System.arraycopy(src.getData(), 0, dest.getData(), 0, length);
+        int length = src.width() * src.height();
+        System.arraycopy(src.asRawData(), 0, dest.asRawData(), 0, length);
     }
 
     interface Sampler<T> extends BiFunction<ColumnDataCache, DataView, T> {

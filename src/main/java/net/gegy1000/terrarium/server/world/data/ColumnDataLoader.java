@@ -10,7 +10,7 @@ import net.minecraft.util.math.ChunkPos;
 
 public final class ColumnDataLoader implements AutoCloseable {
     private final DataGenerator generator;
-    private final Long2ObjectMap<TaskHandle<ColumnData>> taskMap = new Long2ObjectOpenHashMap<>();
+    private final Long2ObjectMap<TaskHandle<DataSample>> taskMap = new Long2ObjectOpenHashMap<>();
 
     private final LocalExecutor executor = new LocalExecutor();
 
@@ -26,16 +26,16 @@ public final class ColumnDataLoader implements AutoCloseable {
         }
     }
 
-    public Future<ColumnData> spawn(ChunkPos columnPos) {
-        TaskHandle<ColumnData> handle = this.executor.spawn(this.generate(columnPos));
+    public Future<DataSample> spawn(ChunkPos columnPos) {
+        TaskHandle<DataSample> handle = this.executor.spawn(this.generate(columnPos));
         synchronized (this.taskMap) {
             this.taskMap.put(ChunkPos.asLong(columnPos.x, columnPos.z), handle);
         }
         return handle;
     }
 
-    public ColumnData getNow(ChunkPos columnPos) {
-        Future<ColumnData> future = this.stealTask(ChunkPos.asLong(columnPos.x, columnPos.z));
+    public DataSample getNow(ChunkPos columnPos) {
+        Future<DataSample> future = this.stealTask(ChunkPos.asLong(columnPos.x, columnPos.z));
         if (future == null) {
             future = this.generate(columnPos);
         }
@@ -43,12 +43,12 @@ public final class ColumnDataLoader implements AutoCloseable {
         return CurrentThreadExecutor.blockOn(future);
     }
 
-    private Future<ColumnData> generate(ChunkPos columnPos) {
+    private Future<DataSample> generate(ChunkPos columnPos) {
         return this.generator.generate(DataView.of(columnPos));
     }
 
-    private Future<ColumnData> stealTask(long columnPos) {
-        TaskHandle<ColumnData> task;
+    private Future<DataSample> stealTask(long columnPos) {
+        TaskHandle<DataSample> task;
         synchronized (this.taskMap) {
             task = this.taskMap.remove(columnPos);
         }
@@ -58,7 +58,7 @@ public final class ColumnDataLoader implements AutoCloseable {
 
     public void cancel(long columnPos) {
         synchronized (this.taskMap) {
-            TaskHandle<ColumnData> handle = this.taskMap.remove(columnPos);
+            TaskHandle<DataSample> handle = this.taskMap.remove(columnPos);
             if (handle != null) {
                 this.executor.cancel(handle);
             }
@@ -72,7 +72,7 @@ public final class ColumnDataLoader implements AutoCloseable {
 
     private void cancelAll() {
         synchronized (this.taskMap) {
-            for (TaskHandle<ColumnData> handle : this.taskMap.values()) {
+            for (TaskHandle<DataSample> handle : this.taskMap.values()) {
                 this.executor.cancel(handle);
             }
             this.taskMap.clear();

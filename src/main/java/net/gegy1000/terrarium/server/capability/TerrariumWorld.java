@@ -69,9 +69,9 @@ public interface TerrariumWorld extends ICapabilityProvider {
             this.world = world;
             this.settings = GenerationSettings.parseFrom(world);
 
-            DataGenerator.Builder dataGenerator = DataGenerator.builder();
-
             TerrariumDataInitializer dataInitializer = worldType.createDataInitializer(this.settings);
+
+            DataGenerator.Builder dataGenerator = DataGenerator.builder();
             dataInitializer.setup(dataGenerator);
 
             MinecraftForge.EVENT_BUS.post(new TerrariumInitializeDataEvent(world, worldType, this.settings, dataGenerator));

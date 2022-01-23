@@ -10,7 +10,7 @@ import net.gegy1000.earth.server.world.ecology.maxent.feature.GetPredictorFeatur
 import net.gegy1000.earth.server.world.ecology.maxent.feature.MaxentFeature;
 import net.gegy1000.earth.server.world.ecology.soil.SoilSuborder;
 import net.gegy1000.earth.server.world.geography.Landform;
-import net.gegy1000.terrarium.server.world.data.ColumnData;
+import net.gegy1000.terrarium.server.world.data.DataSample;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.data.raster.FloatRaster;
@@ -128,18 +128,18 @@ public final class GrowthPredictors {
             return predictors;
         }
 
-        public GrowthPredictors sample(ColumnData data, int x, int z) {
+        public GrowthPredictors sample(DataSample data, int x, int z) {
             GrowthPredictors predictors = new GrowthPredictors();
             this.sampleTo(data, x, z, predictors);
             return predictors;
         }
 
         public void sampleTo(ColumnDataCache dataCache, int x, int z, GrowthPredictors predictors) {
-            ColumnData data = dataCache.joinData(x >> 4, z >> 4);
+            DataSample data = dataCache.joinData(x >> 4, z >> 4);
             this.sampleTo(data, x & 0xF, z & 0xF, predictors);
         }
 
-        public void sampleTo(ColumnData data, int x, int z, GrowthPredictors predictors) {
+        public void sampleTo(DataSample data, int x, int z, GrowthPredictors predictors) {
             predictors.elevation = this.elevation.sample(data, x, z);
             predictors.annualRainfall = this.annualRainfall.sample(data, x, z);
             predictors.meanTemperature = this.meanTemperature.sample(data, x, z);

@@ -5,7 +5,7 @@ import net.gegy1000.earth.server.world.EarthData;
 import net.gegy1000.earth.server.world.cover.Cover;
 import net.gegy1000.terrarium.client.render.TerrariumVertexFormats;
 import net.gegy1000.terrarium.server.world.data.DataKey;
-import net.gegy1000.terrarium.server.world.data.ColumnData;
+import net.gegy1000.terrarium.server.world.data.DataSample;
 import net.gegy1000.terrarium.server.world.data.DataView;
 import net.gegy1000.terrarium.server.world.data.raster.EnumRaster;
 import net.gegy1000.terrarium.server.world.data.raster.FloatRaster;
@@ -39,7 +39,7 @@ public final class TerrainMeshData {
         return TerrainMesh.upload(this.buffer);
     }
 
-    public static TerrainMeshData build(ColumnData data, int granularity, Vec3d translation) {
+    public static TerrainMeshData build(DataSample data, int granularity, Vec3d translation) {
         BufferBuilder builder = new BufferBuilder(computeBufferSize(data.getView(), granularity));
 
         builder.begin(GL11.GL_QUADS, TerrariumVertexFormats.POSITION_COLOR_NORMAL);
@@ -49,9 +49,9 @@ public final class TerrainMeshData {
         FloatRaster minTemperatureRaster = data.getOrDefault(EarthData.MIN_TEMPERATURE);
         EnumRaster<Cover> coverRaster = data.getOrDefault(EarthData.COVER);
 
-        int width = heightRaster.getWidth();
-        int height = heightRaster.getHeight();
-        short[] heightBuffer = heightRaster.getData();
+        int width = heightRaster.width();
+        int height = heightRaster.height();
+        short[] heightBuffer = heightRaster.asRawData();
 
         int strideX = granularity;
         int strideY = width * granularity;
@@ -95,8 +95,8 @@ public final class TerrainMeshData {
 
     private static int computeBufferSize(DataView view, int granularity) {
         int vertexWidth = TerrariumVertexFormats.POSITION_COLOR_NORMAL.getSize();
-        int quadCountX = (view.getWidth() - granularity) / granularity;
-        int quadCountZ = (view.getHeight() - granularity) / granularity;
+        int quadCountX = (view.width() - granularity) / granularity;
+        int quadCountZ = (view.height() - granularity) / granularity;
         int vertexCount = (quadCountX * quadCountZ) * 4;
         return vertexCount * vertexWidth;
     }

@@ -70,8 +70,8 @@ public class ClientProxy extends ServerProxy {
             player.sendStatusMessage(new TextComponentTranslation("status.earth.panorama.searching"), true);
 
             Coordinate coordinate = Coordinate.atBlock(player.posX, player.posZ).to(earth.getCrs());
-            double longitude = coordinate.getX();
-            double latitude = coordinate.getZ();
+            double longitude = coordinate.x();
+            double latitude = coordinate.z();
 
             Thread thread = new Thread(() -> {
                 try {
@@ -94,8 +94,8 @@ public class ClientProxy extends ServerProxy {
 
     private void setPanoramaState(EarthWorld earth, EntityPlayer player, GooglePanorama panorama) {
         Coordinate coord = earth.getCrs().coord(panorama.getLongitude(), panorama.getLatitude());
-        double blockX = coord.getBlockX();
-        double blockZ = coord.getBlockZ();
+        double blockX = coord.blockX();
+        double blockZ = coord.blockZ();
 
         double deltaX = player.posX - blockX;
         double deltaZ = player.posZ - blockZ;

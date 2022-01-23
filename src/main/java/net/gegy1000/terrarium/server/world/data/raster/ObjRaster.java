@@ -24,7 +24,7 @@ public final class ObjRaster<T> extends AbstractRaster<T[]> {
     }
 
     public static <T> ObjRaster<T> create(T value, DataView view) {
-        return create(value, view.getWidth(), view.getHeight());
+        return create(value, view.width(), view.height());
     }
 
     public static <T> Sampler<T> sampler(DataKey<ObjRaster<T>> key, T defaultValue) {
@@ -32,18 +32,18 @@ public final class ObjRaster<T> extends AbstractRaster<T[]> {
     }
 
     public void set(int x, int y, T value) {
-        this.data[this.index(x, y)] = value;
+        this.rawData[this.index(x, y)] = value;
     }
 
     public T get(int x, int y) {
-        return this.data[this.index(x, y)];
+        return this.rawData[this.index(x, y)];
     }
 
     public void transform(Transformer<T> transformer) {
         for (int y = 0; y < this.height; y++) {
             for (int x = 0; x < this.width; x++) {
                 int index = this.index(x, y);
-                this.data[index] = transformer.apply(this.data[index], x, y);
+                this.rawData[index] = transformer.apply(this.rawData[index], x, y);
             }
         }
     }
@@ -51,13 +51,13 @@ public final class ObjRaster<T> extends AbstractRaster<T[]> {
     public void iterate(Iterator<T> iterator) {
         for (int y = 0; y < this.height; y++) {
             for (int x = 0; x < this.width; x++) {
-                iterator.accept(this.data[this.index(x, y)], x, y);
+                iterator.accept(this.rawData[this.index(x, y)], x, y);
             }
         }
     }
 
     public ObjRaster<T> copy() {
-        return new ObjRaster<>(Arrays.copyOf(this.data, this.data.length), this.width, this.height);
+        return new ObjRaster<>(Arrays.copyOf(this.rawData, this.rawData.length), this.width, this.height);
     }
 
     public interface Transformer<T> {

@@ -6,11 +6,11 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
-public final class ColumnData {
+public final class DataSample {
     private final DataView view;
     private final DataStore store;
 
-    ColumnData(DataView view, DataStore store) {
+    DataSample(DataView view, DataStore store) {
         this.view = view;
         this.store = store;
     }
@@ -58,7 +58,7 @@ public final class ColumnData {
         }
 
         public <T> T get(DataKey<T> key) {
-            T value = ColumnData.this.getOrNull(key);
+            T value = DataSample.this.getOrNull(key);
             if (value != null && ArrayUtils.contains(this.keys, key)) {
                 return value;
             } else {

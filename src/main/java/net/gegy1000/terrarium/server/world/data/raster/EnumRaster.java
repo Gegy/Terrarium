@@ -1,6 +1,6 @@
 package net.gegy1000.terrarium.server.world.data.raster;
 
-import net.gegy1000.terrarium.server.world.data.ColumnData;
+import net.gegy1000.terrarium.server.world.data.DataSample;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.DataKey;
 import net.gegy1000.terrarium.server.world.data.DataView;
@@ -35,7 +35,7 @@ public final class EnumRaster<T extends Enum<T>> extends AbstractRaster<byte[]> 
     }
 
     public static <T extends Enum<T>> EnumRaster<T> create(T variant, DataView view) {
-        return create(variant, view.getWidth(), view.getHeight());
+        return create(variant, view.width(), view.height());
     }
 
     public static <T extends Enum<T>> Sampler<T> sampler(DataKey<EnumRaster<T>> key, T defaultVariant) {
@@ -43,19 +43,19 @@ public final class EnumRaster<T extends Enum<T>> extends AbstractRaster<byte[]> 
     }
 
     public void set(int x, int y, T variant) {
-        this.data[this.index(x, y)] = (byte) variant.ordinal();
+        this.rawData[this.index(x, y)] = (byte) variant.ordinal();
     }
 
     public T get(int x, int y) {
-        return this.universe[this.data[this.index(x, y)] & 0xFF];
+        return this.universe[this.rawData[this.index(x, y)] & 0xFF];
     }
 
     public void transform(Transformer<T> transformer) {
         for (int y = 0; y < this.height; y++) {
             for (int x = 0; x < this.width; x++) {
                 int index = this.index(x, y);
-                T variant = this.universe[this.data[index] & 0xFF];
-                this.data[index] = (byte) transformer.apply(variant, x, y).ordinal();
+                T variant = this.universe[this.rawData[index] & 0xFF];
+                this.rawData[index] = (byte) transformer.apply(variant, x, y).ordinal();
             }
         }
     }
@@ -63,14 +63,14 @@ public final class EnumRaster<T extends Enum<T>> extends AbstractRaster<byte[]> 
     public void iterate(Iterator<T> iterator) {
         for (int y = 0; y < this.height; y++) {
             for (int x = 0; x < this.width; x++) {
-                T variant = this.universe[this.data[this.index(x, y)] & 0xFF];
+                T variant = this.universe[this.rawData[this.index(x, y)] & 0xFF];
                 iterator.accept(variant, x, y);
             }
         }
     }
 
     public EnumRaster<T> copy() {
-        return new EnumRaster<>(Arrays.copyOf(this.data, this.data.length), this.width, this.height, this.type);
+        return new EnumRaster<>(Arrays.copyOf(this.rawData, this.rawData.length), this.width, this.height, this.type);
     }
 
     public interface Transformer<T extends Enum<T>> {
@@ -91,11 +91,11 @@ public final class EnumRaster<T extends Enum<T>> extends AbstractRaster<byte[]> 
         }
 
         public T sample(ColumnDataCache dataCache, int x, int z) {
-            ColumnData data = dataCache.joinData(x >> 4, z >> 4);
+            DataSample data = dataCache.joinData(x >> 4, z >> 4);
             return this.sample(data, x & 0xF, z & 0xF);
         }
 
-        public T sample(ColumnData data, int x, int z) {
+        public T sample(DataSample data, int x, int z) {
             Optional<EnumRaster<T>> optional = data.get(this.key);
             if (optional.isPresent()) {
                 EnumRaster<T> raster = optional.get();

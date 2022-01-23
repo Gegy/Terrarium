@@ -19,8 +19,8 @@ public final class ColumnDataEntry {
     private boolean dropped;
 
     @Nullable
-    private Future<ColumnData> future;
-    private ColumnData data;
+    private Future<DataSample> future;
+    private DataSample data;
 
     private long lastAccessTime = System.currentTimeMillis();
 
@@ -57,7 +57,7 @@ public final class ColumnDataEntry {
         return this.columnPos;
     }
 
-    ColumnData join() {
+    DataSample join() {
         this.touch();
 
         this.future = null;
@@ -112,7 +112,7 @@ public final class ColumnDataEntry {
     public class Handle implements AutoCloseable {
         private boolean released;
 
-        public ColumnData join() {
+        public DataSample join() {
             this.checkValid();
             return ColumnDataEntry.this.join();
         }

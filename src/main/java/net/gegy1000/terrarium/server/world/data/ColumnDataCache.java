@@ -90,7 +90,7 @@ public class ColumnDataCache implements AutoCloseable {
         return this.joinData(chunkX, chunkZ).get(key);
     }
 
-    public ColumnData joinData(int chunkX, int chunkZ) {
+    public DataSample joinData(int chunkX, int chunkZ) {
         return this.getEntry(chunkX, chunkZ).join();
     }
 

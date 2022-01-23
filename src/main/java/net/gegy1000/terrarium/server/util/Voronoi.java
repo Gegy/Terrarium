@@ -41,11 +41,11 @@ public final class Voronoi {
     public void scaleBytes(byte[] src, byte[] dst, DataView srcView, DataView dstView,
                            float scaleX, float scaleY, float offsetX, float offsetY
     ) {
-        int dstWidth = dstView.getWidth();
-        int dstHeight = dstView.getHeight();
+        int dstWidth = dstView.width();
+        int dstHeight = dstView.height();
 
-        int srcWidth = srcView.getWidth();
-        int srcHeight = srcView.getHeight();
+        int srcWidth = srcView.width();
+        int srcHeight = srcView.height();
 
         if (dstWidth <= srcWidth && dstHeight <= srcHeight) {
             // nearest-neighbor sampling
@@ -78,17 +78,18 @@ public final class Voronoi {
         int originX = MathHelper.floor(x);
         int originY = MathHelper.floor(y);
 
-        int offsetX = srcView.getX();
-        int offsetY = srcView.getY();
+        int offsetX = srcView.minX();
+        int offsetY = srcView.minX();
 
         int minX = Math.max(originX - 1, 0);
         int minY = Math.max(originY - 1, 0);
 
-        int maxX = Math.min(originX + 1, srcView.getWidth() - 1);
-        int maxY = Math.min(originY + 1, srcView.getHeight() - 1);
+        int maxX = Math.min(originX + 1, srcView.width() - 1);
+        int maxY = Math.min(originY + 1, srcView.height() - 1);
 
         int cellIndex = 0;
         float selectionDistance = Float.MAX_VALUE;
+        float[] fuzzTable = this.fuzzTable;
 
         for (int srcY = minY; srcY <= maxY; srcY++) {
             for (int srcX = minX; srcX <= maxX; srcX++) {
@@ -96,8 +97,8 @@ public final class Voronoi {
                 int ty = (srcY + offsetY) & FUZZ_MASK;
                 int ti = tx + ty * FUZZ_SIZE;
 
-                float fuzzX = this.fuzzTable[ti];
-                float fuzzY = this.fuzzTable[ti + 1];
+                float fuzzX = fuzzTable[ti];
+                float fuzzY = fuzzTable[ti + 1];
 
                 float deltaX = x - (srcX + fuzzX);
                 float deltaY = y - (srcY + fuzzY);
@@ -105,7 +106,7 @@ public final class Voronoi {
 
                 if (distance < selectionDistance) {
                     selectionDistance = distance;
-                    cellIndex = srcX + srcY * srcView.getWidth();
+                    cellIndex = srcX + srcY * srcView.width();
                 }
             }
         }

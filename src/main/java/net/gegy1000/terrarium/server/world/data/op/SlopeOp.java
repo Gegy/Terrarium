@@ -9,13 +9,13 @@ import net.minecraft.util.math.MathHelper;
 public final class SlopeOp {
     private static final int CACHE_SIZE = 128;
     private static final int CACHE_RES = 4;
-    private static final byte[] SLOPE_CACHE = new byte[CACHE_SIZE];
+    private static final byte[] SLOPE_TABLE = new byte[CACHE_SIZE];
 
     static {
         for (int idx = 0; idx < CACHE_SIZE; idx++) {
             float ratio = (float) idx / CACHE_RES;
             double slope = Math.toDegrees(Math.atan(ratio));
-            SLOPE_CACHE[idx] = (byte) Math.floor(slope);
+            SLOPE_TABLE[idx] = (byte) Math.floor(slope);
         }
     }
 
@@ -25,8 +25,8 @@ public final class SlopeOp {
             return heights.apply(sourceView, ctx)
                     .map(opt -> opt.map(source -> {
                         UByteRaster result = UByteRaster.create(view);
-                        for (int localY = 0; localY < view.getHeight(); localY++) {
-                            for (int localX = 0; localX < view.getWidth(); localX++) {
+                        for (int localY = 0; localY < view.height(); localY++) {
+                            for (int localX = 0; localX < view.width(); localX++) {
                                 int slope = computeSlope(source, localX + 1, localY + 1, heightScale);
                                 result.set(localX, localY, slope);
                             }
@@ -56,6 +56,6 @@ public final class SlopeOp {
     private static byte slope(float rise) {
         int idx = (int) (Math.abs(rise) * CACHE_RES);
         if (idx >= CACHE_SIZE) return 90;
-        return SLOPE_CACHE[idx];
+        return SLOPE_TABLE[idx];
     }
 }

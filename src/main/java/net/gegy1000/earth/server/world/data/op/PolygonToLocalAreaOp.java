@@ -16,12 +16,12 @@ public final class PolygonToLocalAreaOp {
             PolygonShapeProducer.Transform transform = new PolygonShapeProducer.Transform() {
                 @Override
                 public double x(double x) {
-                    return crs.blockX(x) - view.getMinX();
+                    return crs.blockX(x) - view.minX();
                 }
 
                 @Override
                 public double y(double y) {
-                    return crs.blockZ(y) - view.getMinY();
+                    return crs.blockZ(y) - view.minY();
                 }
             };
 

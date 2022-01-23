@@ -8,7 +8,7 @@ import net.gegy1000.terrarium.server.util.Lazy;
 import net.gegy1000.terrarium.server.util.Profiler;
 import net.gegy1000.terrarium.server.util.ThreadedProfiler;
 import net.gegy1000.terrarium.server.world.composer.biome.BiomeComposer;
-import net.gegy1000.terrarium.server.world.data.ColumnData;
+import net.gegy1000.terrarium.server.world.data.DataSample;
 import net.gegy1000.terrarium.server.world.data.DataView;
 import net.minecraft.init.Biomes;
 import net.minecraft.util.math.BlockPos;
@@ -68,7 +68,7 @@ public class ComposableBiomeProvider extends BiomeProvider {
         if (cache && fillsChunk) {
             System.arraycopy(this.biomeCache.getCachedBiomes(x, z), 0, biomes, 0, width * height);
         } else {
-            this.populateArea(biomes, DataView.rect(x, z, width, height));
+            this.populateArea(biomes, DataView.of(x, z, width, height));
         }
 
         return biomes;
@@ -84,7 +84,7 @@ public class ComposableBiomeProvider extends BiomeProvider {
         int minX = originX - radius;
         int minZ = originZ - radius;
         int size = (radius * 2) + 1;
-        DataView view = DataView.rect(minX, minZ, size, size);
+        DataView view = DataView.ofSquare(minX, minZ, size);
 
         if (view.equals(this.viableCacheView)) {
             return this.viableCacheResult;
@@ -114,7 +114,7 @@ public class ComposableBiomeProvider extends BiomeProvider {
         int minX = originX - radius;
         int minZ = originZ - radius;
         int size = (radius * 2) + 1;
-        DataView view = DataView.rect(minX, minZ, size, size);
+        DataView view = DataView.of(minX, minZ, size, size);
 
         Biome[] biomes = new Biome[size * size];
         this.populateArea(biomes, view);
@@ -146,14 +146,14 @@ public class ComposableBiomeProvider extends BiomeProvider {
         ) {
             BiomeComposer biomeComposer = terrarium.getBiomeComposer();
 
-            if (this.isChunk(view.getX(), view.getY(), view.getWidth(), view.getHeight())) {
-                ColumnData data = terrarium.getDataCache().joinData(view.getX() >> 4, view.getY() >> 4);
+            if (this.isChunk(view.minX(), view.minY(), view.width(), view.height())) {
+                DataSample data = terrarium.getDataCache().joinData(view.minX() >> 4, view.minY() >> 4);
                 biomeComposer.composeBiomes(resultBiomes, terrarium, data, view);
                 return;
             }
 
-            Future<ColumnData> future = terrarium.getDataGenerator().generate(view);
-            ColumnData data = CurrentThreadExecutor.blockOn(future);
+            Future<DataSample> future = terrarium.getDataGenerator().generate(view);
+            DataSample data = CurrentThreadExecutor.blockOn(future);
 
             biomeComposer.composeBiomes(resultBiomes, terrarium, data, view);
         }

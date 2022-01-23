@@ -23,12 +23,12 @@ public final class VoronoiScaleOp {
             float dstToSrcY = (float) (1.0 / src.scaleZ());
 
             Coordinate minCoordinate = Coordinate.min(
-                    view.getMinCoordinate().to(src),
-                    view.getMaxCoordinate().to(src)
+                    view.minCoordinate().to(src),
+                    view.maxCoordinate().to(src)
             );
 
-            float offsetX = (float) (minCoordinate.getX() - srcView.getX());
-            float offsetY = (float) (minCoordinate.getZ() - srcView.getY());
+            float offsetX = (float) (minCoordinate.x() - srcView.minX());
+            float offsetY = (float) (minCoordinate.z() - srcView.minY());
 
             return data.apply(srcView, ctx).andThen(opt -> {
                 return ctx.spawnBlocking(() -> {
@@ -36,7 +36,7 @@ public final class VoronoiScaleOp {
                         Profiler profiler = ThreadedProfiler.get();
                         try (Profiler.Handle scaleRaster = profiler.push("voronoi_raster")) {
                             EnumRaster<T> result = EnumRaster.create(defaultValue, view);
-                            voronoi.scaleBytes(source.getData(), result.getData(), srcView, view, dstToSrcX, dstToSrcY, offsetX, offsetY);
+                            voronoi.scaleBytes(source.asRawData(), result.asRawData(), srcView, view, dstToSrcX, dstToSrcY, offsetX, offsetY);
                             return result;
                         }
                     });
@@ -46,18 +46,18 @@ public final class VoronoiScaleOp {
     }
 
     private static DataView getSourceView(DataView view, CoordinateReference src) {
-        Coordinate minRegionCoordinateBlock = view.getMinCoordinate().to(src);
-        Coordinate maxRegionCoordinateBlock = view.getMaxCoordinate().to(src);
+        Coordinate minSourceBlock = view.minCoordinate().to(src);
+        Coordinate maxSourceBlock = view.maxCoordinate().to(src);
 
-        Coordinate minRegionCoordinate = Coordinate.min(minRegionCoordinateBlock, maxRegionCoordinateBlock);
-        Coordinate maxRegionCoordinate = Coordinate.max(minRegionCoordinateBlock, maxRegionCoordinateBlock);
+        Coordinate minSource = Coordinate.min(minSourceBlock, maxSourceBlock);
+        Coordinate maxSource = Coordinate.max(minSourceBlock, maxSourceBlock);
 
-        int minSampleX = MathHelper.floor(minRegionCoordinate.getX()) - 1;
-        int minSampleY = MathHelper.floor(minRegionCoordinate.getZ()) - 1;
+        int minSourceX = MathHelper.floor(minSource.x()) - 1;
+        int minSourceY = MathHelper.floor(minSource.z()) - 1;
 
-        int maxSampleX = MathHelper.floor(maxRegionCoordinate.getX()) + 2;
-        int maxSampleY = MathHelper.floor(maxRegionCoordinate.getZ()) + 2;
+        int maxSourceX = MathHelper.floor(maxSource.x()) + 1;
+        int maxSourceY = MathHelper.floor(maxSource.z()) + 1;
 
-        return DataView.rect(minSampleX, minSampleY, maxSampleX - minSampleX, maxSampleY - minSampleY);
+        return DataView.ofCorners(minSourceX, minSourceY, maxSourceX, maxSourceY);
     }
 }

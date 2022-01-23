@@ -15,12 +15,12 @@ public final class RasterizeAreaOp {
             try (Profiler.Handle rasterizeArea = profiler.push("rasterize_area")) {
                 BitRaster raster = BitRaster.create(view);
 
-                RasterCanvas canvas = new RasterCanvas(view.getWidth(), view.getHeight());
+                RasterCanvas canvas = new RasterCanvas(view.width(), view.height());
                 canvas.setColor(1);
                 canvas.fill(area);
 
-                for (int y = 0; y < view.getHeight(); y++) {
-                    for (int x = 0; x < view.getWidth(); x++) {
+                for (int y = 0; y < view.height(); y++) {
+                    for (int x = 0; x < view.width(); x++) {
                         if (canvas.getData(x, y) == 1) {
                             raster.put(x, y);
                         }

@@ -28,8 +28,8 @@ final class PanoramaProfileDebug {
                 double latitude = panorama.getLatitude();
                 double longitude = panorama.getLongitude();
 
-                int x = MathHelper.floor((longitude + 180.0) / 360.0 * rasters.elevation.getWidth());
-                int y = MathHelper.floor((90.0 - latitude) / 180.0 * rasters.elevation.getHeight());
+                int x = MathHelper.floor((longitude + 180.0) / 360.0 * rasters.elevation.width());
+                int y = MathHelper.floor((90.0 - latitude) / 180.0 * rasters.elevation.height());
 
                 System.out.println((count + 1) + ". " + latitude + ", " + longitude);
                 System.out.println("  elevation: " + rasters.elevation.get(x, y) + "m");
@@ -58,8 +58,8 @@ final class PanoramaProfileDebug {
         double latitude = random.nextDouble() * 180.0 - 90.0;
         double longitude = random.nextDouble() * 360.0 - 180.0;
 
-        int x = MathHelper.floor((longitude + 180.0) / 360.0 * rasters.elevation.getWidth());
-        int y = MathHelper.floor((90.0 - latitude) / 180.0 * rasters.elevation.getHeight());
+        int x = MathHelper.floor((longitude + 180.0) / 360.0 * rasters.elevation.width());
+        int y = MathHelper.floor((90.0 - latitude) / 180.0 * rasters.elevation.height());
 
         float elevation = rasters.elevation.get(x, y);
         if (elevation <= 50.0F) {

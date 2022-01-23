@@ -49,8 +49,8 @@ public class RasterCanvas {
     }
 
     public static RasterCanvas of(DataView view) {
-        RasterCanvas canvas = new RasterCanvas(view.getWidth(), view.getHeight());
-        canvas.setOrigin(view.getX(), view.getY());
+        RasterCanvas canvas = new RasterCanvas(view.width(), view.height());
+        canvas.setOrigin(view.minX(), view.minY());
         return canvas;
     }
 

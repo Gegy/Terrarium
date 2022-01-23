@@ -20,7 +20,7 @@ public final class DataGenerator {
         return new Builder();
     }
 
-    public Future<ColumnData> generate(DataView view, Collection<DataKey<?>> keys) {
+    public Future<DataSample> generate(DataView view, Collection<DataKey<?>> keys) {
         ImmutableMap.Builder<DataKey<?>, Future<Optional<?>>> futures = ImmutableMap.builder();
         for (DataKey<?> key : keys) {
             DataOp<?> op = this.attachedData.get(key);
@@ -40,7 +40,7 @@ public final class DataGenerator {
         return Future.joinAll(futures.build())
                 .map(result -> {
                     DataStore store = this.buildDataStore(result);
-                    return new ColumnData(view, store);
+                    return new DataSample(view, store);
                 });
     }
 
@@ -56,7 +56,7 @@ public final class DataGenerator {
         return store;
     }
 
-    public Future<ColumnData> generate(DataView view) {
+    public Future<DataSample> generate(DataView view) {
         return this.generate(view, this.attachedData.keySet());
     }
 

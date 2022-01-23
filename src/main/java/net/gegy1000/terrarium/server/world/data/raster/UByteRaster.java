@@ -1,7 +1,7 @@
 package net.gegy1000.terrarium.server.world.data.raster;
 
 import com.google.common.base.Preconditions;
-import net.gegy1000.terrarium.server.world.data.ColumnData;
+import net.gegy1000.terrarium.server.world.data.DataSample;
 import net.gegy1000.terrarium.server.world.data.ColumnDataCache;
 import net.gegy1000.terrarium.server.world.data.DataKey;
 import net.gegy1000.terrarium.server.world.data.DataView;
@@ -21,12 +21,12 @@ public final class UByteRaster extends AbstractRaster<byte[]> implements Integer
     }
 
     public static UByteRaster create(DataView view) {
-        return create(view.getWidth(), view.getHeight());
+        return create(view.width(), view.height());
     }
 
     public static UByteRaster create(DataView view, int value) {
-        UByteRaster raster = create(view.getWidth(), view.getHeight());
-        Arrays.fill(raster.data, (byte) value);
+        UByteRaster raster = create(view.width(), view.height());
+        Arrays.fill(raster.rawData, (byte) value);
         return raster;
     }
 
@@ -40,29 +40,29 @@ public final class UByteRaster extends AbstractRaster<byte[]> implements Integer
     }
 
     public static UByteRaster copyFrom(IntegerRaster<?> from) {
-        UByteRaster raster = UByteRaster.create(from.getWidth(), from.getHeight());
+        UByteRaster raster = UByteRaster.create(from.width(), from.height());
         from.copyInto(raster);
         return raster;
     }
 
     public void fill(int value) {
-        Arrays.fill(this.data, (byte) (value & 0xFF));
+        Arrays.fill(this.rawData, (byte) (value & 0xFF));
     }
 
     public void set(int x, int y, int value) {
-        this.data[this.index(x, y)] = (byte) (value & 0xFF);
+        this.rawData[this.index(x, y)] = (byte) (value & 0xFF);
     }
 
     public int get(int x, int y) {
-        return this.data[this.index(x, y)] & 0xFF;
+        return this.rawData[this.index(x, y)] & 0xFF;
     }
 
     public void transform(Transformer transformer) {
         for (int y = 0; y < this.height; y++) {
             for (int x = 0; x < this.width; x++) {
                 int index = this.index(x, y);
-                int source = this.data[index] & 0xFF;
-                this.data[index] = (byte) (transformer.apply(source, x, y) & 0xFF);
+                int source = this.rawData[index] & 0xFF;
+                this.rawData[index] = (byte) (transformer.apply(source, x, y) & 0xFF);
             }
         }
     }
@@ -70,7 +70,7 @@ public final class UByteRaster extends AbstractRaster<byte[]> implements Integer
     public void iterate(Iterator iterator) {
         for (int y = 0; y < this.height; y++) {
             for (int x = 0; x < this.width; x++) {
-                int value = this.data[this.index(x, y)] & 0xFF;
+                int value = this.rawData[this.index(x, y)] & 0xFF;
                 iterator.accept(value, x, y);
             }
         }
@@ -98,7 +98,7 @@ public final class UByteRaster extends AbstractRaster<byte[]> implements Integer
     }
 
     public UByteRaster copy() {
-        return new UByteRaster(Arrays.copyOf(this.data, this.data.length), this.width, this.height);
+        return new UByteRaster(Arrays.copyOf(this.rawData, this.rawData.length), this.width, this.height);
     }
 
     public interface Transformer {
@@ -123,11 +123,11 @@ public final class UByteRaster extends AbstractRaster<byte[]> implements Integer
         }
 
         public int sample(ColumnDataCache dataCache, int x, int z) {
-            ColumnData data = dataCache.joinData(x >> 4, z >> 4);
+            DataSample data = dataCache.joinData(x >> 4, z >> 4);
             return this.sample(data, x & 0xF, z & 0xF);
         }
 
-        public int sample(ColumnData data, int x, int z) {
+        public int sample(DataSample data, int x, int z) {
             Optional<UByteRaster> optional = data.get(this.key);
             if (optional.isPresent()) {
                 UByteRaster raster = optional.get();
@@ -140,7 +140,7 @@ public final class UByteRaster extends AbstractRaster<byte[]> implements Integer
         public UByteRaster sample(ColumnDataCache dataCache, DataView view) {
             UByteRaster raster = UByteRaster.create(view);
             if (this.defaultValue != 0) {
-                Arrays.fill(raster.data, (byte) (this.defaultValue & 0xF));
+                Arrays.fill(raster.rawData, (byte) (this.defaultValue & 0xF));
             }
             AbstractRaster.sampleInto(raster, dataCache, view, this.key);
             return raster;

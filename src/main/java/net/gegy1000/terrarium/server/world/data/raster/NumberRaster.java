@@ -11,8 +11,8 @@ public interface NumberRaster<T> extends Raster<T> {
     float getFloat(int x, int y);
 
     default DoubleStream stream() {
-        return IntStream.range(0, this.getHeight())
-                .mapToObj(y -> IntStream.range(0, this.getWidth())
+        return IntStream.range(0, this.height())
+                .mapToObj(y -> IntStream.range(0, this.width())
                         .mapToDouble(x -> this.getFloat(x, y))
                 )
                 .flatMapToDouble(Functions.identity());

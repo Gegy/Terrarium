@@ -27,7 +27,7 @@ public final class BitRaster extends AbstractRaster<char[]> {
     }
 
     public static BitRaster create(DataView view) {
-        return create(view.getWidth(), view.getHeight());
+        return create(view.width(), view.height());
     }
 
     public static Sampler sampler(DataKey<BitRaster> key) {
@@ -42,19 +42,19 @@ public final class BitRaster extends AbstractRaster<char[]> {
     public void put(int x, int y) {
         int index = this.index(x, y);
         int bitIndex = index & BIT_MASK;
-        this.data[wordIndex(index)] |= (1 << bitIndex);
+        this.rawData[wordIndex(index)] |= (1 << bitIndex);
     }
 
     public void remove(int x, int y) {
         int index = this.index(x, y);
         int bitIndex = index & BIT_MASK;
-        this.data[wordIndex(index)] &= ~(1 << bitIndex);
+        this.rawData[wordIndex(index)] &= ~(1 << bitIndex);
     }
 
     public boolean get(int x, int y) {
         int index = this.index(x, y);
         int bitIndex = index & BIT_MASK;
-        char word = this.data[wordIndex(index)];
+        char word = this.rawData[wordIndex(index)];
         return (word >> bitIndex & 1) != 0;
     }
 
@@ -77,7 +77,7 @@ public final class BitRaster extends AbstractRaster<char[]> {
     }
 
     public BitRaster copy() {
-        return new BitRaster(Arrays.copyOf(this.data, this.data.length), this.width, this.height);
+        return new BitRaster(Arrays.copyOf(this.rawData, this.rawData.length), this.width, this.height);
     }
 
     public interface Transformer {
@@ -118,7 +118,7 @@ public final class BitRaster extends AbstractRaster<char[]> {
         public BitRaster sample(ColumnDataCache dataCache, DataView view) {
             BitRaster raster = BitRaster.create(view);
             if (this.defaultValue) {
-                Arrays.fill(raster.data, Character.MAX_VALUE);
+                Arrays.fill(raster.rawData, Character.MAX_VALUE);
             }
             AbstractRaster.sampleInto(raster, dataCache, view, this.key);
             return raster;

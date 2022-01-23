@@ -123,8 +123,8 @@ public class GeoTeleportCommand extends CommandBase {
     }
 
     private void teleport(MinecraftServer server, Entity entity, EarthWorld earthData, Coordinate coordinate) {
-        int blockX = MathHelper.floor(coordinate.getBlockX());
-        int blockZ = MathHelper.floor(coordinate.getBlockZ());
+        int blockX = MathHelper.floor(coordinate.blockX());
+        int blockZ = MathHelper.floor(coordinate.blockZ());
 
         World world = entity.world;
         BlockPos surface = earthData.estimateSurface(world, blockX, blockZ);
@@ -146,10 +146,10 @@ public class GeoTeleportCommand extends CommandBase {
 
             if (entity instanceof EntityPlayerMP) {
                 NetHandlerPlayServer connection = ((EntityPlayerMP) entity).connection;
-                connection.setPlayerLocation(coordinate.getBlockX(), height + 0.5, coordinate.getBlockZ(), 180.0F, 0.0F);
+                connection.setPlayerLocation(coordinate.blockX(), height + 0.5, coordinate.blockZ(), 180.0F, 0.0F);
             }
 
-            entity.sendMessage(DeferredTranslator.translate(entity, new TextComponentTranslation("commands.earth.geotp.success", entity.getName(), coordinate.getZ(), coordinate.getX())));
+            entity.sendMessage(DeferredTranslator.translate(entity, new TextComponentTranslation("commands.earth.geotp.success", entity.getName(), coordinate.z(), coordinate.x())));
         });
     }
 

@@ -9,7 +9,7 @@ import net.gegy1000.terrarium.server.world.TerrariumDataInitializer;
 import net.gegy1000.terrarium.server.world.TerrariumWorldType;
 import net.gegy1000.terrarium.server.world.coordinate.Coordinate;
 import net.gegy1000.terrarium.server.world.data.DataGenerator;
-import net.gegy1000.terrarium.server.world.data.ColumnData;
+import net.gegy1000.terrarium.server.world.data.DataSample;
 import net.gegy1000.terrarium.server.world.data.DataView;
 import net.gegy1000.terrarium.server.world.data.raster.ShortRaster;
 import net.gegy1000.terrarium.server.world.generator.customization.GenerationSettings;
@@ -61,20 +61,20 @@ public final class PreviewMeshBuilder {
                 .andThen(data -> Future.spawnBlocking(EXECUTOR, () -> buildMesh(data)));
     }
 
-    private static TerrainMeshData buildMesh(ColumnData data) {
+    private static TerrainMeshData buildMesh(DataSample data) {
         ShortRaster heightRaster = data.getOrDefault(EarthData.TERRAIN_HEIGHT);
 
         Vec3d translation = new Vec3d(
-                -heightRaster.getWidth() / 2.0,
+                -heightRaster.width() / 2.0,
                 -computeOriginHeight(heightRaster),
-                -heightRaster.getHeight() / 2.0
+                -heightRaster.height() / 2.0
         );
 
         return TerrainMeshData.build(data, WorldPreview.GRANULARITY, translation);
     }
 
-    private static Future<ColumnData> sampleData(DataGenerator dataGenerator, int x, int z, int width, int height) {
-        DataView view = DataView.rect(x, z, width, height);
+    private static Future<DataSample> sampleData(DataGenerator dataGenerator, int x, int z, int width, int height) {
+        DataView view = DataView.of(x, z, width, height);
         return dataGenerator.generate(view, TerrainMeshData.REQUIRED_DATA);
     }
 
@@ -82,7 +82,7 @@ public final class PreviewMeshBuilder {
         long total = 0;
         long maxHeight = 0;
 
-        short[] shortData = heightRaster.getData();
+        short[] shortData = heightRaster.asRawData();
         for (short value : shortData) {
             if (value > maxHeight) {
                 maxHeight = value;

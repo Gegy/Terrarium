@@ -4,7 +4,7 @@ import dev.gegy.gengen.api.CubicPos;
 import dev.gegy.gengen.api.writer.ChunkPrimeWriter;
 import dev.gegy.gengen.util.SpatialRandom;
 import net.gegy1000.terrarium.server.capability.TerrariumWorld;
-import net.gegy1000.terrarium.server.world.data.ColumnData;
+import net.gegy1000.terrarium.server.world.data.DataSample;
 import net.gegy1000.terrarium.server.world.data.DataKey;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -27,7 +27,7 @@ public class BedrockSurfaceComposer implements SurfaceComposer {
     }
 
     @Override
-    public void composeSurface(TerrariumWorld terrarium, ColumnData data, CubicPos pos, ChunkPrimeWriter writer) {
+    public void composeSurface(TerrariumWorld terrarium, DataSample data, CubicPos pos, ChunkPrimeWriter writer) {
         int minY = pos.getMinY();
         int maxY = pos.getMaxY();
         if (minY >= this.scatterRange || maxY < 0) {

@@ -57,10 +57,10 @@ public final class GeoDebugger {
 
             UByteRaster raster = UByteRaster.create(view);
 
-            for (int y = 0; y < view.getHeight(); y++) {
-                for (int x = 0; x < view.getWidth(); x++) {
-                    int blockX = view.getMinX() + x;
-                    int blockZ = view.getMinY() + y;
+            for (int y = 0; y < view.height(); y++) {
+                for (int x = 0; x < view.width(); x++) {
+                    int blockX = view.minX() + x;
+                    int blockZ = view.minY() + y;
                     predictorSampler.sampleTo(dataCache, blockX, blockZ, predictors);
 
                     if (predictors.elevation >= 0.0) {
@@ -81,8 +81,8 @@ public final class GeoDebugger {
             double max = source.stream().max().orElse(0.0);
 
             UByteRaster result = UByteRaster.create(view);
-            for (int y = 0; y < view.getHeight(); y++) {
-                for (int x = 0; x < view.getWidth(); x++) {
+            for (int y = 0; y < view.height(); y++) {
+                for (int x = 0; x < view.width(); x++) {
                     double value = source.getFloat(x, y);
                     result.set(x, y, MathHelper.floor((value - min) / (max - min) * 255.0));
                 }
@@ -94,7 +94,7 @@ public final class GeoDebugger {
 
     public RasterSampler heatmap(String name, Raster.Sampler<UByteRaster> sampler) {
         return new RasterSampler(name, (dataCache, view) -> {
-            BufferedImage image = new BufferedImage(view.getWidth(), view.getHeight(), BufferedImage.TYPE_INT_RGB);
+            BufferedImage image = new BufferedImage(view.width(), view.height(), BufferedImage.TYPE_INT_RGB);
             UByteRaster raster = sampler.apply(dataCache, view);
             raster.iterate((value, x, y) -> {
                 image.setRGB(x, y, 255 << 16 | value << 8);
@@ -105,7 +105,7 @@ public final class GeoDebugger {
 
     public RasterSampler cover(String name, EnumRaster.Sampler<Cover> sampler) {
         return new RasterSampler(name, (dataCache, view) -> {
-            BufferedImage image = new BufferedImage(view.getWidth(), view.getHeight(), BufferedImage.TYPE_INT_RGB);
+            BufferedImage image = new BufferedImage(view.width(), view.height(), BufferedImage.TYPE_INT_RGB);
 
             EnumRaster<Cover> raster = sampler.sample(dataCache, view);
             raster.iterate((cover, x, y) -> {
@@ -118,7 +118,7 @@ public final class GeoDebugger {
 
     public RasterSampler soilSuborder(String name, EnumRaster.Sampler<SoilSuborder> sampler) {
         return new RasterSampler(name, (dataCache, view) -> {
-            BufferedImage image = new BufferedImage(view.getWidth(), view.getHeight(), BufferedImage.TYPE_INT_RGB);
+            BufferedImage image = new BufferedImage(view.width(), view.height(), BufferedImage.TYPE_INT_RGB);
 
             EnumRaster<SoilSuborder> raster = sampler.sample(dataCache, view);
             raster.iterate((cover, x, y) -> {
@@ -131,14 +131,14 @@ public final class GeoDebugger {
 
     public RasterSampler biomes(String name, GrowthPredictors.Sampler sampler) {
         return new RasterSampler(name, (dataCache, view) -> {
-            BufferedImage image = new BufferedImage(view.getWidth(), view.getHeight(), BufferedImage.TYPE_INT_RGB);
+            BufferedImage image = new BufferedImage(view.width(), view.height(), BufferedImage.TYPE_INT_RGB);
 
             BiomeClassifier classifier = new StandardBiomeClassifier();
             GrowthPredictors predictors = new GrowthPredictors();
 
-            for (int y = 0; y < view.getHeight(); y++) {
-                for (int x = 0; x < view.getWidth(); x++) {
-                    sampler.sampleTo(dataCache, x + view.getMinX(), y + view.getMinY(), predictors);
+            for (int y = 0; y < view.height(); y++) {
+                for (int x = 0; x < view.width(); x++) {
+                    sampler.sampleTo(dataCache, x + view.minX(), y + view.minY(), predictors);
 
                     Biome biome = classifier.classify(predictors);
                     image.setRGB(x, y, BiomeColors.get(biome));
@@ -156,7 +156,7 @@ public final class GeoDebugger {
         for (int i = 0; i < testSet.length; i++) {
             DebugProfileTestSet.Location location = testSet[i];
             Coordinate coordinate = new Coordinate(this.earth.getCrs(), location.longitude, location.latitude);
-            profiles[i] = this.takeProfile(location.name, coordinate.getBlockX(), coordinate.getBlockZ());
+            profiles[i] = this.takeProfile(location.name, coordinate.blockX(), coordinate.blockZ());
         }
 
         return profiles;
@@ -166,8 +166,8 @@ public final class GeoDebugger {
         ColumnDataCache data = this.terrarium.getDataCache();
 
         Coordinate coordinate = Coordinate.atBlock(x, z).to(this.earth.getCrs());
-        double latitude = coordinate.getZ();
-        double longitude = coordinate.getX();
+        double latitude = coordinate.z();
+        double longitude = coordinate.x();
 
         int bx = MathHelper.floor(x);
         int bz = MathHelper.floor(z);

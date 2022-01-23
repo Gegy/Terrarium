@@ -13,8 +13,8 @@ public final class NoiseOp {
 
     public DataOp<FloatRaster> sample(double frequency, double amplitude) {
         return DataOp.ofLazy(view -> {
-            int minX = view.getMinX();
-            int minY = view.getMinY();
+            int minX = view.minX();
+            int minY = view.minY();
 
             FloatRaster raster = FloatRaster.create(view);
             raster.transform((v, x, y) -> {

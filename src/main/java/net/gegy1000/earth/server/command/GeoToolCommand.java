@@ -74,8 +74,8 @@ public class GeoToolCommand extends CommandBase {
     private void handleLocate(EntityPlayerMP player, EarthWorld earth) {
         Coordinate coordinate = Coordinate.atBlock(player.posX, player.posZ).to(earth.getCrs());
 
-        double longitude = coordinate.getX();
-        double latitude = coordinate.getZ();
+        double longitude = coordinate.x();
+        double latitude = coordinate.z();
 
         String location = TextFormatting.BOLD.toString() + TextFormatting.UNDERLINE + String.format("%.5f, %.5f", latitude, longitude);
         player.sendMessage(DeferredTranslator.translate(player, new TextComponentTranslation("geotool.earth.locate.success", location)));
@@ -94,8 +94,8 @@ public class GeoToolCommand extends CommandBase {
     private void openMap(EntityPlayerMP player, EarthWorld earth, EarthOpenMapMessage.Type type) {
         Coordinate coordinate = Coordinate.atBlock(player.posX, player.posZ).to(earth.getCrs());
 
-        double longitude = coordinate.getX();
-        double latitude = coordinate.getZ();
+        double longitude = coordinate.x();
+        double latitude = coordinate.z();
 
         TerrariumEarth.NETWORK.sendTo(new EarthOpenMapMessage(latitude, longitude, type), player);
     }

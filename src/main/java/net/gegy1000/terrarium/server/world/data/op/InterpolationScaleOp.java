@@ -59,12 +59,12 @@ public enum InterpolationScaleOp {
             double dstToSrcY = 1.0 / src.scaleZ();
 
             Coordinate minCoordinate = Coordinate.min(
-                    view.getMinCoordinate().to(src),
-                    view.getMaxCoordinate().to(src)
+                    view.minCoordinate().to(src),
+                    view.maxCoordinate().to(src)
             );
 
-            double offsetX = minCoordinate.getX() - srcView.getMinX();
-            double offsetY = minCoordinate.getZ() - srcView.getMinY();
+            double offsetX = minCoordinate.x() - srcView.minX();
+            double offsetY = minCoordinate.z() - srcView.minY();
 
             return data.apply(srcView, ctx).andThen(opt -> {
                 return ctx.spawnBlocking(() -> opt.map(source -> {
@@ -86,8 +86,8 @@ public enum InterpolationScaleOp {
     private <T extends NumberRaster<?>> void scaleInto(T src, T dst, double dstToSrcX, double dstToSrcY, double offsetX, double offsetY) {
         double[][] kernel2 = this.kernel2.get();
         double[] kernel1 = this.kernel1.get();
-        for (int y = 0; y < dst.getHeight(); y++) {
-            for (int x = 0; x < dst.getWidth(); x++) {
+        for (int y = 0; y < dst.height(); y++) {
+            for (int x = 0; x < dst.width(); x++) {
                 float value = this.evaluate(
                         kernel1, kernel2, src,
                         x * dstToSrcX + offsetX - 0.5,
@@ -99,8 +99,8 @@ public enum InterpolationScaleOp {
     }
 
     private <T extends NumberRaster<?>> void scaleIntoNearest(T src, T dst, double dstToSrcX, double dstToSrcY, double offsetX, double offsetY) {
-        for (int y = 0; y < dst.getHeight(); y++) {
-            for (int x = 0; x < dst.getWidth(); x++) {
+        for (int y = 0; y < dst.height(); y++) {
+            for (int x = 0; x < dst.width(); x++) {
                 int srcX = MathHelper.floor(x * dstToSrcX + offsetX - 0.5);
                 int srcY = MathHelper.floor(y * dstToSrcY + offsetY - 0.5);
                 dst.setFloat(x, y, src.getFloat(srcX, srcY));
@@ -132,23 +132,23 @@ public enum InterpolationScaleOp {
         }
     }
 
-    private DataView getSourceView(DataView view, CoordinateReference src) {
-        Coordinate minBlockCoordinate = view.getMinCoordinate().to(src);
-        Coordinate maxBlockCoordinate = view.getMaxCoordinate().to(src);
+    private DataView getSourceView(DataView view, CoordinateReference crs) {
+        Coordinate minSourceBlock = view.minCoordinate().to(crs);
+        Coordinate maxSourceBlock = view.maxCoordinate().to(crs);
 
-        Coordinate minCoordinate = Coordinate.min(minBlockCoordinate, maxBlockCoordinate);
-        Coordinate maxCoordinate = Coordinate.max(minBlockCoordinate, maxBlockCoordinate);
+        Coordinate minSource = Coordinate.min(minSourceBlock, maxSourceBlock);
+        Coordinate maxSource = Coordinate.max(minSourceBlock, maxSourceBlock);
 
         Interpolate.Kernel kernel = this.interpolate.getKernel();
         int kernelOffset = kernel.getOffset();
         int kernelWidth = kernel.getWidth();
 
-        int minSampleX = MathHelper.floor(minCoordinate.getX() + kernelOffset - 0.5);
-        int minSampleY = MathHelper.floor(minCoordinate.getZ() + kernelOffset - 0.5);
+        int minSourceX = MathHelper.floor(minSource.x() + kernelOffset - 0.5);
+        int minSourceY = MathHelper.floor(minSource.z() + kernelOffset - 0.5);
 
-        int maxSampleX = MathHelper.floor(maxCoordinate.getX() + kernelOffset + kernelWidth - 0.5);
-        int maxSampleY = MathHelper.floor(maxCoordinate.getZ() + kernelOffset + kernelWidth - 0.5);
+        int maxSourceX = MathHelper.floor(maxSource.x() + kernelOffset + kernelWidth - 0.5);
+        int maxSourceY = MathHelper.floor(maxSource.z() + kernelOffset + kernelWidth - 0.5);
 
-        return DataView.fromCorners(minSampleX, minSampleY, maxSampleX, maxSampleY);
+        return DataView.ofCorners(minSourceX, minSourceY, maxSourceX, maxSourceY);
     }
 }
