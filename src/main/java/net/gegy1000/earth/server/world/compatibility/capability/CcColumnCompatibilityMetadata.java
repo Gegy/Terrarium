@@ -50,7 +50,7 @@ public final class CcColumnCompatibilityMetadata implements ICapabilitySerializa
     @SubscribeEvent
     public static void onAttachCapabilities(AttachCapabilitiesEvent<Chunk> event) {
         World world = event.getObject().getWorld();
-        if (GenGen.isCubic(world)) {
+        if (world == null || GenGen.isCubic(world)) {
             event.addCapability(ID, new CcColumnCompatibilityMetadata());
         }
     }
