@@ -40,7 +40,7 @@ configurations {
 
 dependencies {
   // optional dependencies
-  deobfCompile 'io.github.opencubicchunks:cubicchunks-api:1.12.2-0.0-SNAPSHOT'
+  deobfCompile 'io.github.opencubicchunks:cubicchunks-api:1.12.2-0.0-SNAPSHOT:api'
   deobfCompile 'io.github.opencubicchunks:cubicchunks:1.12.2-0.0-SNAPSHOT'
 
   deobfCompile 'com.github.glitchfiend.biomesoplenty:BiomesOPlenty:1.12.2-7.0.1.2399:universal'
