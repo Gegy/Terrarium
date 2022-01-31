@@ -15,7 +15,9 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.AbstractList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -30,8 +32,8 @@ public final class ModGenerators {
     private static final MethodHandle SET_SORTED_GENERATOR_LIST;
     private static final MethodHandle COMPUTE_SORTED_GENERATORS;
 
-    private static final List<IWorldGenerator> HIDDEN_GENERATORS = ImmutableList.of();
-    private static List<IWorldGenerator> sortedGenerators;
+    private static final HiddenGeneratorList HIDDEN_GENERATORS = new HiddenGeneratorList();
+    private static List<IWorldGenerator> sortedGenerators = ImmutableList.of();
 
     static {
         try {
@@ -103,6 +105,23 @@ public final class ModGenerators {
         EarthWorldType earth = GenericWorldType.unwrapAs(event.getWorld().getWorldType(), EarthWorldType.class);
         if (earth != null) {
             ModGenerators.restoreSortedGenerators();
+        }
+    }
+
+    private static final class HiddenGeneratorList extends AbstractList<IWorldGenerator> {
+        @Override
+        public IWorldGenerator get(int index) {
+            return null;
+        }
+
+        @Override
+        public int size() {
+            return 0;
+        }
+
+        @Override
+        public Iterator<IWorldGenerator> iterator() {
+            return Collections.emptyIterator();
         }
     }
 }
