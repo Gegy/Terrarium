@@ -32,7 +32,7 @@ public final class ModGenerators {
     private static final MethodHandle SET_SORTED_GENERATOR_LIST;
     private static final MethodHandle COMPUTE_SORTED_GENERATORS;
 
-    private static final HiddenGeneratorList HIDDEN_GENERATORS = new HiddenGeneratorList();
+    private static final List<IWorldGenerator> HIDDEN_GENERATORS = new HiddenGeneratorList();
     private static List<IWorldGenerator> sortedGenerators = ImmutableList.of();
 
     static {
