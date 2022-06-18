@@ -1,0 +1,53 @@
+plugins {
+  id 'fabric-loom' version '1.4-SNAPSHOT'
+}
+
+base {
+  archivesName = "$mod_id-fabric-$minecraft_version"
+}
+
+loom {
+  mixin {
+    defaultRefmapName.set("${mod_id}.refmap.json")
+  }
+
+  accessWidenerPath = file("src/main/resources/${mod_id}.accesswidener")
+
+  runs {
+    client {
+      client()
+      setConfigName 'Fabric Client'
+      ideConfigGenerated true
+      runDir 'run'
+    }
+    server {
+      server()
+      setConfigName 'Fabric Server'
+      ideConfigGenerated true
+      runDir 'run'
+    }
+  }
+}
+
+repositories {
+}
+
+dependencies {
+  implementation project(':common')
+  implementation project(':backend')
+
+  minecraft "com.mojang:minecraft:$minecraft_version"
+  mappings loom.officialMojangMappings()
+
+  modImplementation "net.fabricmc:fabric-loader:$fabric_loader_version"
+  modImplementation "net.fabricmc.fabric-api:fabric-api:$fabric_version"
+}
+
+processResources {
+  from project(':common').sourceSets.main.resources
+}
+
+tasks.withType(JavaCompile).configureEach {
+  it.source(project(':common').sourceSets.main.allSource)
+  it.source(project(':backend').sourceSets.main.allSource)
+}

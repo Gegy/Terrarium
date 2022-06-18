@@ -1,6 +1,6 @@
 # IDEA
 
-.idea/
+/.idea/
 out/
 *.ipr
 *.iws
@@ -11,4 +11,9 @@ build/
 .gradle/
 
 # Minecraft
-minecraft/
+run/
+
+# Symlinks
+fabric/src/main/resources/assets
+fabric/src/main/resources/data
+fabric/src/main/resources/terrarium.mixins.json

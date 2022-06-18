@@ -1,96 +1,97 @@
-buildscript {
-  repositories {
-    maven { url = "http://files.minecraftforge.net/maven" }
-    maven { url = "https://plugins.gradle.org/m2/" }
-  }
-  dependencies {
-    classpath "net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT"
-    classpath "com.wynprice.cursemaven:CurseMaven:2.1.1"
-  }
-}
+import java.nio.file.Files
 
-apply plugin: "net.minecraftforge.gradle.forge"
-apply plugin: "com.wynprice.cursemaven"
+tasks.register('generateModManifests') {
+  final def expandProps = [
+          'version'                      : version,
+          'group'                        : project.group,
+          'minecraft_version'            : minecraft_version,
+          'minecraft_version_range'      : minecraft_version_range,
+          'mod_name'                     : mod_name,
+          'mod_author'                   : mod_author,
+          'mod_id'                       : mod_id,
+          'license'                      : license,
+          'description'                  : project.description,
+          'credits'                      : credits,
+          'issue_tracker'                : issue_tracker,
+          'sources'                      : sources,
+  ]
 
-def mod_file = getModFile("net.gegy1000.terrarium.Terrarium")
-version = getModField("VERSION", mod_file)
-group = "net.gegy1000"
-archivesBaseName = "terrarium"
-sourceCompatibility = targetCompatibility = "1.8"
+  inputs.properties expandProps
 
-minecraft {
-  version = "1.12.2-14.23.5.2847"
-  runDir = "minecraft"
-  mappings = "stable_39"
-}
+  final def templateFiles = fileTree('.').matching {
+    include '**/*.template'
+  }.files
 
-repositories {
-  mavenCentral()
-  maven { url = "https://oss.sonatype.org/content/repositories/public/" }
-  maven { url = "https://repo.spongepowered.org/maven/" }
-  maven { url = "https://maven.gegy.dev" }
-  maven { url = "https://www.cursemaven.com" }
-  maven { url = "http://mvn.topobyte.de" }
-}
-
-configurations {
-  embed
-  compile.extendsFrom(embed)
-}
-
-dependencies {
-  // optional dependencies
-  deobfCompile 'io.github.opencubicchunks:cubicchunks-api:1.12.2-0.0-SNAPSHOT'
-  deobfCompile 'io.github.opencubicchunks:cubicchunks:1.12.2-0.0-SNAPSHOT'
-
-  deobfCompile 'com.github.glitchfiend.biomesoplenty:BiomesOPlenty:1.12.2-7.0.1.2399:universal'
-  deobfCompile 'curse.maven:dynamictrees-252818:2822231'
-
-  // embedded dependencies
-  embed 'dev.gegy:gengen:0.1.0-SNAPSHOT'
-  embed 'net.gegy1000:just-now:0.1.0-SNAPSHOT'
-  embed 'com.vividsolutions:jts:1.13'
-  embed 'org.tukaani:xz-fork:1.8'
-}
-
-jar {
-  from configurations.embed.collect {
-    it.isDirectory() ? it : zipTree(it)
-  }
-  manifest {
-    attributes "FMLAT": "terrarium_at.cfg"
-    attributes "Maven-Artifact": "${project.group}:${project.archivesBaseName}:${project.version}"
-    attributes "Timestamp": System.currentTimeMillis()
-  }
-}
-
-processResources {
-  inputs.property "version", project.version
-  inputs.property "mcversion", project.minecraft.version
-
-  from(sourceSets.main.resources.srcDirs) {
-    include "mcmod.info"
-    expand "version": project.version, "mcversion": project.minecraft.version
-  }
-
-  from(sourceSets.main.resources.srcDirs) {
-    exclude "mcmod.info"
-  }
-}
-
-File getModFile(String fq_name) {
-  return file("src/main/java/${fq_name.replace('.', '/')}.java")
-}
-
-String getModField(String type, File mod_file) {
-  String field = ""
-  String prefix = "public static final String $type = \""
-  mod_file.eachLine { String s ->
-    s = s.trim()
-    if (s.startsWith(prefix)) {
-      s = s.substring(prefix.length(), s.length() - 2)
-      field = s
+  templateFiles.each { templateFile ->
+    final def targetFile = new File(templateFile.parentFile, templateFile.name.substring(0, templateFile.name.length() - '.template'.length()))
+    inputs.file templateFile
+    outputs.file targetFile
+    doLast {
+      copy {
+        from templateFile
+        into targetFile.parentFile
+        rename { targetFile.name }
+        expand expandProps
+      }
     }
   }
-  return field
+}
+
+subprojects {
+  apply plugin: 'java'
+
+  group = maven_group
+  version = "$version+$minecraft_version"
+
+  java {
+    toolchain.languageVersion = JavaLanguageVersion.of(17)
+    withSourcesJar()
+  }
+
+  repositories {
+    mavenCentral()
+    maven { url 'https://repo.spongepowered.org/repository/maven-public/' }
+    maven { url "https://maven.gegy.dev/" }
+  }
+
+  dependencies {
+    implementation 'com.google.code.findbugs:jsr305:3.0.2'
+  }
+
+  // Big hack to support building and running with IDEA. On Windows, needs to be run as administrator.
+  if (project.name == 'fabric') {
+    final def resources = ['assets', 'data', 'terrarium.mixins.json']
+    tasks.register('setupResourceSymlinks') {
+      doLast {
+        resources.each { resource ->
+          final def commonResource = project(':common').sourceSets.main.resources.srcDirs[0].toPath().resolve(resource)
+          final def projectResource = project.sourceSets.main.resources.srcDirs[0].toPath().resolve(resource)
+          if (!Files.exists(projectResource)) {
+            Files.createSymbolicLink(projectResource, commonResource)
+          }
+        }
+      }
+    }
+  }
+
+  jar {
+    from("LICENSE") {
+      rename { "${it}_${mod_id}" }
+    }
+  }
+
+  tasks.withType(JavaCompile).configureEach {
+    it.options.encoding = 'UTF-8'
+    it.options.release = 17
+  }
+
+  tasks.withType(ProcessResources).configureEach {
+    dependsOn generateModManifests
+    exclude '**/*.template'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+  }
+
+  tasks.withType(GenerateModuleMetadata).configureEach {
+    enabled = false
+  }
 }
