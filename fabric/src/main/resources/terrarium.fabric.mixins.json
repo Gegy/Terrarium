@@ -4,6 +4,9 @@
   "package": "dev.gegy.terrarium.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "fabric.geo_chunk.ChunkStatusMixin",
+    "geo_chunk.ChunkSerializerMixin",
+    "geo_chunk.ProtoChunkMixin"
   ],
   "injectors": {
     "defaultRequire": 1
