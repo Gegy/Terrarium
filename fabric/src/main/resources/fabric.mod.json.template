@@ -15,6 +15,9 @@
   "entrypoints": {
     "main": [
       "dev.gegy.terrarium.fabric.TerrariumFabricInitializer"
+    ],
+    "fabric-datagen": [
+      "dev.gegy.terrarium.fabric.TerrariumFabricDataGenerator"
     ]
   },
   "mixins": [

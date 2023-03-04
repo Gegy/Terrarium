@@ -26,6 +26,14 @@ loom {
       ideConfigGenerated true
       runDir 'run'
     }
+    data {
+      inherit server
+      name 'Fabric Data Generation'
+      vmArg '-Dfabric-api.datagen'
+      vmArg "-Dfabric-api.datagen.output-dir=${file('src/main/generated')}"
+      vmArg "-Dfabric-api.datagen.modid=${mod_id}"
+      runDir "build/datagen"
+    }
   }
 }
 
@@ -41,6 +49,14 @@ dependencies {
 
   modImplementation "net.fabricmc:fabric-loader:$fabric_loader_version"
   modImplementation "net.fabricmc.fabric-api:fabric-api:$fabric_version"
+}
+
+sourceSets {
+  main {
+    resources {
+      srcDirs += ['src/main/generated']
+    }
+  }
 }
 
 processResources {
