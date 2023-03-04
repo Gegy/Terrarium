@@ -1,4 +1,6 @@
 dependencies {
-    // Minecraft common dependencies
-    implementation 'com.mojang:datafixerupper:6.0.8'
+  implementation 'org.tukaani:xz:1.9'
+
+  // Minecraft common dependencies
+  implementation 'com.mojang:datafixerupper:6.0.8'
 }

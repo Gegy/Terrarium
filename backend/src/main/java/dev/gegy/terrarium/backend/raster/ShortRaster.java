@@ -28,6 +28,11 @@ public class ShortRaster implements IntLikeRaster {
         return buffer[shape.index(x, y)];
     }
 
+    public void copyFrom(final ShortRaster raster) {
+        Raster.checkSameShape(this, raster);
+        System.arraycopy(raster.buffer, 0, buffer, 0, buffer.length);
+    }
+
     @Override
     public RasterType<ShortRaster> type() {
         return TYPE;
@@ -36,6 +41,15 @@ public class ShortRaster implements IntLikeRaster {
     @Override
     public RasterShape shape() {
         return shape;
+    }
+
+    @Override
+    public void copyFrom(final Raster raster) {
+        if (raster instanceof final ShortRaster shortRaster) {
+            copyFrom(shortRaster);
+        } else {
+            IntLikeRaster.super.copyFrom(raster);
+        }
     }
 
     @Override

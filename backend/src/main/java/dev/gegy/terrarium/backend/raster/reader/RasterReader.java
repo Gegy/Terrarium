@@ -1,0 +1,81 @@
+package dev.gegy.terrarium.backend.raster.reader;
+
+import dev.gegy.terrarium.backend.raster.IntLikeRaster;
+import dev.gegy.terrarium.backend.raster.RasterShape;
+import dev.gegy.terrarium.backend.util.Util;
+import org.tukaani.xz.SingleXZInputStream;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+
+public final class RasterReader {
+    private static final byte[] SIGNATURE = "TERRARIUM/RASTER".getBytes(StandardCharsets.UTF_8);
+    private static final int HEADER_LENGTH = SIGNATURE.length + 1;
+
+    public static <T extends IntLikeRaster> T read(final ReadableByteChannel channel, final RasterFormat<T> format) throws IOException {
+        final int version = parseHeader(channel);
+        if (version != 0) {
+            throw new IOException("Unrecognized raster version: " + version);
+        }
+
+        final ByteBuffer dataHeader = ByteBuffer.allocate(Integer.BYTES * 2 + Byte.BYTES);
+        Util.readFully(channel, dataHeader);
+
+        final int width = dataHeader.getInt();
+        final int height = dataHeader.getInt();
+
+        final RasterFormat<?> dataFormat = RasterFormat.byId(dataHeader.get() & 0xff);
+        if (dataFormat != format) {
+            throw new IOException("Expected raster of type: " + format + ", but got " + dataFormat);
+        }
+
+        final T raster = format.create(new RasterShape(width, height));
+
+        final ByteBuffer chunkHeader = ByteBuffer.allocate(Integer.BYTES);
+        while (Util.tryReadFully(channel, chunkHeader.rewind())) {
+            final int chunkLength = chunkHeader.getInt();
+            final ByteBuffer chunkBody = ByteBuffer.allocate(chunkLength);
+            Util.readFully(channel, chunkBody);
+            readChunk(chunkBody, raster, format);
+        }
+
+        return raster;
+    }
+
+    private static int parseHeader(final ReadableByteChannel channel) throws IOException {
+        final ByteBuffer header = ByteBuffer.allocate(HEADER_LENGTH);
+        Util.readFully(channel, header);
+
+        final byte[] signature = new byte[SIGNATURE.length];
+        header.get(signature);
+        if (!Arrays.equals(signature, SIGNATURE)) {
+            throw new IOException("Invalid signature: " + new String(signature, StandardCharsets.UTF_8));
+        }
+
+        return header.get() & 0xff;
+    }
+
+    private static <T extends IntLikeRaster> void readChunk(final ByteBuffer buffer, final T raster, final RasterFormat<T> format) throws IOException {
+        final int x = buffer.getInt();
+        final int y = buffer.getInt();
+        final RasterShape shape = new RasterShape(buffer.getInt(), buffer.getInt());
+        final RasterFilter filter = RasterFilter.byId(buffer.get() & 0xff);
+
+        final T raw;
+        try (final SingleXZInputStream input = new SingleXZInputStream(Util.asInputStream(buffer))) {
+            raw = format.read(ByteBuffer.wrap(input.readAllBytes()), shape);
+        }
+
+        if (x == 0 && y == 0 && shape.equals(raster.shape())) {
+            filter.evaluate(raw, raster);
+            return;
+        }
+
+        final T filtered = format.create(shape);
+        filter.evaluate(raw, filtered);
+        raster.copyFrom(filtered, x, y);
+    }
+}
