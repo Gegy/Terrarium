@@ -2,6 +2,15 @@ dependencies {
   implementation 'org.tukaani:xz:1.9'
 
   // Minecraft common dependencies
+  implementation 'org.ow2.asm:asm:9.4'
   implementation 'it.unimi.dsi:fastutil:8.5.12'
   implementation 'com.mojang:datafixerupper:6.0.8'
+
+  testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
+  testImplementation 'org.openjdk.jmh:jmh-core:1.37'
+  testAnnotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
+}
+
+tasks.named('test', Test) {
+  useJUnitPlatform()
 }

@@ -10,6 +10,9 @@ out/
 build/
 .gradle/
 
+# JMH
+generated_tests/
+
 # Minecraft
 run/
 
