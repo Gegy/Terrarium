@@ -17,7 +17,7 @@ import java.nio.file.Path;
 
 public final class ClimateRasterInitializer implements SharedDataInitializer {
     private static final Path PATH = TerrariumCacheDirs.GLOBAL_ROOT.resolve("climatic_variables.xz");
-    private static final String URL = "https://terrariumearth.azureedge.net/geo3/climatic_variables.xz";
+    private static final String URL = "https://terrarium.gegy.dev/geo3/climatic_variables.xz";
 
     @Override
     public void initialize(SharedEarthData data, ProcessTracker processTracker) {

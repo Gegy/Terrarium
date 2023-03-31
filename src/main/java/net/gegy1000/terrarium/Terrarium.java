@@ -1,7 +1,6 @@
 package net.gegy1000.terrarium;
 
 import net.gegy1000.terrarium.server.ServerProxy;
-import net.gegy1000.terrarium.server.TlsCertificateInstaller;
 import net.gegy1000.terrarium.server.capability.TerrariumCapabilities;
 import net.gegy1000.terrarium.server.command.TerrariumCommand;
 import net.gegy1000.terrarium.server.message.DataFailWarningMessage;
@@ -28,7 +27,7 @@ import java.util.Map;
 @Mod(modid = Terrarium.ID, name = "Terrarium", version = Terrarium.VERSION, acceptedMinecraftVersions = "[1.12]", dependencies = "after:cubicchunks")
 public class Terrarium {
     public static final String ID = "terrarium";
-    public static final String VERSION = "1.1.9";
+    public static final String VERSION = "1.1.10";
 
     public static final String CLIENT_PROXY = "net.gegy1000.terrarium.client.ClientProxy";
     public static final String SERVER_PROXY = "net.gegy1000.terrarium.server.ServerProxy";
@@ -41,10 +40,6 @@ public class Terrarium {
 
     @SidedProxy(clientSide = CLIENT_PROXY, serverSide = SERVER_PROXY)
     public static ServerProxy PROXY;
-
-    static {
-        TlsCertificateInstaller.installMicrosoftCertificates();
-    }
 
     @Mod.EventHandler
     public static void onPreInit(FMLPreInitializationEvent event) {

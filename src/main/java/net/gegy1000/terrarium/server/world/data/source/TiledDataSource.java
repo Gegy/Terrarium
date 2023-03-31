@@ -1,5 +1,6 @@
 package net.gegy1000.terrarium.server.world.data.source;
 
+import net.gegy1000.terrarium.Terrarium;
 import net.gegy1000.terrarium.server.util.Profiler;
 import net.gegy1000.terrarium.server.util.ThreadedProfiler;
 import net.gegy1000.terrarium.server.util.Vec2i;
@@ -39,7 +40,7 @@ public abstract class TiledDataSource<T> {
         try (Profiler.Handle connect = profiler.push("http_connect")) {
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
             http.setRequestMethod("GET");
-            http.setRequestProperty(HttpHeaders.USER_AGENT, "terrarium");
+            http.setRequestProperty(HttpHeaders.USER_AGENT, Terrarium.ID);
             return http.getInputStream();
         }
     }
