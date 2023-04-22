@@ -40,16 +40,11 @@ public class OceanPolygonSource extends TiledDataSource<PolygonData> {
         if (pos.x < -180 || pos.y < -90 || pos.x >= 180 || pos.y >= 90) {
             return Optional.empty();
         }
-
-        String url = StdSource.ENDPOINT + "/ocean/" + pos.x + "/" + pos.y;
-
-        InputStream sourceInput = CACHING_INPUT.getInputStream(pos, p -> {
-            return httpGet(new URL(url));
-        });
-
-        try (InputStream input = new SingleXZInputStream(new BufferedInputStream(sourceInput))) {
-            return this.parseStream(input);
-        }
+        return CACHING_INPUT.tryLoad(
+                pos,
+                key -> httpGet(new URL(StdSource.ENDPOINT + "/ocean/" + key.x + "/" + key.y)),
+                input -> this.parseStream(new SingleXZInputStream(new BufferedInputStream(input)))
+        );
     }
 
     private Optional<PolygonData> parseStream(InputStream input) throws IOException {

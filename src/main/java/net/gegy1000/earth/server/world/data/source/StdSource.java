@@ -101,11 +101,11 @@ public final class StdSource<T> extends TiledDataSource<T> {
         if (!StdSource.containsTile(pos, this.zoom)) {
             return Optional.empty();
         }
-
-        String url = this.endpoint + "/" + pos.x + "/" + pos.y;
-        try (InputStream input = this.cachingInput.getInputStream(pos, p -> httpGet(new URL(url)))) {
-            return Optional.of(this.read.apply(input));
-        }
+        return Optional.of(this.cachingInput.tryLoad(
+                pos,
+                key -> httpGet(new URL(this.endpoint + "/" + key.x + "/" + key.y)),
+                this.read
+        ));
     }
 
     public static class Builder<T> {
