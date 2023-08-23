@@ -1,12 +1,25 @@
 package dev.gegy.terrarium.backend.projection.cylindrical;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.gegy.terrarium.backend.earth.EarthConstants;
 
 public class Mercator implements CylindricalProjection {
+    public static final Codec<Mercator> CODEC = RecordCodecBuilder.create(i -> i.group(
+            Codec.DOUBLE.fieldOf("meters_per_block").forGetter(e -> e.metersPerBlock)
+    ).apply(i, Mercator::new));
+
+    private final double metersPerBlock;
     private final int blocksX;
 
     public Mercator(final double metersPerBlock) {
+        this.metersPerBlock = metersPerBlock;
         blocksX = (int) Math.floor(EarthConstants.CIRCUMFERENCE_EQUATOR / metersPerBlock);
+    }
+
+    @Override
+    public Type type() {
+        return Type.MERCATOR;
     }
 
     @Override
