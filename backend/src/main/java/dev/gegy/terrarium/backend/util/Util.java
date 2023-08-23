@@ -23,6 +23,14 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 public class Util {
+    public static int floorInt(final float value) {
+        return (int) Math.floor(value);
+    }
+
+    public static float lerp(final float a, final float b, final float x) {
+        return a + (b - a) * x;
+    }
+
     public static void readFully(final ReadableByteChannel channel, final ByteBuffer buffer) throws IOException {
         if (!tryReadFully(channel, buffer)) {
             throw new EOFException("Expected " + buffer.capacity() + " bytes, got " + buffer.position());
