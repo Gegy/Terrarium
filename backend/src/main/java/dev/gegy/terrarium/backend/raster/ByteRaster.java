@@ -1,7 +1,14 @@
 package dev.gegy.terrarium.backend.raster;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+
 public class ByteRaster implements IntLikeRaster {
-    public static final RasterType<ByteRaster> TYPE = RasterType.create(ByteRaster::create);
+    public static final Codec<ByteRaster> CODEC = RecordCodecBuilder.create(i -> i.group(
+            RasterShape.CODEC.forGetter(ByteRaster::shape),
+            RasterBufferCodecs.BYTES.fieldOf("data").forGetter(r -> r.buffer)
+    ).apply(i, ByteRaster::new));
+    public static final RasterType<ByteRaster> TYPE = RasterType.create(ByteRaster::create, CODEC);
 
     protected final RasterShape shape;
     protected final byte[] buffer;

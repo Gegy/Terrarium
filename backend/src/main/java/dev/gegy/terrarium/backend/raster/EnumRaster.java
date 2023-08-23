@@ -1,5 +1,8 @@
 package dev.gegy.terrarium.backend.raster;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+
 import java.util.Arrays;
 
 public class EnumRaster<T extends Enum<T>> implements Raster {
@@ -88,6 +91,7 @@ public class EnumRaster<T extends Enum<T>> implements Raster {
     private static final class EnumRasterType<T extends Enum<T>> implements RasterType<EnumRaster<T>> {
         private final T defaultValue;
         private final T[] variants;
+        private final Codec<EnumRaster<T>> codec;
 
         public EnumRasterType(final T defaultValue) {
             this.defaultValue = defaultValue;
@@ -96,6 +100,10 @@ public class EnumRaster<T extends Enum<T>> implements Raster {
             if (variants.length > 255) {
                 throw new IllegalArgumentException("Cannot construct EnumRaster for " + enumClass + " with " + variants.length + " variants");
             }
+            codec = RecordCodecBuilder.create(i -> i.group(
+                    RasterShape.CODEC.forGetter(EnumRaster::shape),
+                    RasterBufferCodecs.BYTES.fieldOf("data").forGetter(r -> r.buffer)
+            ).apply(i, (shape, buffer) -> new EnumRaster<>(this, shape, buffer)));
         }
 
         @Override
@@ -105,6 +113,11 @@ public class EnumRaster<T extends Enum<T>> implements Raster {
                 Arrays.fill(buffer, (byte) defaultValue.ordinal());
             }
             return new EnumRaster<>(this, shape, buffer);
+        }
+
+        @Override
+        public Codec<EnumRaster<T>> codec() {
+            return codec;
         }
 
         @Override
