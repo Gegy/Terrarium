@@ -14,6 +14,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ReadableByteChannel;
 import java.util.Map;
 import java.util.function.Function;
@@ -36,6 +37,46 @@ public class Util {
         }
         buffer.flip();
         return true;
+    }
+
+    public static ReadableByteChannel asChannel(final byte[] src) {
+        return new ReadableByteChannel() {
+            private int index;
+            private boolean open = true;
+
+            @Override
+            public int read(final ByteBuffer dst) throws IOException {
+                checkOpen();
+                if (!dst.hasRemaining()) {
+                    return 0;
+                }
+                if (index < src.length) {
+                    final int count = Math.min(src.length - index, dst.remaining());
+                    dst.put(src, index, count);
+                    index += count;
+                    return count;
+                } else {
+                    return -1;
+                }
+            }
+
+            @Override
+            public boolean isOpen() {
+                return open;
+            }
+
+            @Override
+            public void close() throws IOException {
+                checkOpen();
+                open = false;
+            }
+
+            private void checkOpen() throws ClosedChannelException {
+                if (!open) {
+                    throw new ClosedChannelException();
+                }
+            }
+        };
     }
 
     public static InputStream asInputStream(final ByteBuffer buffer) {

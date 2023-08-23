@@ -1,8 +1,11 @@
 package dev.gegy.terrarium.backend.raster.reader;
 
+import com.mojang.logging.LogUtils;
+import dev.gegy.terrarium.backend.loader.Loader;
 import dev.gegy.terrarium.backend.raster.IntLikeRaster;
 import dev.gegy.terrarium.backend.raster.RasterShape;
 import dev.gegy.terrarium.backend.util.Util;
+import org.slf4j.Logger;
 import org.tukaani.xz.SingleXZInputStream;
 
 import java.io.IOException;
@@ -10,10 +13,32 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 public final class RasterReader {
+    private static final Logger LOGGER = LogUtils.getLogger();
+
     private static final byte[] SIGNATURE = "TERRARIUM/RASTER".getBytes(StandardCharsets.UTF_8);
     private static final int HEADER_LENGTH = SIGNATURE.length + 1;
+
+    public static <T extends IntLikeRaster> Loader<byte[], T> loader(final RasterFormat<T> format, final Executor executor) {
+        return bytes -> CompletableFuture.supplyAsync(() -> {
+            try {
+                return Optional.of(read(bytes, format));
+            } catch (final IOException e) {
+                LOGGER.error("Failed to read raster of format {}", format, e);
+                return Optional.empty();
+            }
+        }, executor);
+    }
+
+    public static <T extends IntLikeRaster> T read(final byte[] bytes, final RasterFormat<T> format) throws IOException {
+        try (final ReadableByteChannel channel = Util.asChannel(bytes)) {
+            return read(channel, format);
+        }
+    }
 
     public static <T extends IntLikeRaster> T read(final ReadableByteChannel channel, final RasterFormat<T> format) throws IOException {
         final int version = parseHeader(channel);
