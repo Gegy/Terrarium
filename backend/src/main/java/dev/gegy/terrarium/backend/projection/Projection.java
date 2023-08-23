@@ -5,6 +5,7 @@ import dev.gegy.terrarium.backend.layer.GeoLayer;
 import dev.gegy.terrarium.backend.layer.LeveledRasterSampler;
 import dev.gegy.terrarium.backend.projection.cylindrical.Equirectangular;
 import dev.gegy.terrarium.backend.projection.cylindrical.Mercator;
+import dev.gegy.terrarium.backend.raster.EnumRaster;
 import dev.gegy.terrarium.backend.raster.IntLikeRaster;
 import dev.gegy.terrarium.backend.util.Util;
 
@@ -26,6 +27,8 @@ public interface Projection {
     double lon(double blockX, double blockZ);
 
     <V extends IntLikeRaster> GeoLayer<V> createInterpolatedLayer(LeveledRasterSampler<V> leveledSampler, Executor executor);
+
+    <E extends Enum<E>, V extends EnumRaster<E>> GeoLayer<V> createVoronoiLayer(LeveledRasterSampler<V> leveledSampler, Executor executor);
 
     enum Type {
         EQUIRECTANGULAR("equirectangular", Equirectangular.CODEC),

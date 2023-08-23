@@ -5,6 +5,7 @@ import dev.gegy.terrarium.backend.layer.GeoLayer;
 import dev.gegy.terrarium.backend.layer.LeveledRasterSampler;
 import dev.gegy.terrarium.backend.layer.RasterSampler;
 import dev.gegy.terrarium.backend.projection.Projection;
+import dev.gegy.terrarium.backend.raster.EnumRaster;
 import dev.gegy.terrarium.backend.raster.IntLikeRaster;
 import dev.gegy.terrarium.backend.raster.Raster;
 
@@ -86,6 +87,15 @@ public interface CylindricalProjection extends Projection {
     default <V extends IntLikeRaster> GeoLayer<V> createInterpolatedLayer(final LeveledRasterSampler<V> leveledSampler, final Executor executor) {
         return createResamplingLayer(
                 InterpolationMode::choose,
+                leveledSampler,
+                executor
+        );
+    }
+
+    @Override
+    default <E extends Enum<E>, V extends EnumRaster<E>> GeoLayer<V> createVoronoiLayer(final LeveledRasterSampler<V> leveledSampler, final Executor executor) {
+        return createResamplingLayer(
+                scale -> new Voronoi(0.45f, 2016969737595986194L),
                 leveledSampler,
                 executor
         );
