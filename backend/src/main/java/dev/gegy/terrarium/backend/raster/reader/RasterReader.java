@@ -2,8 +2,11 @@ package dev.gegy.terrarium.backend.raster.reader;
 
 import com.mojang.logging.LogUtils;
 import dev.gegy.terrarium.backend.loader.Loader;
+import dev.gegy.terrarium.backend.raster.EnumRaster;
 import dev.gegy.terrarium.backend.raster.IntLikeRaster;
 import dev.gegy.terrarium.backend.raster.RasterShape;
+import dev.gegy.terrarium.backend.raster.RasterType;
+import dev.gegy.terrarium.backend.raster.UnsignedByteRaster;
 import dev.gegy.terrarium.backend.util.Util;
 import org.slf4j.Logger;
 import org.tukaani.xz.SingleXZInputStream;
@@ -16,6 +19,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.function.IntFunction;
 
 public final class RasterReader {
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -32,6 +36,11 @@ public final class RasterReader {
                 return Optional.empty();
             }
         }, executor);
+    }
+
+    public static <T extends Enum<T>> Loader<byte[], EnumRaster<T>> loader(final RasterType<EnumRaster<T>> type, final IntFunction<T> lookup, final Executor executor) {
+        final Loader<UnsignedByteRaster, EnumRaster<T>> converter = Loader.from(raster -> raster.mapToEnum(type, lookup));
+        return converter.compose(loader(RasterFormat.UNSIGNED_BYTE, executor));
     }
 
     public static <T extends IntLikeRaster> T read(final byte[] bytes, final RasterFormat<T> format) throws IOException {

@@ -69,4 +69,14 @@ public class UnsignedByteRaster implements IntLikeRaster {
     public int getInt(final int x, final int y) {
         return getByte(x, y);
     }
+
+    public <T extends Enum<T>> EnumRaster<T> mapToEnum(final RasterType<EnumRaster<T>> type, final IntFunction<T> function) {
+        final EnumRaster<T> result = type.create(shape);
+        for (int y = 0; y < shape.height(); y++) {
+            for (int x = 0; x < shape.width(); x++) {
+                result.put(x, y, function.apply(getByte(x, y)));
+            }
+        }
+        return result;
+    }
 }
