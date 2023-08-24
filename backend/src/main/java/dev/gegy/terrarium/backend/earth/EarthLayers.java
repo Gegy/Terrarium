@@ -3,6 +3,9 @@ package dev.gegy.terrarium.backend.earth;
 import dev.gegy.terrarium.backend.GeoAttachment;
 import dev.gegy.terrarium.backend.GeoChunk;
 import dev.gegy.terrarium.backend.GeoView;
+import dev.gegy.terrarium.backend.earth.climate.ClimateRasterSamplers;
+import dev.gegy.terrarium.backend.earth.climate.RainfallRaster;
+import dev.gegy.terrarium.backend.earth.climate.TemperatureRaster;
 import dev.gegy.terrarium.backend.earth.cover.Cover;
 import dev.gegy.terrarium.backend.earth.soil.SoilSuborder;
 import dev.gegy.terrarium.backend.layer.GeoLayer;
@@ -23,9 +26,13 @@ public record EarthLayers(
         GeoLayer<UnsignedByteRaster> siltContent,
         GeoLayer<UnsignedByteRaster> sandContent,
         GeoLayer<EnumRaster<SoilSuborder>> soilSuborder,
+        GeoLayer<TemperatureRaster> meanTemperature,
+        GeoLayer<TemperatureRaster> minTemperature,
+        GeoLayer<RainfallRaster> annualRainfall,
         Executor executor
 ) implements GeoLayer<GeoChunk> {
     public static EarthLayers create(final EarthTiles tiles, final Projection projection, final Executor executor) {
+        final ClimateRasterSamplers climate = tiles.climateSamplers();
         return new EarthLayers(
                 projection.createInterpolatedLayer(tiles.elevation(), executor),
                 projection.createVoronoiLayer(tiles.landCover(), executor),
@@ -34,6 +41,9 @@ public record EarthLayers(
                 projection.createInterpolatedLayer(tiles.siltContent(), executor),
                 projection.createInterpolatedLayer(tiles.sandContent(), executor),
                 projection.createVoronoiLayer(tiles.soilSuborder(), executor),
+                projection.createInterpolatedLayer(climate.meanTemperature(), executor),
+                projection.createInterpolatedLayer(climate.minTemperature(), executor),
+                projection.createInterpolatedLayer(climate.annualRainfall(), executor),
                 executor
         );
     }

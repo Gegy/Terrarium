@@ -1,5 +1,7 @@
 package dev.gegy.terrarium.backend.earth;
 
+import dev.gegy.terrarium.backend.earth.climate.ClimateRasterSamplers;
+import dev.gegy.terrarium.backend.earth.climate.ClimateRasters;
 import dev.gegy.terrarium.backend.earth.cover.Cover;
 import dev.gegy.terrarium.backend.earth.soil.SoilSuborder;
 import dev.gegy.terrarium.backend.layer.LeveledRasterSampler;
@@ -41,7 +43,8 @@ public record EarthTiles(
         LeveledRasterSampler<UnsignedByteRaster> clayContent,
         LeveledRasterSampler<UnsignedByteRaster> siltContent,
         LeveledRasterSampler<UnsignedByteRaster> sandContent,
-        LeveledRasterSampler<EnumRaster<SoilSuborder>> soilSuborder
+        LeveledRasterSampler<EnumRaster<SoilSuborder>> soilSuborder,
+        ClimateRasterSamplers climateSamplers
 ) {
     private static final int TILE_SIZE = 1000;
     private static final RasterShape TILE_SHAPE = new RasterShape(TILE_SIZE, TILE_SIZE);
@@ -73,7 +76,8 @@ public record EarthTiles(
                     soilUByteRaster("clay", cache),
                     soilUByteRaster("silt", cache),
                     soilUByteRaster("sand", cache),
-                    soilSuborder(cache)
+                    soilSuborder(cache),
+                    climateSamplers()
             );
         }
 
@@ -148,6 +152,17 @@ public record EarthTiles(
         private Cacher<TileKey, byte[]> fileCacher(final String name, final int level) {
             final Path sourceRoot = cacheRoot.resolve(name).resolve(String.valueOf(level));
             return new FileCacher(ioExecutor).mapKey(key -> sourceRoot.resolve(key.path()));
+        }
+
+        private ClimateRasterSamplers climateSamplers() {
+            final Loader<Void, ClimateRasters> loader = ClimateRasters.loader(executor)
+                    .compose(singleFileLoader("climatic_variables.xz"));
+            return ClimateRasterSamplers.create(loader, executor);
+        }
+
+        private Loader<Void, byte[]> singleFileLoader(final String fileName) {
+            return httpLoader.<Void>mapKey(v -> URI.create(ENDPOINT + "/" + fileName))
+                    .cached(new FileCacher(ioExecutor).mapKey(v -> cacheRoot.resolve(fileName)));
         }
     }
 }

@@ -31,6 +31,10 @@ public class Util {
         return a + (b - a) * x;
     }
 
+    public static float inverseLerp(final float a, final float b, final float x) {
+        return (x - a) / (b - a);
+    }
+
     public static int clamp(final int value, final int min, final int max) {
         return Math.min(Math.max(value, min), max);
     }

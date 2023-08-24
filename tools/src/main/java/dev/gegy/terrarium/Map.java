@@ -21,7 +21,10 @@ public class Map {
             new FeatureEntry("Soil pH", new ScalarRasterFeature(EarthLayers::soilPh, ColorRamps.PH)),
             new FeatureEntry("Clay Content", new ScalarRasterFeature(EarthLayers::clayContent, ColorRamps.SOIL)),
             new FeatureEntry("Silt Content", new ScalarRasterFeature(EarthLayers::siltContent, ColorRamps.SOIL)),
-            new FeatureEntry("Sand Content", new ScalarRasterFeature(EarthLayers::sandContent, ColorRamps.SOIL))
+            new FeatureEntry("Sand Content", new ScalarRasterFeature(EarthLayers::sandContent, ColorRamps.SOIL)),
+            new FeatureEntry("Mean Temperature", new TemperatureFeature(EarthLayers::meanTemperature)),
+            new FeatureEntry("Min Temperature", new TemperatureFeature(EarthLayers::minTemperature)),
+            new FeatureEntry("Annual Rainfall", new RainfallFeature(EarthLayers::annualRainfall))
     );
 
     public static void main(final String[] args) {

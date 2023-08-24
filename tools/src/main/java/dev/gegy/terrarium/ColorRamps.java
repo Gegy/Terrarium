@@ -24,4 +24,19 @@ public class ColorRamps {
             .color(0.0f, 0x000000)
             .color(255.0f, 0xffffff)
             .build();
+
+    public static final ColorRamp TEMPERATURE = ColorRamp.builder()
+            .color(-40.0f, 0xffffff)
+            .color(0.0f, 0x0000ff)
+            .color(10.0f, 0x00ff00)
+            .color(25.0f, 0xffaa00)
+            .color(45.0f, 0xff0000)
+            .build();
+
+    public static final ColorRamp RAINFALL = ColorRamp.builder()
+            .color(0.0f, 0xffffff)
+            .color(3000.0f, 0x00aaff)
+            .color(5000.0f, 0x00ff00)
+            .color(7200.0f, 0xaaff00)
+            .build();
 }
