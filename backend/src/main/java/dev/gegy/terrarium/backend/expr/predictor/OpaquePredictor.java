@@ -12,4 +12,9 @@ record OpaquePredictor<T>(Predictor<T> predictor) implements PredictorNode<T> {
         method.visitVarInsn(Opcodes.ALOAD, 1);
         method.visitMethodInsn(Opcodes.INVOKEINTERFACE, Type.getInternalName(Predictor.class), "evaluate", Type.getMethodDescriptor(Type.FLOAT_TYPE, Type.getType(Object.class)), true);
     }
+
+    @Override
+    public PredictorType type() {
+        return PredictorType.OPAQUE;
+    }
 }

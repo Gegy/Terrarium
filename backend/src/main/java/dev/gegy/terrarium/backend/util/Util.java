@@ -1,10 +1,25 @@
 package dev.gegy.terrarium.backend.util;
 
+import com.google.common.base.Suppliers;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.MapLike;
+import com.mojang.serialization.RecordBuilder;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
 
 public class Util {
     public static void readFully(final ReadableByteChannel channel, final ByteBuffer buffer) throws IOException {
@@ -46,6 +61,56 @@ public class Util {
             @Override
             public int available() {
                 return buffer.remaining();
+            }
+        };
+    }
+
+    public static <T> Codec<T> stringLookupCodec(final T[] values, final Function<T, String> keyGetter) {
+        final Map<String, T> lookup = new Object2ObjectOpenHashMap<>();
+        for (final T value : values) {
+            lookup.put(keyGetter.apply(value), value);
+        }
+        return Codec.STRING.comapFlatMap(key -> {
+            final T value = lookup.get(key);
+            return value != null ? DataResult.success(value) : DataResult.error(() -> "Unknown variant with key: '" + key + "'");
+        }, keyGetter);
+    }
+
+    public static <A> Codec<A> lazyCodec(final Supplier<Codec<A>> factory) {
+        return recursiveCodec(codec -> factory.get());
+    }
+
+    public static <A> Codec<A> recursiveCodec(final UnaryOperator<Codec<A>> factory) {
+        return new Codec<>() {
+            private final Supplier<Codec<A>> inner = Suppliers.memoize(() -> factory.apply(this));
+
+            @Override
+            public <T> DataResult<Pair<A, T>> decode(final DynamicOps<T> ops, final T input) {
+                return inner.get().decode(ops, input);
+            }
+
+            @Override
+            public <T> DataResult<T> encode(final A input, final DynamicOps<T> ops, final T prefix) {
+                return inner.get().encode(input, ops, prefix);
+            }
+        };
+    }
+
+    public static <A> MapCodec<A> unsupportedMapCodec(final String name) {
+        return new MapCodec<>() {
+            @Override
+            public <T> Stream<T> keys(final DynamicOps<T> ops) {
+                return Stream.empty();
+            }
+
+            @Override
+            public <T> DataResult<A> decode(final DynamicOps<T> ops, final MapLike<T> input) {
+                return DataResult.error(() -> "Decoding not supported for " + name);
+            }
+
+            @Override
+            public <T> RecordBuilder<T> encode(final A input, final DynamicOps<T> ops, final RecordBuilder<T> prefix) {
+                return prefix.withErrorsFrom(DataResult.error(() -> "Encoding not supported for " + name));
             }
         };
     }
