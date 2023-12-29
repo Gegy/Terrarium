@@ -2,5 +2,6 @@ dependencies {
   implementation 'org.tukaani:xz:1.9'
 
   // Minecraft common dependencies
+  implementation 'it.unimi.dsi:fastutil:8.5.12'
   implementation 'com.mojang:datafixerupper:6.0.8'
 }
