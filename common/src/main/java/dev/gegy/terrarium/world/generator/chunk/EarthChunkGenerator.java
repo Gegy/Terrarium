@@ -3,10 +3,10 @@ package dev.gegy.terrarium.world.generator.chunk;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.gegy.terrarium.backend.GeoChunk;
+import dev.gegy.terrarium.world.GeoProvider;
 import dev.gegy.terrarium.world.chunk.GeoChunkHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.WorldGenRegion;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.StructureManager;
@@ -22,16 +22,22 @@ import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.blending.Blender;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-public class EarthChunkGenerator extends ChunkGenerator implements GeoChunkGenerator {
+public class EarthChunkGenerator extends GeoChunkGenerator {
     public static final Codec<EarthChunkGenerator> CODEC = RecordCodecBuilder.create(i -> i.group(
-        BiomeSource.CODEC.fieldOf("biome_source").forGetter(c -> c.biomeSource)
+            BiomeSource.CODEC.fieldOf("biome_source").forGetter(c -> c.biomeSource)
     ).apply(i, EarthChunkGenerator::new));
 
     public EarthChunkGenerator(final BiomeSource biomeSource) {
         super(biomeSource);
+    }
+
+    @Override
+    public GeoProvider createGeoProvider() {
+        return new GeoProvider(view -> CompletableFuture.completedFuture(Optional.of(GeoChunk.EMPTY)));
     }
 
     @Override
@@ -84,10 +90,5 @@ public class EarthChunkGenerator extends ChunkGenerator implements GeoChunkGener
 
     @Override
     public void addDebugScreenInfo(final List<String> lines, final RandomState randomState, final BlockPos pos) {
-    }
-
-    @Override
-    public CompletableFuture<GeoChunk> loadGeoChunk(final ChunkPos pos) {
-        return CompletableFuture.completedFuture(new GeoChunk());
     }
 }

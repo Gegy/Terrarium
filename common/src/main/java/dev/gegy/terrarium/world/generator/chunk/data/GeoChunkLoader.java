@@ -1,8 +1,9 @@
 package dev.gegy.terrarium.world.generator.chunk.data;
 
+import dev.gegy.terrarium.world.GeoProvider;
+import dev.gegy.terrarium.world.GeoProviderHolder;
 import dev.gegy.terrarium.world.chunk.ChunkStatusDecorator;
 import dev.gegy.terrarium.world.chunk.GeoChunkHolder;
-import dev.gegy.terrarium.world.generator.chunk.GeoChunkGenerator;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -19,9 +20,10 @@ public class GeoChunkLoader {
     }
 
     private static CompletableFuture<?> loadGeoChunk(final ServerLevel level, final ChunkGenerator generator, final ChunkAccess chunk, final List<ChunkAccess> context) {
-        if (generator instanceof final GeoChunkGenerator geoChunkGenerator) {
-            return geoChunkGenerator.loadGeoChunk(chunk.getPos())
-                .thenAccept(geoChunk -> GeoChunkHolder.put(chunk, geoChunk));
+        final GeoProvider geoProvider = GeoProviderHolder.get(level);
+        if (geoProvider != null) {
+            return geoProvider.getOrLoad(chunk.getPos())
+                    .thenAccept(geoChunk -> GeoChunkHolder.put(chunk, geoChunk));
         }
         return DISABLED;
     }

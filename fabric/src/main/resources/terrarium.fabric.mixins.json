@@ -5,8 +5,11 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "fabric.geo_chunk.ChunkStatusMixin",
+    "geo_chunk.ChunkMapMixin",
     "geo_chunk.ChunkSerializerMixin",
-    "geo_chunk.ProtoChunkMixin"
+    "geo_chunk.ClimateSamplerMixin",
+    "geo_chunk.ProtoChunkMixin",
+    "geo_chunk.RandomStateMixin"
   ],
   "injectors": {
     "defaultRequire": 1
