@@ -1,11 +1,25 @@
 package dev.gegy.terrarium;
 
+import com.mojang.serialization.Codec;
 import dev.gegy.terrarium.backend.earth.EarthTiles;
+import dev.gegy.terrarium.backend.earth.GeoParameters;
+import dev.gegy.terrarium.backend.expr.classifier.ClassifierNode;
+import dev.gegy.terrarium.backend.expr.predictor.Predictor;
+import dev.gegy.terrarium.backend.expr.predictor.PredictorNode;
 import dev.gegy.terrarium.backend.loader.ConcurrencyLimiter;
 import dev.gegy.terrarium.backend.tile.TileCache;
+import dev.gegy.terrarium.registry.HolderClassifierNode;
+import dev.gegy.terrarium.registry.HolderPredictorNode;
+import dev.gegy.terrarium.registry.TerrariumRegistries;
+import dev.gegy.terrarium.world.generator.biome.TerrariumBiomeSources;
 import dev.gegy.terrarium.world.generator.chunk.TerrariumChunkGenerators;
 import dev.gegy.terrarium.world.generator.chunk.data.GeoChunkLoader;
 import net.minecraft.Util;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.RegistryFileCodec;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.biome.Biome;
 
 import javax.annotation.Nullable;
 import java.net.http.HttpClient;
@@ -23,8 +37,12 @@ public class Terrarium {
 
     @Nullable
     private static EarthTiles.Config tiles;
+    @Nullable
+    private static Codec<PredictorNode<GeoParameters>> predictorCodec;
+    @Nullable
+    private static Codec<ClassifierNode<GeoParameters, Holder<Biome>>> biomeClassifierCodec;
 
-    public static void bootstrap(final Path terrariumDirectory) {
+    public static void bootstrap(final Path terrariumDirectory, final Registry<Predictor<GeoParameters>> builtinPredictors, final PlatformBootstrap platform) {
         tiles = new EarthTiles.Config(
                 HTTP_CLIENT,
                 new ConcurrencyLimiter(16),
@@ -33,12 +51,55 @@ public class Terrarium {
                 Util.ioPool()
         );
 
+        GeoParameters.forEach((id, predictor) ->
+                Registry.register(builtinPredictors, new ResourceLocation(Terrarium.ID, id), predictor)
+        );
+
+        final PredictorNode.Codecs<GeoParameters> predictorCodecs = PredictorNode.createCodecs(
+                builtinPredictors.byNameCodec(),
+                directCodec -> RegistryFileCodec.create(TerrariumRegistries.PREDICTOR, directCodec).xmap(HolderPredictorNode::new, node -> {
+                    if (node instanceof final HolderPredictorNode<GeoParameters> holder) {
+                        return holder.holder();
+                    }
+                    // Parsing will never construct this case, but we should be able to encode a node tree without Holder-wrapping
+                    return Holder.direct(node);
+                })
+        );
+        predictorCodec = predictorCodecs.externalCodec();
+
+        biomeClassifierCodec = ClassifierNode.createCodec(
+                predictorCodec,
+                Biome.CODEC,
+                directCodec -> RegistryFileCodec.create(TerrariumRegistries.BIOME_CLASSIFIER, directCodec).xmap(HolderClassifierNode::new, node -> {
+                    if (node instanceof final HolderClassifierNode<GeoParameters, Holder<Biome>> holder) {
+                        return holder.holder();
+                    }
+                    // Parsing will never construct this case, but we should be able to encode a node tree without Holder-wrapping
+                    return Holder.direct(node);
+                })
+        );
+
+        platform.initializeRegistries(predictorCodecs.directCodec(), biomeClassifierCodec);
+
         TerrariumChunkGenerators.bootstrap();
+        TerrariumBiomeSources.bootstrap();
         GeoChunkLoader.bootstrap();
     }
 
     public static EarthTiles createTiles(final TileCache cache) {
         final EarthTiles.Config tiles = Objects.requireNonNull(Terrarium.tiles, "Terrarium was not bootstrapped");
         return tiles.create(cache);
+    }
+
+    public static Codec<PredictorNode<GeoParameters>> predictorCodec() {
+        return Objects.requireNonNull(predictorCodec, "Terrarium was not bootstrapped");
+    }
+
+    public static Codec<ClassifierNode<GeoParameters, Holder<Biome>>> biomeClassifierCodec() {
+        return Objects.requireNonNull(biomeClassifierCodec, "Terrarium was not bootstrapped");
+    }
+
+    public interface PlatformBootstrap {
+        void initializeRegistries(Codec<PredictorNode<GeoParameters>> predictorCodec, Codec<ClassifierNode<GeoParameters, Holder<Biome>>> biomeClassifierCodec);
     }
 }

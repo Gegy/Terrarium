@@ -5,8 +5,9 @@
       "generator": {
         "type": "terrarium:earth",
         "biome_source": {
-          "type": "minecraft:fixed",
-          "biome": "minecraft:plains"
+          "type": "terrarium:earth",
+          "classifier": "terrarium:earth",
+          "fallback": "minecraft:the_void"
         },
         "height": 384,
         "height_offset": 63,

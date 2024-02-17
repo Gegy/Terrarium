@@ -1,0 +1,7 @@
+{
+  "type": "threshold",
+  "if_greater": "terrarium:earth_land",
+  "if_less": "terrarium:earth_ocean",
+  "threshold": 0.0,
+  "value": "terrarium:elevation"
+}
