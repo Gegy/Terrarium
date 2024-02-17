@@ -12,6 +12,7 @@ import dev.gegy.terrarium.world.GeoProvider;
 import dev.gegy.terrarium.world.GeoProviderHolder;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.Mth;
@@ -25,11 +26,14 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.blending.Blender;
+import net.minecraft.world.level.levelgen.structure.StructureSet;
+import net.minecraft.world.level.levelgen.structure.placement.ConcentricRingsStructurePlacement;
 
 import java.time.Duration;
 import java.util.List;
@@ -192,5 +196,15 @@ public class EarthChunkGenerator extends GeoChunkGenerator {
 
     @Override
     public void addDebugScreenInfo(final List<String> lines, final RandomState randomState, final BlockPos pos) {
+    }
+
+    @Override
+    public ChunkGeneratorStructureState createState(final HolderLookup<StructureSet> structureSetLookup, final RandomState randomState, final long seed) {
+        return ChunkGeneratorStructureState.createForNormal(randomState, seed, biomeSource, structureSetLookup.filterElements(structureSet -> !shouldDropStructureSet(structureSet)));
+    }
+
+    // TODO: The Stronghold's placement doesn't make too much sense (and the biome scan is too expensive) - should be replaced with something else
+    private static boolean shouldDropStructureSet(final StructureSet set) {
+        return set.placement() instanceof ConcentricRingsStructurePlacement;
     }
 }
