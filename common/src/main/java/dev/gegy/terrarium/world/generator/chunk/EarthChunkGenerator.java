@@ -2,11 +2,20 @@ package dev.gegy.terrarium.world.generator.chunk;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.gegy.terrarium.backend.GeoChunk;
+import dev.gegy.terrarium.GuavaTileCache;
+import dev.gegy.terrarium.Terrarium;
+import dev.gegy.terrarium.backend.GeoAttachment;
+import dev.gegy.terrarium.backend.earth.EarthConfiguration;
+import dev.gegy.terrarium.backend.earth.EarthLayers;
+import dev.gegy.terrarium.backend.raster.ShortRaster;
 import dev.gegy.terrarium.world.GeoProvider;
-import dev.gegy.terrarium.world.chunk.GeoChunkHolder;
+import dev.gegy.terrarium.world.GeoProviderHolder;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.WorldGenRegion;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.StructureManager;
@@ -16,28 +25,52 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.blending.Blender;
 
+import java.time.Duration;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 public class EarthChunkGenerator extends GeoChunkGenerator {
     public static final Codec<EarthChunkGenerator> CODEC = RecordCodecBuilder.create(i -> i.group(
-            BiomeSource.CODEC.fieldOf("biome_source").forGetter(c -> c.biomeSource)
+            BiomeSource.CODEC.fieldOf("biome_source").forGetter(c -> c.biomeSource),
+            Codec.INT.fieldOf("min_y").forGetter(EarthChunkGenerator::getMinY),
+            Codec.INT.fieldOf("height").forGetter(EarthChunkGenerator::getGenDepth),
+            EarthConfiguration.CODEC.forGetter(c -> c.configuration)
     ).apply(i, EarthChunkGenerator::new));
 
-    public EarthChunkGenerator(final BiomeSource biomeSource) {
+    private final int minY;
+    private final int height;
+    private final int maxY;
+
+    private final EarthConfiguration configuration;
+    private final float heightScale;
+
+    private final BlockState fillBlock = Blocks.STONE.defaultBlockState();
+    private final BlockState fluidBlock = Blocks.WATER.defaultBlockState();
+
+    public EarthChunkGenerator(final BiomeSource biomeSource, final int minY, final int height, final EarthConfiguration configuration) {
         super(biomeSource);
+        this.minY = minY;
+        this.height = height;
+        maxY = minY + height - 1;
+
+        this.configuration = configuration;
+        heightScale = configuration.heightScale() / configuration.projection().idealMetersPerBlock();
     }
 
     @Override
     public GeoProvider createGeoProvider() {
-        return new GeoProvider(view -> CompletableFuture.completedFuture(Optional.of(GeoChunk.EMPTY)));
+        return new GeoProvider(EarthLayers.create(
+                Terrarium.createTiles(new GuavaTileCache(Duration.ofSeconds(30), 256)),
+                configuration.projection(),
+                Util.backgroundExecutor()
+        ));
     }
 
     @Override
@@ -59,33 +92,102 @@ public class EarthChunkGenerator extends GeoChunkGenerator {
 
     @Override
     public int getGenDepth() {
-        return 0;
+        return height;
     }
 
     @Override
     public CompletableFuture<ChunkAccess> fillFromNoise(final Executor executor, final Blender blender, final RandomState randomState, final StructureManager structures, final ChunkAccess chunk) {
-        final GeoChunk geoChunk = GeoChunkHolder.get(chunk);
+        final ShortRaster elevation = getGeoChunk(chunk).get(GeoAttachment.ELEVATION);
+        if (elevation != null) {
+            fillSurface(chunk, elevation, fillBlock, fluidBlock, getSeaLevel());
+        }
         return CompletableFuture.completedFuture(chunk);
+    }
+
+    private void fillSurface(final ChunkAccess chunk, final ShortRaster elevationRaster, final BlockState fillBlock, final BlockState fluidBlock, final int seaLevel) {
+        final Heightmap oceanFloorHeightmap = chunk.getOrCreateHeightmapUnprimed(Heightmap.Types.OCEAN_FLOOR_WG);
+        final Heightmap worldSurfaceHeightmap = chunk.getOrCreateHeightmapUnprimed(Heightmap.Types.WORLD_SURFACE_WG);
+
+        final int[] surfaceMap = new int[SectionPos.SECTION_SIZE * SectionPos.SECTION_SIZE];
+        int maxY = seaLevel;
+        for (int z = 0; z < SectionPos.SECTION_SIZE; z++) {
+            for (int x = 0; x < SectionPos.SECTION_SIZE; x++) {
+                final int surfaceY = transformElevationToY(elevationRaster.getInt(x, z));
+                surfaceMap[x + z * SectionPos.SECTION_SIZE] = surfaceY;
+                oceanFloorHeightmap.update(x, surfaceY, z, fillBlock);
+                worldSurfaceHeightmap.update(x, Math.max(surfaceY, seaLevel), z, fluidBlock);
+                if (surfaceY > maxY) {
+                    maxY = surfaceY;
+                }
+            }
+        }
+
+        final int maxSectionY = SectionPos.blockToSectionCoord(maxY);
+        final int minSectionY = chunk.getMinSection();
+        for (int sectionY = maxSectionY; sectionY >= minSectionY; sectionY--) {
+            final int sectionBottomY = SectionPos.sectionToBlockCoord(sectionY);
+            final int sectionTopY = SectionPos.sectionToBlockCoord(sectionY, SectionPos.SECTION_MAX_INDEX);
+            final LevelChunkSection section = chunk.getSection(chunk.getSectionIndexFromSectionY(sectionY));
+            for (int z = 0; z < SectionPos.SECTION_SIZE; z++) {
+                for (int x = 0; x < SectionPos.SECTION_SIZE; x++) {
+                    final int surfaceY = surfaceMap[x + z * SectionPos.SECTION_SIZE];
+                    final int topY = Math.max(surfaceY, seaLevel);
+                    for (int y = Math.min(topY, sectionTopY); y >= sectionBottomY; y--) {
+                        final BlockState block = y > surfaceY ? fluidBlock : fillBlock;
+                        section.setBlockState(x, SectionPos.sectionRelative(y), z, block, false);
+                    }
+                }
+            }
+        }
+    }
+
+    private int transformElevationToY(final int elevation) {
+        final int y = Mth.floor((elevation * heightScale) + configuration.heightOffset());
+        return Mth.clamp(y, minY, maxY);
     }
 
     @Override
     public int getSeaLevel() {
-        return 0;
+        return configuration.heightOffset();
     }
 
     @Override
     public int getMinY() {
-        return 0;
+        return minY;
     }
 
     @Override
     public int getBaseHeight(final int x, final int z, final Heightmap.Types heightmap, final LevelHeightAccessor levelHeight, final RandomState randomState) {
-        return 0;
+        final int surfaceY = sampleBaseSurfaceY(x, z, randomState);
+        if (heightmap.isOpaque().test(fluidBlock)) {
+            return Math.max(surfaceY, getSeaLevel()) + 1;
+        }
+        return surfaceY + 1;
     }
 
     @Override
     public NoiseColumn getBaseColumn(final int x, final int z, final LevelHeightAccessor levelHeight, final RandomState randomState) {
-        return new NoiseColumn(levelHeight.getMinBuildHeight(), new BlockState[]{Blocks.STONE.defaultBlockState()});
+        final int minY = levelHeight.getMinBuildHeight();
+        final int surfaceY = sampleBaseSurfaceY(x, z, randomState);
+        final int topY = Math.max(surfaceY, getSeaLevel());
+        final BlockState[] blocks = new BlockState[topY - minY];
+        for (int i = 0; i < blocks.length; i++) {
+            final int y = i + minY;
+            blocks[i] = y > surfaceY ? fluidBlock : fillBlock;
+        }
+        return new NoiseColumn(minY, blocks);
+    }
+
+    private int sampleBaseSurfaceY(final int x, final int z, final RandomState randomState) {
+        final GeoProvider geoProvider = GeoProviderHolder.get(randomState);
+        if (geoProvider != null) {
+            final ChunkPos chunkPos = new ChunkPos(SectionPos.blockToSectionCoord(x), SectionPos.blockToSectionCoord(z));
+            final ShortRaster elevation = geoProvider.getOrLoadSync(chunkPos).get(GeoAttachment.ELEVATION);
+            if (elevation != null) {
+                return transformElevationToY(elevation.getInt(SectionPos.sectionRelative(x), SectionPos.sectionRelative(z)));
+            }
+        }
+        return minY;
     }
 
     @Override

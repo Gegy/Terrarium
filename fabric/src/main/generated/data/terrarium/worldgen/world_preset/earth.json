@@ -7,6 +7,14 @@
         "biome_source": {
           "type": "minecraft:fixed",
           "biome": "minecraft:plains"
+        },
+        "height": 384,
+        "height_offset": 63,
+        "height_scale": 100.0,
+        "min_y": -64,
+        "projection": {
+          "type": "mercator",
+          "meters_per_block": 50000.0
         }
       }
     },

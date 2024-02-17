@@ -23,6 +23,11 @@ public class Mercator implements CylindricalProjection {
     }
 
     @Override
+    public float idealMetersPerBlock() {
+        return (float) metersPerBlock;
+    }
+
+    @Override
     public double blockX(final double lon) {
         return lon / 360.0 * blocksX;
     }

@@ -3,7 +3,6 @@ package dev.gegy.terrarium.backend;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import dev.gegy.terrarium.backend.raster.ShortRaster;
-import dev.gegy.terrarium.backend.raster.UnsignedByteRaster;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 
 import java.util.Map;
@@ -18,6 +17,8 @@ public class GeoAttachment<V> {
             },
             attachment -> attachment.id
     );
+
+    public static final GeoAttachment<ShortRaster> ELEVATION = register("elevation", ShortRaster.CODEC);
 
     private final String id;
     private final Codec<V> codec;

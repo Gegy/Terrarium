@@ -1,6 +1,8 @@
 package dev.gegy.terrarium.registry;
 
 import dev.gegy.terrarium.Terrarium;
+import dev.gegy.terrarium.backend.earth.EarthConfiguration;
+import dev.gegy.terrarium.backend.projection.cylindrical.Mercator;
 import dev.gegy.terrarium.world.generator.chunk.EarthChunkGenerator;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
@@ -14,6 +16,7 @@ import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterLists;
 import net.minecraft.world.level.biome.TheEndBiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
+import net.minecraft.world.level.dimension.DimensionDefaults;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
@@ -41,7 +44,14 @@ public class TerrariumWorldPresets {
 
     private static ChunkGenerator createDefaultEarthGenerator(final BootstapContext<WorldPreset> context) {
         return new EarthChunkGenerator(
-                new FixedBiomeSource(context.lookup(Registries.BIOME).getOrThrow(Biomes.PLAINS))
+                new FixedBiomeSource(context.lookup(Registries.BIOME).getOrThrow(Biomes.PLAINS)),
+                DimensionDefaults.OVERWORLD_MIN_Y,
+                DimensionDefaults.OVERWORLD_LEVEL_HEIGHT,
+                new EarthConfiguration(
+                        new Mercator(50000.0),
+                        100.0f,
+                        63
+                )
         );
     }
 

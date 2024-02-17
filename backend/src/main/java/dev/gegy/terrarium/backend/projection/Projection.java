@@ -15,6 +15,8 @@ public interface Projection {
 
     Type type();
 
+    float idealMetersPerBlock();
+
     double blockX(double lat, double lon);
 
     double blockZ(double lat, double lon);
