@@ -1,3 +1,4 @@
 {
+  "commands.terrarium.geotp.coordinate.success": "Teleported %s to %s, %s on Earth",
   "generator.terrarium.earth": "Earth"
 }

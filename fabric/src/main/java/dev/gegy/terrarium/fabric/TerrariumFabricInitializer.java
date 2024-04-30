@@ -5,6 +5,7 @@ import dev.gegy.terrarium.backend.earth.GeoParameters;
 import dev.gegy.terrarium.backend.expr.predictor.Predictor;
 import dev.gegy.terrarium.registry.TerrariumRegistries;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
 import net.fabricmc.loader.api.FabricLoader;
@@ -26,5 +27,7 @@ public class TerrariumFabricInitializer implements ModInitializer {
                     DynamicRegistries.register(TerrariumRegistries.BIOME_CLASSIFIER, biomeClassifierCodec);
                 }
         );
+
+        CommandRegistrationCallback.EVENT.register((dispatcher, context, environment) -> Terrarium.registerCommands(dispatcher, context));
     }
 }

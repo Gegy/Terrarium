@@ -78,6 +78,10 @@ public class EarthChunkGenerator extends GeoChunkGenerator {
         heightScale = configuration.heightScale() / configuration.projection().idealMetersPerBlock();
     }
 
+    public EarthConfiguration configuration() {
+        return configuration;
+    }
+
     @Override
     public GeoProvider createGeoProvider() {
         return new GeoProvider(EarthLayers.create(

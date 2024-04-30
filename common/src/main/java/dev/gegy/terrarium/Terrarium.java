@@ -1,5 +1,6 @@
 package dev.gegy.terrarium;
 
+import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.serialization.Codec;
 import dev.gegy.terrarium.backend.earth.EarthTiles;
 import dev.gegy.terrarium.backend.earth.GeoParameters;
@@ -8,6 +9,7 @@ import dev.gegy.terrarium.backend.expr.predictor.Predictor;
 import dev.gegy.terrarium.backend.expr.predictor.PredictorNode;
 import dev.gegy.terrarium.backend.loader.ConcurrencyLimiter;
 import dev.gegy.terrarium.backend.tile.TileCache;
+import dev.gegy.terrarium.command.GeoTeleportCommand;
 import dev.gegy.terrarium.registry.HolderClassifierNode;
 import dev.gegy.terrarium.registry.HolderPredictorNode;
 import dev.gegy.terrarium.registry.TerrariumRegistries;
@@ -15,6 +17,8 @@ import dev.gegy.terrarium.world.generator.biome.TerrariumBiomeSources;
 import dev.gegy.terrarium.world.generator.chunk.TerrariumChunkGenerators;
 import dev.gegy.terrarium.world.generator.chunk.data.GeoChunkLoader;
 import net.minecraft.Util;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.RegistryFileCodec;
@@ -84,6 +88,10 @@ public class Terrarium {
         TerrariumChunkGenerators.bootstrap();
         TerrariumBiomeSources.bootstrap();
         GeoChunkLoader.bootstrap();
+    }
+
+    public static void registerCommands(final CommandDispatcher<CommandSourceStack> dispatcher, final CommandBuildContext context) {
+        GeoTeleportCommand.register(dispatcher);
     }
 
     public static EarthTiles createTiles(final TileCache cache) {

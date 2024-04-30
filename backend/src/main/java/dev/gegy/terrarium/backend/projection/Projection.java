@@ -1,6 +1,7 @@
 package dev.gegy.terrarium.backend.projection;
 
 import com.mojang.serialization.Codec;
+import dev.gegy.terrarium.backend.earth.GeoCoords;
 import dev.gegy.terrarium.backend.layer.GeoLayer;
 import dev.gegy.terrarium.backend.layer.LeveledRasterSampler;
 import dev.gegy.terrarium.backend.projection.cylindrical.Equirectangular;
@@ -20,7 +21,15 @@ public interface Projection {
 
     double blockX(double lat, double lon);
 
+    default double blockX(final GeoCoords coords) {
+        return blockX(coords.lat(), coords.lon());
+    }
+
     double blockZ(double lat, double lon);
+
+    default double blockZ(final GeoCoords coords) {
+        return blockZ(coords.lat(), coords.lon());
+    }
 
     double lat(double blockX, double blockZ);
 
