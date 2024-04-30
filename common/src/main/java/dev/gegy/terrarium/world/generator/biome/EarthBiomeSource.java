@@ -6,8 +6,10 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.gegy.terrarium.backend.GeoAttachment;
 import dev.gegy.terrarium.backend.GeoChunk;
 import dev.gegy.terrarium.backend.earth.GeoParameters;
+import dev.gegy.terrarium.backend.earth.cover.Cover;
 import dev.gegy.terrarium.backend.expr.classifier.Classifier;
 import dev.gegy.terrarium.backend.expr.classifier.ClassifierNode;
+import dev.gegy.terrarium.backend.raster.EnumRaster;
 import dev.gegy.terrarium.backend.raster.ShortRaster;
 import dev.gegy.terrarium.registry.TerrariumRegistries;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
@@ -53,14 +55,16 @@ public class EarthBiomeSource extends GeoBiomeSource {
     @Override
     public FlatChunkResolver chunkResolver(final GeoChunk geoChunk) {
         final ShortRaster elevationRaster = geoChunk.get(GeoAttachment.ELEVATION);
-        if (elevationRaster == null) {
+        final EnumRaster<Cover> coverRaster = geoChunk.get(GeoAttachment.LAND_COVER);
+        if (elevationRaster == null || coverRaster == null) {
             return (x, z) -> fallbackBiome;
         }
         final GeoParameters parameters = this.parameters.get();
         final Classifier<GeoParameters, Holder<Biome>> biomeClassifier = this.biomeClassifier.get();
         return (x, z) -> {
             final int elevation = elevationRaster.getInt(x, z);
-            return biomeClassifier.evaluate(parameters.set(elevation));
+            final Cover cover = coverRaster.get(x, z);
+            return biomeClassifier.evaluate(parameters.set(elevation, cover));
         };
     }
 }

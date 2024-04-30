@@ -2,6 +2,7 @@ package dev.gegy.terrarium.registry;
 
 import dev.gegy.terrarium.Terrarium;
 import dev.gegy.terrarium.backend.earth.GeoParameters;
+import dev.gegy.terrarium.backend.earth.cover.Cover;
 import dev.gegy.terrarium.backend.expr.classifier.ClassifierNode;
 import dev.gegy.terrarium.backend.expr.classifier.Classifiers;
 import dev.gegy.terrarium.backend.expr.predictor.PredictorNode;
@@ -14,6 +15,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 
+import static dev.gegy.terrarium.backend.expr.classifier.Classifiers.ifTrue;
 import static dev.gegy.terrarium.backend.expr.classifier.Classifiers.threshold;
 import static dev.gegy.terrarium.backend.expr.predictor.Predictors.constant;
 import static dev.gegy.terrarium.backend.expr.predictor.Predictors.opaque;
@@ -28,9 +30,11 @@ public class TerrariumBiomeClassifiers {
 
         context.register(EARTH, threshold(
                 elevation(), constant(0.0f),
-                register(context, EARTH_LAND,
+                register(context, EARTH_LAND, ifTrue(
+                        is(Cover.PERMANENT_SNOW),
+                        leaf(biomes, Biomes.SNOWY_PLAINS),
                         leaf(biomes, Biomes.PLAINS)
-                ),
+                )),
                 register(context, EARTH_OCEAN,
                         leaf(biomes, Biomes.OCEAN)
                 )
@@ -39,6 +43,10 @@ public class TerrariumBiomeClassifiers {
 
     private static PredictorNode<GeoParameters> elevation() {
         return opaque(GeoParameters.ELEVATION);
+    }
+
+    private static PredictorNode<GeoParameters> is(final Cover cover) {
+        return opaque(GeoParameters.IS_COVER.get(cover));
     }
 
     private static ClassifierNode<GeoParameters, Holder<Biome>> leaf(final HolderGetter<Biome> biomes, final ResourceKey<Biome> key) {

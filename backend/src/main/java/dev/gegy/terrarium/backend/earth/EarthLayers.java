@@ -42,6 +42,7 @@ public record EarthLayers(
     public CompletableFuture<Optional<GeoChunk>> get(final GeoView view) {
         return new GeoChunk.Builder()
                 .put(GeoAttachment.ELEVATION, elevation.get(view))
+                .put(GeoAttachment.LAND_COVER, landCover.get(view))
                 .build();
     }
 }

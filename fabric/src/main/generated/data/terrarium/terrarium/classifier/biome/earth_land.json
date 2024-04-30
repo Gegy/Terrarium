@@ -1,4 +1,13 @@
 {
-  "type": "const",
-  "value": "minecraft:plains"
+  "type": "threshold",
+  "if_greater": {
+    "type": "const",
+    "value": "minecraft:snowy_plains"
+  },
+  "if_less": {
+    "type": "const",
+    "value": "minecraft:plains"
+  },
+  "threshold": 0.5,
+  "value": "terrarium:is_cover/permanent_snow"
 }
