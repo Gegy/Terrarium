@@ -31,6 +31,14 @@ public class Util {
         return a + (b - a) * x;
     }
 
+    public static int clamp(final int value, final int min, final int max) {
+        return Math.min(Math.max(value, min), max);
+    }
+
+    public static int ceilDiv(final int value, final int divisor) {
+        return (value + divisor - 1) / divisor;
+    }
+
     public static void readFully(final ReadableByteChannel channel, final ByteBuffer buffer) throws IOException {
         if (!tryReadFully(channel, buffer)) {
             throw new EOFException("Expected " + buffer.capacity() + " bytes, got " + buffer.position());

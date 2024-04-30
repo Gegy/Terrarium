@@ -18,4 +18,4 @@ plugins {
 }
 
 rootProject.name = 'Terrarium'
-include ':backend', ':common', ':fabric'
+include ':backend', ':common', ':fabric', ':tools'

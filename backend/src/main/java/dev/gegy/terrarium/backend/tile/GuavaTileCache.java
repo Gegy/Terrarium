@@ -1,11 +1,8 @@
-package dev.gegy.terrarium;
+package dev.gegy.terrarium.backend.tile;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import dev.gegy.terrarium.backend.loader.Cacher;
-import dev.gegy.terrarium.backend.tile.TileCache;
-import dev.gegy.terrarium.backend.tile.TileKey;
-import dev.gegy.terrarium.backend.tile.TileMap;
 
 import java.time.Duration;
 import java.util.Optional;
