@@ -2,24 +2,29 @@ package dev.gegy.terrarium.world.generator.chunk;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.gegy.terrarium.GuavaTileCache;
 import dev.gegy.terrarium.Terrarium;
 import dev.gegy.terrarium.backend.GeoAttachment;
+import dev.gegy.terrarium.backend.GeoChunk;
 import dev.gegy.terrarium.backend.earth.EarthConfiguration;
 import dev.gegy.terrarium.backend.earth.EarthLayers;
 import dev.gegy.terrarium.backend.raster.ShortRaster;
+import dev.gegy.terrarium.backend.tile.GuavaTileCache;
 import dev.gegy.terrarium.world.GeoProvider;
 import dev.gegy.terrarium.world.GeoProviderHolder;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.worldgen.SurfaceRuleData;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.StructureManager;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Blocks;
@@ -30,7 +35,10 @@ import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.NoiseChunk;
 import net.minecraft.world.level.levelgen.RandomState;
+import net.minecraft.world.level.levelgen.SurfaceRules;
+import net.minecraft.world.level.levelgen.WorldGenerationContext;
 import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.structure.StructureSet;
 import net.minecraft.world.level.levelgen.structure.placement.ConcentricRingsStructurePlacement;
@@ -47,6 +55,8 @@ public class EarthChunkGenerator extends GeoChunkGenerator {
             Codec.INT.fieldOf("height").forGetter(EarthChunkGenerator::getGenDepth),
             EarthConfiguration.CODEC.forGetter(c -> c.configuration)
     ).apply(i, EarthChunkGenerator::new));
+
+    private static final SurfaceRules.RuleSource SURFACE_RULE = SurfaceRuleData.overworld();
 
     private final int minY;
     private final int height;
@@ -88,6 +98,24 @@ public class EarthChunkGenerator extends GeoChunkGenerator {
 
     @Override
     public void buildSurface(final WorldGenRegion region, final StructureManager structures, final RandomState randomState, final ChunkAccess chunk) {
+        final GeoChunk geoChunk = getGeoChunk(chunk);
+
+        final WorldGenerationContext context = new WorldGenerationContext(this, region);
+        final BiomeManager biomeManager = region.getBiomeManager();
+        final Registry<Biome> biomeRegistry = region.registryAccess().registryOrThrow(Registries.BIOME);
+        final NoiseChunk noiseChunk = getOrCreateDummyNoiseChunk(randomState, chunk, geoChunk);
+        randomState.surfaceSystem().buildSurface(randomState, biomeManager, biomeRegistry, false, context, chunk, noiseChunk, SURFACE_RULE);
+    }
+
+    private NoiseChunk getOrCreateDummyNoiseChunk(final RandomState randomState, final ChunkAccess chunk, final GeoChunk geoChunk) {
+        final ShortRaster elevation = geoChunk.get(GeoAttachment.ELEVATION);
+        final DummyNoiseChunkFactory.SurfaceSampler surfaceSampler;
+        if (elevation != null) {
+            surfaceSampler = (x, z) -> transformElevationToY(elevation.getInt(SectionPos.sectionRelative(x), SectionPos.sectionRelative(z)));
+        } else {
+            surfaceSampler = (x, z) -> minY;
+        }
+        return DummyNoiseChunkFactory.getOrCreate(chunk, randomState, surfaceSampler);
     }
 
     @Override
