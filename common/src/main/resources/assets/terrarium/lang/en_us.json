@@ -1,4 +1,7 @@
 {
-  "commands.terrarium.geotp.coordinate.success": "Teleported %s to %s, %s on Earth",
+  "commands.terrarium.geotp.coordinate.success": "Teleported %s to %s, %s on Earth.",
+  "commands.terrarium.geotp.lookup.not_found": "Didn't find any potential locations for query: '%s'.",
+  "commands.terrarium.geotp.lookup.rate_limited": "The place query request was rate-limited. Please try again later.",
+  "commands.terrarium.geotp.lookup.unknown_error": "An unknown error occurred while trying to perform this query. Please try again later.",
   "generator.terrarium.earth": "Earth"
 }

@@ -2,8 +2,11 @@ package dev.gegy.terrarium;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.serialization.Codec;
+import dev.gegy.terrarium.backend.earth.ApiKeys;
 import dev.gegy.terrarium.backend.earth.EarthTiles;
 import dev.gegy.terrarium.backend.earth.GeoParameters;
+import dev.gegy.terrarium.backend.earth.geocoder.Geocoder;
+import dev.gegy.terrarium.backend.earth.geocoder.GoogleGeocoder;
 import dev.gegy.terrarium.backend.expr.classifier.ClassifierNode;
 import dev.gegy.terrarium.backend.expr.predictor.Predictor;
 import dev.gegy.terrarium.backend.expr.predictor.PredictorNode;
@@ -30,6 +33,7 @@ import java.net.http.HttpClient;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 public class Terrarium {
     public static final String ID = "terrarium";
@@ -45,6 +49,8 @@ public class Terrarium {
     private static Codec<PredictorNode<GeoParameters>> predictorCodec;
     @Nullable
     private static Codec<ClassifierNode<GeoParameters, Holder<Biome>>> biomeClassifierCodec;
+    @Nullable
+    private static CompletableFuture<Geocoder> geocoder;
 
     public static void bootstrap(final Path terrariumDirectory, final Registry<Predictor<GeoParameters>> builtinPredictors, final PlatformBootstrap platform) {
         tiles = new EarthTiles.Config(
@@ -53,6 +59,12 @@ public class Terrarium {
                 terrariumDirectory.resolve("cache2"),
                 Util.backgroundExecutor(),
                 Util.ioPool()
+        );
+
+        geocoder = ApiKeys.fetch(HTTP_CLIENT).thenApply(apiKeys ->
+                new GoogleGeocoder(HTTP_CLIENT, apiKeys, Util.backgroundExecutor())
+                        .limitConcurrency(new ConcurrencyLimiter(2))
+                        .cached()
         );
 
         GeoParameters.forEach((id, predictor) ->
@@ -105,6 +117,10 @@ public class Terrarium {
 
     public static Codec<ClassifierNode<GeoParameters, Holder<Biome>>> biomeClassifierCodec() {
         return Objects.requireNonNull(biomeClassifierCodec, "Terrarium was not bootstrapped");
+    }
+
+    public static Geocoder geocoder() {
+        return Objects.requireNonNull(geocoder, "Terrarium was not bootstrapped").join();
     }
 
     public interface PlatformBootstrap {

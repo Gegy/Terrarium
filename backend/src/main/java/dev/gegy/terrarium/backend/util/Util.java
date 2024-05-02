@@ -1,10 +1,14 @@
 package dev.gegy.terrarium.backend.util;
 
 import com.google.common.base.Suppliers;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.MapLike;
 import com.mojang.serialization.RecordBuilder;
@@ -13,6 +17,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.http.HttpResponse;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ReadableByteChannel;
@@ -174,5 +179,22 @@ public class Util {
                 return prefix.withErrorsFrom(DataResult.error(() -> "Encoding not supported for " + name));
             }
         };
+    }
+
+    public static <T> HttpResponse.BodyHandler<T> jsonBodyHandler(final Codec<T> codec) {
+        final HttpResponse.BodyHandler<String> stringHandler = HttpResponse.BodyHandlers.ofString();
+        return responseInfo -> HttpResponse.BodySubscribers.mapping(stringHandler.apply(responseInfo), string -> {
+            final JsonElement json = JsonParser.parseString(string);
+            return getOrThrow(codec.parse(JsonOps.INSTANCE, json), JsonSyntaxException::new);
+        });
+    }
+
+    // TODO 1.20.6: Replace with DataFixerUpper equivalent
+    @Deprecated
+    public static <T, E extends Throwable> T getOrThrow(final DataResult<T> result, final Function<String, E> exceptionFactory) throws E {
+        if (result.result().isPresent()) {
+            return result.result().get();
+        }
+        throw exceptionFactory.apply(result.error().orElseThrow().message());
     }
 }

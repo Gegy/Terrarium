@@ -13,7 +13,7 @@ import java.util.concurrent.CompletableFuture;
 
 public record HttpLoader(HttpClient client, Duration requestTimeout) implements Loader<URI, byte[]> {
     private static final Logger LOGGER = LogUtils.getLogger();
-    private static final String USER_AGENT = "Terrarium/2.0";
+    public static final String USER_AGENT = "Terrarium/2.0";
 
     @Override
     public CompletableFuture<Optional<byte[]>> load(final URI uri) {
