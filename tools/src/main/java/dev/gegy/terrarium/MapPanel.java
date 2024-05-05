@@ -144,7 +144,7 @@ public class MapPanel extends JPanel implements ComponentListener, MouseListener
             final int wrappedTileX = Math.floorMod(tileX, tileCount);
             final int x0 = (wrappedTileX - halfTileCount) * TILE_SIZE;
             final int y0 = (tileY - halfTileCount) * TILE_SIZE;
-            return feature.render(layers, zoomLevel, x0, y0, x0 + TILE_SIZE - 1, y0 + TILE_SIZE - 1);
+            return feature.render(layers, wrappedTileX, tileY, zoomLevel, x0, y0, x0 + TILE_SIZE - 1, y0 + TILE_SIZE - 1);
         });
         tileMap.setRepaintListener(this::repaint);
         tileMap.resize(controller.panX(), controller.panY(), getWidth(), getHeight());

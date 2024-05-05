@@ -3,4 +3,7 @@ repositories {
 
 dependencies {
   implementation project(':backend')
+
+  implementation 'org.slf4j:slf4j-api:2.0.7'
+  implementation 'com.mojang:logging:1.1.1'
 }
