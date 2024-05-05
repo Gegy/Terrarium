@@ -115,7 +115,15 @@ public class EarthChunkGenerator extends GeoChunkGenerator {
         final ShortRaster elevation = geoChunk.get(EarthAttachments.ELEVATION);
         final DummyNoiseChunkFactory.SurfaceSampler surfaceSampler;
         if (elevation != null) {
-            surfaceSampler = (x, z) -> transformElevationToY(elevation.getInt(SectionPos.sectionRelative(x), SectionPos.sectionRelative(z)));
+            final ChunkPos chunkPos = chunk.getPos();
+            final int minBlockX = chunkPos.getMinBlockX();
+            final int minBlockZ = chunkPos.getMinBlockZ();
+            surfaceSampler = (x, z) -> {
+                // Surface builders query slightly out of range, but it's good enough to fudge and clamp it
+                final int relativeX = Mth.clamp(x - minBlockX, 0, SectionPos.SECTION_MAX_INDEX);
+                final int relativeZ = Mth.clamp(z - minBlockZ, 0, SectionPos.SECTION_MAX_INDEX);
+                return transformElevationToY(elevation.getInt(relativeX, relativeZ));
+            };
         } else {
             surfaceSampler = (x, z) -> minY;
         }
