@@ -1,4 +1,85 @@
 {
-  "type": "const",
-  "value": "minecraft:ocean"
+  "type": "threshold",
+  "if_greater": {
+    "type": "threshold",
+    "if_greater": {
+      "type": "threshold",
+      "if_greater": {
+        "type": "threshold",
+        "if_greater": {
+          "type": "const",
+          "value": "minecraft:warm_ocean"
+        },
+        "if_less": {
+          "type": "const",
+          "value": "minecraft:deep_lukewarm_ocean"
+        },
+        "threshold": -1000.0,
+        "value": "terrarium:elevation"
+      },
+      "if_less": {
+        "type": "threshold",
+        "if_greater": {
+          "type": "const",
+          "value": "minecraft:lukewarm_ocean"
+        },
+        "if_less": {
+          "type": "const",
+          "value": "minecraft:deep_lukewarm_ocean"
+        },
+        "threshold": -1000.0,
+        "value": "terrarium:elevation"
+      },
+      "threshold": 22.0,
+      "value": "terrarium:average_temperature"
+    },
+    "if_less": {
+      "type": "threshold",
+      "if_greater": {
+        "type": "const",
+        "value": "minecraft:ocean"
+      },
+      "if_less": {
+        "type": "const",
+        "value": "minecraft:deep_ocean"
+      },
+      "threshold": -1000.0,
+      "value": "terrarium:elevation"
+    },
+    "threshold": 18.0,
+    "value": "terrarium:average_temperature"
+  },
+  "if_less": {
+    "type": "threshold",
+    "if_greater": {
+      "type": "threshold",
+      "if_greater": {
+        "type": "const",
+        "value": "minecraft:cold_ocean"
+      },
+      "if_less": {
+        "type": "const",
+        "value": "minecraft:deep_cold_ocean"
+      },
+      "threshold": -1000.0,
+      "value": "terrarium:elevation"
+    },
+    "if_less": {
+      "type": "threshold",
+      "if_greater": {
+        "type": "const",
+        "value": "minecraft:frozen_ocean"
+      },
+      "if_less": {
+        "type": "const",
+        "value": "minecraft:deep_frozen_ocean"
+      },
+      "threshold": -1000.0,
+      "value": "terrarium:elevation"
+    },
+    "threshold": -14.0,
+    "value": "terrarium:min_temperature"
+  },
+  "threshold": 5.0,
+  "value": "terrarium:average_temperature"
 }

@@ -35,14 +35,48 @@ public class TerrariumBiomeClassifiers {
                         leaf(biomes, Biomes.SNOWY_PLAINS),
                         leaf(biomes, Biomes.PLAINS)
                 )),
-                register(context, EARTH_OCEAN,
-                        leaf(biomes, Biomes.OCEAN)
-                )
+                register(context, EARTH_OCEAN, buildOceanClassifier(biomes))
         ));
+    }
+
+    private static ClassifierNode<GeoParameters, Holder<Biome>> buildOceanClassifier(final HolderGetter<Biome> biomes) {
+        return threshold(
+                meanTemperature(), constant(5.0f),
+                threshold(
+                        meanTemperature(), constant(18.0f),
+                        threshold(
+                                meanTemperature(), constant(22.0f),
+                                oceanChoice(biomes, Biomes.WARM_OCEAN, Biomes.DEEP_LUKEWARM_OCEAN),
+                                oceanChoice(biomes, Biomes.LUKEWARM_OCEAN, Biomes.DEEP_LUKEWARM_OCEAN)
+                        ),
+                        oceanChoice(biomes, Biomes.OCEAN, Biomes.DEEP_OCEAN)
+                ),
+                threshold(
+                        minTemperature(), constant(-14.0f),
+                        oceanChoice(biomes, Biomes.COLD_OCEAN, Biomes.DEEP_COLD_OCEAN),
+                        oceanChoice(biomes, Biomes.FROZEN_OCEAN, Biomes.DEEP_FROZEN_OCEAN)
+                )
+        );
+    }
+
+    private static ClassifierNode<GeoParameters, Holder<Biome>> oceanChoice(final HolderGetter<Biome> biomes, final ResourceKey<Biome> ocean, final ResourceKey<Biome> deepOcean) {
+        return threshold(
+                elevation(), constant(-1000.0f),
+                leaf(biomes, ocean),
+                leaf(biomes, deepOcean)
+        );
     }
 
     private static PredictorNode<GeoParameters> elevation() {
         return opaque(GeoParameters.ELEVATION);
+    }
+
+    private static PredictorNode<GeoParameters> meanTemperature() {
+        return opaque(GeoParameters.MEAN_TEMPERATURE);
+    }
+
+    private static PredictorNode<GeoParameters> minTemperature() {
+        return opaque(GeoParameters.MIN_TEMPERATURE);
     }
 
     private static PredictorNode<GeoParameters> is(final Cover cover) {
