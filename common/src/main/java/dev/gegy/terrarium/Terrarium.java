@@ -67,7 +67,7 @@ public class Terrarium {
                         .cached()
         );
 
-        GeoParameters.forEach((id, predictor) ->
+        GeoParameters.forEachFeature((id, predictor) ->
                 Registry.register(builtinPredictors, new ResourceLocation(Terrarium.ID, id), predictor)
         );
 

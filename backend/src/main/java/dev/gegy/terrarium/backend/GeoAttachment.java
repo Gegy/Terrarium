@@ -2,11 +2,8 @@ package dev.gegy.terrarium.backend;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-import dev.gegy.terrarium.backend.earth.cover.Cover;
-import dev.gegy.terrarium.backend.raster.EnumRaster;
 import dev.gegy.terrarium.backend.raster.Raster;
 import dev.gegy.terrarium.backend.raster.RasterType;
-import dev.gegy.terrarium.backend.raster.ShortRaster;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 
 import java.util.Map;
@@ -21,9 +18,6 @@ public class GeoAttachment<V> {
             },
             attachment -> attachment.id
     );
-
-    public static final GeoAttachment<ShortRaster> ELEVATION = register("elevation", ShortRaster.TYPE);
-    public static final GeoAttachment<EnumRaster<Cover>> LAND_COVER = register("land_cover", EnumRaster.type(Cover.NONE));
 
     private final String id;
     private final Codec<V> codec;

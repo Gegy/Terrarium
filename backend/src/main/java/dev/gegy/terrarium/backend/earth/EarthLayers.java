@@ -1,6 +1,5 @@
 package dev.gegy.terrarium.backend.earth;
 
-import dev.gegy.terrarium.backend.GeoAttachment;
 import dev.gegy.terrarium.backend.GeoChunk;
 import dev.gegy.terrarium.backend.GeoView;
 import dev.gegy.terrarium.backend.earth.climate.ClimateRasterSamplers;
@@ -21,6 +20,8 @@ import java.util.concurrent.Executor;
 public record EarthLayers(
         GeoLayer<ShortRaster> elevation,
         GeoLayer<EnumRaster<Cover>> landCover,
+        GeoLayer<UnsignedByteRaster> cationExchangeCapacity,
+        GeoLayer<ShortRaster> organicCarbonContent,
         GeoLayer<UnsignedByteRaster> soilPh,
         GeoLayer<UnsignedByteRaster> clayContent,
         GeoLayer<UnsignedByteRaster> siltContent,
@@ -36,6 +37,8 @@ public record EarthLayers(
         return new EarthLayers(
                 projection.createInterpolatedLayer(tiles.elevation(), executor),
                 projection.createVoronoiLayer(tiles.landCover(), executor),
+                projection.createInterpolatedLayer(tiles.cationExchangeCapacity(), executor),
+                projection.createInterpolatedLayer(tiles.organicCarbonContent(), executor),
                 projection.createInterpolatedLayer(tiles.soilPh(), executor),
                 projection.createInterpolatedLayer(tiles.clayContent(), executor),
                 projection.createInterpolatedLayer(tiles.siltContent(), executor),
@@ -51,8 +54,18 @@ public record EarthLayers(
     @Override
     public CompletableFuture<Optional<GeoChunk>> get(final GeoView view) {
         return new GeoChunk.Builder()
-                .put(GeoAttachment.ELEVATION, elevation.get(view))
-                .put(GeoAttachment.LAND_COVER, landCover.get(view))
+                .put(EarthAttachments.ELEVATION, elevation.get(view))
+                .put(EarthAttachments.LAND_COVER, landCover.get(view))
+                .put(EarthAttachments.CATION_EXCHANGE_CAPACITY, cationExchangeCapacity.get(view))
+                .put(EarthAttachments.ORGANIC_CARBON_CONTENT, organicCarbonContent.get(view))
+                .put(EarthAttachments.SOIL_PH, soilPh.get(view))
+                .put(EarthAttachments.CLAY_CONTENT, clayContent.get(view))
+                .put(EarthAttachments.SILT_CONTENT, siltContent.get(view))
+                .put(EarthAttachments.SAND_CONTENT, sandContent.get(view))
+                .put(EarthAttachments.SOIL_SUBORDER, soilSuborder.get(view))
+                .put(EarthAttachments.MEAN_TEMPERATURE, meanTemperature.get(view))
+                .put(EarthAttachments.MIN_TEMPERATURE, minTemperature.get(view))
+                .put(EarthAttachments.ANNUAL_RAINFALL, annualRainfall.get(view))
                 .build();
     }
 }

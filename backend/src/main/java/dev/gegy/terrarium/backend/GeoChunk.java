@@ -2,17 +2,24 @@ package dev.gegy.terrarium.backend;
 
 import com.mojang.datafixers.util.Pair;
 import com.mojang.datafixers.util.Unit;
-import com.mojang.serialization.*;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.Lifecycle;
+import com.mojang.serialization.RecordBuilder;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public class GeoChunk {
+    // TODO 1.20.6: Replace with DFU Codec.dispatchedMap
     public static final Codec<GeoChunk> CODEC = new Codec<>() {
         @Override
         public <T> DataResult<Pair<GeoChunk, T>> decode(final DynamicOps<T> ops, final T input) {
@@ -68,8 +75,29 @@ public class GeoChunk {
         return (V) attachmentMap.get(attachment);
     }
 
+    public <V> V getOrThrow(final GeoAttachment<V> attachment) {
+        final V value = get(attachment);
+        if (value == null) {
+            throw new IllegalArgumentException("Attachment " + attachment + " was missing on chunk");
+        }
+        return value;
+    }
+
     public boolean isEmpty() {
         return attachmentMap.isEmpty();
+    }
+
+    public Optional<GeoChunk> requireAll(final GeoAttachmentSet attachments) {
+        return hasAll(attachments) ? Optional.of(this) : Optional.empty();
+    }
+
+    public boolean hasAll(final GeoAttachmentSet attachments) {
+        for (final GeoAttachment<?> attachment : attachments) {
+            if (!attachmentMap.containsKey(attachment)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static class Builder {

@@ -3,8 +3,8 @@ package dev.gegy.terrarium.world.generator.chunk;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.gegy.terrarium.Terrarium;
-import dev.gegy.terrarium.backend.GeoAttachment;
 import dev.gegy.terrarium.backend.GeoChunk;
+import dev.gegy.terrarium.backend.earth.EarthAttachments;
 import dev.gegy.terrarium.backend.earth.EarthConfiguration;
 import dev.gegy.terrarium.backend.earth.EarthLayers;
 import dev.gegy.terrarium.backend.raster.ShortRaster;
@@ -112,7 +112,7 @@ public class EarthChunkGenerator extends GeoChunkGenerator {
     }
 
     private NoiseChunk getOrCreateDummyNoiseChunk(final RandomState randomState, final ChunkAccess chunk, final GeoChunk geoChunk) {
-        final ShortRaster elevation = geoChunk.get(GeoAttachment.ELEVATION);
+        final ShortRaster elevation = geoChunk.get(EarthAttachments.ELEVATION);
         final DummyNoiseChunkFactory.SurfaceSampler surfaceSampler;
         if (elevation != null) {
             surfaceSampler = (x, z) -> transformElevationToY(elevation.getInt(SectionPos.sectionRelative(x), SectionPos.sectionRelative(z)));
@@ -133,7 +133,7 @@ public class EarthChunkGenerator extends GeoChunkGenerator {
 
     @Override
     public CompletableFuture<ChunkAccess> fillFromNoise(final Executor executor, final Blender blender, final RandomState randomState, final StructureManager structures, final ChunkAccess chunk) {
-        final ShortRaster elevation = getGeoChunk(chunk).get(GeoAttachment.ELEVATION);
+        final ShortRaster elevation = getGeoChunk(chunk).get(EarthAttachments.ELEVATION);
         if (elevation != null) {
             fillSurface(chunk, elevation, fillBlock, fluidBlock, getSeaLevel());
         }
@@ -218,7 +218,7 @@ public class EarthChunkGenerator extends GeoChunkGenerator {
         final GeoProvider geoProvider = GeoProviderHolder.get(randomState);
         if (geoProvider != null) {
             final ChunkPos chunkPos = new ChunkPos(SectionPos.blockToSectionCoord(x), SectionPos.blockToSectionCoord(z));
-            final ShortRaster elevation = geoProvider.getOrLoadSync(chunkPos).get(GeoAttachment.ELEVATION);
+            final ShortRaster elevation = geoProvider.getOrLoadSync(chunkPos).get(EarthAttachments.ELEVATION);
             if (elevation != null) {
                 return transformElevationToY(elevation.getInt(SectionPos.sectionRelative(x), SectionPos.sectionRelative(z)));
             }
