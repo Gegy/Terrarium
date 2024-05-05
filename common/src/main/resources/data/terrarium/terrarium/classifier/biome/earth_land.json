@@ -1,0 +1,301 @@
+{
+  "value": "terrarium:is_soil_suborder/none",
+  "threshold": 1.0,
+  "if_greater": {
+    "value": "terrarium:is_cover/permanent_snow",
+    "threshold": 1.0,
+    "if_greater": {
+      "value": "minecraft:snowy_plains",
+      "type": "const"
+    },
+    "if_less": {
+      "value": "terrarium:is_cover/water",
+      "threshold": 1.0,
+      "if_greater": {
+        "value": "minecraft:plains",
+        "type": "const"
+      },
+      "if_less": {
+        "value": "minecraft:swamp",
+        "type": "const"
+      },
+      "type": "threshold"
+    },
+    "type": "threshold"
+  },
+  "if_less": {
+    "value": "terrarium:annual_precipitation",
+    "threshold": 458.0,
+    "if_greater": {
+      "value": "terrarium:average_temperature",
+      "threshold": 9.333336,
+      "if_greater": {
+        "value": "terrarium:ph",
+        "threshold": 49.0,
+        "if_greater": {
+          "value": "terrarium:average_temperature",
+          "threshold": 23.333336,
+          "if_greater": {
+            "value": "terrarium:annual_precipitation",
+            "threshold": 3149.0,
+            "if_greater": {
+              "value": "minecraft:sparse_jungle",
+              "type": "const"
+            },
+            "if_less": {
+              "value": "terrarium:is_cover/irrigated_cropland",
+              "threshold": 1.0,
+              "if_greater": {
+                "value": "minecraft:plains",
+                "type": "const"
+              },
+              "if_less": {
+                "value": "terrarium:silt_content",
+                "threshold": 31.0,
+                "if_greater": {
+                  "value": "minecraft:plains",
+                  "type": "const"
+                },
+                "if_less": {
+                  "value": "minecraft:savanna",
+                  "type": "const"
+                },
+                "type": "threshold"
+              },
+              "type": "threshold"
+            },
+            "type": "threshold"
+          },
+          "if_less": {
+            "value": "terrarium:is_cover/flooded_vegetation",
+            "threshold": 1.0,
+            "if_greater": {
+              "value": "minecraft:swamp",
+              "type": "const"
+            },
+            "if_less": {
+              "value": "terrarium:annual_precipitation",
+              "threshold": 606.0,
+              "if_greater": {
+                "value": "terrarium:is_soil_suborder/xeralfs",
+                "threshold": 1.0,
+                "if_greater": {
+                  "value": "minecraft:plains",
+                  "type": "const"
+                },
+                "if_less": {
+                  "value": "terrarium:elevation",
+                  "threshold": 917.0,
+                  "if_greater": {
+                    "value": "terrarium:is_cover/grassland",
+                    "threshold": 1.0,
+                    "if_greater": {
+                      "value": "minecraft:savanna",
+                      "type": "const"
+                    },
+                    "if_less": {
+                      "value": "minecraft:plains",
+                      "type": "const"
+                    },
+                    "type": "threshold"
+                  },
+                  "if_less": {
+                    "value": "terrarium:sand_content",
+                    "threshold": 74.0,
+                    "if_greater": {
+                      "value": "minecraft:plains",
+                      "type": "const"
+                    },
+                    "if_less": {
+                      "value": "terrarium:silt_content",
+                      "threshold": 72.0,
+                      "if_greater": {
+                        "value": "minecraft:plains",
+                        "type": "const"
+                      },
+                      "if_less": {
+                        "value": "minecraft:flower_forest",
+                        "type": "const"
+                      },
+                      "type": "threshold"
+                    },
+                    "type": "threshold"
+                  },
+                  "type": "threshold"
+                },
+                "type": "threshold"
+              },
+              "if_less": {
+                "value": "terrarium:elevation",
+                "threshold": 384.0,
+                "if_greater": {
+                  "value": "minecraft:desert",
+                  "type": "const"
+                },
+                "if_less": {
+                  "value": "minecraft:plains",
+                  "type": "const"
+                },
+                "type": "threshold"
+              },
+              "type": "threshold"
+            },
+            "type": "threshold"
+          },
+          "type": "threshold"
+        },
+        "if_less": {
+          "value": "terrarium:cation_exchange_capacity",
+          "threshold": 9.0,
+          "if_greater": {
+            "value": "minecraft:sparse_jungle",
+            "type": "const"
+          },
+          "if_less": {
+            "value": "minecraft:jungle",
+            "type": "const"
+          },
+          "type": "threshold"
+        },
+        "type": "threshold"
+      },
+      "if_less": {
+        "value": "terrarium:organic_carbon_content",
+        "threshold": 43.0,
+        "if_greater": {
+          "value": "terrarium:average_temperature",
+          "threshold": 4.333336,
+          "if_greater": {
+            "value": "terrarium:is_cover/needle_leaf_evergreen",
+            "threshold": 1.0,
+            "if_greater": {
+              "value": "minecraft:forest",
+              "type": "const"
+            },
+            "if_less": {
+              "value": "minecraft:flower_forest",
+              "type": "const"
+            },
+            "type": "threshold"
+          },
+          "if_less": {
+            "value": "minecraft:taiga",
+            "type": "const"
+          },
+          "type": "threshold"
+        },
+        "if_less": {
+          "value": "minecraft:forest",
+          "type": "const"
+        },
+        "type": "threshold"
+      },
+      "type": "threshold"
+    },
+    "if_less": {
+      "value": "terrarium:min_temperature",
+      "threshold": -1.3333321,
+      "if_greater": {
+        "value": "terrarium:elevation",
+        "threshold": 1718.0,
+        "if_greater": {
+          "value": "minecraft:badlands",
+          "type": "const"
+        },
+        "if_less": {
+          "value": "terrarium:is_soil_suborder/arents",
+          "threshold": 1.0,
+          "if_greater": {
+            "value": "minecraft:badlands",
+            "type": "const"
+          },
+          "if_less": {
+            "value": "terrarium:clay_content",
+            "threshold": 29.0,
+            "if_greater": {
+              "value": "terrarium:cation_exchange_capacity",
+              "threshold": 27.0,
+              "if_greater": {
+                "value": "minecraft:desert",
+                "type": "const"
+              },
+              "if_less": {
+                "value": "minecraft:savanna",
+                "type": "const"
+              },
+              "type": "threshold"
+            },
+            "if_less": {
+              "value": "terrarium:ph",
+              "threshold": 67.0,
+              "if_greater": {
+                "value": "terrarium:elevation",
+                "threshold": -6.0,
+                "if_greater": {
+                  "value": "terrarium:is_cover/sparse_vegetation",
+                  "threshold": 1.0,
+                  "if_greater": {
+                    "value": "terrarium:ph",
+                    "threshold": 80.0,
+                    "if_greater": {
+                      "value": "minecraft:badlands",
+                      "type": "const"
+                    },
+                    "if_less": {
+                      "value": "minecraft:desert",
+                      "type": "const"
+                    },
+                    "type": "threshold"
+                  },
+                  "if_less": {
+                    "value": "minecraft:desert",
+                    "type": "const"
+                  },
+                  "type": "threshold"
+                },
+                "if_less": {
+                  "value": "minecraft:badlands",
+                  "type": "const"
+                },
+                "type": "threshold"
+              },
+              "if_less": {
+                "value": "minecraft:savanna",
+                "type": "const"
+              },
+              "type": "threshold"
+            },
+            "type": "threshold"
+          },
+          "type": "threshold"
+        },
+        "type": "threshold"
+      },
+      "if_less": {
+        "value": "terrarium:ph",
+        "threshold": 68.0,
+        "if_greater": {
+          "value": "terrarium:is_soil_suborder/orthels",
+          "threshold": 1.0,
+          "if_greater": {
+            "value": "minecraft:snowy_plains",
+            "type": "const"
+          },
+          "if_less": {
+            "value": "minecraft:forest",
+            "type": "const"
+          },
+          "type": "threshold"
+        },
+        "if_less": {
+          "value": "minecraft:taiga",
+          "type": "const"
+        },
+        "type": "threshold"
+      },
+      "type": "threshold"
+    },
+    "type": "threshold"
+  },
+  "type": "threshold"
+}

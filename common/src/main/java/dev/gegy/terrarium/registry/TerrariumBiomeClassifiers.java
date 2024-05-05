@@ -8,6 +8,7 @@ import dev.gegy.terrarium.backend.expr.classifier.Classifiers;
 import dev.gegy.terrarium.backend.expr.predictor.PredictorNode;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
+import net.minecraft.core.HolderOwner;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.BootstapContext;
 import net.minecraft.resources.ResourceKey;
@@ -15,7 +16,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 
-import static dev.gegy.terrarium.backend.expr.classifier.Classifiers.ifTrue;
 import static dev.gegy.terrarium.backend.expr.classifier.Classifiers.threshold;
 import static dev.gegy.terrarium.backend.expr.predictor.Predictors.constant;
 import static dev.gegy.terrarium.backend.expr.predictor.Predictors.opaque;
@@ -30,11 +30,7 @@ public class TerrariumBiomeClassifiers {
 
         context.register(EARTH, threshold(
                 elevation(), constant(0.0f),
-                register(context, EARTH_LAND, ifTrue(
-                        is(Cover.PERMANENT_SNOW),
-                        leaf(biomes, Biomes.SNOWY_PLAINS),
-                        leaf(biomes, Biomes.PLAINS)
-                )),
+                linkData(EARTH_LAND),
                 register(context, EARTH_OCEAN, buildOceanClassifier(biomes))
         ));
     }
@@ -91,7 +87,19 @@ public class TerrariumBiomeClassifiers {
         return new HolderClassifierNode<>(context.register(key, node));
     }
 
+    private static ClassifierNode<GeoParameters, Holder<Biome>> linkData(final ResourceKey<ClassifierNode<GeoParameters, Holder<Biome>>> key) {
+        // Big hack - we don't want to let generators know about this Holder, as it is otherwise required to be registered
+        return new HolderClassifierNode<>(Holder.Reference.createStandAlone(new UniversalOwner<>(), key));
+    }
+
     private static ResourceKey<ClassifierNode<GeoParameters, Holder<Biome>>> createKey(final String name) {
         return ResourceKey.create(TerrariumRegistries.BIOME_CLASSIFIER, new ResourceLocation(Terrarium.ID, name));
+    }
+
+    private record UniversalOwner<T>() implements HolderOwner<T> {
+        @Override
+        public boolean canSerializeIn(final HolderOwner<T> owner) {
+            return true;
+        }
     }
 }
