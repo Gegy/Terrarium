@@ -1,4 +1,4 @@
-package dev.gegy.terrarium;
+package dev.gegy.terrarium.feature;
 
 import dev.gegy.terrarium.backend.earth.EarthLayers;
 

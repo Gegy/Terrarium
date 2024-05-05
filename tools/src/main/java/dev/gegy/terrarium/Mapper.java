@@ -4,6 +4,10 @@ import dev.gegy.terrarium.backend.earth.EarthLayers;
 import dev.gegy.terrarium.backend.earth.EarthTiles;
 import dev.gegy.terrarium.backend.loader.ConcurrencyLimiter;
 import dev.gegy.terrarium.backend.tile.GuavaTileCache;
+import dev.gegy.terrarium.feature.MapFeature;
+import dev.gegy.terrarium.feature.RainfallFeature;
+import dev.gegy.terrarium.feature.ScalarRasterFeature;
+import dev.gegy.terrarium.feature.TemperatureFeature;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,7 +17,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.ForkJoinPool;
 
-public class Map {
+public class Mapper {
     public static final ForkJoinPool EXECUTOR = ForkJoinPool.commonPool();
 
     private static final List<FeatureEntry> FEATURES = List.of(
@@ -24,7 +28,7 @@ public class Map {
             new FeatureEntry("Sand Content", new ScalarRasterFeature(EarthLayers::sandContent, ColorRamps.SOIL)),
             new FeatureEntry("Mean Temperature", new TemperatureFeature(EarthLayers::meanTemperature)),
             new FeatureEntry("Min Temperature", new TemperatureFeature(EarthLayers::minTemperature)),
-            new FeatureEntry("Annual Rainfall", new RainfallFeature(EarthLayers::annualRainfall))
+            new FeatureEntry("Annual Rainfall", new RainfallFeature())
     );
 
     public static void main(final String[] args) {

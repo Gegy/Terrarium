@@ -4,6 +4,7 @@ import dev.gegy.terrarium.backend.earth.EarthConstants;
 import dev.gegy.terrarium.backend.earth.EarthLayers;
 import dev.gegy.terrarium.backend.earth.EarthTiles;
 import dev.gegy.terrarium.backend.projection.cylindrical.Mercator;
+import dev.gegy.terrarium.feature.MapFeature;
 
 import javax.swing.*;
 import java.awt.*;
