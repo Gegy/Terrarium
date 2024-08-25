@@ -11,6 +11,10 @@ minecraft {
   version minecraft_version
 }
 
+repositories {
+  maven { url 'https://repo.spongepowered.org/repository/maven-public/' }
+}
+
 dependencies {
   implementation project(':backend')
   compileOnly 'org.spongepowered:mixin:0.8.5'

@@ -7,7 +7,7 @@ import dev.gegy.terrarium.world.generator.biome.EarthBiomeSource;
 import dev.gegy.terrarium.world.generator.chunk.EarthChunkGenerator;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biomes;
@@ -28,7 +28,7 @@ import java.util.Map;
 public class TerrariumWorldPresets {
     public static final ResourceKey<WorldPreset> EARTH = createKey("earth");
 
-    public static void bootstrap(final BootstapContext<WorldPreset> context) {
+    public static void bootstrap(final BootstrapContext<WorldPreset> context) {
         final HolderGetter<DimensionType> dimensionType = context.lookup(Registries.DIMENSION_TYPE);
         final HolderGetter<NoiseGeneratorSettings> noiseSettings = context.lookup(Registries.NOISE_SETTINGS);
 
@@ -42,7 +42,7 @@ public class TerrariumWorldPresets {
         )));
     }
 
-    private static ChunkGenerator createDefaultEarthGenerator(final BootstapContext<WorldPreset> context) {
+    private static ChunkGenerator createDefaultEarthGenerator(final BootstrapContext<WorldPreset> context) {
         return new EarthChunkGenerator(
                 new EarthBiomeSource(
                         context.lookup(TerrariumRegistries.BIOME_CLASSIFIER).getOrThrow(TerrariumBiomeClassifiers.EARTH),
@@ -58,7 +58,7 @@ public class TerrariumWorldPresets {
         );
     }
 
-    private static LevelStem createNether(final BootstapContext<WorldPreset> context, final HolderGetter<DimensionType> dimensionType, final HolderGetter<NoiseGeneratorSettings> noiseSettings) {
+    private static LevelStem createNether(final BootstrapContext<WorldPreset> context, final HolderGetter<DimensionType> dimensionType, final HolderGetter<NoiseGeneratorSettings> noiseSettings) {
         return new LevelStem(
                 dimensionType.getOrThrow(BuiltinDimensionTypes.NETHER),
                 new NoiseBasedChunkGenerator(
@@ -68,7 +68,7 @@ public class TerrariumWorldPresets {
         );
     }
 
-    private static LevelStem createEnd(final BootstapContext<WorldPreset> context, final HolderGetter<DimensionType> dimensionType, final HolderGetter<NoiseGeneratorSettings> noiseSettings) {
+    private static LevelStem createEnd(final BootstrapContext<WorldPreset> context, final HolderGetter<DimensionType> dimensionType, final HolderGetter<NoiseGeneratorSettings> noiseSettings) {
         return new LevelStem(
                 dimensionType.getOrThrow(BuiltinDimensionTypes.END),
                 new NoiseBasedChunkGenerator(
@@ -79,6 +79,6 @@ public class TerrariumWorldPresets {
     }
 
     private static ResourceKey<WorldPreset> createKey(final String name) {
-        return ResourceKey.create(Registries.WORLD_PRESET, new ResourceLocation(Terrarium.ID, name));
+        return ResourceKey.create(Registries.WORLD_PRESET, ResourceLocation.fromNamespaceAndPath(Terrarium.ID, name));
     }
 }

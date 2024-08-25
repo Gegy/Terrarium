@@ -2,6 +2,7 @@ package dev.gegy.terrarium.world.generator.biome;
 
 import com.google.common.base.Suppliers;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.gegy.terrarium.backend.GeoChunk;
 import dev.gegy.terrarium.backend.earth.EarthAttachments;
@@ -19,7 +20,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class EarthBiomeSource extends GeoBiomeSource {
-    public static final Codec<EarthBiomeSource> CODEC = RecordCodecBuilder.create(i -> i.group(
+    public static final MapCodec<EarthBiomeSource> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
             TerrariumRegistries.BIOME_CLASSIFIER_CODEC.fieldOf("classifier").forGetter(s -> s.biomeClassifierNode),
             Biome.CODEC.fieldOf("fallback").forGetter(s -> s.fallbackBiome)
     ).apply(i, EarthBiomeSource::new));
@@ -35,7 +36,7 @@ public class EarthBiomeSource extends GeoBiomeSource {
     }
 
     @Override
-    protected Codec<? extends BiomeSource> codec() {
+    protected MapCodec<? extends BiomeSource> codec() {
         return CODEC;
     }
 

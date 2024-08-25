@@ -1,9 +1,10 @@
 repositories {
+  maven { url 'https://libraries.minecraft.net' }
 }
 
 dependencies {
   implementation project(':backend')
 
-  implementation 'org.slf4j:slf4j-api:2.0.7'
-  implementation 'com.mojang:logging:1.1.1'
+  implementation 'org.slf4j:slf4j-api:2.0.9'
+  implementation 'com.mojang:logging:1.2.7'
 }

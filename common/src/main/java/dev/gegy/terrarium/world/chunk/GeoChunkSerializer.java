@@ -26,7 +26,7 @@ public class GeoChunkSerializer {
     public static boolean write(final ChunkAccess chunk, final CompoundTag root) {
         final GeoChunk geoChunk = GeoChunkHolder.get(chunk);
         if (!geoChunk.isEmpty()) {
-            root.put(GEO_TAG_KEY, Util.getOrThrow(GeoChunk.CODEC.encodeStart(NbtOps.INSTANCE, geoChunk), IllegalStateException::new));
+            root.put(GEO_TAG_KEY, GeoChunk.CODEC.encodeStart(NbtOps.INSTANCE, geoChunk).getOrThrow());
             return true;
         }
         return false;

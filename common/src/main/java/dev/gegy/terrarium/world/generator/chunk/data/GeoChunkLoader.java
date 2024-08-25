@@ -4,12 +4,12 @@ import dev.gegy.terrarium.world.GeoProvider;
 import dev.gegy.terrarium.world.GeoProviderHolder;
 import dev.gegy.terrarium.world.chunk.ChunkStatusDecorator;
 import dev.gegy.terrarium.world.chunk.GeoChunkHolder;
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.GenerationChunkHolder;
+import net.minecraft.util.StaticCache2D;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
+import net.minecraft.world.level.chunk.status.WorldGenContext;
 
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class GeoChunkLoader {
@@ -19,8 +19,8 @@ public class GeoChunkLoader {
         ChunkStatusDecorator.runBefore(ChunkStatus.STRUCTURE_STARTS, GeoChunkLoader::loadGeoChunk);
     }
 
-    private static CompletableFuture<?> loadGeoChunk(final ServerLevel level, final ChunkGenerator generator, final ChunkAccess chunk, final List<ChunkAccess> context) {
-        final GeoProvider geoProvider = GeoProviderHolder.get(level);
+    private static CompletableFuture<?> loadGeoChunk(final WorldGenContext context, final StaticCache2D<GenerationChunkHolder> chunkCache, final ChunkAccess chunk) {
+        final GeoProvider geoProvider = GeoProviderHolder.get(context.level());
         if (geoProvider != null) {
             return geoProvider.getOrLoad(chunk.getPos())
                     .thenAccept(geoChunk -> GeoChunkHolder.put(chunk, geoChunk));

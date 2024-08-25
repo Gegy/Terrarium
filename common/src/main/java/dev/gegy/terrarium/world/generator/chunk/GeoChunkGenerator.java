@@ -28,7 +28,7 @@ public abstract class GeoChunkGenerator extends ChunkGenerator {
     }
 
     @Override
-    public CompletableFuture<ChunkAccess> createBiomes(final Executor executor, final RandomState randomState, final Blender blender, final StructureManager structureManager, final ChunkAccess chunkAccess) {
+    public CompletableFuture<ChunkAccess> createBiomes(final RandomState randomState, final Blender blender, final StructureManager structureManager, final ChunkAccess chunkAccess) {
         if (biomeSource instanceof final GeoBiomeSource geoBiomeSource) {
             final GeoChunk geoChunk = getGeoChunk(chunkAccess);
             return CompletableFuture.supplyAsync(Util.wrapThreadWithTaskName("init_biomes", () -> {
@@ -37,6 +37,6 @@ public abstract class GeoChunkGenerator extends ChunkGenerator {
                 return chunkAccess;
             }), Util.backgroundExecutor());
         }
-        return super.createBiomes(executor, randomState, blender, structureManager, chunkAccess);
+        return super.createBiomes(randomState, blender, structureManager, chunkAccess);
     }
 }

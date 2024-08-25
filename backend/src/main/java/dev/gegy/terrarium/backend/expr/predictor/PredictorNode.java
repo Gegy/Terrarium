@@ -51,9 +51,9 @@ public interface PredictorNode<T> extends ExprNode<Predictor<T>> {
     }
 
     private static <T> Codec<PredictorNode<T>> createTypedCodec(final Codec<PredictorNode<T>> subCodec) {
-        final EnumMap<PredictorType, Codec<? extends PredictorNode<T>>> codecs = new EnumMap<>(PredictorType.class);
+        final EnumMap<PredictorType, MapCodec<? extends PredictorNode<T>>> codecs = new EnumMap<>(PredictorType.class);
         for (final PredictorType type : PredictorType.values()) {
-            codecs.put(type, type.createCodec(subCodec).codec());
+            codecs.put(type, type.createCodec(subCodec));
         }
         return PredictorType.CODEC.dispatch(PredictorNode::type, codecs::get);
     }

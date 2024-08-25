@@ -1,6 +1,7 @@
 package dev.gegy.terrarium.backend.projection;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import dev.gegy.terrarium.backend.earth.GeoCoords;
 import dev.gegy.terrarium.backend.layer.GeoLayer;
 import dev.gegy.terrarium.backend.layer.LeveledRasterSampler;
@@ -47,9 +48,9 @@ public interface Projection {
         public static final Codec<Type> CODEC = Util.stringLookupCodec(values(), type -> type.key);
 
         private final String key;
-        private final Codec<? extends Projection> codec;
+        private final MapCodec<? extends Projection> codec;
 
-        Type(final String key, final Codec<? extends Projection> codec) {
+        Type(final String key, final MapCodec<? extends Projection> codec) {
             this.key = key;
             this.codec = codec;
         }

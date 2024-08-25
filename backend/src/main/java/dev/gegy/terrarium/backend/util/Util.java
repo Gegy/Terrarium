@@ -185,16 +185,7 @@ public class Util {
         final HttpResponse.BodyHandler<String> stringHandler = HttpResponse.BodyHandlers.ofString();
         return responseInfo -> HttpResponse.BodySubscribers.mapping(stringHandler.apply(responseInfo), string -> {
             final JsonElement json = JsonParser.parseString(string);
-            return getOrThrow(codec.parse(JsonOps.INSTANCE, json), JsonSyntaxException::new);
+            return codec.parse(JsonOps.INSTANCE, json).getOrThrow(JsonSyntaxException::new);
         });
-    }
-
-    // TODO 1.20.6: Replace with DataFixerUpper equivalent
-    @Deprecated
-    public static <T, E extends Throwable> T getOrThrow(final DataResult<T> result, final Function<String, E> exceptionFactory) throws E {
-        if (result.result().isPresent()) {
-            return result.result().get();
-        }
-        throw exceptionFactory.apply(result.error().orElseThrow().message());
     }
 }

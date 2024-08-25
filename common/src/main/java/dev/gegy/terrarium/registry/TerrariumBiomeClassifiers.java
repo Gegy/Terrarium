@@ -10,7 +10,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.HolderOwner;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.worldgen.BootstapContext;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
@@ -25,7 +25,7 @@ public class TerrariumBiomeClassifiers {
     public static final ResourceKey<ClassifierNode<GeoParameters, Holder<Biome>>> EARTH_LAND = createKey("earth_land");
     public static final ResourceKey<ClassifierNode<GeoParameters, Holder<Biome>>> EARTH_OCEAN = createKey("earth_ocean");
 
-    public static void bootstrap(final BootstapContext<ClassifierNode<GeoParameters, Holder<Biome>>> context) {
+    public static void bootstrap(final BootstrapContext<ClassifierNode<GeoParameters, Holder<Biome>>> context) {
         final HolderGetter<Biome> biomes = context.lookup(Registries.BIOME);
 
         context.register(EARTH, threshold(
@@ -83,7 +83,7 @@ public class TerrariumBiomeClassifiers {
         return Classifiers.leaf(biomes.getOrThrow(key));
     }
 
-    private static ClassifierNode<GeoParameters, Holder<Biome>> register(final BootstapContext<ClassifierNode<GeoParameters, Holder<Biome>>> context, final ResourceKey<ClassifierNode<GeoParameters, Holder<Biome>>> key, final ClassifierNode<GeoParameters, Holder<Biome>> node) {
+    private static ClassifierNode<GeoParameters, Holder<Biome>> register(final BootstrapContext<ClassifierNode<GeoParameters, Holder<Biome>>> context, final ResourceKey<ClassifierNode<GeoParameters, Holder<Biome>>> key, final ClassifierNode<GeoParameters, Holder<Biome>> node) {
         return new HolderClassifierNode<>(context.register(key, node));
     }
 
@@ -93,7 +93,7 @@ public class TerrariumBiomeClassifiers {
     }
 
     private static ResourceKey<ClassifierNode<GeoParameters, Holder<Biome>>> createKey(final String name) {
-        return ResourceKey.create(TerrariumRegistries.BIOME_CLASSIFIER, new ResourceLocation(Terrarium.ID, name));
+        return ResourceKey.create(TerrariumRegistries.BIOME_CLASSIFIER, ResourceLocation.fromNamespaceAndPath(Terrarium.ID, name));
     }
 
     private record UniversalOwner<T>() implements HolderOwner<T> {

@@ -1,6 +1,7 @@
 package dev.gegy.terrarium.world.generator.chunk;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.gegy.terrarium.Terrarium;
 import dev.gegy.terrarium.backend.GeoChunk;
@@ -13,12 +14,16 @@ import dev.gegy.terrarium.world.GeoProvider;
 import dev.gegy.terrarium.world.GeoProviderHolder;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.SurfaceRuleData;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.WorldGenRegion;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
@@ -45,11 +50,13 @@ import net.minecraft.world.level.levelgen.structure.placement.ConcentricRingsStr
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.stream.Stream;
 
 public class EarthChunkGenerator extends GeoChunkGenerator {
-    public static final Codec<EarthChunkGenerator> CODEC = RecordCodecBuilder.create(i -> i.group(
+    public static final MapCodec<EarthChunkGenerator> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
             BiomeSource.CODEC.fieldOf("biome_source").forGetter(c -> c.biomeSource),
             Codec.INT.fieldOf("min_y").forGetter(EarthChunkGenerator::getMinY),
             Codec.INT.fieldOf("height").forGetter(EarthChunkGenerator::getGenDepth),
@@ -92,7 +99,7 @@ public class EarthChunkGenerator extends GeoChunkGenerator {
     }
 
     @Override
-    protected Codec<? extends ChunkGenerator> codec() {
+    protected MapCodec<? extends ChunkGenerator> codec() {
         return CODEC;
     }
 
@@ -140,7 +147,7 @@ public class EarthChunkGenerator extends GeoChunkGenerator {
     }
 
     @Override
-    public CompletableFuture<ChunkAccess> fillFromNoise(final Executor executor, final Blender blender, final RandomState randomState, final StructureManager structures, final ChunkAccess chunk) {
+    public CompletableFuture<ChunkAccess> fillFromNoise(final Blender blender, final RandomState randomState, final StructureManager structures, final ChunkAccess chunk) {
         final ShortRaster elevation = getGeoChunk(chunk).get(EarthAttachments.ELEVATION);
         if (elevation != null) {
             fillSurface(chunk, elevation, fillBlock, fluidBlock, getSeaLevel());
@@ -240,7 +247,28 @@ public class EarthChunkGenerator extends GeoChunkGenerator {
 
     @Override
     public ChunkGeneratorStructureState createState(final HolderLookup<StructureSet> structureSetLookup, final RandomState randomState, final long seed) {
-        return ChunkGeneratorStructureState.createForNormal(randomState, seed, biomeSource, structureSetLookup.filterElements(structureSet -> !shouldDropStructureSet(structureSet)));
+        final HolderLookup<StructureSet> filteredLookup = new HolderLookup<>() {
+            @Override
+            public Optional<Holder.Reference<StructureSet>> get(final ResourceKey<StructureSet> key) {
+                return structureSetLookup.get(key).filter(set -> !shouldDropStructureSet(set.value()));
+            }
+
+            @Override
+            public Optional<HolderSet.Named<StructureSet>> get(final TagKey<StructureSet> tag) {
+                return structureSetLookup.get(tag);
+            }
+
+            @Override
+            public Stream<Holder.Reference<StructureSet>> listElements() {
+                return structureSetLookup.listElements().filter(set -> !shouldDropStructureSet(set.value()));
+            }
+
+            @Override
+            public Stream<HolderSet.Named<StructureSet>> listTags() {
+                return structureSetLookup.listTags();
+            }
+        };
+        return ChunkGeneratorStructureState.createForNormal(randomState, seed, biomeSource, filteredLookup);
     }
 
     // TODO: The Stronghold's placement doesn't make too much sense (and the biome scan is too expensive) - should be replaced with something else

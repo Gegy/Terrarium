@@ -23,6 +23,6 @@ public class TerrariumRegistries {
     public static final Codec<Holder<ClassifierNode<GeoParameters, Holder<Biome>>>> BIOME_CLASSIFIER_CODEC = RegistryFileCodec.create(BIOME_CLASSIFIER, Util.lazyCodec(Terrarium::biomeClassifierCodec));
 
     private static <T> ResourceKey<Registry<T>> createKey(final String name) {
-        return ResourceKey.createRegistryKey(new ResourceLocation(Terrarium.ID, name));
+        return ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(Terrarium.ID, name));
     }
 }

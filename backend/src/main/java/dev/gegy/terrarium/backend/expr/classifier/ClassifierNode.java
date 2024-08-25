@@ -26,9 +26,9 @@ public interface ClassifierNode<T, R> extends ExprNode<Classifier<T, R>> {
     }
 
     private static <T, R> Codec<ClassifierNode<T, R>> createTypedCodec(final Codec<ClassifierNode<T, R>> subCodec, final Codec<PredictorNode<T>> predictorCodec, final Codec<R> resultCodec) {
-        final EnumMap<ClassifierType, Codec<? extends ClassifierNode<T, R>>> codecs = new EnumMap<>(ClassifierType.class);
+        final EnumMap<ClassifierType, MapCodec<? extends ClassifierNode<T, R>>> codecs = new EnumMap<>(ClassifierType.class);
         for (final ClassifierType type : ClassifierType.values()) {
-            codecs.put(type, type.createCodec(subCodec, predictorCodec, resultCodec).codec());
+            codecs.put(type, type.createCodec(subCodec, predictorCodec, resultCodec));
         }
         return ClassifierType.CODEC.dispatch(ClassifierNode::type, codecs::get);
     }

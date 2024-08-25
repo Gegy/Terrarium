@@ -68,7 +68,7 @@ public class Terrarium {
         );
 
         GeoParameters.forEachFeature((id, predictor) ->
-                Registry.register(builtinPredictors, new ResourceLocation(Terrarium.ID, id), predictor)
+                Registry.register(builtinPredictors, ResourceLocation.fromNamespaceAndPath(Terrarium.ID, id), predictor)
         );
 
         final PredictorNode.Codecs<GeoParameters> predictorCodecs = PredictorNode.createCodecs(

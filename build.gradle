@@ -44,13 +44,12 @@ subprojects {
   version = "$version+$minecraft_version"
 
   java {
-    toolchain.languageVersion = JavaLanguageVersion.of(17)
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
     withSourcesJar()
   }
 
   repositories {
     mavenCentral()
-    maven { url 'https://repo.spongepowered.org/repository/maven-public/' }
     maven { url "https://maven.gegy.dev/" }
   }
 
@@ -82,7 +81,7 @@ subprojects {
 
   tasks.withType(JavaCompile).configureEach {
     it.options.encoding = 'UTF-8'
-    it.options.release = 17
+    it.options.release = 21
   }
 
   tasks.withType(ProcessResources).configureEach {

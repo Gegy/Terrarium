@@ -1,21 +1,34 @@
 package dev.gegy.terrarium.world.chunk;
 
-import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.GenerationChunkHolder;
+import net.minecraft.util.StaticCache2D;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
+import net.minecraft.world.level.chunk.status.WorldGenContext;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-public interface ChunkStatusDecorator {
-    static void runBefore(final ChunkStatus status, final Task task) {
-        ((ChunkStatusDecorator) status).runBefore(task);
+public class ChunkStatusDecorator {
+    private static final Map<ChunkStatus, Task> TASKS = new HashMap<>();
+    private static boolean initializedPyramid;
+
+    public static void runBefore(final ChunkStatus status, final Task task) {
+        if (initializedPyramid) {
+            throw new IllegalStateException("ChunkPyramid has already been initialized");
+        }
+        TASKS.put(status, task);
     }
 
-    void runBefore(Task task);
+    @Nullable
+    public static Task getTaskToInject(final ChunkStatus status) {
+        initializedPyramid = true;
+        return TASKS.get(status);
+    }
 
-    interface Task {
-        CompletableFuture<?> run(ServerLevel level, ChunkGenerator generator, ChunkAccess chunk, List<ChunkAccess> context);
+    public interface Task {
+        CompletableFuture<?> run(WorldGenContext context, StaticCache2D<GenerationChunkHolder> chunkCache, ChunkAccess chunk);
     }
 }

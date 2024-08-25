@@ -1,11 +1,12 @@
 package dev.gegy.terrarium.backend.projection.cylindrical;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.gegy.terrarium.backend.earth.EarthConstants;
 
 public class Equirectangular implements CylindricalProjection {
-    public static final Codec<Equirectangular> CODEC = RecordCodecBuilder.create(i -> i.group(
+    public static final MapCodec<Equirectangular> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
             Codec.DOUBLE.fieldOf("meters_per_block").forGetter(e -> e.metersPerBlock)
     ).apply(i, Equirectangular::new));
 
