@@ -1,5 +1,10 @@
 import java.nio.file.Files
 
+plugins {
+  id 'net.neoforged.moddev' version '2.0.42-beta' apply false
+  id 'fabric-loom' version '1.8-SNAPSHOT' apply false
+}
+
 tasks.register('generateModManifests') {
   final def expandProps = [
           'version'                      : version,
@@ -50,7 +55,8 @@ subprojects {
 
   repositories {
     mavenCentral()
-    maven { url "https://maven.gegy.dev/" }
+    maven { url = 'https://maven.gegy.dev/' }
+    maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
   }
 
   dependencies {
