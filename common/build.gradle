@@ -13,6 +13,8 @@ neoForge {
     minecraftVersion = parchment_minecraft
     mappingsVersion = parchment_version
   }
+
+  ideSyncTask rootProject.tasks.named('generateModManifests')
 }
 
 dependencies {
