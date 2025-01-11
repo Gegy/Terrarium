@@ -83,6 +83,15 @@ public class RenderedTileMap {
         return new Tile(future);
     }
 
+    public boolean isReady() {
+        for (final Tile tile : tiles) {
+            if (!tile.image.isDone()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public record Frame(int minX, int minY, int width, int height) {
         public static final Frame EMPTY = new Frame(0, 0, 0, 0);
 

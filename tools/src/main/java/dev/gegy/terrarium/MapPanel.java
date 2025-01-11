@@ -3,8 +3,13 @@ package dev.gegy.terrarium;
 import dev.gegy.terrarium.backend.earth.EarthConstants;
 import dev.gegy.terrarium.backend.earth.EarthLayers;
 import dev.gegy.terrarium.backend.earth.EarthTiles;
+import dev.gegy.terrarium.backend.earth.GeoCoords;
+import dev.gegy.terrarium.backend.projection.cylindrical.CylindricalProjection;
 import dev.gegy.terrarium.backend.projection.cylindrical.Mercator;
+import dev.gegy.terrarium.backend.util.Util;
 import dev.gegy.terrarium.feature.MapFeature;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectRBTreeMap;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,6 +21,9 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -29,6 +37,9 @@ public class MapPanel extends JPanel implements ComponentListener, MouseListener
     private final Executor executor;
 
     private RenderedTileMap tileMap;
+    private int zoomLevel;
+
+    private final Int2ObjectMap<RenderedTileMap> cascadedTileMaps = new Int2ObjectRBTreeMap<>();
 
     private int lastMouseX;
     private int lastMouseY;
@@ -41,7 +52,8 @@ public class MapPanel extends JPanel implements ComponentListener, MouseListener
 
         controller.register(this);
 
-        tileMap = createTileMap(controller.zoomLevel());
+        zoomLevel = controller.zoomLevel();
+        tileMap = createTileMap(zoomLevel);
 
         addComponentListener(this);
         addMouseListener(this);
@@ -59,7 +71,8 @@ public class MapPanel extends JPanel implements ComponentListener, MouseListener
 
     public void setFeature(final MapFeature feature) {
         this.feature = feature;
-        tileMap = createTileMap(controller.zoomLevel());
+        tileMap = createTileMap(zoomLevel);
+        cascadedTileMaps.clear();
     }
 
     @Override
@@ -116,7 +129,9 @@ public class MapPanel extends JPanel implements ComponentListener, MouseListener
     }
 
     public void mapZoomed() {
-        tileMap = createTileMap(controller.zoomLevel());
+        cascadedTileMaps.put(zoomLevel, tileMap);
+        zoomLevel = controller.zoomLevel();
+        tileMap = createTileMap(zoomLevel);
         repaint();
     }
 
@@ -165,6 +180,22 @@ public class MapPanel extends JPanel implements ComponentListener, MouseListener
 
         final Graphics2D graphics = (Graphics2D) g;
 
+        if (tileMap.isReady()) {
+            cascadedTileMaps.clear();
+        } else {
+            // Pessimistically draw all tiles from former zoom levels - but they should get cleared out soon enough
+            for (final Int2ObjectMap.Entry<RenderedTileMap> entry : cascadedTileMaps.int2ObjectEntrySet()) {
+                final int zoomLevel = entry.getIntKey();
+                final RenderedTileMap tileMap = entry.getValue();
+                drawTileMap(graphics, tileMap, controller.zoomLevel() - zoomLevel);
+            }
+        }
+
+        drawTileMap(graphics, tileMap, 0);
+    }
+
+    private void drawTileMap(final Graphics2D graphics, final RenderedTileMap tileMap, final int relativeZoom) {
+        final int drawSize = scaleByZoom(TILE_SIZE, relativeZoom);
         final RenderedTileMap.Frame frame = tileMap.frame();
         for (int tileY = frame.minY(); tileY <= frame.maxY(); tileY++) {
             for (int tileX = frame.minX(); tileX <= frame.maxX(); tileX++) {
@@ -172,10 +203,21 @@ public class MapPanel extends JPanel implements ComponentListener, MouseListener
                 if (image == null) {
                     continue;
                 }
-                final int x = tileX * TILE_SIZE - controller.panX();
-                final int y = tileY * TILE_SIZE - controller.panY();
-                graphics.drawImage(image, x, y, TILE_SIZE, TILE_SIZE, null);
+                final int x = scaleByZoom(tileX * TILE_SIZE, relativeZoom) - controller.panX();
+                final int y = scaleByZoom(tileY * TILE_SIZE, relativeZoom) - controller.panY();
+                if (x < -drawSize || y < -drawSize || x >= getWidth() || y >= getHeight()) {
+                    continue;
+                }
+                graphics.drawImage(image, x, y, drawSize, drawSize, null);
             }
+        }
+    }
+
+    private static int scaleByZoom(final int coordinate, final int relativeZoom) {
+        if (relativeZoom > 0) {
+            return coordinate << relativeZoom;
+        } else {
+            return coordinate >> -relativeZoom;
         }
     }
 }

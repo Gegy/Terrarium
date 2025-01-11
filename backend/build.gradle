@@ -11,7 +11,7 @@ dependencies {
   implementation 'org.slf4j:slf4j-api:2.0.9'
   implementation 'com.mojang:logging:1.2.7'
   api 'org.ow2.asm:asm:9.6'
-  implementation 'it.unimi.dsi:fastutil:8.5.12'
+  api 'it.unimi.dsi:fastutil:8.5.12'
   implementation 'com.mojang:datafixerupper:8.0.16'
   implementation 'com.google.guava:guava:32.1.2-jre'
 
