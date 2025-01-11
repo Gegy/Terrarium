@@ -26,9 +26,9 @@
   ],
   "accessWidener": "terrarium.accesswidener",
   "depends": {
-    "fabricloader": ">=0.15",
+    "fabricloader": ">=0.16",
     "fabric-api": "*",
-    "minecraft": "[1.21, 1.21.2)",
-    "java": ">=17"
+    "minecraft": "1.21.5",
+    "java": ">=21"
   }
 }

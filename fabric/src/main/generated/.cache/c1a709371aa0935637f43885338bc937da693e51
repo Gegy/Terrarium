@@ -1,4 +1,4 @@
-// 1.21.1	2024-08-25T18:32:24.738542262	Terrarium/Terrarium Dynamic Registries
-499fa854f1798743bbfeea35f49592ced154c0d0 data/terrarium/worldgen/world_preset/earth.json
-558a4b9194399b8df637e0a37b353cffdb243b5a data/terrarium/terrarium/classifier/biome/earth_ocean.json
+// 1.21.5	-999999999-01-01T00:00:00	Terrarium/Terrarium Dynamic Registries
 9ff24a311c9ea2af2916df9b64c692ad193df79a data/terrarium/terrarium/classifier/biome/earth.json
+558a4b9194399b8df637e0a37b353cffdb243b5a data/terrarium/terrarium/classifier/biome/earth_ocean.json
+499fa854f1798743bbfeea35f49592ced154c0d0 data/terrarium/worldgen/world_preset/earth.json

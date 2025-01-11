@@ -25,6 +25,7 @@ import org.jetbrains.annotations.Nullable;
 import java.time.Duration;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -126,7 +127,7 @@ public class GeoTeleportCommand {
         final double x = projection.blockX(coords);
         final double z = projection.blockZ(coords);
         final int y = chunkSource.getGenerator().getFirstFreeHeight(Mth.floor(x), Mth.floor(z), Heightmap.Types.MOTION_BLOCKING, level, chunkSource.randomState());
-        player.teleportTo(level, x, y, z, player.getYRot(), player.getXRot());
+        player.teleportTo(level, x, y, z, Set.of(), player.getYRot(), player.getXRot(), true);
 
         source.sendSuccess(() -> {
             final String formattedLatitude = String.format(Locale.ROOT, "%.3f", coords.lat());

@@ -5,11 +5,11 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "geo_chunk.ChunkMapMixin",
-    "geo_chunk.ChunkSerializerMixin",
     "geo_chunk.ChunkStepBuilderMixin",
     "geo_chunk.ClimateSamplerMixin",
     "geo_chunk.ProtoChunkMixin",
-    "geo_chunk.RandomStateMixin"
+    "geo_chunk.RandomStateMixin",
+    "geo_chunk.SerializableChunkDataMixin"
   ],
   "injectors": {
     "defaultRequire": 1

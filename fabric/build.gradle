@@ -59,7 +59,7 @@ dependencies {
   modImplementation "net.fabricmc:fabric-loader:$fabric_loader_version"
   modImplementation "net.fabricmc.fabric-api:fabric-api:$fabric_version"
 
-  implementation include('org.tukaani:xz:1.9')
+  implementation include('org.tukaani:xz:1.10')
 }
 
 sourceSets {

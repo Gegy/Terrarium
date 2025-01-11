@@ -7,6 +7,7 @@ import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.util.thread.BlockableEventLoop;
+import net.minecraft.world.level.TicketStorage;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.LightChunkGetter;
 import net.minecraft.world.level.entity.ChunkStatusUpdateListener;
@@ -33,7 +34,7 @@ public class ChunkMapMixin {
     private RandomState randomState;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void initRandomState(final ServerLevel level, final LevelStorageSource.LevelStorageAccess storageAccess, final DataFixer dataFixer, final StructureTemplateManager templateManager, final Executor executor, final BlockableEventLoop eventLoop, final LightChunkGetter lightChunkGetter, final ChunkGenerator generator, final ChunkProgressListener progressListener, final ChunkStatusUpdateListener statusUpdateListener, final Supplier<DimensionDataStorage> dataStorageSupplier, final int viewDistance, final boolean sync, final CallbackInfo ci) {
+    private void initRandomState(final ServerLevel level, final LevelStorageSource.LevelStorageAccess storageAccess, final DataFixer dataFixer, final StructureTemplateManager templateManager, final Executor executor, final BlockableEventLoop<Runnable> mainThreadExecutor, final LightChunkGetter lightChunkGetter, final ChunkGenerator generator, final ChunkProgressListener progressListener, final ChunkStatusUpdateListener chunkStatusListener, final Supplier<DimensionDataStorage> overworldDataStorage, final TicketStorage ticketStorage, final int serverViewDistance, final boolean sync, final CallbackInfo ci) {
         if (generator instanceof final GeoChunkGenerator geoGenerator) {
             GeoProviderHolder.inject(randomState, geoGenerator.createGeoProvider());
         }

@@ -1,6 +1,6 @@
 plugins {
-  id 'net.neoforged.moddev' version '2.0.42-beta' apply false
-  id 'fabric-loom' version '1.8-SNAPSHOT' apply false
+  id 'net.neoforged.moddev' version '2.0.82' apply false
+  id 'fabric-loom' version '1.10-SNAPSHOT' apply false
 }
 
 tasks.register('generateModManifests') {
@@ -53,8 +53,14 @@ subprojects {
 
   repositories {
     mavenCentral()
-    maven { url = 'https://maven.gegy.dev/' }
-    maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
+    maven {
+      url = 'https://repo.spongepowered.org/repository/maven-public/'
+      content { includeGroup 'org.spongepowered' }
+    }
+    maven {
+      url = 'https://maven.parchmentmc.org/'
+      content { includeGroup 'org.parchmentmc.data' }
+    }
   }
 
   dependencies {

@@ -104,7 +104,7 @@ public class EarthChunkGenerator extends GeoChunkGenerator {
     }
 
     @Override
-    public void applyCarvers(final WorldGenRegion region, final long seed, final RandomState randomState, final BiomeManager biomes, final StructureManager structures, final ChunkAccess chunk, final GenerationStep.Carving step) {
+    public void applyCarvers(final WorldGenRegion region, final long seed, final RandomState randomState, final BiomeManager biomes, final StructureManager structures, final ChunkAccess chunk) {
     }
 
     @Override
@@ -113,7 +113,7 @@ public class EarthChunkGenerator extends GeoChunkGenerator {
 
         final WorldGenerationContext context = new WorldGenerationContext(this, region);
         final BiomeManager biomeManager = region.getBiomeManager();
-        final Registry<Biome> biomeRegistry = region.registryAccess().registryOrThrow(Registries.BIOME);
+        final Registry<Biome> biomeRegistry = region.registryAccess().lookupOrThrow(Registries.BIOME);
         final NoiseChunk noiseChunk = getOrCreateDummyNoiseChunk(randomState, chunk, geoChunk);
         randomState.surfaceSystem().buildSurface(randomState, biomeManager, biomeRegistry, false, context, chunk, noiseChunk, SURFACE_RULE);
     }
@@ -174,7 +174,7 @@ public class EarthChunkGenerator extends GeoChunkGenerator {
         }
 
         final int maxSectionY = SectionPos.blockToSectionCoord(maxY);
-        final int minSectionY = chunk.getMinSection();
+        final int minSectionY = chunk.getMinSectionY();
         for (int sectionY = maxSectionY; sectionY >= minSectionY; sectionY--) {
             final int sectionBottomY = SectionPos.sectionToBlockCoord(sectionY);
             final int sectionTopY = SectionPos.sectionToBlockCoord(sectionY, SectionPos.SECTION_MAX_INDEX);
@@ -218,7 +218,7 @@ public class EarthChunkGenerator extends GeoChunkGenerator {
 
     @Override
     public NoiseColumn getBaseColumn(final int x, final int z, final LevelHeightAccessor levelHeight, final RandomState randomState) {
-        final int minY = levelHeight.getMinBuildHeight();
+        final int minY = levelHeight.getMinY();
         final int surfaceY = sampleBaseSurfaceY(x, z, randomState);
         final int topY = Math.max(surfaceY, getSeaLevel());
         final BlockState[] blocks = new BlockState[topY - minY];

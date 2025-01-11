@@ -99,7 +99,6 @@ public class Terrarium {
 
         TerrariumChunkGenerators.bootstrap();
         TerrariumBiomeSources.bootstrap();
-        GeoChunkLoader.bootstrap();
     }
 
     public static void registerCommands(final CommandDispatcher<CommandSourceStack> dispatcher, final CommandBuildContext context) {
