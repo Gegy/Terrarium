@@ -3,6 +3,7 @@ package dev.gegy.terrarium.backend.raster;
 import com.mojang.serialization.Codec;
 
 import java.nio.ByteBuffer;
+import java.util.BitSet;
 
 public class RasterBufferCodecs {
     public static final Codec<byte[]> BYTES = Codec.BYTE_BUFFER.xmap(
@@ -25,5 +26,10 @@ public class RasterBufferCodecs {
                 bytes.asShortBuffer().put(shorts);
                 return bytes;
             }
+    );
+
+    public static final Codec<BitSet> BIT_SET = Codec.BYTE_BUFFER.xmap(
+            BitSet::valueOf,
+            bitSet -> ByteBuffer.wrap(bitSet.toByteArray())
     );
 }
