@@ -1,5 +1,3 @@
-import java.nio.file.Files
-
 plugins {
   id 'net.neoforged.moddev' version '2.0.42-beta' apply false
   id 'fabric-loom' version '1.8-SNAPSHOT' apply false
@@ -61,22 +59,6 @@ subprojects {
 
   dependencies {
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
-  }
-
-  // Big hack to support building and running with IDEA. On Windows, needs to be run as administrator.
-  if (project.name == 'fabric') {
-    final def resources = ['assets', 'data', 'terrarium.mixins.json']
-    tasks.register('setupResourceSymlinks') {
-      doLast {
-        resources.each { resource ->
-          final def commonResource = project(':common').sourceSets.main.resources.srcDirs[0].toPath().resolve(resource)
-          final def projectResource = project.sourceSets.main.resources.srcDirs[0].toPath().resolve(resource)
-          if (!Files.exists(projectResource)) {
-            Files.createSymbolicLink(projectResource, commonResource)
-          }
-        }
-      }
-    }
   }
 
   jar {

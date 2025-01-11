@@ -35,6 +35,12 @@ loom {
       runDir "build/datagen"
     }
   }
+  mods {
+    "${mod_id}" {
+      sourceSet project(':common').sourceSets.main
+      sourceSet project.sourceSets.main
+    }
+  }
 }
 
 repositories {
