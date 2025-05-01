@@ -50,9 +50,9 @@ import net.minecraft.world.level.levelgen.structure.placement.ConcentricRingsStr
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.stream.Stream;
 
 public class EarthChunkGenerator extends GeoChunkGenerator {
@@ -243,6 +243,9 @@ public class EarthChunkGenerator extends GeoChunkGenerator {
 
     @Override
     public void addDebugScreenInfo(final List<String> lines, final RandomState randomState, final BlockPos pos) {
+        final double lat = configuration.projection().lat(pos.getX(), pos.getZ());
+        final double lon = configuration.projection().lon(pos.getX(), pos.getZ());
+        lines.add(String.format(Locale.ROOT, "Lat/Lon: %.3f / %.3f", lat, lon));
     }
 
     @Override
