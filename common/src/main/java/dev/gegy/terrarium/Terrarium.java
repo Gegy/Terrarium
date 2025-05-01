@@ -62,7 +62,7 @@ public class Terrarium {
         );
 
         geocoder = ApiKeys.fetch(HTTP_CLIENT).thenApply(apiKeys ->
-                new GoogleGeocoder(HTTP_CLIENT, apiKeys, Util.backgroundExecutor())
+                new GoogleGeocoder(HTTP_CLIENT, apiKeys)
                         .limitConcurrency(new ConcurrencyLimiter(2))
                         .cached()
         );

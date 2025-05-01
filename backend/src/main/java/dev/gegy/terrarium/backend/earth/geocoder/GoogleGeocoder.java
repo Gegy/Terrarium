@@ -20,7 +20,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 
 public class GoogleGeocoder implements Geocoder {
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -32,12 +31,10 @@ public class GoogleGeocoder implements Geocoder {
 
     private final HttpClient httpClient;
     private final ApiKeys apiKeys;
-    private final Executor executor;
 
-    public GoogleGeocoder(final HttpClient httpClient, final ApiKeys apiKeys, final Executor executor) {
+    public GoogleGeocoder(final HttpClient httpClient, final ApiKeys apiKeys) {
         this.httpClient = httpClient;
         this.apiKeys = apiKeys;
-        this.executor = executor;
     }
 
     @Override
@@ -63,14 +60,14 @@ public class GoogleGeocoder implements Geocoder {
                     LOGGER.error("Failed to parse geocoder response for query: '{}'", query, throwable);
                     throw new LookupException(Geocoder.Error.UNKNOWN_ERROR);
                 })
-                .thenApplyAsync(response -> switch (response.body().status()) {
+                .thenApply(response -> switch (response.body().status()) {
                     case OK, ZERO_RESULTS -> {
                         final List<GeoCoords> results = response.body().entries();
-                        yield !results.isEmpty() ? Optional.of(results.get(0)) : Optional.empty();
+                        yield !results.isEmpty() ? Optional.of(results.getFirst()) : Optional.empty();
                     }
                     case OVER_QUERY_LIMIT, OVER_DAILY_LIMIT, REQUEST_DENIED -> throw new LookupException(Geocoder.Error.RATE_LIMITED);
                     case UNKNOWN_ERROR, INVALID_REQUEST -> throw new LookupException(Geocoder.Error.UNKNOWN_ERROR);
-                }, executor);
+                });
     }
 
     @Override
@@ -94,7 +91,7 @@ public class GoogleGeocoder implements Geocoder {
                 .build();
 
         return httpClient.sendAsync(request, Util.jsonBodyHandler(SuggestResult.FALLIBLE_CODEC))
-                .<List<String>>thenApplyAsync(response -> response.body().map(
+                .<List<String>>thenApply(response -> response.body().map(
                         result -> result.entries().stream()
                                 .flatMap(entry -> entry.name.stream())
                                 .toList(),
@@ -102,7 +99,7 @@ public class GoogleGeocoder implements Geocoder {
                             LOGGER.error("Failed to get suggestions for query '{}': {}", query, error);
                             return List.of();
                         }
-                ), executor)
+                ))
                 .exceptionally(throwable -> {
                     LOGGER.error("Failed to parse suggestion response for query: '{}'", query, throwable);
                     return List.of();
