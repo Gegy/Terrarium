@@ -3,7 +3,10 @@ package dev.gegy.terrarium.map;
 import dev.gegy.terrarium.backend.earth.EarthConstants;
 import dev.gegy.terrarium.backend.earth.EarthLayers;
 import dev.gegy.terrarium.backend.earth.EarthTiles;
+import dev.gegy.terrarium.backend.earth.GeoCoords;
+import dev.gegy.terrarium.backend.projection.cylindrical.CylindricalProjection;
 import dev.gegy.terrarium.backend.projection.cylindrical.Mercator;
+import dev.gegy.terrarium.backend.util.Util;
 import dev.gegy.terrarium.map.feature.MapFeature;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectRBTreeMap;
@@ -18,6 +21,9 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -30,6 +36,7 @@ public class MapPanel extends JPanel implements ComponentListener, MouseListener
     private final EarthTiles tileLayers;
     private final Executor executor;
 
+    private CylindricalProjection projection;
     private RenderedTileMap tileMap;
     private int zoomLevel;
 
@@ -37,6 +44,11 @@ public class MapPanel extends JPanel implements ComponentListener, MouseListener
 
     private int lastMouseX;
     private int lastMouseY;
+
+    private MouseClickListener mouseClickListener = (event, latitude, longitude) -> {
+    };
+
+    private final List<MapDecoration> decorations = new ArrayList<>();
 
     public MapPanel(final MapController controller, final EarthTiles tiles, final Executor executor, final MapFeature feature) {
         this.controller = controller;
@@ -47,12 +59,22 @@ public class MapPanel extends JPanel implements ComponentListener, MouseListener
         controller.register(this);
 
         zoomLevel = controller.zoomLevel();
-        tileMap = createTileMap(zoomLevel);
+        projection = createProjection(zoomLevel);
+        tileMap = createTileMap(zoomLevel, projection);
 
         addComponentListener(this);
         addMouseListener(this);
         addMouseMotionListener(this);
         addMouseWheelListener(this);
+    }
+
+    public void setMouseClickListener(final MouseClickListener mouseClickListener) {
+        this.mouseClickListener = mouseClickListener;
+    }
+
+    public void addDecoration(final MapDecoration decoration) {
+        decorations.add(decoration);
+        repaint();
     }
 
     public static int size(final int zoomLevel) {
@@ -65,7 +87,7 @@ public class MapPanel extends JPanel implements ComponentListener, MouseListener
 
     public void setFeature(final MapFeature feature) {
         this.feature = feature;
-        tileMap = createTileMap(zoomLevel);
+        tileMap = createTileMap(zoomLevel, projection);
         cascadedTileMaps.clear();
     }
 
@@ -87,7 +109,29 @@ public class MapPanel extends JPanel implements ComponentListener, MouseListener
     }
 
     @Override
-    public void mouseClicked(final MouseEvent e) {
+    public void mouseClicked(final MouseEvent event) {
+        final Iterator<MapDecoration> iterator = decorations.iterator();
+        while (iterator.hasNext()) {
+            final MapDecoration decoration = iterator.next();
+            final ScreenPos screenPos = getScreenPos(decoration.latitude(), decoration.longitude());
+            if (!isOnScreen(screenPos)) {
+                continue;
+            }
+            final int deltaX = event.getX() - screenPos.x();
+            final int deltaY = event.getY() - screenPos.y();
+            final int distanceSq = deltaX * deltaX + deltaY * deltaY;
+            final int pickDistanceSq = decoration.pickRadius() * decoration.pickRadius();
+            if (distanceSq <= pickDistanceSq) {
+                if (decoration.clicked(event) == MapDecoration.ClickResponse.REMOVE) {
+                    iterator.remove();
+                    repaint();
+                }
+                return;
+            }
+        }
+
+        final GeoCoords coords = getGeoCoordsAt(event.getX(), event.getY());
+        mouseClickListener.onMouseClicked(event, coords.lat(), coords.lon());
     }
 
     @Override
@@ -125,7 +169,8 @@ public class MapPanel extends JPanel implements ComponentListener, MouseListener
     public void mapZoomed() {
         cascadedTileMaps.put(zoomLevel, tileMap);
         zoomLevel = controller.zoomLevel();
-        tileMap = createTileMap(zoomLevel);
+        projection = createProjection(zoomLevel);
+        tileMap = createTileMap(zoomLevel, projection);
         repaint();
     }
 
@@ -139,8 +184,21 @@ public class MapPanel extends JPanel implements ComponentListener, MouseListener
         controller.zoom(e.getX(), e.getY(), amount);
     }
 
-    private RenderedTileMap createTileMap(final int zoomLevel) {
-        final Mercator projection = createProjection(zoomLevel);
+    private GeoCoords getGeoCoordsAt(final int x, final int y) {
+        final int size = size(controller.zoomLevel());
+        final float latitude = (float) projection.lat(y + controller.panY() - size / 2.0);
+        final float longitude = (float) projection.lon(Math.floorMod(x + controller.panX(), size) - size / 2.0);
+        return new GeoCoords(latitude, longitude);
+    }
+
+    private ScreenPos getScreenPos(final double latitude, final double longitude) {
+        final int size = size(controller.zoomLevel());
+        final int x = Math.floorMod(Util.floorInt(projection.blockX(longitude) - controller.panX() + size / 2.0), size);
+        final int y = Util.floorInt(projection.blockZ(latitude) - controller.panY() + size / 2.0);
+        return new ScreenPos(x, y);
+    }
+
+    private RenderedTileMap createTileMap(final int zoomLevel, final CylindricalProjection projection) {
         final EarthLayers layers = EarthLayers.create(tileLayers, projection, executor);
 
         final int tileCount = tileEdgeCount(zoomLevel);
@@ -186,6 +244,14 @@ public class MapPanel extends JPanel implements ComponentListener, MouseListener
         }
 
         drawTileMap(graphics, tileMap, 0);
+
+        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        for (final MapDecoration decoration : decorations) {
+            final ScreenPos pos = getScreenPos(decoration.latitude(), decoration.longitude());
+            if (isOnScreen(pos)) {
+                decoration.draw(graphics, pos.x, pos.y);
+            }
+        }
     }
 
     private void drawTileMap(final Graphics2D graphics, final RenderedTileMap tileMap, final int relativeZoom) {
@@ -213,5 +279,16 @@ public class MapPanel extends JPanel implements ComponentListener, MouseListener
         } else {
             return coordinate >> -relativeZoom;
         }
+    }
+
+    private boolean isOnScreen(final ScreenPos pos) {
+        return pos.x >= 0 && pos.y >= 0 && pos.x < getWidth() && pos.y < getHeight();
+    }
+
+    public interface MouseClickListener {
+        void onMouseClicked(MouseEvent event, double latitude, double longitude);
+    }
+
+    private record ScreenPos(int x, int y) {
     }
 }

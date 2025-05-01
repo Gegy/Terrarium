@@ -32,6 +32,10 @@ public class Util {
         return (int) Math.floor(value);
     }
 
+    public static int floorInt(final double value) {
+        return (int) Math.floor(value);
+    }
+
     public static float lerp(final float a, final float b, final float x) {
         return a + (b - a) * x;
     }

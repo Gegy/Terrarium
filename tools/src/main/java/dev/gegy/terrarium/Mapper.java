@@ -27,12 +27,12 @@ public class Mapper {
 
     private static final Path CACHE_ROOT = Path.of("tiles");
 
-    private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
+    public static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(30))
             .executor(EXECUTOR)
             .build();
 
-    private static final EarthTiles TILES = new EarthTiles.Config(HTTP_CLIENT, new ConcurrencyLimiter(16), CACHE_ROOT, EXECUTOR, EXECUTOR)
+    public static final EarthTiles TILES = new EarthTiles.Config(HTTP_CLIENT, new ConcurrencyLimiter(16), CACHE_ROOT, EXECUTOR, EXECUTOR)
             .create(new GuavaTileCache(Duration.ofMinutes(1), 1024));
 
     public static void main(final String[] args) {
@@ -64,7 +64,7 @@ public class Mapper {
         frame.setVisible(true);
     }
 
-    private static List<FeatureEntry> createFeatures() {
+    public static List<FeatureEntry> createFeatures() {
         final List<FeatureEntry> features = new ArrayList<>();
         features.add(new FeatureEntry("ESRI Tiles", new MapTileFeature(
                 HTTP_CLIENT,
@@ -104,7 +104,7 @@ public class Mapper {
         return features;
     }
 
-    private record FeatureEntry(String name, MapFeature feature) {
+    public record FeatureEntry(String name, MapFeature feature) {
         @Override
         public String toString() {
             return name;

@@ -37,7 +37,11 @@ public class LeveledRasterSampler<V extends Raster> {
             }
             return level;
         }
-        return levels.get(levels.size() - 1);
+        return levels.getLast();
+    }
+
+    public RasterSampler<V> maxLevel() {
+        return levels.getLast();
     }
 
     private boolean wouldUndersample(final RasterSampler<V> level, final double blocksPerDegreeX, final double blocksPerDegreeY) {
