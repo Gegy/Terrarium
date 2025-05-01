@@ -1,4 +1,4 @@
-package dev.gegy.terrarium;
+package dev.gegy.terrarium.map;
 
 import dev.gegy.terrarium.backend.util.Util;
 

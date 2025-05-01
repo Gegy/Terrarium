@@ -1,13 +1,10 @@
-package dev.gegy.terrarium;
+package dev.gegy.terrarium.map;
 
 import dev.gegy.terrarium.backend.earth.EarthConstants;
 import dev.gegy.terrarium.backend.earth.EarthLayers;
 import dev.gegy.terrarium.backend.earth.EarthTiles;
-import dev.gegy.terrarium.backend.earth.GeoCoords;
-import dev.gegy.terrarium.backend.projection.cylindrical.CylindricalProjection;
 import dev.gegy.terrarium.backend.projection.cylindrical.Mercator;
-import dev.gegy.terrarium.backend.util.Util;
-import dev.gegy.terrarium.feature.MapFeature;
+import dev.gegy.terrarium.map.feature.MapFeature;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectRBTreeMap;
 
@@ -21,9 +18,6 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
