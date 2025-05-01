@@ -91,10 +91,11 @@ public record EarthTiles(
         }
 
         private LeveledRasterSampler<EnumRaster<Cover>> landCover(final TileCache cache) {
-            return createLeveledTiledRaster(cache, 0, 4, EnumRaster.type(Cover.NONE), level -> {
+            final RasterType<EnumRaster<Cover>> rasterType = EnumRaster.type(Cover.NONE, Cover.CODEC);
+            return createLeveledTiledRaster(cache, 0, 4, rasterType, level -> {
                 final Loader<TileKey, byte[]> fileLoader = httpLoader("landcover", level)
                         .cached(fileCacher("landcover", level));
-                return RasterReader.loader(EnumRaster.type(Cover.NONE), Cover::byId, executor)
+                return RasterReader.loader(rasterType, Cover::byId, executor)
                         .compose(fileLoader);
             });
         }
@@ -120,7 +121,7 @@ public record EarthTiles(
         }
 
         private LeveledRasterSampler<EnumRaster<SoilSuborder>> soilSuborder(final TileCache cache) {
-            final RasterType<EnumRaster<SoilSuborder>> rasterType = EnumRaster.type(SoilSuborder.NONE);
+            final RasterType<EnumRaster<SoilSuborder>> rasterType = EnumRaster.type(SoilSuborder.NONE, SoilSuborder.CODEC);
             return createLeveledTiledRaster(cache, 0, 4, rasterType, level -> {
                 final Loader<TileKey, byte[]> fileLoader = httpLoader("usda", level)
                         .cached(fileCacher("soil/usda", level));

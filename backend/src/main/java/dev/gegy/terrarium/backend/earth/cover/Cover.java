@@ -1,5 +1,8 @@
 package dev.gegy.terrarium.backend.earth.cover;
 
+import com.mojang.serialization.Codec;
+import dev.gegy.terrarium.backend.util.Util;
+
 import java.util.Arrays;
 
 public enum Cover {
@@ -41,6 +44,8 @@ public enum Cover {
     BARE_UNCONSOLIDATED(202, "bare_unconsolidated"),
     WATER(210, "water"),
     PERMANENT_SNOW(220, "permanent_snow");
+
+    public static final Codec<Cover> CODEC = Util.stringLookupCodec(values(), Cover::getName);
 
     private static final Cover[] LOOKUP = new Cover[256];
 

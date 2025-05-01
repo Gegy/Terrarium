@@ -28,14 +28,14 @@ public record EarthAttachments(
         RainfallRaster annualRainfall
 ) {
     public static final GeoAttachment<ShortRaster> ELEVATION = GeoAttachment.register("elevation", ShortRaster.TYPE);
-    public static final GeoAttachment<EnumRaster<Cover>> LAND_COVER = GeoAttachment.register("land_cover", EnumRaster.type(Cover.NONE));
+    public static final GeoAttachment<EnumRaster<Cover>> LAND_COVER = GeoAttachment.register("land_cover", EnumRaster.type(Cover.NONE, Cover.CODEC));
     public static final GeoAttachment<UnsignedByteRaster> CATION_EXCHANGE_CAPACITY = GeoAttachment.register("cation_exchange_capacity", UnsignedByteRaster.TYPE);
     public static final GeoAttachment<ShortRaster> ORGANIC_CARBON_CONTENT = GeoAttachment.register("organic_carbon_content", ShortRaster.TYPE);
     public static final GeoAttachment<UnsignedByteRaster> SOIL_PH = GeoAttachment.register("soil_ph", UnsignedByteRaster.TYPE);
     public static final GeoAttachment<UnsignedByteRaster> CLAY_CONTENT = GeoAttachment.register("clay_content", UnsignedByteRaster.TYPE);
     public static final GeoAttachment<UnsignedByteRaster> SILT_CONTENT = GeoAttachment.register("silt_content", UnsignedByteRaster.TYPE);
     public static final GeoAttachment<UnsignedByteRaster> SAND_CONTENT = GeoAttachment.register("sand_content", UnsignedByteRaster.TYPE);
-    public static final GeoAttachment<EnumRaster<SoilSuborder>> SOIL_SUBORDER = GeoAttachment.register("soil_suborder", EnumRaster.type(SoilSuborder.NONE));
+    public static final GeoAttachment<EnumRaster<SoilSuborder>> SOIL_SUBORDER = GeoAttachment.register("soil_suborder", EnumRaster.type(SoilSuborder.NONE, SoilSuborder.CODEC));
     public static final GeoAttachment<TemperatureRaster> MEAN_TEMPERATURE = GeoAttachment.register("mean_temperature", TemperatureRaster.TYPE);
     public static final GeoAttachment<TemperatureRaster> MIN_TEMPERATURE = GeoAttachment.register("min_temperature", TemperatureRaster.TYPE);
     public static final GeoAttachment<RainfallRaster> ANNUAL_RAINFALL = GeoAttachment.register("annual_rainfall", RainfallRaster.TYPE);

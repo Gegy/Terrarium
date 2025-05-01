@@ -1,9 +1,15 @@
 package dev.gegy.terrarium.backend.raster;
 
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 public class EnumRaster<T extends Enum<T>> implements Raster {
     private final EnumRasterType<T> type;
@@ -16,8 +22,8 @@ public class EnumRaster<T extends Enum<T>> implements Raster {
         this.buffer = buffer;
     }
 
-    public static <T extends Enum<T>> RasterType<EnumRaster<T>> type(final T defaultValue) {
-        return new EnumRasterType<>(defaultValue);
+    public static <T extends Enum<T>> RasterType<EnumRaster<T>> type(final T defaultValue, final Codec<T> valueCodec) {
+        return new EnumRasterType<>(defaultValue, valueCodec);
     }
 
     public void put(final int x, final int y, final T value) {
@@ -88,22 +94,88 @@ public class EnumRaster<T extends Enum<T>> implements Raster {
         }
     }
 
+    // Fairly crude, could pack values further, but mostly the intent is to remove on-disk dependency on enum ordinals
+    private record PalettedBuffer<T extends Enum<T>>(
+            List<T> palette,
+            Optional<byte[]> buffer
+    ) {
+        private static final int UNASSIGNED = -1;
+
+        public static <T extends Enum<T>> MapCodec<PalettedBuffer<T>> codec(final Codec<T> valueCodec) {
+            return RecordCodecBuilder.mapCodec(i -> i.group(
+                    valueCodec.listOf().fieldOf("palette").forGetter(PalettedBuffer::palette),
+                    RasterBufferCodecs.BYTES.optionalFieldOf("data").forGetter(PalettedBuffer::buffer)
+            ).apply(i, PalettedBuffer::new));
+        }
+
+        public static <T extends Enum<T>> PalettedBuffer<T> pack(final Class<T> enumClass, final byte[] buffer) {
+            final T[] variants = enumClass.getEnumConstants();
+
+            final List<T> valueById = new ArrayList<>();
+            final int[] idByValue = new int[variants.length];
+            Arrays.fill(idByValue, UNASSIGNED);
+
+            final byte[] packedBuffer = new byte[buffer.length];
+            for (int i = 0; i < buffer.length; i++) {
+                final T value = variants[buffer[i]];
+                int packedId = idByValue[value.ordinal()];
+                if (packedId == UNASSIGNED) {
+                    packedId = valueById.size();
+                    idByValue[value.ordinal()] = packedId;
+                    valueById.add(value);
+                }
+                packedBuffer[i] = (byte) (packedId & 0xff);
+            }
+
+            if (valueById.size() == 1) {
+                return new PalettedBuffer<>(valueById, Optional.empty());
+            }
+
+            return new PalettedBuffer<>(valueById, Optional.of(packedBuffer));
+        }
+
+        public DataResult<byte[]> unpack(final int expectedSize) {
+            if (palette.size() == 1) {
+                final byte[] unpackedBuffer = new byte[expectedSize];
+                Arrays.fill(unpackedBuffer, (byte) palette.getFirst().ordinal());
+                return DataResult.success(unpackedBuffer);
+            }
+            if (buffer.isEmpty()) {
+                return DataResult.error(() -> "Expected data field for palette with size " + palette.size() + ", but none was present");
+            }
+            final byte[] packedBuffer = buffer.get();
+            final byte[] unpackedBuffer = new byte[packedBuffer.length];
+            for (int i = 0; i < packedBuffer.length; i++) {
+                final int paletteIndex = packedBuffer[i] & 0xff;
+                if (paletteIndex >= palette.size()) {
+                    return DataResult.error(() -> "Value " + paletteIndex + " does not exist in palette of size " + palette.size());
+                }
+                final T value = palette.get(paletteIndex);
+                unpackedBuffer[i] = (byte) value.ordinal();
+            }
+            return DataResult.success(unpackedBuffer);
+        }
+    }
+
     private static final class EnumRasterType<T extends Enum<T>> implements RasterType<EnumRaster<T>> {
         private final T defaultValue;
         private final T[] variants;
         private final Codec<EnumRaster<T>> codec;
 
-        public EnumRasterType(final T defaultValue) {
+        public EnumRasterType(final T defaultValue, final Codec<T> valueCodec) {
             this.defaultValue = defaultValue;
             final Class<T> enumClass = defaultValue.getDeclaringClass();
             variants = enumClass.getEnumConstants();
             if (variants.length > 255) {
                 throw new IllegalArgumentException("Cannot construct EnumRaster for " + enumClass + " with " + variants.length + " variants");
             }
-            codec = RecordCodecBuilder.create(i -> i.group(
-                    RasterShape.CODEC.forGetter(EnumRaster::shape),
-                    RasterBufferCodecs.BYTES.fieldOf("data").forGetter(r -> r.buffer)
-            ).apply(i, (shape, buffer) -> new EnumRaster<>(this, shape, buffer)));
+            codec = Codec.mapPair(RasterShape.CODEC, PalettedBuffer.codec(valueCodec)).codec().comapFlatMap(
+                    pair -> {
+                        final RasterShape shape = pair.getFirst();
+                        return pair.getSecond().unpack(shape.size()).map(buffer -> new EnumRaster<>(this, shape, buffer));
+                    },
+                    raster -> Pair.of(raster.shape, PalettedBuffer.pack(enumClass, raster.buffer))
+            );
         }
 
         @Override

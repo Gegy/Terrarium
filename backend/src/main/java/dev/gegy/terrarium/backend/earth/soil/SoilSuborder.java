@@ -1,5 +1,8 @@
 package dev.gegy.terrarium.backend.earth.soil;
 
+import com.mojang.serialization.Codec;
+import dev.gegy.terrarium.backend.util.Util;
+
 import java.util.Arrays;
 
 public enum SoilSuborder {
@@ -78,6 +81,8 @@ public enum SoilSuborder {
     PSAMMENTS(97, "psamments", SoilOrder.ENTISOL),
     FLUVENTS(98, "fluvents", SoilOrder.ENTISOL),
     ORTHENTS(99, "orthents", SoilOrder.ENTISOL);
+
+    public static final Codec<SoilSuborder> CODEC = Util.stringLookupCodec(values(), SoilSuborder::getName);
 
     private static final SoilSuborder[] LOOKUP = new SoilSuborder[256];
 
