@@ -5,6 +5,9 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
   ],
+  "client": [
+    "fabric.client.PresetEditorMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   }

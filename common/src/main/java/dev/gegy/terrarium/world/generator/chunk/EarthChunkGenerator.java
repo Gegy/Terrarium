@@ -38,7 +38,6 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
 import net.minecraft.world.level.chunk.LevelChunkSection;
-import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.NoiseChunk;
 import net.minecraft.world.level.levelgen.RandomState;
@@ -83,6 +82,10 @@ public class EarthChunkGenerator extends GeoChunkGenerator {
 
         this.configuration = configuration;
         heightScale = configuration.heightScale() / configuration.projection().idealMetersPerBlock();
+    }
+
+    public EarthChunkGenerator withConfiguration(final EarthConfiguration configuration) {
+        return new EarthChunkGenerator(biomeSource, minY, height, configuration);
     }
 
     public EarthConfiguration configuration() {
