@@ -4,6 +4,13 @@
   "package": "dev.gegy.terrarium.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "geo_chunk.ChunkMapAccessor",
+    "geo_chunk.ChunkMapMixin",
+    "geo_chunk.ChunkStepBuilderMixin",
+    "geo_chunk.ClimateSamplerMixin",
+    "geo_chunk.ProtoChunkMixin",
+    "geo_chunk.RandomStateMixin",
+    "geo_chunk.SerializableChunkDataMixin"
   ],
   "injectors": {
     "defaultRequire": 1
