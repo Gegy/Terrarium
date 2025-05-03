@@ -14,7 +14,10 @@ neoForge {
     mappingsVersion = parchment_version
   }
 
-  ideSyncTask rootProject.tasks.named('generateModManifests')
+  // Bit of a hack, as we don't have this hook for Loom
+  for (final def subProject in rootProject.subprojects) {
+    ideSyncTask subProject.tasks.named('generateModManifests')
+  }
 }
 
 dependencies {

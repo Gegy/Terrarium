@@ -3,43 +3,6 @@ plugins {
   id 'fabric-loom' version '1.10-SNAPSHOT' apply false
 }
 
-tasks.register('generateModManifests') {
-  final def expandProps = [
-          'version'                      : version,
-          'group'                        : project.group,
-          'minecraft_version'            : minecraft_version,
-          'minecraft_version_range'      : minecraft_version_range,
-          'mod_name'                     : mod_name,
-          'mod_author'                   : mod_author,
-          'mod_id'                       : mod_id,
-          'license'                      : license,
-          'description'                  : project.description,
-          'credits'                      : credits,
-          'issue_tracker'                : issue_tracker,
-          'sources'                      : sources,
-  ]
-
-  inputs.properties expandProps
-
-  final def templateFiles = fileTree('.').matching {
-    include '**/*.template'
-  }.files
-
-  templateFiles.each { templateFile ->
-    final def targetFile = new File(templateFile.parentFile, templateFile.name.substring(0, templateFile.name.length() - '.template'.length()))
-    inputs.file templateFile
-    outputs.file targetFile
-    doLast {
-      copy {
-        from templateFile
-        into targetFile.parentFile
-        rename { targetFile.name }
-        expand expandProps
-      }
-    }
-  }
-}
-
 subprojects {
   apply plugin: 'java'
 
@@ -74,13 +37,36 @@ subprojects {
   }
 
   tasks.withType(JavaCompile).configureEach {
-    it.options.encoding = 'UTF-8'
-    it.options.release = 21
+    options.encoding = 'UTF-8'
+    options.release = 21
   }
 
+  final def generateModManifests = tasks.register('generateModManifests', ProcessResources) {
+    final def expandProps = [
+            'version'                : version,
+            'group'                  : project.group,
+            'minecraft_version'      : minecraft_version,
+            'minecraft_version_range': minecraft_version_range,
+            'mod_name'               : mod_name,
+            'mod_author'             : mod_author,
+            'mod_id'                 : mod_id,
+            'license'                : license,
+            'description'            : project.description,
+            'credits'                : credits,
+            'issue_tracker'          : issue_tracker,
+            'sources'                : sources,
+    ]
+
+    inputs.properties expandProps
+    expand expandProps
+
+    from 'src/main/templates'
+    into 'build/generated/sources/modManifests'
+  }
+
+  sourceSets.main.resources.srcDir generateModManifests
+
   tasks.withType(ProcessResources).configureEach {
-    dependsOn generateModManifests
-    exclude '**/*.template'
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
   }
 
