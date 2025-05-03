@@ -1,0 +1,28 @@
+name: Build with Gradle
+
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 21
+
+      - name: Build with Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          arguments: build
+
+      - name: Upload Fabric artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifacts-fabric-${{ github.ref_name }}
+          path: fabric/build/libs/*.jar
+          retention-days: 90
