@@ -23,6 +23,6 @@ jobs:
       - name: Upload Fabric artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: artifacts-fabric-${{ github.ref_name }}
+          name: artifacts-fabric
           path: fabric/build/libs/*.jar
           retention-days: 90
