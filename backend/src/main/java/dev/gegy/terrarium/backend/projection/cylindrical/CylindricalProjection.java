@@ -94,8 +94,9 @@ public interface CylindricalProjection extends Projection {
 
     @Override
     default <E extends Enum<E>, V extends EnumRaster<E>> GeoLayer<V> createVoronoiLayer(final LeveledRasterSampler<V> leveledSampler, final Executor executor) {
+        final Voronoi voronoi = new Voronoi(0.45f, 2016969737595986194L);
         return createResamplingLayer(
-                scale -> new Voronoi(0.45f, 2016969737595986194L),
+                scale -> voronoi,
                 leveledSampler,
                 executor
         );
