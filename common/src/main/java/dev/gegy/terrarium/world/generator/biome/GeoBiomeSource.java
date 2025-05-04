@@ -1,5 +1,7 @@
 package dev.gegy.terrarium.world.generator.biome;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import dev.gegy.terrarium.backend.GeoChunk;
 import dev.gegy.terrarium.world.GeoProvider;
 import dev.gegy.terrarium.world.GeoProviderHolder;
@@ -16,6 +18,17 @@ import net.minecraft.world.level.biome.Climate;
 import java.util.Arrays;
 
 public abstract class GeoBiomeSource extends BiomeSource {
+    public static final Codec<GeoBiomeSource> CODEC = BiomeSource.CODEC.comapFlatMap(
+            biomeSource -> {
+                if (biomeSource instanceof final GeoBiomeSource geoBiomeSource) {
+                    return DataResult.success(geoBiomeSource);
+                } else {
+                    return DataResult.error(() -> biomeSource + " was not a GeoBiomeSource");
+                }
+            },
+            geoBiomeSource -> geoBiomeSource
+    );
+
     private final ThreadLocal<ResolverCache> resolverCache = ThreadLocal.withInitial(ResolverCache::new);
 
     // This is intended only as a fallback path, and has very poor performance characteristics.

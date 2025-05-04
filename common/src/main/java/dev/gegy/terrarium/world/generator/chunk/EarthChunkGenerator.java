@@ -12,6 +12,7 @@ import dev.gegy.terrarium.backend.raster.ShortRaster;
 import dev.gegy.terrarium.backend.tile.GuavaTileCache;
 import dev.gegy.terrarium.world.GeoProvider;
 import dev.gegy.terrarium.world.GeoProviderHolder;
+import dev.gegy.terrarium.world.generator.biome.GeoBiomeSource;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -31,7 +32,6 @@ import net.minecraft.world.level.NoiseColumn;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
-import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -56,7 +56,7 @@ import java.util.stream.Stream;
 
 public class EarthChunkGenerator extends GeoChunkGenerator {
     public static final MapCodec<EarthChunkGenerator> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-            BiomeSource.CODEC.fieldOf("biome_source").forGetter(c -> c.biomeSource),
+            GeoBiomeSource.CODEC.fieldOf("biome_source").forGetter(EarthChunkGenerator::getBiomeSource),
             Codec.INT.fieldOf("min_y").forGetter(EarthChunkGenerator::getMinY),
             Codec.INT.fieldOf("height").forGetter(EarthChunkGenerator::getGenDepth),
             EarthConfiguration.CODEC.forGetter(c -> c.configuration)
@@ -74,7 +74,7 @@ public class EarthChunkGenerator extends GeoChunkGenerator {
     private final BlockState fillBlock = Blocks.STONE.defaultBlockState();
     private final BlockState fluidBlock = Blocks.WATER.defaultBlockState();
 
-    public EarthChunkGenerator(final BiomeSource biomeSource, final int minY, final int height, final EarthConfiguration configuration) {
+    public EarthChunkGenerator(final GeoBiomeSource biomeSource, final int minY, final int height, final EarthConfiguration configuration) {
         super(biomeSource);
         this.minY = minY;
         this.height = height;
@@ -85,7 +85,7 @@ public class EarthChunkGenerator extends GeoChunkGenerator {
     }
 
     public EarthChunkGenerator withConfiguration(final EarthConfiguration configuration) {
-        return new EarthChunkGenerator(biomeSource, minY, height, configuration);
+        return new EarthChunkGenerator(getBiomeSource(), minY, height, configuration);
     }
 
     public EarthConfiguration configuration() {

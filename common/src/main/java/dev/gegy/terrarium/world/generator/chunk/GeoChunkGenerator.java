@@ -7,18 +7,21 @@ import dev.gegy.terrarium.world.generator.biome.GeoBiomeSource;
 import net.minecraft.Util;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.biome.BiomeResolver;
-import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.blending.Blender;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 
 public abstract class GeoChunkGenerator extends ChunkGenerator {
-    public GeoChunkGenerator(final BiomeSource biomeSource) {
+    public GeoChunkGenerator(final GeoBiomeSource biomeSource) {
         super(biomeSource);
+    }
+
+    @Override
+    public GeoBiomeSource getBiomeSource() {
+        return (GeoBiomeSource) super.getBiomeSource();
     }
 
     public abstract GeoProvider createGeoProvider();
