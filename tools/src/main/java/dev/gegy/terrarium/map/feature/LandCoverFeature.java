@@ -11,7 +11,7 @@ import java.util.concurrent.CompletableFuture;
 public record LandCoverFeature() implements RasterMapFeature<EnumRaster<Cover>> {
     @Override
     public CompletableFuture<Optional<EnumRaster<Cover>>> sample(final EarthLayers layers, final GeoView view) {
-        return layers.landCover().get(view);
+        return layers.landCover().getExact(view);
     }
 
     @Override

@@ -15,7 +15,7 @@ public record TemperatureFeature(
 ) implements RasterMapFeature<TemperatureRaster> {
     @Override
     public CompletableFuture<Optional<TemperatureRaster>> sample(final EarthLayers layers, final GeoView view) {
-        return layerFunction.apply(layers).get(view);
+        return layerFunction.apply(layers).getExact(view);
     }
 
     @Override

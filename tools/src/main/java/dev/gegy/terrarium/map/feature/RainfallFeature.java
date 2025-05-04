@@ -11,7 +11,7 @@ import java.util.concurrent.CompletableFuture;
 public record RainfallFeature() implements RasterMapFeature<RainfallRaster> {
     @Override
     public CompletableFuture<Optional<RainfallRaster>> sample(final EarthLayers layers, final GeoView view) {
-        return layers.annualRainfall().get(view);
+        return layers.annualRainfall().getExact(view);
     }
 
     @Override

@@ -16,7 +16,7 @@ public record ScalarRasterFeature(
 ) implements RasterMapFeature<IntLikeRaster> {
     @Override
     public CompletableFuture<Optional<IntLikeRaster>> sample(final EarthLayers layers, final GeoView view) {
-        return layerFunction.apply(layers).get(view).thenApply(r -> r.map(Function.identity()));
+        return layerFunction.apply(layers).getExact(view).thenApply(r -> r.map(Function.identity()));
     }
 
     @Override

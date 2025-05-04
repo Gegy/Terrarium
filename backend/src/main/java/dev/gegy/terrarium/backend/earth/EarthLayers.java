@@ -10,6 +10,7 @@ import dev.gegy.terrarium.backend.earth.soil.SoilSuborder;
 import dev.gegy.terrarium.backend.layer.GeoLayer;
 import dev.gegy.terrarium.backend.projection.Projection;
 import dev.gegy.terrarium.backend.raster.EnumRaster;
+import dev.gegy.terrarium.backend.raster.RasterShape;
 import dev.gegy.terrarium.backend.raster.ShortRaster;
 import dev.gegy.terrarium.backend.raster.UnsignedByteRaster;
 
@@ -52,20 +53,20 @@ public record EarthLayers(
     }
 
     @Override
-    public CompletableFuture<Optional<GeoChunk>> get(final GeoView view) {
+    public CompletableFuture<Optional<GeoChunk>> get(final GeoView sourceView, final RasterShape outputShape) {
         return new GeoChunk.Builder()
-                .put(EarthAttachments.ELEVATION, elevation.get(view))
-                .put(EarthAttachments.LAND_COVER, landCover.get(view))
-                .put(EarthAttachments.CATION_EXCHANGE_CAPACITY, cationExchangeCapacity.get(view))
-                .put(EarthAttachments.ORGANIC_CARBON_CONTENT, organicCarbonContent.get(view))
-                .put(EarthAttachments.SOIL_PH, soilPh.get(view))
-                .put(EarthAttachments.CLAY_CONTENT, clayContent.get(view))
-                .put(EarthAttachments.SILT_CONTENT, siltContent.get(view))
-                .put(EarthAttachments.SAND_CONTENT, sandContent.get(view))
-                .put(EarthAttachments.SOIL_SUBORDER, soilSuborder.get(view))
-                .put(EarthAttachments.MEAN_TEMPERATURE, meanTemperature.get(view))
-                .put(EarthAttachments.MIN_TEMPERATURE, minTemperature.get(view))
-                .put(EarthAttachments.ANNUAL_RAINFALL, annualRainfall.get(view))
+                .put(EarthAttachments.ELEVATION, elevation.get(sourceView, outputShape))
+                .put(EarthAttachments.LAND_COVER, landCover.get(sourceView, outputShape))
+                .put(EarthAttachments.CATION_EXCHANGE_CAPACITY, cationExchangeCapacity.get(sourceView, outputShape))
+                .put(EarthAttachments.ORGANIC_CARBON_CONTENT, organicCarbonContent.get(sourceView, outputShape))
+                .put(EarthAttachments.SOIL_PH, soilPh.get(sourceView, outputShape))
+                .put(EarthAttachments.CLAY_CONTENT, clayContent.get(sourceView, outputShape))
+                .put(EarthAttachments.SILT_CONTENT, siltContent.get(sourceView, outputShape))
+                .put(EarthAttachments.SAND_CONTENT, sandContent.get(sourceView, outputShape))
+                .put(EarthAttachments.SOIL_SUBORDER, soilSuborder.get(sourceView, outputShape))
+                .put(EarthAttachments.MEAN_TEMPERATURE, meanTemperature.get(sourceView, outputShape))
+                .put(EarthAttachments.MIN_TEMPERATURE, minTemperature.get(sourceView, outputShape))
+                .put(EarthAttachments.ANNUAL_RAINFALL, annualRainfall.get(sourceView, outputShape))
                 .build();
     }
 }

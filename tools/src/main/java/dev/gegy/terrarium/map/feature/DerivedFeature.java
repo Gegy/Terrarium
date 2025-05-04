@@ -14,7 +14,7 @@ import java.util.concurrent.CompletableFuture;
 public interface DerivedFeature extends MapFeature {
     @Override
     default CompletableFuture<Optional<BufferedImage>> render(final EarthLayers layers, final int tileX, final int tileY, final int zoomLevel, final int x0, final int y0, final int x1, final int y1) {
-        return layers.get(new GeoView(x0, y0, x1, y1))
+        return layers.getExact(new GeoView(x0, y0, x1, y1))
                 .thenApplyAsync(result -> render(result.orElse(GeoChunk.EMPTY)), Mapper.EXECUTOR);
     }
 

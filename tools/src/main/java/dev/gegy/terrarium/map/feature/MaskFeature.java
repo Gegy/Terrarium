@@ -16,7 +16,7 @@ public record MaskFeature(
 ) implements RasterMapFeature<BitRaster> {
     @Override
     public CompletableFuture<Optional<BitRaster>> sample(final EarthLayers layers, final GeoView view) {
-        return layerFunction.apply(layers).get(view);
+        return layerFunction.apply(layers).getExact(view);
     }
 
     @Override

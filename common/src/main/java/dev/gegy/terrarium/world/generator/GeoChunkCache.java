@@ -25,7 +25,7 @@ public class GeoChunkCache {
                     @Override
                     public CompletableFuture<GeoChunk> load(final ChunkPos pos) {
                         final GeoView view = new GeoView(pos.getMinBlockX(), pos.getMinBlockZ(), pos.getMaxBlockX(), pos.getMaxBlockZ());
-                        return layer.get(view).thenApply(chunk -> chunk.orElse(GeoChunk.EMPTY));
+                        return layer.getExact(view).thenApply(chunk -> chunk.orElse(GeoChunk.EMPTY));
                     }
                 });
     }
