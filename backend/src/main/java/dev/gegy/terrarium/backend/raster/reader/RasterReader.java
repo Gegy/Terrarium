@@ -11,6 +11,7 @@ import dev.gegy.terrarium.backend.util.Util;
 import org.slf4j.Logger;
 import org.tukaani.xz.SingleXZInputStream;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
@@ -66,14 +67,19 @@ public final class RasterReader {
             throw new IOException("Expected raster of type: " + format + ", but got " + dataFormat);
         }
 
-        final T raster = format.create(new RasterShape(width, height));
+        final RasterShape shape = new RasterShape(width, height);
+        T raster = null;
 
         final ByteBuffer chunkHeader = ByteBuffer.allocate(Integer.BYTES);
         while (Util.tryReadFully(channel, chunkHeader.rewind())) {
             final int chunkLength = chunkHeader.getInt();
             final ByteBuffer chunkBody = ByteBuffer.allocate(chunkLength);
             Util.readFully(channel, chunkBody);
-            readChunk(chunkBody, raster, format);
+            raster = readChunk(chunkBody, raster, shape, format);
+        }
+
+        if (raster == null) {
+            return format.create(shape);
         }
 
         return raster;
@@ -92,7 +98,7 @@ public final class RasterReader {
         return header.get() & 0xff;
     }
 
-    private static <T extends IntLikeRaster> void readChunk(final ByteBuffer buffer, final T raster, final RasterFormat<T> format) throws IOException {
+    private static <T extends IntLikeRaster> T readChunk(final ByteBuffer buffer, @Nullable T output, final RasterShape outputShape, final RasterFormat<T> format) throws IOException {
         final int x = buffer.getInt();
         final int y = buffer.getInt();
         final RasterShape shape = new RasterShape(buffer.getInt(), buffer.getInt());
@@ -102,14 +108,16 @@ public final class RasterReader {
         try (final SingleXZInputStream input = new SingleXZInputStream(Util.asInputStream(buffer))) {
             raw = format.read(ByteBuffer.wrap(input.readAllBytes()), shape);
         }
+        filter.evaluateInPlace(raw);
 
-        if (x == 0 && y == 0 && shape.equals(raster.shape())) {
-            filter.evaluate(raw, raster);
-            return;
+        if (x == 0 && y == 0 && shape.equals(outputShape)) {
+            return raw;
         }
 
-        final T filtered = format.create(shape);
-        filter.evaluate(raw, filtered);
-        raster.copyFrom(filtered, x, y);
+        if (output == null) {
+            output = format.create(outputShape);
+        }
+        output.copyFrom(raw, x, y);
+        return output;
     }
 }

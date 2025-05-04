@@ -11,8 +11,7 @@ public enum RasterFilter {
         }
 
         @Override
-        public <T extends IntLikeRaster> void evaluate(final T input, final T output) {
-            output.copyFrom(input);
+        public <T extends IntLikeRaster> void evaluateInPlace(final T input) {
         }
     },
     LEFT {
@@ -52,15 +51,18 @@ public enum RasterFilter {
 
     public abstract int evaluate(int x, int a, int b, int c);
 
-    public <T extends IntLikeRaster> void evaluate(final T input, final T output) {
+    public <T extends IntLikeRaster> void evaluateInPlace(final T input) {
         final RasterShape shape = input.shape();
         for (int y = 0; y < shape.height(); y++) {
+            int lastValue = 0;
             for (int x = 0; x < shape.width(); x++) {
                 final int value = input.getInt(x, y);
-                final int a = x > 0 ? output.getInt(x - 1, y) : 0;
-                final int b = y > 0 ? output.getInt(x, y - 1) : 0;
-                final int c = x > 0 && y > 0 ? output.getInt(x - 1, y - 1) : 0;
-                output.putInt(x, y, evaluate(value, a, b, c));
+                final int a = lastValue;
+                final int b = y > 0 ? input.getInt(x, y - 1) : 0;
+                final int c = x > 0 && y > 0 ? input.getInt(x - 1, y - 1) : 0;
+                final int evaluatedValue = evaluate(value, a, b, c);
+                input.putInt(x, y, evaluatedValue);
+                lastValue = evaluatedValue;
             }
         }
     }
