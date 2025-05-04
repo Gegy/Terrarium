@@ -60,6 +60,9 @@ dependencies {
   modImplementation "net.fabricmc.fabric-api:fabric-api:$fabric_version"
 
   implementation include('org.tukaani:xz:1.10')
+
+  implementation "maven.modrinth:DistantHorizonsApi:$distant_horizons_api_version"
+  modRuntimeOnly "maven.modrinth:DistantHorizons:$distant_horizons_version"
 }
 
 sourceSets {

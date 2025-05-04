@@ -23,6 +23,10 @@ subprojects {
       url = 'https://maven.parchmentmc.org/'
       content { includeGroup 'org.parchmentmc.data' }
     }
+    maven {
+      url = 'https://api.modrinth.com/maven/'
+      content { includeGroup 'maven.modrinth' }
+    }
   }
 
   dependencies {

@@ -13,12 +13,12 @@ import dev.gegy.terrarium.backend.expr.predictor.PredictorNode;
 import dev.gegy.terrarium.backend.loader.ConcurrencyLimiter;
 import dev.gegy.terrarium.backend.tile.TileCache;
 import dev.gegy.terrarium.command.GeoTeleportCommand;
+import dev.gegy.terrarium.integration.distant_horizons.DistantHorizonsIntegration;
 import dev.gegy.terrarium.registry.HolderClassifierNode;
 import dev.gegy.terrarium.registry.HolderPredictorNode;
 import dev.gegy.terrarium.registry.TerrariumRegistries;
 import dev.gegy.terrarium.world.generator.biome.TerrariumBiomeSources;
 import dev.gegy.terrarium.world.generator.chunk.TerrariumChunkGenerators;
-import dev.gegy.terrarium.world.generator.chunk.data.GeoChunkLoader;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -52,7 +52,11 @@ public class Terrarium {
     @Nullable
     private static CompletableFuture<Geocoder> geocoder;
 
-    public static void bootstrap(final Path terrariumDirectory, final Registry<Predictor<GeoParameters>> builtinPredictors, final PlatformBootstrap platform) {
+    private static boolean developmentEnvironment;
+
+    public static void bootstrap(final Path terrariumDirectory, final Registry<Predictor<GeoParameters>> builtinPredictors, final boolean developmentEnvironment, final PlatformBootstrap platform) {
+        Terrarium.developmentEnvironment = developmentEnvironment;
+
         tiles = new EarthTiles.Config(
                 HTTP_CLIENT,
                 new ConcurrencyLimiter(16),
@@ -99,6 +103,10 @@ public class Terrarium {
 
         TerrariumChunkGenerators.bootstrap();
         TerrariumBiomeSources.bootstrap();
+
+        if (platform.isModLoaded("distanthorizons")) {
+            DistantHorizonsIntegration.bootstrap();
+        }
     }
 
     public static void registerCommands(final CommandDispatcher<CommandSourceStack> dispatcher, final CommandBuildContext context) {
@@ -122,7 +130,13 @@ public class Terrarium {
         return Objects.requireNonNull(geocoder, "Terrarium was not bootstrapped").join();
     }
 
+    public static boolean isDevelopmentEnvironment() {
+        return developmentEnvironment;
+    }
+
     public interface PlatformBootstrap {
         void initializeRegistries(Codec<PredictorNode<GeoParameters>> predictorCodec, Codec<ClassifierNode<GeoParameters, Holder<Biome>>> biomeClassifierCodec);
+
+        boolean isModLoaded(String id);
     }
 }

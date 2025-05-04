@@ -11,6 +11,7 @@ public interface GeoProviderHolder {
         ((GeoProviderHolder) (Object) randomState.sampler()).terrarium$setGeoProvider(provider);
     }
 
+    @Nullable
     static GeoProvider get(final ServerLevel level) {
         return get(level.getChunkSource().randomState());
     }

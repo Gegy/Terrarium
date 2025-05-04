@@ -5,8 +5,11 @@ import dev.gegy.terrarium.world.GeoProvider;
 import dev.gegy.terrarium.world.chunk.GeoChunkHolder;
 import dev.gegy.terrarium.world.generator.biome.GeoBiomeSource;
 import net.minecraft.Util;
+import net.minecraft.core.Holder;
 import net.minecraft.world.level.StructureManager;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeResolver;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.RandomState;
@@ -41,5 +44,15 @@ public abstract class GeoChunkGenerator extends ChunkGenerator {
             }, Util.backgroundExecutor().forName("init_biomes"));
         }
         return super.createBiomes(randomState, blender, structureManager, chunkAccess);
+    }
+
+    public abstract void buildLod(LodOutput output, GeoChunk geoChunk, final GeoBiomeSource.FlatChunkResolver biomeResolver);
+
+    public interface LodOutput {
+        void beginColumn(int x, int z, Holder<Biome> biome);
+
+        void addLayerUpTo(int topY, BlockState blockState);
+
+        void endColumn();
     }
 }

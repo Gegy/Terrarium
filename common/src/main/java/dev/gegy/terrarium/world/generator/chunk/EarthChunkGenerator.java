@@ -281,4 +281,32 @@ public class EarthChunkGenerator extends GeoChunkGenerator {
     private static boolean shouldDropStructureSet(final StructureSet set) {
         return set.placement() instanceof ConcentricRingsStructurePlacement;
     }
+
+    @Override
+    public void buildLod(final LodOutput output, final GeoChunk geoChunk, final GeoBiomeSource.FlatChunkResolver biomeResolver) {
+        final Optional<EarthAttachments> earth = EarthAttachments.from(geoChunk);
+        if (earth.isEmpty()) {
+            return;
+        }
+
+        final ShortRaster elevation = earth.get().elevation();
+        final int seaLevel = getSeaLevel();
+
+        for (int z = 0; z < elevation.height(); z++) {
+            for (int x = 0; x < elevation.width(); x++) {
+                final Holder<Biome> biome = biomeResolver.get(x, z);
+                output.beginColumn(x, z, biome);
+
+                final int surfaceY = transformElevationToY(elevation.getInt(x, z));
+                if (surfaceY >= seaLevel) {
+                    output.addLayerUpTo(surfaceY, fillBlock);
+                } else {
+                    output.addLayerUpTo(surfaceY, fillBlock);
+                    output.addLayerUpTo(seaLevel, fluidBlock);
+                }
+
+                output.endColumn();
+            }
+        }
+    }
 }
