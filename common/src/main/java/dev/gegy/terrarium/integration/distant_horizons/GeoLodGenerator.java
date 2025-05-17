@@ -91,7 +91,7 @@ public final class GeoLodGenerator implements IDhApiWorldGenerator {
         final WrapperCache wrappers = wrapperCache.get();
 
         final int minY = levelWrapper.getMinHeight();
-        final int maxY = levelWrapper.getMaxHeight();
+        final int maxY = minY + levelWrapper.getMaxHeight();
         final int absoluteTop = maxY - minY;
 
         final GeoBiomeSource.FlatChunkResolver biomeResolver = biomeSource.chunkResolver(geoChunk);
