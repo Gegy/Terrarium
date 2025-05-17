@@ -46,7 +46,7 @@ public record ApiKeys(
     }
 
     public static CompletableFuture<ApiKeys> fetch(final HttpClient httpClient) {
-        final HttpRequest request = HttpRequest.newBuilder(URI.create("https://terrariumearth.azureedge.net/geo3/keys.json"))
+        final HttpRequest request = HttpRequest.newBuilder(URI.create("https://terrarium.gegy.dev/geo3/keys.json"))
                 .header("User-Agent", HttpLoader.USER_AGENT)
                 .timeout(Duration.ofMinutes(1))
                 .GET()
