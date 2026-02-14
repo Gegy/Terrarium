@@ -1,50 +1,93 @@
-buildscript {
-  repositories {
-    maven { url = "http://files.minecraftforge.net/maven" }
-    maven { url = "https://plugins.gradle.org/m2/" }
-  }
-  dependencies {
-    classpath "net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT"
-    classpath "com.wynprice.cursemaven:CurseMaven:2.1.1"
-  }
+plugins {
+  id 'java'
+  id 'idea'
+  id 'net.minecraftforge.gradle' version '6.0.+'
+  id 'io.github.goooler.shadow' version '8.1.8'
 }
-
-apply plugin: "net.minecraftforge.gradle.forge"
-apply plugin: "com.wynprice.cursemaven"
 
 def mod_file = getModFile("net.gegy1000.terrarium.Terrarium")
 version = getModField("VERSION", mod_file)
 group = "net.gegy1000"
-archivesBaseName = "terrarium"
-sourceCompatibility = targetCompatibility = "1.8"
 
-minecraft {
-  version = "1.12.2-14.23.5.2847"
-  runDir = "minecraft"
-  mappings = "stable_39"
+base {
+  archivesName = "terrarium"
 }
 
+java.toolchain.languageVersion = JavaLanguageVersion.of(8)
+
 repositories {
+  maven {
+    url = "https://maven.gegy.dev"
+    content {
+      includeGroup "net.gegy1000"
+      includeGroup "dev.gegy"
+      includeGroup "org.tukaani"
+    }
+  }
+  maven {
+    url = "https://cursemaven.com"
+    content {
+      includeGroup "curse.maven"
+    }
+  }
+  maven {
+    url = "https://mvn.topobyte.de"
+    content {
+      includeGroup "com.vividsolutions"
+    }
+  }
+  maven {
+    url = "https://repo.spongepowered.org/maven/"
+    content {
+      includeGroup "io.github.opencubicchunks"
+    }
+  }
   mavenCentral()
-  maven { url = "https://oss.sonatype.org/content/repositories/public/" }
-  maven { url = "https://repo.spongepowered.org/maven/" }
-  maven { url = "https://maven.gegy.dev" }
-  maven { url = "https://www.cursemaven.com" }
-  maven { url = "http://mvn.topobyte.de" }
+  maven { url = "https://maven.minecraftforge.net/" }
 }
 
 configurations {
   embed
-  compile.extendsFrom(embed)
+  implementation.extendsFrom(embed)
+}
+
+minecraft {
+  mappings channel: "stable", version: "39-1.12"
+  accessTransformer file('src/main/resources/META-INF/terrarium_at.cfg')
+  accessTransformer file('src/main/resources/META-INF/terrarium_at_dev.cfg')
+
+  runs {
+    client {
+    }
+    server {
+    }
+    configureEach {
+      workingDirectory = project.file('run')
+      mods {
+        "${project.name}" {
+          source sourceSets.main
+        }
+      }
+      // Configure Mixin for Cubic Chunks dependecy
+      jvmArgs = [
+          '-Xmx2G',
+          '-Dfml.coreMods.load=io.github.opencubicchunks.cubicchunks.core.asm.coremod.CubicChunksCoreMod',
+          '-Dmixin.env.compatLevel=JAVA_8',
+          '-Dmixin.env.disableRefMap=true'
+      ]
+    }
+  }
 }
 
 dependencies {
-  // optional dependencies
-  deobfCompile 'io.github.opencubicchunks:cubicchunks-api:1.12.2-0.0-SNAPSHOT'
-  deobfCompile 'io.github.opencubicchunks:cubicchunks:1.12.2-0.0-SNAPSHOT'
+  minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2864'
 
-  deobfCompile 'com.github.glitchfiend.biomesoplenty:BiomesOPlenty:1.12.2-7.0.1.2399:universal'
-  deobfCompile 'curse.maven:dynamictrees-252818:2822231'
+  // optional dependencies
+  implementation 'io.github.opencubicchunks:cubicchunks-api:1.12.2-0.0-SNAPSHOT'
+  implementation fg.deobf('io.github.opencubicchunks:cubicchunks:1.12.2-0.0-SNAPSHOT')
+
+  implementation fg.deobf('curse.maven:biomes-o-plenty-220318:3558882')
+  implementation fg.deobf('curse.maven:dynamictrees-252818:3812473')
 
   // embedded dependencies
   embed 'dev.gegy:gengen:0.1.0-SNAPSHOT'
@@ -54,27 +97,31 @@ dependencies {
 }
 
 jar {
-  from configurations.embed.collect {
-    it.isDirectory() ? it : zipTree(it)
-  }
+  archiveClassifier = 'slim'
   manifest {
     attributes "FMLAT": "terrarium_at.cfg"
     attributes "Maven-Artifact": "${project.group}:${project.archivesBaseName}:${project.version}"
     attributes "Timestamp": System.currentTimeMillis()
   }
+  finalizedBy 'reobfJar'
 }
+
+shadowJar {
+  archiveClassifier = ''
+  configurations = [project.configurations.embed]
+}
+
+reobf {
+  shadowJar { }
+}
+
+build.dependsOn reobfShadowJar
 
 processResources {
   inputs.property "version", project.version
-  inputs.property "mcversion", project.minecraft.version
 
-  from(sourceSets.main.resources.srcDirs) {
-    include "mcmod.info"
-    expand "version": project.version, "mcversion": project.minecraft.version
-  }
-
-  from(sourceSets.main.resources.srcDirs) {
-    exclude "mcmod.info"
+  filesMatching('mcmod.info') {
+    expand 'version': project.version
   }
 }
 
@@ -93,4 +140,32 @@ String getModField(String type, File mod_file) {
     }
   }
   return field
+}
+
+idea {
+  module {
+    downloadSources = true
+    downloadJavadoc = true
+  }
+}
+
+// ForgeGradle horrors beyond my comprehension
+
+configurations.configureEach {
+  resolutionStrategy {
+    eachDependency {
+      if (it.requested.group == 'org.ow2.asm' && it.requested.version == '6.0') {
+        it.useVersion '5.2'
+      }
+    }
+  }
+  exclude group: 'net.minecraftforge', module: 'mergetool'
+}
+
+legacy {
+  fixClasspath = false
+}
+
+sourceSets.configureEach {
+  it.output.resourcesDir = it.output.classesDirs.getFiles().iterator().next()
 }
