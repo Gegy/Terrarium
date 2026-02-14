@@ -58,9 +58,11 @@ public class PlaceSearchWidget extends GuiTextField {
                 } else {
                     this.state = State.OK;
                 }
-                this.queriedSuggestions = null;
             } catch (InterruptedException | ExecutionException e) {
                 Terrarium.LOGGER.error("Failed to get queried suggestions", e);
+                this.state = State.NOT_FOUND;
+            } finally {
+                this.queriedSuggestions = null;
             }
         }
 
