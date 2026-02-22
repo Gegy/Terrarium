@@ -37,7 +37,7 @@ repositories {
     }
   }
   maven {
-    url = "https://repo.spongepowered.org/maven/"
+    url = "https://maven.daporkchop.net"
     content {
       includeGroup "io.github.opencubicchunks"
     }
@@ -83,8 +83,8 @@ dependencies {
   minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2864'
 
   // optional dependencies
-  implementation 'io.github.opencubicchunks:cubicchunks-api:1.12.2-0.0-SNAPSHOT'
-  implementation fg.deobf('io.github.opencubicchunks:cubicchunks:1.12.2-0.0-SNAPSHOT')
+  implementation 'io.github.opencubicchunks:cubicchunks-api:1.12.2-0.0.1301.0-SNAPSHOT'
+  implementation fg.deobf('io.github.opencubicchunks:cubicchunks:1.12.2-0.0.1301.0-SNAPSHOT')
 
   implementation fg.deobf('curse.maven:biomes-o-plenty-220318:3558882')
   implementation fg.deobf('curse.maven:dynamictrees-252818:3812473')

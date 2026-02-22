@@ -3,7 +3,6 @@ package net.gegy1000.terrarium.server.world.chunk.tracker;
 import io.github.opencubicchunks.cubicchunks.api.util.CubePos;
 import io.github.opencubicchunks.cubicchunks.core.server.CubeWatcher;
 import io.github.opencubicchunks.cubicchunks.core.server.PlayerCubeMap;
-import io.github.opencubicchunks.cubicchunks.core.util.WatchersSortingList;
 import it.unimi.dsi.fastutil.longs.LongLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSortedSet;
 import net.gegy1000.terrarium.Terrarium;
@@ -39,7 +38,7 @@ public class CubeTrackerAccess implements ChunkTrackerAccess {
     public LongSortedSet getSortedQueuedColumns() {
         PlayerChunkMap chunkTracker = this.world.getPlayerChunkMap();
         if (chunkTracker instanceof PlayerCubeMap) {
-            WatchersSortingList<CubeWatcher> cubesToGenerate = getCubesToGenerate((PlayerCubeMap) chunkTracker);
+            Iterable<CubeWatcher> cubesToGenerate = getCubesToGenerate((PlayerCubeMap) chunkTracker);
             if (cubesToGenerate == null) {
                 return EMPTY;
             }
@@ -78,10 +77,10 @@ public class CubeTrackerAccess implements ChunkTrackerAccess {
 
     @Nullable
     @SuppressWarnings("unchecked")
-    private static WatchersSortingList<CubeWatcher> getCubesToGenerate(PlayerCubeMap cubeTracker) {
+    private static Iterable<CubeWatcher> getCubesToGenerate(PlayerCubeMap cubeTracker) {
         if (cubesToGenerateField != null) {
             try {
-                return (WatchersSortingList<CubeWatcher>) cubesToGenerateField.get(cubeTracker);
+                return (Iterable<CubeWatcher>) cubesToGenerateField.get(cubeTracker);
             } catch (ReflectiveOperationException e) {
                 Terrarium.LOGGER.error("Failed to get cubes to generate", e);
             }
