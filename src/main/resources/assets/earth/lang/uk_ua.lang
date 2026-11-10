@@ -1,0 +1,171 @@
+# Генератори
+
+generator.terrarium.earth=Земля
+generator.terrarium.earth_debug=Налагодження Землі
+
+# Графічний інтерфейс користувача
+
+container.earth.geotool.name=Налаштування Землі
+geotool.earth.locate.success=Ви перебуваєте на %s
+
+container.earth.geodebug.name=Налаштування налагоджувача Землі
+
+gui.earth.credits=Дані Terrarium:
+gui.earth.spawnpoint=Встановити точку появи
+gui.earth.locate=Визначити місцезнаходження гравця
+gui.earth.teleport=Телепортувати гравця
+gui.earth.preload=Попереднє завантаження світу
+gui.earth.preload.downloading=Завантаження чанків
+
+gui.earth.retry=Повторити
+gui.earth.download=Завантажити
+gui.earth.run_in_background=Запускати у фоновому режимі
+gui.earth.initializing=Ініціалізація
+
+gui.button.earth.teleport=Телепортувати
+
+gui.copy_box.copied.name=Скопійовано до буфера обміну!
+
+gui.earth.preparing=Будь ласка, зачекайте
+gui.earth.preparing.desc.1=Підготовка до Terrarium
+gui.earth.preparing.desc.2=Це може зайняти деякий час
+
+gui.earth.preparing.errored=Виникла проблема
+gui.earth.preparing.errored.desc.1=Не вдалося підготувати до Terrarium!
+gui.earth.preparing.errored.desc.2=Будь ласка, перевірте підключення до Інтернету та спробуйте знову
+
+# Властивості світу
+
+category.terrarium.world.name=Налаштування світу
+
+property.terrarium.world_scale.name=Масштаб світу
+property.terrarium.terrestrial_height_scale.name=Масштаб висоти Землі
+property.terrarium.oceanic_height_scale.name=Шкала глибин океану
+property.terrarium.height_offset.name=Висота зміщення
+
+property.terrarium.world_scale.tooltip=Кількість метрів у реальному житті дорівнює одному блоку в грі
+property.terrarium.terrestrial_height_scale.tooltip=Висота Землі від метрів до блоків вище рівня моря
+property.terrarium.oceanic_height_scale.tooltip=Висота Землі від метрів до блоків ниже рівня моря
+property.terrarium.height_offset.tooltip=Висота в грі, що відповідає рівню моря
+
+# Екологічні властивості
+
+category.terrarium.ecological.name=Екологічні налаштування
+
+property.terrarium.add_trees.name=Додати дерева
+property.terrarium.add_grass.name=Додати трави
+property.terrarium.add_flowers.name=Додати квіти
+property.terrarium.add_cacti.name=Додати кактуси
+property.terrarium.add_sugar_cane.name=Додати цукровий очерет
+property.terrarium.add_gourds.name=Додати гарбузи та кавуни
+
+property.terrarium.add_trees.tooltip=Якщо ввімкнено, дерева генеруватимуть
+property.terrarium.add_grass.tooltip=Якщо ввімкнено, трави генеруватимуть
+property.terrarium.add_flowers.tooltip=Якщо ввімкнено, квіти генеруватимуть
+property.terrarium.add_cacti.tooltip=Якщо ввімкнено, кактуси генеруватимуть
+property.terrarium.add_sugar_cane.tooltip=Якщо ввімкнено, цукрові очерети генеруватимуть
+property.terrarium.add_gourd.tooltip=Якщо ввімкнено, гарбузи та кавуни генеруватимуть
+
+# Геологічні властивості
+
+category.terrarium.geological.name=Геологічні налаштування
+
+property.terrarium.cave_generation.name=Генерація печер
+property.terrarium.ravine_generation.name=Генерація ями
+property.terrarium.ore_generation.name=Генерація руд
+property.terrarium.add_lava_pools.name=Додати басейни з лави
+
+property.terrarium.cave_generation.tooltip=Якщо ввімкнено, печери випадково генеруватимуть
+property.terrarium.ravine_generation.tooltip=Якщо ввімкнено, ями випадково генеруватимуть
+property.terrarium.ore_generation.tooltip=Якщо ввімкнено, руди випадково генеруватимуть
+property.terrarium.add_lava_pools.tooltip=Якщо ввімкнено, підземні басейни з лави випадково генеруватимуть
+
+# Властивості струкрур
+
+category.terrarium.structure.name=Налаштування структур
+
+property.terrarium.add_strongholds.name=Додати цитаделі
+property.terrarium.add_villages.name=Додати селяни
+property.terrarium.add_mineshafts.name=Додати шахти
+property.terrarium.add_temples.name=Додати храми
+property.terrarium.add_ocean_monuments.name=Додати океанські монументи
+property.terrarium.add_woodland_mansions.name=Додати лісові маєтки
+
+property.terrarium.add_strongholds.tooltip=Якщо ввімкнено, цитаделі випадково генеруватимуть
+property.terrarium.add_villages.tooltip=Якщо ввімкнено, селяни випадково генеруватимуть
+property.terrarium.add_mineshafts.tooltip=Якщо ввімкнено, шахти випадково генеруватимуть
+property.terrarium.add_temples.tooltip=Якщо ввімкнено, храми випадково генеруватимуть
+property.terrarium.add_ocean_monuments.tooltip=Якщо ввімкнено, океанські монументи випадково генеруватимуть
+property.terrarium.add_woodland_mansions.tooltip=Якщо ввімкнено, лісові маєтки випадково генеруватимуть
+
+# Властивості сумісності
+
+category.terrarium.compatibility.name=Налаштування сумісності
+
+property.terrarium.compatibility_mode.name=Режим сумісності (Експериментальний)
+property.terrarium.bop_integration.name=Додати Biomes O' Plenty Biomes and Trees
+
+property.terrarium.compatibility_mode.tooltip=Режим експериментально-модифікаційної сумісності: може уповільнити або зламати генерацію взагалі!
+property.terrarium.bop_integration.tooltip=Генерувати біоми та дерева від модифікації BoP. Це, можливо, повинно використуватися у додаванні до режиму сумісності
+
+# Шаблони
+
+preset.terrarium.earth.barren.name=Barren Earth
+preset.terrarium.earth.barren.desc=The bare surface of the earth at 1:40m scale with no additional generation
+
+preset.terrarium.earth.intercontinental.name=Intercontinental
+preset.terrarium.earth.intercontinental.desc=Survival-friendly earth at 1:2000m scale where continents are fairly small
+preset.terrarium.earth.intercontinental_modded.name=Modded Intercontinental
+preset.terrarium.earth.intercontinental_modded.desc=Survival & mod-friendly earth at 1:2000m where continents are fairly small
+
+preset.terrarium.earth.playable.name=Playable Earth
+preset.terrarium.earth.playable.desc=Survival-friendly earth at 1:70m scale with all vanilla generation
+preset.terrarium.earth.playable_modded.name=Modded Playable Earth
+preset.terrarium.earth.playable_modded.desc=Survival & mod-friendly earth at 1:70m scale with all vanilla & modded generation
+
+preset.terrarium.earth.scenic.name=Scenic Earth
+preset.terrarium.earth.scenic.desc=A scenic, but not survival-friendly representation of the Earth
+
+# Команди
+
+commands.earth.wrong_world=Cannot use command in this world
+
+commands.earth.geotp.usage=geotp <latitude> <longitude> OR geotp <place>
+commands.earth.geotp.not_found=Could not find "%s"
+commands.earth.geotp.success=Teleported %s to %.5f, %.5f
+commands.earth.geotp.error=An error occurred while finding "%s": %s: %s
+
+commands.earth.geotool.usage=geotool
+commands.earth.geotool.locate=Map
+commands.earth.geotool.display_panorama=Display Panorama
+commands.earth.geotool.preload_world=Preload World
+
+commands.earth.geodebug.usage=geodebug
+
+# Статус
+
+status.earth.panorama.searching=Searching for nearby panoramas...
+status.earth.panorama.none_found=Found no nearby panoramas!
+status.earth.panorama.found=Found a panorama nearby! Move into the marked area to display it!
+status.earth.panorama.error=An error occurred locating nearby panoramas
+status.earth.panorama.immersed=Immersed in located panorama!
+
+# Конфігурація
+
+config.earth.street_view_zoom=Збільшення огляду вулиць
+config.earth.street_view_zoom.tooltip=Рівень збільшення, щоб завантажити зображення вулиць. Вищі значення означають вищу роздільну здатність
+
+config.earth.osm_geocoder=Використати OpenStreetMap Geocoder
+config.earth.osm_geocoder.tooltip=Якщо прийнято, the Nominatim OpenStreetMap Geocoder буде використувати замість of Google's
+
+config.earth.accept_remote_data=Увага до прийняття віддалених даних
+config.earth.accept_remote_data.tooltip=Якщо прийнято, вам більше не попереджать про використання віддалених даних. (Автоматично встановлено через GUI)
+
+# Ініціалізатори
+
+initializer.terrarium.api_keys=Завантаження ключів API...
+
+initializer.terrarium.climate_raster=Завантаження растрового зображення клімату...
+
+initializer.terrarium.remote_index=Завантаження віддаленого індексу...
+initializer.terrarium.remote_index.downloading=Завантаження

@@ -1,0 +1,24 @@
+# Графічний інтерфейс користувача
+
+gui.terrarium.accept=Прийняти
+gui.terrarium.preset=Попередньо встановити
+
+gui.terrarium.remote_data_warning.1=Увага: Terrarium завантажує свої дані з Інтернету!
+gui.terrarium.remote_data_warning.2=Для генерації чанків можуть знадобитися необхідні дані.
+gui.terrarium.remote_data_warning.3=Це може стати причиною масштабного використання даних, з урахуванням створюваних чанків.
+gui.terrarium.remote_data_warning.4=Дані запитуються лише для тих чанків, які переглядають гравці, а потім кешуються.
+gui.terrarium.remote_data_warning.5=Якщо ви перебуваєте у обмеженому підключенні, будь ласка, переглядайте використання ваших даних!
+
+gui.terrarium.select_preset.name=Вибрати попереднє завантаження світу
+
+options.terrarium.customize_world_title.name=Налаштувати генерацію світу
+options.terrarium.preview_world_title.name=Попередній огляд генерації світу
+
+property.terrarium.slider_range.name=Діапазон: [%.2f-%.2f]
+property.terrarium.slider_fine.name=Утримувати SHIFT, щоб внести корективи
+property.terrarium.locked.name=Ця функція наразі не є доступною
+
+# Тости
+
+toast.terrarium.data_failure.title=Збій даних Terrarium
+toast.terrarium.data_failure.desc=Не вдалося завантажити %s даних блоків
